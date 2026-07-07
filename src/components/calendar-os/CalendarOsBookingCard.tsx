@@ -67,7 +67,7 @@ export function CalendarOsBookingCard({
       )}
       style={isSurgery ? undefined : surface.chipStyle}
     >
-      <div className="flex items-center justify-between gap-0.5">
+      <div className="flex items-start justify-between gap-0.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-0.5">
             {isSurgery ? (
@@ -75,7 +75,7 @@ export function CalendarOsBookingCard({
             ) : null}
             <p
               className={cn(
-                "truncate text-slate-100",
+                "truncate font-medium text-slate-100",
                 isSurgery && "font-semibold text-violet-50",
                 ultraCompact ? "text-[9px]" : compact ? "text-[10px]" : "text-[11px]"
               )}
@@ -83,16 +83,29 @@ export function CalendarOsBookingCard({
               {model.patientName}
             </p>
           </div>
-          {expanded ? (
-            <p
-              className={cn(
-                "truncate text-slate-500",
-                ultraCompact ? "text-[8px]" : "text-[9px]"
-              )}
-            >
-              {model.bookingTypeLabel}
-            </p>
-          ) : null}
+          <p
+            className={cn(
+              "truncate text-slate-400",
+              ultraCompact ? "text-[8px]" : "text-[9px]"
+            )}
+          >
+            {model.bookingTypeLabel}
+          </p>
+          <p
+            className={cn(
+              "truncate text-slate-500",
+              ultraCompact ? "text-[8px]" : "text-[9px]"
+            )}
+          >
+            <span className="inline-flex items-center gap-0.5">
+              <Clock className="h-2 w-2 shrink-0" aria-hidden />
+              {model.timeRangeLabel}
+            </span>
+            <span className="mx-0.5" aria-hidden>
+              ·
+            </span>
+            <span>{model.durationLabel}</span>
+          </p>
         </div>
         <span
           className={cn(
@@ -107,21 +120,16 @@ export function CalendarOsBookingCard({
 
       {expanded ? (
         <>
-          <div
-            className={cn(
-              "flex flex-wrap items-center gap-x-1 gap-y-0 text-slate-500",
-              ultraCompact ? "mt-0 text-[8px]" : "mt-0.5 text-[9px]"
-            )}
-          >
-            <span className="inline-flex items-center gap-0.5">
-              <Clock className="h-2 w-2 shrink-0" aria-hidden />
-              {model.timeRangeLabel}
-            </span>
-            <span>{model.durationMin}m</span>
-            {isSurgery && model.surgery?.plannedGraftCount ? (
-              <span className="text-violet-300/90">{model.surgery.plannedGraftCount} grafts</span>
-            ) : null}
-          </div>
+          {isSurgery && model.surgery?.plannedGraftCount ? (
+            <p
+              className={cn(
+                "truncate text-violet-300/90",
+                ultraCompact ? "text-[8px]" : "text-[9px]"
+              )}
+            >
+              {model.surgery.plannedGraftCount} grafts
+            </p>
+          ) : null}
 
           {model.assignedDoctor ? (
             <p className="mt-0.5 flex items-center gap-0.5 truncate text-[9px] text-slate-500">

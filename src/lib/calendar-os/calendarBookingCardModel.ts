@@ -5,6 +5,12 @@
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeLabel, bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import {
+  extractPersonNameFromBookingTitle,
+  extractServiceLabelFromBookingTitle,
+  isLikelyServiceDescriptorTitle,
+  UNNAMED_PATIENT_LABEL,
+} from "@/src/lib/bookings/bookingDisplayName";
+import {
   bookingDurationMinutesUtc,
   formatTimeRangeInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
@@ -25,6 +31,7 @@ export type CalendarOsBookingCardModel = {
   bookingTypeLabel: string;
   timeRangeLabel: string;
   durationMin: number;
+  durationLabel: string;
   assignedDoctor: string | null;
   assignedNurse: string | null;
   roomLabel: string | null;
@@ -53,11 +60,49 @@ function patientNameForBooking(
 ): string {
   const fromOverride = override?.trim();
   if (fromOverride) return fromOverride;
+
+  const fromTitleName = extractPersonNameFromBookingTitle(booking.title);
   const anchor = display?.anchorLabel?.trim();
-  if (anchor) return anchor;
+  const anchorUsable =
+    anchor && anchor !== UNNAMED_PATIENT_LABEL && anchor.length > 0;
+
+  if (anchorUsable) return anchor;
+  if (fromTitleName) return fromTitleName;
+
   const title = booking.title?.trim();
+  if (title && !isLikelyServiceDescriptorTitle(title)) return title;
   if (title) return title;
+
   return "Patient";
+}
+
+function bookingTypeLabelForCard(
+  booking: FiBookingRow,
+  display: OperationalCalendarBookingDisplay | undefined
+): string {
+  const fromCatalog = display?.procedureCatalogName?.trim();
+  if (fromCatalog) return fromCatalog;
+
+  const fromEventType = display?.calendarOsEventTypeLabel?.trim();
+  if (fromEventType) return fromEventType;
+
+  const fromTitle = extractServiceLabelFromBookingTitle(booking.title);
+  if (fromTitle) return fromTitle;
+
+  return bookingTypeLabel(booking.booking_type) || booking.booking_type;
+}
+
+function formatDurationLabel(minutes: number): string {
+  if (minutes >= 60 && minutes % 60 === 0) {
+    const hours = minutes / 60;
+    return hours === 1 ? "1h" : `${hours}h`;
+  }
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  return `${minutes}m`;
 }
 
 function teamMembersFromStaffing(
@@ -115,12 +160,10 @@ export function buildCalendarOsBookingCardModel(
     bookingId: booking.id,
     patientName: patientNameForBooking(booking, display, patientName),
     bookingType: booking.booking_type,
-    bookingTypeLabel:
-      display?.procedureCatalogName?.trim() ||
-      bookingTypeLabel(booking.booking_type) ||
-      booking.booking_type,
+    bookingTypeLabel: bookingTypeLabelForCard(booking, display),
     timeRangeLabel,
     durationMin,
+    durationLabel: formatDurationLabel(durationMin),
     assignedDoctor: teamFromLine ?? teamFromStaffing.doctor ?? display?.resourceTeamLine ?? null,
     assignedNurse: teamFromStaffing.nurse,
     roomLabel: display?.roomLabel ?? display?.resourceRoomLine ?? booking.location ?? null,

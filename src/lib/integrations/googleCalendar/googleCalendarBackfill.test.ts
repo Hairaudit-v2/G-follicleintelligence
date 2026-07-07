@@ -5,12 +5,16 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 import {
   buildGoogleCalendarBackfillDiagnosticsPatch,
   detectGoogleCalendarExternalSource,
+  isGoogleCalendarConsultationMisclassifiedAsSurgery,
   looksLikeGoogleCalendarAppointment,
+  mapGoogleEventTypeToBookingType,
   matchPatientByEventTitle,
   parseGoogleCalendarBackfillDiagnostics,
+  planGoogleCalendarClassificationRepairs,
   resolveGoogleCalendarBackfillDateRange,
   resolveGoogleCalendarBackfillNextDaysRange,
 } from "@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore";
+import { classifyExternalCalendarEventType } from "@/src/lib/onboarding-os/googleCalendarConnectorCore";
 import {
   markGoogleCalendarLinkedBookingCancelled,
   runGoogleCalendarBackfill,
@@ -124,6 +128,53 @@ describe("googleCalendarBackfillCore", () => {
     assert.equal(parsed.googleCalendarBackfillImportedCount, 12);
     assert.equal(parsed.googleCalendarBackfillReviewCount, 2);
     assert.equal(parsed.warnings.length, 1);
+  });
+
+  it("maps google event types to booking types with consultation default", () => {
+    assert.equal(mapGoogleEventTypeToBookingType("consultation"), "consultation");
+    assert.equal(mapGoogleEventTypeToBookingType("surgery"), "surgery");
+    assert.equal(mapGoogleEventTypeToBookingType("prp"), "prp");
+    assert.equal(mapGoogleEventTypeToBookingType("unknown"), "consultation");
+  });
+
+  it("detects consultation titles misclassified as surgery", () => {
+    assert.equal(
+      isGoogleCalendarConsultationMisclassifiedAsSurgery(
+        "surgery",
+        "Hair transplant consultation - Aaron Diehl"
+      ),
+      true
+    );
+    assert.equal(
+      isGoogleCalendarConsultationMisclassifiedAsSurgery("surgery", "FUE Surgery - Aaron Diehl"),
+      false
+    );
+  });
+
+  it("plans classification repairs for misclassified google calendar rows", () => {
+    const plan = planGoogleCalendarClassificationRepairs({
+      calendarEvents: [
+        {
+          id: "evt-1",
+          title: "Hair transplant consultation - Aaron Diehl",
+          event_type: "surgery",
+        },
+      ],
+      bookings: [
+        {
+          id: "bk-1",
+          title: "Hair transplant consultation - Aaron Diehl",
+          booking_type: "surgery",
+          metadata: { source: "google_calendar" },
+        },
+      ],
+    });
+
+    assert.equal(plan.calendarEventUpdates.length, 1);
+    assert.equal(plan.calendarEventUpdates[0]?.eventType, "consultation");
+    assert.equal(plan.bookingUpdates.length, 1);
+    assert.equal(plan.bookingUpdates[0]?.bookingType, "consultation");
+    assert.equal(classifyExternalCalendarEventType("PRP - Omar Abbasi"), "prp");
   });
 });
 

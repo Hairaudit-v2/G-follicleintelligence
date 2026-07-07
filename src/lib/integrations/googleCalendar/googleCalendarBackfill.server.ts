@@ -20,9 +20,11 @@ import {
   detectGoogleCalendarExternalSource,
   mapGoogleEventTypeToBookingType,
   matchPatientByEventTitle,
+  planGoogleCalendarClassificationRepairs,
   resolveGoogleCalendarBackfillDateRange,
   type GoogleCalendarBackfillDryRunSummary,
   type GoogleCalendarBackfillWriteSummary,
+  type GoogleCalendarClassificationRepairSummary,
 } from "./googleCalendarBackfillCore";
 
 const GOOGLE_CALENDAR_BOOKING_SOURCE = "google_calendar";
@@ -299,6 +301,103 @@ async function loadCalendarEventsInRange(
   }[];
 }
 
+async function loadGoogleCalendarBookingsInRange(
+  supabase: SupabaseClient,
+  tenantId: string,
+  timeMin: string,
+  timeMax: string,
+  clinicId?: string | null
+): Promise<
+  { id: string; title: string | null; booking_type: string; metadata: Record<string, unknown> }[]
+> {
+  let query = supabase
+    .from("fi_bookings")
+    .select("id, title, booking_type, metadata")
+    .eq("tenant_id", tenantId.trim())
+    .lt("start_at", timeMax)
+    .gt("end_at", timeMin);
+
+  if (clinicId?.trim()) {
+    query = query.eq("clinic_id", clinicId.trim());
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return (data ?? []) as {
+    id: string;
+    title: string | null;
+    booking_type: string;
+    metadata: Record<string, unknown>;
+  }[];
+}
+
+/** Reclassify stored Google Calendar events and linked bookings using the current classifier. */
+export async function repairGoogleCalendarClassifications(
+  input: {
+    tenantId: string;
+    clinicId?: string | null;
+    calendarSourceId?: string | null;
+    timeMin: string;
+    timeMax: string;
+    dryRun: boolean;
+  },
+  opts: ServerOpts = {}
+): Promise<GoogleCalendarClassificationRepairSummary> {
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const [calendarEvents, bookings] = await Promise.all([
+    loadCalendarEventsInRange(
+      supabase,
+      input.tenantId,
+      input.timeMin,
+      input.timeMax,
+      input.calendarSourceId
+    ),
+    loadGoogleCalendarBookingsInRange(
+      supabase,
+      input.tenantId,
+      input.timeMin,
+      input.timeMax,
+      input.clinicId
+    ),
+  ]);
+
+  const plan = planGoogleCalendarClassificationRepairs({
+    calendarEvents: calendarEvents.map((event) => ({
+      id: event.id,
+      title: event.title,
+      event_type: event.event_type,
+      description:
+        typeof event.metadata?.description === "string" ? event.metadata.description : null,
+    })),
+    bookings,
+  });
+
+  if (input.dryRun || plan.summary.calendarEventsReclassified + plan.summary.bookingsReclassified === 0) {
+    return plan.summary;
+  }
+
+  const now = new Date().toISOString();
+  for (const update of plan.calendarEventUpdates) {
+    const { error } = await supabase
+      .from("fi_calendar_events")
+      .update({ event_type: update.eventType, updated_at: now })
+      .eq("id", update.id)
+      .eq("tenant_id", input.tenantId.trim());
+    if (error) throw new Error(error.message);
+  }
+
+  for (const update of plan.bookingUpdates) {
+    const { error } = await supabase
+      .from("fi_bookings")
+      .update({ booking_type: update.bookingType, updated_at: now })
+      .eq("id", update.id)
+      .eq("tenant_id", input.tenantId.trim());
+    if (error) throw new Error(error.message);
+  }
+
+  return plan.summary;
+}
+
 async function loadBookingMapping(
   supabase: SupabaseClient,
   tenantId: string,
@@ -378,10 +477,11 @@ async function promoteSafeGoogleCalendarBookings(
     );
     if (existingBookingId) {
       counters.skippedDuplicates += 1;
+      const bookingType = mapGoogleEventTypeToBookingType(event.event_type);
       if (!input.dryRun) {
         const { data: existingBooking } = await supabase
           .from("fi_bookings")
-          .select("id, metadata")
+          .select("id, metadata, booking_type")
           .eq("tenant_id", input.tenantId.trim())
           .eq("id", existingBookingId)
           .maybeSingle();
@@ -393,9 +493,16 @@ async function promoteSafeGoogleCalendarBookings(
             integrationId: input.integrationId,
             existingMetadata: (existingBooking as { metadata: Record<string, unknown> }).metadata,
           });
+          const existingType = String(
+            (existingBooking as { booking_type?: string }).booking_type ?? ""
+          ).trim();
           await supabase
             .from("fi_bookings")
-            .update({ metadata: meta, updated_at: new Date().toISOString() })
+            .update({
+              metadata: meta,
+              ...(existingType !== bookingType ? { booking_type: bookingType } : {}),
+              updated_at: new Date().toISOString(),
+            })
             .eq("id", existingBookingId)
             .eq("tenant_id", input.tenantId.trim());
           counters.updatedBookings += 1;
@@ -576,6 +683,21 @@ export async function runGoogleCalendarBackfill(
   const failedCount = sync.failedCalendars?.length ?? 0;
   const drySummary = buildDryRunSummaryFromSyncResult(sync, failedCount);
 
+  const repairSummary = await repairGoogleCalendarClassifications(
+    {
+      tenantId,
+      clinicId: input.clinicId,
+      calendarSourceId: input.calendarSourceId,
+      timeMin: range.timeMin,
+      timeMax: range.timeMax,
+      dryRun,
+    },
+    opts
+  );
+  if (repairSummary.calendarEventsReclassified > 0 && !dryRun) {
+    drySummary.toUpdate += repairSummary.calendarEventsReclassified;
+  }
+
   let bookingCounts: BookingPromotionCounters = {
     createdBookings: 0,
     updatedBookings: 0,
@@ -597,6 +719,10 @@ export async function runGoogleCalendarBackfill(
       opts
     );
     drySummary.ambiguousReviewRequired += bookingCounts.sentToReview;
+
+    if (repairSummary.bookingsReclassified > 0) {
+      bookingCounts.updatedBookings += repairSummary.bookingsReclassified;
+    }
 
     const cancelledEvents = await loadCalendarEventsInRange(
       supabase,

@@ -379,3 +379,83 @@ export function buildGoogleCalendarBackfillDiagnosticsPatch(input: {
     },
   };
 }
+
+/** Reconcile stored event_type with current classifier output. */
+export function reconcileGoogleCalendarStoredEventType(
+  storedEventType: string | null | undefined,
+  title: string,
+  description?: string | null
+): { eventType: string; changed: boolean } {
+  const classified = classifyExternalCalendarEventType(title, description);
+  const current = String(storedEventType ?? "").trim() || "unknown";
+  return { eventType: classified, changed: classified !== current };
+}
+
+/** True when a Google-imported booking was classified as surgery but title indicates consultation. */
+export function isGoogleCalendarConsultationMisclassifiedAsSurgery(
+  bookingType: string,
+  title: string,
+  description?: string | null
+): boolean {
+  if (bookingType.trim().toLowerCase() !== "surgery") return false;
+  const classified = classifyExternalCalendarEventType(title, description);
+  return classified === "consultation" || classified === "follow_up" || classified === "review";
+}
+
+export type GoogleCalendarClassificationRepairSummary = {
+  calendarEventsReclassified: number;
+  bookingsReclassified: number;
+};
+
+/** Pure repair plan for misclassified Google Calendar rows (no I/O). */
+export function planGoogleCalendarClassificationRepairs(input: {
+  calendarEvents: ReadonlyArray<{
+    id: string;
+    title: string;
+    event_type: string | null;
+    description?: string | null;
+  }>;
+  bookings: ReadonlyArray<{
+    id: string;
+    title: string | null;
+    booking_type: string;
+    metadata?: Record<string, unknown> | null;
+  }>;
+}): {
+  calendarEventUpdates: { id: string; eventType: string }[];
+  bookingUpdates: { id: string; bookingType: string }[];
+  summary: GoogleCalendarClassificationRepairSummary;
+} {
+  const calendarEventUpdates: { id: string; eventType: string }[] = [];
+  for (const event of input.calendarEvents) {
+    const { eventType, changed } = reconcileGoogleCalendarStoredEventType(
+      event.event_type,
+      event.title,
+      event.description
+    );
+    if (changed) calendarEventUpdates.push({ id: event.id, eventType });
+  }
+
+  const bookingUpdates: { id: string; bookingType: string }[] = [];
+  for (const booking of input.bookings) {
+    const meta = booking.metadata ?? {};
+    const source = String(meta.source ?? meta.external_source ?? "").trim();
+    if (source !== "google_calendar") continue;
+
+    const title = booking.title?.trim() ?? "";
+    const classified = classifyExternalCalendarEventType(title);
+    const nextType = mapGoogleEventTypeToBookingType(classified);
+    if (nextType !== booking.booking_type.trim()) {
+      bookingUpdates.push({ id: booking.id, bookingType: nextType });
+    }
+  }
+
+  return {
+    calendarEventUpdates,
+    bookingUpdates,
+    summary: {
+      calendarEventsReclassified: calendarEventUpdates.length,
+      bookingsReclassified: bookingUpdates.length,
+    },
+  };
+}

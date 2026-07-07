@@ -58,6 +58,41 @@ describe("OnboardingOS Phase F3 — deterministic classification", () => {
     assert.equal(classifyExternalCalendarEventType("Team lunch"), "unknown");
   });
 
+  it("classifies hair transplant consultations as consultation, not surgery", () => {
+    assert.equal(
+      classifyExternalCalendarEventType("Hair transplant consultation - Aaron Diehl"),
+      "consultation"
+    );
+    assert.equal(classifyExternalCalendarEventType("HT consultation"), "consultation");
+    assert.equal(classifyExternalCalendarEventType("In-Clinic Consultation"), "consultation");
+    assert.equal(
+      classifyExternalCalendarEventType("Hair transplant consultation"),
+      "consultation"
+    );
+  });
+
+  it("classifies actual surgery titles as surgery", () => {
+    assert.equal(classifyExternalCalendarEventType("FUE Surgery - Aaron Diehl"), "surgery");
+    assert.equal(classifyExternalCalendarEventType("DFI Surgery - Aaron Diehl"), "surgery");
+    assert.equal(classifyExternalCalendarEventType("Procedure day - Aaron Diehl"), "surgery");
+  });
+
+  it("classifies PRP titles as prp", () => {
+    assert.equal(classifyExternalCalendarEventType("PRP - Omar Abbasi"), "prp");
+    assert.equal(classifyExternalCalendarEventType("PRF treatment"), "prp");
+  });
+
+  it("consultation beats broad hair transplant matching", () => {
+    assert.equal(
+      classifyExternalCalendarEventType("Hair transplant consultation with Dr Smith"),
+      "consultation"
+    );
+    assert.notEqual(
+      classifyExternalCalendarEventType("Hair transplant consultation with Dr Smith"),
+      "surgery"
+    );
+  });
+
   it("every classification result is a supported event type", () => {
     const samples = ["Surgery day", "PRP", "consult", "review", "random"];
     for (const title of samples) {

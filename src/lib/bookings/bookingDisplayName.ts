@@ -96,6 +96,27 @@ export function extractPersonNameFromBookingTitle(title: string | null | undefin
   return null;
 }
 
+/** Parse `"Hair transplant consultation - Aaron Diehl"` → `"Hair transplant consultation"`. */
+export function extractServiceLabelFromBookingTitle(title: string | null | undefined): string | null {
+  const t = title?.trim();
+  if (!t) return null;
+  const dash = t.match(/^(.+?)\s*[—–-]\s*.+$/);
+  const prefix = dash?.[1]?.trim();
+  if (prefix && isLikelyServiceDescriptorTitle(prefix)) return prefix;
+  if (isLikelyServiceDescriptorTitle(t)) return t;
+  return null;
+}
+
+/** True when a title looks like a service label rather than a person name. */
+export function isLikelyServiceDescriptorTitle(title: string | null | undefined): boolean {
+  const t = title?.trim();
+  if (!t) return false;
+  if (extractPersonNameFromBookingTitle(t)) return false;
+  return /consult|consultation|surgery|surgical|prp|prf|transplant|exosome|follow.?up|review|procedure|platelet|plasma/i.test(
+    t
+  );
+}
+
 /**
  * Human-readable calendar / drawer label for a booking anchor.
  *

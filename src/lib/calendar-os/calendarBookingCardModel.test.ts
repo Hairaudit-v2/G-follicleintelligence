@@ -114,4 +114,52 @@ describe("buildCalendarOsBookingCardModel", () => {
     assert.equal(card.isUnassigned, true);
     assert.ok(card.warnings.some((w) => w.kind === "unassigned"));
   });
+
+  it("shows patient name and service label for google-style consultation titles", () => {
+    const card = buildCalendarOsBookingCardModel({
+      booking: booking({
+        id: "bk-3",
+        start_at: "2026-07-07T03:00:00.000Z",
+        end_at: "2026-07-07T04:00:00.000Z",
+        booking_type: "consultation",
+        booking_status: "scheduled",
+        title: "Hair transplant consultation - Aaron Diehl",
+      }),
+      display: {
+        anchorLabel: "Unnamed patient",
+        scalesSummary: null,
+        durationMin: 60,
+        reminderHint: null,
+      },
+      calendarTimezone: "UTC",
+    });
+
+    assert.equal(card.patientName, "Aaron Diehl");
+    assert.equal(card.bookingTypeLabel, "Hair transplant consultation");
+    assert.equal(card.durationLabel, "1h");
+    assert.equal(card.surgery, null);
+  });
+
+  it("does not apply surgery styling context to consultation bookings", () => {
+    const card = buildCalendarOsBookingCardModel({
+      booking: booking({
+        id: "bk-4",
+        start_at: "2026-07-07T03:00:00.000Z",
+        end_at: "2026-07-07T04:00:00.000Z",
+        booking_type: "consultation",
+        title: "PRP - Omar Abbasi",
+      }),
+      display: {
+        anchorLabel: "Omar Abbasi",
+        scalesSummary: null,
+        durationMin: 60,
+        reminderHint: null,
+      },
+      calendarTimezone: "UTC",
+    });
+
+    assert.equal(card.patientName, "Omar Abbasi");
+    assert.equal(card.bookingType, "consultation");
+    assert.equal(card.surgery, null);
+  });
 });

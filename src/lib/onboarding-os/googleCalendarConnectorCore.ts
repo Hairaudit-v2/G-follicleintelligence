@@ -16,28 +16,58 @@ import type {
 } from "./googleCalendarConnectorTypes";
 import { isExternalCalendarEventType } from "./googleCalendarConnectorTypes";
 
-/** Keyword rules ordered by specificity (first match wins). */
+/**
+ * Keyword rules ordered by specificity (first match wins).
+ * Consultation must precede surgery so "hair transplant consultation" is never classified as surgery.
+ */
 const CLASSIFICATION_RULES: readonly {
   type: ExternalCalendarEventType;
   keywords: readonly string[];
 }[] = [
+  { type: "prp", keywords: ["prp", "prf", "platelet rich plasma", "platelet-rich", "platelet", "plasma"] },
   { type: "exosomes", keywords: ["exosome", "exosomes"] },
-  { type: "prp", keywords: ["prp", "platelet rich plasma", "platelet-rich"] },
   {
-    type: "surgery",
-    keywords: ["surgery", "transplant", "fue", "dhi", "hair transplant", "procedure day"],
+    type: "consultation",
+    keywords: [
+      "hair transplant consultation",
+      "ht consultation",
+      "ht consult",
+      "in-clinic consultation",
+      "doctor consultation",
+      "video consultation",
+      "phone consultation",
+      "consultation",
+      "consult",
+      "initial consult",
+      "hair consult",
+      "discovery call",
+    ],
   },
   {
     type: "follow_up",
     keywords: ["follow up", "follow-up", "followup", "post op", "post-op", "postoperative"],
   },
   {
-    type: "consultation",
-    keywords: ["consultation", "consult", "initial consult", "hair consult", "discovery call"],
-  },
-  {
     type: "review",
     keywords: ["review", "check-in", "check in", "progress review", "6 month", "12 month"],
+  },
+  {
+    type: "surgery",
+    keywords: [
+      "transplant surgery",
+      "fue surgery",
+      "dhi surgery",
+      "dfi surgery",
+      "ht surgery",
+      "procedure day",
+      "fue hair transplant",
+      "dhi hair transplant",
+      "hair transplant procedure",
+      "surgical",
+      "surgery",
+      "procedure",
+      "hair transplant",
+    ],
   },
 ];
 
