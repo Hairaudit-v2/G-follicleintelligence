@@ -19,7 +19,6 @@ import { resolve } from "node:path";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { buildDefaultPipelineStageInsertRows } from "../src/lib/crm/pipelineSeedPayload";
-import { activateTenantModule } from "../src/lib/platform/entitlements/activateTenantModule.server";
 
 /** Fill `process.env` from repo-root env files (tsx does not auto-load `.env.local`). */
 function loadRepoEnvFiles(): void {
@@ -50,6 +49,52 @@ loadRepoEnvFiles();
 const DEFAULT_SLUG = "evolved";
 const DEFAULT_NAME = "Evolved Hair Clinics";
 const DEFAULT_TZ = "Australia/Perth";
+
+/** Script-safe hr_os activation (avoids server-only Next.js modules under tsx). */
+async function activateEvolvedHrOsModule(
+  tenantId: string,
+  activatedAt: string
+): Promise<void> {
+  const supabase = supabaseAdmin();
+  const { data: moduleRow, error: moduleLookupErr } = await supabase
+    .from("fi_modules")
+    .select("id, is_active")
+    .eq("code", "hr_os")
+    .maybeSingle();
+  if (moduleLookupErr) throw new Error(moduleLookupErr.message);
+  if (!moduleRow || (moduleRow as { is_active: boolean | null }).is_active === false) {
+    throw new Error("hr_os module is not available in fi_modules.");
+  }
+  const moduleId = String((moduleRow as { id: string }).id);
+
+  const { error: verifyErr } = await supabase
+    .from("fi_tenants")
+    .update({ verification_status: "verified" })
+    .eq("id", tenantId);
+  if (verifyErr) throw new Error(verifyErr.message);
+
+  const { error: billingErr } = await supabase.from("fi_tenant_billing_status").upsert(
+    {
+      tenant_id: tenantId,
+      subscription_status: "active",
+      updated_at: activatedAt,
+    },
+    { onConflict: "tenant_id" }
+  );
+  if (billingErr) throw new Error(billingErr.message);
+
+  const { error: moduleErr } = await supabase.from("fi_tenant_modules").upsert(
+    {
+      tenant_id: tenantId,
+      module_id: moduleId,
+      enabled: true,
+      enabled_at: activatedAt,
+      updated_at: activatedAt,
+    },
+    { onConflict: "tenant_id,module_id" }
+  );
+  if (moduleErr) throw new Error(moduleErr.message);
+}
 
 /** Colours + support contact for fi_tenant_settings (brand display name = fi_tenants.name at runtime). */
 const BRAND = {
@@ -229,13 +274,7 @@ async function main(): Promise<void> {
   if (settingsErr) throw new Error(settingsErr.message);
   console.log(`Upserted fi_tenant_settings (default_timezone=${defaultTimezone}, branding) for tenant ${tenantId}`);
 
-  const hrActivation = await activateTenantModule({
-    tenantId,
-    moduleCode: "hr_os",
-    subscriptionStatus: "active",
-    verificationStatus: "verified",
-  });
-  if (!hrActivation.ok) throw new Error(hrActivation.message);
+  await activateEvolvedHrOsModule(tenantId, now);
   console.log(`Activated hr_os module (verification=verified, subscription=active) for tenant ${tenantId}`);
 
   let stagesSeeded = 0;
