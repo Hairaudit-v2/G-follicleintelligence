@@ -19,6 +19,7 @@ import { resolve } from "node:path";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { buildDefaultPipelineStageInsertRows } from "../src/lib/crm/pipelineSeedPayload";
+import { activateTenantModule } from "../src/lib/platform/entitlements/activateTenantModule.server";
 
 /** Fill `process.env` from repo-root env files (tsx does not auto-load `.env.local`). */
 function loadRepoEnvFiles(): void {
@@ -227,6 +228,15 @@ async function main(): Promise<void> {
   );
   if (settingsErr) throw new Error(settingsErr.message);
   console.log(`Upserted fi_tenant_settings (default_timezone=${defaultTimezone}, branding) for tenant ${tenantId}`);
+
+  const hrActivation = await activateTenantModule({
+    tenantId,
+    moduleCode: "hr_os",
+    subscriptionStatus: "active",
+    verificationStatus: "verified",
+  });
+  if (!hrActivation.ok) throw new Error(hrActivation.message);
+  console.log(`Activated hr_os module (verification=verified, subscription=active) for tenant ${tenantId}`);
 
   let stagesSeeded = 0;
   const { count: stageCount, error: stageCountErr } = await supabase

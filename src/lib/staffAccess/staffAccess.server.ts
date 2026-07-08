@@ -213,8 +213,8 @@ export async function resolveStaffAccessPrincipal(
 
   const roleKey =
     workspaceIdentity.roleKey ??
-    normalizeStaffRoleKey(fiUser.role) ??
-    normalizeStaffRoleKey(tenantAdminRole ?? null);
+    normalizeStaffRoleKey(tenantAdminRole ?? null) ??
+    normalizeStaffRoleKey(fiUser.role);
 
   return {
     tenantId: tid,

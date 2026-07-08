@@ -62,7 +62,8 @@ async function resolveTeamWorkspaceAccessImpl(
     allowed: false,
     tabAccess,
     hrOsRouteGranted: false,
-    deniedReason: hrAccess.ok ? "role_not_allowed" : hrAccess.access.reason,
+    // Team has a workforce-access fallback — entitlement denials here are misleading.
+    deniedReason: "role_not_allowed",
   };
 }
 

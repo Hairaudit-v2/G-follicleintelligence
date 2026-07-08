@@ -76,17 +76,17 @@ test("receptionist with roster.manage cannot access identity tab segment", () =>
   assert.equal(isTeamTabSegmentAllowed(access, "identity", { hrOsFullNav: false }), false);
 });
 
-test("manager without hrOsFullNav sees roster-safe team tabs only", () => {
+test("manager without hrOsFullNav sees staff, roster, and identity tabs", () => {
   const access = computeEffectiveAccess({ roleKey: "manager", grants: [] });
   const tabAccess = resolveTeamWorkspaceTabAccess(access, { hrOsFullNav: false });
-  assert.deepEqual(tabAccess.visibleTabIds, ["staff", "roster"]);
+  assert.deepEqual(tabAccess.visibleTabIds, ["staff", "roster", "identity"]);
   assert.ok(!tabAccess.visibleTabIds.includes("overview"));
-  assert.ok(!tabAccess.visibleTabIds.includes("identity"));
   assert.ok(!tabAccess.visibleTabIds.includes("onboarding"));
   assert.equal(tabAccess.canManageRoster, true);
+  assert.equal(tabAccess.canManageIdentity, true);
   assert.equal(isTeamTabSegmentAllowed(access, "overview", { hrOsFullNav: false }), false);
   assert.equal(isTeamTabSegmentAllowed(access, "roster", { hrOsFullNav: false }), true);
-  assert.equal(isTeamTabSegmentAllowed(access, "identity", { hrOsFullNav: false }), false);
+  assert.equal(isTeamTabSegmentAllowed(access, "identity", { hrOsFullNav: false }), true);
 });
 
 test("manager hrOsFullNav retains full team tab set", () => {

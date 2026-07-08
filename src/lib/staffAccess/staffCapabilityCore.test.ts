@@ -12,6 +12,7 @@ import {
   computeEffectiveAccess,
   type StaffAccessGrantInput,
 } from "@/src/lib/staffAccess/staffAccessCore";
+import { normalizeStaffRoleKey } from "@/src/lib/staffAccess/staffAccessRegistry";
 
 function grant(
   partial: Partial<StaffAccessGrantInput> & { moduleKey: string }
@@ -24,6 +25,14 @@ function grant(
     ...partial,
   };
 }
+
+test("operations_admin tenant backend role maps to manager staff access", () => {
+  const roleKey = normalizeStaffRoleKey("operations_admin");
+  assert.equal(roleKey, "manager");
+  const access = computeEffectiveAccess({ roleKey, grants: [] });
+  assert.equal(canEnterTeamWorkspace(access), true);
+  assert.equal(staffCapabilitySatisfies(access, "roster.manage"), true);
+});
 
 test("receptionist without override cannot manage roster", () => {
   const access = computeEffectiveAccess({ roleKey: "reception", grants: [] });

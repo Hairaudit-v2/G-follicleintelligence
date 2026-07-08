@@ -52,7 +52,10 @@ function tabVisibleByCapability(
   }
 
   if (tabId === "identity") {
-    return canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false });
+    return (
+      canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }) ||
+      staffCapabilitySatisfies(access, "team.identity.manage")
+    );
   }
 
   return canAccessWorkforceTabForTeamNav(access, workforceTabKey, "read", {
