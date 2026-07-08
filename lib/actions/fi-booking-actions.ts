@@ -197,7 +197,12 @@ export async function completeBookingAction(
   bookingId: string,
   body: unknown
 ): Promise<
-  { ok: true; booking: Awaited<ReturnType<typeof completeBooking>> } | { ok: false; error: string }
+  | {
+      ok: true;
+      booking: Awaited<ReturnType<typeof completeBooking>>;
+      treatmentPhotosWarning?: string | null;
+    }
+  | { ok: false; error: string }
 > {
   try {
     const parsed = bookingCompleteBodySchema.parse(body);
@@ -207,8 +212,21 @@ export async function completeBookingAction(
       request: undefined,
       staffPinFloorAction: "patient.check_in",
     });
+    const existing = await loadBookingForTenant(tenantId, bookingId);
+    if (!existing) return { ok: false, error: "Booking not found." };
+
+    const { validateTreatmentPhotosForBookingCompletion } =
+      await import("@/src/lib/imaging-os/treatmentImagingSession.server");
+    const photoPolicy = await validateTreatmentPhotosForBookingCompletion({
+      tenantId,
+      booking: existing,
+    });
+    if (!photoPolicy.allowed) {
+      return { ok: false, error: photoPolicy.blockedMessage ?? "Treatment photos are required." };
+    }
+
     const booking = await completeBooking({ tenantId, bookingId });
-    return { ok: true, booking };
+    return { ok: true, booking, treatmentPhotosWarning: photoPolicy.warning };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

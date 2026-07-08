@@ -254,4 +254,17 @@ describe("VIE completeness scoring", () => {
     assert.equal(extraction!.required_complete, 0);
     assert.equal(extraction!.percent, 0);
   });
+
+  it("treatment scalp standard protocol defines five required treatment views", () => {
+    const protocol = getVieProtocolOrThrow("treatment_scalp_standard");
+    assert.equal(protocol.picker_category, "treatment_session");
+    assert.equal(protocol.slots.filter((s) => s.required).length, 5);
+    assert.deepEqual(
+      protocol.slots.filter((s) => s.required).map((s) => s.slug),
+      ["front_hairline", "left_side", "right_side", "top", "crown"]
+    );
+    const misc = protocol.slots.find((s) => s.slug === "misc");
+    assert.ok(misc);
+    assert.equal(misc?.required, false);
+  });
 });

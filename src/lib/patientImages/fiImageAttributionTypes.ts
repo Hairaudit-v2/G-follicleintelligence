@@ -19,6 +19,7 @@ export const FI_IMAGE_CAPTURE_SOURCES = [
   "legacy_follow_up",
   "follow_up_encounter",
   "hairaudit",
+  "treatment_imaging",
   "guided_capture",
   "unknown",
 ] as const;

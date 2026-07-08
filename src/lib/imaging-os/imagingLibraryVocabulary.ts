@@ -46,6 +46,7 @@ export function mapTemplateSlugToImagingLibraryAxis(templateSlug: string): Imagi
   ) {
     return "consultation";
   }
+  if (s === "treatment_scalp_standard") return "general_clinical";
   return "general_clinical";
 }
 

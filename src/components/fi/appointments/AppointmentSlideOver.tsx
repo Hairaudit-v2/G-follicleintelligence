@@ -75,6 +75,7 @@ import {
   AppointmentProcedureSection,
   defaultAppointmentCompletionLeadOpts,
 } from "./shared";
+import { TreatmentPhotosChecklist } from "@/src/components/fi/treatment-imaging/TreatmentPhotosChecklist";
 
 export type AppointmentShellOperatorContext = {
   tenantId: string;
@@ -1007,6 +1008,16 @@ export function AppointmentSlideOverPanel({
             clinicalLine={payload.clinicalLine}
             surgeryPlan={payload.surgeryPlan}
           />
+
+          {payload.treatmentImaging.applies ? (
+            <TreatmentPhotosChecklist
+              tenantId={tenantId}
+              patientId={booking.patient_id}
+              bookingId={booking.id}
+              checklist={payload.treatmentImaging}
+              canCapture={canMutate && !cancelled && booking.booking_status !== "completed"}
+            />
+          ) : null}
 
           <AppointmentProcedureSection
             tenantId={tenantId}

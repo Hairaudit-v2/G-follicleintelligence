@@ -18,6 +18,11 @@ import {
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { resolveOrCreateCanonicalProtocolSession } from "@/src/lib/imaging-os/canonicalCaptureResolver.server";
+import {
+  ensureTreatmentImagingSession,
+  loadTreatmentImagingChecklistForBooking,
+} from "@/src/lib/imaging-os/treatmentImagingSession.server";
+import { TREATMENT_IMAGING_CAPTURE_SOURCE, TREATMENT_IMAGING_PROTOCOL_SLUG } from "@/src/lib/imaging-os/treatmentImagingProtocol";
 import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
   bulkAssignImagingReviewItemsStaffNote,
@@ -219,7 +224,28 @@ export async function createImagingProtocolSessionAction(
     const supabase = supabaseAdmin();
     const tid = tenantId.trim();
     const pid = patientId.trim();
-    const captureSource = parsed.surgeryId ? "surgery_os" : "imaging_os_wizard";
+    const captureSource = parsed.surgeryId
+      ? "surgery_os"
+      : parsed.templateSlug.trim() === TREATMENT_IMAGING_PROTOCOL_SLUG
+        ? TREATMENT_IMAGING_CAPTURE_SOURCE
+        : "imaging_os_wizard";
+
+    if (
+      parsed.templateSlug.trim() === TREATMENT_IMAGING_PROTOCOL_SLUG &&
+      parsed.bookingId?.trim()
+    ) {
+      const { loadBookingForTenant } = await import("@/src/lib/bookings/bookings");
+      const booking = await loadBookingForTenant(tid, parsed.bookingId.trim(), supabase);
+      if (!booking) return { ok: false, error: "Booking not found." };
+      const session = await ensureTreatmentImagingSession({
+        tenantId: tid,
+        patientId: pid,
+        booking,
+        client: supabase,
+      });
+      return { ok: true, sessionId: session.sessionId };
+    }
+
     const resolved = await resolveOrCreateCanonicalProtocolSession({
       tenantId: tid,
       patientId: pid,
@@ -1225,6 +1251,63 @@ export async function loadPatientVisualSummaryStaffRecordAction(
         ? (data.metadata as Record<string, unknown>)
         : {};
     return { ok: true, record: readPatientVisualSummaryStaffRecord(meta) };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const ensureTreatmentImagingSessionSchema = z
+  .object({
+    adminKey: z.string().optional(),
+    bookingId: z.string().uuid(),
+  })
+  .strict();
+
+export async function ensureTreatmentImagingSessionAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | {
+      ok: true;
+      sessionId: string;
+      created: boolean;
+      checklist: Awaited<ReturnType<typeof loadTreatmentImagingChecklistForBooking>>;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = ensureTreatmentImagingSessionSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const { loadBookingForTenant } = await import("@/src/lib/bookings/bookings");
+    const booking = await loadBookingForTenant(tenantId, parsed.bookingId);
+    if (!booking) return { ok: false, error: "Booking not found." };
+    if (!booking.patient_id?.trim() || booking.patient_id.trim() !== patientId.trim()) {
+      return { ok: false, error: "Patient is not linked to this booking." };
+    }
+    const session = await ensureTreatmentImagingSession({ tenantId, patientId, booking });
+    const checklist = await loadTreatmentImagingChecklistForBooking({ tenantId, booking });
+    revalidatePath(`/fi-admin/${tenantId.trim()}/calendar`);
+    return { ok: true, sessionId: session.sessionId, created: session.created, checklist };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function loadTreatmentImagingChecklistAction(
+  tenantId: string,
+  bookingId: string
+): Promise<
+  | { ok: true; checklist: Awaited<ReturnType<typeof loadTreatmentImagingChecklistForBooking>> }
+  | { ok: false; error: string }
+> {
+  try {
+    await assertCrmTenantWriteAllowed({ tenantId, request: undefined });
+    const { loadBookingForTenant } = await import("@/src/lib/bookings/bookings");
+    const booking = await loadBookingForTenant(tenantId, bookingId);
+    if (!booking) return { ok: false, error: "Booking not found." };
+    const checklist = await loadTreatmentImagingChecklistForBooking({ tenantId, booking });
+    return { ok: true, checklist };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

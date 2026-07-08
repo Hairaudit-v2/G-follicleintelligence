@@ -60,6 +60,8 @@ import {
 import type { FiBookingRow } from "./types";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { loadBookingClinicalStaffingSummary } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
+import type { TreatmentImagingChecklistPayload } from "@/src/lib/imaging-os/treatmentImagingSession.server";
+import { loadTreatmentImagingChecklistForBooking } from "@/src/lib/imaging-os/treatmentImagingSession.server";
 
 export type AppointmentSlideOverLeadAnchor = {
   lead: FiCrmLeadRow;
@@ -95,6 +97,8 @@ export type AppointmentSlideOverPayload = {
   calendarTimezone: string;
   /** WorkforceOS Phase 2D — staffing readiness for this appointment. */
   clinicalStaffing: ClinicalStaffingSummaryDto;
+  /** FI-TREATMENT-IMAGING-PROTOCOL-1 — regenerative treatment photo checklist. */
+  treatmentImaging: TreatmentImagingChecklistPayload;
 };
 
 export type AppointmentShellRelatedAppointmentItem = {
@@ -164,6 +168,7 @@ export async function loadAppointmentSlideOverPayload(
     patientImages,
     surgeryPlan,
     clinicalStaffing,
+    treatmentImaging,
   ] = await Promise.all([
     loadClinicalStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
@@ -185,6 +190,7 @@ export async function loadAppointmentSlideOverPayload(
     patientId ? loadPatientImagesProfileBundle(tid, patientId) : Promise.resolve(null),
     caseId ? loadSurgeryPlanForCase(tid, caseId) : Promise.resolve(null),
     loadBookingClinicalStaffingSummary(tid, booking, { syncExistingStaff: true }),
+    loadTreatmentImagingChecklistForBooking({ tenantId: tid, booking }),
   ]);
 
   const meta = booking.metadata ?? {};
@@ -216,6 +222,7 @@ export async function loadAppointmentSlideOverPayload(
     pipelineStages,
     timeline: timelineBundle,
     clinicalStaffing,
+    treatmentImaging,
   };
 }
 

@@ -74,4 +74,15 @@ describe("resolveGuidedCaptureSource", () => {
       "surgery_os"
     );
   });
+
+  it("maps treatment_scalp_standard template to treatment_imaging", () => {
+    assert.equal(
+      resolveGuidedCaptureSource({
+        protocolTemplateSlug: "treatment_scalp_standard",
+        explicitCaptureSource: "treatment_imaging",
+        guidedSurface: "vie",
+      }),
+      "treatment_imaging"
+    );
+  });
 });

@@ -4,6 +4,8 @@
 
 import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
 
+const TREATMENT_PROTOCOL_TEMPLATES = new Set(["treatment_scalp_standard"]);
+
 const SURGERY_PROTOCOL_TEMPLATES = new Set([
   "surgery_day",
   "post_op_review",
@@ -18,6 +20,7 @@ const PRESERVED_EXPLICIT_SOURCES = new Set<FiImageCaptureSource>([
   "patient_profile",
   "patient_slide_over",
   "profile_upload_form",
+  "treatment_imaging",
 ]);
 
 function normalizeKey(value: string | null | undefined): string {
@@ -48,6 +51,13 @@ export function resolveGuidedCaptureSource(
   }
   if (explicit === "surgery_os" || explicit === "follow_up_outcome") {
     return explicit;
+  }
+  if (explicit === "treatment_imaging") {
+    return "treatment_imaging";
+  }
+
+  if (TREATMENT_PROTOCOL_TEMPLATES.has(template)) {
+    return "treatment_imaging";
   }
 
   if (SURGERY_PROTOCOL_TEMPLATES.has(template)) {

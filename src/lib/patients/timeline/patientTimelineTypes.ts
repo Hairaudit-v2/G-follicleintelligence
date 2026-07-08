@@ -122,6 +122,9 @@ export type PatientTimelineImageInput = {
   created_at: string;
   archived_at: string | null;
   follow_up_encounter_id?: string | null;
+  booking_id?: string | null;
+  imaging_protocol_template_slug?: string | null;
+  imaging_protocol_slot_slug?: string | null;
 };
 
 export type PatientTimelineFollowUpEncounterInput = {

@@ -30,6 +30,7 @@ export const CANONICAL_STAFF_PROTOCOL_REQUIRED_SOURCES = [
   "imaging_os_wizard",
   "consultation_os",
   "follow_up_outcome",
+  "treatment_imaging",
 ] as const;
 
 export type CanonicalCaptureContext = {
@@ -94,6 +95,7 @@ export function resolveTemplateSlugForCaptureContext(input: {
   if (source === "consultation_os") return "hair_loss_consultation";
   if (source === "follow_up_outcome") return "follow_up_review";
   if (source === "legacy_follow_up") return "follow_up_review";
+  if (source === "treatment_imaging") return "treatment_scalp_standard";
   return "hair_loss_consultation";
 }
 

@@ -16,6 +16,7 @@ import type {
   PatientTimelineSourceBundle,
 } from "./patientTimelineTypes";
 import { isGenericEmailActivityKind } from "@/src/lib/integrations/genericEmail/genericEmailActivityCore";
+import { treatmentImagingTimelineSummary } from "@/src/lib/imaging-os/treatmentImagingProtocol";
 
 const EXCLUDED_DUPLICATE_ACTIVITY_KINDS = new Set([
   "booking.created",
@@ -356,19 +357,28 @@ export function buildPatientTimeline(
     const cat = String(im.image_category).replace(/_/g, " ");
     if (im.image_status === "active") {
       const isFollowUpPhoto = Boolean(im.follow_up_encounter_id);
+      const treatmentSummary = treatmentImagingTimelineSummary(im);
       items.push({
         id: `image_uploaded:${im.id}`,
         occurred_at: im.created_at,
         item_type: isFollowUpPhoto ? "follow_up_photos_captured" : "image_uploaded",
-        title: isFollowUpPhoto ? "Photos captured" : "Clinical image uploaded",
-        subtitle: null,
+        title: treatmentSummary
+          ? "Treatment session photo"
+          : isFollowUpPhoto
+            ? "Photos captured"
+            : "Clinical image uploaded",
+        subtitle: treatmentSummary ? null : null,
         source_type: "image",
         source_id: im.id,
         severity: im.image_status,
         href: isFollowUpPhoto
           ? `/fi-admin/${ctx.tenantId.trim()}/patients/${bundle.foundationPatientId}/imaging`
-          : null,
-        metadata_summary: isFollowUpPhoto ? "Follow-up imaging session" : `Category: ${cat}`,
+          : treatmentSummary && im.booking_id
+            ? buildCalendarHref(ctx.tenantId.trim(), {
+                date: String(im.created_at).slice(0, 10),
+              })
+            : null,
+        metadata_summary: treatmentSummary ?? (isFollowUpPhoto ? "Follow-up imaging session" : `Category: ${cat}`),
         is_sensitive: false,
       });
     }

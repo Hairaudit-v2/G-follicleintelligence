@@ -18,6 +18,7 @@ const SURGERY_TIMING = "On surgery day — capture at each operative milestone";
 const POST_OP_TIMING = "Within 24–72 hours post-procedure";
 const FOLLOW_UP_TIMING = "At follow-up interval — match baseline framing";
 const REPAIR_TIMING = "Repair / corrective procedure visit";
+const TREATMENT_TIMING = "During in-clinic regenerative treatment — before or after the procedure";
 
 function defaultFraming(slug: string): VieCaptureFraming {
   return slug.endsWith("_close") || slug.includes("_close") ? "close_up" : "overview";
@@ -511,6 +512,64 @@ export const VIE_PROTOCOL_CATALOG: VieProtocolDef[] = [
         "recipient_zone",
         "frontal_third",
         { suggested_timing: REPAIR_TIMING }
+      ),
+    ],
+  },
+  {
+    slug: "treatment_scalp_standard",
+    name: "Treatment scalp — standard series",
+    description:
+      "Five required scalp views for in-clinic PRP, mesotherapy, dutasteride mesotherapy, and exosome sessions.",
+    picker_category: "treatment_session",
+    imaging_library_axis: "general_clinical",
+    slots: [
+      slot(
+        "front_hairline",
+        "Frontal hairline",
+        "Face the camera directly. Include the full hairline from ear to ear at arm's length.",
+        "front_hairline",
+        "hairline",
+        { suggested_timing: TREATMENT_TIMING }
+      ),
+      slot(
+        "left_side",
+        "Left side / temple",
+        "Turn head slightly right to expose the left temporal and parietal zone with even lighting.",
+        "left_side",
+        "temple_left",
+        { suggested_timing: TREATMENT_TIMING }
+      ),
+      slot(
+        "right_side",
+        "Right side / temple",
+        "Turn head slightly left to expose the right temporal and parietal zone. Match left-side framing.",
+        "right_side",
+        "temple_right",
+        { suggested_timing: TREATMENT_TIMING }
+      ),
+      slot(
+        "top",
+        "Top / mid-scalp",
+        "Capture a true overhead view of the midscalp. Patient tilts chin down; device held above the vertex.",
+        "top",
+        "midscalp",
+        { suggested_timing: TREATMENT_TIMING }
+      ),
+      slot(
+        "crown",
+        "Crown",
+        "Centre the crown / vertex in frame. Part the hair if needed; hold the device steady above the head.",
+        "crown",
+        "crown",
+        { suggested_timing: TREATMENT_TIMING }
+      ),
+      slot(
+        "misc",
+        "Misc clinical image",
+        "Optional additional clinical photo (e.g. close-up, injection site, or supporting detail).",
+        "front_close",
+        "other",
+        { required: false, slot_tier: "optional", suggested_timing: TREATMENT_TIMING }
       ),
     ],
   },

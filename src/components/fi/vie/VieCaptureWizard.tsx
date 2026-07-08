@@ -169,6 +169,7 @@ export function VieCaptureWizard({
   onClose,
   captureSource = "vie_capture_wizard",
   surgeryContext,
+  treatmentContext,
 }: {
   tenantId: string;
   patientId: string;
@@ -178,12 +179,18 @@ export function VieCaptureWizard({
   onClose: () => void;
   captureSource?: Extract<
     FiImageCaptureSource,
-    "vie_capture_wizard" | "surgery_os" | "appointment_procedure"
+    "vie_capture_wizard" | "surgery_os" | "appointment_procedure" | "treatment_imaging"
   >;
   surgeryContext?: {
     caseId: string | null;
     bookingId: string | null;
     procedureDayId: string | null;
+  };
+  treatmentContext?: {
+    bookingId: string;
+    treatmentType: string;
+    imageContext: string;
+    protocolSlug: string;
   };
 }) {
   const router = useRouter();
@@ -421,6 +428,7 @@ export function VieCaptureWizard({
           if (surgeryContext?.bookingId) fd.set("booking_id", surgeryContext.bookingId);
           if (surgeryContext?.procedureDayId)
             fd.set("procedure_day_id", surgeryContext.procedureDayId);
+          if (treatmentContext?.bookingId) fd.set("booking_id", treatmentContext.bookingId);
           if (dims.width) fd.set("image_width", String(dims.width));
           if (dims.height) fd.set("image_height", String(dims.height));
           if (hasAccepted || hasPending) fd.set("guided_replace", "1");
@@ -428,6 +436,15 @@ export function VieCaptureWizard({
             "metadata",
             JSON.stringify({
               protocol_session_id: sessionId,
+              ...(treatmentContext
+                ? {
+                    image_context: treatmentContext.imageContext,
+                    treatment_type: treatmentContext.treatmentType,
+                    imaging_protocol: treatmentContext.protocolSlug,
+                    view_type: currentSlug,
+                    treatment_context: treatmentContext,
+                  }
+                : {}),
               capture_hints: {
                 framing_score:
                   dims.width && dims.height && Math.min(dims.width, dims.height) >= 720 ? 85 : 55,
@@ -495,6 +512,7 @@ export function VieCaptureWizard({
       router,
       sessionId,
       surgeryContext,
+      treatmentContext,
       templateSlug,
       tenantId,
     ]

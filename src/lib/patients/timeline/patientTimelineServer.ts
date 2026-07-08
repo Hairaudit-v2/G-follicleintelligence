@@ -60,7 +60,9 @@ export async function loadPatientTimelineSources(
 
   const { data: imgRows, error: ie } = await supabase
     .from("fi_patient_images")
-    .select("id, image_category, image_status, caption, created_at, archived_at, metadata")
+    .select(
+      "id, image_category, image_status, caption, created_at, archived_at, metadata, booking_id, imaging_protocol_template_slug, imaging_protocol_slot_slug"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .order("created_at", { ascending: false })
@@ -84,6 +86,13 @@ export async function loadPatientTimelineSources(
       created_at: String(x.created_at),
       archived_at: x.archived_at != null ? String(x.archived_at) : null,
       follow_up_encounter_id: followUpEncounterId,
+      booking_id: x.booking_id != null ? String(x.booking_id) : null,
+      imaging_protocol_template_slug:
+        x.imaging_protocol_template_slug != null
+          ? String(x.imaging_protocol_template_slug)
+          : null,
+      imaging_protocol_slot_slug:
+        x.imaging_protocol_slot_slug != null ? String(x.imaging_protocol_slot_slug) : null,
     };
   });
 

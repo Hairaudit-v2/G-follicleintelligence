@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { PROGRESS_META_KEY } from "./protocolSlotVocabulary";
 import { loadResolvedProtocol } from "./protocolCatalogResolver.server";
 import { buildProtocolCatalogCaptureMetadata } from "./protocolCaptureMetadataCore";
+import { TREATMENT_IMAGING_PROTOCOL_SLUG } from "./treatmentImagingProtocol";
 import {
   buildCanonicalCaptureAuditMetadata,
   isCanonicalCaptureLegacyExempt,
@@ -138,6 +139,14 @@ export async function resolveOrCreateCanonicalProtocolSession(
       booking_id: input.bookingId?.trim() || null,
       procedure_day_id: input.procedureDayId?.trim() || null,
       surgery_id: input.surgeryId?.trim() || null,
+      capture_surface: captureSource,
+    };
+  }
+  if (templateSlug === TREATMENT_IMAGING_PROTOCOL_SLUG && input.bookingId?.trim()) {
+    progressMeta.treatment_context = {
+      booking_id: input.bookingId.trim(),
+      image_context: "treatment",
+      protocol_slug: templateSlug,
       capture_surface: captureSource,
     };
   }

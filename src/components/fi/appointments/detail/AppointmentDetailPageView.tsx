@@ -36,6 +36,8 @@ import { AppointmentOverviewStats } from "./AppointmentOverviewStats";
 import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import { AppointmentPostProcedurePlanPanel } from "./AppointmentPostProcedurePlanPanel";
 import { AppointmentProcedurePhotosPanel } from "./AppointmentProcedurePhotosPanel";
+import { TreatmentPhotosChecklist } from "@/src/components/fi/treatment-imaging/TreatmentPhotosChecklist";
+import { isSurgeryBookingType } from "@/src/lib/imaging-os/treatmentImagingProtocol";
 import { useAppointmentDetailState } from "./useAppointmentDetailState";
 
 export function AppointmentDetailPageView({
@@ -216,6 +218,15 @@ export function AppointmentDetailPageView({
               date: booking.start_at,
             }}
           />
+          {payload.treatmentImaging.applies ? (
+            <TreatmentPhotosChecklist
+              tenantId={tenantId}
+              patientId={booking.patient_id}
+              bookingId={booking.id}
+              checklist={payload.treatmentImaging}
+              canCapture={state.canMutate && !cancelled && booking.booking_status !== "completed"}
+            />
+          ) : null}
           <AppointmentAnchorFlowsSection
             booking={booking}
             lead={lead}
@@ -351,14 +362,30 @@ export function AppointmentDetailPageView({
       ) : null}
 
       {activeTab === "photos" ? (
-        <AppointmentProcedurePhotosPanel
-          tenantId={tenantId}
-          patientId={booking.patient_id}
-          bookingId={booking.id}
-          leadId={booking.lead_id}
-          caseId={booking.case_id}
-          bundle={payload.patientImages}
-        />
+        payload.treatmentImaging.applies ? (
+          <TreatmentPhotosChecklist
+            tenantId={tenantId}
+            patientId={booking.patient_id}
+            bookingId={booking.id}
+            checklist={payload.treatmentImaging}
+            canCapture={state.canMutate && !cancelled && booking.booking_status !== "completed"}
+          />
+        ) : isSurgeryBookingType(booking.booking_type) ? (
+          <AppointmentProcedurePhotosPanel
+            tenantId={tenantId}
+            patientId={booking.patient_id}
+            bookingId={booking.id}
+            leadId={booking.lead_id}
+            caseId={booking.case_id}
+            bundle={payload.patientImages}
+          />
+        ) : (
+          <AppointmentGallerySection
+            tenantId={tenantId}
+            patientId={booking.patient_id}
+            bundle={payload.patientImages}
+          />
+        )
       ) : null}
 
       {activeTab === "billing" ? (

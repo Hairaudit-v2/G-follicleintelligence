@@ -15,6 +15,7 @@ export const VIE_PROTOCOL_SLUGS = [
   "post_op_review",
   "follow_up_review",
   "repair_surgery_review",
+  "treatment_scalp_standard",
 ] as const;
 
 export type VieProtocolSlug = (typeof VIE_PROTOCOL_SLUGS)[number];
@@ -27,7 +28,8 @@ export type VieProtocolPickerCategory =
   | "full_clinical_head_series"
   | "surgery_day"
   | "follow_up"
-  | "repair_review";
+  | "repair_review"
+  | "treatment_session";
 
 export const VIE_PROTOCOL_PICKER_GROUPS: ReadonlyArray<{
   category: VieProtocolPickerCategory;
@@ -58,6 +60,11 @@ export const VIE_PROTOCOL_PICKER_GROUPS: ReadonlyArray<{
     category: "repair_review",
     label: "Repair review",
     hint: "Corrective procedure documentation and outcome assessment.",
+  },
+  {
+    category: "treatment_session",
+    label: "In-clinic treatment",
+    hint: "Standard scalp views for PRP, mesotherapy, and regenerative treatment sessions.",
   },
 ];
 
