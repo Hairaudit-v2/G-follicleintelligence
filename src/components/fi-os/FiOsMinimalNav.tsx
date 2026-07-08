@@ -17,6 +17,7 @@ import {
   type FiOsMinimalNavItemId,
 } from "@/src/lib/fiAdmin/fiOsMinimalNav";
 import { TenantBrandMark } from "@/src/components/brand/TenantBrandMark";
+import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import {
@@ -117,18 +118,24 @@ function FiOsMinimalNavBrandBlock({
   branding: NormalizedTenantBranding;
   brandName: string;
 }) {
+  const hasLogo = Boolean(resolveTenantLogoSource(branding.logoUrl));
+
   return (
     <div
-      className="fi-tenant-card-accent mb-2 flex shrink-0 flex-col items-center gap-1.5 border-b border-white/[0.06] px-1.5 pb-2.5 pt-2"
+      className="fi-tenant-card-accent mb-1.5 flex shrink-0 flex-col items-center gap-1 border-b border-white/[0.06] px-1 pb-2 pt-1.5"
       style={{ backgroundColor: "var(--fi-tenant-brand-bg)" }}
     >
-      <TenantBrandMark branding={branding} size="sm" />
-      <p
-        className="w-full truncate text-center text-[9px] font-semibold leading-tight text-slate-300"
-        title={brandName}
-      >
-        {brandName}
-      </p>
+      <div className="flex w-full items-center justify-center overflow-hidden px-0.5">
+        <TenantBrandMark branding={branding} size="xs" className="min-w-0 max-w-full" />
+      </div>
+      {!hasLogo ? (
+        <p
+          className="w-full truncate text-center text-[8px] font-semibold leading-tight text-slate-400"
+          title={brandName}
+        >
+          {brandName}
+        </p>
+      ) : null}
     </div>
   );
 }

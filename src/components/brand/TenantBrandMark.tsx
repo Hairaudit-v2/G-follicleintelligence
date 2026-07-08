@@ -11,16 +11,17 @@ import { cn } from "@/lib/utils";
 
 type TenantBrandMarkProps = {
   branding: NormalizedTenantBranding;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
   showLabel?: boolean;
   labelClassName?: string;
 };
 
 const SIZE = {
-  sm: { box: "h-8 w-8 text-xs", img: 32, logoH: "h-6" },
-  md: { box: "h-9 w-9 text-xs", img: 36, logoH: "h-8" },
-  lg: { box: "h-12 w-12 text-sm", img: 48, logoH: "h-10" },
+  xs: { box: "h-6 w-6 text-[10px]", img: 24, logoH: "h-4", logoMaxW: "max-w-[3.25rem]" },
+  sm: { box: "h-8 w-8 text-xs", img: 32, logoH: "h-6", logoMaxW: "max-w-[140px]" },
+  md: { box: "h-9 w-9 text-xs", img: 36, logoH: "h-8", logoMaxW: "max-w-[140px]" },
+  lg: { box: "h-12 w-12 text-sm", img: 48, logoH: "h-10", logoMaxW: "max-w-[140px]" },
 } as const;
 
 /**
@@ -45,7 +46,7 @@ export function TenantBrandMark({
         alt={branding.clinicDisplayName}
         width={dims.img}
         height={dims.img}
-        className={cn("w-auto max-w-[140px] object-contain", dims.logoH)}
+        className={cn("w-auto object-contain", dims.logoMaxW, dims.logoH)}
       />
     ) : (
       <div
