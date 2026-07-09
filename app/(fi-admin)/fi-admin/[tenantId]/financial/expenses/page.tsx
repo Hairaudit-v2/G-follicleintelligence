@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ExpenseCsvImportForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCsvImportForm";
+import { ExpenseDocumentsTable } from "@/src/components/fi-admin/financial-os/expenses/ExpenseDocumentsTable";
 import { ExpenseManualEntryForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseManualEntryForm";
+import { ExpenseReceiptUploadForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseReceiptUploadForm";
 import { ExpensesListTable } from "@/src/components/fi-admin/financial-os/expenses/ExpensesListTable";
 import {
   FinancialOsSubPageHeader,
@@ -13,6 +15,7 @@ import {
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadExpenseDocumentsForTenant } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
 import {
   ensureExpenseCategoriesForTenant,
   loadExpenseImportsForTenant,
@@ -41,12 +44,14 @@ export default async function FinancialOsExpensesPage({
   let categories: Awaited<ReturnType<typeof ensureExpenseCategoriesForTenant>> = [];
   let expenses: Awaited<ReturnType<typeof loadExpensesForTenant>> = [];
   let imports: Awaited<ReturnType<typeof loadExpenseImportsForTenant>> = [];
+  let documents: Awaited<ReturnType<typeof loadExpenseDocumentsForTenant>> = [];
   let loadError: string | null = null;
 
   try {
     categories = await ensureExpenseCategoriesForTenant(tid);
     expenses = await loadExpensesForTenant(tid, { limit: 200 });
     imports = await loadExpenseImportsForTenant(tid, 20);
+    documents = await loadExpenseDocumentsForTenant(tid, 30);
   } catch (e) {
     loadError =
       e instanceof Error
@@ -62,7 +67,7 @@ export default async function FinancialOsExpensesPage({
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs via manual entry or bank/card CSV. Review before posting. Does not write to the revenue ledger (Phase 1)."
+        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload with OCR. Review before posting. Does not write to the revenue ledger."
       />
 
       {loadError ? (
@@ -71,14 +76,20 @@ export default async function FinancialOsExpensesPage({
         </p>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-3">
         <ExpenseManualEntryForm tenantId={tid} categories={categories} canMutate={canMutate} />
         <ExpenseCsvImportForm tenantId={tid} canMutate={canMutate} />
+        <ExpenseReceiptUploadForm tenantId={tid} canMutate={canMutate} />
       </div>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-slate-100">Recent expenses</h2>
         <ExpensesListTable tenantId={tid} expenses={expenses} canMutate={canMutate} />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-slate-100">Recent documents</h2>
+        <ExpenseDocumentsTable tenantId={tid} documents={documents} canMutate={canMutate} />
       </section>
 
       <section className="space-y-3">

@@ -1,10 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 
 import { assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecordAccess.server";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { readExpenseReceiptUploadFormData } from "@/src/lib/financialOs/expenses/expenseDocumentStorageCore";
+import {
+  processExpenseDocumentOcr,
+  uploadExpenseDocument,
+} from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
 import {
   commitImportLinesSchema,
   createExpenseImportSchema,
@@ -23,6 +28,11 @@ import {
   updateExpenseImportLine,
   voidExpense,
 } from "@/src/lib/financialOs/expenses/expenseMutations.server";
+
+const reprocessOcrSchema = z.object({
+  adminKey: z.string().optional(),
+  document_id: z.string().uuid(),
+});
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -201,6 +211,78 @@ export async function commitExpenseImportLinesAction(
       ok: true,
       committed: result.committed,
       expense_ids: result.expenseIds,
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/**
+ * Receipt / invoice upload via FormData (File must be top-level FormData field).
+ * Creates a draft expense by default and runs OCR inline (stub or OpenAI when configured).
+ */
+export async function uploadExpenseReceiptAction(formData: FormData): Promise<
+  | {
+      ok: true;
+      document_id: string;
+      expense_id: string | null;
+      ocr_status: string;
+      ocr_applied: boolean;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    const fields = readExpenseReceiptUploadFormData(formData);
+    if (!fields.ok) return { ok: false, error: fields.error };
+
+    const access = await assertPaymentRecordWriteAllowed(fields.tenantId, fields.adminKey);
+    const result = await uploadExpenseDocument({
+      tenantId: fields.tenantId,
+      file: fields.file,
+      contentType: fields.contentType,
+      originalFilename: fields.file.name || "receipt",
+      docKind: fields.docKind,
+      expenseId: fields.expenseId,
+      createDraftExpense: fields.createDraftExpense || !fields.expenseId,
+      runOcrInline: true,
+      actorFiUserId: access.actorFiUserId,
+    });
+
+    revalidateExpensePaths(fields.tenantId);
+    return {
+      ok: true,
+      document_id: result.document.id,
+      expense_id: result.expense?.id ?? result.document.expense_id,
+      ocr_status: result.document.ocr_status,
+      ocr_applied: result.ocr_applied,
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function reprocessExpenseDocumentOcrAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; document_id: string; ocr_status: string; expense_id: string | null }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = reprocessOcrSchema.parse(body);
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const result = await processExpenseDocumentOcr({
+      tenantId: tenantId.trim(),
+      documentId: parsed.document_id,
+      actorFiUserId: access.actorFiUserId,
+      applyToExpense: true,
+    });
+    revalidateExpensePaths(tenantId);
+    return {
+      ok: true,
+      document_id: result.document.id,
+      ocr_status: result.document.ocr_status,
+      expense_id: result.document.expense_id,
     };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
