@@ -22,6 +22,7 @@ describe("financialOsModuleNav", () => {
       resolveFinancialOsActiveModule(`${base}/pathway-inbox`, base)?.id,
       "pathway-inbox"
     );
+    assert.equal(resolveFinancialOsActiveModule(`${base}/expenses`, base)?.id, "expenses");
     assert.equal(resolveFinancialOsActiveModule(base, base)?.id, "dashboard");
   });
 });

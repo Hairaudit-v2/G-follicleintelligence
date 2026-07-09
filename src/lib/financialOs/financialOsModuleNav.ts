@@ -34,6 +34,7 @@ export const FINANCIAL_OS_PRIMARY_MODULES: readonly FinancialOsModule[] = [
     group: "primary",
   },
   { id: "deposit-rules", label: "Deposit rules", segment: "deposit-rules", group: "primary" },
+  { id: "expenses", label: "Expenses", segment: "expenses", group: "primary" },
 ] as const;
 
 /** Additional FinancialOS routes — preserved for direct URLs; listed under “More” in the switcher. */
