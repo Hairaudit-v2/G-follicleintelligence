@@ -16,6 +16,7 @@ import {
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadExpenseDocumentsForTenant } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
+import { loadRecentExpenseCampaignKeys } from "@/src/lib/financialOs/expenses/expenseEntitySearch.server";
 import {
   ensureExpenseCategoriesForTenant,
   loadExpenseImportsForTenant,
@@ -45,6 +46,7 @@ export default async function FinancialOsExpensesPage({
   let expenses: Awaited<ReturnType<typeof loadExpensesForTenant>> = [];
   let imports: Awaited<ReturnType<typeof loadExpenseImportsForTenant>> = [];
   let documents: Awaited<ReturnType<typeof loadExpenseDocumentsForTenant>> = [];
+  let campaignSuggestions: string[] = [];
   let loadError: string | null = null;
 
   try {
@@ -52,6 +54,7 @@ export default async function FinancialOsExpensesPage({
     expenses = await loadExpensesForTenant(tid, { limit: 200 });
     imports = await loadExpenseImportsForTenant(tid, 20);
     documents = await loadExpenseDocumentsForTenant(tid, 30);
+    campaignSuggestions = await loadRecentExpenseCampaignKeys(tid, 30);
   } catch (e) {
     loadError =
       e instanceof Error
@@ -67,7 +70,7 @@ export default async function FinancialOsExpensesPage({
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload with OCR. Review before posting. Does not write to the revenue ledger."
+        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload. Link leads, cases, and campaigns; attach documents; preview receipts. Does not write to the revenue ledger."
       />
 
       {loadError ? (
@@ -77,14 +80,28 @@ export default async function FinancialOsExpensesPage({
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-3">
-        <ExpenseManualEntryForm tenantId={tid} categories={categories} canMutate={canMutate} />
+        <ExpenseManualEntryForm
+          tenantId={tid}
+          categories={categories}
+          canMutate={canMutate}
+          campaignSuggestions={campaignSuggestions}
+        />
         <ExpenseCsvImportForm tenantId={tid} canMutate={canMutate} />
-        <ExpenseReceiptUploadForm tenantId={tid} canMutate={canMutate} />
+        <ExpenseReceiptUploadForm
+          tenantId={tid}
+          canMutate={canMutate}
+          expenses={expenses}
+        />
       </div>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-slate-100">Recent expenses</h2>
-        <ExpensesListTable tenantId={tid} expenses={expenses} canMutate={canMutate} />
+        <ExpensesListTable
+          tenantId={tid}
+          expenses={expenses}
+          canMutate={canMutate}
+          campaignSuggestions={campaignSuggestions}
+        />
       </section>
 
       <section className="space-y-3">

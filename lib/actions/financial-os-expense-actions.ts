@@ -7,6 +7,7 @@ import { assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecor
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { readExpenseReceiptUploadFormData } from "@/src/lib/financialOs/expenses/expenseDocumentStorageCore";
 import {
+  createExpenseDocumentSignedUrl,
   processExpenseDocumentOcr,
   uploadExpenseDocument,
 } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
@@ -284,6 +285,35 @@ export async function reprocessExpenseDocumentOcrAction(
       ocr_status: result.document.ocr_status,
       expense_id: result.document.expense_id,
     };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const signedUrlSchema = z.object({
+  adminKey: z.string().optional(),
+  document_id: z.string().uuid(),
+  ttl_sec: z.number().int().min(60).max(3600).optional(),
+});
+
+/**
+ * Short-lived signed URL for receipt/invoice preview (tenant-scoped).
+ * Read path still requires finance write gate for consistency with payment records,
+ * or portal access is assumed via server action session — uses write gate to match other expense ops.
+ */
+export async function getExpenseDocumentSignedUrlAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  try {
+    const parsed = signedUrlSchema.parse(body);
+    await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const url = await createExpenseDocumentSignedUrl({
+      tenantId: tenantId.trim(),
+      documentId: parsed.document_id,
+      ttlSec: parsed.ttl_sec ?? 300,
+    });
+    return { ok: true, url };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

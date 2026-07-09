@@ -5,6 +5,10 @@ import { useState, useTransition } from "react";
 
 import { createManualExpenseAction } from "@/lib/actions/financial-os-expense-actions";
 import {
+  ExpenseLinkPickers,
+  type ExpenseLinkSelection,
+} from "@/src/components/fi-admin/financial-os/expenses/ExpenseLinkPickers";
+import {
   FinancialOsFeedbackText,
   financialOsActionFeedback,
   financialOsClasses,
@@ -17,7 +21,6 @@ function todayYmd(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Convert major-unit string (e.g. 12.50) to integer cents. */
 function parseDollarsToCents(raw: string): number | null {
   const s = raw.trim().replace(/[$,\s]/g, "");
   if (!s) return null;
@@ -26,10 +29,19 @@ function parseDollarsToCents(raw: string): number | null {
   return Math.round(n * 100);
 }
 
+const emptyLinks = (): ExpenseLinkSelection => ({
+  leadId: null,
+  leadLabel: null,
+  caseId: null,
+  caseLabel: null,
+  campaignKey: "",
+});
+
 export function ExpenseManualEntryForm(props: {
   tenantId: string;
   categories: FiExpenseCategoryRow[];
   canMutate: boolean;
+  campaignSuggestions?: string[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -41,8 +53,8 @@ export function ExpenseManualEntryForm(props: {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState(props.categories[0]?.id ?? "");
   const [paymentMethod, setPaymentMethod] = useState<string>("card");
-  const [campaignKey, setCampaignKey] = useState("");
   const [status, setStatus] = useState<"draft" | "reviewed">("reviewed");
+  const [links, setLinks] = useState<ExpenseLinkSelection>(emptyLinks);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +75,9 @@ export function ExpenseManualEntryForm(props: {
         description: description || null,
         category_id: categoryId || null,
         payment_method: paymentMethod || null,
-        campaign_key: campaignKey || null,
+        campaign_key: links.campaignKey || null,
+        lead_id: links.leadId,
+        case_id: links.caseId,
         status,
       });
       const fb = financialOsActionFeedback(res, "Expense saved.");
@@ -72,7 +86,7 @@ export function ExpenseManualEntryForm(props: {
         setAmount("");
         setVendor("");
         setDescription("");
-        setCampaignKey("");
+        setLinks(emptyLinks());
         router.refresh();
       }
     });
@@ -82,8 +96,7 @@ export function ExpenseManualEntryForm(props: {
     <form onSubmit={onSubmit} className={financialOsClasses.formPanel}>
       <h2 className={financialOsClasses.formTitle}>Manual expense</h2>
       <p className={financialOsClasses.formHint}>
-        Capture a single clinic cost. Amount is stored in cents (AUD). Does not touch the revenue
-        ledger.
+        Capture a single clinic cost. Optionally link lead/case/campaign for CPL and case costing.
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -182,18 +195,19 @@ export function ExpenseManualEntryForm(props: {
             maxLength={2000}
           />
         </label>
-        <label className={`${financialOsClasses.formLabel} sm:col-span-2`}>
-          Campaign key (optional, for CPL later)
-          <input
-            type="text"
-            value={campaignKey}
-            onChange={(e) => setCampaignKey(e.target.value)}
-            className={financialOsClasses.input}
-            disabled={!props.canMutate || pending}
-            placeholder="e.g. meta_q3_perth"
-            maxLength={200}
-          />
-        </label>
+      </div>
+
+      <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Attribution links
+        </p>
+        <ExpenseLinkPickers
+          tenantId={props.tenantId}
+          disabled={!props.canMutate || pending}
+          value={links}
+          onChange={setLinks}
+          campaignSuggestions={props.campaignSuggestions}
+        />
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

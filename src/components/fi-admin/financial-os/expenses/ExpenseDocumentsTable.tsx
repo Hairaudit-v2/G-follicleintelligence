@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { reprocessExpenseDocumentOcrAction } from "@/lib/actions/financial-os-expense-actions";
+import {
+  getExpenseDocumentSignedUrlAction,
+  reprocessExpenseDocumentOcrAction,
+} from "@/lib/actions/financial-os-expense-actions";
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import {
   FinancialOsFeedbackText,
@@ -23,6 +26,9 @@ export function ExpenseDocumentsTable(props: {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState<string | null>(null);
+  const [previewIsImage, setPreviewIsImage] = useState(false);
 
   function reprocess(documentId: string) {
     if (!props.canMutate) return;
@@ -33,6 +39,40 @@ export function ExpenseDocumentsTable(props: {
       });
       setFeedback(financialOsActionFeedback(res, "OCR reprocessed."));
       if (res.ok) router.refresh();
+    });
+  }
+
+  function openPreview(doc: FiExpenseDocumentRow) {
+    if (!props.canMutate) {
+      setFeedback({
+        message: "Preview requires finance write access on this tenant.",
+        tone: "warning",
+      });
+      return;
+    }
+    setFeedback(null);
+    const filename =
+      typeof doc.metadata.original_filename === "string"
+        ? doc.metadata.original_filename
+        : doc.storage_path.split("/").pop() ?? "document";
+    start(async () => {
+      const res = await getExpenseDocumentSignedUrlAction(props.tenantId, {
+        document_id: doc.id,
+        ttl_sec: 300,
+      });
+      if (!res.ok) {
+        setFeedback({ message: res.error, tone: "error" });
+        return;
+      }
+      const ct = (doc.content_type || "").toLowerCase();
+      const isImage = ct.startsWith("image/");
+      setPreviewIsImage(isImage);
+      setPreviewName(filename);
+      setPreviewUrl(res.url);
+      if (!isImage && !ct.includes("pdf")) {
+        // Open non-previewable types in a new tab
+        window.open(res.url, "_blank", "noopener,noreferrer");
+      }
     });
   }
 
@@ -86,19 +126,92 @@ export function ExpenseDocumentsTable(props: {
                 {doc.expense_id ? doc.expense_id.slice(0, 8) + "…" : "—"}
               </td>
               <td className={financialOsClasses.tableCell}>
-                <button
-                  type="button"
-                  className={financialOsClasses.textButton}
-                  disabled={!props.canMutate || pending}
-                  onClick={() => reprocess(doc.id)}
-                >
-                  Re-run OCR
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className={financialOsClasses.textButton}
+                    disabled={pending}
+                    onClick={() => openPreview(doc)}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    type="button"
+                    className={financialOsClasses.textButton}
+                    disabled={!props.canMutate || pending}
+                    onClick={() => reprocess(doc.id)}
+                  >
+                    Re-run OCR
+                  </button>
+                </div>
               </td>
             </tr>
           );
         })}
       </FinancialOsTable>
+
+      {previewUrl ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setPreviewUrl(null);
+              setPreviewName(null);
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Document preview"
+            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-white/[0.1] bg-[#0a101f] shadow-2xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
+              <h3 className="truncate text-sm font-semibold text-slate-100">
+                {previewName ?? "Preview"}
+              </h3>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={financialOsClasses.textButton}
+                >
+                  Open tab
+                </a>
+                <button
+                  type="button"
+                  className={financialOsClasses.secondaryButton}
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setPreviewName(null);
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto bg-black/40 p-2">
+              {previewIsImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt={previewName ?? "Receipt"}
+                  className="mx-auto max-h-[75vh] max-w-full object-contain"
+                />
+              ) : (
+                <iframe
+                  title={previewName ?? "Document"}
+                  src={previewUrl}
+                  className="h-[75vh] w-full rounded border border-white/[0.06] bg-white"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
