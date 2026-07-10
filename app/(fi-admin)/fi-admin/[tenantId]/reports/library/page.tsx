@@ -5,8 +5,11 @@ import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { ReportLibraryClient } from "@/src/components/fi-admin/reports/ReportLibraryClient";
 import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { normalizeExpensePeriod } from "@/src/lib/financialOs/expenses/expensePeriodCore";
+import { loadRevenueAttributionFilterOptions } from "@/src/lib/financialOs/financialRevenueAttribution.server";
+import { loadSurgeryEconomicsFilterOptions } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { REPORT_CATALOG } from "@/src/lib/reports/reportCatalog";
+import type { ReportFilterOptions } from "@/src/lib/reports/reportFilters";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
@@ -57,6 +60,29 @@ export default async function FiAdminReportsLibraryPage({
     periodEnd: one("to"),
   });
 
+  let filterOptions: ReportFilterOptions = {
+    procedureTypes: [],
+    attributionSources: [],
+    campaigns: [],
+  };
+  try {
+    const [surgeryOpts, attrOpts] = await Promise.all([
+      loadSurgeryEconomicsFilterOptions(tid),
+      loadRevenueAttributionFilterOptions(tid),
+    ]);
+    const procedureSet = new Set([
+      ...surgeryOpts.procedureTypes,
+      ...attrOpts.procedureTypes,
+    ]);
+    filterOptions = {
+      procedureTypes: [...procedureSet].filter(Boolean).sort(),
+      attributionSources: attrOpts.sources.filter(Boolean),
+      campaigns: attrOpts.campaigns.filter(Boolean),
+    };
+  } catch {
+    // Filter dropdowns stay empty; reports still generate without options.
+  }
+
   return (
     <div className={financialOsClasses.pageShell}>
       <ReportLibraryClient
@@ -64,6 +90,7 @@ export default async function FiAdminReportsLibraryPage({
         periodStart={period_start}
         periodEnd={period_end}
         catalog={REPORT_CATALOG}
+        filterOptions={filterOptions}
       />
     </div>
   );

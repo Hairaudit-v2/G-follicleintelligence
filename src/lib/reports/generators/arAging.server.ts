@@ -22,6 +22,7 @@ export async function generateArAgingReport(input: {
   periodStart?: string | null;
   periodEnd?: string | null;
   currency?: string | null;
+  arRisk?: string | null;
 }): Promise<ReportGenerateResult> {
   const tid = input.tenantId.trim();
   if (!tid) throw new Error("tenantId is required.");
@@ -34,10 +35,11 @@ export async function generateArAgingReport(input: {
     periodEnd: input.periodEnd,
   });
   const currency = (input.currency?.trim() || "AUD").toUpperCase();
+  const risk = input.arRisk?.trim() && input.arRisk !== "all" ? input.arRisk.trim() : null;
 
   const [metrics, rows] = await Promise.all([
     loadAccountsReceivableDashboardMetrics(tid),
-    loadAccountsReceivableWorkQueue(tid, {}, 300),
+    loadAccountsReceivableWorkQueue(tid, risk ? { risk } : {}, 300),
   ]);
 
   const open = rows.filter((r) => r.outstanding_amount_cents > 0);

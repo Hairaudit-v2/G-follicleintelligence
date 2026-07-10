@@ -11,6 +11,8 @@ export async function generateSurgeryGrossMarginReport(input: {
   periodStart?: string | null;
   periodEnd?: string | null;
   currency?: string | null;
+  procedureType?: string | null;
+  snapshotStatus?: "all" | "paid_in_full" | "outstanding" | null;
 }): Promise<ReportGenerateResult> {
   const tid = input.tenantId.trim();
   if (!tid) throw new Error("tenantId is required.");
@@ -22,10 +24,17 @@ export async function generateSurgeryGrossMarginReport(input: {
     periodEnd: input.periodEnd,
   });
 
+  const status = input.snapshotStatus?.trim();
+  const snapshotStatus =
+    status === "paid_in_full" || status === "outstanding" || status === "all"
+      ? status
+      : "all";
+
   const payload = await loadSurgeryEconomicsDashboardPayload(tid, 50, {
     dateFrom: period_start,
     dateTo: period_end,
-    snapshotStatus: "all",
+    procedureType: input.procedureType?.trim() || null,
+    snapshotStatus,
   });
   const currency = (input.currency?.trim() || payload.currency || "AUD").toUpperCase();
   const m = payload.metrics;

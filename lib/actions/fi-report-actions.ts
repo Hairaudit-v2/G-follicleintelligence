@@ -20,6 +20,7 @@ import { generateMarketingCplReport } from "@/src/lib/reports/generators/marketi
 import { generateOperatingPlReport } from "@/src/lib/reports/generators/operatingPl.server";
 import { generateRevenueAttributionReport } from "@/src/lib/reports/generators/revenueAttribution.server";
 import { generateSurgeryGrossMarginReport } from "@/src/lib/reports/generators/surgeryGrossMargin.server";
+import type { ReportGenerateFilters } from "@/src/lib/reports/reportFilters";
 import { reportCsvFilename, reportResultToCsv } from "@/src/lib/reports/reportCsv";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
 
@@ -35,7 +36,17 @@ const generateSchema = z.object({
   periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   currency: z.string().max(8).optional().nullable(),
+  procedureType: z.string().max(120).optional().nullable(),
+  attributionSource: z.string().max(80).optional().nullable(),
+  campaign: z.string().max(200).optional().nullable(),
+  arRisk: z.string().max(40).optional().nullable(),
+  snapshotStatus: z
+    .enum(["all", "paid_in_full", "outstanding"])
+    .optional()
+    .nullable(),
 });
+
+type GenerateInput = z.infer<typeof generateSchema>;
 
 async function assertReportAccess(
   tenantId: string,
@@ -70,6 +81,16 @@ async function assertReportAccess(
   return { ok: true };
 }
 
+function filtersFromBody(parsed: GenerateInput): ReportGenerateFilters {
+  return {
+    procedureType: parsed.procedureType,
+    attributionSource: parsed.attributionSource,
+    campaign: parsed.campaign,
+    arRisk: parsed.arRisk,
+    snapshotStatus: parsed.snapshotStatus,
+  };
+}
+
 async function runGenerator(
   reportId: ReportId,
   input: {
@@ -77,7 +98,7 @@ async function runGenerator(
     periodStart?: string | null;
     periodEnd?: string | null;
     currency?: string | null;
-  }
+  } & ReportGenerateFilters
 ): Promise<ReportGenerateResult> {
   switch (reportId) {
     case "expense_breakdown":
@@ -117,6 +138,7 @@ export async function generateReportAction(
       periodStart: parsed.periodStart,
       periodEnd: parsed.periodEnd,
       currency: parsed.currency,
+      ...filtersFromBody(parsed),
     });
     return { ok: true, result };
   } catch (e) {
@@ -161,6 +183,7 @@ export async function exportReportCsvAction(
       periodStart: parsed.periodStart,
       periodEnd: parsed.periodEnd,
       currency: parsed.currency,
+      ...filtersFromBody(parsed),
     });
     const csv = reportResultToCsv(result);
     const filename = reportCsvFilename(result.reportId, result.periodStart, result.periodEnd);

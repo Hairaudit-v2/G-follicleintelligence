@@ -11,6 +11,9 @@ export async function generateRevenueAttributionReport(input: {
   periodStart?: string | null;
   periodEnd?: string | null;
   currency?: string | null;
+  attributionSource?: string | null;
+  campaign?: string | null;
+  procedureType?: string | null;
 }): Promise<ReportGenerateResult> {
   const tid = input.tenantId.trim();
   if (!tid) throw new Error("tenantId is required.");
@@ -25,6 +28,9 @@ export async function generateRevenueAttributionReport(input: {
   const payload = await loadRevenueAttributionDashboardPayload(tid, {
     dateFrom: period_start,
     dateTo: period_end,
+    source: input.attributionSource?.trim() || null,
+    campaign: input.campaign?.trim() || null,
+    procedureType: input.procedureType?.trim() || null,
   });
   const currency = (input.currency?.trim() || payload.currency || "AUD").toUpperCase();
   const m = payload.metrics;

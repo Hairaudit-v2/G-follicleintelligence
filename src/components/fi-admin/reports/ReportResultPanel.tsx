@@ -1,16 +1,19 @@
 "use client";
 
+import Link from "next/link";
+
 import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
 import { cn } from "@/lib/utils";
 
 export function ReportResultPanel(props: {
   result: ReportGenerateResult;
+  liveHref?: string | null;
   onExportCsv?: () => void;
   exportBusy?: boolean;
   onClose?: () => void;
 }) {
-  const { result, onExportCsv, exportBusy, onClose } = props;
+  const { result, liveHref, onExportCsv, exportBusy, onClose } = props;
 
   return (
     <section
@@ -40,6 +43,11 @@ export function ReportResultPanel(props: {
                   ? "Download CSV pack"
                   : "Download CSV"}
             </button>
+          ) : null}
+          {liveHref ? (
+            <Link href={liveHref} className={financialOsClasses.secondaryButton}>
+              Open live view
+            </Link>
           ) : null}
           {onClose ? (
             <button type="button" className={financialOsClasses.secondaryButton} onClick={onClose}>
