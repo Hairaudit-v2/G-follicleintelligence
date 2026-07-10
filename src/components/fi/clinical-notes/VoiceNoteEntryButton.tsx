@@ -29,7 +29,47 @@ function pickRecorderMime(): string | undefined {
   if (typeof MediaRecorder === "undefined") return undefined;
   if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) return "audio/webm;codecs=opus";
   if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
+  if (MediaRecorder.isTypeSupported("audio/mp4")) return "audio/mp4";
   return undefined;
+}
+
+/** Map getUserMedia / MediaRecorder failures to actionable clinic-facing copy. */
+function formatMicrophoneAccessError(err: unknown): string {
+  const name =
+    err && typeof err === "object" && "name" in err
+      ? String((err as { name?: string }).name ?? "")
+      : "";
+  const message =
+    err instanceof Error
+      ? err.message
+      : err && typeof err === "object" && "message" in err
+        ? String((err as { message?: string }).message ?? "")
+        : "";
+
+  if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+    return [
+      "Microphone blocked by the browser or Windows.",
+      "Edge: click the lock icon in the address bar → Permissions for this site → Microphone → Allow, then reload.",
+      "Also check Windows Settings → Privacy & security → Microphone (access On, and allow Microsoft Edge).",
+      "You can still use Upload audio below without the mic.",
+    ].join(" ");
+  }
+  if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+    return "No microphone was found. Plug in a mic/headset, set it as the default input in Windows Sound settings, then try again — or use Upload audio.";
+  }
+  if (name === "NotReadableError" || name === "TrackStartError") {
+    return "Microphone is busy or locked by another app (Zoom, Teams, etc.). Close those apps and retry, or use Upload audio.";
+  }
+  if (name === "SecurityError") {
+    return "Microphone requires a secure page (https). Open the production site over https and try again.";
+  }
+  if (name === "NotSupportedError" || typeof MediaRecorder === "undefined") {
+    return "This browser cannot record audio in-page. Use Upload audio (phone voice memo / Windows Voice Recorder .m4a/.mp3/.wav) instead.";
+  }
+  const detail = [name, message].filter(Boolean).join(": ");
+  return detail
+    ? `Microphone unavailable (${detail}). Try Upload audio, or check Edge/Windows mic permissions.`
+    : "Microphone permission was denied or unavailable. Try Upload audio, or allow the mic for this site in Edge and Windows Settings.";
 }
 
 export function VoiceNoteEntryButton({
@@ -84,30 +124,76 @@ export function VoiceNoteEntryButton({
   const startRecording = useCallback(async () => {
     setErr(null);
     resetCapture();
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      setErr(
+        "Microphone needs a secure context (https or localhost). Open the site via https:// and try again."
+      );
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
-      setErr("Recording is not supported in this browser.");
+      setErr(
+        "Recording is not supported in this browser. Use Upload audio instead (phone memo or Windows Voice Recorder)."
+      );
+      return;
+    }
+    if (typeof MediaRecorder === "undefined") {
+      setErr(
+        "MediaRecorder is not available in this browser. Use Upload audio instead."
+      );
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Prefer Permissions API when available (helps surface Edge pre-block state).
+      try {
+        const perm = await navigator.permissions?.query?.({
+          name: "microphone" as PermissionName,
+        });
+        if (perm?.state === "denied") {
+          setErr(formatMicrophoneAccessError({ name: "NotAllowedError", message: "permission denied" }));
+          return;
+        }
+      } catch {
+        /* permissions.query('microphone') not supported in all Edge builds — continue to getUserMedia */
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       const mime = pickRecorderMime();
-      const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      let mr: MediaRecorder;
+      try {
+        mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      } catch {
+        // Edge sometimes rejects a mimeType even when isTypeSupported is true.
+        mr = new MediaRecorder(stream);
+      }
       chunksRef.current = [];
       mr.ondataavailable = (ev) => {
         if (ev.data.size > 0) chunksRef.current.push(ev.data);
       };
       mr.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+        const blob = new Blob(chunksRef.current, {
+          type: mr.mimeType || mime || "audio/webm",
+        });
         setRecordedBlob(blob);
         mediaRecorderRef.current = null;
         setRecording(false);
       };
+      mr.onerror = () => {
+        setErr("Recording failed mid-capture. Try Upload audio instead.");
+        stream.getTracks().forEach((t) => t.stop());
+        setRecording(false);
+      };
       mediaRecorderRef.current = mr;
-      mr.start();
+      mr.start(250);
       setRecording(true);
-    } catch {
-      setErr("Microphone permission was denied or unavailable.");
+    } catch (e) {
+      setErr(formatMicrophoneAccessError(e));
     }
   }, [resetCapture]);
 
@@ -221,12 +307,18 @@ export function VoiceNoteEntryButton({
 
             {!draft ? (
               <div className="mt-4 space-y-4">
-                <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
-                  <p className="text-xs font-medium text-slate-300">Upload audio</p>
+                <div className="rounded border border-cyan-500/25 bg-cyan-950/25 p-3">
+                  <p className="text-xs font-semibold text-cyan-100">
+                    Recommended if the mic is blocked: Upload audio
+                  </p>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Record on your phone (Voice Memos) or Windows Voice Recorder, then upload
+                    .m4a / .mp3 / .wav / .webm here. No browser mic permission needed.
+                  </p>
                   <input
                     type="file"
-                    accept="audio/*,.webm,.m4a,.mp3,.wav,.ogg"
-                    className="mt-2 block w-full text-sm"
+                    accept="audio/*,.webm,.m4a,.mp3,.wav,.ogg,.mp4"
+                    className="mt-2 block w-full text-sm text-slate-200"
                     disabled={pending || recording}
                     onChange={(e) => {
                       const f = e.target.files?.[0] ?? null;
@@ -234,10 +326,20 @@ export function VoiceNoteEntryButton({
                       if (f) setRecordedBlob(null);
                     }}
                   />
+                  {file ? (
+                    <p className="mt-2 text-xs text-emerald-300">
+                      Ready: {file.name} ({Math.round(file.size / 1024)} KB)
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
-                  <p className="text-xs font-medium text-slate-300">Or record in browser</p>
+                  <p className="text-xs font-medium text-slate-300">Or record in this browser</p>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Edge must allow Microphone for this site, and Windows Privacy must allow Edge
+                    to use the mic. InPrivate does not reset a previously blocked site permission
+                    in all cases — reset it under the lock icon or edge://settings/content/microphone
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {!recording ? (
                       <button
@@ -267,7 +369,7 @@ export function VoiceNoteEntryButton({
 
                 <button
                   type="button"
-                  disabled={pending || recording}
+                  disabled={pending || recording || (!file && !recordedBlob)}
                   onClick={submitAudio}
                   className="rounded bg-violet-700 px-4 py-2 text-sm font-medium text-white hover:bg-violet-800 disabled:bg-gray-400"
                 >
