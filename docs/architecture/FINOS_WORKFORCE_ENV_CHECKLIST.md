@@ -2,7 +2,7 @@
 
 **Last audited:** 2026-07-10  
 **Source of truth:** local `.env.local` presence only (no secret values recorded)  
-**Related:** [FINOS_EXPENSES_UPDATE_LOG.md](./FINOS_EXPENSES_UPDATE_LOG.md), [financial-os-expenses-change-log.md](./financial-os-expenses-change-log.md), `.env.example`
+**Related:** [FINOS_EXPENSES_UPDATE_LOG.md](./FINOS_EXPENSES_UPDATE_LOG.md), [financial-os-expenses-change-log.md](./financial-os-expenses-change-log.md), [ROSTER_COMMAND_CENTRE_CHANGE_LOG.md](./ROSTER_COMMAND_CENTRE_CHANGE_LOG.md), `.env.example`
 
 This checklist records **which environment variables matter for FinancialOS (FinOS) and Workforce/HR sync**, whether they appear set or commented in local `.env.local`, and what they do. **Do not put live secret values in this document.**
 
