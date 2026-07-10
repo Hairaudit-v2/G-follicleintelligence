@@ -166,6 +166,53 @@ export function collectCancellableRosterDayShifts(input: {
   return [...byId.values()];
 }
 
+export type RosterPeriodShiftLike = RosterCancellableDayShift & {
+  staff_id: string;
+  localDate?: string;
+  starts_at: string;
+};
+
+/** Active shifts for one staff across a set of local calendar dates (grid period). */
+export function collectCancellableStaffShiftsInPeriod(input: {
+  shifts: readonly RosterPeriodShiftLike[];
+  staffId: string;
+  localDates: readonly string[];
+}): RosterPeriodShiftLike[] {
+  const dateSet = new Set(input.localDates.map((d) => d.slice(0, 10)));
+  return input.shifts.filter((shift) => {
+    if (shift.staff_id !== input.staffId) return false;
+    if (shift.status !== "scheduled" && shift.status !== "confirmed") return false;
+    const local = (shift.localDate ?? shift.starts_at.slice(0, 10)).slice(0, 10);
+    return dateSet.has(local);
+  });
+}
+
+/** Full-period leave window (first day 00:00 → last day 23:59 local). */
+export function buildRosterPeriodAbsenceLocalWindow(localDates: readonly string[]): {
+  startsAtLocal: string;
+  endsAtLocal: string;
+} | null {
+  const sorted = [...localDates].map((d) => d.slice(0, 10)).filter(Boolean).sort();
+  if (sorted.length === 0) return null;
+  const first = sorted[0]!;
+  const last = sorted[sorted.length - 1]!;
+  return {
+    startsAtLocal: `${first}T00:00`,
+    endsAtLocal: `${last}T23:59`,
+  };
+}
+
+/** Quick-cancel reasons shown on the chip action (subset of drawer reasons). */
+export const ROSTER_QUICK_CANCEL_REASONS = [
+  "staff_sick",
+  "created_in_error",
+  "clinic_closed",
+  "manual_adjustment",
+  "other",
+] as const;
+
+export type RosterQuickCancelReason = (typeof ROSTER_QUICK_CANCEL_REASONS)[number];
+
 /** Resolve staff context for the shift drawer — never rely on staffOptions alone. */
 export function resolveRosterDrawerStaffContext(input: {
   drawer: RosterCommandCentreDrawerState;

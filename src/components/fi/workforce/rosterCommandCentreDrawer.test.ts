@@ -208,7 +208,11 @@ test("RosterShiftDrawer passes canManage from command centre and supports genera
     "staffTimezone={payload.staffTimezoneByStaffId",
     "handleShiftClick",
     "dayShifts={drawerDayShifts}",
-    "buildWorkforceStaffProfileHref"
+    "buildWorkforceStaffProfileHref",
+    "onQuickCancelShift",
+    "onMarkPeriodAway",
+    "roster-quick-cancel-modal",
+    "handleMarkPeriodAway"
   );
   sourceIncludes(
     ROSTER_SHIFT_DRAWER,

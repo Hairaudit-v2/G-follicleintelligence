@@ -7,7 +7,9 @@ import {
   buildRosterShiftDrawerDefaults,
   buildRosterShiftFormValuesFromShift,
   closeRosterDrawer,
+  buildRosterPeriodAbsenceLocalWindow,
   collectCancellableRosterDayShifts,
+  collectCancellableStaffShiftsInPeriod,
   formatRosterShiftDrawerTitle,
   formatStandardHoursDrawerTitle,
   listStaffMissingStandardHours,
@@ -165,6 +167,67 @@ test("roster day-away helpers map leave kinds to labels and cancel reasons", () 
   assert.equal(rosterDayAwayReasonLabel("sick_leave"), "Sick leave");
   assert.equal(rosterDayAwayShiftCancellationReason("sick_leave"), "staff_sick");
   assert.equal(rosterDayAwayShiftCancellationReason("leave"), "manual_adjustment");
+});
+
+test("buildRosterPeriodAbsenceLocalWindow spans first to last local date", () => {
+  assert.deepEqual(
+    buildRosterPeriodAbsenceLocalWindow(["2026-07-08", "2026-07-06", "2026-07-10"]),
+    {
+      startsAtLocal: "2026-07-06T00:00",
+      endsAtLocal: "2026-07-10T23:59",
+    }
+  );
+  assert.equal(buildRosterPeriodAbsenceLocalWindow([]), null);
+});
+
+test("collectCancellableStaffShiftsInPeriod filters by staff, status, and local dates", () => {
+  const staffA = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const staffB = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  const rows = collectCancellableStaffShiftsInPeriod({
+    staffId: staffA,
+    localDates: ["2026-07-06", "2026-07-07"],
+    shifts: [
+      {
+        id: "1",
+        staff_id: staffA,
+        status: "scheduled",
+        starts_at: "2026-07-05T23:00:00.000Z",
+        localDate: "2026-07-06",
+      },
+      {
+        id: "2",
+        staff_id: staffA,
+        status: "cancelled",
+        starts_at: "2026-07-06T23:00:00.000Z",
+        localDate: "2026-07-07",
+      },
+      {
+        id: "3",
+        staff_id: staffB,
+        status: "scheduled",
+        starts_at: "2026-07-06T01:00:00.000Z",
+        localDate: "2026-07-06",
+      },
+      {
+        id: "4",
+        staff_id: staffA,
+        status: "confirmed",
+        starts_at: "2026-07-07T01:00:00.000Z",
+        localDate: "2026-07-07",
+      },
+      {
+        id: "5",
+        staff_id: staffA,
+        status: "scheduled",
+        starts_at: "2026-07-08T01:00:00.000Z",
+        localDate: "2026-07-08",
+      },
+    ],
+  });
+  assert.deepEqual(
+    rows.map((r) => r.id).sort(),
+    ["1", "4"]
+  );
 });
 
 test("buildRosterShiftDrawerDefaults normalises second-precision standard hours times", () => {

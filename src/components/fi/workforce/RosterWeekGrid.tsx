@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 
-import type { RosterGridAvailabilityCell, RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
+import type {
+  RosterGridAvailabilityCell,
+  RosterGridShift,
+} from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
@@ -22,6 +25,7 @@ import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore"
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
   ROSTER_GRID_SCROLL_CLASSES,
+  type RosterDayAwayKind,
   shiftMatchesRosterCellDate,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { cn } from "@/lib/utils";
@@ -38,10 +42,19 @@ export type RosterWeekGridProps = {
   canManage?: boolean;
   manageDeniedReason?: string;
   showStandardHoursEditor?: boolean;
+  /** e.g. "week" / "fortnight" for mark-away CTA labels */
+  periodLabel?: string;
   onCellClick?: (staffId: string, localDate: string) => void;
   onShiftClick?: (shift: RosterGridShift) => void;
+  /** One-click cancel from the shift chip (does not open the edit drawer). */
+  onQuickCancelShift?: (shift: RosterGridShift) => void;
+  /** Mark staff away for every day in the displayed period. */
+  onMarkPeriodAway?: (staffId: string, kind: RosterDayAwayKind) => void;
   onEditStandardHours?: (staffId: string) => void;
   selectedShiftId?: string | null;
+  /** Shift currently being cancelled (disables chip controls). */
+  quickCancelPendingShiftId?: string | null;
+  periodAwayPendingStaffId?: string | null;
 };
 
 function formatDayHeader(isoDate: string): string {
@@ -91,6 +104,10 @@ function isRdoDay(
   return Boolean(row && !row.is_working_day);
 }
 
+function shiftIsCancellable(shift: RosterGridShift): boolean {
+  return shift.status === "scheduled" || shift.status === "confirmed";
+}
+
 export function RosterWeekGrid({
   tenantId,
   weekDayDates,
@@ -103,10 +120,15 @@ export function RosterWeekGrid({
   canManage = true,
   manageDeniedReason = "You do not have permission to edit roster shifts.",
   showStandardHoursEditor = true,
+  periodLabel = "period",
   onCellClick,
   onShiftClick,
+  onQuickCancelShift,
+  onMarkPeriodAway,
   onEditStandardHours,
   selectedShiftId,
+  quickCancelPendingShiftId = null,
+  periodAwayPendingStaffId = null,
 }: RosterWeekGridProps) {
   if (staffOptions.length === 0) {
     return <p className="text-sm text-slate-500">No staff match the current filters.</p>;
@@ -142,6 +164,7 @@ export function RosterWeekGrid({
             const hasStandardHours = staffHasConfiguredStandardHours(standardHours);
             const summary = formatStandardHoursSummary(standardHours);
             const weeklyTotal = formatStandardHoursWeeklyTotal(standardHours ?? []);
+            const periodAwayPending = periodAwayPendingStaffId === staff.id;
 
             return (
               <tr key={staff.id} className="border-b border-white/[0.05] align-top">
@@ -186,6 +209,46 @@ export function RosterWeekGrid({
                       </button>
                     )
                   ) : null}
+
+                  {canManage && onMarkPeriodAway ? (
+                    <div
+                      className="mt-2 space-y-1"
+                      data-testid={`mark-period-away-${staff.id}`}
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        Mark {periodLabel} away
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          disabled={periodAwayPending}
+                          data-testid={`mark-period-sick-${staff.id}`}
+                          onClick={() => onMarkPeriodAway(staff.id, "sick_leave")}
+                          className="rounded-md border border-rose-500/35 bg-rose-950/30 px-2 py-1 text-[11px] text-rose-100 hover:bg-rose-950/50 disabled:opacity-50"
+                        >
+                          Sick
+                        </button>
+                        <button
+                          type="button"
+                          disabled={periodAwayPending}
+                          data-testid={`mark-period-personal-${staff.id}`}
+                          onClick={() => onMarkPeriodAway(staff.id, "leave")}
+                          className="rounded-md border border-amber-500/35 bg-amber-950/25 px-2 py-1 text-[11px] text-amber-100 hover:bg-amber-950/45 disabled:opacity-50"
+                        >
+                          Personal
+                        </button>
+                        <button
+                          type="button"
+                          disabled={periodAwayPending}
+                          data-testid={`mark-period-unavailable-${staff.id}`}
+                          onClick={() => onMarkPeriodAway(staff.id, "unavailable")}
+                          className="rounded-md border border-white/[0.12] px-2 py-1 text-[11px] text-slate-300 hover:bg-white/[0.06] disabled:opacity-50"
+                        >
+                          Away
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </td>
                 {weekDayDates.map((date) => {
                   const cellShifts = shiftsForCell(shifts, staff.id, date);
@@ -218,6 +281,16 @@ export function RosterWeekGrid({
                           onCellClick?.(staff.id, date);
                         }}
                         onClick={(event) => {
+                          const quickCancel = (event.target as HTMLElement).closest(
+                            "[data-roster-quick-cancel]"
+                          );
+                          if (quickCancel) {
+                            event.stopPropagation();
+                            const shiftId = quickCancel.getAttribute("data-roster-quick-cancel");
+                            const shift = cellShifts.find((row) => row.id === shiftId);
+                            if (shift) onQuickCancelShift?.(shift);
+                            return;
+                          }
                           const shiftTarget = (event.target as HTMLElement).closest(
                             "[data-roster-shift-id]"
                           );
@@ -239,7 +312,7 @@ export function RosterWeekGrid({
                             data-roster-shift-id={shift.id}
                             data-testid={`roster-shift-${shift.id}`}
                             className={cn(
-                              "block rounded-md px-2 py-1.5",
+                              "relative block rounded-md px-2 py-1.5 pr-7",
                               selectedShiftId === shift.id ? "ring-1 ring-cyan-400/60" : "",
                               shift.shift_source === "standard_hours"
                                 ? "bg-cyan-950/50 text-cyan-100"
@@ -257,6 +330,23 @@ export function RosterWeekGrid({
                             <span className="block text-[10px] opacity-60">
                               {shiftSourceDisplayLabel(shift.shift_source)}
                             </span>
+                            {canManage && onQuickCancelShift && shiftIsCancellable(shift) ? (
+                              <button
+                                type="button"
+                                data-roster-quick-cancel={shift.id}
+                                data-testid={`roster-quick-cancel-${shift.id}`}
+                                disabled={quickCancelPendingShiftId === shift.id}
+                                title="Cancel this shift"
+                                aria-label={`Cancel shift ${shift.shift_type.replace(/_/g, " ")}`}
+                                className="absolute right-1 top-1 rounded px-1.5 py-0.5 text-[11px] font-semibold text-rose-200 hover:bg-rose-950/60 hover:text-rose-50 disabled:opacity-40"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onQuickCancelShift(shift);
+                                }}
+                              >
+                                ×
+                              </button>
+                            ) : null}
                           </span>
                         ))}
                         {cellBlocks.map((block) => (

@@ -43,6 +43,10 @@ test("roster grid cells stay clickable without manage permission so the deny mes
   assert.ok(src.includes("onCellClick?.(staff.id, date)"));
   assert.ok(src.includes("data-roster-shift-id"));
   assert.ok(src.includes("onShiftClick?.(shift)"));
+  assert.ok(src.includes("data-roster-quick-cancel"));
+  assert.ok(src.includes("onQuickCancelShift"));
+  assert.ok(src.includes("onMarkPeriodAway"));
+  assert.ok(src.includes("mark-period-sick-"));
   assert.ok(
     !src.includes('role="presentation"'),
     "shift cards must not use nested click handlers inside the cell surface"

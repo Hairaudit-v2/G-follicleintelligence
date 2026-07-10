@@ -12,8 +12,10 @@ import { RosterSidePanel } from "@/src/components/fi/workforce/RosterSidePanel";
 import { RosterWeekGrid } from "@/src/components/fi/workforce/RosterWeekGrid";
 import {
   applyDefaultClinicStandardHoursAction,
+  cancelRosterShiftAction,
   clearGeneratedRosterShiftsAction,
   copyPreviousRosterPeriodAction,
+  createAvailabilityBlockAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
 import {
@@ -42,18 +44,27 @@ import {
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
 import {
+  buildRosterPeriodAbsenceLocalWindow,
   closeRosterDrawer,
+  collectCancellableStaffShiftsInPeriod,
   openRosterShiftDrawer,
   pushRosterStandardHoursEditorNavigation,
   resolveRosterDrawerStaffContext,
   resolveRosterDrawerStaffMemberId,
   resolveRosterManageDeniedMessage,
   resolveRosterPayloadWeekDayDates,
+  rosterDayAwayReasonLabel,
+  rosterDayAwayShiftCancellationReason,
+  rosterShiftDatetimeLocalToUtcIso,
   ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
+  ROSTER_QUICK_CANCEL_REASONS,
   shiftMatchesRosterCellDate,
   type RosterCommandCentreDrawerState,
+  type RosterDayAwayKind,
+  type RosterQuickCancelReason,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import { formatRosterAdjustmentReasonLabel } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
 import { filterRosterGridStaffOptions } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 
 const STATUS_FILTERS: Array<{ id: RosterStaffingStatusFilter | ""; label: string }> = [
@@ -127,6 +138,10 @@ export function RosterCommandCentreView({
   const [actionError, setActionError] = useState<string | null>(null);
   const [ineligibleExpanded, setIneligibleExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [quickCancelShift, setQuickCancelShift] = useState<RosterGridShift | null>(null);
+  const [quickCancelReason, setQuickCancelReason] =
+    useState<RosterQuickCancelReason>("staff_sick");
+  const [periodAwayPendingStaffId, setPeriodAwayPendingStaffId] = useState<string | null>(null);
 
   /** Normalise once — blank strings from pages must never surface as silent denies. */
   const manageDeniedMessage = resolveRosterManageDeniedMessage(manageDeniedReason);
@@ -301,6 +316,128 @@ export function RosterCommandCentreView({
     });
     if (!opened) return;
     setActionError(canManage ? null : manageDeniedMessage);
+  }
+
+  function handleQuickCancelOpen(shift: RosterGridShift) {
+    if (!canManage) {
+      setActionError(manageDeniedMessage);
+      return;
+    }
+    setQuickCancelReason("staff_sick");
+    setQuickCancelShift(shift);
+    setActionError(null);
+  }
+
+  function handleQuickCancelConfirm() {
+    if (!quickCancelShift || !canManage) return;
+    const shift = quickCancelShift;
+    setActionError(null);
+    setActionMessage(null);
+    startTransition(async () => {
+      const result = await cancelRosterShiftAction({
+        tenantId,
+        shiftId: shift.id,
+        cancellationReason: quickCancelReason,
+        notes: "Quick cancel from roster calendar",
+      });
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setQuickCancelShift(null);
+      setActionMessage(
+        `Shift cancelled (${formatRosterAdjustmentReasonLabel(quickCancelReason)}).`
+      );
+      refresh();
+    });
+  }
+
+  function handleMarkPeriodAway(staffId: string, kind: RosterDayAwayKind) {
+    if (!canManage) {
+      setActionError(manageDeniedMessage);
+      return;
+    }
+    const staffName =
+      rosterGridStaffOptions.find((s) => s.id === staffId)?.name ??
+      payload.staffOptions.find((s) => s.id === staffId)?.name ??
+      "this staff member";
+    const reasonLabel = rosterDayAwayReasonLabel(kind);
+    const shiftsToCancel = collectCancellableStaffShiftsInPeriod({
+      shifts: payload.shifts,
+      staffId,
+      localDates: weekDayDates,
+    });
+    const confirmed = window.confirm(
+      `Mark ${staffName} as ${reasonLabel.toLowerCase()} for this entire ${periodLabel}?\n\n` +
+        `• Creates a leave block covering the ${periodLabel}\n` +
+        `• Cancels ${shiftsToCancel.length} scheduled shift${shiftsToCancel.length === 1 ? "" : "s"}\n\n` +
+        `Continue?`
+    );
+    if (!confirmed) return;
+
+    const windowLocal = buildRosterPeriodAbsenceLocalWindow(weekDayDates);
+    if (!windowLocal) {
+      setActionError("No dates in this roster period.");
+      return;
+    }
+    const staffTimezone = payload.staffTimezoneByStaffId[staffId] ?? null;
+    const utcTimes = rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: windowLocal.startsAtLocal,
+      endsAtLocal: windowLocal.endsAtLocal,
+      staffTimezone,
+      tenantTimezone: payload.tenantTimezone,
+    });
+    if ("error" in utcTimes) {
+      setActionError(utcTimes.error);
+      return;
+    }
+
+    setActionError(null);
+    setActionMessage(null);
+    setPeriodAwayPendingStaffId(staffId);
+    startTransition(async () => {
+      try {
+        const blockResult = await createAvailabilityBlockAction({
+          tenantId,
+          staffId,
+          clinicId: filters.clinicId || null,
+          blockType: kind,
+          startsAt: utcTimes.startsAt,
+          endsAt: utcTimes.endsAt,
+          reason: `${reasonLabel} — full ${periodLabel}`,
+        });
+        if (!blockResult.ok) {
+          setActionError(blockResult.error);
+          return;
+        }
+
+        const cancelReason = rosterDayAwayShiftCancellationReason(kind);
+        let cancelled = 0;
+        for (const shift of shiftsToCancel) {
+          const cancelResult = await cancelRosterShiftAction({
+            tenantId,
+            shiftId: shift.id,
+            cancellationReason: cancelReason,
+            notes: `${reasonLabel} (full ${periodLabel} from calendar)`,
+          });
+          if (!cancelResult.ok) {
+            setActionError(
+              `Leave recorded, but could not cancel a shift: ${cancelResult.error}`
+            );
+            refresh();
+            return;
+          }
+          cancelled += 1;
+        }
+
+        setActionMessage(
+          `${reasonLabel} for ${staffName}: leave block created, ${cancelled} shift${cancelled === 1 ? "" : "s"} cancelled.`
+        );
+        refresh();
+      } finally {
+        setPeriodAwayPendingStaffId(null);
+      }
+    });
   }
 
   function handleGenerateRoster(overwriteGeneratedOnly: boolean) {
@@ -698,12 +835,83 @@ export function RosterCommandCentreView({
           canManage={canManage}
           manageDeniedReason={manageDeniedMessage}
           showStandardHoursEditor={canManageStandardHours}
+          periodLabel={periodLabel}
           selectedShiftId={drawerShift?.id ?? null}
+          quickCancelPendingShiftId={pending && quickCancelShift ? quickCancelShift.id : null}
+          periodAwayPendingStaffId={periodAwayPendingStaffId}
           onCellClick={handleCellClick}
           onShiftClick={handleShiftClick}
+          onQuickCancelShift={handleQuickCancelOpen}
+          onMarkPeriodAway={handleMarkPeriodAway}
           onEditStandardHours={openStandardHoursDrawer}
         />
       </section>
+
+      {quickCancelShift ? (
+        <div
+          className="fixed inset-0 z-[450] flex items-center justify-center bg-black/60 p-4 backdrop-blur-[2px]"
+          role="presentation"
+          data-testid="roster-quick-cancel-modal"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="roster-quick-cancel-title"
+            className="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[#0B1220] p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              id="roster-quick-cancel-title"
+              className="text-base font-semibold text-slate-50"
+            >
+              Cancel shift
+            </h3>
+            <p className="mt-2 text-sm text-slate-400">
+              {quickCancelShift.staffName ?? "Staff"} ·{" "}
+              <span className="capitalize">
+                {quickCancelShift.shift_type.replace(/_/g, " ")}
+              </span>{" "}
+              · {(quickCancelShift.localDate ?? quickCancelShift.starts_at).slice(0, 10)}
+            </p>
+            <label className="mt-4 block text-xs text-slate-400">
+              Reason
+              <select
+                value={quickCancelReason}
+                onChange={(e) =>
+                  setQuickCancelReason(e.target.value as RosterQuickCancelReason)
+                }
+                className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
+                data-testid="roster-quick-cancel-reason"
+              >
+                {ROSTER_QUICK_CANCEL_REASONS.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {formatRosterAdjustmentReasonLabel(reason)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => setQuickCancelShift(null)}
+                className="rounded-lg border border-white/[0.12] px-4 py-2 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
+              >
+                Keep shift
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={handleQuickCancelConfirm}
+                data-testid="roster-quick-cancel-confirm"
+                className="rounded-lg border border-rose-500/40 bg-rose-950/40 px-4 py-2 text-sm font-medium text-rose-100 hover:bg-rose-950/60 disabled:opacity-50"
+              >
+                {pending ? "Cancelling…" : "Confirm cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {ineligibleStaffOptions.length > 0 ? (
         <section

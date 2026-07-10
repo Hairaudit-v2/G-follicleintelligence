@@ -32,6 +32,9 @@ This log records shipped behaviour, regressions fixed, and **do-not-reintroduce*
 
 | Commit | Summary |
 |--------|---------|
+| _(pending)_ | **feat(roster):** chip quick-cancel + full-period Sick/Personal/Away on staff column |
+| `bdfb9461` | **fix(roster):** remove unused import (Vercel ESLint) |
+| `fa6804b0` | **fix(roster):** full-viewport drawer so add-shift click is visible |
 | `0362a28a` | **refactor(roster):** centralise deny messages + day-away helpers; delete dead AvailabilityPanel; simplify drawer |
 | `1565b010` | **fix(roster):** calendar add/cancel + mark-away (sick/personal); grid errors; datetime-local normalise; staff profile href |
 | `0f6d6df2` | **fix(roster):** place manual shifts by clinic/staff timezone (`localDate` on grid) |
@@ -235,6 +238,16 @@ Edit `staffStandardHoursManageGate.server.ts` and keep UI deny copy via `resolve
 - Clear “view-only” vs “editing enabled” banner so operators know if the account can mutate.  
 
 **Env:** none required for Add shift. Need Supabase session + manage permission (`roster.manage` capability, HR-OS role, or clinic/ops tenant admin).
+
+### 2026-07-10 — Quick cancel + full-period mark away
+
+| Feature | How |
+|---------|-----|
+| **One-click cancel on chip** | `×` on each scheduled/confirmed shift → modal with reason (`ROSTER_QUICK_CANCEL_REASONS`) → `cancelRosterShiftAction` |
+| **Mark week/fortnight away** | Staff column: **Sick / Personal / Away** → confirm → one leave block spanning displayed `weekDayDates` + cancel all that staff’s shifts in period |
+
+**Helpers:** `collectCancellableStaffShiftsInPeriod`, `buildRosterPeriodAbsenceLocalWindow`, `ROSTER_QUICK_CANCEL_REASONS`.  
+**Grid props:** `onQuickCancelShift`, `onMarkPeriodAway`, `periodLabel`.
 
 ---
 
