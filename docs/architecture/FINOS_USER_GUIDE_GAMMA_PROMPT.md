@@ -1,6 +1,7 @@
 # FinOS User Guide — Gamma PDF Prompt
 
 **Purpose:** Paste the **Prompt for Gamma** section below into [Gamma](https://gamma.app) to generate a polished PDF user guide.  
+**Pocket companion:** One-page ops card prompt → [FINOS_OPS_CARD_GAMMA_PROMPT.md](./FINOS_OPS_CARD_GAMMA_PROMPT.md)  
 **Grounding:** Labels, kickers, buttons, and section titles are taken from the live FinOS build (`financialOsModuleNav`, page metadata, expense components, command centre). Do not invent alternate product names.  
 **Product name in UI:** Primary nav label is **Finances**. Command centre hero also uses **FinancialOS** / **FI OS**. Staff often say **FinOS**.
 
