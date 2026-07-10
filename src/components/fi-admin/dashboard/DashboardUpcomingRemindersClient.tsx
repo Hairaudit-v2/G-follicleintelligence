@@ -190,7 +190,7 @@ export function DashboardUpcomingRemindersClient(props: {
         <p className="text-sm leading-relaxed text-[#94A3B8]">
           No reminder jobs in the next week. Configure{" "}
           <Link
-            href={`/fi-admin/${tenantId}/settings/reminders`}
+            href={`/fi-admin/${tenantId}/settings/templates?tab=booking`}
             className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
           >
             templates
@@ -378,7 +378,7 @@ export function DashboardUpcomingRemindersClient(props: {
       <p className="mt-4 text-xs text-[#64748B]">
         Manage templates and cadence in{" "}
         <Link
-          href={`/fi-admin/${tenantId}/settings/reminders`}
+          href={`/fi-admin/${tenantId}/settings/templates?tab=booking`}
           className="font-medium text-[#22C1FF] underline-offset-2 hover:underline"
         >
           Settings → Reminders

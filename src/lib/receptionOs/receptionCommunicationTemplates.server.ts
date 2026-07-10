@@ -83,3 +83,57 @@ export async function loadReceptionCommunicationTemplateForTenant(
   if (!data) return RECEPTION_COMMUNICATION_DEFAULT_TEMPLATES[templateKey];
   return mapTemplateRow(data as Record<string, unknown>);
 }
+
+export type UpsertReceptionCommunicationTemplateParams = {
+  tenantId: string;
+  templateKey: ReceptionCommunicationTemplateKey;
+  smsBody?: string | null;
+  emailSubject?: string | null;
+  emailBody?: string | null;
+  isActive?: boolean;
+};
+
+/** Upsert tenant override for a reception communication template key. */
+export async function upsertReceptionCommunicationTemplate(
+  params: UpsertReceptionCommunicationTemplateParams,
+  client?: SupabaseClient
+): Promise<ReceptionCommunicationTemplateContent> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
+  if (!isReceptionCommunicationTemplateKey(params.templateKey)) {
+    throw new Error(`Invalid template key: ${params.templateKey}`);
+  }
+  const now = new Date().toISOString();
+  const row = {
+    tenant_id: tid,
+    template_key: params.templateKey,
+    sms_body: params.smsBody?.trim() || null,
+    email_subject: params.emailSubject?.trim() || null,
+    email_body: params.emailBody?.trim() || null,
+    is_active: params.isActive ?? true,
+    metadata: {},
+    updated_at: now,
+  };
+  const { data, error } = await supabase
+    .from("fi_reception_communication_templates")
+    .upsert(row, { onConflict: "tenant_id,template_key" })
+    .select("template_key, sms_body, email_subject, email_body")
+    .single();
+  if (error) throw new Error(error.message);
+  return mapTemplateRow(data as Record<string, unknown>);
+}
+
+export async function resetReceptionCommunicationTemplateToDefault(
+  tenantId: string,
+  templateKey: ReceptionCommunicationTemplateKey,
+  client?: SupabaseClient
+): Promise<void> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const { error } = await supabase
+    .from("fi_reception_communication_templates")
+    .delete()
+    .eq("tenant_id", tid)
+    .eq("template_key", templateKey);
+  if (error && !error.message.includes("does not exist")) throw new Error(error.message);
+}

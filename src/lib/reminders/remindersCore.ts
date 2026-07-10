@@ -14,6 +14,10 @@ export const REMINDER_PLACEHOLDER_KEYS = [
   "{{booking_title}}",
   "{{booking_type}}",
   "{{norwood_summary}}",
+  "{{invoice_number}}",
+  "{{invoice_amount}}",
+  "{{due_date}}",
+  "{{payment_link}}",
 ] as const;
 
 export type ReminderMergeContext = {
@@ -25,6 +29,10 @@ export type ReminderMergeContext = {
   booking_type?: string;
   /** From {@link formatClinicalScalesSummary} when patient clinical details exist */
   norwood_summary?: string;
+  invoice_number?: string;
+  invoice_amount?: string;
+  due_date?: string;
+  payment_link?: string;
 };
 
 const PLACEHOLDER_MAP: Record<
@@ -37,6 +45,10 @@ const PLACEHOLDER_MAP: Record<
   "{{booking_title}}": "booking_title",
   "{{booking_type}}": "booking_type",
   "{{norwood_summary}}": "norwood_summary",
+  "{{invoice_number}}": "invoice_number",
+  "{{invoice_amount}}": "invoice_amount",
+  "{{due_date}}": "due_date",
+  "{{payment_link}}": "payment_link",
 };
 
 /** Maps shorthand template triggers to scheduling keys used by `scheduledAtForBookingTrigger`. */
@@ -57,6 +69,8 @@ export function toBookingScheduleTrigger(
     case "booking_24h_before":
     case "booking_24h":
       return "booking_24h_before";
+    // same_day / cancel / reschedule / invoice_* are template catalog keys;
+    // scheduling enqueue is wired separately when those flows go live.
     default:
       return null;
   }

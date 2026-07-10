@@ -102,18 +102,42 @@ export default async function FiOsPaymentsSettingsPage({
       </section>
 
       <section className="rounded-xl border border-white/[0.08] bg-[#0b1220]/80 p-5">
-        <h2 className="text-sm font-semibold text-white">Automation (placeholders)</h2>
+        <h2 className="text-sm font-semibold text-white">Payment message templates</h2>
         <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-slate-400">
-          <li>Deposit reminder templates — not wired to outbound email/SMS yet.</li>
-          <li>Balance reminder templates — not wired to outbound email/SMS yet.</li>
-          <li>Automation master toggle — placeholder until consent + templates exist.</li>
+          <li>
+            Deposit, balance, due, and overdue copy lives under{" "}
+            <a
+              href={`/fi-admin/${tid}/settings/templates?tab=booking`}
+              className="text-cyan-300 hover:underline"
+            >
+              Templates → Booking &amp; lifecycle
+            </a>{" "}
+            (invoice_* triggers) and{" "}
+            <a
+              href={`/fi-admin/${tid}/settings/templates?tab=commercial`}
+              className="text-cyan-300 hover:underline"
+            >
+              Front-desk &amp; payments
+            </a>
+            .
+          </li>
+          <li>
+            Sales terms &amp; invoice legal blocks:{" "}
+            <a
+              href={`/fi-admin/${tid}/settings/templates?tab=documents`}
+              className="text-cyan-300 hover:underline"
+            >
+              Templates → Sales documents
+            </a>
+            .
+          </li>
+          <li>Outbound auto-send still requires cron + consent + ESP/SMS wiring (not enabled here).</li>
         </ul>
         <p className="mt-3 text-xs text-slate-500">
           A cron entry point exists at{" "}
           <code className="rounded bg-black/40 px-1">POST /api/cron/fi-payments/reminders</code>{" "}
           (Bearer secret). It currently records CRM/metadata only for due/overdue signals and is
-          idempotent per invoice/day. Auto-send to patients requires a later cron stage, explicit
-          tenant settings, and a safe sender configuration — not enabled here.
+          idempotent per invoice/day.
         </p>
       </section>
 

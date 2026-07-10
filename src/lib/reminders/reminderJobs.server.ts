@@ -599,7 +599,7 @@ export async function loadOperationalDashboardReminderJobs(
     const lead = leadId ? leadById.get(leadId) : undefined;
 
     let recipientLabel = "Reminder";
-    let detailHref = `/fi-admin/${tid}/settings/reminders`;
+    let detailHref = `/fi-admin/${tid}/settings/templates?tab=booking`;
     let patientId: string | null = metaPatientId;
     let bookingAssigneeFiUserId: string | null = null;
     let leadPrimaryOwnerFiUserId: string | null = null;

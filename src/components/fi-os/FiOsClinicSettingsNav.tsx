@@ -117,10 +117,10 @@ export function FiOsClinicSettingsNav({
         ) : null}
         {showReminders ? (
           <Link
-            href={`${base}/settings/reminders`}
-            className={linkCls(`${base}/settings/reminders`)}
+            href={`${base}/settings/templates`}
+            className={linkCls(`${base}/settings/templates`)}
           >
-            Reminders
+            Templates
           </Link>
         ) : null}
         {showTax ? (

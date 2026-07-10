@@ -53,6 +53,7 @@ export async function createReminderTemplateAction(
       body: parsed.body,
       is_active: parsed.is_active,
     });
+    revalidatePath(`/fi-admin/${tenantId.trim()}/settings/templates`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/settings/reminders`);
     return { ok: true };
   } catch (e) {
@@ -78,6 +79,7 @@ export async function updateReminderTemplateAction(
       body: parsed.body,
       is_active: parsed.is_active,
     });
+    revalidatePath(`/fi-admin/${tenantId.trim()}/settings/templates`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/settings/reminders`);
     return { ok: true };
   } catch (e) {
@@ -93,6 +95,7 @@ export async function deleteReminderTemplateAction(
   try {
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
     await deleteReminderTemplate(tenantId.trim(), templateId.trim());
+    revalidatePath(`/fi-admin/${tenantId.trim()}/settings/templates`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/settings/reminders`);
     return { ok: true };
   } catch (e) {

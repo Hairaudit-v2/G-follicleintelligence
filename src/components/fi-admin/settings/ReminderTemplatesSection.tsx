@@ -13,6 +13,8 @@ import type { FiReminderTemplateRow } from "@/src/lib/reminders/reminderTypes";
 import {
   REMINDER_TEMPLATE_TYPES,
   REMINDER_TRIGGER_EVENTS,
+  REMINDER_TRIGGER_GROUPS,
+  REMINDER_TRIGGER_LABELS,
 } from "@/src/lib/reminders/reminderConstants";
 
 const inputClass =
@@ -142,10 +144,14 @@ export function ReminderTemplatesSection(props: {
                 setTrigger(e.target.value as (typeof REMINDER_TRIGGER_EVENTS)[number])
               }
             >
-              {REMINDER_TRIGGER_EVENTS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+              {REMINDER_TRIGGER_GROUPS.map((group) => (
+                <optgroup key={group.id} label={group.label}>
+                  {group.triggers.map((t) => (
+                    <option key={t} value={t}>
+                      {REMINDER_TRIGGER_LABELS[t]}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>
@@ -309,8 +315,13 @@ export function ReminderTemplatesSection(props: {
                   <tr key={row.id} className="border-t border-white/[0.06]">
                     <td className="py-2 pr-3 align-top text-[#F8FAFC]">{row.name}</td>
                     <td className="py-2 pr-3 align-top">{row.type}</td>
-                    <td className="py-2 pr-3 align-top font-mono text-[11px]">
-                      {row.trigger_event}
+                    <td className="py-2 pr-3 align-top text-[11px]">
+                      <span className="text-[#F8FAFC]">
+                        {REMINDER_TRIGGER_LABELS[row.trigger_event] ?? row.trigger_event}
+                      </span>
+                      <span className="mt-0.5 block font-mono text-[10px] text-[#64748B]">
+                        {row.trigger_event}
+                      </span>
                     </td>
                     <td className="py-2 pr-3 align-top">{row.is_active ? "yes" : "no"}</td>
                     <td className="py-2 align-top">

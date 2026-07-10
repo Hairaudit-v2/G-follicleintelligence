@@ -257,9 +257,9 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       title: "Settings — tenant and system configuration.",
     },
     {
-      href: `${base}/settings/reminders`,
-      label: "Reminders",
-      title: "Settings — reminder templates.",
+      href: `${base}/settings/templates`,
+      label: "Templates",
+      title: "Settings — booking messages, payment reminders, and sales documents.",
     },
     {
       href: `${base}/settings/calendar`,

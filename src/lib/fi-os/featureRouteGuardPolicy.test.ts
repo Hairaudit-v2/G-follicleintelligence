@@ -62,7 +62,7 @@ test("decision: non-admin blocked from settings when settings off", () => {
     settings: false,
   });
   const d = resolveFiFeatureRouteDecision({
-    pathname: `${base}/settings/reminders`,
+    pathname: `${base}/settings/templates`,
     tenantBase: base,
     featureAccessMap: m,
     isActiveTenantBackendAdmin: false,
