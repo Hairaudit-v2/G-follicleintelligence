@@ -198,10 +198,12 @@ test("RosterShiftDrawer passes canManage from command centre and supports genera
     ROSTER_VIEW,
     "canManage={canManage}",
     "canManageStandardHours={canManageStandardHours}",
-    "manageDeniedReason={manageDeniedReason}",
+    "manageDeniedReason={manageDeniedReason || ROSTER_MANAGE_DENIED_REASON}",
     "tenantTimezone={payload.tenantTimezone}",
     "staffTimezone={payload.staffTimezoneByStaffId",
-    "handleShiftClick"
+    "handleShiftClick",
+    "dayShifts={drawerDayShifts}",
+    "buildWorkforceStaffProfileHref"
   );
   sourceIncludes(
     ROSTER_SHIFT_DRAWER,
@@ -213,6 +215,10 @@ test("RosterShiftDrawer passes canManage from command centre and supports genera
     'data-testid="roster-shift-cancel-confirm"',
     "ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS",
     "createRosterShiftAction",
+    "createAvailabilityBlockAction",
+    "roster-mark-day-away-panel",
+    "roster-mark-sick-leave",
+    "roster-mark-personal-leave",
     "rosterShiftDatetimeLocalToUtcIso",
     "updateRosterShiftAction",
     "openInEditMode",

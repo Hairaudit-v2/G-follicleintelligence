@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import {
+  createAvailabilityBlockAction,
   createRosterShiftAction,
   cancelRosterShiftAction,
   generateRosterFromStandardHoursAction,
@@ -10,6 +11,7 @@ import {
 } from "@/src/lib/actions/workforce-roster-actions";
 import type { RosterGridShift } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
 import {
+  buildRosterFullDayAbsenceLocalWindow,
   buildRosterShiftDrawerDefaults,
   buildRosterShiftFormValuesFromShift,
   formatRosterDrawerDateLabel,
@@ -45,6 +47,8 @@ const SHIFT_TYPES = [
   "on_call",
 ] as const;
 
+export type RosterDayAwayKind = "sick_leave" | "leave" | "unavailable";
+
 export type RosterShiftDrawerProps = {
   open: boolean;
   tenantId: string;
@@ -58,6 +62,8 @@ export type RosterShiftDrawerProps = {
   rosterCadence?: RosterCadence;
   rosterCycleAnchorDate?: string;
   selectedShift: RosterGridShift | null;
+  /** Other shifts for this staff/day (used when marking away / cancelling cover). */
+  dayShifts?: RosterGridShift[];
   clinics: Array<{ id: string; displayName: string }>;
   staffTimezone?: string | null;
   tenantTimezone: string;
@@ -89,6 +95,7 @@ function RosterShiftDrawerBody({
   rosterCadence = "weekly",
   rosterCycleAnchorDate = "2026-01-05",
   selectedShift,
+  dayShifts = [],
   clinics,
   staffTimezone = null,
   tenantTimezone,
@@ -100,6 +107,9 @@ function RosterShiftDrawerBody({
   onEditStandardHours,
 }: RosterShiftDrawerProps) {
   const viewingExistingShift = mode === "edit" && selectedShift ? selectedShift : null;
+  const cancellableDayShifts = dayShifts.filter(
+    (shift) => shift.status === "scheduled" || shift.status === "confirmed"
+  );
   const { canShowEditButton, canCancelShift, openInEditMode } =
     resolveRosterShiftDrawerEditEligibility(viewingExistingShift);
 
@@ -338,7 +348,83 @@ function RosterShiftDrawerBody({
     });
   }
 
-  const readOnlyManageMessage = ROSTER_MANAGE_DENIED_REASON;
+  /**
+   * Mark the whole day as sick / personal leave / unavailable:
+   * creates an availability block and cancels any remaining shifts that day.
+   */
+  function handleMarkDayAway(kind: RosterDayAwayKind) {
+    if (!canManage) {
+      setError(manageDeniedReason || ROSTER_MANAGE_DENIED_REASON);
+      return;
+    }
+    setError(null);
+
+    const window = buildRosterFullDayAbsenceLocalWindow(localDate);
+    const utcTimes = rosterShiftDatetimeLocalToUtcIso({
+      startsAtLocal: window.startsAtLocal,
+      endsAtLocal: window.endsAtLocal,
+      staffTimezone,
+      tenantTimezone,
+    });
+    if ("error" in utcTimes) {
+      setError(utcTimes.error);
+      return;
+    }
+
+    const reasonLabel =
+      kind === "sick_leave"
+        ? "Sick leave"
+        : kind === "leave"
+          ? "Personal leave"
+          : "Unavailable";
+    const cancelReason = kind === "sick_leave" ? "staff_sick" : "manual_adjustment";
+    const shiftsToCancel =
+      viewingExistingShift && !cancellableDayShifts.some((s) => s.id === viewingExistingShift.id)
+        ? [viewingExistingShift, ...cancellableDayShifts]
+        : cancellableDayShifts.length > 0
+          ? cancellableDayShifts
+          : viewingExistingShift
+            ? [viewingExistingShift]
+            : [];
+
+    startTransition(async () => {
+      const blockResult = await createAvailabilityBlockAction({
+        tenantId,
+        staffId,
+        clinicId: clinicId || filterClinicId || null,
+        blockType: kind,
+        startsAt: utcTimes.startsAt,
+        endsAt: utcTimes.endsAt,
+        reason: `${reasonLabel} — ${formatRosterDrawerDateLabel(localDate)}`,
+      });
+      if (!blockResult.ok) {
+        setError(blockResult.error);
+        return;
+      }
+
+      for (const shift of shiftsToCancel) {
+        if (shift.status === "cancelled") continue;
+        const cancelResult = await cancelRosterShiftAction({
+          tenantId,
+          shiftId: shift.id,
+          cancellationReason: cancelReason,
+          notes: `${reasonLabel} (roster calendar)`,
+        });
+        if (!cancelResult.ok) {
+          setError(
+            `Marked ${reasonLabel.toLowerCase()}, but could not cancel a shift: ${cancelResult.error}`
+          );
+          onRefresh();
+          return;
+        }
+      }
+
+      onClose();
+      onRefresh();
+    });
+  }
+
+  const readOnlyManageMessage = manageDeniedReason?.trim() || ROSTER_MANAGE_DENIED_REASON;
   const shiftIsGenerated =
     viewingExistingShift != null && isGeneratedShiftSource(viewingExistingShift.shift_source);
 
@@ -372,7 +458,7 @@ function RosterShiftDrawerBody({
       ) : null}
 
       {mode === "cell-actions" ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {canManage ? (
             <>
               <ManualShiftForm
@@ -400,6 +486,13 @@ function RosterShiftDrawerBody({
                 onEditReasonChange={setEditReason}
                 onSubmit={handleCreateManual}
               />
+
+              <MarkDayAwayPanel
+                pending={pending}
+                shiftCount={cancellableDayShifts.length}
+                onMarkAway={handleMarkDayAway}
+              />
+
               <button
                 type="button"
                 disabled={pending || !canGenerateFromStandardHours}
@@ -433,7 +526,11 @@ function RosterShiftDrawerBody({
               ) : null}
             </>
           ) : null}
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+          {error ? (
+            <p className="text-sm text-rose-300" role="alert" data-testid="roster-shift-drawer-error">
+              {error}
+            </p>
+          ) : null}
         </div>
       ) : (
         <div className="space-y-3">
@@ -490,6 +587,10 @@ function RosterShiftDrawerBody({
               <p className="text-sm font-medium text-rose-200">
                 {shiftIsGenerated ? "Remove this shift" : "Cancel this shift"}
               </p>
+              <p className="text-xs text-slate-500">
+                Use this when the person was rostered but should not work this shift (sick call,
+                personal day, clinic closed, etc.).
+              </p>
               <label className="block text-xs text-slate-400">
                 Cancellation reason
                 <select
@@ -520,16 +621,84 @@ function RosterShiftDrawerBody({
                 disabled={pending || !cancellationReason.trim()}
                 onClick={handleCancelShift}
                 data-testid="roster-shift-cancel-confirm"
-                className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-lg border border-rose-500/40 bg-rose-950/30 px-3 py-2.5 text-sm font-medium text-rose-200 hover:bg-rose-950/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {shiftIsGenerated ? "Confirm remove shift" : "Confirm cancel shift"}
               </button>
             </div>
           ) : null}
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+
+          {canManage && !isInlineEditing ? (
+            <MarkDayAwayPanel
+              pending={pending}
+              shiftCount={
+                viewingExistingShift &&
+                (viewingExistingShift.status === "scheduled" ||
+                  viewingExistingShift.status === "confirmed")
+                  ? Math.max(1, cancellableDayShifts.length)
+                  : cancellableDayShifts.length
+              }
+              onMarkAway={handleMarkDayAway}
+            />
+          ) : null}
+
+          {error ? (
+            <p className="text-sm text-rose-300" role="alert" data-testid="roster-shift-drawer-error">
+              {error}
+            </p>
+          ) : null}
         </div>
       )}
     </RosterRightDrawer>
+  );
+}
+
+function MarkDayAwayPanel(props: {
+  pending: boolean;
+  shiftCount: number;
+  onMarkAway: (kind: RosterDayAwayKind) => void;
+}) {
+  return (
+    <div
+      className="space-y-2 rounded-lg border border-amber-500/25 bg-amber-950/15 p-3"
+      data-testid="roster-mark-day-away-panel"
+    >
+      <p className="text-sm font-medium text-amber-100">Mark staff away (full day)</p>
+      <p className="text-xs text-slate-400">
+        Records leave on the roster and cancels any shifts still scheduled this day
+        {props.shiftCount > 0 ? ` (${props.shiftCount})` : ""}. Use for sick calls and personal
+        days.
+      </p>
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          disabled={props.pending}
+          onClick={() => props.onMarkAway("sick_leave")}
+          data-testid="roster-mark-sick-leave"
+          className="w-full rounded-lg border border-rose-500/35 bg-rose-950/25 px-3 py-2 text-left text-sm text-rose-100 hover:bg-rose-950/40 disabled:opacity-50"
+        >
+          Sick leave (call in sick)
+        </button>
+        <button
+          type="button"
+          disabled={props.pending}
+          onClick={() => props.onMarkAway("leave")}
+          data-testid="roster-mark-personal-leave"
+          className="w-full rounded-lg border border-amber-500/35 bg-amber-950/25 px-3 py-2 text-left text-sm text-amber-100 hover:bg-amber-950/40 disabled:opacity-50"
+        >
+          Personal leave / day off
+        </button>
+        <button
+          type="button"
+          disabled={props.pending}
+          onClick={() => props.onMarkAway("unavailable")}
+          data-testid="roster-mark-unavailable"
+          className="w-full rounded-lg border border-white/[0.12] px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50"
+        >
+          Unavailable (other)
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -700,7 +869,8 @@ function ManualShiftForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm font-medium text-slate-100 hover:bg-white/[0.04] disabled:opacity-50"
+          data-testid="roster-shift-save"
+          className="w-full rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Saving…" : saveLabel}
         </button>

@@ -25,3 +25,8 @@ export function buildStaffStandardHoursEditorHref(
 export function buildStaffStandardHoursReturnToRosterHref(tenantId: string): string {
   return `/fi-admin/${tenantId.trim()}/workforce-os/roster`;
 }
+
+/** Staff employment / lifecycle profile used from roster ineligible list and HR deep links. */
+export function buildWorkforceStaffProfileHref(tenantId: string, staffId: string): string {
+  return `/fi-admin/${tenantId.trim()}/workforce-os/staff/${staffId.trim()}`;
+}

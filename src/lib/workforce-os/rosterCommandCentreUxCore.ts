@@ -191,9 +191,10 @@ export function resolveRosterCellClickOutcome(input: {
     };
   }
   if (!input.canManage) {
+    const denied = input.manageDeniedReason?.trim();
     return {
       outcome: "deny",
-      message: input.manageDeniedReason ?? ROSTER_MANAGE_DENIED_REASON,
+      message: denied || ROSTER_MANAGE_DENIED_REASON,
     };
   }
   return { outcome: "open_drawer", mode: "cell-actions" };
@@ -323,6 +324,37 @@ function standardDayForLocalDate(
   });
 }
 
+/**
+ * Normalise time strings for `<input type="datetime-local">` (must be HH:mm).
+ * DB / standard-hours values may arrive as `8:30`, `08:30:00`, or `08:30:00.000`.
+ */
+export function normaliseDatetimeLocalHm(
+  raw: string | null | undefined,
+  fallback = "09:00"
+): string {
+  const t = (raw ?? "").trim();
+  const match = t.match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
+  if (!match) return fallback;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute) || hour > 23 || minute > 59) {
+    return fallback;
+  }
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/** Full calendar day window in datetime-local form for leave / sick blocks. */
+export function buildRosterFullDayAbsenceLocalWindow(localDate: string): {
+  startsAtLocal: string;
+  endsAtLocal: string;
+} {
+  const d = localDate.slice(0, 10);
+  return {
+    startsAtLocal: `${d}T00:00`,
+    endsAtLocal: `${d}T23:59`,
+  };
+}
+
 /** Prefill values when opening the shift drawer from a grid cell. */
 export function buildRosterShiftDrawerDefaults(input: {
   staffId: string;
@@ -343,15 +375,22 @@ export function buildRosterShiftDrawerDefaults(input: {
   const shiftType = day
     ? shiftTypeFromStandardDay(day)
     : shiftTypeFromStaffRole(input.staffRole);
-  const startHm = day?.is_working_day ? (day.start_time ?? "09:00") : "09:00";
-  const endHm = day?.is_working_day ? (day.end_time ?? "17:00") : "17:00";
+  const startHm = normaliseDatetimeLocalHm(
+    day?.is_working_day ? day.start_time : null,
+    "09:00"
+  );
+  const endHm = normaliseDatetimeLocalHm(
+    day?.is_working_day ? day.end_time : null,
+    "17:00"
+  );
+  const date = input.localDate.slice(0, 10);
 
   return {
     staffId: input.staffId,
     clinicId,
     shiftType,
-    startsAt: `${input.localDate}T${startHm}`,
-    endsAt: `${input.localDate}T${endHm}`,
+    startsAt: `${date}T${startHm}`,
+    endsAt: `${date}T${endHm}`,
   };
 }
 

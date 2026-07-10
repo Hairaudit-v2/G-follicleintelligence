@@ -270,8 +270,11 @@ export function RosterWeekGrid({
                           </span>
                         ))}
                         {rdo ? (
-                          <span className="block rounded-md bg-white/[0.03] px-2 py-1.5 text-xs text-slate-500">
-                            RDO
+                          <span
+                            className="block rounded-md bg-white/[0.03] px-2 py-1.5 text-xs text-slate-500"
+                            data-testid={`rdo-cell-${staff.id}-${date}`}
+                          >
+                            RDO · click to add shift or mark away
                           </span>
                         ) : null}
                         {emptyCell ? (
@@ -279,7 +282,7 @@ export function RosterWeekGrid({
                             className="block px-1 py-2 text-xs font-medium text-cyan-300/90"
                             data-testid={`add-shift-${staff.id}-${date}`}
                           >
-                            Add shift
+                            + Add shift / mark away
                           </span>
                         ) : null}
                       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -37,6 +37,7 @@ import {
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import {
   buildStaffStandardHoursSetupIndexHref,
+  buildWorkforceStaffProfileHref,
   ROSTER_MANAGE_DENIED_REASON,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
@@ -51,6 +52,7 @@ import {
   resolveRosterPayloadWeekDayDates,
   ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
+  shiftMatchesRosterCellDate,
   type RosterCommandCentreDrawerState,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { filterRosterGridStaffOptions } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
@@ -155,6 +157,20 @@ export function RosterCommandCentreView({
     rosterGridStaffOptions,
     selectedShift: drawerShift,
   });
+  const drawerDayShifts = useMemo(() => {
+    if (drawerState.kind !== "shift" || !drawerStaffMemberId) return [];
+    return payload.shifts.filter((shift) =>
+      shiftMatchesRosterCellDate(shift, drawerStaffMemberId, drawerState.localDate)
+    );
+  }, [drawerState, drawerStaffMemberId, payload.shifts]);
+
+  useEffect(() => {
+    if (!actionError) return;
+    const el = document.querySelector('[data-testid="roster-action-error"]');
+    if (el instanceof HTMLElement) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [actionError]);
 
   function closeDrawer() {
     setDrawerState(closeRosterDrawer());
@@ -568,11 +584,6 @@ export function RosterCommandCentreView({
             {actionMessage}
           </p>
         ) : null}
-        {actionError ? (
-          <p className="mt-3 text-sm text-rose-300" role="alert" data-testid="roster-action-error">
-            {actionError}
-          </p>
-        ) : null}
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -643,10 +654,20 @@ export function RosterCommandCentreView({
         <div>
           <h2 className="text-sm font-semibold capitalize text-slate-100">{periodLabel} roster</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Add shifts to empty cells, edit any shift, or copy a previous {periodLabel}. Standard
+            Click an empty cell to <strong className="font-medium text-slate-300">Add shift</strong>{" "}
+            or mark sick/personal leave. Click an existing shift to edit or cancel it. Standard
             hours are optional — use Generate only when you want a template fill.
           </p>
         </div>
+        {actionError ? (
+          <p
+            className="rounded-lg border border-rose-500/30 bg-rose-950/30 px-3 py-2 text-sm text-rose-100"
+            role="alert"
+            data-testid="roster-action-error"
+          >
+            {actionError}
+          </p>
+        ) : null}
         <RosterWeekGrid
           tenantId={tenantId}
           weekDayDates={weekDayDates}
@@ -657,7 +678,7 @@ export function RosterCommandCentreView({
           rosterCadence={rosterCadence}
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           canManage={canManage}
-          manageDeniedReason={manageDeniedReason}
+          manageDeniedReason={manageDeniedReason || ROSTER_MANAGE_DENIED_REASON}
           showStandardHoursEditor={canManageStandardHours}
           selectedShiftId={drawerShift?.id ?? null}
           onCellClick={handleCellClick}
@@ -699,7 +720,7 @@ export function RosterCommandCentreView({
                 >
                   <div>
                     <Link
-                      href={`/fi-admin/${tenantId}/hr-os/staff/${staff.id}`}
+                      href={buildWorkforceStaffProfileHref(tenantId, staff.id)}
                       className="font-medium text-slate-100 hover:text-cyan-300"
                     >
                       {staff.name}
@@ -712,7 +733,7 @@ export function RosterCommandCentreView({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Link
-                      href={`/fi-admin/${tenantId}/hr-os/staff/${staff.id}`}
+                      href={buildWorkforceStaffProfileHref(tenantId, staff.id)}
                       className="rounded-md border border-white/[0.1] px-2 py-1 text-[11px] text-slate-300 hover:bg-white/[0.04]"
                     >
                       Manage employment
@@ -748,11 +769,12 @@ export function RosterCommandCentreView({
           rosterCadence={rosterCadence}
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           selectedShift={drawerShift}
+          dayShifts={drawerDayShifts}
           clinics={payload.clinics}
           staffTimezone={payload.staffTimezoneByStaffId[drawerStaffMemberId] ?? null}
           tenantTimezone={payload.tenantTimezone}
           canManage={canManage}
-          manageDeniedReason={manageDeniedReason}
+          manageDeniedReason={manageDeniedReason || ROSTER_MANAGE_DENIED_REASON}
           canManageStandardHours={canManageStandardHours}
           onClose={closeDrawer}
           onRefresh={refresh}

@@ -3,12 +3,14 @@ import { test } from "node:test";
 
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
+  buildRosterFullDayAbsenceLocalWindow,
   buildRosterShiftDrawerDefaults,
   buildRosterShiftFormValuesFromShift,
   closeRosterDrawer,
   formatRosterShiftDrawerTitle,
   formatStandardHoursDrawerTitle,
   listStaffMissingStandardHours,
+  normaliseDatetimeLocalHm,
   openRosterMissingStandardHoursSetupDrawer,
   openRosterShiftDrawer,
   openRosterStandardHoursDrawer,
@@ -110,6 +112,43 @@ test("buildRosterShiftDrawerDefaults falls back to staff role and filter clinic"
   assert.equal(defaults.clinicId, "clinic-filter");
   assert.equal(defaults.shiftType, "surgery_day");
   assert.equal(defaults.startsAt, "2026-07-07T09:00");
+});
+
+test("normaliseDatetimeLocalHm coerces DB time formats for datetime-local inputs", () => {
+  assert.equal(normaliseDatetimeLocalHm("8:30"), "08:30");
+  assert.equal(normaliseDatetimeLocalHm("08:30:00"), "08:30");
+  assert.equal(normaliseDatetimeLocalHm("17:00:00.000"), "17:00");
+  assert.equal(normaliseDatetimeLocalHm("bad", "09:00"), "09:00");
+});
+
+test("buildRosterFullDayAbsenceLocalWindow spans local calendar day for leave blocks", () => {
+  assert.deepEqual(buildRosterFullDayAbsenceLocalWindow("2026-07-10"), {
+    startsAtLocal: "2026-07-10T00:00",
+    endsAtLocal: "2026-07-10T23:59",
+  });
+});
+
+test("buildRosterShiftDrawerDefaults normalises second-precision standard hours times", () => {
+  const defaults = buildRosterShiftDrawerDefaults({
+    staffId: STAFF_PAUL,
+    localDate: "2026-07-06",
+    staffRole: "reception",
+    filterClinicId: "",
+    standardHours: [
+      {
+        weekday: 0,
+        cycle_week: 1,
+        is_working_day: true,
+        start_time: "08:30:00",
+        end_time: "17:00:00",
+        break_minutes: 30,
+        role_code: "reception",
+        clinic_id: null,
+      },
+    ],
+  });
+  assert.equal(defaults.startsAt, "2026-07-06T08:30");
+  assert.equal(defaults.endsAt, "2026-07-06T17:00");
 });
 
 test("drawer titles include staff and date context", () => {
