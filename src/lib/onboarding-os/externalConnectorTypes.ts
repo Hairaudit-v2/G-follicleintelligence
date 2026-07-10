@@ -13,6 +13,7 @@ export const EXTERNAL_CONNECTOR_PROVIDERS = [
   "microsoft_outlook",
   "stripe",
   "xero",
+  "quickbooks",
   "meta_ads",
   "google_ads",
 ] as const;
@@ -207,6 +208,7 @@ export const EXTERNAL_CONNECTOR_PROVIDER_LABELS: Record<ExternalConnectorProvide
   microsoft_outlook: "Microsoft Outlook",
   stripe: "Stripe",
   xero: "Xero",
+  quickbooks: "QuickBooks",
   meta_ads: "Meta Ads",
   google_ads: "Google Ads",
 };

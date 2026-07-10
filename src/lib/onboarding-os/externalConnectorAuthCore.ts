@@ -31,6 +31,7 @@ const PROVIDER_AUTH_METHODS: Record<
   microsoft_outlook: ["oauth2", "manual_placeholder"],
   stripe: ["api_key", "webhook_secret", "manual_placeholder"],
   xero: ["oauth2", "api_key", "manual_placeholder"],
+  quickbooks: ["oauth2", "api_key", "manual_placeholder"],
   meta_ads: ["oauth2", "api_key", "manual_placeholder"],
   google_ads: ["oauth2", "manual_placeholder"],
 };
@@ -63,6 +64,12 @@ const PROVIDER_REQUIRED_SCOPES: Record<
   xero: [
     { key: "accounting.transactions.read", label: "Read transactions" },
     { key: "accounting.contacts.read", label: "Read contacts" },
+  ],
+  quickbooks: [
+    { key: "com.intuit.quickbooks.accounting", label: "Accounting API" },
+    { key: "purchases.write", label: "Create purchases / expenses" },
+    { key: "vendors.read", label: "Read vendors" },
+    { key: "accounts.read", label: "Read chart of accounts" },
   ],
   meta_ads: [{ key: "ads_read", label: "Read ad campaigns" }],
   google_ads: [{ key: "adwords.readonly", label: "Read Google Ads data" }],

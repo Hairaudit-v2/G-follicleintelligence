@@ -2,7 +2,7 @@
 
 **Module:** FinancialOS (FinOS)  
 **Surface:** `/fi-admin/[tenantId]/financial/expenses`  
-**Status:** Stages 1–5 shipped (additive; revenue payments paths unchanged)
+**Status:** Stages 1–6 shipped (additive; revenue payments paths unchanged)
 
 This log tracks the **clinic opex / expenses capture** workstream under FinancialOS. It is separate from earlier FinOS phases (payment pathways, financing, clearance, surgery economics).
 
@@ -16,7 +16,8 @@ This log tracks the **clinic opex / expenses capture** workstream under Financia
 | **2** | Receipt/invoice upload + OCR | `feat(financial-os): add expense receipt OCR and document upload` | `20261009120001_fi_financial_os_expense_documents_bucket` |
 | **3** | Entity links + attach + preview | `feat(financial-os): link expenses to leads/cases and preview docs` | (no new migration) |
 | **4** | Ledger bridge + CPL + read preview | `feat(financial-os): expense ledger bridge, CPL, read preview` | `20261010120001_fi_financial_os_expense_ledger_bridge` |
-| **5** | Period filters + spend CPG intelligence | `feat(financial-os): expense intelligence period filters & CPG` | (no new migration) |
+| **5** | Period filters + spend CPG intelligence | `feat(financial-os): expense intelligence period filters and CPG` | (no new migration) |
+| **6** | P&amp;L, bank recon, exports, QuickBooks | `feat(financial-os): P&L, bank recon, QuickBooks export` | (no new migration; connector catalog) |
 
 ---
 
@@ -179,13 +180,50 @@ FI_EXPENSE_OCR_MIN_CONFIDENCE=0.55
 
 ---
 
-## Suggested Stage 6+ (not started)
+## Stage 6 — Operating P&amp;L, bank recon, CSV / QuickBooks
 
-- Chart of accounts / simple P&amp;L by clinic
-- Bank statement reconciliation against posted expenses
-- Xero export of posted opex
-- Richer standard CPG using full surgery economics calculator (not just graft consumable unit)
-- Export CSV of intelligence panels
+**Goal:** Close the loop from capture → ledger → export/accounting coexistence.
+
+### Operating snapshot (ledger P&amp;L)
+- Collections (`payment_received`, `deposit_paid`, `balance_paid` credits)
+- Net opex (`expense_posted` debits − `expense_void_reversal` credits)
+- Net operating = collections − net opex
+- Panel: `ExpenseOperatingPlPanel`
+
+### Bank reconciliation (scaffold)
+- Match import lines ↔ expenses: `source_import_line_id`, then amount + date ±3d + vendor
+- Metrics only (no auto-link writes yet)
+- `expenseBankReconCore.ts`, `ExpenseBankReconPanel`
+
+### Exports
+- FI expenses CSV (all statuses in period)
+- **QuickBooks CSV** (posted only, import-friendly columns)
+- **QuickBooks JSON drafts** (Purchase-shaped payload for future API)
+- Action: `exportExpensesPeriodAction`
+
+### QuickBooks integration (connector + export)
+- Provider `quickbooks` added to OnboardingOS external connector catalog (finance)
+- Auth: oauth2 / api_key / manual_placeholder
+- Scopes: accounting, purchases.write, vendors.read, accounts.read
+- Mapping plan: vendors, purchases ↔ `fi_expense`, accounts ↔ categories
+- Config: `realm_id`, `environment`, token
+- **Live QBO API push not enabled** — export files + connector registration first
+- Register via OnboardingOS external connectors UI when available
+
+### Key paths
+- `expensePlCore.ts`, `expenseBankReconCore.ts`, `expenseExportCore.ts`, `expenseStage6.server.ts`
+- `ExpenseExportPanel.tsx`, `ExpenseOperatingPlPanel.tsx`, `ExpenseBankReconPanel.tsx`
+- Connector: `externalConnectorTypes.ts`, `externalConnectorCore.ts`, `externalConnectorAuthCore.ts`
+
+---
+
+## Suggested Stage 7+ (not started)
+
+- Full chart of accounts / multi-clinic P&amp;L
+- Persist bank recon matches + staff confirm workflow
+- Live QuickBooks OAuth push of purchases (using stored connector credentials)
+- Xero expense export parity
+- Richer standard CPG via full surgery economics calculator
 
 ---
 

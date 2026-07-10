@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ExpenseBankReconPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseBankReconPanel";
 import { ExpenseCostPerGraftPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCostPerGraftPanel";
 import { ExpenseCplPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCplPanel";
 import { ExpenseCsvImportForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCsvImportForm";
 import { ExpenseDocumentsTable } from "@/src/components/fi-admin/financial-os/expenses/ExpenseDocumentsTable";
+import { ExpenseExportPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseExportPanel";
 import { ExpenseManualEntryForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseManualEntryForm";
+import { ExpenseOperatingPlPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseOperatingPlPanel";
 import { ExpensePeriodFilterBar } from "@/src/components/fi-admin/financial-os/expenses/ExpensePeriodFilterBar";
 import { ExpenseReceiptUploadForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseReceiptUploadForm";
 import { ExpenseSpendByCategoryPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseSpendByCategoryPanel";
@@ -32,6 +35,11 @@ import {
   loadExpensesForTenant,
 } from "@/src/lib/financialOs/expenses/expenseLoaders.server";
 import { normalizeExpensePeriod } from "@/src/lib/financialOs/expenses/expensePeriodCore";
+import type { ExpensePlSummary } from "@/src/lib/financialOs/expenses/expensePlCore";
+import {
+  loadBankReconciliationPreview,
+  loadOperatingPlSummary,
+} from "@/src/lib/financialOs/expenses/expenseStage6.server";
 import type { FiExpenseRow } from "@/src/lib/financialOs/expenses/expenseTypes";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
@@ -72,6 +80,8 @@ export default async function FinancialOsExpensesPage({
   let documents: Awaited<ReturnType<typeof loadExpenseDocumentsForTenant>> = [];
   let campaignSuggestions: string[] = [];
   let intelligence: ExpenseIntelligenceBundle | null = null;
+  let plSummary: ExpensePlSummary | null = null;
+  let bankRecon: Awaited<ReturnType<typeof loadBankReconciliationPreview>> | null = null;
   let loadError: string | null = null;
 
   try {
@@ -85,6 +95,14 @@ export default async function FinancialOsExpensesPage({
       periodStart: period_start,
       periodEnd: period_end,
     });
+    plSummary = await loadOperatingPlSummary(tid, {
+      periodStart: period_start,
+      periodEnd: period_end,
+    });
+    bankRecon = await loadBankReconciliationPreview(tid, {
+      periodStart: period_start,
+      periodEnd: period_end,
+    });
   } catch (e) {
     loadError =
       e instanceof Error
@@ -94,13 +112,15 @@ export default async function FinancialOsExpensesPage({
 
   const capability = await getPaymentRecordMutationCapability(tid);
   const canMutate = capability.canMutate;
+  // Export uses financial_os read gate in action; mutators and portal readers both reach this page.
+  const canExport = true;
 
   return (
     <div className={financialOsClasses.pageSection}>
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs, link entities, post to the master ledger, and review CPL / category spend / cost-per-graft actuals for the selected period."
+        description="Capture clinic costs, link entities, post to the master ledger, review CPL / spend / CPG, operating P&L, bank recon, and export to CSV or QuickBooks for the selected period."
       />
 
       {loadError ? (
@@ -129,6 +149,27 @@ export default async function FinancialOsExpensesPage({
           expenses={expenses}
         />
       </div>
+
+      <ExpenseExportPanel
+        tenantId={tid}
+        periodStart={period_start}
+        periodEnd={period_end}
+        canExport={canExport}
+      />
+
+      {plSummary ? <ExpenseOperatingPlPanel summary={plSummary} /> : null}
+
+      {bankRecon ? (
+        <ExpenseBankReconPanel
+          periodStart={bankRecon.period_start}
+          periodEnd={bankRecon.period_end}
+          lineCount={bankRecon.line_count}
+          expenseCount={bankRecon.expense_count}
+          matchCount={bankRecon.matches.length}
+          unmatchedLines={bankRecon.unmatched_line_ids.length}
+          unmatchedExpenses={bankRecon.unmatched_expense_ids.length}
+        />
+      ) : null}
 
       {intelligence ? (
         <div className="grid gap-6 2xl:grid-cols-1">

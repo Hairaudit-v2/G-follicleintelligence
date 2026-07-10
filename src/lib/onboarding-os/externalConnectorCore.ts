@@ -34,6 +34,7 @@ const PROVIDER_CATEGORY_MAP: Record<
   microsoft_outlook: "calendar",
   stripe: "finance",
   xero: "finance",
+  quickbooks: "finance",
   meta_ads: "marketing",
   google_ads: "marketing",
 };
@@ -171,6 +172,38 @@ const BASE_MAPPING_PLANS: Record<
       ],
     },
   ],
+  quickbooks: [
+    {
+      sourceEntity: "vendor",
+      targetEntity: "fi_expense_vendor",
+      label: "QuickBooks vendors → FI expense vendors",
+      fields: [
+        { sourceField: "Id", targetField: "external_id", required: true },
+        { sourceField: "DisplayName", targetField: "vendor_name", required: true },
+      ],
+    },
+    {
+      sourceEntity: "purchase",
+      targetEntity: "fi_expense",
+      label: "QuickBooks purchases ↔ FI expenses",
+      fields: [
+        { sourceField: "Id", targetField: "external_id", required: true },
+        { sourceField: "TxnDate", targetField: "expense_date", required: true },
+        { sourceField: "TotalAmt", targetField: "amount_cents", required: true },
+        { sourceField: "EntityRef.name", targetField: "vendor_name", required: false },
+      ],
+    },
+    {
+      sourceEntity: "account",
+      targetEntity: "fi_expense_category",
+      label: "QuickBooks expense accounts → FI categories",
+      fields: [
+        { sourceField: "Id", targetField: "external_id", required: true },
+        { sourceField: "Name", targetField: "label", required: true },
+        { sourceField: "AcctNum", targetField: "code", required: false },
+      ],
+    },
+  ],
   meta_ads: [
     {
       sourceEntity: "campaign",
@@ -228,6 +261,11 @@ const CONFIG_FIELDS: Record<
     { key: "tenant_id", label: "Xero organisation ID", required: true },
     { key: "api_key", label: "API key / token", required: true, sensitive: true },
   ],
+  quickbooks: [
+    { key: "realm_id", label: "QuickBooks company (realm) ID", required: true },
+    { key: "environment", label: "Environment (sandbox|production)", required: false },
+    { key: "api_key", label: "OAuth access token / API key", required: true, sensitive: true },
+  ],
   meta_ads: [
     { key: "ad_account_id", label: "Ad account ID", required: true },
     { key: "api_key", label: "Access token", required: true, sensitive: true },
@@ -246,6 +284,7 @@ const PROVIDER_DESCRIPTIONS: Record<ExternalConnectorProvider, string> = {
   microsoft_outlook: "Mirror Outlook calendar events alongside FI scheduling.",
   stripe: "Reference Stripe billing data while FI FinancialOS is primary.",
   xero: "Reference Xero invoices and contacts during finance transition.",
+  quickbooks: "Export FI posted expenses to QuickBooks and map vendors/accounts during finance coexistence.",
   meta_ads: "Track Meta ad campaigns for attribution alongside FI marketing.",
   google_ads: "Track Google Ads campaigns for attribution alongside FI marketing.",
 };

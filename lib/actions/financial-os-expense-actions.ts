@@ -13,6 +13,7 @@ import {
   processExpenseDocumentOcr,
   uploadExpenseDocument,
 } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
+import { buildExpensePeriodExports } from "@/src/lib/financialOs/expenses/expenseStage6.server";
 import {
   commitImportLinesSchema,
   createExpenseImportSchema,
@@ -35,6 +36,21 @@ import {
 const reprocessOcrSchema = z.object({
   adminKey: z.string().optional(),
   document_id: z.string().uuid(),
+});
+
+const periodExportSchema = z.object({
+  adminKey: z.string().optional(),
+  period_start: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  period_end: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  format: z.enum(["fi_csv", "quickbooks_csv", "quickbooks_json"]).default("fi_csv"),
 });
 
 function errMsg(e: unknown): string {
@@ -322,6 +338,92 @@ export async function getExpenseDocumentSignedUrlAction(
       ttlSec: parsed.ttl_sec ?? 300,
     });
     return { ok: true, url };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/**
+ * Stage 6: export period expenses as FI CSV, QuickBooks CSV, or QuickBooks purchase JSON drafts.
+ * Read-capable (financial_os read) — does not mutate data.
+ */
+export async function exportExpensesPeriodAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | {
+      ok: true;
+      format: "fi_csv" | "quickbooks_csv" | "quickbooks_json";
+      filename: string;
+      content: string;
+      period_start: string;
+      period_end: string;
+      row_count: number;
+      posted_count: number;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = periodExportSchema.parse(body ?? {});
+    const tid = tenantId.trim();
+    if (parsed.adminKey) {
+      await assertPaymentRecordWriteAllowed(tid, parsed.adminKey);
+    } else {
+      await assertFiTenantPortalAccess(tid);
+      await assertStaffModuleAccess(tid, "financial_os", "read");
+    }
+
+    const bundle = await buildExpensePeriodExports(tid, {
+      periodStart: parsed.period_start,
+      periodEnd: parsed.period_end,
+    });
+
+    if (parsed.format === "quickbooks_json") {
+      return {
+        ok: true,
+        format: "quickbooks_json",
+        filename: `fi-expenses-quickbooks-${bundle.period_start}_${bundle.period_end}.json`,
+        content: JSON.stringify(
+          {
+            provider: "quickbooks",
+            period_start: bundle.period_start,
+            period_end: bundle.period_end,
+            purchases: bundle.quickbooks_drafts,
+            note: "Scaffold for QBO Purchase API; import CSV or run OAuth push later.",
+          },
+          null,
+          2
+        ),
+        period_start: bundle.period_start,
+        period_end: bundle.period_end,
+        row_count: bundle.row_count,
+        posted_count: bundle.posted_count,
+      };
+    }
+
+    if (parsed.format === "quickbooks_csv") {
+      return {
+        ok: true,
+        format: "quickbooks_csv",
+        filename: `fi-expenses-quickbooks-${bundle.period_start}_${bundle.period_end}.csv`,
+        content: bundle.quickbooks_csv,
+        period_start: bundle.period_start,
+        period_end: bundle.period_end,
+        row_count: bundle.row_count,
+        posted_count: bundle.posted_count,
+      };
+    }
+
+    return {
+      ok: true,
+      format: "fi_csv",
+      filename: `fi-expenses-${bundle.period_start}_${bundle.period_end}.csv`,
+      content: bundle.fi_csv,
+      period_start: bundle.period_start,
+      period_end: bundle.period_end,
+      row_count: bundle.row_count,
+      posted_count: bundle.posted_count,
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
