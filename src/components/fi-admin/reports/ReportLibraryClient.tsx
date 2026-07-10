@@ -177,19 +177,17 @@ export function ReportLibraryClient(props: {
         return;
       }
       setSaveMessage(`Snapshot saved (${r.runId.slice(0, 8)}…).`);
-      setRuns((prev) => [
-        {
-          id: r.runId,
-          report_id: result.reportId,
-          title: result.title,
-          period_start: result.periodStart,
-          period_end: result.periodEnd,
-          source: "manual",
-          status: "completed",
-          created_at: new Date().toISOString(),
-        },
-        ...prev,
-      ].slice(0, 30));
+      const nextRun: ReportRunListItem = {
+        id: r.runId,
+        report_id: result.reportId,
+        title: result.title,
+        period_start: result.periodStart,
+        period_end: result.periodEnd,
+        source: "manual",
+        status: "completed",
+        created_at: new Date().toISOString(),
+      };
+      setRuns((prev) => [nextRun, ...prev].slice(0, 30));
     });
   }
 
