@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { ZodError, z } from "zod";
 
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { assertPaymentRecordWriteAllowed } from "@/src/lib/payments/paymentRecordAccess.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { readExpenseReceiptUploadFormData } from "@/src/lib/financialOs/expenses/expenseDocumentStorageCore";
 import {
@@ -297,9 +299,9 @@ const signedUrlSchema = z.object({
 });
 
 /**
- * Short-lived signed URL for receipt/invoice preview (tenant-scoped).
- * Read path still requires finance write gate for consistency with payment records,
- * or portal access is assumed via server action session — uses write gate to match other expense ops.
+ * Short-lived signed URL for receipt/invoice preview.
+ * Stage 4: portal members with financial_os read access may preview (not write-only).
+ * Admin key still accepted for automation/tooling.
  */
 export async function getExpenseDocumentSignedUrlAction(
   tenantId: string,
@@ -307,9 +309,15 @@ export async function getExpenseDocumentSignedUrlAction(
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   try {
     const parsed = signedUrlSchema.parse(body);
-    await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const tid = tenantId.trim();
+    if (parsed.adminKey) {
+      await assertPaymentRecordWriteAllowed(tid, parsed.adminKey);
+    } else {
+      await assertFiTenantPortalAccess(tid);
+      await assertStaffModuleAccess(tid, "financial_os", "read");
+    }
     const url = await createExpenseDocumentSignedUrl({
-      tenantId: tenantId.trim(),
+      tenantId: tid,
       documentId: parsed.document_id,
       ttlSec: parsed.ttl_sec ?? 300,
     });

@@ -22,6 +22,10 @@ import {
   loadExpenseImportLines,
 } from "@/src/lib/financialOs/expenses/expenseLoaders.server";
 import {
+  appendExpensePostedLedgerEntry,
+  appendExpenseVoidReversalLedgerEntry,
+} from "@/src/lib/financialOs/expenses/expenseLedgerBridge.server";
+import {
   mapExpenseImportRow,
   mapExpenseRow,
   type FiExpenseImportRow,
@@ -211,7 +215,26 @@ export async function postExpense(input: {
     .select("*")
     .single();
   if (error) throw new Error(error.message);
-  const posted = mapExpenseRow(data as Record<string, unknown>);
+  let posted = mapExpenseRow(data as Record<string, unknown>);
+
+  // Stage 4: append-only ledger debit (idempotent).
+  const ledgerTxId = await appendExpensePostedLedgerEntry({
+    expense: posted,
+    actorFiUserId: input.actorFiUserId,
+    supabase: db,
+  });
+  if (ledgerTxId) {
+    const { data: linked, error: linkErr } = await db
+      .from("fi_expenses")
+      .update({ ledger_post_transaction_id: ledgerTxId })
+      .eq("tenant_id", tid)
+      .eq("id", posted.id)
+      .select("*")
+      .single();
+    if (!linkErr && linked) {
+      posted = mapExpenseRow(linked as Record<string, unknown>);
+    }
+  }
 
   await writeAudit({
     tenantId: tid,
@@ -219,11 +242,14 @@ export async function postExpense(input: {
     actorFiUserId: input.actorFiUserId,
     expenseId: posted.id,
     previous: { status: existing.status },
-    next: { status: "posted", posted_at: now },
+    next: {
+      status: "posted",
+      posted_at: now,
+      ledger_post_transaction_id: ledgerTxId,
+    },
     supabase: db,
   });
 
-  // Phase 1: no fi_financial_transactions write (ledger bridge deferred).
   return posted;
 }
 
@@ -240,6 +266,9 @@ export async function voidExpense(input: {
   if (!existing) throw new Error("Expense not found.");
   if (existing.status === "void") return existing;
 
+  const wasPosted =
+    existing.status === "posted" || Boolean(existing.ledger_post_transaction_id);
+
   const now = new Date().toISOString();
   const metadata = {
     ...existing.metadata,
@@ -254,7 +283,30 @@ export async function voidExpense(input: {
     .select("*")
     .single();
   if (error) throw new Error(error.message);
-  const voided = mapExpenseRow(data as Record<string, unknown>);
+  let voided = mapExpenseRow(data as Record<string, unknown>);
+
+  let ledgerVoidTxId: string | null = null;
+  // Compensating credit only when the expense had been posted to the ledger.
+  if (wasPosted || existing.status === "posted") {
+    ledgerVoidTxId = await appendExpenseVoidReversalLedgerEntry({
+      expense: { ...voided, status: "void", amount_cents: existing.amount_cents },
+      actorFiUserId: input.actorFiUserId,
+      reason: input.reason,
+      supabase: db,
+    });
+    if (ledgerVoidTxId) {
+      const { data: linked, error: linkErr } = await db
+        .from("fi_expenses")
+        .update({ ledger_void_transaction_id: ledgerVoidTxId })
+        .eq("tenant_id", tid)
+        .eq("id", voided.id)
+        .select("*")
+        .single();
+      if (!linkErr && linked) {
+        voided = mapExpenseRow(linked as Record<string, unknown>);
+      }
+    }
+  }
 
   await writeAudit({
     tenantId: tid,
@@ -262,7 +314,11 @@ export async function voidExpense(input: {
     actorFiUserId: input.actorFiUserId,
     expenseId: voided.id,
     previous: { status: existing.status },
-    next: { status: "void", reason: input.reason?.trim() || null },
+    next: {
+      status: "void",
+      reason: input.reason?.trim() || null,
+      ledger_void_transaction_id: ledgerVoidTxId,
+    },
     supabase: db,
   });
 

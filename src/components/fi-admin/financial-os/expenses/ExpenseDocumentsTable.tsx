@@ -43,13 +43,7 @@ export function ExpenseDocumentsTable(props: {
   }
 
   function openPreview(doc: FiExpenseDocumentRow) {
-    if (!props.canMutate) {
-      setFeedback({
-        message: "Preview requires finance write access on this tenant.",
-        tone: "warning",
-      });
-      return;
-    }
+    // Stage 4: read-capable portal members may preview (server enforces financial_os read).
     setFeedback(null);
     const filename =
       typeof doc.metadata.original_filename === "string"

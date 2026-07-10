@@ -8,6 +8,7 @@ export type LedgerInvariantViolationCode =
   | "amount_not_finite"
   | "negative_amount_not_allowed"
   | "debit_only_refund_processed"
+  | "debit_kind_not_allowed"
   | "cross_tenant_anchor"
   | "idempotency_key_empty"
   | "idempotency_key_cross_tenant";
@@ -29,7 +30,11 @@ export type LedgerAppendValidationResult =
 /** Ledger rows are append-only at the application layer; DB revokes UPDATE/DELETE on service_role. */
 export const FI_FINANCIAL_LEDGER_APPEND_ONLY = true as const;
 
-const DEBIT_ALLOWED_KINDS: ReadonlySet<FiFinancialTransactionKind> = new Set(["refund_processed"]);
+/** Debit direction is only allowed for these kinds (amount_cents remains non-negative). */
+const DEBIT_ALLOWED_KINDS: ReadonlySet<FiFinancialTransactionKind> = new Set([
+  "refund_processed",
+  "expense_posted",
+]);
 
 export function validateLedgerAppendInput(
   input: LedgerAppendValidationInput
@@ -61,8 +66,8 @@ export function validateLedgerAppendInput(
   if (direction === "debit" && !DEBIT_ALLOWED_KINDS.has(input.transactionKind)) {
     return {
       ok: false,
-      code: "debit_only_refund_processed",
-      message: `Debit direction is only permitted for refund_processed transactions (got ${input.transactionKind}).`,
+      code: "debit_kind_not_allowed",
+      message: `Debit direction is only permitted for refund_processed or expense_posted (got ${input.transactionKind}).`,
     };
   }
 

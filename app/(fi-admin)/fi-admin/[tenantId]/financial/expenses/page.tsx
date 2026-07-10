@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ExpenseCplPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCplPanel";
 import { ExpenseCsvImportForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCsvImportForm";
 import { ExpenseDocumentsTable } from "@/src/components/fi-admin/financial-os/expenses/ExpenseDocumentsTable";
 import { ExpenseManualEntryForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseManualEntryForm";
@@ -15,6 +16,8 @@ import {
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadExpenseCplSummary } from "@/src/lib/financialOs/expenses/expenseCpl.server";
+import type { ExpenseCplSummary } from "@/src/lib/financialOs/expenses/expenseCplCore";
 import { loadExpenseDocumentsForTenant } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
 import { loadRecentExpenseCampaignKeys } from "@/src/lib/financialOs/expenses/expenseEntitySearch.server";
 import {
@@ -47,6 +50,7 @@ export default async function FinancialOsExpensesPage({
   let imports: Awaited<ReturnType<typeof loadExpenseImportsForTenant>> = [];
   let documents: Awaited<ReturnType<typeof loadExpenseDocumentsForTenant>> = [];
   let campaignSuggestions: string[] = [];
+  let cplSummary: ExpenseCplSummary | null = null;
   let loadError: string | null = null;
 
   try {
@@ -55,6 +59,7 @@ export default async function FinancialOsExpensesPage({
     imports = await loadExpenseImportsForTenant(tid, 20);
     documents = await loadExpenseDocumentsForTenant(tid, 30);
     campaignSuggestions = await loadRecentExpenseCampaignKeys(tid, 30);
+    cplSummary = await loadExpenseCplSummary(tid);
   } catch (e) {
     loadError =
       e instanceof Error
@@ -70,7 +75,7 @@ export default async function FinancialOsExpensesPage({
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload. Link leads, cases, and campaigns; attach documents; preview receipts. Does not write to the revenue ledger."
+        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload. Link leads, cases, and campaigns; preview receipts; post to the master ledger (debit). CPL uses posted marketing spend."
       />
 
       {loadError ? (
@@ -93,6 +98,8 @@ export default async function FinancialOsExpensesPage({
           expenses={expenses}
         />
       </div>
+
+      {cplSummary ? <ExpenseCplPanel summary={cplSummary} /> : null}
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-slate-100">Recent expenses</h2>

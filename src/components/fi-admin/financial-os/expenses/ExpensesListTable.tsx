@@ -122,6 +122,9 @@ export function ExpensesListTable(props: {
             </td>
             <td className={financialOsClasses.tableCell}>
               <FinancialOsRecordStatusBadge status={row.status} />
+              {row.ledger_post_transaction_id ? (
+                <div className={financialOsClasses.mutedMeta}>ledger linked</div>
+              ) : null}
             </td>
             <td className={financialOsClasses.tableCell}>
               <div className="space-y-0.5 text-[11px] text-slate-400">

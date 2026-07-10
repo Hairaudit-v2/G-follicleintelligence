@@ -110,6 +110,8 @@ export type FiExpenseRow = {
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  ledger_post_transaction_id?: string | null;
+  ledger_void_transaction_id?: string | null;
   /** Joined presentation fields (optional). */
   category_code?: string | null;
   category_label?: string | null;
@@ -218,6 +220,10 @@ export function mapExpenseRow(raw: Record<string, unknown>): FiExpenseRow {
     metadata,
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
+    ledger_post_transaction_id:
+      raw.ledger_post_transaction_id != null ? String(raw.ledger_post_transaction_id) : null,
+    ledger_void_transaction_id:
+      raw.ledger_void_transaction_id != null ? String(raw.ledger_void_transaction_id) : null,
     category_code: raw.category_code != null ? String(raw.category_code) : null,
     category_label: raw.category_label != null ? String(raw.category_label) : null,
   };

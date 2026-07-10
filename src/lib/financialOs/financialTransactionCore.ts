@@ -7,6 +7,10 @@ export const FI_FINANCIAL_TRANSACTION_KINDS = [
   "deposit_paid",
   "balance_paid",
   "cancellation_fee",
+  /** Clinic opex outflow (debit). */
+  "expense_posted",
+  /** Compensating credit when a posted expense is voided. */
+  "expense_void_reversal",
 ] as const;
 export type FiFinancialTransactionKind = (typeof FI_FINANCIAL_TRANSACTION_KINDS)[number];
 

@@ -37,14 +37,22 @@ describe("FinancialOS ledger invariants", () => {
     if (!r.ok) assert.equal(r.code, "negative_amount_not_allowed");
   });
 
-  it("allows debit only for refund_processed", () => {
-    const ok = validateLedgerAppendInput({
+  it("allows debit for refund_processed and expense_posted only", () => {
+    const refund = validateLedgerAppendInput({
       tenantId: TENANT_A,
       amountCents: 500,
       direction: "debit",
       transactionKind: "refund_processed",
     });
-    assert.equal(ok.ok, true);
+    assert.equal(refund.ok, true);
+
+    const expense = validateLedgerAppendInput({
+      tenantId: TENANT_A,
+      amountCents: 1200,
+      direction: "debit",
+      transactionKind: "expense_posted",
+    });
+    assert.equal(expense.ok, true);
 
     const blocked = validateLedgerAppendInput({
       tenantId: TENANT_A,
@@ -53,7 +61,7 @@ describe("FinancialOS ledger invariants", () => {
       transactionKind: "payment_received",
     });
     assert.equal(blocked.ok, false);
-    if (!blocked.ok) assert.equal(blocked.code, "debit_only_refund_processed");
+    if (!blocked.ok) assert.equal(blocked.code, "debit_kind_not_allowed");
   });
 
   it("enforces tenant isolation on anchors", () => {
