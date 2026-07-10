@@ -12,6 +12,7 @@ export type FiOsReportsTabId =
   | "quality"
   | "surgery"
   | "performance"
+  | "library"
   | "admin";
 
 export type FiOsReportsTab = {
@@ -57,6 +58,13 @@ export const FI_OS_REPORTS_TABS: readonly FiOsReportsTab[] = [
     segment: "performance",
     navSubItemId: "reports-performance",
     featureKey: "settings",
+  },
+  {
+    id: "library",
+    label: "Library",
+    segment: "library",
+    navSubItemId: "reports-library",
+    featureKey: "analytics",
   },
   {
     id: "admin",

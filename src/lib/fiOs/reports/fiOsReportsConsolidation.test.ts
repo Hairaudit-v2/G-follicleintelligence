@@ -115,7 +115,7 @@ test("More contains one Reports group with consolidated destination", () => {
   assert.equal(reports!.items[0]!.href, `${base}/reports`);
 });
 
-test("Reports workspace exposes overview, analytics, quality, surgery, performance, and admin tabs", () => {
+test("Reports workspace exposes overview, analytics, quality, surgery, performance, library, and admin tabs", () => {
   const subs = buildReportsSidebarSubItems(tenantId, {
     showAuditOsNav: true,
     showReportsAdminSurfaces: true,
@@ -125,7 +125,9 @@ test("Reports workspace exposes overview, analytics, quality, surgery, performan
     assert.ok(subIds.has(tab.navSubItemId));
     assert.ok(isFiOsReportsConsolidatedPath(buildFiOsReportsTabHref(tenantId, tab), base));
   }
+  assert.ok(subIds.has("reports-library"));
   assert.equal(buildFiOsReportsBase(tenantId), `${base}/reports`);
+  assert.equal(buildFiOsReportsTabHref(tenantId, FI_OS_REPORTS_TABS.find((t) => t.id === "library")!), `${base}/reports/library`);
 });
 
 test("legacy reporting routes remain in nav catalog; staff More hides direct links", () => {
@@ -163,6 +165,7 @@ test("consolidated reports paths activate the reports nav item", () => {
     getFiOsShellActiveSidebarId(`${base}/reports/performance`, base),
     FI_OS_REPORTS_NAV_ID
   );
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/reports/library`, base), FI_OS_REPORTS_NAV_ID);
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reports/admin`, base), FI_OS_REPORTS_NAV_ID);
 });
 
