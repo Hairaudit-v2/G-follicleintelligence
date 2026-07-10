@@ -2,7 +2,7 @@
 
 **Module:** FinancialOS (FinOS)  
 **Surface:** `/fi-admin/[tenantId]/financial/expenses`  
-**Status:** Stages 1–4 shipped (additive; revenue payments paths unchanged)
+**Status:** Stages 1–5 shipped (additive; revenue payments paths unchanged)
 
 This log tracks the **clinic opex / expenses capture** workstream under FinancialOS. It is separate from earlier FinOS phases (payment pathways, financing, clearance, surgery economics).
 
@@ -16,6 +16,7 @@ This log tracks the **clinic opex / expenses capture** workstream under Financia
 | **2** | Receipt/invoice upload + OCR | `feat(financial-os): add expense receipt OCR and document upload` | `20261009120001_fi_financial_os_expense_documents_bucket` |
 | **3** | Entity links + attach + preview | `feat(financial-os): link expenses to leads/cases and preview docs` | (no new migration) |
 | **4** | Ledger bridge + CPL + read preview | `feat(financial-os): expense ledger bridge, CPL, read preview` | `20261010120001_fi_financial_os_expense_ledger_bridge` |
+| **5** | Period filters + spend CPG intelligence | `feat(financial-os): expense intelligence period filters & CPG` | (no new migration) |
 
 ---
 
@@ -145,14 +146,46 @@ FI_EXPENSE_OCR_MIN_CONFIDENCE=0.55
 
 ---
 
-## Suggested Stage 5+ (not started)
+## Stage 5 — Period filters + spend / CPG intelligence
 
-- Date-range filters on CPL UI
-- Cost-per-graft actuals vs `fi_surgery_cost_models` / profitability snapshots
+**Goal:** Make opex intelligence operable for clinic finance: date ranges, category breakdown, graft actuals vs standard, readable entity links.
+
+### Period control
+- Query params: `?from=YYYY-MM-DD&to=YYYY-MM-DD` on expenses page
+- UI: **ExpensePeriodFilterBar** with Apply + presets (30d / 90d / YTD)
+- Shared normalizer: `expensePeriodCore.ts` (swap inverted ranges, defaults)
+
+### Intelligence panels (same period)
+1. **CPL** — existing Stage 4 logic, now period-aware via URL  
+2. **Spend by category** — posted opex totals, counts, % of total  
+3. **Cost per graft** — clinical consumables / case-linked spend ÷ grafts implanted  
+   - Grafts from `fi_case_procedures` (fallback: profitability snapshots)  
+   - Standard unit cost from active `fi_surgery_cost_models.graft_consumable_cost_cents`  
+   - Variance = actual CPG − standard graft unit  
+
+### Entity labels
+- `attachExpenseEntityLabels` resolves lead `summary` and case treatment/external id
+- Expense list + edit-links dialog show human labels (not only UUIDs)
+
+### Key paths
+- `expensePeriodCore.ts`, `expenseSpendSummaryCore.ts`, `expenseCostPerGraftCore.ts`
+- `expenseIntelligence.server.ts`
+- `ExpensePeriodFilterBar.tsx`, `ExpenseSpendByCategoryPanel.tsx`, `ExpenseCostPerGraftPanel.tsx`
+
+### Explicit non-goals (still later)
+- Full double-entry chart of accounts / clinic P&amp;L
+- Bank feed reconciliation
+- Xero export
+
+---
+
+## Suggested Stage 6+ (not started)
+
 - Chart of accounts / simple P&amp;L by clinic
 - Bank statement reconciliation against posted expenses
 - Xero export of posted opex
-- Soft-link lead picker labels resolved from CRM (display names)
+- Richer standard CPG using full surgery economics calculator (not just graft consumable unit)
+- Export CSV of intelligence panels
 
 ---
 

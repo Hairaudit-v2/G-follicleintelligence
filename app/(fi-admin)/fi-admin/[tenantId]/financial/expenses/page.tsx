@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ExpenseCostPerGraftPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCostPerGraftPanel";
 import { ExpenseCplPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCplPanel";
 import { ExpenseCsvImportForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseCsvImportForm";
 import { ExpenseDocumentsTable } from "@/src/components/fi-admin/financial-os/expenses/ExpenseDocumentsTable";
 import { ExpenseManualEntryForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseManualEntryForm";
+import { ExpensePeriodFilterBar } from "@/src/components/fi-admin/financial-os/expenses/ExpensePeriodFilterBar";
 import { ExpenseReceiptUploadForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseReceiptUploadForm";
+import { ExpenseSpendByCategoryPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseSpendByCategoryPanel";
 import { ExpensesListTable } from "@/src/components/fi-admin/financial-os/expenses/ExpensesListTable";
 import {
   FinancialOsSubPageHeader,
@@ -16,15 +19,20 @@ import {
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { loadExpenseCplSummary } from "@/src/lib/financialOs/expenses/expenseCpl.server";
-import type { ExpenseCplSummary } from "@/src/lib/financialOs/expenses/expenseCplCore";
 import { loadExpenseDocumentsForTenant } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
 import { loadRecentExpenseCampaignKeys } from "@/src/lib/financialOs/expenses/expenseEntitySearch.server";
+import {
+  attachExpenseEntityLabels,
+  loadExpenseIntelligenceBundle,
+  type ExpenseIntelligenceBundle,
+} from "@/src/lib/financialOs/expenses/expenseIntelligence.server";
 import {
   ensureExpenseCategoriesForTenant,
   loadExpenseImportsForTenant,
   loadExpensesForTenant,
 } from "@/src/lib/financialOs/expenses/expenseLoaders.server";
+import { normalizeExpensePeriod } from "@/src/lib/financialOs/expenses/expensePeriodCore";
+import type { FiExpenseRow } from "@/src/lib/financialOs/expenses/expenseTypes";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 
 export const metadata: Metadata = {
@@ -36,30 +44,47 @@ export const dynamic = "force-dynamic";
 
 export default async function FinancialOsExpensesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
+  const sp = (await searchParams) ?? {};
   const tid = tenantId?.trim();
   if (!tid) notFound();
 
   await assertFiTenantPortalAccess(tid);
 
+  const one = (key: string) => {
+    const v = sp[key];
+    if (typeof v === "string") return v.trim() || null;
+    return null;
+  };
+  const { period_start, period_end } = normalizeExpensePeriod({
+    periodStart: one("from"),
+    periodEnd: one("to"),
+  });
+
   let categories: Awaited<ReturnType<typeof ensureExpenseCategoriesForTenant>> = [];
-  let expenses: Awaited<ReturnType<typeof loadExpensesForTenant>> = [];
+  let expenses: FiExpenseRow[] = [];
   let imports: Awaited<ReturnType<typeof loadExpenseImportsForTenant>> = [];
   let documents: Awaited<ReturnType<typeof loadExpenseDocumentsForTenant>> = [];
   let campaignSuggestions: string[] = [];
-  let cplSummary: ExpenseCplSummary | null = null;
+  let intelligence: ExpenseIntelligenceBundle | null = null;
   let loadError: string | null = null;
 
   try {
     categories = await ensureExpenseCategoriesForTenant(tid);
-    expenses = await loadExpensesForTenant(tid, { limit: 200 });
+    const rawExpenses = await loadExpensesForTenant(tid, { limit: 200 });
+    expenses = await attachExpenseEntityLabels(tid, rawExpenses);
     imports = await loadExpenseImportsForTenant(tid, 20);
     documents = await loadExpenseDocumentsForTenant(tid, 30);
     campaignSuggestions = await loadRecentExpenseCampaignKeys(tid, 30);
-    cplSummary = await loadExpenseCplSummary(tid);
+    intelligence = await loadExpenseIntelligenceBundle(tid, {
+      periodStart: period_start,
+      periodEnd: period_end,
+    });
   } catch (e) {
     loadError =
       e instanceof Error
@@ -75,7 +100,7 @@ export default async function FinancialOsExpensesPage({
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs via manual entry, bank/card CSV, or receipt/invoice upload. Link leads, cases, and campaigns; preview receipts; post to the master ledger (debit). CPL uses posted marketing spend."
+        description="Capture clinic costs, link entities, post to the master ledger, and review CPL / category spend / cost-per-graft actuals for the selected period."
       />
 
       {loadError ? (
@@ -83,6 +108,12 @@ export default async function FinancialOsExpensesPage({
           {loadError}
         </p>
       ) : null}
+
+      <ExpensePeriodFilterBar
+        tenantId={tid}
+        periodStart={period_start}
+        periodEnd={period_end}
+      />
 
       <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-3">
         <ExpenseManualEntryForm
@@ -99,7 +130,15 @@ export default async function FinancialOsExpensesPage({
         />
       </div>
 
-      {cplSummary ? <ExpenseCplPanel summary={cplSummary} /> : null}
+      {intelligence ? (
+        <div className="grid gap-6 2xl:grid-cols-1">
+          <ExpenseCplPanel summary={intelligence.cpl} />
+          <div className="grid gap-6 xl:grid-cols-2">
+            <ExpenseSpendByCategoryPanel summary={intelligence.spend} />
+            <ExpenseCostPerGraftPanel summary={intelligence.costPerGraft} />
+          </div>
+        </div>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-slate-100">Recent expenses</h2>

@@ -18,8 +18,9 @@ export function ExpenseCplPanel(props: { summary: ExpenseCplSummary }) {
       description={
         <>
           Posted marketing spend ({s.period_start} → {s.period_end}) ÷ leads created in the same
-          window. Categories starting with <code className={financialOsClasses.code}>marketing_</code>{" "}
-          or any expense with a campaign key count as spend. Draft/void expenses are excluded.
+          window. Categories starting with{" "}
+          <code className={financialOsClasses.code}>marketing_</code> or any expense with a campaign
+          key count as spend. Use the period filter above to change the window.
         </>
       }
     >

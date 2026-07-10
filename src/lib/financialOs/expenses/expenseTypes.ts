@@ -115,6 +115,8 @@ export type FiExpenseRow = {
   /** Joined presentation fields (optional). */
   category_code?: string | null;
   category_label?: string | null;
+  lead_label?: string | null;
+  case_label?: string | null;
 };
 
 export type FiExpenseImportRow = {
@@ -226,6 +228,8 @@ export function mapExpenseRow(raw: Record<string, unknown>): FiExpenseRow {
       raw.ledger_void_transaction_id != null ? String(raw.ledger_void_transaction_id) : null,
     category_code: raw.category_code != null ? String(raw.category_code) : null,
     category_label: raw.category_label != null ? String(raw.category_label) : null,
+    lead_label: raw.lead_label != null ? String(raw.lead_label) : null,
+    case_label: raw.case_label != null ? String(raw.case_label) : null,
   };
 }
 

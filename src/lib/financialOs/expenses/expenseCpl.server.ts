@@ -5,12 +5,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   aggregateExpenseCpl,
-  defaultCplPeriod,
   type ExpenseCplLeadInput,
   type ExpenseCplSpendInput,
   type ExpenseCplSummary,
 } from "@/src/lib/financialOs/expenses/expenseCplCore";
 import { ensureExpenseCategoriesForTenant } from "@/src/lib/financialOs/expenses/expenseLoaders.server";
+import { normalizeExpensePeriod } from "@/src/lib/financialOs/expenses/expensePeriodCore";
 
 function client(c?: SupabaseClient): SupabaseClient {
   return c ?? supabaseAdmin();
@@ -44,9 +44,10 @@ export async function loadExpenseCplSummary(
   if (!tid) throw new Error("tenantId is required.");
   const db = client(options?.supabase);
 
-  const defaults = defaultCplPeriod();
-  const period_start = (options?.periodStart?.trim() || defaults.period_start).slice(0, 10);
-  const period_end = (options?.periodEnd?.trim() || defaults.period_end).slice(0, 10);
+  const { period_start, period_end } = normalizeExpensePeriod({
+    periodStart: options?.periodStart,
+    periodEnd: options?.periodEnd,
+  });
 
   const categories = await ensureExpenseCategoriesForTenant(tid, db);
   const codeById = new Map(categories.map((c) => [c.id, c.code]));

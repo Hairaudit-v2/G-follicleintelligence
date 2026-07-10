@@ -61,9 +61,13 @@ export function ExpensesListTable(props: {
     setEditingId(row.id);
     setLinkDraft({
       leadId: row.lead_id,
-      leadLabel: row.lead_id ? `Lead ${row.lead_id.slice(0, 8)}…` : null,
+      leadLabel: row.lead_id
+        ? row.lead_label?.trim() || `Lead ${row.lead_id.slice(0, 8)}…`
+        : null,
       caseId: row.case_id,
-      caseLabel: row.case_id ? `Case ${row.case_id.slice(0, 8)}…` : null,
+      caseLabel: row.case_id
+        ? row.case_label?.trim() || `Case ${row.case_id.slice(0, 8)}…`
+        : null,
       campaignKey: row.campaign_key ?? "",
     });
   }
@@ -139,7 +143,7 @@ export function ExpensesListTable(props: {
                       className={financialOsClasses.inlineLink}
                       href={`/fi-admin/${props.tenantId}/crm/leads/${encodeURIComponent(row.lead_id)}`}
                     >
-                      Lead
+                      {row.lead_label?.trim() || "Lead"}
                     </Link>
                   </div>
                 ) : null}
@@ -149,7 +153,7 @@ export function ExpensesListTable(props: {
                       className={financialOsClasses.inlineLink}
                       href={`/fi-admin/${props.tenantId}/cases/${encodeURIComponent(row.case_id)}`}
                     >
-                      Case
+                      {row.case_label?.trim() || "Case"}
                     </Link>
                   </div>
                 ) : null}
