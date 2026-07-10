@@ -36,8 +36,17 @@ test("isReportId and live href helpers", () => {
   );
 });
 
-test("exactly one generate-enabled report in Phase 1 MVP slice", () => {
-  const enabled = REPORT_CATALOG.filter((r) => r.phase === 1 && r.generateEnabled);
-  assert.equal(enabled.length, 1);
-  assert.equal(enabled[0]?.id, "expense_breakdown");
+test("phase 1 financial core reports are generate-enabled", () => {
+  const enabled = REPORT_CATALOG.filter((r) => r.phase === 1 && r.generateEnabled).map(
+    (r) => r.id
+  );
+  for (const id of [
+    "expense_breakdown",
+    "marketing_cpl",
+    "cost_per_graft_actuals",
+    "operating_pl",
+  ] as const) {
+    assert.ok(enabled.includes(id), `${id} should be generate-enabled`);
+  }
+  assert.equal(enabled.length, 4);
 });

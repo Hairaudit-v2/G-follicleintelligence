@@ -4,6 +4,7 @@ import { formatMoneyFromCents } from "@/src/lib/format/money";
 import { loadExpenseIntelligenceBundle } from "@/src/lib/financialOs/expenses/expenseIntelligence.server";
 import { normalizeExpensePeriod } from "@/src/lib/financialOs/expenses/expensePeriodCore";
 import { getReportDefinition } from "@/src/lib/reports/reportCatalog";
+import { reportResultToCsv } from "@/src/lib/reports/reportCsv";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
 
 /**
@@ -92,31 +93,5 @@ export async function generateExpenseBreakdownReport(input: {
 
 /** Build a simple FI CSV for expense breakdown rows. */
 export function expenseBreakdownToCsv(result: ReportGenerateResult): string {
-  const lines: string[] = [];
-  lines.push(`Report,${csvEscape(result.title)}`);
-  lines.push(`Period,${result.periodStart},${result.periodEnd}`);
-  lines.push(`Generated,${result.generatedAt}`);
-  lines.push("");
-  for (const m of result.metrics) {
-    lines.push(`${csvEscape(m.label)},${csvEscape(m.value)}`);
-  }
-  lines.push("");
-  if (result.table && result.table.rows.length > 0) {
-    lines.push(result.table.columns.map((c) => csvEscape(c.label)).join(","));
-    for (const row of result.table.rows) {
-      lines.push(
-        result.table.columns
-          .map((c) => csvEscape(row[c.key] == null ? "" : String(row[c.key])))
-          .join(",")
-      );
-    }
-  } else {
-    lines.push("No category rows");
-  }
-  return lines.join("\n");
-}
-
-function csvEscape(value: string): string {
-  if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
+  return reportResultToCsv(result);
 }

@@ -4,11 +4,16 @@ import { z } from "zod";
 
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
-import { getReportDefinition, isReportId } from "@/src/lib/reports/reportCatalog";
 import {
-  expenseBreakdownToCsv,
-  generateExpenseBreakdownReport,
-} from "@/src/lib/reports/generators/expenseBreakdown.server";
+  getReportDefinition,
+  isReportId,
+  type ReportId,
+} from "@/src/lib/reports/reportCatalog";
+import { generateCostPerGraftReport } from "@/src/lib/reports/generators/costPerGraft.server";
+import { generateExpenseBreakdownReport } from "@/src/lib/reports/generators/expenseBreakdown.server";
+import { generateMarketingCplReport } from "@/src/lib/reports/generators/marketingCpl.server";
+import { generateOperatingPlReport } from "@/src/lib/reports/generators/operatingPl.server";
+import { reportCsvFilename, reportResultToCsv } from "@/src/lib/reports/reportCsv";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
 
 function errMsg(e: unknown): string {
@@ -44,19 +49,41 @@ async function assertReportAccess(
   try {
     await assertStaffModuleAccess(tenantId, "analytics_os", "read");
   } catch {
-    // Hub is Reports/analytics-oriented; some tenants only grant financial_os.
+    // Portal members with Finances access may still generate financial reports.
   }
 
   if (def.requiredModules.includes("financial_os")) {
     try {
       await assertStaffModuleAccess(tenantId, "financial_os", "read");
     } catch {
-      // Match Expenses page: portal membership is enough for read of expense intelligence
-      // when financial_os module grant is not provisioned. Keep try for future tightening.
+      // Match Expenses page: portal membership is enough when module grant is missing.
     }
   }
 
   return { ok: true };
+}
+
+async function runGenerator(
+  reportId: ReportId,
+  input: {
+    tenantId: string;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+    currency?: string | null;
+  }
+): Promise<ReportGenerateResult> {
+  switch (reportId) {
+    case "expense_breakdown":
+      return generateExpenseBreakdownReport(input);
+    case "marketing_cpl":
+      return generateMarketingCplReport(input);
+    case "cost_per_graft_actuals":
+      return generateCostPerGraftReport(input);
+    case "operating_pl":
+      return generateOperatingPlReport(input);
+    default:
+      throw new Error("Report generator is not implemented yet.");
+  }
 }
 
 export async function generateReportAction(
@@ -70,17 +97,13 @@ export async function generateReportAction(
     const access = await assertReportAccess(parsed.tenantId, reportId);
     if (!access.ok) return access;
 
-    if (reportId === "expense_breakdown") {
-      const result = await generateExpenseBreakdownReport({
-        tenantId: parsed.tenantId,
-        periodStart: parsed.periodStart,
-        periodEnd: parsed.periodEnd,
-        currency: parsed.currency,
-      });
-      return { ok: true, result };
-    }
-
-    return { ok: false, error: "Report generator is not implemented yet." };
+    const result = await runGenerator(reportId, {
+      tenantId: parsed.tenantId,
+      periodStart: parsed.periodStart,
+      periodEnd: parsed.periodEnd,
+      currency: parsed.currency,
+    });
+    return { ok: true, result };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
@@ -97,19 +120,15 @@ export async function exportReportCsvAction(
     const access = await assertReportAccess(parsed.tenantId, reportId);
     if (!access.ok) return access;
 
-    if (reportId === "expense_breakdown") {
-      const result = await generateExpenseBreakdownReport({
-        tenantId: parsed.tenantId,
-        periodStart: parsed.periodStart,
-        periodEnd: parsed.periodEnd,
-        currency: parsed.currency,
-      });
-      const csv = expenseBreakdownToCsv(result);
-      const filename = `expense-breakdown_${result.periodStart}_${result.periodEnd}.csv`;
-      return { ok: true, filename, csv };
-    }
-
-    return { ok: false, error: "CSV export is not available for this report yet." };
+    const result = await runGenerator(reportId, {
+      tenantId: parsed.tenantId,
+      periodStart: parsed.periodStart,
+      periodEnd: parsed.periodEnd,
+      currency: parsed.currency,
+    });
+    const csv = reportResultToCsv(result);
+    const filename = reportCsvFilename(result.reportId, result.periodStart, result.periodEnd);
+    return { ok: true, filename, csv };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
