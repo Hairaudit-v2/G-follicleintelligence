@@ -2,7 +2,7 @@
 
 **Module:** FinancialOS (FinOS)  
 **Surface:** `/fi-admin/[tenantId]/financial/expenses`  
-**Status:** Stages 1–6 shipped (additive; revenue payments paths unchanged)
+**Status:** Stages 1–7 shipped (additive; revenue payments paths unchanged)
 
 This log tracks the **clinic opex / expenses capture** workstream under FinancialOS. It is separate from earlier FinOS phases (payment pathways, financing, clearance, surgery economics).
 
@@ -18,6 +18,7 @@ This log tracks the **clinic opex / expenses capture** workstream under Financia
 | **4** | Ledger bridge + CPL + read preview | `feat(financial-os): expense ledger bridge, CPL, read preview` | `20261010120001_fi_financial_os_expense_ledger_bridge` |
 | **5** | Period filters + spend CPG intelligence | `feat(financial-os): expense intelligence period filters and CPG` | (no new migration) |
 | **6** | P&amp;L, bank recon, exports, QuickBooks | `feat(financial-os): P&L, bank recon, QuickBooks export` | (no new migration; connector catalog) |
+| **7** | COA, multi-clinic P&amp;L, recon confirm, Xero | `feat(financial-os): COA, recon workflow, Xero parity` | `20261011120001_fi_financial_os_expenses_stage7` |
 
 ---
 
@@ -217,13 +218,37 @@ FI_EXPENSE_OCR_MIN_CONFIDENCE=0.55
 
 ---
 
-## Suggested Stage 7+ (not started)
+## Stage 7 — Chart of accounts, recon confirm, Xero parity
 
-- Full chart of accounts / multi-clinic P&amp;L
-- Persist bank recon matches + staff confirm workflow
-- Live QuickBooks OAuth push of purchases (using stored connector credentials)
-- Xero expense export parity
+**Goal:** Multi-clinic finance + accounting coexistence.
+
+### Chart of accounts (light)
+- `fi_expense_gl_accounts` seeded system accounts
+- Category → GL mapping; optional expense GL + external QB/Xero ids
+
+### Multi-clinic P&amp;L
+- Ledger split by `clinic_id` — `ExpenseMultiClinicPlPanel`
+
+### Bank recon confirm
+- `fi_expense_bank_recon_matches` with suggest / confirm / reject
+- Confirm writes `source_import_line_id` when empty
+
+### Xero + QuickBooks
+- Xero spend CSV export
+- Dry-run push readiness (connector + `FI_ACCOUNTING_LIVE_PUSH`)
+- DB CHECK allows `quickbooks` on tenant integrations
+
+### Migration
+`20261011120001_fi_financial_os_expenses_stage7.sql`
+
+---
+
+## Suggested Stage 8+ (not started)
+
+- Live QuickBooks/Xero OAuth purchase push (network I/O)
+- Full double-entry journals per COA
 - Richer standard CPG via full surgery economics calculator
+- Bulk confirm on recon queue
 
 ---
 

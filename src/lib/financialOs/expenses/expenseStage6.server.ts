@@ -8,9 +8,12 @@ import {
   type BankReconResult,
 } from "@/src/lib/financialOs/expenses/expenseBankReconCore";
 import {
+  buildAccountingPushDryRun,
   buildExpensesCsv,
   buildQuickBooksExpenseCsv,
   buildQuickBooksPurchaseDrafts,
+  buildXeroExpenseCsv,
+  type AccountingPushDryRun,
   type ExpenseExportRow,
   type QuickBooksPurchaseDraft,
 } from "@/src/lib/financialOs/expenses/expenseExportCore";
@@ -112,6 +115,7 @@ export async function buildExpensePeriodExports(
   period_end: string;
   fi_csv: string;
   quickbooks_csv: string;
+  xero_csv: string;
   quickbooks_drafts: QuickBooksPurchaseDraft[];
   row_count: number;
   posted_count: number;
@@ -129,10 +133,45 @@ export async function buildExpensePeriodExports(
     period_end,
     fi_csv: buildExpensesCsv(rows),
     quickbooks_csv: buildQuickBooksExpenseCsv(posted),
+    xero_csv: buildXeroExpenseCsv(posted),
     quickbooks_drafts: buildQuickBooksPurchaseDrafts(posted),
     row_count: rows.length,
     posted_count: posted.length,
   };
+}
+
+/** Dry-run accounting push readiness (no live network I/O). */
+export async function dryRunAccountingExpensePush(
+  tenantId: string,
+  provider: "quickbooks" | "xero",
+  options?: { periodStart?: string | null; periodEnd?: string | null; supabase?: SupabaseClient }
+): Promise<AccountingPushDryRun> {
+  const tid = tenantId.trim();
+  const db = client(options?.supabase);
+  const { period_start, period_end } = normalizeExpensePeriod({
+    periodStart: options?.periodStart,
+    periodEnd: options?.periodEnd,
+  });
+  const rows = await loadPostedExpensesForExport(tid, period_start, period_end, db);
+  const posted = rows.filter((r) => r.status === "posted");
+
+  const { data: connectors } = await db
+    .from("fi_tenant_external_integrations")
+    .select("id, provider, status")
+    .eq("tenant_id", tid)
+    .eq("provider", provider)
+    .in("status", ["configured", "active"])
+    .limit(1);
+
+  const connectorConfigured = (connectors ?? []).length > 0;
+  const livePushEnabled = process.env.FI_ACCOUNTING_LIVE_PUSH?.trim() === "1";
+
+  return buildAccountingPushDryRun({
+    provider,
+    rows: posted,
+    connectorConfigured,
+    livePushEnabled,
+  });
 }
 
 export async function loadBankReconciliationPreview(

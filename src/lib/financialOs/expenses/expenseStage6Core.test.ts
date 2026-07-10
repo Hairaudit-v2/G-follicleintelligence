@@ -3,10 +3,13 @@ import { describe, it } from "node:test";
 
 import { matchBankLinesToExpenses } from "@/src/lib/financialOs/expenses/expenseBankReconCore";
 import {
+  buildAccountingPushDryRun,
   buildExpensesCsv,
   buildQuickBooksExpenseCsv,
   buildQuickBooksPurchaseDrafts,
+  buildXeroExpenseCsv,
 } from "@/src/lib/financialOs/expenses/expenseExportCore";
+import { aggregateMultiClinicOperatingPl } from "@/src/lib/financialOs/expenses/expenseChartOfAccountsCore";
 import { aggregateOperatingPl } from "@/src/lib/financialOs/expenses/expensePlCore";
 
 describe("expensePlCore", () => {
@@ -127,5 +130,63 @@ describe("expenseExportCore + QuickBooks", () => {
     assert.equal(drafts[0]?.TotalAmt, 250);
     assert.equal(drafts[0]?.fi_expense_id, "e1");
     assert.equal(drafts[0]?.Line[0]?.DetailType, "AccountBasedExpenseLineDetail");
+  });
+
+  it("builds Xero spend CSV and dry-run push gate", () => {
+    const xero = buildXeroExpenseCsv(rows);
+    assert.match(xero, /\*Date/);
+    assert.match(xero, /-250\.00/);
+    const blocked = buildAccountingPushDryRun({
+      provider: "quickbooks",
+      rows,
+      connectorConfigured: false,
+      livePushEnabled: false,
+    });
+    assert.equal(blocked.ready, false);
+    const ready = buildAccountingPushDryRun({
+      provider: "xero",
+      rows,
+      connectorConfigured: true,
+      livePushEnabled: true,
+    });
+    assert.equal(ready.ready, true);
+  });
+});
+
+describe("expenseChartOfAccountsCore multi-clinic", () => {
+  it("splits P&L by clinic", () => {
+    const names = new Map([["c1", "Perth"], ["c2", "Sydney"]]);
+    const summary = aggregateMultiClinicOperatingPl({
+      period_start: "2026-07-01",
+      period_end: "2026-07-31",
+      clinicNames: names,
+      ledger: [
+        {
+          clinic_id: "c1",
+          transaction_kind: "payment_received",
+          direction: "credit",
+          amount_cents: 50000,
+          created_at: "2026-07-10T00:00:00Z",
+        },
+        {
+          clinic_id: "c1",
+          transaction_kind: "expense_posted",
+          direction: "debit",
+          amount_cents: 10000,
+          created_at: "2026-07-11T00:00:00Z",
+        },
+        {
+          clinic_id: "c2",
+          transaction_kind: "payment_received",
+          direction: "credit",
+          amount_cents: 30000,
+          created_at: "2026-07-12T00:00:00Z",
+        },
+      ],
+    });
+    assert.equal(summary.by_clinic.length, 2);
+    assert.equal(summary.totals.revenue_collected_cents, 80000);
+    assert.equal(summary.totals.opex_net_cents, 10000);
+    assert.equal(summary.totals.net_operating_cents, 70000);
   });
 });

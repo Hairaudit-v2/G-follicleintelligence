@@ -163,3 +163,96 @@ export function buildQuickBooksPurchaseDrafts(
       };
     });
 }
+
+/**
+ * Xero bank transaction / spend-money CSV (import-friendly).
+ * Columns align with common Xero bank statement / spend money import patterns.
+ */
+export function buildXeroExpenseCsv(rows: readonly ExpenseExportRow[]): string {
+  const headers = [
+    "*Date",
+    "*Amount",
+    "Payee",
+    "Description",
+    "Reference",
+    "AccountCode",
+    "TaxType",
+    "Currency",
+    "TrackingName1",
+    "TrackingOption1",
+    "FI Expense Id",
+  ];
+  const lines = [headers.join(",")];
+  for (const r of rows) {
+    if (r.status !== "posted") continue;
+    // Xero spend money often uses negative amounts for money out.
+    const amount = (-Math.abs(r.amount_cents) / 100).toFixed(2);
+    const accountCode = r.category_code || "6900";
+    lines.push(
+      [
+        r.expense_date,
+        amount,
+        r.vendor_name ?? "",
+        r.description ?? "",
+        r.campaign_key ?? r.id.slice(0, 8),
+        accountCode,
+        "GST on Expenses",
+        (r.currency || "AUD").toUpperCase(),
+        r.procedure_type ? "Procedure" : "",
+        r.procedure_type ?? "",
+        r.id,
+      ]
+        .map((c) => csvEscape(String(c)))
+        .join(",")
+    );
+  }
+  return lines.join("\n") + "\n";
+}
+
+/** Dry-run result for a would-be live accounting push (no network). */
+export type AccountingPushDryRun = {
+  provider: "quickbooks" | "xero";
+  mode: "dry_run";
+  ready: boolean;
+  reason: string;
+  payload_count: number;
+  sample_ids: string[];
+};
+
+export function buildAccountingPushDryRun(input: {
+  provider: "quickbooks" | "xero";
+  rows: readonly ExpenseExportRow[];
+  connectorConfigured: boolean;
+  livePushEnabled: boolean;
+}): AccountingPushDryRun {
+  const posted = input.rows.filter((r) => r.status === "posted" && r.amount_cents > 0);
+  if (!input.connectorConfigured) {
+    return {
+      provider: input.provider,
+      mode: "dry_run",
+      ready: false,
+      reason: `${input.provider} connector is not configured for this tenant.`,
+      payload_count: posted.length,
+      sample_ids: posted.slice(0, 5).map((r) => r.id),
+    };
+  }
+  if (!input.livePushEnabled) {
+    return {
+      provider: input.provider,
+      mode: "dry_run",
+      ready: false,
+      reason:
+        "Live push is disabled. Set FI_ACCOUNTING_LIVE_PUSH=1 after OAuth is verified, or use CSV export.",
+      payload_count: posted.length,
+      sample_ids: posted.slice(0, 5).map((r) => r.id),
+    };
+  }
+  return {
+    provider: input.provider,
+    mode: "dry_run",
+    ready: true,
+    reason: "Would push purchases (live transport not executed in this build).",
+    payload_count: posted.length,
+    sample_ids: posted.slice(0, 5).map((r) => r.id),
+  };
+}

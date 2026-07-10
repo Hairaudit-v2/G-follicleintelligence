@@ -9,6 +9,7 @@ import { ExpenseCsvImportForm } from "@/src/components/fi-admin/financial-os/exp
 import { ExpenseDocumentsTable } from "@/src/components/fi-admin/financial-os/expenses/ExpenseDocumentsTable";
 import { ExpenseExportPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseExportPanel";
 import { ExpenseManualEntryForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseManualEntryForm";
+import { ExpenseMultiClinicPlPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseMultiClinicPlPanel";
 import { ExpenseOperatingPlPanel } from "@/src/components/fi-admin/financial-os/expenses/ExpenseOperatingPlPanel";
 import { ExpensePeriodFilterBar } from "@/src/components/fi-admin/financial-os/expenses/ExpensePeriodFilterBar";
 import { ExpenseReceiptUploadForm } from "@/src/components/fi-admin/financial-os/expenses/ExpenseReceiptUploadForm";
@@ -22,6 +23,12 @@ import {
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadBankReconMatches } from "@/src/lib/financialOs/expenses/expenseBankRecon.server";
+import type { ClinicPlSummary } from "@/src/lib/financialOs/expenses/expenseChartOfAccountsCore";
+import {
+  ensureGlAccountsForTenant,
+  loadMultiClinicOperatingPl,
+} from "@/src/lib/financialOs/expenses/expenseChartOfAccounts.server";
 import { loadExpenseDocumentsForTenant } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
 import { loadRecentExpenseCampaignKeys } from "@/src/lib/financialOs/expenses/expenseEntitySearch.server";
 import {
@@ -81,11 +88,14 @@ export default async function FinancialOsExpensesPage({
   let campaignSuggestions: string[] = [];
   let intelligence: ExpenseIntelligenceBundle | null = null;
   let plSummary: ExpensePlSummary | null = null;
+  let multiClinicPl: ClinicPlSummary | null = null;
   let bankRecon: Awaited<ReturnType<typeof loadBankReconciliationPreview>> | null = null;
+  let persistedMatches: Awaited<ReturnType<typeof loadBankReconMatches>> = [];
   let loadError: string | null = null;
 
   try {
     categories = await ensureExpenseCategoriesForTenant(tid);
+    await ensureGlAccountsForTenant(tid);
     const rawExpenses = await loadExpensesForTenant(tid, { limit: 200 });
     expenses = await attachExpenseEntityLabels(tid, rawExpenses);
     imports = await loadExpenseImportsForTenant(tid, 20);
@@ -99,10 +109,15 @@ export default async function FinancialOsExpensesPage({
       periodStart: period_start,
       periodEnd: period_end,
     });
+    multiClinicPl = await loadMultiClinicOperatingPl(tid, {
+      periodStart: period_start,
+      periodEnd: period_end,
+    });
     bankRecon = await loadBankReconciliationPreview(tid, {
       periodStart: period_start,
       periodEnd: period_end,
     });
+    persistedMatches = await loadBankReconMatches(tid, "all");
   } catch (e) {
     loadError =
       e instanceof Error
@@ -120,7 +135,7 @@ export default async function FinancialOsExpensesPage({
       <FinancialOsSubPageHeader
         kicker="Opex capture"
         title="Expenses"
-        description="Capture clinic costs, link entities, post to the master ledger, review CPL / spend / CPG, operating P&L, bank recon, and export to CSV or QuickBooks for the selected period."
+        description="Capture clinic costs, post to the ledger, multi-clinic P&L, bank recon confirm, and export to FI / QuickBooks / Xero for the selected period."
       />
 
       {loadError ? (
@@ -158,16 +173,20 @@ export default async function FinancialOsExpensesPage({
       />
 
       {plSummary ? <ExpenseOperatingPlPanel summary={plSummary} /> : null}
+      {multiClinicPl ? <ExpenseMultiClinicPlPanel summary={multiClinicPl} /> : null}
 
       {bankRecon ? (
         <ExpenseBankReconPanel
+          tenantId={tid}
           periodStart={bankRecon.period_start}
           periodEnd={bankRecon.period_end}
           lineCount={bankRecon.line_count}
           expenseCount={bankRecon.expense_count}
-          matchCount={bankRecon.matches.length}
+          heuristicMatchCount={bankRecon.matches.length}
           unmatchedLines={bankRecon.unmatched_line_ids.length}
           unmatchedExpenses={bankRecon.unmatched_expense_ids.length}
+          persistedMatches={persistedMatches}
+          canMutate={canMutate}
         />
       ) : null}
 

@@ -13,7 +13,15 @@ import {
   processExpenseDocumentOcr,
   uploadExpenseDocument,
 } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
-import { buildExpensePeriodExports } from "@/src/lib/financialOs/expenses/expenseStage6.server";
+import {
+  confirmBankReconMatch,
+  rejectBankReconMatch,
+  suggestBankReconMatches,
+} from "@/src/lib/financialOs/expenses/expenseBankRecon.server";
+import {
+  buildExpensePeriodExports,
+  dryRunAccountingExpensePush,
+} from "@/src/lib/financialOs/expenses/expenseStage6.server";
 import {
   commitImportLinesSchema,
   createExpenseImportSchema,
@@ -50,7 +58,43 @@ const periodExportSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional()
     .nullable(),
-  format: z.enum(["fi_csv", "quickbooks_csv", "quickbooks_json"]).default("fi_csv"),
+  format: z
+    .enum(["fi_csv", "quickbooks_csv", "quickbooks_json", "xero_csv"])
+    .default("fi_csv"),
+});
+
+const reconSuggestSchema = z.object({
+  adminKey: z.string().optional(),
+  period_start: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  period_end: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+});
+
+const reconMatchIdSchema = z.object({
+  adminKey: z.string().optional(),
+  match_id: z.string().uuid(),
+});
+
+const accountingDryRunSchema = z.object({
+  adminKey: z.string().optional(),
+  provider: z.enum(["quickbooks", "xero"]),
+  period_start: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  period_end: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
 });
 
 function errMsg(e: unknown): string {
@@ -353,7 +397,7 @@ export async function exportExpensesPeriodAction(
 ): Promise<
   | {
       ok: true;
-      format: "fi_csv" | "quickbooks_csv" | "quickbooks_json";
+      format: "fi_csv" | "quickbooks_csv" | "quickbooks_json" | "xero_csv";
       filename: string;
       content: string;
       period_start: string;
@@ -414,6 +458,19 @@ export async function exportExpensesPeriodAction(
       };
     }
 
+    if (parsed.format === "xero_csv") {
+      return {
+        ok: true,
+        format: "xero_csv",
+        filename: `fi-expenses-xero-${bundle.period_start}_${bundle.period_end}.csv`,
+        content: bundle.xero_csv,
+        period_start: bundle.period_start,
+        period_end: bundle.period_end,
+        row_count: bundle.row_count,
+        posted_count: bundle.posted_count,
+      };
+    }
+
     return {
       ok: true,
       format: "fi_csv",
@@ -423,6 +480,105 @@ export async function exportExpensesPeriodAction(
       period_end: bundle.period_end,
       row_count: bundle.row_count,
       posted_count: bundle.posted_count,
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function suggestBankReconMatchesAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; suggested: number; period_start: string; period_end: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = reconSuggestSchema.parse(body ?? {});
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const result = await suggestBankReconMatches({
+      tenantId: tenantId.trim(),
+      periodStart: parsed.period_start,
+      periodEnd: parsed.period_end,
+      actorFiUserId: access.actorFiUserId,
+    });
+    revalidateExpensePaths(tenantId);
+    return { ok: true, ...result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function confirmBankReconMatchAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = reconMatchIdSchema.parse(body);
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    await confirmBankReconMatch({
+      tenantId: tenantId.trim(),
+      matchId: parsed.match_id,
+      actorFiUserId: access.actorFiUserId,
+    });
+    revalidateExpensePaths(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function rejectBankReconMatchAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = reconMatchIdSchema.parse(body);
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    await rejectBankReconMatch({
+      tenantId: tenantId.trim(),
+      matchId: parsed.match_id,
+      actorFiUserId: access.actorFiUserId,
+    });
+    revalidateExpensePaths(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function dryRunAccountingPushAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | {
+      ok: true;
+      provider: "quickbooks" | "xero";
+      ready: boolean;
+      reason: string;
+      payload_count: number;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = accountingDryRunSchema.parse(body);
+    const tid = tenantId.trim();
+    if (parsed.adminKey) {
+      await assertPaymentRecordWriteAllowed(tid, parsed.adminKey);
+    } else {
+      await assertFiTenantPortalAccess(tid);
+      await assertStaffModuleAccess(tid, "financial_os", "read");
+    }
+    const result = await dryRunAccountingExpensePush(tid, parsed.provider, {
+      periodStart: parsed.period_start,
+      periodEnd: parsed.period_end,
+    });
+    return {
+      ok: true,
+      provider: result.provider,
+      ready: result.ready,
+      reason: result.reason,
+      payload_count: result.payload_count,
     };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
