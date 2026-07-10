@@ -13,7 +13,9 @@ import {
   processExpenseDocumentOcr,
   uploadExpenseDocument,
 } from "@/src/lib/financialOs/expenses/expenseDocumentMutations.server";
+import { runAccountingExpensePush } from "@/src/lib/financialOs/expenses/expenseAccountingPush.server";
 import {
+  bulkConfirmBankReconMatches,
   confirmBankReconMatch,
   rejectBankReconMatch,
   suggestBankReconMatches,
@@ -579,6 +581,72 @@ export async function dryRunAccountingPushAction(
       ready: result.ready,
       reason: result.reason,
       payload_count: result.payload_count,
+    };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function bulkConfirmBankReconMatchesAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; confirmed: number } | { ok: false; error: string }> {
+  try {
+    const parsed = z
+      .object({
+        adminKey: z.string().optional(),
+        match_ids: z.array(z.string().uuid()).max(500).optional(),
+        confirm_all_suggested: z.boolean().optional(),
+      })
+      .parse(body ?? {});
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const result = await bulkConfirmBankReconMatches({
+      tenantId: tenantId.trim(),
+      matchIds: parsed.match_ids,
+      confirmAllSuggested: parsed.confirm_all_suggested === true,
+      actorFiUserId: access.actorFiUserId,
+    });
+    revalidateExpensePaths(tenantId);
+    return { ok: true, confirmed: result.confirmed };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function runAccountingPushAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | {
+      ok: true;
+      provider: "quickbooks" | "xero";
+      mode: "dry_run" | "live";
+      status: string;
+      message: string;
+      success: number;
+      failed: number;
+    }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = accountingDryRunSchema.parse(body);
+    const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
+    const result = await runAccountingExpensePush({
+      tenantId: tenantId.trim(),
+      provider: parsed.provider,
+      periodStart: parsed.period_start,
+      periodEnd: parsed.period_end,
+      actorFiUserId: access.actorFiUserId,
+    });
+    revalidateExpensePaths(tenantId);
+    return {
+      ok: true,
+      provider: result.provider,
+      mode: result.mode,
+      status: result.status,
+      message: result.message,
+      success: result.success,
+      failed: result.failed,
     };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

@@ -18,8 +18,8 @@ export function ExpenseCostPerGraftPanel(props: { summary: ExpenseCpgSummary }) 
       description={
         <>
           Posted clinical consumables / case-linked spend ({s.period_start} → {s.period_end}) ÷
-          grafts implanted from procedure-day (or profitability snapshots). Standard uses active
-          surgery cost model graft consumable rate. Full model CPG still lives in Surgery Economics.
+          grafts implanted from procedure-day (or profitability snapshots). Standard uses full
+          surgery economics model CPG at 2,000 reference grafts (default staffing/duration).
         </>
       }
     >

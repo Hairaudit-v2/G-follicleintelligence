@@ -198,6 +198,45 @@ export async function confirmBankReconMatch(input: {
   });
 }
 
+export async function bulkConfirmBankReconMatches(input: {
+  tenantId: string;
+  matchIds?: string[] | null;
+  confirmAllSuggested?: boolean;
+  actorFiUserId?: string | null;
+  supabase?: SupabaseClient;
+}): Promise<{ confirmed: number }> {
+  const tid = input.tenantId.trim();
+  const db = client(input.supabase);
+
+  let ids = (input.matchIds ?? []).map((id) => id.trim()).filter(Boolean);
+  if (input.confirmAllSuggested) {
+    const { data, error } = await db
+      .from("fi_expense_bank_recon_matches")
+      .select("id")
+      .eq("tenant_id", tid)
+      .eq("status", "suggested")
+      .limit(500);
+    if (error) throw new Error(error.message);
+    ids = (data ?? []).map((r) => String((r as { id: string }).id));
+  }
+
+  let confirmed = 0;
+  for (const id of ids) {
+    try {
+      await confirmBankReconMatch({
+        tenantId: tid,
+        matchId: id,
+        actorFiUserId: input.actorFiUserId,
+        supabase: db,
+      });
+      confirmed += 1;
+    } catch {
+      // skip invalid / already handled
+    }
+  }
+  return { confirmed };
+}
+
 export async function rejectBankReconMatch(input: {
   tenantId: string;
   matchId: string;

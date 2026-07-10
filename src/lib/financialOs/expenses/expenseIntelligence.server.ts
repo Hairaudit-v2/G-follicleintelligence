@@ -20,6 +20,7 @@ import {
   type ExpenseSpendSummary,
 } from "@/src/lib/financialOs/expenses/expenseSpendSummaryCore";
 import type { FiExpenseRow } from "@/src/lib/financialOs/expenses/expenseTypes";
+import { calculateSurgeryProfitability } from "@/src/lib/financialOs/financialSurgeryEconomicsCore";
 import { loadSurgeryCostModelsForTenant } from "@/src/lib/financialOs/financialSurgeryCostModel.server";
 
 function client(c?: SupabaseClient): SupabaseClient {
@@ -182,14 +183,34 @@ export async function loadExpenseIntelligenceBundle(
   let standards: ExpenseCpgStandardModel[] = [];
   try {
     const models = await loadSurgeryCostModelsForTenant(tid, db);
+    const REF_GRAFTS = 2000;
     standards = models
       .filter((m) => m.is_active)
-      .map((m) => ({
-        procedure_type: m.procedure_type,
-        graft_consumable_cost_cents: m.graft_consumable_cost_cents,
-        // Standard CPG proxy: graft consumable unit cost (full model CPG needs revenue context).
-        standard_cost_per_graft_cents: m.graft_consumable_cost_cents,
-      }));
+      .map((m) => {
+        // Stage 8: full-model standard CPG at reference graft count + default staffing.
+        const result = calculateSurgeryProfitability({
+          tenant_id: tid,
+          procedure_type: m.procedure_type,
+          cost_model: m,
+          revenue: {
+            revenue_cents: 0,
+            collected_cents: 0,
+            outstanding_cents: 0,
+          },
+          duration_minutes: m.default_duration_minutes,
+          staff_counts: { rn_count: 1, technician_count: 2, assistant_count: 1 },
+          treatment_addons: { prp: false, exosome: false },
+          graft_count: REF_GRAFTS,
+          hair_count: null,
+        });
+        return {
+          procedure_type: m.procedure_type,
+          graft_consumable_cost_cents: m.graft_consumable_cost_cents,
+          standard_cost_per_graft_cents: result.cost_per_graft_cents,
+          standard_total_cost_cents: result.total_cost_cents,
+          reference_graft_count: REF_GRAFTS,
+        };
+      });
   } catch {
     standards = [];
   }

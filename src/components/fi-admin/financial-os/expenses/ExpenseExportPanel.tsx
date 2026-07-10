@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import {
   dryRunAccountingPushAction,
   exportExpensesPeriodAction,
+  runAccountingPushAction,
 } from "@/lib/actions/financial-os-expense-actions";
 import {
   FinancialOsFeedbackText,
@@ -78,6 +79,26 @@ export function ExpenseExportPanel(props: {
     });
   }
 
+  function livePush(provider: "quickbooks" | "xero") {
+    if (!props.canExport) return;
+    setFeedback(null);
+    start(async () => {
+      const res = await runAccountingPushAction(props.tenantId, {
+        provider,
+        period_start: props.periodStart,
+        period_end: props.periodEnd,
+      });
+      if (!res.ok) {
+        setFeedback({ message: res.error, tone: "error" });
+        return;
+      }
+      setFeedback({
+        message: res.message,
+        tone: res.status === "failed" ? "error" : res.status === "partial" ? "warning" : "success",
+      });
+    });
+  }
+
   return (
     <div className={financialOsClasses.formPanel}>
       <h2 className={financialOsClasses.formTitle}>Exports · QuickBooks · Xero</h2>
@@ -134,6 +155,22 @@ export function ExpenseExportPanel(props: {
           onClick={() => dryRun("xero")}
         >
           Xero push dry-run
+        </button>
+        <button
+          type="button"
+          className={financialOsClasses.secondaryButton}
+          disabled={!props.canExport || pending}
+          onClick={() => livePush("quickbooks")}
+        >
+          QB live push
+        </button>
+        <button
+          type="button"
+          className={financialOsClasses.secondaryButton}
+          disabled={!props.canExport || pending}
+          onClick={() => livePush("xero")}
+        >
+          Xero live push
         </button>
       </div>
       <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />

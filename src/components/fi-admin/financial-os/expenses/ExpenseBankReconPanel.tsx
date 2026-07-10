@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import {
+  bulkConfirmBankReconMatchesAction,
   confirmBankReconMatchAction,
   rejectBankReconMatchAction,
   suggestBankReconMatchesAction,
@@ -112,6 +113,31 @@ export function ExpenseBankReconPanel(props: ExpenseBankReconPanelProps) {
           onClick={runSuggest}
         >
           {pending ? "Working…" : "Generate suggested matches"}
+        </button>
+        <button
+          type="button"
+          className={financialOsClasses.secondaryButton}
+          disabled={!props.canMutate || pending || suggested.length === 0}
+          onClick={() => {
+            if (!props.canMutate) return;
+            setFeedback(null);
+            start(async () => {
+              const res = await bulkConfirmBankReconMatchesAction(props.tenantId, {
+                confirm_all_suggested: true,
+              });
+              if (res.ok) {
+                setFeedback({
+                  message: `Bulk confirmed ${res.confirmed} match(es).`,
+                  tone: "success",
+                });
+                router.refresh();
+              } else {
+                setFeedback({ message: res.error, tone: "error" });
+              }
+            });
+          }}
+        >
+          Confirm all suggested
         </button>
       </div>
       <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />

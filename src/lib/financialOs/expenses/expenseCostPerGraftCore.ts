@@ -27,8 +27,14 @@ export type ExpenseCpgStandardModel = {
   procedure_type: string;
   /** From active cost model: graft consumable unit cost. */
   graft_consumable_cost_cents: number;
-  /** Optional precomputed standard cost_per_graft from model defaults (null if N/A). */
+  /**
+   * Full-model standard cost_per_graft (Stage 8: from calculateSurgeryProfitability
+   * with default staffing/duration and reference graft count).
+   */
   standard_cost_per_graft_cents: number | null;
+  /** Optional full model total cost at reference graft count (for transparency). */
+  standard_total_cost_cents?: number | null;
+  reference_graft_count?: number | null;
 };
 
 export type ExpenseCpgProcedureRow = {

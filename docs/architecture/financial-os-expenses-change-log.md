@@ -2,7 +2,7 @@
 
 **Module:** FinancialOS (FinOS)  
 **Surface:** `/fi-admin/[tenantId]/financial/expenses`  
-**Status:** Stages 1–7 shipped (additive; revenue payments paths unchanged)
+**Status:** Stages 1–8 shipped (additive; revenue payments paths unchanged)
 
 This log tracks the **clinic opex / expenses capture** workstream under FinancialOS. It is separate from earlier FinOS phases (payment pathways, financing, clearance, surgery economics).
 
@@ -19,6 +19,7 @@ This log tracks the **clinic opex / expenses capture** workstream under Financia
 | **5** | Period filters + spend CPG intelligence | `feat(financial-os): expense intelligence period filters and CPG` | (no new migration) |
 | **6** | P&amp;L, bank recon, exports, QuickBooks | `feat(financial-os): P&L, bank recon, QuickBooks export` | (no new migration; connector catalog) |
 | **7** | COA, multi-clinic P&amp;L, recon confirm, Xero | `feat(financial-os): COA, recon workflow, Xero parity` | `20261011120001_fi_financial_os_expenses_stage7` |
+| **8** | Journals, bulk recon, full CPG, live push gate | `feat(financial-os): journals, bulk recon, accounting push` | `20261012120001_fi_financial_os_expenses_stage8` |
 
 ---
 
@@ -243,12 +244,47 @@ FI_EXPENSE_OCR_MIN_CONFIDENCE=0.55
 
 ---
 
-## Suggested Stage 8+ (not started)
+## Stage 8 — Journals, bulk recon, full-model CPG, live push gate
 
-- Live QuickBooks/Xero OAuth purchase push (network I/O)
-- Full double-entry journals per COA
-- Richer standard CPG via full surgery economics calculator
-- Bulk confirm on recon queue
+**Goal:** Native double-entry for expenses + staff-scale recon + gated live accounting push.
+
+### Double-entry journals
+- `fi_expense_journal_entries` + `fi_expense_journal_lines` (balanced debit=credit)
+- On expense **post**: Dr expense GL / Cr cash (or AP)
+- On **void**: reversing journal
+- Idempotent keys `journal_post` / `journal_void`
+- Links: `fi_expenses.journal_entry_id`, `journal_void_entry_id`
+
+### Bulk bank recon
+- **Confirm all suggested** action + server bulk confirm
+
+### Standard CPG (full model)
+- Uses `calculateSurgeryProfitability` at 2,000 reference grafts with default staffing/duration
+- Variance still actual CPG − standard CPG
+
+### Accounting push
+- `fi_expense_accounting_push_runs` audit
+- **QB live push** when `FI_ACCOUNTING_LIVE_PUSH=1` + realm + `FI_QUICKBOOKS_ACCESS_TOKEN` (or connector config token)
+- Xero live still returns partial (use CSV)
+- Always records push run audit
+
+### Env
+```bash
+FI_ACCOUNTING_LIVE_PUSH=1
+FI_QUICKBOOKS_ACCESS_TOKEN=...
+```
+
+### Migration
+`20261012120001_fi_financial_os_expenses_stage8.sql`
+
+---
+
+## Suggested Stage 9+ (not started)
+
+- Full OAuth token refresh from encrypted connector credentials
+- Xero bank-transaction live POST
+- Multi-currency journals
+- Period lock / close for journals
 
 ---
 

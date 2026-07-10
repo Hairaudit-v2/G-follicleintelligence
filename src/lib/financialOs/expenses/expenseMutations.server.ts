@@ -26,6 +26,10 @@ import {
   appendExpenseVoidReversalLedgerEntry,
 } from "@/src/lib/financialOs/expenses/expenseLedgerBridge.server";
 import {
+  postExpenseJournalForExpense,
+  postExpenseVoidJournalForExpense,
+} from "@/src/lib/financialOs/expenses/expenseJournal.server";
+import {
   mapExpenseImportRow,
   mapExpenseRow,
   type FiExpenseImportRow,
@@ -223,10 +227,25 @@ export async function postExpense(input: {
     actorFiUserId: input.actorFiUserId,
     supabase: db,
   });
-  if (ledgerTxId) {
+  // Stage 8: double-entry journal (Dr expense / Cr funding).
+  let journalId: string | null = null;
+  try {
+    journalId = await postExpenseJournalForExpense({
+      expense: posted,
+      actorFiUserId: input.actorFiUserId,
+      supabase: db,
+    });
+  } catch {
+    // Journal tables may not be migrated yet — ledger post still succeeds.
+    journalId = null;
+  }
+  if (ledgerTxId || journalId) {
+    const patch: Record<string, unknown> = {};
+    if (ledgerTxId) patch.ledger_post_transaction_id = ledgerTxId;
+    if (journalId) patch.journal_entry_id = journalId;
     const { data: linked, error: linkErr } = await db
       .from("fi_expenses")
-      .update({ ledger_post_transaction_id: ledgerTxId })
+      .update(patch)
       .eq("tenant_id", tid)
       .eq("id", posted.id)
       .select("*")
@@ -246,6 +265,7 @@ export async function postExpense(input: {
       status: "posted",
       posted_at: now,
       ledger_post_transaction_id: ledgerTxId,
+      journal_entry_id: journalId,
     },
     supabase: db,
   });
@@ -286,6 +306,7 @@ export async function voidExpense(input: {
   let voided = mapExpenseRow(data as Record<string, unknown>);
 
   let ledgerVoidTxId: string | null = null;
+  let journalVoidId: string | null = null;
   // Compensating credit only when the expense had been posted to the ledger.
   if (wasPosted || existing.status === "posted") {
     ledgerVoidTxId = await appendExpenseVoidReversalLedgerEntry({
@@ -294,10 +315,23 @@ export async function voidExpense(input: {
       reason: input.reason,
       supabase: db,
     });
-    if (ledgerVoidTxId) {
+    try {
+      journalVoidId = await postExpenseVoidJournalForExpense({
+        expense: { ...voided, status: "void", amount_cents: existing.amount_cents },
+        actorFiUserId: input.actorFiUserId,
+        reason: input.reason,
+        supabase: db,
+      });
+    } catch {
+      journalVoidId = null;
+    }
+    const patch: Record<string, unknown> = {};
+    if (ledgerVoidTxId) patch.ledger_void_transaction_id = ledgerVoidTxId;
+    if (journalVoidId) patch.journal_void_entry_id = journalVoidId;
+    if (Object.keys(patch).length > 0) {
       const { data: linked, error: linkErr } = await db
         .from("fi_expenses")
-        .update({ ledger_void_transaction_id: ledgerVoidTxId })
+        .update(patch)
         .eq("tenant_id", tid)
         .eq("id", voided.id)
         .select("*")
@@ -318,6 +352,7 @@ export async function voidExpense(input: {
       status: "void",
       reason: input.reason?.trim() || null,
       ledger_void_transaction_id: ledgerVoidTxId,
+      journal_void_entry_id: journalVoidId,
     },
     supabase: db,
   });
