@@ -90,6 +90,16 @@ export function ReportLibraryClient(props: {
     });
   }
 
+  function downloadCsvBlob(filename: string, csv: string) {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function runExport() {
     if (!activeReportId) return;
     startExport(async () => {
@@ -103,13 +113,13 @@ export function ReportLibraryClient(props: {
         setError(r.error);
         return;
       }
-      const blob = new Blob([r.csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = r.filename;
-      a.click();
-      URL.revokeObjectURL(url);
+      if (r.files && r.files.length > 0) {
+        for (const file of r.files) {
+          downloadCsvBlob(file.filename, file.csv);
+        }
+        return;
+      }
+      downloadCsvBlob(r.filename, r.csv);
     });
   }
 
@@ -121,8 +131,8 @@ export function ReportLibraryClient(props: {
           Generate clinic reports
         </h1>
         <p className={cn(financialOsClasses.bodyText, "max-w-3xl")}>
-          Searchable catalog of high-value reports. Phase 1 focuses on financial reports powered by
-          Expenses Capture (posted spend). Set a period, then generate.
+          Searchable catalog of high-value financial reports — expenses, CPL, surgery margin,
+          attribution, AR aging, and multi-format export packs. Set a period, then generate.
         </p>
       </div>
 

@@ -9,10 +9,17 @@ import {
   isReportId,
   type ReportId,
 } from "@/src/lib/reports/reportCatalog";
+import { generateArAgingReport } from "@/src/lib/reports/generators/arAging.server";
 import { generateCostPerGraftReport } from "@/src/lib/reports/generators/costPerGraft.server";
 import { generateExpenseBreakdownReport } from "@/src/lib/reports/generators/expenseBreakdown.server";
+import {
+  buildExpenseExportPackFiles,
+  generateExpenseExportPackReport,
+} from "@/src/lib/reports/generators/expenseExportPack.server";
 import { generateMarketingCplReport } from "@/src/lib/reports/generators/marketingCpl.server";
 import { generateOperatingPlReport } from "@/src/lib/reports/generators/operatingPl.server";
+import { generateRevenueAttributionReport } from "@/src/lib/reports/generators/revenueAttribution.server";
+import { generateSurgeryGrossMarginReport } from "@/src/lib/reports/generators/surgeryGrossMargin.server";
 import { reportCsvFilename, reportResultToCsv } from "@/src/lib/reports/reportCsv";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
 
@@ -81,6 +88,14 @@ async function runGenerator(
       return generateCostPerGraftReport(input);
     case "operating_pl":
       return generateOperatingPlReport(input);
+    case "surgery_gross_margin":
+      return generateSurgeryGrossMarginReport(input);
+    case "revenue_attribution_summary":
+      return generateRevenueAttributionReport(input);
+    case "ar_aging_summary":
+      return generateArAgingReport(input);
+    case "expense_export_pack":
+      return generateExpenseExportPackReport(input);
     default:
       throw new Error("Report generator is not implemented yet.");
   }
@@ -109,9 +124,14 @@ export async function generateReportAction(
   }
 }
 
+export type ReportExportFile = { filename: string; csv: string; label?: string };
+
 export async function exportReportCsvAction(
   body: unknown
-): Promise<{ ok: true; filename: string; csv: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; filename: string; csv: string; files?: ReportExportFile[] }
+  | { ok: false; error: string }
+> {
   try {
     const parsed = generateSchema.parse(body);
     const reportId = parsed.reportId.trim();
@@ -119,6 +139,22 @@ export async function exportReportCsvAction(
 
     const access = await assertReportAccess(parsed.tenantId, reportId);
     if (!access.ok) return access;
+
+    if (reportId === "expense_export_pack") {
+      const pack = await buildExpenseExportPackFiles({
+        tenantId: parsed.tenantId,
+        periodStart: parsed.periodStart,
+        periodEnd: parsed.periodEnd,
+      });
+      const primary = pack.files[0];
+      if (!primary) return { ok: false, error: "No export files produced." };
+      return {
+        ok: true,
+        filename: primary.filename,
+        csv: primary.csv,
+        files: pack.files,
+      };
+    }
 
     const result = await runGenerator(reportId, {
       tenantId: parsed.tenantId,

@@ -34,7 +34,11 @@ export function ReportResultPanel(props: {
               disabled={exportBusy}
               onClick={onExportCsv}
             >
-              {exportBusy ? "Exporting…" : "Download CSV"}
+              {exportBusy
+                ? "Exporting…"
+                : result.reportId === "expense_export_pack"
+                  ? "Download CSV pack"
+                  : "Download CSV"}
             </button>
           ) : null}
           {onClose ? (

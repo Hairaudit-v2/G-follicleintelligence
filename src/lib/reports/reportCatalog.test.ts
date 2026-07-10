@@ -36,17 +36,10 @@ test("isReportId and live href helpers", () => {
   );
 });
 
-test("phase 1 financial core reports are generate-enabled", () => {
-  const enabled = REPORT_CATALOG.filter((r) => r.phase === 1 && r.generateEnabled).map(
-    (r) => r.id
-  );
-  for (const id of [
-    "expense_breakdown",
-    "marketing_cpl",
-    "cost_per_graft_actuals",
-    "operating_pl",
-  ] as const) {
-    assert.ok(enabled.includes(id), `${id} should be generate-enabled`);
+test("all phase 1 catalog reports are generate-enabled", () => {
+  const phase1 = REPORT_CATALOG.filter((r) => r.phase === 1);
+  assert.equal(phase1.length, 8);
+  for (const r of phase1) {
+    assert.equal(r.generateEnabled, true, `${r.id} should be generate-enabled`);
   }
-  assert.equal(enabled.length, 4);
 });
