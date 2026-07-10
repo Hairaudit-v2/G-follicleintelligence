@@ -45,7 +45,6 @@ import {
   closeRosterDrawer,
   openRosterShiftDrawer,
   pushRosterStandardHoursEditorNavigation,
-  resolveRosterCellClickOutcome,
   resolveRosterDrawerStaffContext,
   resolveRosterDrawerStaffMemberId,
   resolveRosterManageDeniedMessage,
