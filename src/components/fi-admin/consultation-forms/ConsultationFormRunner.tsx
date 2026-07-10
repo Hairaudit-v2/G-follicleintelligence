@@ -12,6 +12,7 @@ import {
 } from "@/lib/actions/fi-consultation-form-actions";
 import { BodyAreaMapAnnotationsSummary } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
 import { ConsultationCompletionSummaryCard } from "@/src/components/fi-admin/consultation-forms/ConsultationCompletionSummaryCard";
+import { ConsultationFormVoiceAssist } from "@/src/components/fi-admin/consultation-forms/ConsultationFormVoiceAssist";
 import { ConsultationHandoffPanel } from "@/src/components/fi-admin/consultation-forms/ConsultationHandoffPanel";
 import { ConsultationFormFieldRenderer } from "@/src/components/fi-admin/consultation-forms/ConsultationFormFieldRenderer";
 import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultation-forms/ConsultationFormSectionNav";
@@ -219,6 +220,19 @@ export function ConsultationFormRunner({
       });
     },
     [scheduleAutosave]
+  );
+
+  const onApplyVoiceValues = useCallback(
+    (next: Record<string, unknown>) => {
+      setValues(next);
+      scheduleAutosave(next);
+    },
+    [scheduleAutosave]
+  );
+
+  const allSchemaFields = useMemo(
+    () => sections.flatMap((s) => s.fields ?? []),
+    [sections]
   );
 
   useEffect(
@@ -462,6 +476,19 @@ export function ConsultationFormRunner({
           </p>
         ) : null}
       </FiCard>
+
+      {canEdit ? (
+        <ConsultationFormVoiceAssist
+          tenantId={tid}
+          consultationId={cid}
+          patientId={patientId}
+          caseId={caseId}
+          fields={allSchemaFields}
+          values={values}
+          canEdit={canEdit}
+          onApplyValues={onApplyVoiceValues}
+        />
+      ) : null}
 
       <ConsultationWorkflowStepper phase={workflowPhase} />
 

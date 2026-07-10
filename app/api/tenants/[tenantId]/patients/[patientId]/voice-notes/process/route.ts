@@ -51,6 +51,11 @@ export async function POST(
 
     const caseIdRaw = form.get("caseId");
     const caseId = typeof caseIdRaw === "string" && caseIdRaw.trim() ? caseIdRaw.trim() : null;
+    const consultationIdRaw = form.get("consultationId");
+    const consultationId =
+      typeof consultationIdRaw === "string" && consultationIdRaw.trim()
+        ? consultationIdRaw.trim()
+        : null;
 
     const doctorUserId = await tryResolveFiUserIdForTenant(tenantId, req);
 
@@ -64,10 +69,12 @@ export async function POST(
       tenantId,
       patientId,
       caseId,
+      consultationId,
       transcriptRaw: transcript,
       sections,
       structureModel: model,
       createdByFiUserId: doctorUserId,
+      metadata: consultationId ? { consultation_id: consultationId } : undefined,
     });
 
     return crmJsonOk({
@@ -78,6 +85,7 @@ export async function POST(
         transcript_raw: note.transcript_raw,
         created_at: note.created_at,
         case_id: note.case_id,
+        consultation_id: consultationId,
       },
     });
   } catch (e) {

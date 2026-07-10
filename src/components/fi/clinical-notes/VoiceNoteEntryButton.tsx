@@ -19,6 +19,7 @@ type ProcessOk = {
     transcript_raw: string;
     created_at: string;
     case_id: string | null;
+    consultation_id?: string | null;
   };
 };
 
@@ -35,14 +36,19 @@ export function VoiceNoteEntryButton({
   tenantId,
   patientId,
   caseId,
+  consultationId,
   label = "Voice note",
   className,
+  onDraftCreated,
 }: {
   tenantId: string;
   patientId: string;
   caseId?: string | null;
+  /** Links the draft clinical note to this consultation when set. */
+  consultationId?: string | null;
   label?: string;
   className?: string;
+  onDraftCreated?: (note: ProcessOk["clinical_note"]) => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -124,6 +130,7 @@ export function VoiceNoteEntryButton({
         const fd = new FormData();
         fd.append("audio", blob, file?.name?.trim() || "voice-note.webm");
         if (caseId?.trim()) fd.append("caseId", caseId.trim());
+        if (consultationId?.trim()) fd.append("consultationId", consultationId.trim());
         const res = await fetch(
           `/api/tenants/${encodeURIComponent(tenantId.trim())}/patients/${encodeURIComponent(
             patientId.trim()
@@ -138,12 +145,13 @@ export function VoiceNoteEntryButton({
         }
         const ok = json as ProcessOk;
         setDraft(ok.clinical_note);
+        onDraftCreated?.(ok.clinical_note);
         router.refresh();
       } catch {
         setErr("Network error while processing audio.");
       }
     });
-  }, [caseId, file, patientId, recordedBlob, router, tenantId]);
+  }, [caseId, consultationId, file, onDraftCreated, patientId, recordedBlob, router, tenantId]);
 
   const approve = useCallback(() => {
     if (!draft) return;

@@ -12,6 +12,7 @@ import { ConsultationLeadLinkField } from "@/src/components/fi-admin/consultatio
 import { ConsultationPatientLinkField } from "@/src/components/fi-admin/consultations/ConsultationPatientLinkField";
 import { ConsultationOsHubRoutingActions } from "@/src/components/fi-admin/consultations/ConsultationOsHubRoutingActions";
 import { ConsultationPreparationChecklistPanel } from "@/src/components/fi-admin/consultations/ConsultationPreparationChecklistPanel";
+import { ConsultationVoiceCapturePanel } from "@/src/components/fi-admin/consultations/ConsultationVoiceCapturePanel";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
@@ -521,6 +522,14 @@ export function ConsultationOsWorkspace({
       </FiCard>
 
       {!hubPlan.hasPathwayCompletionSummary ? pathwayLauncherEl : null}
+
+      <ConsultationVoiceCapturePanel
+        tenantId={tenantId}
+        consultationId={cid}
+        patientId={linkedPatientId}
+        caseId={initialRow.case_id}
+        canEdit={canEdit}
+      />
 
       {error ? (
         <div
