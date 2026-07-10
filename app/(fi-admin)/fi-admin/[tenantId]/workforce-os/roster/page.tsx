@@ -91,9 +91,7 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
         useWorkforceOsRoute
         canManage={manageCapability.canManage}
         canManageStandardHours={manageCapability.canManage}
-        manageDeniedReason={
-          manageCapability.canManage ? "" : ROSTER_MANAGE_DENIED_REASON
-        }
+        manageDeniedReason={ROSTER_MANAGE_DENIED_REASON}
       />
     </div>
   );

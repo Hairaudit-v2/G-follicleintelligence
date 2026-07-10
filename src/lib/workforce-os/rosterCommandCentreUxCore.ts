@@ -113,6 +113,59 @@ export type RosterDrawerStaffOption = {
 export const ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE =
   "Could not open the roster drawer for this staff member. Refresh the page and try again.";
 
+/** Single source for roster manage-deny copy (never allow blank deny messages). */
+export function resolveRosterManageDeniedMessage(
+  manageDeniedReason?: string | null
+): string {
+  const trimmed = manageDeniedReason?.trim();
+  return trimmed || ROSTER_MANAGE_DENIED_REASON;
+}
+
+export type RosterDayAwayKind = "sick_leave" | "leave" | "unavailable";
+
+const ROSTER_DAY_AWAY_LABELS: Record<RosterDayAwayKind, string> = {
+  sick_leave: "Sick leave",
+  leave: "Personal leave",
+  unavailable: "Unavailable",
+};
+
+export function rosterDayAwayReasonLabel(kind: RosterDayAwayKind): string {
+  return ROSTER_DAY_AWAY_LABELS[kind];
+}
+
+/** Cancellation reason applied when marking a full day away. */
+export function rosterDayAwayShiftCancellationReason(
+  kind: RosterDayAwayKind
+): "staff_sick" | "manual_adjustment" {
+  return kind === "sick_leave" ? "staff_sick" : "manual_adjustment";
+}
+
+export type RosterCancellableDayShift = {
+  id: string;
+  status: string;
+};
+
+/**
+ * Shifts cancelled when marking a day away — union of day list + selected shift,
+ * de-duplicated, only scheduled/confirmed.
+ */
+export function collectCancellableRosterDayShifts(input: {
+  dayShifts: readonly RosterCancellableDayShift[];
+  selectedShift?: RosterCancellableDayShift | null;
+}): RosterCancellableDayShift[] {
+  const isActive = (status: string) => status === "scheduled" || status === "confirmed";
+  const byId = new Map<string, RosterCancellableDayShift>();
+
+  for (const shift of input.dayShifts) {
+    if (isActive(shift.status)) byId.set(shift.id, shift);
+  }
+  if (input.selectedShift && isActive(input.selectedShift.status)) {
+    byId.set(input.selectedShift.id, input.selectedShift);
+  }
+
+  return [...byId.values()];
+}
+
 /** Resolve staff context for the shift drawer — never rely on staffOptions alone. */
 export function resolveRosterDrawerStaffContext(input: {
   drawer: RosterCommandCentreDrawerState;
@@ -191,10 +244,9 @@ export function resolveRosterCellClickOutcome(input: {
     };
   }
   if (!input.canManage) {
-    const denied = input.manageDeniedReason?.trim();
     return {
       outcome: "deny",
-      message: denied || ROSTER_MANAGE_DENIED_REASON,
+      message: resolveRosterManageDeniedMessage(input.manageDeniedReason),
     };
   }
   return { outcome: "open_drawer", mode: "cell-actions" };

@@ -7,6 +7,7 @@ import {
   buildRosterShiftDrawerDefaults,
   buildRosterShiftFormValuesFromShift,
   closeRosterDrawer,
+  collectCancellableRosterDayShifts,
   formatRosterShiftDrawerTitle,
   formatStandardHoursDrawerTitle,
   listStaffMissingStandardHours,
@@ -14,8 +15,11 @@ import {
   openRosterMissingStandardHoursSetupDrawer,
   openRosterShiftDrawer,
   openRosterStandardHoursDrawer,
+  resolveRosterManageDeniedMessage,
   resolveRosterShiftDrawerChangedFields,
   resolveRosterShiftDrawerEditEligibility,
+  rosterDayAwayReasonLabel,
+  rosterDayAwayShiftCancellationReason,
   rosterShiftDrawerEditRequiresReason,
   toRosterShiftDatetimeLocal,
   resolveRosterCellClickIntent,
@@ -31,6 +35,7 @@ import {
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
+import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
   applyStandardHoursTemplate,
   formatStandardHoursSummary,
@@ -126,6 +131,40 @@ test("buildRosterFullDayAbsenceLocalWindow spans local calendar day for leave bl
     startsAtLocal: "2026-07-10T00:00",
     endsAtLocal: "2026-07-10T23:59",
   });
+});
+
+test("resolveRosterManageDeniedMessage never returns a blank deny string", () => {
+  assert.equal(resolveRosterManageDeniedMessage(""), ROSTER_MANAGE_DENIED_REASON);
+  assert.equal(resolveRosterManageDeniedMessage(null), ROSTER_MANAGE_DENIED_REASON);
+  assert.equal(resolveRosterManageDeniedMessage("  Custom deny  "), "Custom deny");
+});
+
+test("collectCancellableRosterDayShifts unions day list and selected shift without duplicates", () => {
+  const day = [
+    { id: "a", status: "scheduled" },
+    { id: "b", status: "cancelled" },
+    { id: "c", status: "confirmed" },
+  ];
+  assert.deepEqual(
+    collectCancellableRosterDayShifts({
+      dayShifts: day,
+      selectedShift: { id: "a", status: "scheduled" },
+    }).map((s) => s.id),
+    ["a", "c"]
+  );
+  assert.deepEqual(
+    collectCancellableRosterDayShifts({
+      dayShifts: [],
+      selectedShift: { id: "z", status: "scheduled" },
+    }).map((s) => s.id),
+    ["z"]
+  );
+});
+
+test("roster day-away helpers map leave kinds to labels and cancel reasons", () => {
+  assert.equal(rosterDayAwayReasonLabel("sick_leave"), "Sick leave");
+  assert.equal(rosterDayAwayShiftCancellationReason("sick_leave"), "staff_sick");
+  assert.equal(rosterDayAwayShiftCancellationReason("leave"), "manual_adjustment");
 });
 
 test("buildRosterShiftDrawerDefaults normalises second-precision standard hours times", () => {

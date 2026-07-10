@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -38,7 +38,6 @@ import {
 import {
   buildStaffStandardHoursSetupIndexHref,
   buildWorkforceStaffProfileHref,
-  ROSTER_MANAGE_DENIED_REASON,
   STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { RosterAssignableCandidate } from "@/src/lib/workforce-os/workforceRosterCandidates";
@@ -49,6 +48,7 @@ import {
   resolveRosterCellClickOutcome,
   resolveRosterDrawerStaffContext,
   resolveRosterDrawerStaffMemberId,
+  resolveRosterManageDeniedMessage,
   resolveRosterPayloadWeekDayDates,
   ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
@@ -116,9 +116,10 @@ export function RosterCommandCentreView({
   useTeamRoute = false,
   canManage = true,
   canManageStandardHours = true,
-  manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
+  manageDeniedReason,
 }: RosterCommandCentreViewProps) {
   const router = useRouter();
+  const actionErrorRef = useRef<HTMLParagraphElement | null>(null);
   const [selectedEventKey, setSelectedEventKey] = useState(payload.preselectedEventKey);
   const [drawerState, setDrawerState] = useState<RosterCommandCentreDrawerState>({
     kind: "closed",
@@ -127,6 +128,9 @@ export function RosterCommandCentreView({
   const [actionError, setActionError] = useState<string | null>(null);
   const [ineligibleExpanded, setIneligibleExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  /** Normalise once — blank strings from pages must never surface as silent denies. */
+  const manageDeniedMessage = resolveRosterManageDeniedMessage(manageDeniedReason);
 
   const rosterPlanning = payload.rosterPlanning;
   const rosterCadence = rosterPlanning.rosterCadence;
@@ -166,10 +170,7 @@ export function RosterCommandCentreView({
 
   useEffect(() => {
     if (!actionError) return;
-    const el = document.querySelector('[data-testid="roster-action-error"]');
-    if (el instanceof HTMLElement) {
-      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
+    actionErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [actionError]);
 
   function closeDrawer() {
@@ -182,7 +183,7 @@ export function RosterCommandCentreView({
         tenantId,
         staffMemberId,
         canManage,
-        manageDeniedReason,
+        manageDeniedReason: manageDeniedMessage,
       });
       if (result.outcome === "deny") {
         setActionError(result.reason);
@@ -190,12 +191,12 @@ export function RosterCommandCentreView({
       }
       setActionError(null);
     },
-    [canManage, manageDeniedReason, router, tenantId]
+    [canManage, manageDeniedMessage, router, tenantId]
   );
 
   function handleApplyDefaultClinicHours() {
     if (!canManage) {
-      setActionError(manageDeniedReason);
+      setActionError(manageDeniedMessage);
       return;
     }
     const count = staffMissingStandardHours.length;
@@ -271,7 +272,7 @@ export function RosterCommandCentreView({
       staffId,
       eligibleStaffIds: payload.eligibleStaffIds,
       canManage,
-      manageDeniedReason,
+      manageDeniedReason: manageDeniedMessage,
     });
 
     if (clickOutcome.outcome === "deny") {
@@ -341,7 +342,7 @@ export function RosterCommandCentreView({
 
   function handleClearGeneratedShifts(confirmMessage: string, successPrefix: string) {
     if (!canManage) {
-      setActionError(manageDeniedReason);
+      setActionError(manageDeniedMessage);
       return;
     }
     if (!window.confirm(confirmMessage)) return;
@@ -422,7 +423,7 @@ export function RosterCommandCentreView({
           role="status"
         >
           <p className="text-sm font-medium text-slate-200">View-only roster access</p>
-          <p className="mt-1 text-xs text-slate-400">{manageDeniedReason}</p>
+          <p className="mt-1 text-xs text-slate-400">{manageDeniedMessage}</p>
         </section>
       ) : null}
 
@@ -661,6 +662,7 @@ export function RosterCommandCentreView({
         </div>
         {actionError ? (
           <p
+            ref={actionErrorRef}
             className="rounded-lg border border-rose-500/30 bg-rose-950/30 px-3 py-2 text-sm text-rose-100"
             role="alert"
             data-testid="roster-action-error"
@@ -678,7 +680,7 @@ export function RosterCommandCentreView({
           rosterCadence={rosterCadence}
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           canManage={canManage}
-          manageDeniedReason={manageDeniedReason || ROSTER_MANAGE_DENIED_REASON}
+          manageDeniedReason={manageDeniedMessage}
           showStandardHoursEditor={canManageStandardHours}
           selectedShiftId={drawerShift?.id ?? null}
           onCellClick={handleCellClick}
@@ -718,7 +720,7 @@ export function RosterCommandCentreView({
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-300"
                   data-testid={`roster-ineligible-staff-${staff.id}`}
                 >
-                  <div>
+                  <div className="min-w-0">
                     <Link
                       href={buildWorkforceStaffProfileHref(tenantId, staff.id)}
                       className="font-medium text-slate-100 hover:text-cyan-300"
@@ -730,11 +732,10 @@ export function RosterCommandCentreView({
                     ) : null}
                     <span className="text-slate-500"> · </span>
                     <span className="text-amber-200/90">{staff.reasonLabel}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
+                    <span className="text-slate-500"> · </span>
                     <Link
                       href={buildWorkforceStaffProfileHref(tenantId, staff.id)}
-                      className="rounded-md border border-white/[0.1] px-2 py-1 text-[11px] text-slate-300 hover:bg-white/[0.04]"
+                      className="text-[11px] text-cyan-400/90 hover:text-cyan-300"
                     >
                       Manage employment
                     </Link>
@@ -774,7 +775,7 @@ export function RosterCommandCentreView({
           staffTimezone={payload.staffTimezoneByStaffId[drawerStaffMemberId] ?? null}
           tenantTimezone={payload.tenantTimezone}
           canManage={canManage}
-          manageDeniedReason={manageDeniedReason || ROSTER_MANAGE_DENIED_REASON}
+          manageDeniedReason={manageDeniedMessage}
           canManageStandardHours={canManageStandardHours}
           onClose={closeDrawer}
           onRefresh={refresh}

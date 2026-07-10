@@ -14,13 +14,18 @@ import {
   buildRosterFullDayAbsenceLocalWindow,
   buildRosterShiftDrawerDefaults,
   buildRosterShiftFormValuesFromShift,
+  collectCancellableRosterDayShifts,
   formatRosterDrawerDateLabel,
   formatRosterShiftDrawerTitle,
+  resolveRosterManageDeniedMessage,
   resolveRosterShiftDrawerChangedFields,
   resolveRosterShiftDrawerEditEligibility,
+  rosterDayAwayReasonLabel,
+  rosterDayAwayShiftCancellationReason,
   rosterShiftDatetimeLocalToUtcIso,
   rosterShiftDrawerEditRequiresReason,
   staffHasWorkingStandardHoursForDate,
+  type RosterDayAwayKind,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { shiftSourceDisplayLabel } from "@/src/lib/workforce-os/rosterGenerationCore";
 import {
@@ -32,7 +37,6 @@ import {
   formatRosterAdjustmentReasonLabel,
   isGeneratedShiftSource,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
-import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import type { StaffStandardHoursDayInput } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { RosterRightDrawer } from "@/src/components/fi/workforce/RosterRightDrawer";
@@ -47,7 +51,7 @@ const SHIFT_TYPES = [
   "on_call",
 ] as const;
 
-export type RosterDayAwayKind = "sick_leave" | "leave" | "unavailable";
+export type { RosterDayAwayKind };
 
 export type RosterShiftDrawerProps = {
   open: boolean;
@@ -101,15 +105,17 @@ function RosterShiftDrawerBody({
   tenantTimezone,
   canManage = true,
   canManageStandardHours = true,
-  manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
+  manageDeniedReason,
   onClose,
   onRefresh,
   onEditStandardHours,
 }: RosterShiftDrawerProps) {
+  const manageDeniedMessage = resolveRosterManageDeniedMessage(manageDeniedReason);
   const viewingExistingShift = mode === "edit" && selectedShift ? selectedShift : null;
-  const cancellableDayShifts = dayShifts.filter(
-    (shift) => shift.status === "scheduled" || shift.status === "confirmed"
-  );
+  const cancellableDayShifts = collectCancellableRosterDayShifts({
+    dayShifts,
+    selectedShift: viewingExistingShift,
+  });
   const { canShowEditButton, canCancelShift, openInEditMode } =
     resolveRosterShiftDrawerEditEligibility(viewingExistingShift);
 
@@ -208,7 +214,7 @@ function RosterShiftDrawerBody({
   function handleGenerateDay() {
     setError(null);
     if (!canManage) {
-      setError(manageDeniedReason);
+      setError(manageDeniedMessage);
       return;
     }
     if (!canGenerateFromStandardHours) {
@@ -244,7 +250,7 @@ function RosterShiftDrawerBody({
     e.preventDefault();
     setError(null);
     if (!canManage) {
-      setError(manageDeniedReason);
+      setError(manageDeniedMessage);
       return;
     }
     const utcTimes = rosterShiftDatetimeLocalToUtcIso({
@@ -354,7 +360,7 @@ function RosterShiftDrawerBody({
    */
   function handleMarkDayAway(kind: RosterDayAwayKind) {
     if (!canManage) {
-      setError(manageDeniedReason || ROSTER_MANAGE_DENIED_REASON);
+      setError(manageDeniedMessage);
       return;
     }
     setError(null);
@@ -371,21 +377,9 @@ function RosterShiftDrawerBody({
       return;
     }
 
-    const reasonLabel =
-      kind === "sick_leave"
-        ? "Sick leave"
-        : kind === "leave"
-          ? "Personal leave"
-          : "Unavailable";
-    const cancelReason = kind === "sick_leave" ? "staff_sick" : "manual_adjustment";
-    const shiftsToCancel =
-      viewingExistingShift && !cancellableDayShifts.some((s) => s.id === viewingExistingShift.id)
-        ? [viewingExistingShift, ...cancellableDayShifts]
-        : cancellableDayShifts.length > 0
-          ? cancellableDayShifts
-          : viewingExistingShift
-            ? [viewingExistingShift]
-            : [];
+    const reasonLabel = rosterDayAwayReasonLabel(kind);
+    const cancelReason = rosterDayAwayShiftCancellationReason(kind);
+    const shiftsToCancel = cancellableDayShifts;
 
     startTransition(async () => {
       const blockResult = await createAvailabilityBlockAction({
@@ -403,7 +397,6 @@ function RosterShiftDrawerBody({
       }
 
       for (const shift of shiftsToCancel) {
-        if (shift.status === "cancelled") continue;
         const cancelResult = await cancelRosterShiftAction({
           tenantId,
           shiftId: shift.id,
@@ -424,9 +417,14 @@ function RosterShiftDrawerBody({
     });
   }
 
-  const readOnlyManageMessage = manageDeniedReason?.trim() || ROSTER_MANAGE_DENIED_REASON;
   const shiftIsGenerated =
     viewingExistingShift != null && isGeneratedShiftSource(viewingExistingShift.shift_source);
+  const showMarkAway = canManage && !isInlineEditing;
+  const drawerError = error ? (
+    <p className="text-sm text-rose-300" role="alert" data-testid="roster-shift-drawer-error">
+      {error}
+    </p>
+  ) : null;
 
   return (
     <RosterRightDrawer
@@ -442,213 +440,191 @@ function RosterShiftDrawerBody({
       }
       subtitle={
         mode === "cell-actions"
-          ? "Add a manual shift, or optionally generate from standard hours."
+          ? "Add a manual shift, mark sick/personal leave, or generate from standard hours."
           : null
       }
       onClose={onClose}
       testId="roster-shift-drawer"
     >
-      {!canManage ? (
-        <p
-          className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100"
-          data-testid="roster-shift-manage-denied"
-        >
-          {readOnlyManageMessage}
-        </p>
-      ) : null}
+      <div className="space-y-4">
+        {!canManage ? (
+          <p
+            className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100"
+            data-testid="roster-shift-manage-denied"
+          >
+            {manageDeniedMessage}
+          </p>
+        ) : null}
 
-      {mode === "cell-actions" ? (
-        <div className="space-y-4">
-          {canManage ? (
-            <>
-              <ManualShiftForm
-                staffName={staffName}
-                clinicId={clinicId}
-                clinics={clinics}
-                shiftType={shiftType}
-                startsAt={startsAt}
-                endsAt={endsAt}
-                notes={notes}
-                adjustmentReason={adjustmentReason}
-                editReason=""
-                showAdjustmentReason
-                showEditReason={false}
-                pending={pending}
-                readOnly={false}
-                showSave={showCreateSave}
-                saveLabel="Add shift"
-                onClinicChange={setClinicId}
-                onShiftTypeChange={setShiftType}
-                onStartsAtChange={setStartsAt}
-                onEndsAtChange={setEndsAt}
-                onNotesChange={setNotes}
-                onAdjustmentReasonChange={setAdjustmentReason}
-                onEditReasonChange={setEditReason}
-                onSubmit={handleCreateManual}
-              />
+        {mode === "cell-actions" && canManage ? (
+          <>
+            <ManualShiftForm
+              staffName={staffName}
+              clinicId={clinicId}
+              clinics={clinics}
+              shiftType={shiftType}
+              startsAt={startsAt}
+              endsAt={endsAt}
+              notes={notes}
+              adjustmentReason={adjustmentReason}
+              editReason=""
+              showAdjustmentReason
+              showEditReason={false}
+              pending={pending}
+              readOnly={false}
+              showSave={showCreateSave}
+              saveLabel="Add shift"
+              onClinicChange={setClinicId}
+              onShiftTypeChange={setShiftType}
+              onStartsAtChange={setStartsAt}
+              onEndsAtChange={setEndsAt}
+              onNotesChange={setNotes}
+              onAdjustmentReasonChange={setAdjustmentReason}
+              onEditReasonChange={setEditReason}
+              onSubmit={handleCreateManual}
+            />
 
-              <MarkDayAwayPanel
-                pending={pending}
-                shiftCount={cancellableDayShifts.length}
-                onMarkAway={handleMarkDayAway}
-              />
-
-              <button
-                type="button"
-                disabled={pending || !canGenerateFromStandardHours}
-                onClick={handleGenerateDay}
-                data-testid="generate-day-from-standard-hours"
-                title={
-                  !canGenerateFromStandardHours
-                    ? "No standard hours are set for this day."
-                    : "Optional template fill from standard hours"
-                }
-                className="w-full rounded-lg border border-cyan-500/35 px-4 py-2.5 text-left text-sm text-cyan-200 hover:bg-cyan-950/30 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Generate this day from standard hours (optional)
-              </button>
-              {!canGenerateFromStandardHours ? (
-                <p
-                  className="text-xs text-slate-500"
-                  data-testid="generate-day-no-standard-hours"
-                >
-                  No standard hours template for this day — add a shift manually above.
-                </p>
-              ) : null}
-              {canManageStandardHours ? (
-                <button
-                  type="button"
-                  onClick={() => onEditStandardHours(staffId)}
-                  className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-400 hover:bg-white/[0.04]"
-                >
-                  Edit standard hours template
-                </button>
-              ) : null}
-            </>
-          ) : null}
-          {error ? (
-            <p className="text-sm text-rose-300" role="alert" data-testid="roster-shift-drawer-error">
-              {error}
-            </p>
-          ) : null}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {viewingExistingShift ? (
-            <p className="text-[11px] text-slate-500" data-testid="roster-shift-source-label">
-              {shiftSourceDisplayLabel(viewingExistingShift.shift_source)}
-            </p>
-          ) : null}
-
-          {canManage && canShowEditButton && !isInlineEditing ? (
             <button
               type="button"
-              onClick={handleStartInlineEdit}
-              data-testid="roster-shift-edit-start"
-              className="w-full rounded-lg border border-cyan-500/40 bg-cyan-950/20 px-4 py-2.5 text-sm font-medium text-cyan-200 hover:bg-cyan-950/40"
+              disabled={pending || !canGenerateFromStandardHours}
+              onClick={handleGenerateDay}
+              data-testid="generate-day-from-standard-hours"
+              title={
+                !canGenerateFromStandardHours
+                  ? "No standard hours are set for this day."
+                  : "Optional template fill from standard hours"
+              }
+              className="w-full rounded-lg border border-cyan-500/35 px-4 py-2.5 text-left text-sm text-cyan-200 hover:bg-cyan-950/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Edit shift
+              Generate this day from standard hours (optional)
             </button>
-          ) : null}
-
-          <ManualShiftForm
-            staffName={staffName}
-            clinicId={clinicId}
-            clinics={clinics}
-            shiftType={shiftType}
-            startsAt={startsAt}
-            endsAt={endsAt}
-            notes={notes}
-            adjustmentReason={adjustmentReason}
-            editReason={editReason}
-            showAdjustmentReason={!viewingExistingShift}
-            showEditReason={showInlineEditControls && editReasonRequired}
-            pending={pending}
-            readOnly={formReadOnly}
-            showSave={showCreateSave}
-            saveLabel="Add manual shift"
-            showInlineEditActions={showInlineEditControls}
-            onClinicChange={setClinicId}
-            onShiftTypeChange={setShiftType}
-            onStartsAtChange={setStartsAt}
-            onEndsAtChange={setEndsAt}
-            onNotesChange={setNotes}
-            onAdjustmentReasonChange={setAdjustmentReason}
-            onEditReasonChange={setEditReason}
-            onSubmit={viewingExistingShift && isInlineEditing ? handleUpdateShift : handleCreateManual}
-            onCancelEdit={handleCancelInlineEdit}
-          />
-
-          {viewingExistingShift && canManage && canCancelShift && !isInlineEditing ? (
-            <div
-              className="space-y-3 rounded-lg border border-rose-500/20 bg-rose-950/10 p-3"
-              data-testid="roster-shift-cancel-section"
-            >
-              <p className="text-sm font-medium text-rose-200">
-                {shiftIsGenerated ? "Remove this shift" : "Cancel this shift"}
+            {!canGenerateFromStandardHours ? (
+              <p className="text-xs text-slate-500" data-testid="generate-day-no-standard-hours">
+                No standard hours template for this day — add a shift manually above.
               </p>
-              <p className="text-xs text-slate-500">
-                Use this when the person was rostered but should not work this shift (sick call,
-                personal day, clinic closed, etc.).
-              </p>
-              <label className="block text-xs text-slate-400">
-                Cancellation reason
-                <select
-                  value={cancellationReason}
-                  onChange={(e) => setCancellationReason(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
-                  data-testid="roster-shift-cancellation-reason"
-                >
-                  <option value="">Select a reason…</option>
-                  {ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS.map((reason) => (
-                    <option key={reason} value={reason}>
-                      {formatRosterAdjustmentReasonLabel(reason)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="block text-xs text-slate-400">
-                Notes (optional)
-                <input
-                  value={cancelNotes}
-                  onChange={(e) => setCancelNotes(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
-                  placeholder="Additional context"
-                />
-              </label>
+            ) : null}
+            {canManageStandardHours ? (
               <button
                 type="button"
-                disabled={pending || !cancellationReason.trim()}
-                onClick={handleCancelShift}
-                data-testid="roster-shift-cancel-confirm"
-                className="w-full rounded-lg border border-rose-500/40 bg-rose-950/30 px-3 py-2.5 text-sm font-medium text-rose-200 hover:bg-rose-950/50 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => onEditStandardHours(staffId)}
+                className="w-full rounded-lg border border-white/[0.12] px-4 py-2.5 text-sm text-slate-400 hover:bg-white/[0.04]"
               >
-                {shiftIsGenerated ? "Confirm remove shift" : "Confirm cancel shift"}
+                Edit standard hours template
               </button>
-            </div>
-          ) : null}
+            ) : null}
+          </>
+        ) : null}
 
-          {canManage && !isInlineEditing ? (
-            <MarkDayAwayPanel
+        {mode !== "cell-actions" ? (
+          <>
+            {viewingExistingShift ? (
+              <p className="text-[11px] text-slate-500" data-testid="roster-shift-source-label">
+                {shiftSourceDisplayLabel(viewingExistingShift.shift_source)}
+              </p>
+            ) : null}
+
+            {canManage && canShowEditButton && !isInlineEditing ? (
+              <button
+                type="button"
+                onClick={handleStartInlineEdit}
+                data-testid="roster-shift-edit-start"
+                className="w-full rounded-lg border border-cyan-500/40 bg-cyan-950/20 px-4 py-2.5 text-sm font-medium text-cyan-200 hover:bg-cyan-950/40"
+              >
+                Edit shift
+              </button>
+            ) : null}
+
+            <ManualShiftForm
+              staffName={staffName}
+              clinicId={clinicId}
+              clinics={clinics}
+              shiftType={shiftType}
+              startsAt={startsAt}
+              endsAt={endsAt}
+              notes={notes}
+              adjustmentReason={adjustmentReason}
+              editReason={editReason}
+              showAdjustmentReason={!viewingExistingShift}
+              showEditReason={showInlineEditControls && editReasonRequired}
               pending={pending}
-              shiftCount={
-                viewingExistingShift &&
-                (viewingExistingShift.status === "scheduled" ||
-                  viewingExistingShift.status === "confirmed")
-                  ? Math.max(1, cancellableDayShifts.length)
-                  : cancellableDayShifts.length
+              readOnly={formReadOnly}
+              showSave={showCreateSave}
+              saveLabel="Add manual shift"
+              showInlineEditActions={showInlineEditControls}
+              onClinicChange={setClinicId}
+              onShiftTypeChange={setShiftType}
+              onStartsAtChange={setStartsAt}
+              onEndsAtChange={setEndsAt}
+              onNotesChange={setNotes}
+              onAdjustmentReasonChange={setAdjustmentReason}
+              onEditReasonChange={setEditReason}
+              onSubmit={
+                viewingExistingShift && isInlineEditing ? handleUpdateShift : handleCreateManual
               }
-              onMarkAway={handleMarkDayAway}
+              onCancelEdit={handleCancelInlineEdit}
             />
-          ) : null}
 
-          {error ? (
-            <p className="text-sm text-rose-300" role="alert" data-testid="roster-shift-drawer-error">
-              {error}
-            </p>
-          ) : null}
-        </div>
-      )}
+            {viewingExistingShift && canManage && canCancelShift && !isInlineEditing ? (
+              <div
+                className="space-y-3 rounded-lg border border-rose-500/20 bg-rose-950/10 p-3"
+                data-testid="roster-shift-cancel-section"
+              >
+                <p className="text-sm font-medium text-rose-200">
+                  {shiftIsGenerated ? "Remove this shift" : "Cancel this shift"}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Use this when the person was rostered but should not work this shift (sick call,
+                  personal day, clinic closed, etc.).
+                </p>
+                <label className="block text-xs text-slate-400">
+                  Cancellation reason
+                  <select
+                    value={cancellationReason}
+                    onChange={(e) => setCancellationReason(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+                    data-testid="roster-shift-cancellation-reason"
+                  >
+                    <option value="">Select a reason…</option>
+                    {ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS.map((reason) => (
+                      <option key={reason} value={reason}>
+                        {formatRosterAdjustmentReasonLabel(reason)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-xs text-slate-400">
+                  Notes (optional)
+                  <input
+                    value={cancelNotes}
+                    onChange={(e) => setCancelNotes(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-2 py-2 text-sm"
+                    placeholder="Additional context"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={pending || !cancellationReason.trim()}
+                  onClick={handleCancelShift}
+                  data-testid="roster-shift-cancel-confirm"
+                  className="w-full rounded-lg border border-rose-500/40 bg-rose-950/30 px-3 py-2.5 text-sm font-medium text-rose-200 hover:bg-rose-950/50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {shiftIsGenerated ? "Confirm remove shift" : "Confirm cancel shift"}
+                </button>
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
+        {showMarkAway ? (
+          <MarkDayAwayPanel
+            pending={pending}
+            shiftCount={cancellableDayShifts.length}
+            onMarkAway={handleMarkDayAway}
+          />
+        ) : null}
+
+        {drawerError}
+      </div>
     </RosterRightDrawer>
   );
 }
