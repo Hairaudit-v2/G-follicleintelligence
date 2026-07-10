@@ -82,6 +82,24 @@ test("filterPlatformTenantList: demo tenants grouped/hidden correctly", () => {
   assert.equal(withDemo.length, 2);
 });
 
+test("filterPlatformTenantList: production-visible showcase demos appear even when includeDemo=false", () => {
+  const showcaseDemo = row({
+    id: DEMO_ID,
+    slug: "ihrg-global",
+    name: "International Hair Restoration Group",
+    is_demo: true,
+    is_production_visible: true,
+  });
+  const filtered = filterPlatformTenantList([ACTIVE_PRODUCTION, showcaseDemo], {
+    includeDemo: false,
+    includeHidden: false,
+  });
+  assert.deepEqual(
+    filtered.map((t) => t.slug).sort(),
+    [PRODUCTION_TENANT_SLUG, "ihrg-global"].sort()
+  );
+});
+
 test("groupPlatformTenantsForAdminUi: separates production, demo, archived", () => {
   const groups = groupPlatformTenantsForAdminUi([ACTIVE_PRODUCTION, DEMO, ARCHIVED]);
   assert.equal(groups.production.length, 1);

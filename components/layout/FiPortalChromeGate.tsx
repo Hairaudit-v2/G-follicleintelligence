@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { BodyScrollUnlockOnNavigate } from "@/components/layout/BodyScrollUnlockOnNavigate";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -28,13 +29,24 @@ function isMarketingBareShell(pathname: string | null): boolean {
 export function FiPortalChromeGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   if (isFiAdminPath(pathname)) {
-    return <>{children}</>;
+    return (
+      <>
+        <BodyScrollUnlockOnNavigate />
+        {children}
+      </>
+    );
   }
   if (isMarketingBareShell(pathname)) {
-    return <div className="min-h-screen bg-slate-950 text-slate-100">{children}</div>;
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100">
+        <BodyScrollUnlockOnNavigate />
+        {children}
+      </div>
+    );
   }
   return (
     <>
+      <BodyScrollUnlockOnNavigate />
       <Header />
       <main>{children}</main>
       <Footer />

@@ -20,6 +20,7 @@ import {
   resolveFiOsQuickCreateItems,
   type ResolvedFiOsQuickCreateItem,
 } from "@/src/lib/fiAdmin/fiOsQuickCreateItems";
+import { useRouteProgress } from "@/src/components/navigation/RouteProgressProvider";
 
 const ICONS: Record<string, typeof Stethoscope> = {
   consultation: Stethoscope,
@@ -51,6 +52,7 @@ export function FiOsQuickCreatePalette({
   onOpenCreateLead?: () => void;
 }) {
   const router = useRouter();
+  const { startPending } = useRouteProgress();
   const base = `/fi-admin/${tenantId.trim()}`;
   const items = useMemo(
     () => resolveFiOsQuickCreateItems(base, showCrmNav, showBookingsBoard),
@@ -93,10 +95,11 @@ export function FiOsQuickCreatePalette({
         close();
         return;
       }
+      startPending(null);
       router.push(it.href);
       close();
     },
-    [router, close, onOpenCreateLead]
+    [router, close, onOpenCreateLead, startPending]
   );
 
   useEffect(() => {

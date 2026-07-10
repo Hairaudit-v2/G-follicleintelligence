@@ -8,7 +8,7 @@
  *   pnpm tsx scripts/seed-ihrg-demo-data.ts --tenant ihrg-demo --profile alive
  *   npm run seed:ihrg-demo
  *
- * Profiles: light | standard | alive (default) | enterprise
+ * Profiles: light | standard | alive (default) | enterprise | showcase
  * Tenant aliases: ihrg-demo → ihrg-global (canonical slug)
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY

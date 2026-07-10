@@ -144,12 +144,31 @@ async function findOrCreateDemoTenant(
         tenantId,
       };
     }
+    // Keep demo flag and restore production visibility for showcase re-seeds.
+    const now = new Date().toISOString();
+    const { error: visibilityErr } = await supabase
+      .from("fi_tenants")
+      .update({
+        is_demo: true,
+        is_production_visible: true,
+        archived_at: null,
+        archived_by: null,
+        archive_reason: null,
+        updated_at: now,
+      })
+      .eq("id", tenantId);
+    if (visibilityErr) throw new Error(visibilityErr.message);
     return { ok: true, tenantId, createdTenant: false };
   }
 
   const { data: inserted, error: insErr } = await supabase
     .from("fi_tenants")
-    .insert({ name: ENTERPRISE_DEMO_TENANT_NAME, slug: ENTERPRISE_DEMO_TENANT_SLUG })
+    .insert({
+      name: ENTERPRISE_DEMO_TENANT_NAME,
+      slug: ENTERPRISE_DEMO_TENANT_SLUG,
+      is_demo: true,
+      is_production_visible: true,
+    })
     .select("id")
     .single();
   if (insErr) throw new Error(insErr.message);

@@ -1,7 +1,7 @@
 import type { EnterpriseDemoVolumeOptions } from "@/src/lib/enterprise-demo/enterpriseDemoVolumeOptions";
 import { ENTERPRISE_DEMO_TENANT_SLUG } from "@/src/lib/enterprise-demo/enterpriseDemoConstants";
 
-export type IhrgDemoProfile = "light" | "standard" | "alive" | "enterprise";
+export type IhrgDemoProfile = "light" | "standard" | "alive" | "enterprise" | "showcase";
 
 export const IHRG_DEMO_DEFAULT_PROFILE: IhrgDemoProfile = "alive";
 
@@ -74,6 +74,18 @@ const PROFILE_CONFIGS: Record<IhrgDemoProfile, Omit<IhrgDemoProfileConfig, "prof
     competencyProjectionsPerStaff: 4,
     crmTasksPerClinic: 8,
   },
+  /** Maximum dense journey data for live sales demos / prospective-company pitch. */
+  showcase: {
+    patientsPerClinic: 40,
+    surgeriesPerClinic: 24,
+    leadflowLeadsPerClinic: 16,
+    crmLeadsPerClinic: 22,
+    calendarEventsPerClinic: 30,
+    analyticsEventsTotal: 400,
+    receptionTasksPerClinic: 14,
+    competencyProjectionsPerStaff: 5,
+    crmTasksPerClinic: 14,
+  },
 };
 
 export function ihrgDemoProfileConfig(profile: IhrgDemoProfile): IhrgDemoProfileConfig {
@@ -82,10 +94,16 @@ export function ihrgDemoProfileConfig(profile: IhrgDemoProfile): IhrgDemoProfile
 
 export function parseIhrgDemoProfile(value: string | undefined): IhrgDemoProfile {
   const raw = (value ?? IHRG_DEMO_DEFAULT_PROFILE).trim().toLowerCase();
-  if (raw === "light" || raw === "standard" || raw === "alive" || raw === "enterprise") {
+  if (
+    raw === "light" ||
+    raw === "standard" ||
+    raw === "alive" ||
+    raw === "enterprise" ||
+    raw === "showcase"
+  ) {
     return raw;
   }
   throw new Error(
-    `Unknown IHRG demo profile "${value}". Use light, standard, alive, or enterprise.`
+    `Unknown IHRG demo profile "${value}". Use light, standard, alive, enterprise, or showcase.`
   );
 }

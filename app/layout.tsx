@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { FiPortalChromeGate } from "@/components/layout/FiPortalChromeGate";
+import { RouteProgressRoot } from "@/components/layout/RouteProgressRoot";
 import { buildRootMetadata } from "@/lib/seo/page-metadata";
 import { SITE_URL } from "@/lib/seo/constants";
 import { getRootStructuredData } from "@/lib/structured-data";
@@ -26,7 +27,9 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="min-h-screen font-sans antialiased">
         <JsonLd data={getRootStructuredData(SITE_URL)} />
-        <FiPortalChromeGate>{children}</FiPortalChromeGate>
+        <RouteProgressRoot>
+          <FiPortalChromeGate>{children}</FiPortalChromeGate>
+        </RouteProgressRoot>
         <Analytics />
         <SpeedInsights />
       </body>

@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { useBodyScrollLock } from "@/src/lib/dom/useBodyScrollLock";
 
 export type RosterRightDrawerProps = {
   open: boolean;
@@ -36,14 +37,7 @@ export function RosterRightDrawer({
 }: RosterRightDrawerProps) {
   const titleId = useId();
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+  useBodyScrollLock(open);
 
   useEffect(() => {
     if (!open) return;

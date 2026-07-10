@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { crmCreateLeadAction } from "@/lib/actions/fi-crm-actions";
 import { LabeledTextInput } from "@/src/components/fi-admin/consultations/consultationOsPreviewFields";
+import { useRouteProgress } from "@/src/components/navigation/RouteProgressProvider";
 
 export function FiOsCreateLeadModal({
   tenantId,
@@ -17,6 +18,7 @@ export function FiOsCreateLeadModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
+  const { startPending } = useRouteProgress();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -82,6 +84,7 @@ export function FiOsCreateLeadModal({
       }
       reset();
       onOpenChange(false);
+      startPending(null);
       router.push(`/fi-admin/${tenantId.trim()}/crm/leads/${encodeURIComponent(r.lead.id)}`);
       router.refresh();
     } finally {

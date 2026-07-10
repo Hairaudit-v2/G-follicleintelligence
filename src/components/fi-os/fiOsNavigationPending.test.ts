@@ -22,6 +22,11 @@ test("FiOsAppShell wires navigation pending shell attributes and progress strip"
   assert.match(src, /onClickCapture=\{navigationPendingEnabled \? onInternalNavClick/);
 });
 
+test("root layout mounts site-wide RouteProgressRoot", () => {
+  const layout = readFileSync("app/layout.tsx", "utf8");
+  assert.match(layout, /RouteProgressRoot/);
+});
+
 test("tenant loading.tsx renders shared FiOsPageLoading", () => {
   const src = readFileSync(LOADING, "utf8");
   assert.match(src, /FiOsPageLoading/);
@@ -62,11 +67,11 @@ test("Calendar quick create submit shows creating pending copy", () => {
   assert.match(src, /disabled=\{busy/);
 });
 
-test("navigation provider resets via pathname and search params", () => {
+test("navigation provider is backed by site-wide RouteProgress", () => {
   const src = readFileSync(PROVIDER, "utf8");
-  assert.match(src, /usePathname/);
-  assert.match(src, /useSearchParams/);
-  assert.match(src, /setIsNavigationPending\(false\)/);
+  assert.match(src, /useRouteProgress/);
+  assert.match(src, /startPending/);
+  assert.match(src, /isNavigationPending: isPending/);
 });
 
 test("FiOsPageLoading keeps visible non-animated busy state hooks", () => {

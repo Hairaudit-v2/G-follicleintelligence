@@ -75,7 +75,7 @@ export function Header() {
           >
             <ul className="flex items-center gap-8 whitespace-nowrap md:gap-10 lg:gap-12">
               <li className="shrink-0">
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
@@ -140,7 +140,9 @@ export function Header() {
             >
               <Link href="/fi-login">Partner Access</Link>
             </Button>
-            <DropdownMenu>
+            {/* modal=false: avoid react-remove-scroll body lock for a simple nav menu
+                (intermittent stuck page scroll after open/close/navigation). */}
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild className="lg:hidden">
                 <Button
                   variant="ghost"

@@ -362,6 +362,13 @@ body {
     animation: fi-os-nav-progress 1.1s ease-in-out infinite;
   }
 
+  /** Site-wide soft-navigation progress (RouteProgressProvider) — prefer reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fi-os-nav-progress {
+      animation: none;
+    }
+  }
+
   .fi-tenant-nav-active {
     border-color: color-mix(in srgb, var(--fi-tenant-accent) 25%, transparent);
     background-color: var(--fi-tenant-primary-soft);

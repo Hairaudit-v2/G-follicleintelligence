@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ArrowRight, Briefcase, LineChart, Loader2, Search, User, X } from "lucide-react";
 import type { ClinicOsGlobalSearchPayload } from "@/src/lib/fiAdmin/clinicOsGlobalSearchTypes";
+import { useBodyScrollLock } from "@/src/lib/dom/useBodyScrollLock";
 import { FiCaseCard } from "@/src/components/fi-design/FiCaseCard";
 import { FiEmptyState } from "@/src/components/fi-design/FiEmptyState";
 import { FiLeadCard } from "@/src/components/fi-design/FiLeadCard";
@@ -81,14 +82,7 @@ export function ClinicOsGlobalSearch({
     return () => window.cancelAnimationFrame(id);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+  useBodyScrollLock(open);
 
   useEffect(() => {
     if (!open) {

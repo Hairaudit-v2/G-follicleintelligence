@@ -46,8 +46,19 @@ export function filterPlatformTenantList(
 
   return tenants.filter((t) => {
     if (!includeArchived && isTenantArchived(t)) return false;
-    if (!includeDemo && isTenantDemo(t) && !isTenantArchived(t)) return false;
+    // Hygiene flag: demos/sandboxes stay out of the default production directory
+    // unless is_production_visible is flipped true for an intentional showcase.
     if (!includeHidden && t.is_production_visible === false && !isTenantArchived(t)) return false;
+    // Demo tenants are omitted when includeDemo=false, except production-visible
+    // showcase demos (e.g. IHRG enterprise pitch) which must appear in the switcher.
+    if (
+      !includeDemo &&
+      isTenantDemo(t) &&
+      !isTenantArchived(t) &&
+      t.is_production_visible !== true
+    ) {
+      return false;
+    }
     return true;
   });
 }

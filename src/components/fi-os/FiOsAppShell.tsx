@@ -44,6 +44,7 @@ import {
   useFiOsNavigationPending,
 } from "@/src/components/fi-os/FiOsNavigationPendingProvider";
 import { cn } from "@/lib/utils";
+import { useBodyScrollLock } from "@/src/lib/dom/useBodyScrollLock";
 
 /**
  * Authenticated FI OS workspace chrome: fixed primary rail, sticky command bar, scrollable main.
@@ -286,14 +287,17 @@ function FiOsAppShellBody({
       window.removeEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
   }, []);
 
+  // Reference-counted body lock — stacks safely with global search / workspace drawers.
+  useBodyScrollLock(mobileNav || quickCreateOpen || moreNavOpen);
+
+  // Soft-nav: always release overlay locks so body never stays stuck after a route change.
   useEffect(() => {
-    if (!mobileNav && !quickCreateOpen && !moreNavOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [mobileNav, quickCreateOpen, moreNavOpen]);
+    setMobileNav(false);
+    setMoreNavOpen(false);
+    setSearchOpen(false);
+    setQuickCreateOpen(false);
+    setCreateLeadOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     function measureChromeViewport() {
