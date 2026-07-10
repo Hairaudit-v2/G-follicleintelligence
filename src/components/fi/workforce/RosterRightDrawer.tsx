@@ -1,22 +1,11 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useEffect, useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import {
-  fiOsChromeClasses,
-  fiOsChromeCssVars,
-  FI_OS_TOP_CHROME_OFFSET_FALLBACK,
-} from "@/src/components/fi-os/fiOsChromeTokens";
+import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
 export type RosterRightDrawerProps = {
   open: boolean;
@@ -29,25 +18,12 @@ export type RosterRightDrawerProps = {
   wide?: boolean;
 };
 
-function readFiOsShellViewportStyle(): CSSProperties {
-  if (typeof document === "undefined") return {};
-  const shell = document.querySelector<HTMLElement>(".fi-os-shell");
-  if (!shell) return {};
-  const computed = getComputedStyle(shell);
-  const top = computed.getPropertyValue(fiOsChromeCssVars.topOffset).trim();
-  const bottom = computed.getPropertyValue(fiOsChromeCssVars.bottomOffset).trim();
-  const style: Record<string, string> = {};
-  if (top) style[fiOsChromeCssVars.topOffset] = top;
-  if (bottom) style[fiOsChromeCssVars.bottomOffset] = bottom;
-  return style as CSSProperties;
-}
-
-function shellViewportOffsetsMissing(style: CSSProperties): boolean {
-  const top = style[fiOsChromeCssVars.topOffset as keyof CSSProperties];
-  const bottom = style[fiOsChromeCssVars.bottomOffset as keyof CSSProperties];
-  return !top && !bottom;
-}
-
+/**
+ * Full-viewport portal drawer.
+ *
+ * IMPORTANT: Do not use chrome-offset top/bottom vars on body portals — measured
+ * shell offsets can collapse the overlay to zero height (click appears to do nothing).
+ */
 export function RosterRightDrawer({
   open,
   title,
@@ -59,32 +35,6 @@ export function RosterRightDrawer({
   wide = false,
 }: RosterRightDrawerProps) {
   const titleId = useId();
-  const [viewportStyle, setViewportStyle] = useState<CSSProperties>({});
-  const useFullViewport = shellViewportOffsetsMissing(viewportStyle);
-
-  const syncViewportStyle = () => {
-    setViewportStyle(readFiOsShellViewportStyle());
-  };
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    syncViewportStyle();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    syncViewportStyle();
-
-    const shell = document.querySelector<HTMLElement>(".fi-os-shell");
-    const ro = new ResizeObserver(syncViewportStyle);
-    if (shell) ro.observe(shell);
-    window.addEventListener("resize", syncViewportStyle);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", syncViewportStyle);
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -95,34 +45,27 @@ export function RosterRightDrawer({
     };
   }, [open]);
 
-  if (!open || typeof document === "undefined") return null;
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
 
-  const overlayStyle: CSSProperties | undefined = useFullViewport
-    ? undefined
-    : {
-        ...viewportStyle,
-        [fiOsChromeCssVars.topOffset as string]:
-          viewportStyle[fiOsChromeCssVars.topOffset as keyof CSSProperties] ??
-          FI_OS_TOP_CHROME_OFFSET_FALLBACK,
-        [fiOsChromeCssVars.bottomOffset as string]:
-          viewportStyle[fiOsChromeCssVars.bottomOffset as keyof CSSProperties] ?? "0px",
-      };
+  if (!open || typeof document === "undefined") return null;
 
   return createPortal(
     <div
-      className={cn(
-        useFullViewport
-          ? "fixed inset-0 z-[200] flex justify-end bg-black/55 backdrop-blur-[2px]"
-          : cn(fiOsChromeClasses.rightDrawerOverlay, "z-[200] bg-black/55 backdrop-blur-[2px]")
-      )}
-      style={overlayStyle}
+      className="fixed inset-0 z-[400] flex justify-end bg-black/60 backdrop-blur-[2px]"
       role="presentation"
       data-testid={testId}
-      data-roster-drawer-viewport={useFullViewport ? "full" : "chrome-aware"}
+      data-roster-drawer-viewport="full"
     >
       <button
         type="button"
-        className={fiOsChromeClasses.rightDrawerBackdrop}
+        className="absolute inset-0 cursor-default bg-transparent"
         aria-label="Close drawer"
         onClick={onClose}
       />
@@ -131,18 +74,12 @@ export function RosterRightDrawer({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          fiOsChromeClasses.rightDrawerPanel,
-          "border border-white/[0.08] bg-[#0B1220]/98 shadow-2xl backdrop-blur-xl",
+          "relative z-[1] flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border border-white/[0.08] bg-[#0B1220] shadow-2xl sm:mr-2 sm:mt-2 sm:mb-2 sm:max-h-[calc(100dvh-1rem)] sm:max-w-md sm:rounded-2xl",
           wide ? "sm:max-w-2xl" : "sm:max-w-md"
         )}
         onClick={(event) => event.stopPropagation()}
       >
-        <div
-          className={cn(
-            fiOsChromeClasses.rightDrawerHeader,
-            "flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-4 sm:px-5"
-          )}
-        >
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-4 sm:px-5">
           <div className="min-w-0">
             <h2 id={titleId} className="text-base font-semibold text-slate-50 sm:text-lg">
               {title}
@@ -159,19 +96,17 @@ export function RosterRightDrawer({
           </button>
         </div>
 
-        <div className={cn(fiOsChromeClasses.rightDrawerBodyScroll, "px-4 py-4 sm:px-5")}>
+        <div
+          className={cn(
+            fiOsChromeClasses.rightDrawerBodyScroll,
+            "min-h-0 flex-1 px-4 py-4 sm:px-5"
+          )}
+        >
           {children}
         </div>
 
         {footer ? (
-          <div
-            className={cn(
-              fiOsChromeClasses.rightDrawerFooter,
-              "border-t border-white/[0.08] px-4 py-3 sm:px-5"
-            )}
-          >
-            {footer}
-          </div>
+          <div className="shrink-0 border-t border-white/[0.08] px-4 py-3 sm:px-5">{footer}</div>
         ) : null}
       </div>
     </div>,

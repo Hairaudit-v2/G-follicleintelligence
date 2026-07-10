@@ -222,6 +222,20 @@ Edit `staffStandardHoursManageGate.server.ts` and keep UI deny copy via `resolve
 - Removed dead `RosterAvailabilityPanel`; centralised deny + day-away helpers to prevent dual-path regressions.  
 - Commits: `1565b010`, `0362a28a` (plus earlier `0f6d6df2`, `ef91421b`).
 
+### 2026-07-10 — Drawer open “does nothing” (env not required)
+
+**Not an `.env.local` issue.** Roster mutations use session auth + role/capability, not a feature flag env var.
+
+**Root cause (UI):** `RosterRightDrawer` used chrome-offset CSS vars on a `document.body` portal. Measured shell offsets could collapse the overlay height to ~0px so clicks set drawer state but nothing was visible.
+
+**Fixes:**
+
+- Full-viewport portal only (`fixed inset-0 z-[400]`, explicit panel height).  
+- Always open the drawer on grid cell/shift click (permission shown inside drawer + banner).  
+- Clear “view-only” vs “editing enabled” banner so operators know if the account can mutate.  
+
+**Env:** none required for Add shift. Need Supabase session + manage permission (`roster.manage` capability, HR-OS role, or clinic/ops tenant admin).
+
 ---
 
 **End of log.** When you ship further roster UX, append a dated section here and a row under **Recent commits**.

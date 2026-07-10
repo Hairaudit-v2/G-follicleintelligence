@@ -251,7 +251,7 @@ export function RosterCommandCentreView({
     localDate: string;
     shiftId: string | null;
     selectedShift?: RosterGridShift | null;
-  }) {
+  }): boolean {
     const nextDrawer = openRosterShiftDrawer(input);
     const staff = resolveRosterDrawerStaffContext({
       drawer: nextDrawer,
@@ -261,41 +261,47 @@ export function RosterCommandCentreView({
     });
     if (!staff) {
       setActionError(ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE);
-      return;
+      return false;
     }
-    setActionError(null);
     setDrawerState(nextDrawer);
+    return true;
   }
 
+  /**
+   * Always open the drawer for a grid cell. Permission denials are shown inside
+   * the drawer and as a banner — never as a silent no-op.
+   * Grid rows are already eligibility-filtered server-side.
+   */
   function handleCellClick(staffId: string, localDate: string) {
-    const clickOutcome = resolveRosterCellClickOutcome({
-      staffId,
-      eligibleStaffIds: payload.eligibleStaffIds,
-      canManage,
-      manageDeniedReason: manageDeniedMessage,
-    });
-
-    if (clickOutcome.outcome === "deny") {
-      setActionError(clickOutcome.message);
+    const onGrid = rosterGridStaffOptions.some((s) => s.id === staffId);
+    if (!onGrid) {
+      setActionError(
+        "This staff member is not on the roster grid for this period. Clear filters or check employment status."
+      );
       return;
     }
 
-    openShiftDrawer({
-      mode: clickOutcome.mode,
+    const opened = openShiftDrawer({
+      mode: "cell-actions",
       staffMemberId: staffId,
       localDate,
       shiftId: null,
     });
+    if (!opened) return;
+
+    setActionError(canManage ? null : manageDeniedMessage);
   }
 
   function handleShiftClick(shift: RosterGridShift) {
-    openShiftDrawer({
+    const opened = openShiftDrawer({
       mode: "edit",
       staffMemberId: shift.staff_id,
       localDate: shift.localDate ?? shift.starts_at.slice(0, 10),
       shiftId: shift.id,
       selectedShift: shift,
     });
+    if (!opened) return;
+    setActionError(canManage ? null : manageDeniedMessage);
   }
 
   function handleGenerateRoster(overwriteGeneratedOnly: boolean) {
@@ -418,14 +424,25 @@ export function RosterCommandCentreView({
 
       {!canManage ? (
         <section
-          className="rounded-xl border border-slate-500/30 bg-slate-900/60 px-4 py-3"
+          className="rounded-xl border border-amber-500/40 bg-amber-950/40 px-4 py-3"
           data-testid="roster-manage-denied-banner"
           role="status"
         >
-          <p className="text-sm font-medium text-slate-200">View-only roster access</p>
-          <p className="mt-1 text-xs text-slate-400">{manageDeniedMessage}</p>
+          <p className="text-sm font-semibold text-amber-100">View-only roster access</p>
+          <p className="mt-1 text-sm text-amber-50/90">{manageDeniedMessage}</p>
+          <p className="mt-2 text-xs text-amber-100/70">
+            You can open cells to inspect, but Add shift / Cancel / Mark away will stay disabled
+            until your account has roster manage permission (fi_users HR role, tenant admin, or
+            staff capability <code className="text-amber-50">roster.manage</code>). This is not an
+            .env.local setting.
+          </p>
         </section>
-      ) : null}
+      ) : (
+        <p className="text-xs text-emerald-400/80" data-testid="roster-manage-enabled-hint">
+          Roster editing is enabled for your account — click an empty cell to add a shift or mark
+          leave.
+        </p>
+      )}
 
       <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-4">
         <div className="flex flex-wrap items-end gap-3">

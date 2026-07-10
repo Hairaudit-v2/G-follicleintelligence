@@ -150,16 +150,20 @@ test("RosterWeekGrid exposes per-staff standard-hours CTA and add-shift cell hin
   assert.equal(expectedEditorHref(TENANT, STAFF).includes(STAFF), true);
 });
 
-test("RosterRightDrawer portals to document.body with chrome-aware and full-viewport fallback", () => {
+test("RosterRightDrawer portals full-viewport overlay to document.body (no chrome-offset collapse)", () => {
   sourceIncludes(
     ROSTER_DRAWER,
     '"use client"',
     "createPortal",
     "document.body",
-    "fiOsChromeClasses.rightDrawerOverlay",
-    "z-[200]",
-    "data-roster-drawer-viewport",
-    "useLayoutEffect"
+    'data-roster-drawer-viewport="full"',
+    "fixed inset-0 z-[400]",
+    "max-h-[100dvh]"
+  );
+  const src = readFileSync(ROSTER_DRAWER, "utf8");
+  assert.ok(
+    !src.includes("rightDrawerOverlay"),
+    "must not use chrome-offset overlay that can collapse to zero height"
   );
 });
 
