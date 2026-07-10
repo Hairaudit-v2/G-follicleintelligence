@@ -13,8 +13,10 @@ export function ReportCard(props: {
   definition: ReportDefinition;
   liveHref: string | null;
   onGenerate: () => void;
+  onSchedule?: () => void;
+  scheduleBusy?: boolean;
 }) {
-  const { definition: def, liveHref, onGenerate } = props;
+  const { definition: def, liveHref, onGenerate, onSchedule, scheduleBusy } = props;
   const enabled = def.generateEnabled;
 
   return (
@@ -59,6 +61,17 @@ export function ReportCard(props: {
         >
           {enabled ? "Generate" : "Coming soon"}
         </button>
+        {enabled && onSchedule ? (
+          <button
+            type="button"
+            className={financialOsClasses.secondaryButton}
+            disabled={scheduleBusy}
+            onClick={onSchedule}
+            title="Enable daily scheduled snapshot for this report"
+          >
+            Schedule
+          </button>
+        ) : null}
         {liveHref ? (
           <Link href={liveHref} className={financialOsClasses.secondaryButton}>
             Open live view

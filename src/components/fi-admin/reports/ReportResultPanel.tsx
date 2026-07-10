@@ -11,9 +11,21 @@ export function ReportResultPanel(props: {
   liveHref?: string | null;
   onExportCsv?: () => void;
   exportBusy?: boolean;
+  onSaveSnapshot?: () => void;
+  saveBusy?: boolean;
+  saveMessage?: string | null;
   onClose?: () => void;
 }) {
-  const { result, liveHref, onExportCsv, exportBusy, onClose } = props;
+  const {
+    result,
+    liveHref,
+    onExportCsv,
+    exportBusy,
+    onSaveSnapshot,
+    saveBusy,
+    saveMessage,
+    onClose,
+  } = props;
 
   return (
     <section
@@ -30,6 +42,16 @@ export function ReportResultPanel(props: {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {onSaveSnapshot ? (
+            <button
+              type="button"
+              className={financialOsClasses.secondaryButton}
+              disabled={saveBusy}
+              onClick={onSaveSnapshot}
+            >
+              {saveBusy ? "Saving…" : "Save snapshot"}
+            </button>
+          ) : null}
           {onExportCsv ? (
             <button
               type="button"
@@ -56,6 +78,12 @@ export function ReportResultPanel(props: {
           ) : null}
         </div>
       </div>
+
+      {saveMessage ? (
+        <p className={financialOsClasses.successText} role="status">
+          {saveMessage}
+        </p>
+      ) : null}
 
       <div className={financialOsClasses.metricGrid}>
         {result.metrics.map((m) => (

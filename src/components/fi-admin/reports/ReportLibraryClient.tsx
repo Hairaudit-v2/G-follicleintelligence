@@ -6,8 +6,12 @@ import { useRouter } from "next/navigation";
 import {
   exportReportCsvAction,
   generateReportAction,
+  loadReportRunAction,
+  saveReportRunAction,
+  upsertReportScheduleAction,
 } from "@/lib/actions/fi-report-actions";
 import { ReportCard } from "@/src/components/fi-admin/reports/ReportCard";
+import { ReportRecentRunsPanel } from "@/src/components/fi-admin/reports/ReportRecentRunsPanel";
 import { ReportResultPanel } from "@/src/components/fi-admin/reports/ReportResultPanel";
 import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import {
@@ -30,6 +34,7 @@ import {
 } from "@/src/lib/reports/reportFilters";
 import { periodFromPreset } from "@/src/lib/financialOs/expenses/expensePeriodCore";
 import type { ReportGenerateResult } from "@/src/lib/reports/reportTypes";
+import type { ReportRunListItem } from "@/src/lib/reports/reportRunTypes";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_FILTERS: Array<ReportCategory | "all"> = [
@@ -46,6 +51,7 @@ export function ReportLibraryClient(props: {
   periodEnd: string;
   catalog: readonly ReportDefinition[];
   filterOptions?: ReportFilterOptions;
+  initialRuns?: ReportRunListItem[];
 }) {
   const { tenantId, filterOptions } = props;
   const router = useRouter();
@@ -62,9 +68,14 @@ export function ReportLibraryClient(props: {
   );
   const [busy, startTransition] = useTransition();
   const [exportBusy, startExport] = useTransition();
+  const [saveBusy, startSave] = useTransition();
+  const [runBusy, startRunLoad] = useTransition();
+  const [scheduleBusy, startSchedule] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [result, setResult] = useState<ReportGenerateResult | null>(null);
   const [activeReportId, setActiveReportId] = useState<ReportId | null>(null);
+  const [runs, setRuns] = useState<ReportRunListItem[]>(props.initialRuns ?? []);
 
   // Prefer stored period when URL has no explicit override (server default 30d).
   useEffect(() => {
@@ -122,6 +133,7 @@ export function ReportLibraryClient(props: {
   function runGenerate(def: ReportDefinition) {
     if (!def.generateEnabled) return;
     setError(null);
+    setSaveMessage(null);
     setActiveReportId(def.id);
     const filters = currentFilters();
     startTransition(async () => {
@@ -143,6 +155,84 @@ export function ReportLibraryClient(props: {
       }
       setResult(r.result);
       setError(null);
+    });
+  }
+
+  function runSaveSnapshot() {
+    if (!result) return;
+    setSaveMessage(null);
+    setError(null);
+    startSave(async () => {
+      const r = await saveReportRunAction({
+        tenantId,
+        result,
+        params: {
+          periodStart: from,
+          periodEnd: to,
+          filters: currentFilters(),
+        },
+      });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setSaveMessage(`Snapshot saved (${r.runId.slice(0, 8)}…).`);
+      setRuns((prev) => [
+        {
+          id: r.runId,
+          report_id: result.reportId,
+          title: result.title,
+          period_start: result.periodStart,
+          period_end: result.periodEnd,
+          source: "manual",
+          status: "completed",
+          created_at: new Date().toISOString(),
+        },
+        ...prev,
+      ].slice(0, 30));
+    });
+  }
+
+  function openSavedRun(runId: string) {
+    setError(null);
+    setSaveMessage(null);
+    startRunLoad(async () => {
+      const r = await loadReportRunAction({ tenantId, runId });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setResult(r.result);
+      setActiveReportId(r.result.reportId as ReportId);
+      setFrom(r.result.periodStart);
+      setTo(r.result.periodEnd);
+    });
+  }
+
+  function enableWeeklySchedule(def: ReportDefinition) {
+    if (!def.generateEnabled) return;
+    setError(null);
+    setSaveMessage(null);
+    const filters = currentFilters();
+    startSchedule(async () => {
+      const r = await upsertReportScheduleAction({
+        tenantId,
+        reportId: def.id,
+        periodPreset: def.defaultPeriodPreset,
+        isActive: true,
+        procedureType: filters.procedureType,
+        attributionSource: filters.attributionSource,
+        campaign: filters.campaign,
+        arRisk: filters.arRisk,
+        snapshotStatus: filters.snapshotStatus,
+      });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setSaveMessage(
+        `Weekly schedule enabled for “${def.title}” (${def.defaultPeriodPreset}). Cron: /api/cron/reports/scheduled-runs`
+      );
     });
   }
 
@@ -423,12 +513,18 @@ export function ReportLibraryClient(props: {
           }
           onExportCsv={runExport}
           exportBusy={exportBusy}
+          onSaveSnapshot={runSaveSnapshot}
+          saveBusy={saveBusy}
+          saveMessage={saveMessage}
           onClose={() => {
             setResult(null);
             setActiveReportId(null);
+            setSaveMessage(null);
           }}
         />
       ) : null}
+
+      <ReportRecentRunsPanel runs={runs} busy={runBusy} onOpen={openSavedRun} />
 
       {filtered.length === 0 ? (
         <div className={financialOsClasses.emptyStatePanel}>
@@ -442,6 +538,8 @@ export function ReportLibraryClient(props: {
               definition={def}
               liveHref={liveHrefFor(def)}
               onGenerate={() => runGenerate(def)}
+              onSchedule={() => enableWeeklySchedule(def)}
+              scheduleBusy={scheduleBusy}
             />
           ))}
         </div>

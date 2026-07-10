@@ -10,6 +10,7 @@ import { loadSurgeryEconomicsFilterOptions } from "@/src/lib/financialOs/financi
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { REPORT_CATALOG } from "@/src/lib/reports/reportCatalog";
 import type { ReportFilterOptions } from "@/src/lib/reports/reportFilters";
+import { listReportRunsForTenant } from "@/src/lib/reports/reportRuns.server";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
@@ -65,10 +66,12 @@ export default async function FiAdminReportsLibraryPage({
     attributionSources: [],
     campaigns: [],
   };
+  let initialRuns: Awaited<ReturnType<typeof listReportRunsForTenant>> = [];
   try {
-    const [surgeryOpts, attrOpts] = await Promise.all([
+    const [surgeryOpts, attrOpts, runs] = await Promise.all([
       loadSurgeryEconomicsFilterOptions(tid),
       loadRevenueAttributionFilterOptions(tid),
+      listReportRunsForTenant(tid, { limit: 20 }),
     ]);
     const procedureSet = new Set([
       ...surgeryOpts.procedureTypes,
@@ -79,8 +82,9 @@ export default async function FiAdminReportsLibraryPage({
       attributionSources: attrOpts.sources.filter(Boolean),
       campaigns: attrOpts.campaigns.filter(Boolean),
     };
+    initialRuns = runs;
   } catch {
-    // Filter dropdowns stay empty; reports still generate without options.
+    // Filter dropdowns / runs stay empty; reports still generate without options.
   }
 
   return (
@@ -91,6 +95,7 @@ export default async function FiAdminReportsLibraryPage({
         periodEnd={period_end}
         catalog={REPORT_CATALOG}
         filterOptions={filterOptions}
+        initialRuns={initialRuns}
       />
     </div>
   );
