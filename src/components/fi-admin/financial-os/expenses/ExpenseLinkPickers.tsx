@@ -49,7 +49,7 @@ export function ExpenseLinkPickers(props: {
           props.onChange({
             ...props.value,
             leadId: hit.id,
-            leadLabel: hit.name,
+            leadLabel: hit.name ?? null,
           })
         }
         onClear={() =>
@@ -71,7 +71,7 @@ export function ExpenseLinkPickers(props: {
           props.onChange({
             ...props.value,
             caseId: hit.id,
-            caseLabel: hit.label,
+            caseLabel: hit.label ?? null,
           })
         }
         onClear={() =>
