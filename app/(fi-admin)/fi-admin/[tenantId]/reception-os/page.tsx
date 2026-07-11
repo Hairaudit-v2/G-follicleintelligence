@@ -1,19 +1,23 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { ReceptionOsDashboard } from "@/src/components/fi-admin/reception-os/ReceptionOsDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { resolveAuthUserId, isFiOsPlatformAdminFullSessionBypass } from "@/src/lib/crm/crmGate";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { resolveReceptionOsViewerContext } from "@/src/lib/receptionOs/receptionOsAccess.server";
 import { loadReceptionOsCommandCentrePayload } from "@/src/lib/receptionOs/receptionOsCommandCentreLoader.server";
 
 export const metadata = {
-  title: "Front desk",
+  title: "Reception tooling",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
 
+/**
+ * S3.4F — platform-admin-only technical ReceptionOS surface.
+ * Ordinary staff receive notFound() (not a redirect to Front Desk).
+ */
 export default async function FiAdminReceptionOsPage({
   params,
   searchParams,
@@ -28,6 +32,11 @@ export default async function FiAdminReceptionOsPage({
 
   await assertFiTenantPortalAccessUnlessStaffPinSession(tenantId);
 
+  const authUserId = await resolveAuthUserId();
+  if (!authUserId || !(await isFiOsPlatformAdminFullSessionBypass(authUserId))) {
+    notFound();
+  }
+
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
     !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
@@ -41,11 +50,6 @@ export default async function FiAdminReceptionOsPage({
     );
   }
 
-  const viewer = await resolveReceptionOsViewerContext(tenantId.trim());
-  if (!viewer.canAccessReceptionOs) {
-    redirect(`/fi-admin/${tenantId.trim()}/calendar`);
-  }
-
   let data: Awaited<ReturnType<typeof loadReceptionOsCommandCentrePayload>>;
   try {
     data = await loadReceptionOsCommandCentrePayload(tenantId.trim(), new Date(), {
@@ -57,10 +61,10 @@ export default async function FiAdminReceptionOsPage({
     console.error("[FiAdminReceptionOsPage]", msg || "load failed");
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="Front desk could not load">
+        <InfoNotice variant="danger" title="Reception tooling could not load">
           <p className="text-sm">
-            The command centre failed to load. Check production Supabase migrations and Vercel
-            function logs for the server error digest.
+            The platform admin surface failed to load. Check production Supabase migrations and
+            Vercel function logs for the server error digest.
           </p>
           {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
         </InfoNotice>
