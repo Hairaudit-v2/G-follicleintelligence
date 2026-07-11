@@ -13,6 +13,7 @@ import {
   STAFF_ACCESS_MODULE_KEYS,
   STAFF_ACCESS_SCOPES,
 } from "@/src/lib/staffAccess/staffAccessRegistry";
+import { capabilityKeysForGrant } from "@/src/lib/staffAccess/staffEffectivePermissionsCore";
 
 export type FiStaffAccessActionResult = { ok: true } | { ok: false; error: string };
 
@@ -30,6 +31,8 @@ const upsertGrantSchema = z.object({
   clinicId: z.string().uuid().optional().nullable(),
   roleKey: z.string().trim().max(60).optional().nullable(),
   reason: z.string().trim().max(2000).optional().nullable(),
+  /** Optional grant expiry (ISO timestamptz). */
+  expiresAt: z.string().datetime({ offset: true }).optional().nullable(),
 });
 
 const revokeGrantSchema = z.object({
@@ -88,24 +91,40 @@ export async function upsertStaffAccessGrantAction(
       : existingQuery.is("clinic_id", null);
     const { data: existing } = await existingQuery.maybeSingle();
 
+    const capabilityKeys = capabilityKeysForGrant({
+      moduleKey: parsed.moduleKey,
+      tabKey,
+      accessLevel: parsed.accessLevel,
+    });
     const newAccess = {
       access_level: parsed.accessLevel,
       scope: parsed.scope,
       clinic_id: clinicId,
       tab_key: tabKey,
+      expires_at: parsed.expiresAt?.trim() || null,
+      capability_keys: capabilityKeys,
+    };
+    const metadata = {
+      ...(parsed.reason?.trim() ? { reason: parsed.reason.trim() } : {}),
+      capability_keys: capabilityKeys,
+      effect: "allow" as const,
     };
 
     if (existing) {
       const prev = existing as { id: string; access_level: string; scope: string };
+      const updatePayload: Record<string, unknown> = {
+        access_level: parsed.accessLevel,
+        scope: parsed.scope,
+        role_key: parsed.roleKey?.trim() || null,
+        granted_by: perm.actorAuthUserId,
+        metadata,
+      };
+      if (parsed.expiresAt !== undefined) {
+        updatePayload.expires_at = parsed.expiresAt?.trim() || null;
+      }
       const { error } = await supabase
         .from("fi_staff_access_grants")
-        .update({
-          access_level: parsed.accessLevel,
-          scope: parsed.scope,
-          role_key: parsed.roleKey?.trim() || null,
-          granted_by: perm.actorAuthUserId,
-          metadata: parsed.reason?.trim() ? { reason: parsed.reason.trim() } : {},
-        })
+        .update(updatePayload)
         .eq("id", prev.id)
         .eq("tenant_id", tid);
       if (error) return { ok: false, error: error.message };
@@ -120,9 +139,14 @@ export async function upsertStaffAccessGrantAction(
         previousAccess: { access_level: prev.access_level, scope: prev.scope },
         newAccess,
         reason: parsed.reason?.trim() || null,
+        metadata: {
+          capability_keys: capabilityKeys,
+          effect: "allow",
+          action_kind: "capability_override_granted",
+        },
       });
     } else {
-      const { error } = await supabase.from("fi_staff_access_grants").insert({
+      const insertPayload: Record<string, unknown> = {
         tenant_id: tid,
         clinic_id: clinicId,
         staff_member_id: parsed.staffMemberId,
@@ -132,8 +156,12 @@ export async function upsertStaffAccessGrantAction(
         access_level: parsed.accessLevel,
         scope: parsed.scope,
         granted_by: perm.actorAuthUserId,
-        metadata: parsed.reason?.trim() ? { reason: parsed.reason.trim() } : {},
-      });
+        metadata,
+      };
+      if (parsed.expiresAt?.trim()) {
+        insertPayload.expires_at = parsed.expiresAt.trim();
+      }
+      const { error } = await supabase.from("fi_staff_access_grants").insert(insertPayload);
       if (error) return { ok: false, error: error.message };
 
       await tryInsertStaffAccessAuditEvent({
@@ -146,6 +174,11 @@ export async function upsertStaffAccessGrantAction(
         previousAccess: null,
         newAccess,
         reason: parsed.reason?.trim() || null,
+        metadata: {
+          capability_keys: capabilityKeys,
+          effect: "allow",
+          action_kind: "capability_override_granted",
+        },
       });
     }
 
@@ -193,6 +226,12 @@ export async function revokeStaffAccessGrantAction(
     };
     if (row.revoked_at) return { ok: true };
 
+    const capabilityKeys = capabilityKeysForGrant({
+      moduleKey: row.module_key,
+      tabKey: row.tab_key,
+      accessLevel: row.access_level,
+    });
+
     const { error } = await supabase
       .from("fi_staff_access_grants")
       .update({ revoked_at: new Date().toISOString(), revoked_by: perm.actorAuthUserId })
@@ -207,9 +246,18 @@ export async function revokeStaffAccessGrantAction(
       action: "grant_revoked",
       moduleKey: row.module_key,
       tabKey: row.tab_key,
-      previousAccess: { access_level: row.access_level, scope: row.scope },
+      previousAccess: {
+        access_level: row.access_level,
+        scope: row.scope,
+        capability_keys: capabilityKeys,
+      },
       newAccess: null,
       reason: parsed.reason?.trim() || null,
+      metadata: {
+        capability_keys: capabilityKeys,
+        effect: "allow",
+        action_kind: "capability_override_revoked",
+      },
     });
 
     revalidateStaffAccess(tid);

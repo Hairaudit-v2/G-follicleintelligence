@@ -47,6 +47,7 @@ function tabVisibleByCapability(
   if (tabId === "roster") {
     return (
       canAccessWorkforceTabForTeamNav(access, "roster", "read", { hrOsFullNav: false }) ||
+      staffCapabilitySatisfies(access, "roster.view") ||
       staffCapabilitySatisfies(access, "roster.manage")
     );
   }

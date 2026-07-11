@@ -50,6 +50,7 @@ test("receptionist with roster tab grant receives roster.manage only", () => {
     ],
   });
 
+  assert.equal(staffCapabilitySatisfies(access, "roster.view"), true);
   assert.equal(staffCapabilitySatisfies(access, "roster.manage"), true);
   assert.equal(staffCapabilitySatisfies(access, "roster.standard_hours.manage"), true);
   assert.equal(staffCapabilitySatisfies(access, "team.identity.manage"), false);
@@ -57,9 +58,57 @@ test("receptionist with roster tab grant receives roster.manage only", () => {
   assert.equal(canAccessWorkforceTab(access, "roster", "edit"), true);
   assert.equal(canAccessWorkforceTab(access, "identity", "read"), false);
   assert.deepEqual(listSatisfiedStaffCapabilities(access), [
+    "roster.view",
     "roster.manage",
     "roster.standard_hours.manage",
   ]);
+});
+
+test("receptionist with roster.view only cannot manage roster or standard hours", () => {
+  const access = computeEffectiveAccess({
+    roleKey: "reception",
+    grants: [
+      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" }),
+    ],
+  });
+  assert.equal(staffCapabilitySatisfies(access, "roster.view"), true);
+  assert.equal(staffCapabilitySatisfies(access, "roster.manage"), false);
+  assert.equal(staffCapabilitySatisfies(access, "roster.standard_hours.manage"), false);
+  assert.equal(canAccessWorkforceTab(access, "roster", "read"), true);
+  assert.equal(canAccessWorkforceTab(access, "roster", "edit"), false);
+  assert.equal(canEnterTeamWorkspace(access), true);
+});
+
+test("revoked roster override does not apply", () => {
+  const access = computeEffectiveAccess({
+    roleKey: "reception",
+    grants: [
+      grant({
+        moduleKey: "workforce_os",
+        tabKey: "roster",
+        accessLevel: "edit",
+        revokedAt: "2026-01-01T00:00:00.000Z",
+      }),
+    ],
+  });
+  assert.equal(staffCapabilitySatisfies(access, "roster.manage"), false);
+  assert.equal(canEnterTeamWorkspace(access), false);
+});
+
+test("expired roster override does not apply", () => {
+  const access = computeEffectiveAccess({
+    roleKey: "reception",
+    grants: [
+      grant({
+        moduleKey: "workforce_os",
+        tabKey: "roster",
+        accessLevel: "edit",
+        expiresAt: "2020-01-01T00:00:00.000Z",
+      }),
+    ],
+  });
+  assert.equal(staffCapabilitySatisfies(access, "roster.manage"), false);
+  assert.equal(canEnterTeamWorkspace(access), false);
 });
 
 test("manager template retains full workforce module edit", () => {

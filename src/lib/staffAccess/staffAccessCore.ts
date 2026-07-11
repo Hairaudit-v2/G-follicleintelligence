@@ -25,6 +25,18 @@ import {
 
 export type EffectiveAccessSource = "role" | "grant" | "override";
 
+/** True when expiresAt is a past ISO timestamp (invalid/empty → not expired). */
+export function isGrantExpired(
+  expiresAt: string | null | undefined,
+  nowMs: number = Date.now()
+): boolean {
+  const raw = expiresAt?.trim();
+  if (!raw) return false;
+  const t = Date.parse(raw);
+  if (!Number.isFinite(t)) return false;
+  return t <= nowMs;
+}
+
 export type EffectiveModuleAccess = {
   module: StaffAccessModuleKey;
   level: StaffAccessLevel;
@@ -47,6 +59,11 @@ export type StaffAccessGrantInput = {
   scope: StaffAccessScope;
   /** When set, the grant is revoked and MUST be ignored. */
   revokedAt: string | null;
+  /**
+   * When set and in the past, the grant is expired and MUST be ignored
+   * (same effective behaviour as revoked).
+   */
+  expiresAt?: string | null;
 };
 
 export type RoleTemplateMap = Partial<Record<StaffAccessModuleKey, StaffAccessEntry>>;
@@ -101,9 +118,14 @@ export function computeEffectiveAccess(input: ComputeEffectiveAccessInput): Effe
       : emptyModuleAccess(moduleKey);
   }
 
-  // Apply explicit grants (skip revoked). Grants override the template value directly.
+  // Apply explicit grants (skip revoked / expired). Grants override the template value directly.
+  // Precedence for effective access:
+  //   role template < explicit grant (allow or suppress via level none) < admin override.
+  // There is no separate "deny" effect enum — `access_level: none` is the suppress form.
+  const nowMs = Date.now();
   for (const grant of input.grants) {
     if (grant.revokedAt) continue;
+    if (isGrantExpired(grant.expiresAt, nowMs)) continue;
     if (!isStaffAccessModuleKey(grant.moduleKey)) continue;
     const moduleKey = grant.moduleKey;
     const entry = map[moduleKey];

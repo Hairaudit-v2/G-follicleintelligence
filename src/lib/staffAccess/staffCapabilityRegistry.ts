@@ -21,6 +21,7 @@ export type WorkforceOsTabKey = (typeof WORKFORCE_OS_TAB_KEYS)[number];
 
 /** Human-facing capability identifiers (audit + policy). */
 export const STAFF_CAPABILITY_KEYS = [
+  "roster.view",
   "roster.manage",
   "roster.standard_hours.manage",
   "team.identity.manage",
@@ -49,6 +50,14 @@ export const WORKFORCE_SENSITIVE_TAB_KEYS = new Set<WorkforceOsTabKey>([
 ]);
 
 export const STAFF_CAPABILITY_SPECS: Record<StaffCapabilityKey, StaffCapabilitySpec> = {
+  "roster.view": {
+    capability: "roster.view",
+    module: "workforce_os",
+    tabKey: "roster",
+    requiredLevel: "read",
+    label: "Roster view",
+    description: "View roster planning without mutating shifts.",
+  },
   "roster.manage": {
     capability: "roster.manage",
     module: "workforce_os",

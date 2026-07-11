@@ -288,6 +288,46 @@ export async function loadStaffAccessGrants(
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff_access_grants")
+    .select("module_key, tab_key, access_level, scope, revoked_at, expires_at")
+    .eq("tenant_id", tid)
+    .eq("staff_member_id", sid);
+  if (error || !data) {
+    // Fallback without expires_at if migration not applied yet.
+    if (error?.message?.includes("expires_at")) {
+      return loadStaffAccessGrantsWithoutExpires(tid, sid);
+    }
+    return [];
+  }
+  const out: StaffAccessGrantInput[] = [];
+  for (const r of data as Array<Record<string, unknown>>) {
+    const moduleKey = String(r.module_key ?? "");
+    const level = String(r.access_level ?? "none");
+    const scope = String(r.scope ?? "tenant");
+    if (
+      !isStaffAccessModuleKey(moduleKey) ||
+      !isStaffAccessLevel(level) ||
+      !isStaffAccessScope(scope)
+    )
+      continue;
+    out.push({
+      moduleKey: moduleKey,
+      tabKey: r.tab_key ? String(r.tab_key) : null,
+      accessLevel: level,
+      scope,
+      revokedAt: r.revoked_at ? String(r.revoked_at) : null,
+      expiresAt: r.expires_at != null ? String(r.expires_at) : null,
+    });
+  }
+  return out;
+}
+
+async function loadStaffAccessGrantsWithoutExpires(
+  tid: string,
+  sid: string
+): Promise<StaffAccessGrantInput[]> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff_access_grants")
     .select("module_key, tab_key, access_level, scope, revoked_at")
     .eq("tenant_id", tid)
     .eq("staff_member_id", sid);
@@ -309,6 +349,7 @@ export async function loadStaffAccessGrants(
       accessLevel: level,
       scope,
       revokedAt: r.revoked_at ? String(r.revoked_at) : null,
+      expiresAt: null,
     });
   }
   return out;

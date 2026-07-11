@@ -20,7 +20,15 @@ import {
   type StaffAccessLevel,
 } from "./staffAccessRegistry";
 
-/** Whether the viewer holds a capability via module edit or explicit tab grant. */
+/**
+ * Whether the viewer holds a capability via module level or explicit tab grant.
+ *
+ * Inheritance (policy):
+ * - `roster.manage` implies `roster.view`
+ * - `roster.manage` implies `roster.standard_hours.manage` (current clinic policy)
+ * - Explicit `none`/deny is expressed as a grant at access_level `none` (grant beats template)
+ * - Revoked / expired grants never apply (filtered in computeEffectiveAccess)
+ */
 export function staffCapabilitySatisfies(
   access: EffectiveAccessMap,
   capability: StaffCapabilityKey
@@ -30,6 +38,9 @@ export function staffCapabilitySatisfies(
     return true;
   }
   if (canAccessWorkforceTab(access, spec.tabKey, spec.requiredLevel)) {
+    return true;
+  }
+  if (capability === "roster.view" && staffCapabilitySatisfies(access, "roster.manage")) {
     return true;
   }
   if (

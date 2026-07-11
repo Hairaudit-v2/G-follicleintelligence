@@ -48,6 +48,20 @@ test("receptionist with roster.manage sees Team/Roster nav only", () => {
   assert.ok(!labels.some((l) => /identity audit/i.test(l)));
 });
 
+test("receptionist with roster.view only sees roster tab but cannot manage", () => {
+  const access = computeEffectiveAccess({
+    roleKey: "reception",
+    grants: [
+      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" }),
+    ],
+  });
+  const tabAccess = resolveTeamWorkspaceTabAccess(access, { hrOsFullNav: false });
+  assert.ok(tabAccess.visibleTabIds.includes("roster"));
+  assert.equal(tabAccess.canManageRoster, false);
+  assert.equal(tabAccess.canManageStandardHours, false);
+  assert.equal(isTeamTabSegmentAllowed(access, "identity", { hrOsFullNav: false }), false);
+});
+
 test("receptionist with roster.manage enables staff nav feature override", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
