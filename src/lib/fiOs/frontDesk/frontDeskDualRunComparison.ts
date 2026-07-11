@@ -126,11 +126,9 @@ export function compareFrontDeskDualRun(
   presentation: FrontDeskTodayPresentation,
   opts?: { nowMs?: number }
 ): FrontDeskDualRunComparison {
-  const nowMs =
-    opts?.nowMs ??
-    (Number.isFinite(Date.parse(payload.loadedAt))
-      ? Date.parse(payload.loadedAt)
-      : Date.parse(presentation.generatedAt));
+  // nowMs reserved for callers who re-derive presentation with a fixed clock; comparison uses
+  // the supplied presentation states as-is (no second derivation pipeline).
+  void opts?.nowMs;
 
   const oldIds = uniqueSorted((payload.receptionCards ?? []).map((c) => c.id).filter(Boolean));
   const { all: newIds, duplicates: duplicateBookingIds } =
@@ -329,25 +327,3 @@ export function compareFrontDeskDualRun(
   };
 }
 
-function mapStateToLegacyColumn(state: ReceptionOperationalState): string {
-  switch (state) {
-    case "cancelled":
-      return "cancelled";
-    case "complete":
-      return "complete";
-    case "no_show":
-      return "no_show";
-    case "in_treatment":
-      return "in_treatment";
-    case "in_consultation":
-      return "in_consultation";
-    case "waiting":
-      return "arrived";
-    case "running_late":
-    case "arriving_soon":
-    case "expected":
-      return "expected";
-    default:
-      return "expected";
-  }
-}

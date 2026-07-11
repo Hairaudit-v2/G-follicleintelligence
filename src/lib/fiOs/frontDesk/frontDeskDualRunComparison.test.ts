@@ -16,7 +16,6 @@ const BASE = `/fi-admin/${TENANT}`;
 const NOW_MS = Date.parse("2026-07-11T12:00:00.000Z");
 const A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-const C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
 function emptyQueue(): ReceptionBoardCommandCenterPayload["queue"] {
   return {
@@ -159,8 +158,6 @@ test("1. missing booking detection", () => {
   const p = payload({
     receptionCards: [card({ id: A }), card({ id: B })],
   });
-  const presentation = present(p);
-  // Simulate missing by stripping one card from presentation via empty clone mismatch:
   // Force missing by comparing payload with presentation built without B
   const pOnlyA = payload({ receptionCards: [card({ id: A })] });
   const presOnlyA = present(pOnlyA);
