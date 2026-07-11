@@ -129,7 +129,7 @@ export function FoundationOsDashboard({
             FI OS · Clinical intelligence
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
-            Patient Twin
+            Health record
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
             Unified patient identity, media, clinical timeline, and treatment history across FI OS.
@@ -143,7 +143,7 @@ export function FoundationOsDashboard({
               "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95"
             )}
           >
-            Open PatientOS
+            Open patients
           </Link>
           <Link
             href={`${base}/cases`}
@@ -152,7 +152,7 @@ export function FoundationOsDashboard({
               "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            Open SurgeryOS
+            Open surgery
           </Link>
           <Link
             href={`${base}/audit`}
@@ -161,7 +161,7 @@ export function FoundationOsDashboard({
               "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            Open AuditOS
+            Open quality review
           </Link>
           <Link
             href={`${base}/patients/new`}
@@ -179,7 +179,7 @@ export function FoundationOsDashboard({
 
       {newClinic ? (
         <InfoNotice variant="info" title="Fresh workspace">
-          Patient Twin metrics will populate as you onboard patients, link cases, capture media, and
+          Health record metrics will populate as you onboard patients, link cases, capture media, and
           record clinical milestones.
         </InfoNotice>
       ) : null}
@@ -204,7 +204,7 @@ export function FoundationOsDashboard({
           <SummaryTile
             label="Active case journeys"
             value={patientOs.kpis.patientsWithActiveCases}
-            sub="Patients with an open SurgeryOS case"
+            sub="Patients with an open Surgery case"
             tone={patientOs.kpis.patientsWithActiveCases > 0 ? "info" : "neutral"}
           />
           <SummaryTile
@@ -327,12 +327,12 @@ export function FoundationOsDashboard({
         <TwinSectionCard
           id="active-journeys"
           title="Active clinical journeys"
-          description="Patients currently moving through SurgeryOS — case status and next steps."
+          description="Patients currently moving through Surgery — case status and next steps."
         >
           {patientOs.activeJourneys.length === 0 ? (
             <TwinEmptyState
               title="No active journeys"
-              description="When cases are in progress for linked patients, they will appear here with shortcuts into SurgeryOS and the patient twin."
+              description="When cases are in progress for linked patients, they will appear here with shortcuts into Surgery and the patient twin."
             />
           ) : (
             <ul className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a101f]/50">
@@ -353,14 +353,14 @@ export function FoundationOsDashboard({
                       <span className="text-slate-400"> · </span>
                       Updated {formatTwinWhen(j.updatedAt)}
                       <span className="text-slate-400"> · </span>
-                      Next: review case progress in SurgeryOS
+                      Next: review case progress in Surgery
                     </>
                   }
                   actions={
                     <>
                       {actionLink(`${base}/cases/${j.caseId}`, "Open case", true)}
                       {actionLink(`${base}/patients/${j.patientId}/twin`, "Patient twin")}
-                      {actionLink(`${base}/audit`, "AuditOS")}
+                      {actionLink(`${base}/audit`, "Quality review")}
                     </>
                   }
                 />
@@ -649,7 +649,7 @@ export function FoundationOsDashboard({
           <DashboardCard className="p-4 sm:p-5">
             <SectionHeader
               title="Coverage diagnostics"
-              description="Operating ratios from aggregates — not the per-patient Patient Twin completeness score."
+              description="Operating ratios from aggregates — not the per-patient Health record completeness score."
             />
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <SummaryTile
@@ -658,11 +658,11 @@ export function FoundationOsDashboard({
               />
               <SummaryTile label="CRM coverage" value={coveragePercentLabel(tc.crm_coverage_pct)} />
               <SummaryTile
-                label="SurgeryOS linkage"
+                label="Surgery linkage"
                 value={coveragePercentLabel(tc.surgeryos_linkage_pct)}
               />
               <SummaryTile
-                label="AuditOS linkage"
+                label="Quality review linkage"
                 value={coveragePercentLabel(tc.audit_case_coverage_pct)}
               />
               <SummaryTile
@@ -679,7 +679,7 @@ export function FoundationOsDashboard({
           <DashboardCard className="p-4 sm:p-5">
             <SectionHeader
               title="Resolution / integrity queue"
-              description="Actionable previews — resolve via PatientOS / SurgeryOS workflows."
+              description="Actionable previews — resolve via Patients / Surgery workflows."
             />
             <div className="mt-4 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2">
               <div>

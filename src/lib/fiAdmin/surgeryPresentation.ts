@@ -1,6 +1,6 @@
 /**
  * Surgery workflow presentation helpers — UI copy and layout derivations only.
- * Readiness Board, Procedure Day, and SurgeryOS share this layer (no loader changes).
+ * Readiness Board, Surgery day, and Surgery share this layer (no loader changes).
  */
 
 import type {

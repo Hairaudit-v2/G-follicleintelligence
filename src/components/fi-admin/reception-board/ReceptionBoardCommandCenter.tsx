@@ -348,7 +348,7 @@ export function ReceptionBoardCommandCenter(props: {
             <div className="border-b border-white/[0.06] px-5 py-4 sm:px-6">
               <SectionHeader
                 title="Tomorrow surgery preparation"
-                description="SurgeryOS readiness — deposits, consent, clearance, and pre-op checklist"
+                description="Surgery readiness — deposits, consent, clearance, and pre-op checklist"
               />
             </div>
             <div className="space-y-3 px-4 py-4 sm:px-5">

@@ -24,7 +24,7 @@ type UseSurgeryOsRefreshOptions = {
 };
 
 /**
- * SurgeryOS live refresh — SSR seeds initial payload; client polls tenant JSON API every 30s.
+ * Surgery live refresh — SSR seeds initial payload; client polls tenant JSON API every 30s.
  */
 export function useSurgeryOsRefresh(opts: UseSurgeryOsRefreshOptions): SurgeryOsRefreshState {
   const {

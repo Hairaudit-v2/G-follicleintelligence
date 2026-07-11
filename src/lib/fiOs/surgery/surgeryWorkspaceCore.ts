@@ -19,7 +19,7 @@ export type FiOsSurgeryTab = {
 export const FI_OS_SURGERY_TABS: readonly FiOsSurgeryTab[] = [
   {
     id: "command",
-    label: "Surgery command",
+    label: "Overview",
     segment: "",
     navSubItemId: "surgery-command",
     featureKey: "surgery_pipeline",
@@ -33,7 +33,7 @@ export const FI_OS_SURGERY_TABS: readonly FiOsSurgeryTab[] = [
   },
   {
     id: "procedure-day",
-    label: "Procedure day",
+    label: "Surgery day",
     segment: "procedure-day",
     navSubItemId: "surgery-procedure-day",
     featureKey: "procedure_day",
@@ -49,20 +49,20 @@ export const FI_OS_SURGERY_TABS: readonly FiOsSurgeryTab[] = [
 
 /** Legacy deep-link routes that must remain live (not redirected). */
 export const FI_OS_SURGERY_LEGACY_ROUTES = [
-  { id: "surgery-os", label: "Surgery command", suffix: "surgery-os" },
+  { id: "surgery-os", label: "Overview", suffix: "surgery-os" },
   { id: "cases-worklist", label: "Cases", suffix: "cases" },
-  { id: "procedure-day-board", label: "Procedure day", suffix: "procedure-day" },
-  { id: "surgery-readiness-board", label: "Readiness board", suffix: "surgery-readiness" },
+  { id: "procedure-day-board", label: "Surgery day", suffix: "procedure-day" },
+  { id: "surgery-readiness-board", label: "Ready for surgery", suffix: "surgery-readiness" },
 ] as const;
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
 export const FI_OS_SURGERY_ADMIN_LEGACY_ROUTES = [
   {
     id: "surgery-intelligence-dashboard",
-    label: "Outcome intelligence",
+    label: "Surgery insights",
     suffix: "surgery-os/intelligence",
   },
-  { id: "graft-counting-legacy", label: "Graft tray review", suffix: "surgery-os/graft-counting" },
+  { id: "graft-counting-legacy", label: "Graft count review", suffix: "surgery-os/graft-counting" },
 ] as const;
 
 export const FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS = new Set([

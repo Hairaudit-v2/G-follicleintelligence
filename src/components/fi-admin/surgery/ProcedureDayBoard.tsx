@@ -29,10 +29,10 @@ function ProcedureDayPrimaryActions({ base, todayYmd }: { base: string; todayYmd
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <Link href={`${base}/surgery-os`} className={surgeryLinkButtonClass}>
-        Open SurgeryOS
+        Open surgery
       </Link>
       <Link href={`${base}/reception`} className={surgeryLinkButtonClass}>
-        Open Reception Board
+        Open reception board
       </Link>
       <Link
         href={`${base}/calendar?date=${encodeURIComponent(todayYmd)}`}
@@ -83,14 +83,14 @@ function FlowProcedureCard({ base, item }: { base: string; item: ProcedureDayFlo
       <p className="mt-2 text-[0.68rem] leading-relaxed text-[#94A3B8]">{item.nextAction}</p>
       <div className="mt-2 flex flex-wrap gap-x-3 text-[0.68rem] font-semibold">
         <Link href={`${base}/surgery-os`} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
-          SurgeryOS
+          Surgery
         </Link>
         <Link href={`${base}/reception`} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
           Reception
         </Link>
         {card.hrefs.patient ? (
           <Link href={card.hrefs.patient} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
-            PatientOS
+            Patients
           </Link>
         ) : null}
       </div>
@@ -139,7 +139,7 @@ export function ProcedureDayBoard({ data: initialData }: { data: ProcedureDayLiv
             FI OS · Surgery
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-            Procedure Day
+            Surgery day
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
             Live surgical day coordination across arrivals, preparation, procedure progress, rooms,

@@ -55,7 +55,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         <SectionHeader
           kicker="Outcome Intelligence"
           title="Surgery case intelligence"
-          description="Read-only view of published graft-tray, surgery imaging, longitudinal outcome comparison, and audit-readiness facts from the analytics event pipeline. Facts are not rebuilt from live SurgeryOS state on this page."
+          description="Read-only view of published graft-tray, surgery imaging, longitudinal outcome comparison, and audit-readiness facts from the analytics event pipeline. Facts are not rebuilt from live Surgery state on this page."
         />
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#64748B]">
           <span>
@@ -195,7 +195,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
         <div className="border-b border-white/[0.08] px-5 py-4">
           <SectionHeader
             title="Case drill-down"
-            description="Published facts per surgery case — open SurgeryOS or ImagingOS for live review."
+            description="Published facts per surgery case — open Surgery or ImagingOS for live review."
           />
         </div>
         <div className="overflow-x-auto">
@@ -332,7 +332,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                           href={row.surgeryHref}
                           className="rounded-md border border-white/10 px-2 py-1 text-xs text-[#22C1FF] hover:border-[#22C1FF]/40"
                         >
-                          SurgeryOS
+                          Surgery
                         </Link>
                         {row.caseHref ? (
                           <Link

@@ -36,7 +36,7 @@ export function CaseProcedureDayCard({
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.procedureDay)}
             className="text-sm font-semibold text-slate-100"
           >
-            Procedure day workflow
+            Surgery day workflow
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5C: structured procedure-day record (timing, team, technique, counts, notes). This

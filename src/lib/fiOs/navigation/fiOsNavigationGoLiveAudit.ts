@@ -455,7 +455,10 @@ function isPermittedProcedureDayDirectLabel(
   label: string,
   showProcedureDayNav?: boolean
 ): boolean {
-  return showProcedureDayNav === true && /^procedure day \(direct\)$/i.test(label.trim());
+  return (
+    showProcedureDayNav === true &&
+    /^(procedure day|surgery day)\s*\(direct\)$/i.test(label.trim())
+  );
 }
 
 function auditStaffMoreDrawer(

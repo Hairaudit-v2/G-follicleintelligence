@@ -64,7 +64,7 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-3">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-cyan-300/90">
-            Patient Twin · Read-only
+            Health record · Read-only
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             {displayName(twin)}

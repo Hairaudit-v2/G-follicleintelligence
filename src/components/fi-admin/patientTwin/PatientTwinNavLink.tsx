@@ -5,13 +5,13 @@ import { fiButtonVariantClassNames } from "@/src/components/fi-design/fiDesignTo
 
 export type PatientTwinNavLinkProps = {
   tenantId: string;
-  /** Foundation `fi_patients.id` — Patient Twin route segment. */
+  /** Foundation `fi_patients.id` — Health record route segment. */
   patientId: string;
   className?: string;
 };
 
 /**
- * Secondary navigation to the read-only Patient Twin dashboard (consistent FI admin labelling).
+ * Secondary navigation to the read-only Health record dashboard (consistent FI admin labelling).
  */
 export function PatientTwinNavLink({ tenantId, patientId, className }: PatientTwinNavLinkProps) {
   const tid = tenantId.trim();
@@ -29,7 +29,7 @@ export function PatientTwinNavLink({ tenantId, patientId, className }: PatientTw
         className
       )}
     >
-      <span className="leading-tight">Patient Twin</span>
+      <span className="leading-tight">Health record</span>
       <span className="text-xs font-normal leading-snug text-slate-500">
         View the unified longitudinal patient record.
       </span>

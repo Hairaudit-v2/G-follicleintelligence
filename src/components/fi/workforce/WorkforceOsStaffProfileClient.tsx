@@ -73,7 +73,7 @@ export function WorkforceOsStaffProfileClient({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-            WorkforceOS · Staff profile
+            Team · Staff profile
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC]">
             {lifecycle.full_name}
@@ -239,7 +239,7 @@ export function WorkforceOsStaffProfileClient({
 
       <p className="text-center text-sm text-[#64748B]">
         <Link href={`${base}/directory`} className="underline-offset-2 hover:underline">
-          Back to WorkforceOS directory
+          Back to Team directory
         </Link>
         {" · "}
         <Link href={profileHref} className="underline-offset-2 hover:underline">

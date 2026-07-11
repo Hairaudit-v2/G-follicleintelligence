@@ -98,7 +98,7 @@ export function StaffIdentityReadinessAuditClient({
     <div className="space-y-6">
       <header>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-          WorkforceOS
+          Team
         </p>
         <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Identity Audit</h1>
         <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">
@@ -167,13 +167,13 @@ export function StaffIdentityReadinessAuditClient({
           href={`/fi-admin/${tenantId}/workforce-os/staff-access`}
           className="text-[#22C1FF] underline-offset-2 hover:underline"
         >
-          Staff Access Centre
+          Staff access
         </Link>
         <Link
           href={`/fi-admin/${tenantId}/workforce-os`}
           className="text-[#22C1FF] underline-offset-2 hover:underline"
         >
-          Workforce Command Centre
+          Team overview
         </Link>
         <Link
           href={`/fi-admin/${tenantId}/staff`}

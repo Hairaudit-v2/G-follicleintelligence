@@ -43,10 +43,10 @@ export default async function FiOsPaymentsSettingsPage({
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/90">
           Settings
         </p>
-        <h1 className="text-xl font-semibold text-white">Payments &amp; RevenueOS</h1>
+        <h1 className="text-xl font-semibold text-white">Payments &amp; Payments</h1>
         <p className="text-sm text-slate-400">
           Gateway configuration is server-only. Invoices and payment requests are created from
-          ConsultationOS, SurgeryOS, the{" "}
+          Consultations, Surgery, the{" "}
           <Link
             href={`/fi-admin/${tid}/payments`}
             className="text-cyan-300 underline hover:text-cyan-200"

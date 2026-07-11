@@ -40,7 +40,7 @@ export function PatientProfilePage({
 
       <p className="rounded border border-blue-100 bg-blue-500/10 p-3 text-sm text-blue-200">
         Patient profiles are the foundation for future clinical records, images, treatment plans,
-        HLI assessments, HairAudit outcomes, and SurgeryOS workflows.
+        HLI assessments, HairAudit outcomes, and Surgery workflows.
       </p>
 
       <PatientProfileSummaryCards data={data} />

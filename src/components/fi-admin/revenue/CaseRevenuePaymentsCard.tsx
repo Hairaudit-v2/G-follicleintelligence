@@ -15,7 +15,7 @@ export function CaseRevenuePaymentsCard(props: {
   return (
     <FiSection
       title="Invoices & payment requests"
-      description="RevenueOS invoices — separate from manual payment status cards. Amounts are administrative; staff must verify before collection."
+      description="Payments invoices — separate from manual payment status cards. Amounts are administrative; staff must verify before collection."
       headingId="case-revenue-payments-heading"
     >
       <CaseRevenuePaymentsCardClient

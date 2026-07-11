@@ -2,7 +2,7 @@ import { AuditOsDashboard } from "@/src/components/fi-admin/audit/AuditOsDashboa
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 
 export const metadata = {
-  title: "Audit Intelligence",
+  title: "Quality review",
   description:
     "Clinical quality, outcome review, patient evidence, and audit readiness across surgical cases.",
   robots: { index: false, follow: false },

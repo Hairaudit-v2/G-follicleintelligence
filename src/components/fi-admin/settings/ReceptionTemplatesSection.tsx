@@ -62,7 +62,7 @@ export function ReceptionTemplatesSection(props: {
           Front-desk &amp; commercial messages
         </h2>
         <p className="text-xs leading-relaxed text-[#94A3B8]">
-          Used by ReceptionOS composers for deposits, quotes, payment links, invoice chases, and
+          Used by Front desk composers for deposits, quotes, payment links, invoice chases, and
           booking notices. Defaults ship with the platform; save to store a tenant override.
         </p>
         <p className="mt-2 text-xs text-[#94A3B8]">

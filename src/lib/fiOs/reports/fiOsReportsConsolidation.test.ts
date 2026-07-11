@@ -56,6 +56,8 @@ function fullSidebar(showReportsAdmin = false) {
     true,
     true,
     showReportsAdmin,
+    showReportsAdmin,
+    undefined,
     showReportsAdmin
   );
 }
@@ -66,6 +68,7 @@ function moreSections(showReportsAdmin = false) {
     forCollapsedShell: true,
     showReportsAdminSurfaces: showReportsAdmin,
     showNavigationAdminSurfaces: showReportsAdmin,
+    showSettingsAdminSurfaces: showReportsAdmin,
   });
 }
 

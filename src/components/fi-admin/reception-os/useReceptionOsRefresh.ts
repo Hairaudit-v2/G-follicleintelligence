@@ -28,7 +28,7 @@ type UseReceptionOsRefreshOptions = {
 };
 
 /**
- * ReceptionOS live refresh — SSR seeds initial payload; client polls tenant JSON API every 30s.
+ * Front desk live refresh — SSR seeds initial payload; client polls tenant JSON API every 30s.
  */
 export function useReceptionOsRefresh(opts: UseReceptionOsRefreshOptions): ReceptionOsRefreshState {
   const {

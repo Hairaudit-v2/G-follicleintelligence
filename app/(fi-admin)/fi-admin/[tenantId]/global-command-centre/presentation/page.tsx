@@ -12,7 +12,7 @@ import { resolveEnterpriseDemoTenant } from "@/src/lib/enterprise-demo/enterpris
 import { isNonEmptyUuid } from "@/src/lib/crm/validation";
 
 export const metadata = {
-  title: "TITAN · Global Command Centre · Presentation",
+  title: "TITAN · Platform administration · Presentation",
   robots: { index: false, follow: false },
 };
 

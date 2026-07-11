@@ -680,7 +680,7 @@ function BackLink({ href }: { href: string }) {
       className="inline-flex items-center gap-1.5 text-sm text-slate-500 transition hover:text-slate-300"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden />
-      SurgeryOS
+      Surgery
     </Link>
   );
 }

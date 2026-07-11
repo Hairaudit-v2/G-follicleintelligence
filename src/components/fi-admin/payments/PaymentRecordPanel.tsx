@@ -20,7 +20,7 @@ const DEFAULT_EMPTY_COPY =
 
 export function PaymentRecordPanel(props: {
   tenantId: string;
-  /** Optional `FI_ADMIN_API_KEY` override — only pass when the parent surface already collects it (e.g. ConsultationOS workspace card). */
+  /** Optional `FI_ADMIN_API_KEY` override — only pass when the parent surface already collects it (e.g. Consultations workspace card). */
   optionalFiAdminKey?: string;
   todayYmd: string;
   paymentContext: PaymentContext;

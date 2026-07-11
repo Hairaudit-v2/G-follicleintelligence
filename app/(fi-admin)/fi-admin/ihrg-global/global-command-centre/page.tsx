@@ -5,7 +5,7 @@ import { ENTERPRISE_DEMO_TENANT_SLUG } from "@/src/lib/enterprise-demo/enterpris
 import { resolveEnterpriseDemoTenant } from "@/src/lib/enterprise-demo/enterpriseDemoTenantAccess.server";
 
 export const metadata = {
-  title: "TITAN · Global Command Centre",
+  title: "TITAN · Platform administration",
   robots: { index: false, follow: false },
 };
 

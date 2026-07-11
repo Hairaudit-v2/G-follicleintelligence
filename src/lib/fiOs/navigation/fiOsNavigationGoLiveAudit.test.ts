@@ -189,9 +189,10 @@ test("workspace tabs exist for Front Desk, Surgery, Team, and Reports", () => {
     "Reception board",
     "Tomorrow board",
   ]);
-  assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Surgery command"));
+  assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Overview"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Cases"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Review"));
+  assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Surgery day"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.team.includes("Team overview"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.team.includes("Staff directory"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.team.includes("Roster"));

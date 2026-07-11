@@ -49,16 +49,16 @@ function surgeryBlockReason(
 ): string | null {
   const cid = caseId?.trim();
   if (summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {
-    if (!cid) return "Create/link a case before sending to SurgeryOS.";
+    if (!cid) return "Create/link a case before sending to Surgery.";
     if (summary.outcomeType !== "proceed_surgery") {
       return "Not recommended from this summary — outcome is not proceed to surgery.";
     }
     if (!summary.repairConsultationCompletionSnapshot?.surgeryosPlanningRecommended) {
-      return "SurgeryOS corrective planning was not flagged on the repair form.";
+      return "Surgery corrective planning was not flagged on the repair form.";
     }
     return null;
   }
-  if (!cid) return "Create/link a case before sending to SurgeryOS.";
+  if (!cid) return "Create/link a case before sending to Surgery.";
   if (summary.outcomeType !== "proceed_surgery") {
     return "Not recommended from this summary — outcome is not proceed to surgery.";
   }
@@ -67,7 +67,7 @@ function surgeryBlockReason(
     (summary.estimatedGraftsMin != null && summary.estimatedGraftsMax != null) ||
     summary.recommendedZones.length > 0;
   if (!hasPlanSignal) {
-    return "Add a recommended procedure, graft estimates, or zones to the summary before opening SurgeryOS planning.";
+    return "Add a recommended procedure, graft estimates, or zones to the summary before opening Surgery planning.";
   }
   return null;
 }
@@ -268,7 +268,7 @@ export function ConsultationHandoffPanel({
         },
         {
           key: "surgery" as const,
-          title: "SurgeryOS planning",
+          title: "Surgery planning",
           why: "Push structured zones, graft estimates, and strategy notes into the case surgery plan as a draft (does not approve the case).",
           requirements: (
             <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
@@ -280,7 +280,7 @@ export function ConsultationHandoffPanel({
           ),
           blocked: !surgeryEligible,
           blockedDetail: surgeryReason,
-          cta: "Send to SurgeryOS planning",
+          cta: "Send to Surgery planning",
           onClick: (): void => {
             void run("surgery", () =>
               createSurgeryPlanningDraftFromConsultationSummaryAction(tid, cid, body)

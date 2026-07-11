@@ -1,5 +1,5 @@
 /**
- * AnalyticsOS — clinic-facing presentation helpers (UI copy only; no loader changes).
+ * Insights — clinic-facing presentation helpers (UI copy only; no loader changes).
  */
 
 import type {
@@ -130,10 +130,10 @@ function mapRiskRowToClinicAttention(row: AnalyticsOsRiskRow): ClinicAttentionIt
   const labelMap: Record<string, string> = {
     "Stale leads (pipeline hygiene)":
       "Lead follow-up is overdue — review consultation pipeline hygiene.",
-    "CRM tasks due (horizon)": "Open follow-up tasks need attention in LeadFlow.",
+    "CRM tasks due (horizon)": "Open follow-up tasks need attention in Enquiries.",
     "Surgery readiness alerts (cases)":
       "Surgery readiness needs review before upcoming procedures.",
-    "Pending HairAudit reviews": "Independent audit reviews are waiting in AuditOS.",
+    "Pending HairAudit reviews": "Independent audit reviews are waiting in Quality review.",
     "Cases missing foundation patient link":
       "Some patient records still need linking for a complete journey view.",
   };
@@ -359,7 +359,7 @@ export function buildClinicModuleHealthRows(
 
   const workforceRow: ClinicModuleHealthRow = {
     id: "workforceos",
-    label: "WorkforceOS",
+    label: "Team",
     statusLabel: workforce ? clinicCoverageStatusLabel(workforce.status) : "Limited data",
     summary: workforce
       ? workforce.status === "active"
@@ -371,7 +371,7 @@ export function buildClinicModuleHealthRows(
 
   const financialRow: ClinicModuleHealthRow = {
     id: "financialos",
-    label: "FinancialOS",
+    label: "Finances",
     statusLabel: financial ? clinicCoverageStatusLabel(financial.status) : "Limited data",
     summary: financial
       ? financial.status === "active"

@@ -7,7 +7,7 @@ import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre
 import { resolveWorkforceHrManageCapability } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Staff Access Centre · Team",
+  title: "Staff access · Team",
   robots: { index: false, follow: false },
 };
 

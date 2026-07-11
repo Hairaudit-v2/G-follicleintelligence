@@ -6,7 +6,7 @@ import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNo
 import { FiCard } from "@/src/components/fi-design/FiCard";
 
 /**
- * In-room voice capture for ConsultationOS hubs.
+ * In-room voice capture for Consultations hubs.
  * Reuses DoctorOS voice → Whisper → structured clinical note pipeline.
  */
 export function ConsultationVoiceCapturePanel({

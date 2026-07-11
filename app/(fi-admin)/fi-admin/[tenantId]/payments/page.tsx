@@ -57,7 +57,7 @@ export default async function TenantPaymentsInboxPage({
       <div className="mx-auto max-w-2xl px-4 py-10 text-sm text-slate-300">
         <h1 className="text-lg font-semibold text-slate-100">Payments</h1>
         <p className="mt-2">
-          RevenueOS payments are disabled for this deployment (
+          Payments payments are disabled for this deployment (
           <code className="rounded bg-white/[0.06] px-1">FI_PAYMENTS_ENABLED</code>).
         </p>
       </div>
@@ -153,7 +153,7 @@ export default async function TenantPaymentsInboxPage({
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 text-slate-100">
       <header className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">RevenueOS</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Payments</p>
         <h1 className="text-xl font-semibold">Payments inbox</h1>
         <p className="text-sm text-slate-400">
           Operational view for clinic staff — today in tenant calendar: {todayYmd}.

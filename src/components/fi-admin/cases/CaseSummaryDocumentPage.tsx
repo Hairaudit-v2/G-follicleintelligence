@@ -168,7 +168,7 @@ export function CaseSummaryDocumentPage({
           )}
         </CaseSummaryDocumentSection>
 
-        <CaseSummaryDocumentSection title="Procedure day">
+        <CaseSummaryDocumentSection title="Surgery day">
           {!doc.procedureDay.present ? (
             <p className="text-sm text-gray-600">No procedure day record yet.</p>
           ) : (
@@ -327,7 +327,7 @@ export function CaseSummaryDocumentPage({
       </div>
 
       <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500 print:mt-8 print:border-gray-800 print:text-gray-700">
-        Follicle Intelligence · SurgeryOS patient summary · Internal use only. This view does not
+        Follicle Intelligence · Surgery patient summary · Internal use only. This view does not
         include HairAudit, formal audit grading, AI outcome scoring, or certification scoring.
       </footer>
     </div>

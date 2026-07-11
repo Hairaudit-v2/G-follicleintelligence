@@ -39,7 +39,7 @@ export function StaffStandardHoursIndexClient({
   return (
     <div className={cn(fiOsChromeClasses.pageScrollContent, "space-y-6 pb-10")}>
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Team</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Standard hours</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Set each staff member&apos;s working pattern before generating rosters or allocating patients.
@@ -158,7 +158,7 @@ export function StaffStandardHoursEditorClient({
   return (
     <div className={cn(fiOsChromeClasses.pageScrollContent, "space-y-6 pb-10")}>
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Team</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
           {staffName} — Standard hours
         </h1>

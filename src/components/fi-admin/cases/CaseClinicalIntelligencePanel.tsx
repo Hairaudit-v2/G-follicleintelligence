@@ -51,7 +51,7 @@ export function CaseClinicalIntelligencePanel(props: {
           Readiness
         </Link>
         <Link href={`${base}${CASE_PROCEDURE_DAY_DETAIL_HASH}`} className="hover:underline">
-          Procedure day
+          Surgery day
         </Link>
         <Link href={`${base}#${CASE_DETAIL_SECTION_IDS.postOp}`} className="hover:underline">
           Post-op / follow-ups
@@ -61,7 +61,7 @@ export function CaseClinicalIntelligencePanel(props: {
             href={`/fi-admin/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientFoundationId)}/twin`}
             className="hover:underline"
           >
-            Patient Twin
+            Health record
           </Link>
         ) : null}
       </div>

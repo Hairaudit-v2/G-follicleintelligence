@@ -125,7 +125,7 @@ export function FinancialSurgeryEconomicsCard(props: {
               : "text-sm font-semibold text-slate-100"
           }
         >
-          FinancialOS · Surgery economics
+          Finances · Surgery economics
         </h4>
         <span
           className={cn(

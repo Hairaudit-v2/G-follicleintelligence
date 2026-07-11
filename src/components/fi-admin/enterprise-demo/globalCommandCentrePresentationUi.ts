@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** TITAN Global Command Centre — Phase 1H presentation mode tokens. */
+/** TITAN Platform administration — Phase 1H presentation mode tokens. */
 export const globalCommandCentrePresentationClasses = {
   root: "relative flex min-h-[100dvh] flex-col bg-[#03060d] text-slate-100",
   backdrop:

@@ -59,11 +59,11 @@ export function AnalyticsOsDashboard({
             FI OS
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-            AnalyticsOS
+            Insights
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Executive intelligence across revenue, consultations, surgery, patients, workforce, and
-            clinic performance.
+            Clinic performance across revenue, consultations, surgery, patients, team, and day-to-day
+            operations.
           </p>
           {tenantName ? (
             <p className="mt-2 text-sm text-[#64748B]">
@@ -72,28 +72,28 @@ export function AnalyticsOsDashboard({
           ) : null}
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href={base} className={analyticsOsLinkButtonClass}>
-              Open ClinicOS
+              Open home
             </Link>
             {showCrmNav ? (
               <Link href={`${base}/crm`} className={analyticsOsLinkButtonClass}>
-                Open LeadFlow
+                Open enquiries
               </Link>
             ) : (
               <span className={analyticsOsLinkButtonClass} title="Requires CRM shell access">
-                Open LeadFlow
+                Open enquiries
               </span>
             )}
             <Link
               href={showCrmNav ? `${base}/patients` : `${base}/directory`}
               className={analyticsOsLinkButtonClass}
             >
-              Open PatientOS
+              Open patients
             </Link>
             <Link href={`${base}/cases`} className={analyticsOsLinkButtonClass}>
-              Open SurgeryOS
+              Open surgery
             </Link>
             <Link href={`${base}/audit`} className={analyticsOsLinkButtonClass}>
-              Open AuditOS
+              Open quality review
             </Link>
           </div>
         </div>

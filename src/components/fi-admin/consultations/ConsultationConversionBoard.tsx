@@ -179,14 +179,14 @@ export function ConsultationConversionBoard({
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
-            ConsultationOS · Conversion
+            Consultations · Conversion
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
             Consultation conversion board
           </h1>
           <p className="mt-1 text-sm text-slate-500">
             Window {window.ymdPast90} → {window.ymdFuture30} ({window.calendarTimezone}) · live
-            LeadFlow, bookings, cases, and ConsultationOS
+            Enquiries, bookings, cases, and Consultations
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -233,7 +233,7 @@ export function ConsultationConversionBoard({
               "inline-flex px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            LeadFlow
+            Enquiries
           </Link>
           <Link
             href={`${base}/calendar`}

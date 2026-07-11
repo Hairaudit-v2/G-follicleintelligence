@@ -38,7 +38,7 @@ export type PatientTwinDashboardProps = {
 };
 
 /**
- * Patient Twin dashboard: imaging + Smart Photography Protocol support client actions on the protocol card; other sections remain read-oriented unless otherwise noted.
+ * Health record dashboard: imaging + Smart Photography Protocol support client actions on the protocol card; other sections remain read-oriented unless otherwise noted.
  */
 export function PatientTwinDashboard({
   tenantId,
@@ -55,7 +55,7 @@ export function PatientTwinDashboard({
       <div className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4 text-sm text-slate-200">
         <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Payments</p>
         <p className="mt-2 text-sm text-slate-400">
-          Structured invoices and balances live on the patient profile Payments tab (RevenueOS).
+          Structured invoices and balances live on the patient profile Payments tab (Payments).
         </p>
         <Link
           href={`/fi-admin/${tenantId}/patients/${patientId}?tab=payments`}

@@ -531,9 +531,9 @@ export function RosterCommandCentreView({
       data-roster-drawer-kind={drawerState.kind}
     >
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">WorkforceOS</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Team</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
-          Roster Command Centre
+          Roster
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           Build the {periodLabel} roster manually, copy a previous period, or optionally generate
@@ -546,7 +546,7 @@ export function RosterCommandCentreView({
               href={`/fi-admin/${tenantId}/workforce-os`}
               className="text-cyan-400 hover:text-cyan-300"
             >
-              Workforce Command Centre
+              Team overview
             </Link>
             {" · "}
             <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">

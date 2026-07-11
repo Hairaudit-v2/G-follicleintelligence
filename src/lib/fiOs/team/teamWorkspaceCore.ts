@@ -77,15 +77,15 @@ export const FI_OS_TEAM_TABS: readonly FiOsTeamTab[] = [
 
 /** Legacy deep-link routes that must remain live (not redirected). */
 export const FI_OS_TEAM_LEGACY_ROUTES = [
-  { id: "workforce-os-hub", label: "Workforce hub", suffix: "workforce-os" },
-  { id: "hr-os-dashboard", label: "HR dashboard", suffix: "hr-os" },
+  { id: "workforce-os-hub", label: "Team overview", suffix: "workforce-os" },
+  { id: "hr-os-dashboard", label: "Team overview", suffix: "hr-os" },
   { id: "staff-directory-legacy", label: "Staff directory", suffix: "staff" },
   { id: "onboarding-centre", label: "Onboarding", suffix: "hr-os/onboarding" },
   { id: "roster-command-legacy", label: "Roster", suffix: "workforce-os/roster" },
   { id: "compliance-legacy", label: "Compliance", suffix: "hr-os/compliance" },
   { id: "certifications-legacy", label: "Certifications", suffix: "hr-os/certifications" },
   { id: "credentials-legacy", label: "Credentials", suffix: "hr-os/credentials" },
-  { id: "academyos", label: "Academy", suffix: "academy" },
+  { id: "academyos", label: "Training", suffix: "academy" },
 ] as const;
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */

@@ -8,7 +8,7 @@ import { loadCertificationsPageModel } from "@/src/lib/workforce/certificationsP
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Certifications · HR OS",
+  title: "Certifications · Team",
   robots: { index: false, follow: false },
 };
 

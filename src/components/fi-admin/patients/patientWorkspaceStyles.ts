@@ -50,7 +50,7 @@ export const pwsMetricValue = "mt-0.5 text-lg font-bold tabular-nums text-slate-
 export const pwsCta =
   "rounded-md border border-white/[0.10] bg-white/[0.05] px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-white/[0.09] hover:text-slate-100";
 
-/** Cyan primary CTA — high-value actions (Patient Twin, book appointment). */
+/** Cyan primary CTA — high-value actions (Health record, book appointment). */
 export const pwsCtaCyan =
   "rounded-md border border-cyan-500/30 bg-cyan-950/60 px-2.5 py-1 text-xs font-semibold text-cyan-300 transition-colors hover:bg-cyan-900/70 hover:text-cyan-200";
 

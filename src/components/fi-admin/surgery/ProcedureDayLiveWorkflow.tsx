@@ -300,7 +300,7 @@ function LiveSurgeryCard({
             onClick={() =>
               run(
                 () => startProcedureDaySessionAction(tenantId, { booking_id: card.bookingId }),
-                "Procedure day session started"
+                "Surgery day session started"
               )
             }
           >

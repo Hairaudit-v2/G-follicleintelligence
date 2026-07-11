@@ -195,7 +195,7 @@ export function CalendarTestingPanel({
   return (
     <div className="min-w-0 space-y-6">
       <FiPageHeader
-        eyebrow="ClinicOS"
+        eyebrow="Clinic"
         title="Calendar UAT"
         description="Clinic calendar readiness for real testing: staff and service checks, automated guard probes, manual workflow sign-off, and optional demo seed data. Automated probes use the same server validation paths as production."
         titleId="calendar-uat-heading"

@@ -6,7 +6,7 @@ import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIde
 import { runStaffIdentityReadinessAudit } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 
 export const metadata = {
-  title: "Identity Audit · Team",
+  title: "Identity readiness · Team",
   robots: { index: false, follow: false },
 };
 

@@ -16,7 +16,7 @@ export function ReceptionOsModuleHealthPanel({ health }: { health: ReceptionOsMo
       <div className="space-y-2 text-sm">
         <p>
           The front-desk command centre is available. Some add-on modules could not load, usually
-          because ReceptionOS migrations are pending or a non-critical query failed.
+          because Front desk migrations are pending or a non-critical query failed.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           {health.unavailableModules.map((item) => (

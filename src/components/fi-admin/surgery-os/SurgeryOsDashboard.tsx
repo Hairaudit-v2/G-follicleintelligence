@@ -60,7 +60,7 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
-              FI OS · SurgeryOS
+              FI OS · Surgery
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
               {data.tenantName}
@@ -86,7 +86,7 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
                 Refresh
               </button>
               <Link href={`${base}/procedure-day`} className={surgeryLinkButtonClass}>
-                Procedure Day
+                Surgery day
               </Link>
               <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
                 Readiness Board

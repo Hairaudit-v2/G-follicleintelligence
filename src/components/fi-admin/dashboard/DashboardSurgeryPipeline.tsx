@@ -8,7 +8,7 @@ import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 
 /**
  * Operational dashboard surgery snapshot. Planning / ready / post-op counts are estimated
- * proxies until Stage 2 loaders wire real SurgeryOS pipeline stages.
+ * proxies until Stage 2 loaders wire real Surgery pipeline stages.
  */
 
 function PipelinePill({

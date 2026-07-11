@@ -8,7 +8,7 @@ import { loadDuplicateDecisionCards } from "@/src/lib/workforce/duplicateReview.
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Duplicate Review · HR OS",
+  title: "Duplicate review · Team",
   robots: { index: false, follow: false },
 };
 

@@ -21,10 +21,10 @@ type TeamTabSpec = {
 };
 
 const TEAM_TABS: TeamTabSpec[] = [
-  { id: "overview", label: "Team overview", segment: "", heading: /Workforce Intelligence Centre/i },
+  { id: "overview", label: "Team overview", segment: "", heading: /Team overview/i },
   { id: "staff", label: "Staff directory", segment: "staff", heading: /Staff Directory/i },
-  { id: "roster", label: "Roster", segment: "roster", heading: /Roster Command Centre/i },
-  { id: "onboarding", label: "Onboarding", segment: "onboarding", heading: /Onboarding Centre/i },
+  { id: "roster", label: "Roster", segment: "roster", heading: /Roster/i },
+  { id: "onboarding", label: "Onboarding", segment: "onboarding", heading: /Onboarding/i },
   { id: "compliance", label: "Compliance", segment: "compliance", heading: /^Compliance$/i },
   { id: "training", label: "Training", segment: "training", heading: /Certifications/i },
   { id: "identity", label: "Identity & access", segment: "identity", heading: /Staff Access Centre/i },

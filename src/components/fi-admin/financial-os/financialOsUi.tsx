@@ -7,7 +7,7 @@ import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui/InfoNotice";
 import { SectionHeader } from "@/src/components/fi-admin/dashboard-ui/SectionHeader";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
-/** Shared FinancialOS command-centre styling — aligned with ReceptionOS / FI OS chrome. */
+/** Shared Finances command-centre styling — aligned with Front desk / FI OS chrome. */
 export const financialOsClasses = {
   pageShell:
     "mx-auto w-full max-w-[1920px] space-y-6 pb-10 xl:space-y-7 2xl:max-w-[2200px] 2xl:space-y-8",

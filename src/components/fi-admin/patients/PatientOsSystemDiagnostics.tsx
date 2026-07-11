@@ -113,7 +113,7 @@ export function PatientOsSystemDiagnostics({
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
           <SectionHeader
             title="Active journey case linkage"
-            description="Foundation patient to SurgeryOS case mapping from overview loader."
+            description="Foundation patient to Surgery case mapping from overview loader."
             className="mb-3"
           />
           <ul className="max-h-48 space-y-1 overflow-y-auto font-mono text-xs text-[#64748B]">

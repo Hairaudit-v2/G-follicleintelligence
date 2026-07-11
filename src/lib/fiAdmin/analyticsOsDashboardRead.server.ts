@@ -32,7 +32,7 @@ import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationa
 import type { SurgeryOsDashboardModel } from "@/src/lib/cases/surgeryOsDashboardDerive";
 
 /**
- * User-facing AnalyticsOS load note. In production, never forward raw Error messages
+ * User-facing Insights load note. In production, never forward raw Error messages
  * (may contain SQL, paths, or internal details). Developers still see full text locally.
  */
 function publicAnalyticsLoadNote(key: string, err: unknown): string {
@@ -342,7 +342,7 @@ export type LoadAnalyticsOsDashboardContext = {
 };
 
 /**
- * Tenant-scoped read-only composition of ClinicOS, LeadFlow, PatientOS, SurgeryOS, AuditOS, and FoundationOS signals.
+ * Tenant-scoped read-only composition of Clinic, Enquiries, PatientOS, Surgery, Quality review, and FoundationOS signals.
  * Each submodule is isolated — one failure does not block others.
  */
 export async function loadAnalyticsOsDashboard(
@@ -356,7 +356,7 @@ export async function loadAnalyticsOsDashboard(
   // investor.deidentified_outcomes) for viewers without full read, via `getStaffFieldPermission`
   // / `redactObjectForStaffAccess` from `@/src/lib/staffAccess/staffFieldAccess.server`. An
   // investor sees the de-identified summary, never identifiable revenue detail. Apply at the
-  // dashboard render boundary. Field access is clamped to AnalyticsOS module access by the engine.
+  // dashboard render boundary. Field access is clamped to Insights module access by the engine.
 
   const [operational, patient, surgery, audit, foundation] = await Promise.all([
     wrapLoad("clinicos", () => loadTenantOperationalDashboard(tid)),

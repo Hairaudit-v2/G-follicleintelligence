@@ -1,4 +1,4 @@
-/** Shared types for AuditOS dashboard read model (safe for client + server). */
+/** Shared types for Quality review dashboard read model (safe for client + server). */
 
 export type AuditQueueItem = {
   report_id: string;

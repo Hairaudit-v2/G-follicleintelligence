@@ -27,7 +27,7 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.readiness)}
             className="text-sm font-semibold text-slate-100"
           >
-            SurgeryOS readiness
+            Surgery readiness
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5F: read-only checklist from data already on this page — no new writes, no

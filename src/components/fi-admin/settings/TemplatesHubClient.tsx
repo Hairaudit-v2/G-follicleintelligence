@@ -19,7 +19,7 @@ const TABS = [
   {
     id: "commercial",
     label: "Front-desk & payments",
-    description: "ReceptionOS messages for deposits, invoices, payment links, and booking notices.",
+    description: "Front desk messages for deposits, invoices, payment links, and booking notices.",
   },
   {
     id: "documents",

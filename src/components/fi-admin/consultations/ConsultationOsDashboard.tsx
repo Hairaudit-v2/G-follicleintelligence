@@ -31,10 +31,10 @@ function ConsultationOsPrimaryActions({ base }: { base: string }) {
         Open Calendar
       </Link>
       <Link href={`${base}/crm`} className={consultationOsLinkButtonClass}>
-        Open LeadFlow
+        Open enquiries
       </Link>
       <Link href={`${base}/patients`} className={consultationOsLinkButtonClass}>
-        Open PatientOS
+        Open patients
       </Link>
       <Link href={`${base}/doctor`} className={consultationOsLinkButtonClass}>
         Open Doctor Workspace
@@ -286,7 +286,7 @@ export function ConsultationOsDashboard({
         )}
         <div className="mt-4">
           <Link href={`${base}/crm`} className={consultationOsLinkButtonClass}>
-            Open LeadFlow
+            Open enquiries
           </Link>
         </div>
       </DashboardCard>

@@ -149,7 +149,7 @@ export function StaffHrTaskMapClient({
     <div className="space-y-6" data-testid="staff-hr-task-map">
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-          WorkforceOS · HR Task Map
+          Team · HR Task Map
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC]">
           I need to…
@@ -164,7 +164,7 @@ export function StaffHrTaskMapClient({
             href={commandHref}
             className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-[#94A3B8] hover:bg-white/5 hover:text-[#E2E8F0]"
           >
-            ← Command Centre
+            ← Overview
           </Link>
           {staffId ? (
             <Link

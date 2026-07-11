@@ -170,7 +170,7 @@ export const FI_OS_LEGACY_MORE_SUB_ITEM_IDS: ReadonlySet<string> = new Set([
 
 /** Staff-facing More drawer labels that expose legacy module/direct surfaces. */
 const FI_OS_STAFF_HIDDEN_MORE_DRAWER_LABEL_RE =
-  /\b(direct|engine|signal learning|intelligence validation|navigation drift audit|outcome intelligence|graft tray review|readiness board direct|SurgeryOS|ReceptionOS|HR OS|WorkforceOS|Identity Audit)\b/i;
+  /\b(direct|engine|signal learning|intelligence validation|navigation drift audit|navigation audit|priority tuning|arrival confirmation|surgery insights|graft count review|identity audit|identity readiness)\b/i;
 
 export function isStaffHiddenMoreDrawerLabel(label: string): boolean {
   return FI_OS_STAFF_HIDDEN_MORE_DRAWER_LABEL_RE.test(label.trim());

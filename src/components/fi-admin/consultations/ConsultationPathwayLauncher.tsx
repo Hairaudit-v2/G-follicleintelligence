@@ -66,7 +66,7 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
       {!isSoon && card.templateSlug ? (
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
           {card.instanceId
-            ? "A saved ConsultationOS pathway instance exists for this visit."
+            ? "A saved Consultations pathway instance exists for this visit."
             : "No pathway instance yet - starting opens the guided form for this template."}
         </p>
       ) : null}

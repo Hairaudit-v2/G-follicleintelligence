@@ -34,22 +34,22 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       href: base,
       label: "Dashboard",
       home: true,
-      title: "ClinicOS — tenant home, agenda context, and daily operations.",
+      title: "Clinic — tenant home, agenda context, and daily operations.",
     },
     {
       href: `${base}/operations`,
       label: "Operations",
-      title: "ClinicOS — operations centre, agenda, and links to other boards.",
+      title: "Clinic — operations centre, agenda, and links to other boards.",
     },
     {
       href: `${base}/reception`,
       label: "Reception",
-      title: "ClinicOS — today’s reception board and booking flow.",
+      title: "Clinic — today’s reception board and booking flow.",
     },
     {
       href: `${base}/tomorrow`,
       label: "Tomorrow",
-      title: "ClinicOS — end-of-day readiness for tomorrow’s clinic day.",
+      title: "Clinic — end-of-day readiness for tomorrow’s clinic day.",
     },
   ];
   if (showBookingsBoard) {
@@ -57,18 +57,18 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       {
         href: `${base}/appointments`,
         label: "Appointments",
-        title: "ClinicOS — appointments list and slide-over actions.",
+        title: "Clinic — appointments list and slide-over actions.",
       },
       {
         href: `${base}/bookings`,
         label: "Board",
-        title: "ClinicOS — legacy booking board and agenda.",
+        title: "Clinic — legacy booking board and agenda.",
       },
-      { href: `${base}/calendar`, label: "Calendar", title: "ClinicOS — operational calendar." },
+      { href: `${base}/calendar`, label: "Calendar", title: "Clinic — operational calendar." },
       {
         href: `${base}/calendar/testing`,
         label: "Cal. UAT",
-        title: "ClinicOS — calendar UAT checklist (staff, services, probes, seed data).",
+        title: "Clinic — calendar UAT checklist (staff, services, probes, seed data).",
       }
     );
   }
@@ -76,35 +76,35 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
     clinicItems.push({
       href: `${base}/system-status`,
       label: "System status",
-      title: "ClinicOS — platform and integration checks.",
+      title: "Clinic — platform and integration checks.",
     });
   }
   groups.push({
     id: "clinicos",
-    label: "ClinicOS",
+    label: "Clinic",
     description: "Dashboard, bookings, calendar, daily operations.",
     items: clinicItems,
   });
 
   groups.push({
     id: "surgeryos",
-    label: "SurgeryOS",
-    description: "Planning, procedure day, post-op, follow-up.",
+    label: "Surgery",
+    description: "Planning, surgery day, post-op, follow-up.",
     items: [
       {
         href: `${base}/cases`,
-        label: "SurgeryOS",
-        title: "SurgeryOS — cases, planning, procedure day, and follow-up.",
+        label: "Surgery",
+        title: "Surgery — cases, planning, surgery day, and follow-up.",
       },
       {
         href: `${base}/surgery-readiness`,
-        label: "Readiness board",
-        title: "SurgeryOS — 14-day surgery readiness across bookings and case signals.",
+        label: "Ready for surgery",
+        title: "Surgery readiness — 14-day window across bookings and case signals.",
       },
       {
         href: `${base}/procedure-day`,
-        label: "Procedure day",
-        title: "SurgeryOS — today’s surgery schedule, team, and procedure progress.",
+        label: "Surgery day",
+        title: "Surgery day — today’s surgery schedule, team, and procedure progress.",
       },
     ],
   });
@@ -112,18 +112,18 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   if (showBookingsBoard || showCrmNav) {
     groups.push({
       id: "consultationos",
-      label: "ConsultationOS",
+      label: "Consultations",
       description: "Consultation workspace and conversion funnel.",
       items: [
         {
           href: `${base}/consultations`,
           label: "Consultations",
-          title: "ConsultationOS — clinical consultation records and quotes.",
+          title: "Consultations — clinical consultation records and quotes.",
         },
         {
           href: `${base}/consultation-conversion`,
           label: "Conversion board",
-          title: "ConsultationOS — live view from booked consult through surgery booking.",
+          title: "Conversion — live view from booked consult through surgery booking.",
         },
       ],
     });
@@ -133,18 +133,18 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   if (showBookingsBoard) {
     patientItems.push({
       href: `${base}/patients`,
-      label: "PatientOS",
-      title: "PatientOS — patient profile, timeline, and treatment history.",
+      label: "Patients",
+      title: "Patients — patient profile, timeline, and treatment history.",
     });
   }
   patientItems.push({
     href: `${base}/directory`,
     label: "Directory",
-    title: "PatientOS — tenant directory and lookups.",
+    title: "Patients — tenant directory and lookups.",
   });
   groups.push({
     id: "patientos",
-    label: "PatientOS",
+    label: "Patients",
     description: "Patient records, profiles, and directory.",
     items: patientItems,
   });
@@ -152,13 +152,13 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   if (showCrmNav) {
     groups.push({
       id: "leadflow",
-      label: "LeadFlow",
+      label: "Enquiries",
       description: "Enquiries, leads, pipeline, tasks, follow-ups.",
       items: [
         {
           href: `${base}/crm`,
-          label: "LeadFlow",
-          title: "LeadFlow — CRM pipeline, leads, tasks, and follow-ups.",
+          label: "Enquiries",
+          title: "Enquiries — CRM pipeline, leads, tasks, and follow-ups.",
         },
       ],
     });
@@ -186,41 +186,40 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
 
   groups.push({
     id: "analyticsos",
-    label: "AnalyticsOS",
-    description:
-      "Executive KPIs across ClinicOS, LeadFlow, PatientOS, SurgeryOS, AuditOS, FoundationOS.",
+    label: "Insights",
+    description: "Executive KPIs across clinic operations, enquiries, patients, surgery, and quality.",
     items: [
       {
         href: `${base}/analytics`,
-        label: "AnalyticsOS",
-        title: "AnalyticsOS — read-only cross-module intelligence.",
+        label: "Insights",
+        title: "Insights — read-only clinic performance and outcomes.",
       },
     ],
   });
 
   groups.push({
     id: "auditos",
-    label: "AuditOS",
-    description: "HairAudit queue and outcome intelligence.",
+    label: "Quality review",
+    description: "HairAudit queue and outcome quality review.",
     items: [
       {
         href: `${base}/audit`,
-        label: "AuditOS",
-        title: "AuditOS — HairAudit queue, evidence, and outcomes.",
+        label: "Quality review",
+        title: "Quality review — HairAudit queue, evidence, and outcomes.",
       },
     ],
   });
 
   groups.push({
     id: "foundationos",
-    label: "Patient Twin",
+    label: "Health record",
     description: "Unified patient identity, media, clinical timeline, and treatment history.",
     items: [
       {
         href: `${base}/foundation-integrity`,
-        label: "Patient Twin",
+        label: "Health record",
         title:
-          "Patient Twin — unified patient identity, media, clinical timeline, and treatment history.",
+          "Health record — unified patient identity, media, clinical timeline, and treatment history.",
       },
     ],
   });
@@ -312,7 +311,7 @@ const groupLabelClass =
 /**
  * Tenant FI Admin primary nav — dark bar, cyan active affordance. Link set mirrors server layout
  * (`showCrmNav` / `showBookingsBoard` from `getCrmShellNavAllowed` / `getBookingsBoardNavAllowed`);
- * PatientOS `/patients` uses bookings-operator eligibility like the patients route layout.
+ * Patients `/patients` uses bookings-operator eligibility like the patients route layout.
  */
 export function FiAdminTenantNav({
   base,
@@ -338,7 +337,7 @@ export function FiAdminTenantNav({
       />
       <div className="relative flex flex-wrap items-center gap-x-1 gap-y-2 overflow-x-auto overscroll-x-contain touch-pan-x px-2 py-2 sm:gap-x-2 sm:px-3 sm:py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group) => {
-          /** Avoid repeating the module name beside a link with the same label (e.g. PatientOS + PatientOS). */
+          /** Avoid repeating the module name beside a link with the same label (e.g. Patients + Patients). */
           const showGroupLabel =
             group.items.length > 1 && !group.items.some((item) => item.label === group.label);
           return (

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** TITAN Global Command Centre — gold-accent enterprise dashboard tokens. */
+/** TITAN Platform administration — gold-accent enterprise dashboard tokens. */
 export const globalCommandCentreClasses = {
   page: "mx-auto max-w-[1920px] space-y-6 pb-10",
   header:

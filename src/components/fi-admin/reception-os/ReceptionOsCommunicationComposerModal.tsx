@@ -138,7 +138,7 @@ export function ReceptionOsCommunicationComposerModal({
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/80">
-              ReceptionOS
+              Front desk
             </p>
             <h2 className="text-lg font-semibold text-slate-50">{CHANNEL_LABELS[channel]}</h2>
             <p className="mt-0.5 text-sm text-slate-500">{context.label}</p>

@@ -38,7 +38,7 @@ export default async function SystemMedicationCataloguePage() {
         <p className={fiOsChromeClasses.sectionEyebrow}>Prescribing</p>
         <h1 className="mt-1 text-xl font-semibold text-slate-50">Medication catalogue</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Cross-tenant view (first 400 rows). Editing remains per-tenant in ClinicOS.
+          Cross-tenant view (first 400 rows). Editing remains per-tenant in Clinic.
         </p>
       </div>
       <ul className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#060d18]/80">

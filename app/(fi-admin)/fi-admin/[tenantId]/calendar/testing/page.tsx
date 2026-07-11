@@ -10,7 +10,7 @@ import {
 
 export const metadata = {
   title: "Calendar UAT",
-  description: "ClinicOS calendar UAT checklist for real clinic testing (FI Admin).",
+  description: "Clinic calendar UAT checklist for real clinic testing (FI Admin).",
   robots: { index: false, follow: false },
 };
 

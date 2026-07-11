@@ -75,13 +75,13 @@ type FiOsAppShellProps = {
   showTaxLocalisationSettingsNav?: boolean;
   /** Reminder templates settings link (`manage_operations` or clinical member). */
   showRemindersSettingsNav?: boolean;
-  /** AuditOS primary nav (`view_security_audit` or clinical member). */
+  /** Quality review primary nav (`view_security_audit` or clinical member). */
   showAuditOsNav?: boolean;
   /** `/configuration` hub link in primary sidebar. */
   showConfigurationHubNav?: boolean;
-  /** RevenueOS payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
+  /** Payments payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
   showFiPaymentsInboxNav?: boolean;
-  /** Procedure Day board (`/procedure-day`) when `FI_PROCEDURE_DAY_ENABLED` is true. */
+  /** Surgery day board (`/procedure-day`) when `FI_PROCEDURE_DAY_ENABLED` is true. */
   showProcedureDayNav?: boolean;
   /** HR OS primary nav when tenant entitlement + role allow. */
   showHrOsNav?: boolean;

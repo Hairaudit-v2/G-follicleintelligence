@@ -163,7 +163,7 @@ export function HrSyncHealthClient({
       ) : null}
 
       <DashboardCard className="p-5 border-[#22C1FF]/25">
-        <h2 className="text-lg font-semibold text-[#F8FAFC]">WorkforceOS HR sync audit</h2>
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">Team HR sync audit</h2>
         <p className="mt-1 text-sm text-[#94A3B8]">
           Identity reconciliation layer — links inbound IIOHR HR records to existing FI OS staff
           members and surfaces duplicate candidates for manual review.
@@ -214,7 +214,7 @@ export function HrSyncHealthClient({
         <DashboardCard className="p-5 border-amber-500/25">
           <h2 className="text-lg font-semibold text-[#F8FAFC]">Open duplicate candidates</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Pairs scoring ≥80 — Sprint 1 does not auto-merge. Review in WorkforceOS HR
+            Pairs scoring ≥80 — Sprint 1 does not auto-merge. Review in Team HR
             reconciliation.
           </p>
           <div className="mt-4 overflow-x-auto">
@@ -255,7 +255,7 @@ export function HrSyncHealthClient({
         <DashboardCard className="p-5">
           <h2 className="text-lg font-semibold text-[#F8FAFC]">Unlinked active staff</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Active WorkforceOS members without an IIOHR HR identity link.
+            Active Team members without an IIOHR HR identity link.
           </p>
           <ul className="mt-4 space-y-2 text-sm text-[#E2E8F0]">
             {unlinkedActiveStaff.slice(0, 15).map((s) => (
@@ -275,7 +275,7 @@ export function HrSyncHealthClient({
 
       {workforceRuns.length > 0 ? (
         <DashboardCard className="p-5">
-          <h2 className="text-lg font-semibold text-[#F8FAFC]">Recent WorkforceOS sync runs</h2>
+          <h2 className="text-lg font-semibold text-[#F8FAFC]">Recent Team sync runs</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-[#64748B]">

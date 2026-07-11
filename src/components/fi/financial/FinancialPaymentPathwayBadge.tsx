@@ -37,8 +37,8 @@ export function pathwayStatusLabel(status: string | null): string {
 }
 
 /**
- * Compact pathway chip for boards (Tomorrow, Procedure Day, Surgery Readiness, Operations Centre,
- * case FinancialOS summary). Surfaces attention only — never blocks the surgery flow it sits on.
+ * Compact pathway chip for boards (Tomorrow, Surgery day, Surgery Readiness, Operations Centre,
+ * case Finances summary). Surfaces attention only — never blocks the surgery flow it sits on.
  */
 export function FinancialPaymentPathwayBadge(props: {
   summary: PaymentPathwayAttentionSummary;

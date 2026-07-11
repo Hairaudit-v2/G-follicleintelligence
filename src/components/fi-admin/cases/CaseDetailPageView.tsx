@@ -123,7 +123,7 @@ export function CaseDetailPageView({
     detail.patient?.foundation_patient_id ??
     detail.foundation_patient_id ??
     detail.legacy_patient_id;
-  /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
+  /** Foundation patient UUID for Health record (omit link when only legacy linkage without fi_patients row). */
   const twinFoundationPatientId =
     detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null;
   const prefillPatientId = detail.patient?.foundation_patient_id ?? null;
@@ -157,7 +157,7 @@ export function CaseDetailPageView({
           href={`/fi-admin/${tenantId}/procedure-day`}
           className="text-blue-300 hover:underline"
         >
-          Procedure day board
+          Surgery day board
         </Link>
       </p>
 
@@ -186,7 +186,7 @@ export function CaseDetailPageView({
           </div>
         </div>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery
+          Tenant-scoped patient profile for Surgery: Stage 5A core profile, Stage 5B surgery
           planning, Stage 5C procedure day, Stage 5D post-op / outcome tracking, Stage 5E unified
           timeline, Stage 5F readiness indicators, Stage 5G–5I worklist navigation polish,
           patient-level planning notes, and Stage 5J read-only summary / print. HairAudit scoring,
@@ -243,7 +243,7 @@ export function CaseDetailPageView({
             />
           </div>
           <div className="mt-6 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
-            <h3 className="text-sm font-semibold text-slate-100">FinancialOS · Surgery pipeline</h3>
+            <h3 className="text-sm font-semibold text-slate-100">Finances · Surgery pipeline</h3>
             <p className="mt-1 text-xs text-slate-400">
               Revenue invoices and booking financial overlay — additive to manual payment records
               above.

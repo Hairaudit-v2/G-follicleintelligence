@@ -256,7 +256,7 @@ export function PatientIntelligenceSummary({
       <div className={`mt-3 flex flex-wrap gap-2 ${pwsDivider} pt-3`}>
         <Link href={`${base}/twin`} className={`flex-1 text-center ${pwsCtaCyan}`}>
           <Brain className="mr-1 inline h-3.5 w-3.5" aria-hidden />
-          Patient Twin
+          Health record
         </Link>
         <Link href={`${base}/imaging`} className={`flex-1 text-center ${pwsCta}`}>
           <ScanLine className="mr-1 inline h-3.5 w-3.5" aria-hidden />

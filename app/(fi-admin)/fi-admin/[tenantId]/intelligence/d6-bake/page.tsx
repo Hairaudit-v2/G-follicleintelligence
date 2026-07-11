@@ -8,7 +8,7 @@ import { canViewTodaySignalLearning } from "@/src/lib/fiOs/todaySignal/todaySign
 import { loadTodaySignalBakePageModel } from "@/src/lib/fiOs/todaySignal/todaySignalValidation.server";
 
 export const metadata = {
-  title: "D6 Intelligence Bake",
+  title: "Intelligence validation",
   description: "Operational validation for the living Today and workspace signal layer.",
   robots: { index: false, follow: false },
 };

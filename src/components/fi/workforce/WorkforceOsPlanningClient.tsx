@@ -53,7 +53,7 @@ export function WorkforceOsPlanningClient({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-            WorkforceOS · Phase 2
+            Team · Phase 2
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Workforce planning engine</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">

@@ -64,7 +64,7 @@ export function FinancialOsModuleSwitcher({ base }: { base: string }) {
             fiOsChromeClasses.toolbarControlSurface,
             "inline-flex h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-semibold text-cyan-100/95 sm:h-10 sm:w-auto sm:min-w-[15rem]"
           )}
-          aria-label={`FinancialOS section: ${activeLabel}. Open section switcher.`}
+          aria-label={`Finances section: ${activeLabel}. Open section switcher.`}
           aria-haspopup="menu"
         >
           <span className="flex min-w-0 flex-1 items-center gap-2">
@@ -80,7 +80,7 @@ export function FinancialOsModuleSwitcher({ base }: { base: string }) {
         className="z-50 max-h-[min(70vh,28rem)] w-[min(calc(100vw-1.5rem),18rem)] overflow-y-auto rounded-xl border border-white/[0.1] bg-[#0c1629]/95 p-1 text-slate-100 shadow-xl backdrop-blur-xl sm:w-[18rem]"
       >
         <DropdownMenuLabel className="px-2 py-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
-          FinancialOS modules
+          Finances modules
         </DropdownMenuLabel>
         {FINANCIAL_OS_PRIMARY_MODULES.map((module) => (
           <ModuleMenuItem key={module.id} base={base} module={module} pathname={pathname} />

@@ -9,7 +9,7 @@ import { loadPresenceSnapshotForTenant } from "@/src/lib/fiOs/presence/presenceE
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 
 export const metadata = {
-  title: "Presence Intelligence",
+  title: "Arrival confirmation",
   description: "Operational presence coverage derived from existing clinic signals.",
   robots: { index: false, follow: false },
 };

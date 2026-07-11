@@ -296,7 +296,7 @@ export function SurgeryOsVieCapturePanel({
                   href={capture.longitudinalSurfacing.patient_twin_href}
                   className="rounded-lg border border-[#334155] px-3 py-1.5 text-[#CBD5E1] hover:bg-white/5"
                 >
-                  Patient Twin
+                  Health record
                 </Link>
                 <Link
                   href={capture.longitudinalSurfacing.imaging_gallery_href}

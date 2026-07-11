@@ -83,7 +83,7 @@ export function PhotoProtocolIncompleteSessionsTable({
                     }
                     className={`font-medium hover:underline ${dark ? "text-cyan-300 hover:text-cyan-200" : "text-cyan-300"}`}
                   >
-                    Patient Twin
+                    Health record
                   </Link>
                 </td>
               </tr>

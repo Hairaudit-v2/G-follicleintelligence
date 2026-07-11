@@ -92,7 +92,7 @@ export function ReceptionOsDashboard({
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
-            ReceptionOS · Command centre
+            Front desk · Overview
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
             {data.tenantName}

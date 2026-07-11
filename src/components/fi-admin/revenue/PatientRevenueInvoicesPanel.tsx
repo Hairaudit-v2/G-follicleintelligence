@@ -21,7 +21,7 @@ export function PatientRevenueInvoicesPanel(props: {
   return (
     <div className="space-y-4">
       <FiSection
-        title="Invoices (RevenueOS)"
+        title="Invoices (Payments)"
         description="Structured invoices and balances. This does not replace manual payment status tracking elsewhere on the profile."
         headingId="patient-revenue-invoices-heading"
       >

@@ -201,7 +201,7 @@ export function OnboardingCentreClient({
 
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-50">
-          Onboarding Centre
+          Onboarding
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Create staff, send onboarding invites, resend when needed, and track checklist progress

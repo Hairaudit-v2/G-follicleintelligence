@@ -62,7 +62,7 @@ export function ClinicalStaffingStatusCard({
 
       {!compact ? (
         <p className="mt-2 text-xs text-slate-400">
-          WorkforceOS validates required roles, clinical eligibility, and availability for this
+          Team validates required roles, clinical eligibility, and availability for this
           event.
         </p>
       ) : null}

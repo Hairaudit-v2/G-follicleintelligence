@@ -37,13 +37,13 @@ function PatientOsPrimaryActions({
         New patient
       </Link>
       <Link href={twinHref} className={patientOsLinkButtonClass}>
-        Open Patient Twin
+        Open health record
       </Link>
       <Link href={`${base}/consultations`} className={patientOsLinkButtonClass}>
         Open Consultations
       </Link>
       <Link href={`${base}/cases`} className={patientOsLinkButtonClass}>
-        Open SurgeryOS
+        Open surgery
       </Link>
       <Link href={`${base}/audit`} className={patientOsLinkButtonClass}>
         Open Audit Intelligence
@@ -101,7 +101,7 @@ export function PatientOsDashboard({
         <div className="relative border-l-4 border-cyan-400/80 pl-5 sm:pl-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300/95">FI OS</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-            PatientOS
+            Patients
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
             Patient journey coordination across consultations, treatment planning, surgery,
@@ -193,13 +193,13 @@ export function PatientOsDashboard({
         <SectionHeader
           kicker="Queue"
           title="Active patient journeys"
-          description="Patients on an active care pathway — open the profile, twin, or linked SurgeryOS case."
+          description="Patients on an active care pathway — open the profile, twin, or linked Surgery case."
           className="mb-4"
         />
         {activeJourneys.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
             Active patient journeys will appear when cases are linked to patient records on
-            SurgeryOS.
+            Surgery.
           </p>
         ) : (
           <ul className="space-y-3">
@@ -239,7 +239,7 @@ export function PatientOsDashboard({
                       Open patient
                     </Link>
                     <Link href={item.twinHref} className={patientOsLinkButtonClass}>
-                      Patient Twin
+                      Health record
                     </Link>
                     {item.bookingHref && showBookingsBoard ? (
                       <Link href={item.bookingHref} className={patientOsLinkButtonClass}>

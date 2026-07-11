@@ -8,7 +8,7 @@ import { loadStaffReconciliationDecisionQueue } from "@/src/lib/workforce/staffR
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Staff Reconciliation · HR OS",
+  title: "Staff reconciliation · Team",
   robots: { index: false, follow: false },
 };
 

@@ -245,7 +245,7 @@ export function LeadFlowOperatorDashboard({
           <SectionHeader
             kicker="Procedures"
             title="Predicted procedure intelligence"
-            description="Likely procedure interest based on LeadFlow scoring."
+            description="Likely procedure interest based on enquiry scoring."
             className="mb-4"
           />
           <div className="grid grid-cols-2 gap-3">
@@ -334,7 +334,7 @@ export function LeadFlowOperatorDashboard({
         <SectionHeader
           kicker="Activity"
           title="Recent activity"
-          description="Latest LeadFlow events across your leads."
+          description="Latest enquiry events across your leads."
           className="mb-4"
         />
         {payload.recentActivity.length === 0 ? (

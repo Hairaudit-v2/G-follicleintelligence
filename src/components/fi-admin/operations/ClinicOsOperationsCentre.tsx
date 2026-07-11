@@ -32,11 +32,11 @@ function OperationsCentrePrimaryActions({
         Open Calendar
       </Link>
       <Link href={`${base}/reception`} className={operationsCentreLinkButtonClass}>
-        Open Reception Board
+        Open reception board
       </Link>
       {showProcedureDayNav ? (
         <Link href={resolveProcedureDayNavHref(base, true)} className={operationsCentreLinkButtonClass}>
-          Open Procedure Day
+          Open surgery day
         </Link>
       ) : null}
       <Link href={`${base}/tomorrow`} className={operationsCentreLinkButtonClass}>
@@ -50,7 +50,7 @@ function OperationsCentrePrimaryActions({
 }
 
 /**
- * ClinicOS Operations Centre — live day-of clinic coordination workspace.
+ * Clinic Operations Centre — live day-of clinic coordination workspace.
  */
 export function ClinicOsOperationsCentre(props: {
   data: TenantOperationalDashboard;
@@ -349,7 +349,7 @@ export function ClinicOsOperationsCentre(props: {
           id="ops-financial-heading"
           kicker="Payments"
           title="Financial blockers"
-          description="Focused payment items that may block today's treatment — open FinancialOS for the full view."
+          description="Focused payment items that may block today's treatment — open Finances for the full view."
           className="mb-4"
         />
         {financialBlockers.length === 0 ? (
@@ -378,7 +378,7 @@ export function ClinicOsOperationsCentre(props: {
             href={`${base}/financial/dashboard`}
             className="text-sm font-semibold text-[#22C1FF] hover:underline"
           >
-            Open FinancialOS →
+            Open finances →
           </Link>
         </p>
       </DashboardCard>

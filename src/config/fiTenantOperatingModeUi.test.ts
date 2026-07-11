@@ -12,9 +12,10 @@ test("operating mode keys validate", () => {
   assert.equal(isFiTenantOperatingModeKey("nope"), false);
 });
 
-test("preview line: hair transplant mentions SurgeryOS", () => {
+test("preview line: hair transplant mentions Surgery", () => {
   const line = buildFiOsOperatingModePreviewLine("hair_transplant_clinic");
-  assert.match(line, /SurgeryOS/i);
+  assert.match(line, /Surgery/i);
+  assert.doesNotMatch(line, /SurgeryOS/i);
 });
 
 test("UI options cover every canonical key", () => {

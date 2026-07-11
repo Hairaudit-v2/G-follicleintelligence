@@ -25,7 +25,7 @@ export function CaseSurgeryPlanningCard({
 }) {
   const anchorHint = (() => {
     const pd = procedureDay?.procedure_date?.trim();
-    if (pd) return `Procedure day (${pd.slice(0, 10)})`;
+    if (pd) return `Surgery day (${pd.slice(0, 10)})`;
     if (linkedSurgeryBookingYmd?.trim())
       return `Earliest surgery booking (${linkedSurgeryBookingYmd.trim()})`;
     return null;

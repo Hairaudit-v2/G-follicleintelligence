@@ -23,7 +23,7 @@ export default async function HrOsLayout({
     return (
       <FiModuleAccessDenied
         tenantId={tenantId.trim()}
-        moduleLabel="HR OS"
+        moduleLabel="Team"
         reason={access.access.reason}
       />
     );

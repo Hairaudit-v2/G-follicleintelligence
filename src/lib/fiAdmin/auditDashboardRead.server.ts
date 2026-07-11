@@ -90,7 +90,7 @@ export async function fetchAuditQueueForTenant(
 }
 
 /**
- * Read-only aggregate for AuditOS dashboard (fi_reports, fi_audits, fi_model_runs, fi_scorecards).
+ * Read-only aggregate for Quality review dashboard (fi_reports, fi_audits, fi_model_runs, fi_scorecards).
  */
 export async function loadAuditDashboardSnapshot(
   supabase: SupabaseClient,

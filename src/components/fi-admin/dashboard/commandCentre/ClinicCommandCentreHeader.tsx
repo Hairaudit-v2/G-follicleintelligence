@@ -75,7 +75,7 @@ export function ClinicCommandCentreHeader(props: {
         </Link>
         <Link href={`${base}/reception`} className={headerAction}>
           <Users className="h-4 w-4 text-cyan-400" aria-hidden />
-          Open Reception Board
+          Open reception board
         </Link>
         <Link href={`${base}/surgery-os`} className={headerAction}>
           <Scissors className="h-4 w-4 text-cyan-400" aria-hidden />

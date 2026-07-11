@@ -36,7 +36,7 @@ export function DashboardQuickActions(props: {
           <QuickActionCard
             href={`${base}/crm`}
             title="New enquiry"
-            description="Open LeadFlow to capture or manage enquiries."
+            description="Open enquiries to capture or manage enquiries."
             icon={<UserPlus size={ICON} strokeWidth={1.75} aria-hidden />}
           />
         ) : (

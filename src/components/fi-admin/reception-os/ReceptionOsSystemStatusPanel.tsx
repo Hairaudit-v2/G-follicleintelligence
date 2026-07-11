@@ -39,7 +39,7 @@ export function ReceptionOsSystemStatusPanel({
       <div className="border-b border-white/[0.06] px-4 py-3">
         <SectionHeader
           title="System status"
-          description="ReceptionOS pilot / communication readiness"
+          description="Front desk pilot / communication readiness"
         />
       </div>
       <div className="grid gap-3 px-4 py-4 sm:grid-cols-2 xl:grid-cols-4">

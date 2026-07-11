@@ -190,7 +190,7 @@ export function DashboardActionCentre(props: {
           <ActionRow
             href={`${base}/financial/invoices`}
             label="Surgery payment follow-up"
-            detail="FinancialOS + issued invoices in the next 14-day surgery window — deposits, balances, installments, or failed payments."
+            detail="Finances and issued invoices in the next 14-day surgery window — deposits, balances, installments, or failed payments."
             count={actionCentre.surgeryFinancialPaymentAttention}
             icon={<Banknote className="h-4 w-4" />}
             severity={actionCentre.surgeryFinancialPaymentAttention > 0 ? "warning" : "normal"}

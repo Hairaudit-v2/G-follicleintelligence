@@ -14,17 +14,17 @@ export type HrOsNavItem = {
 export function buildHrOsNavItems(tenantId: string): HrOsNavItem[] {
   const base = `/fi-admin/${tenantId}/hr-os`;
   return [
-    { label: "Workforce Dashboard", href: base, segment: "" },
-    { label: "Sync Health", href: `${base}/sync-health`, segment: "sync-health" },
+    { label: "Team overview", href: base, segment: "" },
+    { label: "Sync health", href: `${base}/sync-health`, segment: "sync-health" },
     {
-      label: "Staff Reconciliation",
+      label: "Staff reconciliation",
       href: `${base}/staff-reconciliation`,
       segment: "staff-reconciliation",
     },
-    { label: "Duplicate Review", href: `${base}/duplicates`, segment: "duplicates" },
-    { label: "Onboarding Centre", href: `${base}/onboarding`, segment: "onboarding" },
+    { label: "Duplicate review", href: `${base}/duplicates`, segment: "duplicates" },
+    { label: "Onboarding", href: `${base}/onboarding`, segment: "onboarding" },
     { label: "Roster", href: `${base}/roster`, segment: "roster" },
-    { label: "Offboarding Centre", href: `${base}/offboarding`, segment: "offboarding" },
+    { label: "Offboarding", href: `${base}/offboarding`, segment: "offboarding" },
     { label: "Credentials", href: `${base}/credentials`, segment: "credentials" },
     { label: "Certifications", href: `${base}/certifications`, segment: "certifications" },
     { label: "Compliance", href: `${base}/compliance`, segment: "compliance" },
@@ -43,7 +43,7 @@ export function HrOsSubNav({ tenantId }: { tenantId: string }) {
 
   return (
     <nav
-      aria-label="HR OS navigation"
+      aria-label="Team navigation"
       className="mb-8 flex flex-wrap gap-2 border-b border-white/[0.08] pb-4"
     >
       {items.map((item) => {

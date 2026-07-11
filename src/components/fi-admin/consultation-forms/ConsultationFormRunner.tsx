@@ -431,7 +431,7 @@ export function ConsultationFormRunner({
     <div className="space-y-5">
       <FiCard>
         <FiPageHeader
-          eyebrow="ConsultationOS · Guided form"
+          eyebrow="Consultations · Guided form"
           title={initialInstance.template.name}
           description={`Version ${initialInstance.template_version.version} · ${initialInstance.channel.replace(/_/g, " ")} · Status: ${status}`}
           secondaryAction={
@@ -522,7 +522,7 @@ export function ConsultationFormRunner({
                 </button>
                 <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
                   Locks this form, persists the rules-based snapshot, and unlocks routing plus
-                  optional CRM, pathology, and SurgeryOS hand-offs. Nothing downstream runs
+                  optional CRM, pathology, and Surgery hand-offs. Nothing downstream runs
                   automatically.
                 </p>
               </div>

@@ -1,12 +1,12 @@
 /**
  * Clinic OS shell navigation and quick-action definitions.
  * Visibility mirrors server props from `crmShellAccess`:
- * - CRM / LeadFlow: `showCrmNav` from {@link getCrmShellNavAllowed}
+ * - CRM / Enquiries: `showCrmNav` from {@link getCrmShellNavAllowed}
  * - Bookings board, appointments, and **PatientOS** (`/patients*`): `showBookingsBoard` from
  *   {@link getBookingsBoardNavAllowed} — same eligibility as {@link getBookingsOperatorPageSession}
  *   used by `app/(fi-admin)/fi-admin/[tenantId]/patients/layout.tsx` (no separate route permission change).
  *
- * Navigation is grouped by FI OS module labels (ClinicOS, LeadFlow, …); route paths are unchanged.
+ * Navigation is grouped by FI OS module labels (Clinic, Enquiries, …); route paths are unchanged.
  */
 
 export type ClinicOsShellPermissionHint = {
@@ -83,7 +83,7 @@ export type ResolvedClinicOsQuickAction = {
 export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   {
     id: "clinicos",
-    label: "ClinicOS",
+    label: "Clinic",
     description: "Dashboard, bookings, calendar, and daily operations.",
     items: [
       {
@@ -205,12 +205,12 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "patientos",
-    label: "PatientOS",
+    label: "Patients",
     description: "Patient profile, timeline, and treatment history.",
     items: [
       {
         id: "patientos",
-        label: "PatientOS",
+        label: "Patients",
         path: "patients",
         permissionHint: { requiresBookingsBoardNav: true },
       },
@@ -218,23 +218,23 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "imagingos",
-    label: "ImagingOS",
+    label: "Imaging",
     description:
-      "Clinical imaging library, protocols, scalp maps, and compare — per patient from PatientOS.",
+      "Clinical imaging library, protocols, scalp maps, and compare — per patient from Patients.",
     items: [
       {
         id: "imagingos-guide",
         label: "Patient imaging",
         path: "patients",
         permissionHint: { requiresBookingsBoardNav: true },
-        description: "Open a patient, then use ImagingOS on their profile (or Patient Twin).",
+        description: "Open a patient, then use Imaging on their profile (or Health record).",
       },
     ],
   },
   {
     id: "surgeryos",
     label: "Surgery",
-    description: "Planning, procedure day, post-op, and follow-up.",
+    description: "Planning, surgery day, post-op, and follow-up.",
     items: [
       { id: "surgeryos", label: "Surgery", path: "cases", permissionHint: {} },
       {
@@ -247,7 +247,7 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
       },
       {
         id: "surgery-readiness-board",
-        label: "Readiness board",
+        label: "Ready for surgery",
         path: "surgery-readiness",
         permissionHint: {},
         description:
@@ -255,7 +255,7 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
       },
       {
         id: "procedure-day-board",
-        label: "Procedure day",
+        label: "Surgery day",
         path: "procedure-day",
         permissionHint: {},
         description:
@@ -265,22 +265,22 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "auditos",
-    label: "AuditOS",
+    label: "Quality review",
     description: "HairAudit queue and outcome intelligence.",
-    items: [{ id: "auditos", label: "AuditOS", path: "audit", permissionHint: {} }],
+    items: [{ id: "auditos", label: "Quality review", path: "audit", permissionHint: {} }],
   },
   {
     id: "academyos",
-    label: "AcademyOS",
+    label: "Training",
     description: "Training and certification (coming soon).",
     items: [
-      { id: "academyos", label: "AcademyOS", path: "", permissionHint: {}, placeholder: true },
+      { id: "academyos", label: "Training", path: "", permissionHint: {}, placeholder: true },
     ],
   },
   {
     id: "workforceos",
     label: "Team",
-    description: "Workforce onboarding, compliance, and staff governance.",
+    description: "Team onboarding, compliance, and staff governance.",
     items: [
       {
         id: "workforceos",
@@ -465,7 +465,7 @@ function resolveOneNavItem(
 
 /**
  * Which primary nav tab should show as active for the current URL.
- * Uses path segments under `base`; also treats `/hair-audit/*` as AuditOS when outside the tenant prefix.
+ * Uses path segments under `base`; also treats `/hair-audit/*` as Quality review when outside the tenant prefix.
  */
 export function getClinicOsShellActiveNavId(pathname: string, base: string): string | null {
   const nb = normalizeBase(base);
@@ -585,28 +585,28 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
     label: "Lead",
     path: "crm",
     permissionHint: { requiresCrmShellNav: true },
-    description: "LeadFlow — enquiries, pipeline, and tasks.",
+    description: "Enquiries — enquiries, pipeline, and tasks.",
   },
   {
     id: "booking",
     label: "Appointment",
     path: "appointments",
     permissionHint: { requiresBookingsBoardNav: true },
-    description: "Open Appointments to create or edit (ClinicOS).",
+    description: "Open Appointments to create or edit (Clinic).",
   },
   {
     id: "case",
     label: "New case",
     path: "cases/new",
     permissionHint: {},
-    description: "Start a surgery case (SurgeryOS).",
+    description: "Start a surgery case (Surgery).",
   },
   {
     id: "task",
     label: "Task",
     path: "crm",
     permissionHint: { requiresCrmShellNav: true },
-    description: "LeadFlow — open a lead, then add a task on the Timeline tab.",
+    description: "Enquiries — open a lead, then add a task on the Timeline tab.",
   },
   {
     id: "message",

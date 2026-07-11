@@ -54,7 +54,7 @@ export function PatientOsOverviewPanels({
     <div className="min-w-0 space-y-6">
       <FiPageHeader
         eyebrow="FI OS"
-        title="PatientOS"
+        title="Patients"
         description="Patient records, profiles, clinical timelines, consultations, treatment history and care coordination."
         titleId="patientos-dashboard-heading"
         primaryAction={
@@ -72,14 +72,14 @@ export function PatientOsOverviewPanels({
                 href={`${base}/crm`}
                 className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
               >
-                Open LeadFlow
+                Open enquiries
               </Link>
             ) : null}
             <Link
               href={`${base}/cases`}
               className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
-              Open SurgeryOS
+              Open surgery
             </Link>
           </div>
         }
@@ -157,12 +157,12 @@ export function PatientOsOverviewPanels({
 
           <SectionCard
             title="Active patient journeys"
-            description="Patients with a non-terminal case on SurgeryOS — longitudinal care anchored on the patient record."
+            description="Patients with a non-terminal case on Surgery — longitudinal care anchored on the patient record."
           >
             {model.activeJourneys.length === 0 ? (
               <FiEmptyState
                 title="No active journeys"
-                description="When cases are in progress for linked patients, they will appear here with a shortcut into SurgeryOS."
+                description="When cases are in progress for linked patients, they will appear here with a shortcut into Surgery."
               />
             ) : (
               <ul className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
@@ -312,7 +312,7 @@ export function PatientOsOverviewPanels({
               ) : (
                 <FiQuickActionCard
                   title="New appointment"
-                  description="Scheduling access is required to create bookings from PatientOS."
+                  description="Scheduling access is required to create bookings from Patients."
                   disabled
                   disabledReason="Enable bookings / CRM operator access to use this shortcut."
                   icon={<Stethoscope className="h-5 w-5 text-slate-400" aria-hidden />}
@@ -322,7 +322,7 @@ export function PatientOsOverviewPanels({
               )}
               {showCrmNav ? (
                 <FiQuickActionCard
-                  title="Open LeadFlow"
+                  title="Open enquiries"
                   description="CRM pipeline, leads, and commercial follow-up."
                   href={`${base}/crm`}
                   icon={<Users className="h-5 w-5" aria-hidden />}
@@ -331,7 +331,7 @@ export function PatientOsOverviewPanels({
                 />
               ) : (
                 <FiQuickActionCard
-                  title="Open LeadFlow"
+                  title="Open enquiries"
                   description="CRM workspace is not enabled for your role."
                   disabled
                   disabledReason="Ask an administrator for CRM shell access."
@@ -341,7 +341,7 @@ export function PatientOsOverviewPanels({
                 />
               )}
               <FiQuickActionCard
-                title="Open SurgeryOS"
+                title="Open surgery"
                 description="Case worklist, planning, procedures, and post-op."
                 href={`${base}/cases`}
                 icon={<ClipboardList className="h-5 w-5" aria-hidden />}
@@ -349,7 +349,7 @@ export function PatientOsOverviewPanels({
                 className="!min-h-0 sm:!min-h-0"
               />
               <FiQuickActionCard
-                title="Open AuditOS"
+                title="Open quality review"
                 description="Report queue and audit decisions for this tenant."
                 href={`${base}/audit`}
                 icon={<ListChecks className="h-5 w-5" aria-hidden />}

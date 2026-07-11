@@ -6,7 +6,7 @@ import {
 } from "@/src/lib/cases/caseDetailNavConstants";
 
 /**
- * Wraps a major SurgeryOS block with a stable anchor and scroll margin for sticky section nav.
+ * Wraps a major Surgery block with a stable anchor and scroll margin for sticky section nav.
  */
 export function CaseDetailSection({
   id,

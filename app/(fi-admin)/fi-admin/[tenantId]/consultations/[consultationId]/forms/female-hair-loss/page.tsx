@@ -41,8 +41,8 @@ export default async function FemaleHairLossGuidedFormPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-400">
-        ConsultationOS pathway 3 — female-context hair loss, hormonal screening, and Hair Longevity
-        / Patient Twin alignment. For general non-surgical intake, use{" "}
+        Consultations pathway 3 — female-context hair loss, hormonal screening, and Hair Longevity
+        / Health record alignment. For general non-surgical intake, use{" "}
         <Link
           href={`/fi-admin/${tid}/consultations/${cid}/forms/hair-loss-treatment`}
           className="font-semibold text-emerald-300 underline"

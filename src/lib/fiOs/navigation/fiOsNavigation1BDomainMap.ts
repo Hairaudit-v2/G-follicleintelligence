@@ -127,9 +127,13 @@ export const FI_OS_NAV_1B_DOMAIN_BY_LABEL: Record<string, FiOs1BWorkflowDomain> 
   Cases: "Surgery",
   Surgery: "Surgery",
   "Surgery intelligence": "Surgery",
+  "Ready for surgery": "Surgery",
   "Readiness board": "Surgery",
+  "Surgery day": "Surgery",
   "Procedure day": "Surgery",
+  "Doctor overview": "Clinical",
   "Doctor workspace": "Clinical",
+  Overview: "Surgery",
   Prescriptions: "Clinical",
   Pathology: "Clinical",
   Payments: "Finance",
@@ -137,6 +141,7 @@ export const FI_OS_NAV_1B_DOMAIN_BY_LABEL: Record<string, FiOs1BWorkflowDomain> 
   Insights: "Reports",
   "Quality review": "Reports",
   Staff: "Team",
+  Onboarding: "Team",
   "Onboarding Centre": "Team",
   Team: "Team",
   Academy: "Team",
@@ -199,33 +204,34 @@ export const FI_OS_D6_INTELLIGENCE_NAV_ENTRIES: ReadonlyArray<{
 }> = [
   {
     id: "d6-presence",
-    label: "Presence engine",
+    label: "Arrival confirmation",
     routeSuffix: "intelligence/presence",
     domain: "Reports",
   },
   {
     id: "d6-signal-learning",
-    label: "Signal learning",
+    label: "Priority tuning",
     routeSuffix: "intelligence/signal-learning",
     domain: "Reports",
   },
   {
     id: "d6-bake",
-    label: "D6 intelligence bake",
+    label: "Intelligence validation",
     routeSuffix: "intelligence/d6-bake",
     domain: "Reports",
   },
   {
     id: "d6-navigation-audit",
-    label: "Navigation drift audit",
+    label: "Navigation audit",
     routeSuffix: "intelligence/navigation-audit",
     domain: "Reports",
   },
 ];
 
-const OS_SUFFIX_IN_LABEL_RE = /\b\w+\s*OS\b/i;
+const OS_SUFFIX_IN_LABEL_RE = /\b(?!FI\b)\w+\s*OS\b/i;
+/** Architecture / product-module language that must not appear in ordinary staff nav labels. */
 const MODULE_LANGUAGE_LABEL_RE =
-  /\b(Health record|Intelligence|Finances|Onboarding Centre|Quality review)\b/i;
+  /\b(Patient\s+Twin|Digital\s+Twin|Command\s+Cent(?:re|er)|Procedure\s+Day|Readiness\s+Board|LeadFlow|Audit\s+Intelligence|Workforce\s+Intelligence|Onboarding\s+Centre|Intelligence\s+Centre|Access\s+Centre|Global\s+Command)\b/i;
 
 export function mapNavIdTo1BDomain(navId: string): FiOs1BWorkflowDomain | null {
   const entry = FI_OS_NAV_1B_DOMAIN_BY_ID[navId.trim()];

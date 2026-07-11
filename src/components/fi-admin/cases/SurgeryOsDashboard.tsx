@@ -131,7 +131,7 @@ export function SurgeryOsDashboard({
     <div className="space-y-6">
       <FiPageHeader
         eyebrow="FI OS"
-        title="SurgeryOS"
+        title="Surgery"
         description="Surgical planning, procedure day tracking, post-op care, follow-ups, and readiness — all on the existing case worklist and detail routes below."
         titleId="surgeryos-dashboard-heading"
         primaryAction={
@@ -140,7 +140,7 @@ export function SurgeryOsDashboard({
               href={`${base}/patients`}
               className="inline-flex w-full items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:w-auto"
             >
-              View PatientOS
+              View patients
             </Link>
             <Link
               href={`${base}/cases/new`}
@@ -383,14 +383,14 @@ export function SurgeryOsDashboard({
                 className="!min-h-0 sm:!min-h-0"
               />
               <FiQuickActionCard
-                title="Open PatientOS"
+                title="Open patients"
                 description="Patient directory and profiles."
                 href={`${base}/patients`}
                 showOpenAffordance={false}
                 className="!min-h-0 sm:!min-h-0"
               />
               <FiQuickActionCard
-                title="View AuditOS"
+                title="View Quality review"
                 description="HairAudit queue for this tenant."
                 href={`${base}/audit`}
                 showOpenAffordance={false}

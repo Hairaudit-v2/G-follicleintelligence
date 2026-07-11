@@ -139,7 +139,7 @@ export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
               disabled={pending || !staffId || pin.length !== 4}
               onClick={submit}
             >
-              {pending ? "Signing in…" : "Clock in & enter ClinicOS"}
+              {pending ? "Signing in…" : "Clock in & enter Clinic"}
             </Button>
           </div>
         )}

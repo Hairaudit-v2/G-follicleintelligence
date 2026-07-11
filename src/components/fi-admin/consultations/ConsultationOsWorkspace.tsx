@@ -488,9 +488,9 @@ export function ConsultationOsWorkspace({
       <FiCard>
         <FiPageHeader
           titleId="consultation-os-heading"
-          eyebrow="ConsultationOS"
+          eyebrow="Consultations"
           title="Consultation hub"
-          description="Intelligence workflow: structured pathways produce the clinical record and, when completed, a consultation intelligence summary plus routing into SurgeryOS, RevenueOS, HairAudit, and Twin-aligned follow-up."
+          description="Intelligence workflow: structured pathways produce the clinical record and, when completed, a consultation intelligence summary plus routing into Surgery, Payments, HairAudit, and Health-record-aligned follow-up."
           secondaryAction={
             <div className="flex flex-wrap gap-2">
               {appointmentHref ? (

@@ -5,7 +5,7 @@ import { WorkforceOsPlanningClient } from "@/src/components/fi/workforce/Workfor
 import { loadWorkforceOsPlanningPage } from "@/src/lib/workforce/workforcePlanningEnginePage.server";
 
 export const metadata = {
-  title: "Workforce planning · Team",
+  title: "Team planning",
   robots: { index: false, follow: false },
 };
 

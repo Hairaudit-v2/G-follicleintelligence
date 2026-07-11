@@ -8,7 +8,7 @@ import { expireStaleOnboardingInvitations, loadOnboardingPageModel } from "@/src
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Onboarding Centre · HR OS",
+  title: "Onboarding · Team",
   robots: { index: false, follow: false },
 };
 

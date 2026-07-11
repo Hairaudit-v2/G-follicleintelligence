@@ -35,13 +35,13 @@ export function ConsultationOsHubRoutingActions({
 
   const tiles: HubRouteTile[] = [
     {
-      title: "Open SurgeryOS",
+      title: "Open surgery",
       body: "Case workspace for planning, graft design, and operative documentation.",
       href: kase ? `/fi-admin/${tid}/cases/${kase}` : null,
       cta: kase ? "Open case" : "Link a case on this consultation",
     },
     {
-      title: "Create RevenueOS quote",
+      title: "Create Payments quote",
       body: "Invoices use consultation quote fields and CRM quote drafts. Open the case workspace for payments, or the guided form for Create quote draft.",
       href: kase ? `/fi-admin/${tid}/cases/${kase}` : `${base}/forms`,
       cta: kase ? "Open case (payments)" : "Open consultation form",
@@ -53,10 +53,10 @@ export function ConsultationOsHubRoutingActions({
       cta: "Open HairAudit",
     },
     {
-      title: "Update Patient Twin",
+      title: "Update health record",
       body: "Foundation twin, checklist, and longitudinal signals for this patient.",
       href: pid ? `/fi-admin/${tid}/patients/${pid}/twin` : null,
-      cta: pid ? "Open Patient Twin" : "Link a patient first",
+      cta: pid ? "Open health record" : "Link a patient first",
     },
     {
       title: "Open Pathology",

@@ -13,7 +13,7 @@ export function DashboardPerformanceKpis(props: { kpis: readonly PerformanceKpi[
         id="performance-kpis-heading"
         kicker="Performance"
         title="Operational performance"
-        description="High-level clinic signals — not a substitute for AnalyticsOS."
+        description="High-level clinic signals — not a substitute for Insights."
       />
       <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         {kpis.map((kpi) => (

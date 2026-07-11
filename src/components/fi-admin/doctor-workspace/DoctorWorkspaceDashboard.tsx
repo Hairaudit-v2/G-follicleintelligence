@@ -21,13 +21,13 @@ function DoctorWorkspacePrimaryActions({ base }: { base: string }) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <Link href={`${base}/patients`} className={doctorWorkspaceLinkButtonClass}>
-        Open PatientOS
+        Open patients
       </Link>
       <Link href={`${base}/consultations`} className={doctorWorkspaceLinkButtonClass}>
-        Open Consultations
+        Open consultations
       </Link>
       <Link href={`${base}/surgery-os`} className={doctorWorkspaceLinkButtonClass}>
-        Open SurgeryOS
+        Open surgery
       </Link>
       <Link href={`${base}/prescriptions/new`} className={doctorWorkspaceLinkButtonClass}>
         New Prescription

@@ -23,7 +23,7 @@ export function ConsultationPreparationChecklistPanel({
     <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 dark:border-slate-700 dark:bg-slate-900">
       <FiSection
         title="Pre-consultation checklist (HIE)"
-        description="Latest surgeon consultation checklist from Patient Twin intelligence. Read-only on this page; generate or edit on Patient Twin."
+        description="Latest surgeon consultation checklist from Health record insights. Read-only on this page; generate or edit on Health record."
         headingId="consultation-os-hie-checklist-heading"
       >
         <p className="mb-3 rounded-md border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200 dark:border-amber-500/35 dark:bg-amber-950/40 dark:text-amber-50/95">
@@ -37,7 +37,7 @@ export function ConsultationPreparationChecklistPanel({
               href={patientTwinHref}
               className="font-medium text-cyan-300 underline hover:text-cyan-200 dark:text-sky-400"
             >
-              Patient Twin
+              Health record
             </Link>{" "}
             to run the checklist engine.
           </p>
@@ -74,7 +74,7 @@ export function ConsultationPreparationChecklistPanel({
                 </ul>
                 {checklist.checklist_items.length > 12 ? (
                   <p className="mt-1 text-xs text-slate-500">
-                    +{checklist.checklist_items.length - 12} more on Patient Twin…
+                    +{checklist.checklist_items.length - 12} more on Health record…
                   </p>
                 ) : null}
               </div>
@@ -89,7 +89,7 @@ export function ConsultationPreparationChecklistPanel({
                 href={patientTwinHref}
                 className="font-medium text-cyan-300 underline dark:text-sky-400"
               >
-                Open Patient Twin
+                Open health record
               </Link>
             </p>
           </div>

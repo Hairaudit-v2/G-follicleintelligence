@@ -375,7 +375,7 @@ export function ClinicOsGlobalSearch({
                       className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
                     >
                       <User className="h-3.5 w-3.5" aria-hidden />
-                      PatientOS
+                      Patients
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.patients.map((p) => (
@@ -401,7 +401,7 @@ export function ClinicOsGlobalSearch({
                       className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
                     >
                       <Briefcase className="h-3.5 w-3.5" aria-hidden />
-                      SurgeryOS
+                      Surgery
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.cases.map((c) => (
@@ -427,7 +427,7 @@ export function ClinicOsGlobalSearch({
                       className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
                     >
                       <LineChart className="h-3.5 w-3.5" aria-hidden />
-                      LeadFlow
+                      Enquiries
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.leads.map((l) => (

@@ -17,7 +17,7 @@ import { patientDirectoryHasLegacyFilters } from "@/src/lib/patients/patientDire
 import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 
 export const metadata = {
-  title: "PatientOS",
+  title: "Patients",
   description:
     "Patient journey coordination across consultations, treatment planning, surgery, follow-up, media, and outcomes.",
   robots: { index: false, follow: false },

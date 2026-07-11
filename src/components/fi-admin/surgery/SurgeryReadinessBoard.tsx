@@ -37,16 +37,16 @@ function ReadinessPrimaryActions({ base }: { base: string }) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <Link href={`${base}/procedure-day`} className={surgeryLinkButtonClass}>
-        Open Procedure Day
+        Open surgery day
       </Link>
       <Link href={`${base}/surgery-os`} className={surgeryLinkButtonClass}>
-        Open SurgeryOS
+        Open surgery
       </Link>
       <Link href={`${base}/calendar`} className={surgeryLinkButtonClass}>
         Open Calendar
       </Link>
       <Link href={`${base}/patients`} className={surgeryLinkButtonClass}>
-        Open PatientOS
+        Open patients
       </Link>
       <Link href={`${base}/doctor`} className={surgeryLinkButtonClass}>
         Open Doctor Workspace
@@ -118,7 +118,7 @@ function UpcomingProcedureCard({
         ) : null}
         {card.hrefs.patient ? (
           <Link href={card.hrefs.patient} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
-            PatientOS
+            Patients
           </Link>
         ) : null}
         <Link href={`${base}/doctor`} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">

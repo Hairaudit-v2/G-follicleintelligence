@@ -24,7 +24,7 @@ import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";
 
 export const metadata = {
-  title: "Staff Twin",
+  title: "Staff profile",
   robots: { index: false, follow: false },
 };
 

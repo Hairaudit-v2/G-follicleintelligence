@@ -88,7 +88,7 @@ export function OperationsCrmPipelineSnapshot(props: {
       <p className="mt-3 text-xs text-slate-500">
         Open{" "}
         <Link className="text-cyan-400/90 underline-offset-2 hover:underline" href={crmHref}>
-          LeadFlow
+          Enquiries
         </Link>{" "}
         for full pipeline and tasks.
       </p>

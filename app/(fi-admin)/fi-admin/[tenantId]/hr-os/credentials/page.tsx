@@ -8,7 +8,7 @@ import { loadCredentialsPageModel } from "@/src/lib/workforce/credentialsPage.se
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Credentials · HR OS",
+  title: "Credentials · Team",
   robots: { index: false, follow: false },
 };
 

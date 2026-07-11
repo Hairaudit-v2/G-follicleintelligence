@@ -7,7 +7,7 @@ import { FinancialClearanceBadge } from "@/src/components/fi/financial/Financial
 import type { FinancialClearanceResult } from "@/src/lib/financialOs/financialClearanceCore";
 import { formatMoneyFromCents } from "@/src/lib/format/money";
 
-/** Financial clearance summary for case detail and surgery/clinic boards. Use `variant="dark"` on FI OS dark surfaces; `variant="light"` only on light case-detail panels. FinancialOS command-centre pages do not render this component. */
+/** Financial clearance summary for case detail and surgery/clinic boards. Use `variant="dark"` on FI OS dark surfaces; `variant="light"` only on light case-detail panels. Finances command-centre pages do not render this component. */
 export function FinancialClearancePanel(props: {
   tenantId: string;
   clearance: FinancialClearanceResult;

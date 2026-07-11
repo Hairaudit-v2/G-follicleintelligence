@@ -175,9 +175,9 @@ export function StaffAccessCentreClient({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-            WorkforceOS
+            Team
           </p>
-          <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Staff Access Centre</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Staff access</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">
             Provision login access for existing active staff in{" "}
             <span className="text-[#CBD5E1]">fi_staff_members</span> — no new staff record
@@ -369,7 +369,7 @@ export function StaffAccessCentreClient({
           href={`/fi-admin/${tenantId}/hr-os/onboarding`}
           className="font-medium text-[#22C1FF] underline"
         >
-          Onboarding Centre
+          Onboarding
         </a>{" "}
         to create staff records. This centre is for existing active staff who need login access
         only.

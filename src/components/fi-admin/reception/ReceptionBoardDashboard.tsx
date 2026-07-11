@@ -31,10 +31,10 @@ function ReceptionBoardPrimaryActions({ base }: { base: string }) {
         Open clinic flow
       </Link>
       <Link href={`${base}/procedure-day`} className={receptionBoardLinkButtonClass}>
-        Open Procedure Day
+        Open surgery day
       </Link>
       <Link href={`${base}/financial/dashboard`} className={receptionBoardLinkButtonClass}>
-        Open FinancialOS
+        Open finances
       </Link>
       <Link href={`${base}/calendar`} className={receptionBoardLinkButtonClass}>
         Quick Create Booking
@@ -265,7 +265,7 @@ export function ReceptionBoardDashboard(props: {
             href={`${base}/financial/dashboard`}
             className={`mt-4 inline-flex ${receptionBoardLinkButtonClass}`}
           >
-            Open FinancialOS
+            Open finances
           </Link>
         </DashboardCard>
       ) : null}

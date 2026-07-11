@@ -8,7 +8,7 @@ import { canViewTodaySignalLearning } from "@/src/lib/fiOs/todaySignal/todaySign
 import { loadTodaySignalLearningSummaryForTenant } from "@/src/lib/fiOs/todaySignal/todaySignalLearningSummary.server";
 
 export const metadata = {
-  title: "Signal Learning",
+  title: "Priority tuning",
   description: "Operational pattern intelligence from Today signal behaviour.",
   robots: { index: false, follow: false },
 };

@@ -15,7 +15,7 @@ import {
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
 export const metadata = {
-  title: "HR OS",
+  title: "Team",
   robots: { index: false, follow: false },
 };
 
@@ -45,7 +45,7 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
       {access.platformAdminPreview ? (
         <InfoNotice variant="info" title="Platform operator preview">
           <p className="text-sm">
-            You are viewing HR OS as a platform operator. Tenant entitlement checks are bypassed for
+            You are viewing Team as a platform operator. Tenant entitlement checks are bypassed for
             support and provisioning.
           </p>
         </InfoNotice>
@@ -57,11 +57,11 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
           Paid add-on module
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">HR OS</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Team</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-          Workforce operations, staff readiness, and HR sync health for your clinic. This workspace
+          Team operations, staff readiness, and HR sync health for your clinic. This workspace
           is protected by platform entitlements — only verified clinics with an active subscription
-          and enabled HR OS access can use it.
+          and enabled Team access can use it.
         </p>
       </header>
 

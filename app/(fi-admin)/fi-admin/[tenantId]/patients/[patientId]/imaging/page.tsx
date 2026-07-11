@@ -66,7 +66,7 @@ export default async function ImagingOsPatientPage({
         <p className="max-w-3xl text-sm text-slate-400">
           Longitudinal image library, photography protocols, scalp mapping, annotations, compare
           modes, and AI-ready job hooks — all tenant-scoped and linked to this foundation patient
-          for Patient Twin and AuditOS.
+          for Health record and Quality review.
         </p>
       </header>
 

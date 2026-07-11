@@ -14,7 +14,7 @@ type CrmShellLayoutProps = {
 export default async function CrmShellLayout({ children, params }: CrmShellLayoutProps) {
   const { tenantId } = await params;
   const session = await getCrmShellPageSession(tenantId);
-  // SA-1: LeadFlow entitlement (defers for non-staff sessions; see staffAccessGuards).
+  // SA-1: Enquiries entitlement (defers for non-staff sessions; see staffAccessGuards).
   await assertStaffModuleAccess(tenantId, "lead_flow", "read");
 
   return (

@@ -20,7 +20,7 @@ export function PatientConsultationsCard({
         <div>
           <h2 className="text-sm font-semibold text-slate-100">Consultations</h2>
           <p className="mt-1 text-xs text-slate-400">
-            ConsultationOS workspaces linked to this patient. Norwood / Ludwig scales sync to
+            Consultations workspaces linked to this patient. Norwood / Ludwig scales sync to
             clinical details on save.
           </p>
         </div>

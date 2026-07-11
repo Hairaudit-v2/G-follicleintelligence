@@ -297,7 +297,7 @@ export function FinancialOsSystemDiagnostics({
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
           <SectionHeader
             title="Revenue attribution"
-            description="LeadFlow-sourced revenue, gross profit, and attribution breakdown."
+            description="Enquiries-sourced revenue, gross profit, and attribution breakdown."
             className="mb-3"
           />
           {revenueAttributionFilterOptions ? (
@@ -451,19 +451,19 @@ export function FinancialOsSystemDiagnostics({
           />
           <ul className="grid gap-2 text-sm text-slate-300 sm:grid-cols-3">
             <li className={financialOsClasses.subPanel}>
-              <span className="font-semibold text-slate-100">ConsultationOS</span>
+              <span className="font-semibold text-slate-100">Consultations</span>
               <p className="mt-1 text-xs text-slate-400">
-                Consultation quotes create invoices and ledger entries via RevenueOS.
+                Consultation quotes create invoices and ledger entries via Payments.
               </p>
             </li>
             <li className={financialOsClasses.subPanel}>
-              <span className="font-semibold text-slate-100">SurgeryOS</span>
+              <span className="font-semibold text-slate-100">Surgery</span>
               <p className="mt-1 text-xs text-slate-400">
                 Deposit and balance invoices use procedure-scoped deposit rules.
               </p>
             </li>
             <li className={financialOsClasses.subPanel}>
-              <span className="font-semibold text-slate-100">LeadFlow</span>
+              <span className="font-semibold text-slate-100">Enquiries</span>
               <p className="mt-1 text-xs text-slate-400">
                 Payment events append CRM activity and anchor ledger rows on lead_id.
               </p>
@@ -477,7 +477,7 @@ export function FinancialOsSystemDiagnostics({
                 "px-3 py-1.5 text-xs font-semibold text-slate-200"
               )}
             >
-              Full FinancialOS module
+              Full Finances module
             </Link>
             <Link
               href={`${base}/settings/payments`}

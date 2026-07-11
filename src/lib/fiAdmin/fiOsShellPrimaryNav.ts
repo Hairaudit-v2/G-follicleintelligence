@@ -39,7 +39,7 @@ export type FiOsPrimarySidebarItem = {
   disabled: boolean;
   /** Shown when disabled (permissions / coming soon). */
   hint?: string;
-  /** Nested links (SurgeryOS readiness, ConsultationOS conversion). */
+  /** Nested links (Surgery readiness, Consultations conversion). */
   subItems?: FiOsPrimarySidebarSubItem[];
   /** Stage 2: optional UI visibility key (does not replace route guards). */
   featureKey?: FiFeatureKey;
@@ -188,7 +188,7 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "doctor-workspace",
       featureKey: "consultations",
-      label: "Doctor workspace",
+      label: "Doctor overview",
       shortLabel: "Doctor",
       href: hrefFor(b, "doctor"),
       disabled: !showBookingsBoard || blocks.doctor,
@@ -389,7 +389,7 @@ export function resolveFiOsPrimarySidebarItems(
       href: hrefFor(b, "payments"),
       disabled: !showFiPaymentsInboxNav,
       hint: !showFiPaymentsInboxNav
-        ? "RevenueOS payments are disabled (FI_PAYMENTS_ENABLED)."
+        ? "Payments inbox is disabled (FI_PAYMENTS_ENABLED)."
         : undefined,
     },
     {

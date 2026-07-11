@@ -353,7 +353,7 @@ export default async function FinancialOsDashboardPage({
       <FinancialOsSectionCard
         title="Financial clearance (Phase 4)"
         kicker="Surgery readiness"
-        description="Unified advisory clearance for surgery bookings in the next 14 days — aggregates invoices, pathways, finance, super release, international transfer, installments, and deposit state. Does not block SurgeryOS or change payment recording."
+        description="Unified advisory clearance for surgery bookings in the next 14 days — aggregates invoices, pathways, finance, super release, international transfer, installments, and deposit state. Does not block Surgery or change payment recording."
       >
         <dl className={financialOsClasses.metricGrid}>
           <FinancialOsMetricTile
@@ -428,10 +428,10 @@ export default async function FinancialOsDashboardPage({
         kicker="Deposits"
         description={
           <>
-            Creates a RevenueOS payment request for a consultation quote invoice and sets the linked
+            Creates a Payments payment request for a consultation quote invoice and sets the linked
             booking&apos;s <code className={financialOsClasses.code}>financial_os_status</code> to{" "}
             <code className={financialOsClasses.code}>deposit_pending</code> when a consultation
-            booking link exists. Does not alter ConsultationOS quote acceptance.
+            booking link exists. Does not alter Consultations quote acceptance.
           </>
         }
       >

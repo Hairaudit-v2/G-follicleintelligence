@@ -101,7 +101,7 @@ export function FinancialOsAccountsReceivablePanel(props: {
         </p>
         <FinancialOsTable
           isEmpty={openRows.length === 0}
-          emptyMessage="No open accounts receivable cases. Overdue invoices will auto-open cases via FinancialOS automation."
+          emptyMessage="No open accounts receivable cases. Overdue invoices will auto-open cases via Finances automation."
           head={
             <>
               <FinancialOsTh>Patient</FinancialOsTh>

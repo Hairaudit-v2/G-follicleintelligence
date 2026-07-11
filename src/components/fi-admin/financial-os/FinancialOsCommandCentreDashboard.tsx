@@ -30,13 +30,13 @@ function FinancialOsPrimaryActions({ base }: { base: string }) {
         Open Payments Inbox
       </Link>
       <Link href={`${base}/crm?view=workspace`} className={financialOsLinkButtonClass}>
-        Open LeadFlow
+        Open enquiries
       </Link>
       <Link href={`${base}/surgery-os`} className={financialOsLinkButtonClass}>
-        Open SurgeryOS
+        Open surgery
       </Link>
       <Link href={`${base}/analytics`} className={financialOsLinkButtonClass}>
-        Open AnalyticsOS
+        Open Insights
       </Link>
       <Link href={`${financialModule}/payment-requests`} className={financialOsLinkButtonClass}>
         Create payment request
@@ -90,7 +90,7 @@ export function FinancialOsCommandCentreDashboard(props: {
             FI OS
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-            FinancialOS
+            Finances
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
             Revenue, payments, deposits, profitability, and collection priorities across clinic
@@ -299,7 +299,7 @@ export function FinancialOsCommandCentreDashboard(props: {
 
         <DashboardCard className="p-5 sm:p-6">
           <SectionHeader
-            kicker="LeadFlow"
+            kicker="Enquiries"
             title="Consultation-to-revenue bridge"
             description="Financial gaps between consultations, quotes, and booked procedures."
             className="mb-4"
@@ -319,7 +319,7 @@ export function FinancialOsCommandCentreDashboard(props: {
           </ul>
           <div className="mt-4">
             <Link href={`${base}/crm?view=workspace`} className={financialOsLinkButtonClass}>
-              Open LeadFlow
+              Open enquiries
             </Link>
           </div>
         </DashboardCard>

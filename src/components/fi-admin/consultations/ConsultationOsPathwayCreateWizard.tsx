@@ -144,7 +144,7 @@ export function ConsultationOsPathwayCreateWizard({
       <FiCard>
         <FiPageHeader
           titleId="consultation-os-new-heading"
-          eyebrow="ConsultationOS"
+          eyebrow="Consultations"
           title="New consultation"
           description="Pathway-first intake: capture visit context, choose the clinical pathway, then open the structured form. Legacy free-form panels are retired — clinical detail lives in the pathway."
           secondaryAction={

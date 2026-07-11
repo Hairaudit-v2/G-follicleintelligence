@@ -19,7 +19,7 @@ import {
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 
 export const metadata = {
-  title: "Roster Command Centre",
+  title: "Roster",
   robots: { index: false, follow: false },
 };
 

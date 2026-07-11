@@ -8,7 +8,7 @@ import { loadOffboardingPageModel } from "@/src/lib/workforce/offboardingPage.se
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Offboarding Centre · HR OS",
+  title: "Offboarding · Team",
   robots: { index: false, follow: false },
 };
 

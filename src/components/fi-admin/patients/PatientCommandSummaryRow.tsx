@@ -118,7 +118,7 @@ export function PatientCommandSummaryRow({
           <p className={pwsValueMuted}>{journeyStatus.description}</p>
         </div>
         <Link href={`${base}/twin`} className={`self-start ${pwsCtaCyan}`}>
-          Open Patient Twin
+          Open health record
         </Link>
       </div>
     </div>

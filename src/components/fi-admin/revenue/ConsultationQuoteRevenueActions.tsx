@@ -62,7 +62,7 @@ export function ConsultationQuoteRevenueActions(props: {
   return (
     <FiSection
       title="Billing actions"
-      description="Creates RevenueOS invoices from this consultation — does not change quote fields. Finance or manager role required."
+      description="Creates Payments invoices from this consultation — does not change quote fields. Finance or manager role required."
       headingId="consultation-revenue-actions-heading"
     >
       <div className="flex flex-wrap gap-2">

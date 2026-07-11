@@ -36,7 +36,7 @@ import {
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 /**
- * FI OS tenant home — Clinic Command Center.
+ * FI OS tenant home — Clinic Overview.
  *
  * Consolidated operational overview: snapshot, priorities, timeline, performance,
  * module navigation, and tomorrow preview. Technical platform diagnostics are

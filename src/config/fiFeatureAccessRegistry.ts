@@ -107,7 +107,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   patients: {
     key: "patients",
     label: "Patients",
-    description: "PatientOS directory and patient records entry points.",
+    description: "Patient directory and patient records entry points.",
     category: "patient_journey",
     navPath: "patients",
     defaultEnabledForRoles: {
@@ -128,7 +128,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   consultations: {
     key: "consultations",
     label: "Consultations",
-    description: "ConsultationOS including conversion workflows.",
+    description: "Consultations including conversion workflows.",
     category: "patient_journey",
     navPath: "consultations",
     defaultEnabledForRoles: {
@@ -142,7 +142,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   cases: {
     key: "cases",
     label: "Cases",
-    description: "Case worklists, SurgeryOS readiness, and case lifecycle.",
+    description: "Case worklists, surgery readiness, and case lifecycle.",
     category: "clinical",
     navPath: "cases",
     defaultEnabledForRoles: {
@@ -155,8 +155,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   procedure_day: {
     key: "procedure_day",
-    label: "Procedure day",
-    description: "Procedure day board under SurgeryOS.",
+    label: "Surgery day",
+    description: "Surgery day board under Surgery.",
     category: "clinical",
     navPath: "procedure-day",
     defaultEnabledForRoles: {

@@ -71,7 +71,7 @@ export const fiOsChromeClasses = {
   tenantMainSurfaceInner: "relative px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
   /** Route page root — grows with content inside scrollable `<main>`. */
   pageScrollRoot: "min-h-full w-full shrink-0",
-  /** Optional centred page column (WorkforceOS, settings hubs, etc.). */
+  /** Optional centred page column (Team, settings hubs, etc.). */
   pageScrollContent: "mx-auto w-full min-w-0 max-w-[88rem]",
   /** Desktop primary rail (decorative glow applied inline in `FiOsSidebar`) */
   sidebarRail:

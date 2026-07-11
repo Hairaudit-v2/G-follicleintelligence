@@ -259,7 +259,7 @@ export function ManageEmploymentModal({
           href={`/fi-admin/${tenantId}/hr-os/offboarding`}
           className="font-medium text-amber-50 underline underline-offset-2 hover:text-white"
         >
-          HR OS Offboarding Centre
+          HR OS Offboarding
         </Link>
         . That flow revokes system access, PIN login, and permissions while preserving audit history.
       </p>

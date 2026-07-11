@@ -48,7 +48,7 @@ export function FinancialOsExecutiveDetailDashboard(props: {
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-cyan-400/80">
-            FinancialOS
+            Finances
           </p>
           <h1 className="text-xl font-semibold text-slate-50 sm:text-2xl">
             Executive finance intelligence
@@ -147,7 +147,7 @@ export function FinancialOsExecutiveDetailDashboard(props: {
         </dl>
       </FinancialOsSectionCard>
 
-      <FinancialOsSectionCard title="Revenue attribution" kicker="LeadFlow → ledger">
+      <FinancialOsSectionCard title="Revenue attribution" kicker="Enquiries → ledger">
         <dl className={financialOsClasses.metricGrid}>
           <FinancialOsMetricTile
             label="Best revenue source"

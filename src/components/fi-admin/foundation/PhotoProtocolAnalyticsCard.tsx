@@ -133,7 +133,7 @@ export function PhotoProtocolAnalyticsCard({
           href={`/fi-admin/${encodeURIComponent(tid)}/patients`}
           className="shrink-0 text-sm font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
         >
-          PatientOS
+          Patients
         </Link>
       </div>
       {scanNote ? (
@@ -186,7 +186,7 @@ export function PhotoProtocolAnalyticsCard({
           href={`/fi-admin/${encodeURIComponent(tid)}/patients`}
           className="shrink-0 text-sm font-medium text-cyan-300 hover:underline"
         >
-          PatientOS
+          Patients
         </Link>
       </div>
       {scanNote ? (
@@ -214,7 +214,7 @@ export function PhotoProtocolAnalyticsCard({
                     href={fiOsPatientTwinPhotoProtocolHref(tid, a.patient_id)}
                     className="mt-1 inline-block text-xs font-medium text-cyan-300 hover:underline"
                   >
-                    Open Patient Twin (protocol)
+                    Open health record (protocol)
                   </Link>
                 ) : null}
               </li>

@@ -76,7 +76,7 @@ export function GlobalCommandCentreDashboard({
       <header className={globalCommandCentreClasses.header}>
         <div>
           <p className={globalCommandCentreClasses.kicker}>
-            {data.codename} · Global Command Centre
+            {data.codename} · Platform administration
           </p>
           <h1 className={globalCommandCentreClasses.title}>{data.tenantName}</h1>
           <p className={globalCommandCentreClasses.subtitle}>
@@ -276,7 +276,7 @@ export function GlobalCommandCentreDashboard({
           aria-label="Surgical intelligence snapshot"
         >
           <div className={globalCommandCentreClasses.panelHeader}>
-            <p className={globalCommandCentreClasses.panelKicker}>SurgeryOS</p>
+            <p className={globalCommandCentreClasses.panelKicker}>Surgery</p>
             <h2 className={globalCommandCentreClasses.panelTitle}>
               Surgical intelligence snapshot
             </h2>
@@ -313,7 +313,7 @@ export function GlobalCommandCentreDashboard({
 
         <section className={globalCommandCentreClasses.panel} aria-label="Outcome audit snapshot">
           <div className={globalCommandCentreClasses.panelHeader}>
-            <p className={globalCommandCentreClasses.panelKicker}>AuditOS</p>
+            <p className={globalCommandCentreClasses.panelKicker}>Quality review</p>
             <h2 className={globalCommandCentreClasses.panelTitle}>Outcome / audit snapshot</h2>
           </div>
           <div className={globalCommandCentreClasses.panelBody}>

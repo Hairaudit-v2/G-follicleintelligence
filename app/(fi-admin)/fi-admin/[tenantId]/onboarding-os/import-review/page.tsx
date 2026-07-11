@@ -11,7 +11,7 @@ import { loadHubspotIntegrationForTenant } from "@/src/lib/onboarding-os/hubspot
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Import review — OnboardingOS",
+  title: "Import review · Onboarding",
   robots: { index: false, follow: false },
 };
 
@@ -64,7 +64,7 @@ export default async function OnboardingOsImportReviewPage({
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
-          OnboardingOS import review
+          Import review
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
           Convert approved connector staging records into native FI leads and opportunities. Every

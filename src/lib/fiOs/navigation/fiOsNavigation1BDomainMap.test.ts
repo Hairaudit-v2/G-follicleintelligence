@@ -20,8 +20,9 @@ test("Tomorrow board maps to Front Desk", () => {
   assert.equal(mapNavLabelTo1BDomain("Tomorrow board"), "Front Desk");
 });
 
-test("Onboarding Centre maps to Team", () => {
+test("Onboarding maps to Team", () => {
   assert.equal(mapNavIdTo1BDomain("onboarding-centre"), "Team");
+  assert.equal(mapNavLabelTo1BDomain("Onboarding"), "Team");
   assert.equal(mapNavLabelTo1BDomain("Onboarding Centre"), "Team");
 });
 
@@ -51,26 +52,32 @@ test("Insights and Quality review map to Reports", () => {
   assert.equal(mapNavLabelTo1BDomain("Quality review"), "Reports");
 });
 
-test("Doctor workspace and Pathology map to Clinical", () => {
+test("Doctor overview and Pathology map to Clinical", () => {
   assert.equal(mapNavIdTo1BDomain("doctor-workspace"), "Clinical");
   assert.equal(mapNavIdTo1BDomain("pathology-nav"), "Clinical");
+  assert.equal(mapNavLabelTo1BDomain("Doctor overview"), "Clinical");
   assert.equal(mapNavLabelTo1BDomain("Doctor workspace"), "Clinical");
   assert.equal(mapNavLabelTo1BDomain("Pathology"), "Clinical");
 });
 
-test("Cases and Readiness board map to Surgery", () => {
+test("Cases and Ready for surgery map to Surgery", () => {
   assert.equal(mapNavIdTo1BDomain("cases"), "Surgery");
   assert.equal(mapNavIdTo1BDomain("surgery-readiness-board"), "Surgery");
   assert.equal(mapNavLabelTo1BDomain("Cases"), "Surgery");
-  assert.equal(mapNavLabelTo1BDomain("Readiness board"), "Surgery");
+  assert.equal(mapNavLabelTo1BDomain("Ready for surgery"), "Surgery");
+  assert.equal(mapNavLabelTo1BDomain("Surgery day"), "Surgery");
   assert.equal(mapRouteSuffixTo1BDomain("surgery-os/intelligence"), "Surgery");
 });
 
 test("OS suffixes are not aligned in staff-facing labels", () => {
   assert.equal(labelHasOsSuffix("Surgery OS"), true);
   assert.equal(labelHasLegacyModuleLanguage("Onboarding Centre"), true);
-  assert.equal(labelHasLegacyModuleLanguage("Health record"), true);
+  assert.equal(labelHasLegacyModuleLanguage("Health record"), false);
   assert.equal(labelHasLegacyModuleLanguage("Front desk"), false);
+  assert.equal(labelHasLegacyModuleLanguage("Surgery day"), false);
+  assert.equal(labelHasLegacyModuleLanguage("Ready for surgery"), false);
+  assert.equal(labelHasLegacyModuleLanguage("SurgeryOS"), true);
+  assert.equal(labelHasLegacyModuleLanguage("Command Centre"), true);
 });
 
 test("resolve1BDomainForNavItem prefers id then route suffix then label", () => {

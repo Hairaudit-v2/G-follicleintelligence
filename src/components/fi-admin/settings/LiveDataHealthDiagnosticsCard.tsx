@@ -129,7 +129,7 @@ export function LiveDataHealthDiagnosticsCard({
             </div>
           </dl>
           <p className="mt-3 text-xs text-[#64748B]">
-            LeadFlow webhook path writes <code className="text-[#94A3B8]">fi_leads</code>; OnboardingOS F5
+            Enquiries webhook path writes <code className="text-[#94A3B8]">fi_leads</code>; OnboardingOS F5
             writes <code className="text-[#94A3B8]">fi_crm_leads</code>.
           </p>
         </div>
@@ -171,7 +171,7 @@ export function LiveDataHealthDiagnosticsCard({
           <p className="mt-3 text-xs text-[#64748B]">
             Pathology email ingestion is isolated from generic clinic email activity (
             <code className="text-[#94A3B8]">fi_generic_clinic_email_activities</code>). Generic
-            email projects to LeadFlow/CRM when confidently matched.
+            email projects to Enquiries/CRM when confidently matched.
           </p>
         </div>
       </div>

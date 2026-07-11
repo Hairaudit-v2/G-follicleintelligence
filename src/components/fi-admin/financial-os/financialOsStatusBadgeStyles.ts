@@ -1,4 +1,4 @@
-/** Dark FI OS badge tones for FinancialOS command-centre surfaces. */
+/** Dark FI OS badge tones for Finances command-centre surfaces. */
 export const financialOsStatusBadgeBase =
   "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
 
@@ -46,7 +46,7 @@ const EXACT_STATUS_TONES: Record<string, FinancialOsStatusBadgeTone> = {
   inactive: "cancelled",
 };
 
-/** Maps raw record status strings to dark-surface badge tones (ReceptionOS-aligned semantics). */
+/** Maps raw record status strings to dark-surface badge tones (Front desk-aligned semantics). */
 export function resolveFinancialOsRecordStatusTone(status: string): FinancialOsStatusBadgeTone {
   const normalized = status.trim().toLowerCase();
   if (!normalized) return "neutral";

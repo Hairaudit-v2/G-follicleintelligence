@@ -154,8 +154,8 @@ export function OperationsSystemDiagnostics({
 
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
           <SectionHeader
-            title="FinancialOS attention counts"
-            description="14-day surgery window and pathway SLAs — open FinancialOS for full workflow."
+            title="Finances attention counts"
+            description="14-day surgery window and pathway SLAs — open Finances for full workflow."
             className="mb-3"
           />
           <div className="space-y-2">
@@ -207,11 +207,11 @@ export function OperationsSystemDiagnostics({
               href={`${base}/financial/dashboard`}
               className="text-sm font-semibold text-[#22C1FF] hover:underline"
             >
-              Open FinancialOS →
+              Open finances →
             </Link>
             {" · "}
             <Link href={crmHref} className="text-sm font-semibold text-[#22C1FF] hover:underline">
-              Open LeadFlow →
+              Open enquiries →
             </Link>
           </p>
         </DashboardCard>

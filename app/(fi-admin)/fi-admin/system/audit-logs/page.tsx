@@ -25,7 +25,7 @@ export default async function SystemAuditLogsPage() {
         <p className="mt-1 text-sm text-slate-500">
           Platform impersonation sessions recorded in{" "}
           <code className="text-xs text-slate-400">fi_os_impersonation_sessions</code> ({count ?? 0}{" "}
-          rows). Tenant AuditOS and HairAudit remain the operational review surfaces.
+          rows). Tenant Quality review and HairAudit remain the operational review surfaces.
         </p>
       </div>
       <div className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4">
@@ -39,7 +39,7 @@ export default async function SystemAuditLogsPage() {
         </Link>
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-200">Tenant AuditOS</p>
+        <p className="text-sm font-semibold text-slate-200">Tenant Quality review</p>
         <ul className="mt-2 divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#060d18]/80">
           {trows.map((t) => (
             <li key={t.id} className="flex items-center justify-between px-4 py-2.5">
@@ -48,7 +48,7 @@ export default async function SystemAuditLogsPage() {
                 href={`/fi-admin/${t.id}/audit`}
                 className="text-xs font-medium text-cyan-400 hover:text-cyan-300"
               >
-                AuditOS →
+                Quality review →
               </Link>
             </li>
           ))}

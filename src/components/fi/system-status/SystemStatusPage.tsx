@@ -34,7 +34,7 @@ function featureLabel(s: FeatureRolloutStatus): string {
 
 export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
   const features = resolveFeatureInventoryStatuses(data);
-  const groups = ["CRM", "Bookings", "Patients", "HairAudit", "SurgeryOS", "IIOHR"] as const;
+  const groups = ["CRM", "Bookings", "Patients", "HairAudit", "Surgery", "IIOHR"] as const;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 py-6">

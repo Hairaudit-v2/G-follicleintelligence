@@ -162,7 +162,7 @@ export function PatientCommandHero({
           </span>
           <Link href={`${base}/twin`} className={chipCyanPrimary}>
             <Brain className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            Patient Twin
+            Health record
           </Link>
           <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className={chipGhost}>
             Surgery readiness

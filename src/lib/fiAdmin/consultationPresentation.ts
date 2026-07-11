@@ -1,5 +1,5 @@
 /**
- * ConsultationOS — clinic-facing presentation helpers (UI copy only; no loader changes).
+ * Consultations — clinic-facing presentation helpers (UI copy only; no loader changes).
  */
 
 import type { ConsultationConversionBoardCard } from "@/src/lib/consultations/consultationConversionBoardLoader.server";

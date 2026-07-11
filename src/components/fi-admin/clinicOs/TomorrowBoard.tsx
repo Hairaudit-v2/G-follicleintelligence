@@ -46,7 +46,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
       <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">
-            ClinicOS · Tomorrow board
+            Clinic · Tomorrow board
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
             Tomorrow readiness
@@ -94,7 +94,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
               "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200"
             )}
           >
-            Procedure day
+            Surgery day
           </Link>
         </div>
       </header>
@@ -251,7 +251,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
         <SectionHeader
           id="tomorrow-surgery-heading"
           title="Surgery readiness (tomorrow)"
-          description="Same signals as the Surgery Readiness board, scoped to tomorrow’s surgery bookings."
+          description="Same signals as Ready for surgery, scoped to tomorrow’s surgery bookings."
         />
         {data.surgeryReadiness.length === 0 ? (
           <p className="mt-4 text-sm text-slate-500">No surgery bookings tomorrow.</p>

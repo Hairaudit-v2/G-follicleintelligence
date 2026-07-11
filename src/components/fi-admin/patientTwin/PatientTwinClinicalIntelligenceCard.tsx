@@ -25,7 +25,7 @@ export function PatientTwinClinicalIntelligenceCard(props: {
       </p>
       {view.signals.length === 0 ? (
         <p className="mt-3 text-sm text-slate-400">
-          No open signals from the current Patient Twin projection.
+          No open signals from the current Health record projection.
         </p>
       ) : (
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-200">
@@ -51,7 +51,7 @@ export function PatientTwinClinicalIntelligenceCard(props: {
           Imaging workspace
         </Link>
         <Link href={`/fi-admin/${encodeURIComponent(tenantId)}/cases`} className="hover:underline">
-          SurgeryOS cases
+          Surgery cases
         </Link>
         <Link
           href={`/fi-admin/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}`}

@@ -6,7 +6,7 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-/** Legacy HR OS roster route — redirects to WorkforceOS roster command centre. */
+/** Legacy HR OS roster route — redirects to Team roster command centre. */
 export default async function HrOsRosterRedirectPage({ params, searchParams }: PageProps) {
   noStore();
   const { tenantId } = await params;

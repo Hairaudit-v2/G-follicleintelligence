@@ -1,5 +1,5 @@
 /**
- * FinancialOS — clinic-facing presentation helpers (UI copy only; no loader changes).
+ * Finances — clinic-facing presentation helpers (UI copy only; no loader changes).
  */
 
 import type { FinancialOsCommandCentrePayload } from "@/src/lib/financialOs/financialOsCommandCentreLoader.server";

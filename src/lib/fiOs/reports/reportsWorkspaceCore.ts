@@ -79,25 +79,25 @@ export const FI_OS_REPORTS_TABS: readonly FiOsReportsTab[] = [
 export const FI_OS_REPORTS_LEGACY_ROUTES = [
   { id: "analytics-legacy", label: "Analytics", suffix: "analytics" },
   { id: "insights-legacy", label: "Insights", suffix: "analytics" },
-  { id: "auditos-legacy", label: "Quality", suffix: "audit" },
+  { id: "auditos-legacy", label: "Quality review", suffix: "audit" },
   { id: "financial-os-legacy", label: "Revenue & billing", suffix: "financial-os" },
   { id: "payments-inbox-legacy", label: "Payments", suffix: "payments" },
   {
     id: "surgery-intelligence-dashboard",
-    label: "Surgical performance",
+    label: "Surgery insights",
     suffix: "surgery-os/intelligence",
   },
-  { id: "graft-counting-legacy", label: "Graft tray review", suffix: "surgery-os/graft-counting" },
+  { id: "graft-counting-legacy", label: "Graft count review", suffix: "surgery-os/graft-counting" },
 ] as const;
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
 export const FI_OS_REPORTS_ADMIN_LEGACY_ROUTES = [
   {
     id: "surgery-intelligence-dashboard",
-    label: "Surgical performance",
+    label: "Surgery insights",
     suffix: "surgery-os/intelligence",
   },
-  { id: "graft-counting-legacy", label: "Graft tray review", suffix: "surgery-os/graft-counting" },
+  { id: "graft-counting-legacy", label: "Graft count review", suffix: "surgery-os/graft-counting" },
 ] as const;
 
 export const FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([

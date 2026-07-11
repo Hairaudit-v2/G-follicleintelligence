@@ -1,5 +1,5 @@
 /**
- * AnalyticsOS MVP — presentation types for a tenant-scoped executive dashboard.
+ * Insights MVP — presentation types for a tenant-scoped executive dashboard.
  * Metrics are composed from existing module loaders only (no new DB reads here).
  *
  * Payload shapes are aggregate-only (no row-level CRM/patient/audit identifiers or labels)
@@ -42,7 +42,7 @@ export type AnalyticsOsQuickStatsPublic = {
   staffOnDutyToday: number;
 };
 
-/** Operational dashboard fields used on AnalyticsOS (no booking rows, lead titles, or reminder PII). */
+/** Operational dashboard fields used on Insights (no booking rows, lead titles, or reminder PII). */
 export type AnalyticsOsOperationalPublic = {
   tenantName: string;
   agendaByBucketCounts: { consult: number; surgery: number; follow_up: number; other: number };
@@ -127,7 +127,7 @@ export type AnalyticsOsFoundationPublic = {
 
 export type AnalyticsOsDashboardPayload = {
   tenantId: string;
-  /** Tenant display name when ClinicOS operational snapshot loaded. */
+  /** Tenant display name when Clinic operational snapshot loaded. */
   tenantName: string | null;
   showCrmNav: boolean;
   showBookingsBoard: boolean;

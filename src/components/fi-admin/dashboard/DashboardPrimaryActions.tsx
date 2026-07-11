@@ -32,7 +32,7 @@ export function DashboardPrimaryActions(props: {
     {
       key: "lead",
       title: "Add Lead",
-      description: "Capture a new enquiry in LeadFlow.",
+      description: "Capture a new enquiry in Enquiries.",
       modal: true as const,
       enabled: showCrmNav,
       disabledReason: "Requires CRM access.",

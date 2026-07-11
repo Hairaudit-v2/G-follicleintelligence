@@ -57,7 +57,7 @@ export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string 
   { id: CASE_DETAIL_SECTION_IDS.outcomeIntelligence, label: "Outcome intelligence" },
   { id: CASE_DETAIL_SECTION_IDS.timeline, label: "Timeline" },
   { id: CASE_DETAIL_SECTION_IDS.surgeryPlanning, label: "Surgery planning" },
-  { id: CASE_DETAIL_SECTION_IDS.procedureDay, label: "Procedure day" },
+  { id: CASE_DETAIL_SECTION_IDS.procedureDay, label: "Surgery day" },
   { id: CASE_DETAIL_SECTION_IDS.postOp, label: "Post-op / outcomes" },
   { id: CASE_DETAIL_SECTION_IDS.patient, label: "Patient" },
   { id: CASE_DETAIL_SECTION_IDS.lead, label: "Lead" },

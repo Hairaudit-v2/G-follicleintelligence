@@ -104,7 +104,7 @@ export function WorkforceOsSubNav({
 
   return (
     <nav
-      aria-label="WorkforceOS navigation"
+      aria-label="Team navigation"
       className="mb-6 flex flex-wrap gap-2 border-b border-white/[0.08] pb-4"
     >
       {items.map((item) => {

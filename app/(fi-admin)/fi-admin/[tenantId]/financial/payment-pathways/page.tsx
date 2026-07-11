@@ -41,8 +41,8 @@ export default async function FinancialOsPaymentPathwaysPage({
           <>
             Records how a patient intends to pay after quote/invoice acceptance (
             <code className={financialOsClasses.code}>fi_payment_pathways</code>). This is
-            staff-recorded settlement intent — it does not drive Stripe checkout, ConsultationOS,
-            Clinical Intelligence, or SurgeryOS behaviour.
+            staff-recorded settlement intent — it does not drive Stripe checkout, Consultations,
+            Clinical Intelligence, or Surgery behaviour.
           </>
         }
       />

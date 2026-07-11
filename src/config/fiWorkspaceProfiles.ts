@@ -62,7 +62,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     key: "director",
     label: "Director",
     description:
-      "Business performance, conversion, revenue, clinic health, and full ReceptionOS visibility.",
+      "Business performance, conversion, revenue, clinic health, and full Front desk visibility.",
     primaryFocus: "Business performance, conversion, revenue, clinic health, outcome intelligence.",
     defaultDashboardWidgets: [
       "clinic_metrics",
@@ -92,7 +92,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     key: "clinic_manager",
     label: "Clinic manager",
     description:
-      "Day-to-day clinic operations, staffing, patient flow, and full ReceptionOS oversight.",
+      "Day-to-day clinic operations, staffing, patient flow, and full Front desk oversight.",
     primaryFocus: "Operational excellence, scheduling, team coordination, patient experience.",
     defaultDashboardWidgets: [
       "operational_workspace",
@@ -192,7 +192,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   consultant: {
     key: "consultant",
     label: "Consultant",
-    description: "Leads, consultations, quotes, bookings, and ReceptionOS pipeline follow-ups.",
+    description: "Leads, consultations, quotes, bookings, and Front desk pipeline follow-ups.",
     primaryFocus: "Leads, consults, quotes, bookings.",
     defaultDashboardWidgets: [
       "my_workspace",
@@ -217,7 +217,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
     key: "reception",
     label: "Reception",
     description:
-      "Front desk, calendar, arrivals, and ReceptionOS command centre (patients, comms, alerts, surgery awareness).",
+      "Front desk, calendar, arrivals, and Front desk command centre (patients, comms, alerts, surgery awareness).",
     primaryFocus: "Bookings, front desk, calendar, patient flow.",
     defaultDashboardWidgets: [
       "operational_workspace",

@@ -26,7 +26,7 @@ export function DashboardStaleLeads(props: {
           icon={<UserPlus className="h-5 w-5" aria-hidden />}
           title="Pipeline is moving"
           description="No leads have been sitting in the same stage beyond your follow-up threshold."
-          actionLabel="Open LeadFlow"
+          actionLabel="Open enquiries"
           actionHref={`/fi-admin/${tenantId}/crm`}
         />
       ) : (

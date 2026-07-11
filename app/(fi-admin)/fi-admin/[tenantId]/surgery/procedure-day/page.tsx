@@ -8,7 +8,7 @@ import { assertFiProcedureDayRouteAllowed } from "@/src/lib/procedureDay/procedu
 import { loadProcedureDayBoardForTenant } from "@/src/lib/procedureDay/procedureDayOrchestrator.server";
 
 export const metadata = {
-  title: "Procedure day",
+  title: "Surgery day",
   robots: { index: false, follow: false },
 };
 

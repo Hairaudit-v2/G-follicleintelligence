@@ -32,9 +32,9 @@ export const FI_TENANT_OPERATING_MODE_UI_OPTIONS: readonly FiTenantOperatingMode
     modeKey: "hair_transplant_clinic",
     label: "Hair transplant clinic",
     description:
-      "Surgery-forward defaults: SurgeryOS, procedure day, imaging, audit intelligence, and patient twin workflows.",
+      "Surgery-forward defaults: Surgery, surgery day, imaging, quality review, and health record workflows.",
     defaultModulesLine:
-      "SurgeryOS, cases, procedure day, imaging, audit intelligence, patient twin.",
+      "Surgery, cases, surgery day, imaging, quality review, health record.",
   },
   {
     modeKey: "medical_hair_clinic",
@@ -55,14 +55,14 @@ export const FI_TENANT_OPERATING_MODE_UI_OPTIONS: readonly FiTenantOperatingMode
     label: "Audit partner",
     description:
       "Partner organisations focused on audit and analytics with reduced scheduling and CRM defaults.",
-    defaultModulesLine: "Audit intelligence, analytics, patient safety review surfaces.",
+    defaultModulesLine: "Quality review, analytics, patient safety review surfaces.",
   },
 ] as const;
 
 const MODE_PREVIEW: Record<FiTenantOperatingModeKey, string> = {
   full_fi_os: "This operating mode keeps the full FI OS surface available at tenant defaults.",
   hair_transplant_clinic:
-    "This operating mode emphasises: SurgeryOS, cases, procedure day, imaging, audit intelligence, and patient twin.",
+    "This operating mode emphasises: Surgery, cases, surgery day, imaging, quality review, and health record.",
   medical_hair_clinic:
     "This operating mode emphasises: consultations, prescriptions, pathology, patients, and CRM-led growth workflows.",
   training_academy:

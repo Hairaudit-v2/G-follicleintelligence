@@ -8,7 +8,7 @@ import { loadCompliancePageModel } from "@/src/lib/workforce/compliancePage.serv
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {
-  title: "Compliance · HR OS",
+  title: "Compliance · Team",
   robots: { index: false, follow: false },
 };
 

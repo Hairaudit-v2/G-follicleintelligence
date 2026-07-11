@@ -48,9 +48,9 @@ export const FI_OS_FRONT_DESK_TABS: readonly FiOsFrontDeskTab[] = [
 /** Legacy deep-link routes that must remain live (not redirected). */
 export const FI_OS_FRONT_DESK_LEGACY_ROUTES = [
   { id: "operations-centre", label: "Clinic flow", suffix: "operations" },
-  { id: "reception-os", label: "ReceptionOS", suffix: "reception-os" },
+  { id: "reception-os", label: "Front desk", suffix: "reception-os" },
   { id: "reception-board", label: "Reception board", suffix: "reception" },
-  { id: "reception-board-command", label: "Reception command", suffix: "reception-board" },
+  { id: "reception-board-command", label: "Front desk", suffix: "reception-board" },
   { id: "tomorrow-board", label: "Tomorrow board", suffix: "tomorrow" },
 ] as const;
 

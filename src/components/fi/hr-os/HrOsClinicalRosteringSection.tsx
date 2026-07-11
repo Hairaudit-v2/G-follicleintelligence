@@ -62,7 +62,7 @@ export function HrOsClinicalRosteringSection({
           href={rosterHref}
           className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-200 hover:bg-cyan-500/15"
         >
-          Roster Command Centre →
+          Roster →
         </Link>
       </div>
 

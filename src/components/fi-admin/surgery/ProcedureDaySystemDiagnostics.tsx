@@ -35,7 +35,7 @@ export function ProcedureDaySystemDiagnostics({
       <div className="space-y-6 border-t border-white/[0.06] px-5 py-5 sm:px-6 sm:py-6">
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
           <SectionHeader
-            title="Procedure day window"
+            title="Surgery day window"
             description="Tenant-local today window from procedure day loader."
             className="mb-3"
           />

@@ -42,7 +42,7 @@ export function SurgeryReadinessSystemDiagnostics({
       <div className="space-y-6 border-t border-white/[0.06] px-5 py-5 sm:px-6 sm:py-6">
         <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
           <SectionHeader
-            title="Readiness board window"
+            title="Ready for surgery window"
             description="14-day tenant-local window from surgery readiness loader."
             className="mb-3"
           />

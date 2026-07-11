@@ -30,7 +30,7 @@ export async function generateMetadata({
 }
 
 /**
- * Read-only Patient Twin V1 dashboard (foundation patient). Tenant access is enforced by
+ * Read-only Health record V1 dashboard (foundation patient). Tenant access is enforced by
  * `assertFiTenantPortalAccess` in the parent `[tenantId]` layout.
  */
 export default async function PatientTwinV1RoutePage({
@@ -49,7 +49,7 @@ export default async function PatientTwinV1RoutePage({
   ) {
     return (
       <p className="text-sm text-amber-200/90">
-        Server misconfigured (Supabase). Patient Twin cannot be loaded.
+        Server misconfigured (Supabase). Health record cannot be loaded.
       </p>
     );
   }

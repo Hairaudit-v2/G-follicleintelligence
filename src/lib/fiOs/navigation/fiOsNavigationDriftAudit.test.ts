@@ -6,8 +6,9 @@ import {
   classifyNavigationDrift,
   collectFiOsCurrentNavigationModel,
   summarizeNavigationDrift,
+  mapCurrentNavItemTo1BDomain,
 } from "@/src/lib/fiOs/navigation/fiOsNavigationDriftAudit";
-import { mapCurrentNavItemTo1BDomain } from "@/src/lib/fiOs/navigation/fiOsNavigationDriftAudit";
+import { labelHasLegacyModuleLanguage } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
 
 const TENANT = "tenant-audit-1";
 
@@ -63,11 +64,19 @@ test("duplicate surfaces are detected for surgery and pipeline overlaps", () => 
   assert.equal(classifyNavigationDrift(followUps, items).classification, "duplicate_surface");
 });
 
-test("legacy labels are detected for module language", () => {
+test("legacy module language detector still flags architecture terms", () => {
+  assert.equal(labelHasLegacyModuleLanguage("SurgeryOS"), true);
+  assert.equal(labelHasLegacyModuleLanguage("Command Centre"), true);
+  assert.equal(labelHasLegacyModuleLanguage("Onboarding Centre"), true);
+
+  // S2: core staff destinations use plain language and must not be classified as legacy labels.
   const report = buildNavigationDriftReport(TENANT, { includeQuickCreate: false });
-  const legacyIds = new Set(report.legacyLabels.map((l) => l.id));
-  assert.ok(legacyIds.has("onboarding-centre") || legacyIds.has("patient-twin"));
-  assert.ok(report.legacyLabels.length > 0);
+  const byId = new Map(report.items.map((r) => [r.item.id, r]));
+  for (const id of ["front-desk", "surgery", "team", "patients", "calendar", "reports"]) {
+    const row = byId.get(id);
+    if (!row) continue;
+    assert.notEqual(row.classification, "legacy_label", `${id} should not be legacy_label`);
+  }
 });
 
 test("primary rail recommendation does not exceed 6", () => {

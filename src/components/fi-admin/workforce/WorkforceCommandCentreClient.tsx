@@ -354,11 +354,11 @@ function WorkforceIntelligenceEngineSection({
   const topRecommendations = executiveRecommendations.slice(0, 3);
 
   return (
-    <section aria-label="Workforce intelligence engine" className="space-y-5">
+    <section aria-label="Team insights" className="space-y-5">
       <SectionHeading
-        kicker="Intelligence"
-        title="Workforce Intelligence Engine"
-        description="Predictive workforce risk, readiness, and ranked executive actions — FI interprets what matters next."
+        kicker="Team insights"
+        title="Team recommendations"
+        description="Predictive staffing risk, readiness, and ranked next actions — what needs attention next."
       />
       <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
         <div
@@ -616,11 +616,11 @@ function SurgicalWorkforceIntelligenceSection({
   }
 
   return (
-    <section aria-label="Surgical workforce intelligence" className="space-y-5">
+    <section aria-label="Surgical team insights" className="space-y-5">
       <SectionHeading
-        kicker="SurgeryOS"
-        title="Surgical Workforce Intelligence"
-        description="Clinical procedure staffing intelligence — assignment safety, surgical capacity, and operational risk across upcoming procedures."
+        kicker="Surgery"
+        title="Surgical team insights"
+        description="Procedure staffing — assignment safety, surgical capacity, and operational risk across upcoming procedures."
       />
       <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
         <div
@@ -865,23 +865,23 @@ export function WorkforceCommandCentreClient({
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-4">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#22C1FF]/90 sm:text-sm">
-                WorkforceOS · Intelligence Centre
+                Team · Overview
               </p>
               <h1 className="text-4xl font-semibold tracking-tight text-[#F8FAFC] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
-                Workforce Intelligence Centre
+                Team overview
               </h1>
               <p className="text-base leading-relaxed text-[#94A3B8] sm:text-lg sm:leading-8">
-                Real-time workforce intelligence across staffing readiness, surgical workforce allocation,
-                compliance monitoring, payroll exposure, and operational workforce performance.
+                Real-time view of staffing readiness, surgical team allocation, compliance,
+                payroll exposure, and operational team performance.
               </p>
             </div>
             {canManage ? (
               <div className="flex flex-wrap gap-3">
                 <Link href={`${base}/planning`} className={heroPrimaryButtonClass}>
-                  Open Workforce Planning
+                  Open team planning
                 </Link>
                 <Link href={`${base}/procedure-staffing`} className={heroSecondaryButtonClass}>
-                  Procedure Staffing
+                  Surgery staffing
                 </Link>
                 <Link href={`${base}/payroll`} className={heroSecondaryButtonClass}>
                   Payroll & Wages

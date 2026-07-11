@@ -220,7 +220,7 @@ function HairTransplantRepairCompletionBrief({
     ? "Yes — baseline documentation recommended"
     : "Not flagged";
   const surgeryOs = snap?.surgeryosPlanningRecommended
-    ? "Yes — corrective planning in SurgeryOS recommended"
+    ? "Yes — corrective planning in Surgery recommended"
     : "Not flagged";
   const urgency = snap?.followUpUrgencyLabel?.trim() || "—";
 
@@ -261,7 +261,7 @@ function HairTransplantRepairCompletionBrief({
             <p>{hairAudit}</p>
           </SectionBlock>
 
-          <SectionBlock title="SurgeryOS planning recommendation">
+          <SectionBlock title="Surgery planning recommendation">
             <p>{surgeryOs}</p>
           </SectionBlock>
 
@@ -503,7 +503,7 @@ export function ConsultationCompletionSummaryCard({
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  HLI / Patient Twin pathway
+                  HLI / Health record pathway
                 </dt>
                 <dd
                   className={cn(

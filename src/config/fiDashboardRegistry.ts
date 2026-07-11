@@ -88,7 +88,7 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
     description: "Consultation-oriented worklist (ties to ConsultationOS).",
   },
   procedure_day_queue: {
-    title: "Procedure day",
+    title: "Surgery day",
     description: "Procedure-day preparation signals (board lives under Surgery).",
   },
   follow_up_queue: {
@@ -104,17 +104,17 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
     description: "Scheduling and arrivals-oriented snapshot (calendar remains canonical).",
   },
   staff_intelligence_summary: {
-    title: "Staff intelligence",
+    title: "Team insights",
     description:
       "Operational support signals for clinic leadership (no automated permission changes).",
   },
   clinical_intelligence_summary: {
-    title: "Clinical Intelligence",
+    title: "Clinical insights",
     description:
       "Neutral patient journey and outcome support signals for clinical leadership (no automated medical advice).",
   },
   outcome_intelligence_summary: {
-    title: "Outcome Intelligence",
+    title: "Outcome insights",
     description:
       "Structured outcome checkpoints, imaging and audit references, and anonymisation-ready aggregates (no predictions).",
   },

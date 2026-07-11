@@ -14,7 +14,7 @@ export function FinancialSurgeryPipelineInline(props: {
   tenantId: string;
   caseId: string | null;
   status: FinancialSurgeryPipelineStatus;
-  /** Dark SurgeryOS / ClinicOS boards vs light case detail. */
+  /** Dark Surgery / Clinic boards vs light case detail. */
   variant?: "dark" | "light";
   /** Single-line chip + micro links (boards). */
   compact?: boolean;

@@ -31,7 +31,7 @@ export const STAFF_UAT_SCREEN_GUIDES: Record<StaffUatScreenKey, StaffUatScreenGu
     purpose: "See every appointment on the grid, assign staff and rooms, and resolve scheduling blockers.",
     nextBestAction: "Click a surgery with blockers and assign room + surgeon from the booking drawer.",
     commonMistakes: [
-      "Booking surgery without a room — the readiness board will stay red.",
+      "Booking surgery without a room — ready for surgery will stay blocked.",
       "Assuming hover tooltips show blockers — surgery cards show readiness on the card.",
       "Changing time without checking staff overlap warnings.",
     ],
@@ -62,7 +62,7 @@ export const STAFF_UAT_SCREEN_GUIDES: Record<StaffUatScreenKey, StaffUatScreenGu
     ],
   },
   procedure_day: {
-    purpose: "Live surgical day cockpit — advance stages, record graft counts, and complete procedures.",
+    purpose: "Live surgery day board — advance stages, record graft counts, and complete procedures.",
     nextBestAction: "Start the session when the patient is in pre-op, then use Next stage buttons through post-op.",
     commonMistakes: [
       "Advancing stages without recording graft metrics during extraction/implantation.",
@@ -73,7 +73,7 @@ export const STAFF_UAT_SCREEN_GUIDES: Record<StaffUatScreenKey, StaffUatScreenGu
     purpose: "Staff readiness, certifications, and surgical team coverage for upcoming procedures.",
     nextBestAction: "Resolve critical attention queue items before today's surgeries.",
     commonMistakes: [
-      "Assigning staff in calendar without checking workforce compliance flags.",
+      "Assigning staff in calendar without checking team compliance flags.",
       "Ignoring expired certification badges on staff cards.",
     ],
   },

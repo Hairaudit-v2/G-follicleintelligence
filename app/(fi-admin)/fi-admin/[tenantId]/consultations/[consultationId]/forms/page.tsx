@@ -41,7 +41,7 @@ export default async function ConsultationGuidedFormPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-400">
-        Hair transplant pathway (surgical planning). For non-surgical Hair Longevity / Patient Twin
+        Hair transplant pathway (surgical planning). For non-surgical Hair Longevity / Health record
         intake, use the{" "}
         <Link
           href={`/fi-admin/${tid}/consultations/${cid}/forms/hair-loss-treatment`}

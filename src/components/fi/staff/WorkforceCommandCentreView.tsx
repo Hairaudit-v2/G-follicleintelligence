@@ -222,10 +222,10 @@ export function WorkforceCommandCentreView({
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
-            WorkforceOS · Settings
+            Team · Settings
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">
-            Workforce Command Centre
+            Team overview
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
             Manage clinical readiness, compliance, permissions and workforce allocation.

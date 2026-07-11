@@ -25,7 +25,7 @@ export function RosterCommandCentreDiagnosticCard({
       className="mx-auto max-w-3xl rounded-xl border border-rose-500/30 bg-rose-950/20 p-5"
       data-testid="roster-load-diagnostic"
     >
-      <h1 className="text-lg font-semibold text-rose-100">Roster Command Centre load failed</h1>
+      <h1 className="text-lg font-semibold text-rose-100">Roster load failed</h1>
       <p className="mt-2 text-sm text-rose-50/90">
         The roster route failed before render completed. Standard-hours setup is blocked until this
         is resolved.

@@ -12,7 +12,7 @@ import { resolveEnterpriseDemoTenant } from "@/src/lib/enterprise-demo/enterpris
 import { isNonEmptyUuid } from "@/src/lib/crm/validation";
 
 export const metadata = {
-  title: "TITAN · Global Command Centre",
+  title: "TITAN · Platform administration",
   robots: { index: false, follow: false },
 };
 
@@ -61,7 +61,7 @@ export default async function FiAdminGlobalCommandCentrePage({
   if (!result.ok && result.kind === "load_failed") {
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="Global Command Centre could not load">
+        <InfoNotice variant="danger" title="Platform administration could not load">
           <p className="text-sm">
             The TITAN global command centre failed to load. Ensure the enterprise demo tenant is
             seeded and Supabase migrations are applied.

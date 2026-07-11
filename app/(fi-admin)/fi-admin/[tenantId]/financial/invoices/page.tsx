@@ -42,7 +42,7 @@ export default async function FinancialOsInvoicesPage({
       <FinancialOsSubPageHeader
         kicker="Revenue"
         title="Invoices"
-        description="Latest RevenueOS invoices for this tenant (read-only)."
+        description="Latest Payments invoices for this tenant (read-only)."
       />
       <FinancialOsTable
         isEmpty={rows.length === 0}

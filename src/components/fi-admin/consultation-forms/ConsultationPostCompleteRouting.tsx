@@ -35,19 +35,19 @@ export function ConsultationPostCompleteRouting({
 
   const tiles: RouteTile[] = [
     {
-      title: "SurgeryOS",
+      title: "Surgery",
       body: "Open the linked case for planning, graft design, and operative documentation.",
       href: kase ? `/fi-admin/${tid}/cases/${kase}` : null,
       cta: kase ? "Open case" : "Link a case first",
     },
     {
-      title: "RevenueOS",
+      title: "Payments",
       body: "Quotes, payment requests, and billing configuration for this tenant.",
       href: `/fi-admin/${tid}/payments`,
       cta: "Open payments",
     },
     {
-      title: "LeadFlow follow-up",
+      title: "Enquiry follow-up",
       body: "Return to the CRM lead workspace for sequencing and tasks.",
       href: lid ? `/fi-admin/${tid}/crm/leads/${lid}` : null,
       cta: lid ? "Open lead" : "Link a lead first",
