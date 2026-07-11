@@ -63,7 +63,11 @@ test.describe("FI-UX-REBUILD D2 navigation collapse @smoke", () => {
 
     const modulesNav = page.getByRole("navigation", { name: "Clinic navigation" });
     await expect(modulesNav).toBeVisible({ timeout: 15_000 });
-    await expect(modulesNav.getByText("Clinic flow", { exact: true }).first()).toBeVisible();
+    // S3.4D: staff More surfaces Front Desk as a workflow group (not retired Clinic flow labels).
+    await expect(
+      modulesNav.getByText(/Front desk|Today|Tomorrow/i).first()
+    ).toBeVisible();
+    await expect(modulesNav.getByText("Clinic flow", { exact: true })).toHaveCount(0);
   });
 
   test("calendar route still renders full page with minimal rail", async ({ page }) => {

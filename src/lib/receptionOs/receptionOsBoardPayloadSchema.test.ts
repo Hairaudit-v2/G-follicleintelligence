@@ -328,24 +328,39 @@ describe("receptionOsBoardPayloadSchema", () => {
 });
 
 describe("reception board regression guard", () => {
-  it("keeps legacy /reception board on tenant operational dashboard loader", () => {
+  it("S3.4E: legacy /reception redirects to Front Desk Today (no local board load)", () => {
     const receptionPage = readFileSync(
       "app/(fi-admin)/fi-admin/[tenantId]/reception/page.tsx",
       "utf8"
     );
-    assert.match(receptionPage, /loadTenantOperationalDashboard/);
-    assert.match(receptionPage, /ReceptionBoardDashboard/);
-    assert.doesNotMatch(receptionPage, /loadReceptionOsBoardPayload/);
+    assert.match(receptionPage, /buildFrontDeskLegacyRedirectPath/);
+    assert.match(receptionPage, /kind:\s*"today"/);
+    assert.doesNotMatch(receptionPage, /loadTenantOperationalDashboard/);
+    assert.doesNotMatch(receptionPage, /ReceptionBoardDashboard/);
     assert.doesNotMatch(receptionPage, /ReceptionOsDashboard/);
   });
 
-  it("routes ReceptionOS command centre separately from kanban reception board", () => {
+  it("S3.4B: live /front-desk uses FrontDeskTodayBoard shell loader", () => {
+    const frontDeskPage = readFileSync(
+      "app/(fi-admin)/fi-admin/[tenantId]/front-desk/page.tsx",
+      "utf8"
+    );
+    assert.match(frontDeskPage, /FrontDeskTodayBoard/);
+    assert.match(frontDeskPage, /loadReceptionBoardCommandCenterPayload/);
+    assert.match(frontDeskPage, /tier:\s*"shell"/);
+    assert.doesNotMatch(frontDeskPage, /ReceptionOsDashboard/);
+    assert.doesNotMatch(frontDeskPage, /loadReceptionOsCommandCentrePayload/);
+  });
+
+  it("S3.4F: routes ReceptionOS command centre as platform-admin-only surface", () => {
     const receptionOsPage = readFileSync(
       "app/(fi-admin)/fi-admin/[tenantId]/reception-os/page.tsx",
       "utf8"
     );
     assert.match(receptionOsPage, /loadReceptionOsCommandCentrePayload/);
     assert.match(receptionOsPage, /ReceptionOsDashboard/);
+    assert.match(receptionOsPage, /isFiOsPlatformAdminFullSessionBypass/);
+    assert.match(receptionOsPage, /notFound\(\)/);
     assert.doesNotMatch(receptionOsPage, /ReceptionBoardClient/);
     assert.doesNotMatch(receptionOsPage, /loadTenantOperationalDashboard/);
   });

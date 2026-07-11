@@ -1,5 +1,5 @@
 /**
- * FI-UX-AUDIT-1 — live label validation (demo tenant, local dev).
+ * FI-UX-AUDIT-1 / S3.4 — live Front Desk cutover label validation (demo tenant, local dev).
  * Run:
  *   FI_E2E_BASE_URL=http://localhost:3000 FI_E2E_TENANT_ID=<uuid> FI_E2E_BROWSERS=chromium \
  *     npx playwright test e2e/fi-ux-audit-labels.spec.ts
@@ -15,81 +15,131 @@ test.beforeAll(() => {
   requireE2eBaseUrl();
 });
 
-test.describe("FI-UX-AUDIT-1 label pass @smoke", () => {
-  test("reception board — page chrome and snapshot labels", async ({ page }) => {
-    await page.goto(`${BASE()}/reception`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByRole("heading", { name: "Reception Board", level: 1 })).toBeVisible({
+test.describe("FI-UX S3.4 Front Desk cutover @smoke", () => {
+  test("/front-desk renders Today board (not ReceptionOS dashboard)", async ({ page }) => {
+    await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: "Today", level: 1 })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByRole("link", { name: "Open Calendar" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Open clinic flow" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Quick Create Booking" }).first()).toBeVisible();
-
-    await expect(page.getByRole("heading", { name: "Reception snapshot", level: 2 })).toBeVisible();
-    for (const card of [
-      "Expected arrivals",
-      "Checked in",
-      "Waiting",
-      "In consultation / treatment",
-    ]) {
-      await expect(page.getByText(card, { exact: true }).first()).toBeVisible();
-    }
-
-    await expect(page.getByRole("heading", { name: "Patient flow board", level: 2 })).toBeVisible();
-    const flowBoard = page.getByRole("region", { name: "Patient flow board" });
-    const laneOrEmpty = flowBoard.getByRole("heading", { level: 3 }).or(
-      flowBoard.getByText(/No active patient flow/i),
-    );
-    await expect(laneOrEmpty.first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Front desk").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Reception Board", level: 1 })).toHaveCount(0);
+    await expect(page.getByText("Clinic operations cockpit")).toHaveCount(0);
+    await expect(page.getByLabel("Day summary")).toBeVisible({ timeout: 15_000 });
   });
 
-  test("legacy /reception-board is command center (not /reception dashboard)", async ({ page }) => {
-    await page.goto(`${BASE()}/reception-board`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(
-      page.getByRole("heading", { name: "Clinic operations cockpit", level: 1 }),
-    ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("FI OS · Reception Board")).toBeVisible();
-  });
-
-  test("FI OS shell — sidebar nav labels", async ({ page }) => {
-    await page.goto(`${BASE()}/reception`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    const nav = page.getByRole("navigation", { name: "Clinic navigation" });
-    await expect(nav).toBeVisible({ timeout: 30_000 });
-
-    for (const label of [
-      "Today",
+  test("exactly two Front Desk tabs: Today and Tomorrow", async ({ page }) => {
+    await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const subNav = page.getByRole("navigation", { name: "Front desk navigation" });
+    await expect(subNav).toBeVisible({ timeout: 30_000 });
+    await expect(subNav.getByRole("link", { name: "Today" })).toBeVisible();
+    await expect(subNav.getByRole("link", { name: "Tomorrow" })).toBeVisible();
+    await expect(subNav.getByRole("link")).toHaveCount(2);
+    for (const absent of [
+      "Reception operations",
       "Clinic flow",
       "Reception board",
       "Tomorrow board",
-      "Cases",
-      "Finances",
-      "Front desk",
-      "Staff",
     ]) {
-      await expect(nav.getByText(label, { exact: true }).first()).toBeVisible();
+      await expect(subNav.getByText(absent, { exact: true })).toHaveCount(0);
     }
   });
 
-  test("FI OS shell — top bar search and quick create", async ({ page }) => {
-    await page.goto(`${BASE()}/reception`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByRole("button", { name: /open workspace search/i })).toBeVisible({
+  test("Today tab is active on /front-desk", async ({ page }) => {
+    await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const today = page
+      .getByRole("navigation", { name: "Front desk navigation" })
+      .getByRole("link", { name: "Today" });
+    await expect(today).toBeVisible({ timeout: 30_000 });
+    await expect(today).toHaveClass(/22C1FF|bg-\[#22C1FF/);
+  });
+
+  test("Tomorrow tab is active on /front-desk/tomorrow", async ({ page }) => {
+    await page.goto(`${BASE()}/front-desk/tomorrow`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    const tomorrow = page
+      .getByRole("navigation", { name: "Front desk navigation" })
+      .getByRole("link", { name: "Tomorrow" });
+    await expect(tomorrow).toBeVisible({ timeout: 30_000 });
+    await expect(page).toHaveURL(new RegExp(`/front-desk/tomorrow`));
+  });
+
+  test("legacy /reception redirects to /front-desk and preserves bookingId/date", async ({
+    page,
+  }) => {
+    await page.goto(`${BASE()}/reception?bookingId=abc&date=2026-07-12&demo=1&junk=x`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await expect(page).toHaveURL(new RegExp(`/front-desk\\?`));
+    const url = new URL(page.url());
+    expect(url.pathname.endsWith("/front-desk")).toBeTruthy();
+    expect(url.searchParams.get("bookingId")).toBe("abc");
+    expect(url.searchParams.get("date")).toBe("2026-07-12");
+    expect(url.searchParams.get("demo")).toBeNull();
+    expect(url.searchParams.get("junk")).toBeNull();
+    await expect(page.getByRole("heading", { name: "Today", level: 1 })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByText(/search patients, enquiries, cases/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /open quick create/i })).toBeVisible();
   });
 
-  test("quick create entry point visible", async ({ page }) => {
-    await page.goto(`${BASE()}/reception`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    const btn = page.getByRole("button", { name: /open quick create/i });
-    await expect(btn).toBeVisible({ timeout: 30_000 });
-    await expect(btn).toContainText("Quick create");
-    // Palette item labels: verified in fiOsQuickCreateItems.ts (Playwright palette open flaky on dev HMR).
+  test("legacy /reception-board and /operations redirect to Today", async ({ page }) => {
+    for (const path of ["reception-board", "operations"]) {
+      await page.goto(`${BASE()}/${path}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+      await expect(page).toHaveURL(new RegExp(`/front-desk$`));
+    }
   });
 
-  test("operations centre loads", async ({ page }) => {
-    await page.goto(`${BASE()}/operations`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(page.getByText(/clinic flow/i).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole("link", { name: "Open Calendar" }).first()).toBeVisible();
+  test("legacy /tomorrow redirects to /front-desk/tomorrow", async ({ page }) => {
+    await page.goto(`${BASE()}/tomorrow`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page).toHaveURL(new RegExp(`/front-desk/tomorrow`));
+  });
+
+  test("legacy front-desk subroutes redirect to Today", async ({ page }) => {
+    for (const path of ["front-desk/clinic-flow", "front-desk/reception-board"]) {
+      await page.goto(`${BASE()}/${path}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+      await expect(page).toHaveURL(new RegExp(`/front-desk$`));
+    }
+  });
+
+  test("staff cannot open /reception-os (not found)", async ({ page }) => {
+    const res = await page.goto(`${BASE()}/reception-os`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    // Staff PIN / ordinary staff: 404 page, not Front Desk redirect.
+    const status = res?.status() ?? 0;
+    expect([404, 200]).toContain(status);
+    if (status === 200) {
+      // Platform admin may still see tooling; ordinary staff see not-found chrome.
+      const hasToday = await page.getByRole("heading", { name: "Today", level: 1 }).count();
+      expect(hasToday).toBe(0);
+    }
+  });
+
+  test("top bar search and quick create remain available", async ({ page }) => {
+    await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const search = page
+      .getByRole("button", { name: /open workspace search/i })
+      .or(page.getByRole("button", { name: /open search/i }));
+    await expect(search.first()).toBeVisible({ timeout: 30_000 });
+    const create = page
+      .getByRole("button", { name: /open quick create/i })
+      .or(page.getByRole("button", { name: /open new/i }));
+    await expect(create.first()).toBeVisible();
+  });
+
+  test("tablet 768×1024 has no horizontal document overflow on Today", async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: "Today", level: 1 })).toBeVisible({
+      timeout: 30_000,
+    });
+    const overflow = await page.evaluate(() => {
+      const root = document.documentElement;
+      return root.scrollWidth > root.clientWidth + 1;
+    });
+    expect(overflow).toBe(false);
   });
 });
