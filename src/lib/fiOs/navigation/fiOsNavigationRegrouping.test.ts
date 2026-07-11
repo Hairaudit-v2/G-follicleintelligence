@@ -262,8 +262,10 @@ test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in M
   const surgeryIds = surgery!.items.map((i) => i.id);
   const surgerySubIds = surgery!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.deepEqual(frontIds, ["front-desk"]);
-  assert.ok(frontSubIds.includes("front-desk-clinic-flow"));
-  assert.ok(frontSubIds.includes("front-desk-reception-board"));
+  assert.ok(frontSubIds.includes("front-desk-today"));
+  assert.ok(frontSubIds.includes("front-desk-tomorrow"));
+  assert.ok(!frontSubIds.includes("front-desk-clinic-flow"));
+  assert.ok(!frontSubIds.includes("front-desk-reception-board"));
   assert.ok(!frontSubIds.includes("reception-os"));
   assert.ok(!frontSubIds.includes("operations-centre"));
   assert.deepEqual(surgeryIds, ["surgery"]);

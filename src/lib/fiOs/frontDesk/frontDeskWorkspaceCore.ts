@@ -1,14 +1,11 @@
 /**
- * FI-UX-REBUILD D6G-C — consolidated Front Desk workspace (routes preserved).
+ * FI-UX-REBUILD D6G-C / S3.4D — Front Desk workspace.
+ * Visible staff tabs: Today + Tomorrow only. Legacy routes stay catalogued for redirects.
  */
 
 export const FI_OS_FRONT_DESK_NAV_ID = "front-desk" as const;
 
-export type FiOsFrontDeskTabId =
-  | "reception-operations"
-  | "clinic-flow"
-  | "reception-board"
-  | "tomorrow";
+export type FiOsFrontDeskTabId = "today" | "tomorrow";
 
 export type FiOsFrontDeskTab = {
   id: FiOsFrontDeskTabId;
@@ -18,28 +15,17 @@ export type FiOsFrontDeskTab = {
   navSubItemId: string;
 };
 
+/** Staff-visible Front Desk tabs (exactly two). */
 export const FI_OS_FRONT_DESK_TABS: readonly FiOsFrontDeskTab[] = [
   {
-    id: "reception-operations",
-    label: "Reception operations",
+    id: "today",
+    label: "Today",
     segment: "",
-    navSubItemId: "front-desk-reception-operations",
-  },
-  {
-    id: "clinic-flow",
-    label: "Clinic flow",
-    segment: "clinic-flow",
-    navSubItemId: "front-desk-clinic-flow",
-  },
-  {
-    id: "reception-board",
-    label: "Reception board",
-    segment: "reception-board",
-    navSubItemId: "front-desk-reception-board",
+    navSubItemId: "front-desk-today",
   },
   {
     id: "tomorrow",
-    label: "Tomorrow board",
+    label: "Tomorrow",
     segment: "tomorrow",
     navSubItemId: "front-desk-tomorrow",
   },
@@ -82,10 +68,14 @@ export function resolveFrontDeskTabFromPath(
   const base = tenantBase.replace(/\/+$/, "");
   const path = pathname.replace(/\/+$/, "") || "/";
   if (path === `${base}/front-desk` || path === `${base}/front-desk/`) {
-    return "reception-operations";
+    return "today";
   }
   if (!path.startsWith(`${base}/front-desk/`)) return null;
   const segment = path.slice(`${base}/front-desk/`.length).split("/")[0] ?? "";
+  // Retired hub segments redirect to Today; treat as today for active-state during dual-run.
+  if (segment === "clinic-flow" || segment === "reception-board") {
+    return "today";
+  }
   const tab = FI_OS_FRONT_DESK_TABS.find((t) => t.segment === segment);
   return tab?.id ?? null;
 }

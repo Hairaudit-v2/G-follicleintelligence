@@ -126,7 +126,8 @@ test("resolveFiOsPrimarySidebarItems: consolidated front desk entry with preserv
   assert.ok(subIds.has("reception-os"));
   assert.ok(subIds.has("reception-board"));
   assert.ok(subIds.has("tomorrow-board"));
-  assert.ok(subIds.has("front-desk-clinic-flow"));
+  assert.ok(subIds.has("front-desk-today"));
+  assert.ok(subIds.has("front-desk-tomorrow"));
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {

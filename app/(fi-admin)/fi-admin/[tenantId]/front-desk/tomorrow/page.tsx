@@ -7,7 +7,7 @@ import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/
 import { loadTomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
 
 export const metadata = {
-  title: "Tomorrow board",
+  title: "Tomorrow",
   robots: { index: false, follow: false },
 };
 

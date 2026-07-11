@@ -100,12 +100,17 @@ test("Front desk destination includes all required tabs and legacy deep links", 
   }
 });
 
-test("consolidated front desk tabs cover clinic flow, reception board, tomorrow, and reception operations", () => {
+test("staff Front desk tabs are exactly Today and Tomorrow", () => {
   const tabLabels = FI_OS_FRONT_DESK_TABS.map((t) => t.label);
-  assert.ok(tabLabels.includes("Clinic flow"));
-  assert.ok(tabLabels.includes("Reception board"));
-  assert.ok(tabLabels.includes("Tomorrow board"));
-  assert.ok(tabLabels.includes("Reception operations"));
+  assert.deepEqual(tabLabels, ["Today", "Tomorrow"]);
+  assert.deepEqual(
+    FI_OS_FRONT_DESK_TABS.map((t) => t.id),
+    ["today", "tomorrow"]
+  );
+  assert.ok(!tabLabels.includes("Clinic flow"));
+  assert.ok(!tabLabels.includes("Reception board"));
+  assert.ok(!tabLabels.includes("Reception operations"));
+  assert.ok(!tabLabels.includes("Tomorrow board"));
   assert.equal(buildFiOsFrontDeskBase(tenantId), `${base}/front-desk`);
 });
 

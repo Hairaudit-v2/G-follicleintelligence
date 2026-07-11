@@ -183,12 +183,7 @@ test("platform admin still sees permitted admin, audit, and intelligence surface
 });
 
 test("workspace tabs exist for Front Desk, Surgery, Team, and Reports", () => {
-  assert.deepEqual(GO_LIVE_WORKSPACE_TAB_LABELS.frontDesk, [
-    "Reception operations",
-    "Clinic flow",
-    "Reception board",
-    "Tomorrow board",
-  ]);
+  assert.deepEqual(GO_LIVE_WORKSPACE_TAB_LABELS.frontDesk, ["Today", "Tomorrow"]);
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Overview"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Cases"));
   assert.ok(GO_LIVE_WORKSPACE_TAB_LABELS.surgery.includes("Review"));
