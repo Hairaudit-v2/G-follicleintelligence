@@ -216,7 +216,7 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Front",
       href: hrefFor(b, "front-desk"),
       disabled: false,
-      hint: "Clinic flow, reception board, tomorrow prep, and reception operations.",
+      hint: "Today’s clinic board and tomorrow prep.",
       subItems: buildFrontDeskSidebarSubItems(b.split("/").filter(Boolean).pop() ?? ""),
     },
     {
