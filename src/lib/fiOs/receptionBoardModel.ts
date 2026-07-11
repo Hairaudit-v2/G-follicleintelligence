@@ -64,9 +64,9 @@ export const RECEPTION_ARRIVING_SOON_WINDOW_MINUTES = 60;
 
 /**
  * Minutes after appointment start before an expected (not-arrived) booking becomes "running late".
- * Zero matches existing presentation overdue behaviour (`startAt <= now`).
+ * Default 10 minutes (S3.2 clinic desk grace). Overridable per call for tests and policy.
  */
-export const RECEPTION_RUNNING_LATE_GRACE_MINUTES = 0;
+export const RECEPTION_RUNNING_LATE_GRACE_MINUTES = 10;
 
 export function parseReceptionFlowPhase(
   metadata: Record<string, unknown> | null | undefined

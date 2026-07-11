@@ -124,9 +124,13 @@ test("2. scheduled booking inside arriving-soon window → arriving_soon", () =>
 });
 
 test("3. confirmed booking past start + grace → running_late", () => {
-  const start = "2026-07-11T11:00:00.000Z"; // 1h ago; grace default 0
+  // Default grace is 10 minutes; 1h past start is late.
+  const start = "2026-07-11T11:00:00.000Z";
   assert.equal(derive({ bookingStatus: "confirmed", startAtIso: start }), "running_late");
   assert.equal(isBookingRunningLate({ bookingStatus: "confirmed", startAtIso: start, nowMs: NOW_MS }), true);
+  // Within default 10m grace: not yet running late
+  const withinGrace = "2026-07-11T11:55:00.000Z"; // 5 min before now
+  assert.equal(derive({ bookingStatus: "confirmed", startAtIso: withinGrace }), "expected");
 });
 
 test("4. arrived booking past start → waiting, not running_late", () => {
@@ -215,7 +219,7 @@ test("11. boundary exactly at arriving-soon threshold", () => {
 });
 
 test("12. boundary exactly at running-late grace threshold", () => {
-  const graceMin = RECEPTION_RUNNING_LATE_GRACE_MINUTES;
+  const graceMin = RECEPTION_RUNNING_LATE_GRACE_MINUTES; // default 10
   // start + grace = now → running_late (inclusive)
   const startAtGrace = new Date(NOW_MS - graceMin * 60_000).toISOString();
   assert.equal(
@@ -226,25 +230,24 @@ test("12. boundary exactly at running-late grace threshold", () => {
     }),
     "running_late"
   );
-  // With grace 5: start = now - 5min → late; start = now - 4min → not late yet
-  const grace5 = 5;
-  const lateStart = new Date(NOW_MS - grace5 * 60_000).toISOString();
-  const notLateStart = new Date(NOW_MS - (grace5 * 60_000 - 1)).toISOString();
-  assert.equal(
-    derive({
-      bookingStatus: "confirmed",
-      startAtIso: lateStart,
-      runningLateGraceMinutes: grace5,
-    }),
-    "running_late"
-  );
+  // One ms before grace ends → not late
+  const notLateStart = new Date(NOW_MS - graceMin * 60_000 + 1).toISOString();
   assert.equal(
     derive({
       bookingStatus: "confirmed",
       startAtIso: notLateStart,
-      runningLateGraceMinutes: grace5,
+      runningLateGraceMinutes: graceMin,
     }),
     "expected"
+  );
+  // Explicit zero-grace override still works
+  assert.equal(
+    derive({
+      bookingStatus: "scheduled",
+      startAtIso: NOW_ISO,
+      runningLateGraceMinutes: 0,
+    }),
+    "running_late"
   );
 });
 

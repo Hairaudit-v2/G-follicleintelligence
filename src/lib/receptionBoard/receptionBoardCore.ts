@@ -55,6 +55,8 @@ export function buildCalendarSchedulingConflictAlerts(
         severity: "critical",
         href: `${base}/calendar?booking=${card.id}`,
         priorityScore: 94,
+        bookingId: card.id,
+        patientId: card.patientId,
       });
     }
     if ((isSurgery || missingRoom) && missingRoom) {
@@ -66,6 +68,8 @@ export function buildCalendarSchedulingConflictAlerts(
         severity: isSurgery ? "critical" : "warning",
         href: `${base}/calendar?booking=${card.id}`,
         priorityScore: isSurgery ? 90 : 72,
+        bookingId: card.id,
+        patientId: card.patientId,
       });
     }
   }
@@ -305,7 +309,8 @@ export function buildQueueBoard(
   return empty;
 }
 
-const EXTENDED_ALERT_PRIORITY: Partial<Record<ReceptionBoardExtendedAlertKind, number>> = {
+/** Higher = more urgent. Exported for Front Desk Today attention ordering (S3.2). */
+export const EXTENDED_ALERT_PRIORITY: Partial<Record<ReceptionBoardExtendedAlertKind, number>> = {
   surgery_risk: 98,
   missing_deposit: 95,
   missing_medical_clearance: 94,
@@ -345,6 +350,8 @@ export function mapOsAlertToBoardAlert(alert: ReceptionOsActionAlert): Reception
     severity: alert.severity,
     href: alert.href,
     priorityScore,
+    bookingId: null,
+    patientId: null,
   };
 }
 
@@ -380,6 +387,8 @@ export function buildExtendedAlertsFromSurgeryCards(
         severity,
         href: card.hrefs.case ?? card.hrefs.patient ?? card.hrefs.calendar,
         priorityScore: EXTENDED_ALERT_PRIORITY[kind] ?? 75,
+        bookingId: card.bookingId,
+        patientId: null,
       });
     }
 
@@ -392,6 +401,8 @@ export function buildExtendedAlertsFromSurgeryCards(
         severity: "warning",
         href: card.hrefs.calendar,
         priorityScore: EXTENDED_ALERT_PRIORITY.staff_not_assigned ?? 86,
+        bookingId: card.bookingId,
+        patientId: null,
       });
     }
   }

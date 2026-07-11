@@ -293,6 +293,8 @@ export async function loadReceptionBoardCommandCenterPayload(
       severity: b.severity === "critical" ? ("critical" as const) : ("warning" as const),
       href: b.href,
       priorityScore: b.severity === "critical" ? 96 : 78,
+      bookingId: null as string | null,
+      patientId: snap.patientId,
     }))
   );
 

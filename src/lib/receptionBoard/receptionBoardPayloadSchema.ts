@@ -73,6 +73,8 @@ const alertSchema = z.object({
   severity: z.enum(["info", "warning", "critical", "blocked"]),
   href: z.string().nullable(),
   priorityScore: z.number(),
+  bookingId: z.string().uuid().nullable().optional(),
+  patientId: z.string().uuid().nullable().optional(),
 });
 
 const quickActionSchema = z.object({

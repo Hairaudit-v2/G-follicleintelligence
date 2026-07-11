@@ -109,6 +109,13 @@ export type ReceptionBoardActionAlert = {
   severity: "info" | "warning" | "critical" | "blocked";
   href: string | null;
   priorityScore: number;
+  /**
+   * Optional first-class attribution for Front Desk Today (S3.2).
+   * When set, the presentation builder may attach this alert to a card.
+   * Never parse these from composite `id` strings.
+   */
+  bookingId?: string | null;
+  patientId?: string | null;
 };
 
 export type ReceptionBoardQuickActionId =
