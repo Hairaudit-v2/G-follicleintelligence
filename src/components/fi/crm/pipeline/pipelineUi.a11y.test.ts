@@ -1,0 +1,65 @@
+/**
+ * S4.3E — accessibility and tablet layout contract (static source checks).
+ */
+
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+
+const UI = readFileSync(join("src/components/fi/crm/pipeline/pipelineUi.tsx"), "utf8");
+const WS = readFileSync(join("src/components/fi/crm/pipeline/PipelineWorkspace.tsx"), "utf8");
+
+test("keyboard users can move stage without drag", () => {
+  assert.match(UI, /Move stage destinations/);
+  assert.match(UI, /role="menu"/);
+  assert.doesNotMatch(UI, /onDrag|draggable|dataTransfer/);
+  assert.doesNotMatch(WS, /onDrag|draggable|dataTransfer/);
+});
+
+test("collapsible sections expose aria-expanded", () => {
+  assert.match(UI, /aria-expanded/);
+  assert.match(UI, /aria-controls/);
+});
+
+test("primary touch targets use min-h-11 (44px)", () => {
+  assert.match(UI, /min-h-11/);
+  assert.ok((UI.match(/min-h-11/g) ?? []).length >= 5);
+});
+
+test("tablet layout uses vertical stack without nested horizontal column scroll", () => {
+  assert.match(UI, /lg:hidden/);
+  assert.match(UI, /layout="stack"/);
+  // Desktop board-level horizontal scroll only
+  assert.match(UI, /overflow-x-auto/);
+  assert.match(UI, /hidden lg:block/);
+});
+
+test("live announcements for mutation outcomes", () => {
+  assert.match(WS, /aria-live="polite"/);
+  assert.match(WS, /Lead moved to/);
+  assert.match(WS, /Follow-up completed/);
+  assert.match(WS, /Lead marked as lost/);
+  assert.match(WS, /Could not move lead/);
+});
+
+test("focus restoration after move uses data-lead-id", () => {
+  assert.match(WS, /data-lead-id/);
+  assert.match(UI, /data-lead-id=\{card\.leadId\}/);
+  assert.match(WS, /focusLead/);
+});
+
+test("no technical CRM / LeadFlow / Kanban / OS language in UI copy", () => {
+  const banned = /\bLeadFlow\b|\bKanban\b|\bCRM\b|command centre|\bOS\b/;
+  // Allow import paths and technical identifiers in code, check string literals roughly
+  const stringLits = UI.match(/["'`][^"'`]{3,80}["'`]/g) ?? [];
+  for (const s of stringLits) {
+    if (s.includes("@/") || s.includes("pipeline") || s.includes("className")) continue;
+    assert.doesNotMatch(s, banned, s);
+  }
+});
+
+test("raw diagnostics IDs are not rendered in UI", () => {
+  assert.doesNotMatch(UI, /duplicateLeadIds|orphanTaskIds|unknownStageLeadIds|conversionInconsistencies/);
+  assert.match(UI, /hiddenLeadCount/);
+});
