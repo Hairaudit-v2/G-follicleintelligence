@@ -36,7 +36,8 @@ test("tablet layout uses vertical stack without nested horizontal column scroll"
 });
 
 test("live announcements for mutation outcomes", () => {
-  assert.match(WS, /aria-live="polite"/);
+  assert.match(UI, /aria-live="polite"/);
+  assert.match(WS, /PipelineLiveRegion/);
   assert.match(WS, /Lead moved to/);
   assert.match(WS, /Follow-up completed/);
   assert.match(WS, /Lead marked as lost/);
