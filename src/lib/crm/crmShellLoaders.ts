@@ -150,7 +150,17 @@ export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {
 };
 
 const CRM_BOARD_PAGE_SIZE = 100;
+/** Legacy full-board cap (list/kanban). Pipeline uses a tighter initial window. */
 const CRM_BOARD_MAX_PAGES = 25;
+
+/**
+ * Pipeline initial board window — enough for daily work without loading ~2.5k cards.
+ * 3 × 100 = 300 leads. Override with searchParams `boardMaxPages` (1–25) when needed.
+ */
+export const PIPELINE_BOARD_DEFAULT_MAX_PAGES = 3;
+export const PIPELINE_BOARD_PAGE_SIZE = CRM_BOARD_PAGE_SIZE;
+export const PIPELINE_BOARD_DEFAULT_MAX_LEADS =
+  PIPELINE_BOARD_DEFAULT_MAX_PAGES * PIPELINE_BOARD_PAGE_SIZE;
 
 export type CrmShellLeadsBoardIndexResult = {
   cards: CrmKanbanLeadCard[];
@@ -180,8 +190,21 @@ export async function loadCrmShellLeadsIndex(
   return { ...page, query: parsed };
 }
 
+function resolveBoardMaxPages(
+  searchParams: Record<string, string | string[] | undefined>,
+  fallbackMaxPages: number
+): number {
+  const raw = searchParams.boardMaxPages;
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (v == null || String(v).trim() === "") return fallbackMaxPages;
+  const n = Number.parseInt(String(v), 10);
+  if (!Number.isFinite(n)) return fallbackMaxPages;
+  return Math.min(CRM_BOARD_MAX_PAGES, Math.max(1, n));
+}
+
 /**
- * Kanban: all matching leads (up to CRM_BOARD_PAGE_SIZE * CRM_BOARD_MAX_PAGES) with card enrichment.
+ * Kanban / Pipeline board window with card enrichment.
+ * Default max pages = legacy 25 (2,500). Pipeline loaders inject `boardMaxPages=3` (300).
  */
 export async function loadCrmShellLeadsBoardIndex(
   tenantId: string,
@@ -198,18 +221,21 @@ export async function loadCrmShellLeadsBoardIndex(
     pipelineKey: DEFAULT_CRM_PIPELINE_KEY,
   });
 
+  const maxPages = resolveBoardMaxPages(searchParams, CRM_BOARD_MAX_PAGES);
+  const pageSize = CRM_BOARD_PAGE_SIZE;
+
   const collected: CrmShellLeadListPage["items"] = [];
   let total = 0;
-  for (let pageNum = 1; pageNum <= CRM_BOARD_MAX_PAGES; pageNum++) {
+  for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
     const parsed: ParsedCrmLeadListQuery = {
       ...parsedBase,
       page: pageNum,
-      pageSize: CRM_BOARD_PAGE_SIZE,
+      pageSize,
     };
     const page = await loadCrmLeadsShellPage(tid, parsed);
     total = page.total;
     collected.push(...page.items);
-    if (collected.length >= total || page.items.length < CRM_BOARD_PAGE_SIZE) break;
+    if (collected.length >= total || page.items.length < pageSize) break;
   }
 
   const truncated = collected.length < total;

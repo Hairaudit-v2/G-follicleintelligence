@@ -286,5 +286,26 @@ export function normalizePipelineSearchParams(
     out.search = q;
   }
   // OPERATIONS-1: map ops sort/owner into board window keys (shell + full identical)
-  return pipelineOpsToBoardSearchParams(out);
+  const mapped = pipelineOpsToBoardSearchParams(out);
+  // Bound initial board window (default 300). Shell + full must share the same cap.
+  if (mapped.boardMaxPages === undefined || mapped.boardMaxPages === "") {
+    mapped.boardMaxPages = "3";
+  }
+  // Lazy terminal: when not explicitly requesting lost/converted lifecycle, keep default window.
+  // Explicit lifecycle=closed_lost|converted may raise pages for review (still capped).
+  const life = String(
+    Array.isArray(mapped.lifecycle) ? mapped.lifecycle[0] : mapped.lifecycle ?? ""
+  )
+    .trim()
+    .toLowerCase();
+  if (life === "closed_lost" || life === "converted" || life === "lost") {
+    // Still bounded — not full 2.5k — but allow a slightly larger window for review
+    if (!out.boardMaxPages) mapped.boardMaxPages = "5";
+  }
+  return mapped;
+}
+
+/** Pure: default Pipeline board lead cap (pages × page size). */
+export function pipelineInitialBoardMaxLeads(): number {
+  return 3 * 100;
 }
