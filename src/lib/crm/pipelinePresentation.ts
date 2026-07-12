@@ -20,6 +20,12 @@ import {
   type PipelineStaffColumnId,
   type PipelineUrgencyFlag,
 } from "@/src/lib/crm/pipelineStaffModel";
+import {
+  compareMostRecentlyLost,
+  compareNewColumnDefault,
+  maxMeaningfulActivityIso,
+  pipelineCardToOpsSortable,
+} from "@/src/lib/crm/pipelineOperationsSort";
 import type {
   PipelineCardActionId,
   PipelineCardBlocker,
@@ -102,11 +108,17 @@ export function buildPipelinePresentation(
       enrichFollowUpCounts(card, dedupedTasks, nowMs);
       enrichNextAction(card, dedupedTasks, consults, reminders, comms, nowMs);
       enrichConsultation(card, consults, nowMs);
+      enrichMeaningfulActivity(card, dedupedTasks, consults, comms);
     } else {
       // Shell: cheap overdue count from kanban aggregate only — no claimed due date
       const kanban = findKanbanLead(input.leads, leadId);
       if (kanban) {
         card.followUps.overdueCount = kanban.overdueTaskCount ?? 0;
+        // Shell activity: lead timestamps + kanban lastActivity only (no passive refresh)
+        card.timestamps.meaningfulActivityAtIso = maxMeaningfulActivityIso([
+          card.timestamps.updatedAtIso,
+          kanban.lastActivityAtIso,
+        ]);
       }
       card.nextAction = {
         kind: "none",
@@ -151,17 +163,27 @@ export function buildPipelinePresentation(
     columnBuckets.get(card.stage.staffColumnId)?.push(card);
   }
 
-  // Sort cards within columns
+  // Sort cards within columns (ops defaults: New = newest; Lost = most recently lost)
   for (const id of PIPELINE_STAFF_COLUMN_ORDER) {
     const list = columnBuckets.get(id) ?? [];
     const def = getPipelineStaffColumn(id);
-    if (def?.lifecycle === "terminal_won" || def?.lifecycle === "terminal_lost") {
+    if (id === "new") {
+      // created_at DESC → updated_at DESC → lead_id ASC
+      list.sort((a, b) =>
+        compareNewColumnDefault(pipelineCardToOpsSortable(a), pipelineCardToOpsSortable(b))
+      );
+    } else if (def?.lifecycle === "terminal_lost") {
+      list.sort((a, b) =>
+        compareMostRecentlyLost(pipelineCardToOpsSortable(a), pipelineCardToOpsSortable(b))
+      );
+    } else if (def?.lifecycle === "terminal_won") {
       list.sort(compareTerminalCards);
     } else {
+      // Other active/holding: operational urgency ordering
       list.sort((a, b) =>
         comparePipelineSortableLeads(
-          toSortable(a, createdAtByLeadId.get(a.leadId) ?? null),
-          toSortable(b, createdAtByLeadId.get(b.leadId) ?? null)
+          toSortable(a, createdAtByLeadId.get(a.leadId) ?? a.timestamps.createdAtIso),
+          toSortable(b, createdAtByLeadId.get(b.leadId) ?? b.timestamps.createdAtIso)
         )
       );
     }
@@ -350,6 +372,17 @@ function buildBaseCard(
       ? life.state
       : "active";
 
+  const createdAtIso = lead.created_at?.trim() || null;
+  const updatedAtIso = lead.updated_at?.trim() || null;
+  const stageEnteredAtIso = row.stageEnteredAtIso?.trim() || null;
+  const lastActivityAtIso = row.lastActivityAtIso?.trim() || null;
+  // Lost: prefer metadata lost_at, else stage enter for closed_lost, else updated
+  const metaLostAt = lostAtFromMeta(lead.metadata as Record<string, unknown>);
+  const lostAtIso =
+    life.state === "lost" || resolved.columnId === "closed_lost"
+      ? metaLostAt ?? stageEnteredAtIso ?? updatedAtIso
+      : metaLostAt;
+
   return {
     leadId,
     person: {
@@ -401,6 +434,13 @@ function buildBaseCard(
       convertedAtIso: lead.converted_at,
       patientId,
       lostReason,
+    },
+    timestamps: {
+      createdAtIso,
+      updatedAtIso,
+      meaningfulActivityAtIso: maxMeaningfulActivityIso([updatedAtIso, lastActivityAtIso]),
+      stageEnteredAtIso,
+      lostAtIso,
     },
     score: {
       value: null,
@@ -1376,6 +1416,44 @@ function lostReasonFromMeta(meta: Record<string, unknown> | null | undefined): s
     asStr(m.lostReason) ||
     null
   );
+}
+
+function lostAtFromMeta(meta: Record<string, unknown> | null | undefined): string | null {
+  const m = meta ?? {};
+  const raw =
+    asStr(m.lost_at) ||
+    asStr(m.lostAt) ||
+    asStr(m.closed_at) ||
+    asStr(m.closedAt) ||
+    null;
+  if (!raw) return null;
+  return parseMs(raw) != null ? raw : null;
+}
+
+/**
+ * Full-tier meaningful activity: max of lead updated, task due/completed, consult start, comm follow-up.
+ * Never uses presentation generatedAt / passive refresh.
+ */
+function enrichMeaningfulActivity(
+  card: PipelineLeadCard,
+  tasks: readonly PipelineTaskInput[],
+  consults: readonly PipelineConsultationInput[],
+  comms: readonly PipelineCommunicationHintInput[]
+): void {
+  const parts: Array<string | null | undefined> = [
+    card.timestamps.updatedAtIso,
+    card.timestamps.meaningfulActivityAtIso,
+  ];
+  for (const t of tasks) {
+    parts.push(t.dueAtIso, t.completedAtIso);
+  }
+  for (const c of consults) {
+    parts.push(c.startAtIso, c.cancelledAtIso);
+  }
+  for (const h of comms) {
+    parts.push(h.nextFollowUpAtIso);
+  }
+  card.timestamps.meaningfulActivityAtIso = maxMeaningfulActivityIso(parts);
 }
 
 function leadTitleFallback(summary: string | null | undefined, leadId: string): string {

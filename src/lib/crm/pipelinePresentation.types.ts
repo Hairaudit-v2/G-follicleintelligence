@@ -165,6 +165,19 @@ export type PipelineLeadCard = {
     patientId: string | null;
     lostReason: string | null;
   };
+  /**
+   * Canonical lead timestamps for ops sort/filter (from fi_crm_leads + enrichment).
+   * Never use presentation generatedAt as activity.
+   */
+  timestamps: {
+    createdAtIso: string | null;
+    updatedAtIso: string | null;
+    /** max(updated_at, lastActivity, comms, tasks, consults) — not passive refresh. */
+    meaningfulActivityAtIso: string | null;
+    stageEnteredAtIso: string | null;
+    /** Lost timestamp when known (metadata or stage enter for closed_lost). */
+    lostAtIso: string | null;
+  };
   score: {
     value: number | null;
     highValue: boolean;

@@ -12,6 +12,7 @@ import type {
   PipelinePresentation,
   PipelinePresentationPermissions,
 } from "@/src/lib/crm/pipelinePresentation.types";
+import { pipelineOpsToBoardSearchParams } from "@/src/lib/crm/pipelineQueryCompat";
 import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import type {
   PipelineResolvedPermissions,
@@ -284,5 +285,6 @@ export function normalizePipelineSearchParams(
   if (q !== undefined && out.search === undefined) {
     out.search = q;
   }
-  return out;
+  // OPERATIONS-1: map ops sort/owner into board window keys (shell + full identical)
+  return pipelineOpsToBoardSearchParams(out);
 }
