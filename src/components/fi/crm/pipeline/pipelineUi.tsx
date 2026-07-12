@@ -117,6 +117,7 @@ export function PipelineViewTabs(props: {
   view: PipelineWorkspaceView;
   boardCount: number;
   followUpCount: number;
+  inactiveCount?: number;
   onChange: (view: PipelineWorkspaceView) => void;
 }) {
   return (
@@ -129,6 +130,11 @@ export function PipelineViewTabs(props: {
         [
           { id: "board" as const, label: "Board", count: props.boardCount },
           { id: "follow_ups" as const, label: "Follow-ups", count: props.followUpCount },
+          {
+            id: "inactive_review" as const,
+            label: "Inactive review",
+            count: props.inactiveCount ?? 0,
+          },
         ] as const
       ).map((tab) => {
         const selected = props.view === tab.id;
@@ -186,6 +192,11 @@ export function PipelineFilterBar(props: {
   active: PipelineActiveFilters;
   onChange: (next: PipelineActiveFilters) => void;
   view: PipelineWorkspaceView;
+  /** Ops sort mode (client presentation re-order). */
+  sortMode?: string;
+  onSortChange?: (mode: string) => void;
+  /** Lost-column sort options when lifecycle is closed_lost. */
+  lostMode?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const activeCount =
@@ -198,7 +209,11 @@ export function PipelineFilterBar(props: {
     (props.active.overdue ? 1 : 0) +
     (props.active.dueToday ? 1 : 0) +
     (props.active.consultationDue ? 1 : 0) +
-    (props.active.highValue ? 1 : 0);
+    (props.active.highValue ? 1 : 0) +
+    (props.active.ageBucket ? 1 : 0) +
+    (props.active.activity ? 1 : 0) +
+    (props.active.ownerId ? 1 : 0) +
+    (props.active.sourceKey ? 1 : 0);
 
   const clear = () =>
     props.onChange({
@@ -215,6 +230,10 @@ export function PipelineFilterBar(props: {
       consultationDue: false,
       highValue: false,
       followUpBucket: null,
+      ageBucket: null,
+      activity: null,
+      ownerId: null,
+      sourceKey: null,
     });
 
   const toggleCol = (id: PipelineStaffColumnId) => {
@@ -227,9 +246,103 @@ export function PipelineFilterBar(props: {
     });
   };
 
+  const sortOptions = props.lostMode
+    ? [
+        { value: "most_recently_lost", label: "Most recently lost" },
+        { value: "oldest_lost", label: "Oldest lost" },
+        { value: "newest_created", label: "Newest created" },
+        { value: "oldest_created", label: "Oldest created" },
+      ]
+    : [
+        { value: "newest_first", label: "Newest first" },
+        { value: "oldest_first", label: "Oldest first" },
+        { value: "recently_updated", label: "Recently updated" },
+        { value: "oldest_untouched", label: "Oldest untouched" },
+        { value: "operational", label: "Operational urgency" },
+      ];
+
+  const ageOptions = [
+    { value: "", label: "Any age" },
+    { value: "today", label: "Today" },
+    { value: "last_7_days", label: "Last 7 days" },
+    { value: "8_30_days", label: "8–30 days" },
+    { value: "31_60_days", label: "31–60 days" },
+    { value: "61_90_days", label: "61–90 days" },
+    { value: "over_90_days", label: "Over 90 days" },
+  ];
+
+  const activityOptions = [
+    { value: "", label: "Any activity" },
+    { value: "has_overdue_follow_up", label: "Has overdue follow-up" },
+    { value: "has_upcoming_follow_up", label: "Has upcoming follow-up" },
+    { value: "no_follow_up", label: "No follow-up" },
+    { value: "no_recent_contact", label: "No recent contact" },
+    { value: "has_consultation", label: "Has consultation" },
+    { value: "no_consultation", label: "No consultation" },
+    { value: "unassigned", label: "Unassigned" },
+  ];
+
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0b1220]/80 p-3">
       <div className="flex flex-wrap items-center gap-2">
+        <label className="flex min-h-11 items-center gap-2 text-sm text-slate-300">
+          <span className="text-xs text-slate-500">Sort</span>
+          <select
+            className="min-h-11 rounded-lg border border-white/[0.12] bg-black/30 px-2 py-1.5 text-sm text-slate-100"
+            value={props.sortMode ?? "newest_first"}
+            onChange={(e) => props.onSortChange?.(e.target.value)}
+            aria-label="Sort enquiries"
+          >
+            {sortOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-h-11 items-center gap-2 text-sm text-slate-300">
+          <span className="text-xs text-slate-500">Age</span>
+          <select
+            className="min-h-11 rounded-lg border border-white/[0.12] bg-black/30 px-2 py-1.5 text-sm text-slate-100"
+            value={props.active.ageBucket ?? ""}
+            onChange={(e) =>
+              props.onChange({
+                ...props.active,
+                ageBucket: e.target.value || null,
+              })
+            }
+            aria-label="Filter by lead age"
+          >
+            {ageOptions.map((o) => (
+              <option key={o.value || "any"} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-h-11 items-center gap-2 text-sm text-slate-300">
+          <span className="text-xs text-slate-500">Activity</span>
+          <select
+            className="min-h-11 rounded-lg border border-white/[0.12] bg-black/30 px-2 py-1.5 text-sm text-slate-100"
+            value={props.active.activity ?? ""}
+            onChange={(e) => {
+              const v = e.target.value || null;
+              props.onChange({
+                ...props.active,
+                activity: v,
+                unassignedOnly: v === "unassigned" ? true : props.active.unassignedOnly,
+                overdue: v === "has_overdue_follow_up" ? true : props.active.overdue,
+              });
+            }}
+            aria-label="Filter by activity"
+          >
+            {activityOptions.map((o) => (
+              <option key={o.value || "any-act"} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <button
           type="button"
           className={btnSecondary}
@@ -289,32 +402,112 @@ export function PipelineFilterBar(props: {
         </label>
       </div>
       {open ? (
-        <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
-          {props.filters.staffColumns.map((opt) => {
-            const colId = opt.id.replace(/^col:/, "") as PipelineStaffColumnId;
-            const on = props.active.staffColumnIds.includes(colId);
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                data-filter-id={opt.id}
-                className={cn(
-                  "min-h-11 rounded-full border px-3 py-1.5 text-xs font-medium",
-                  on
-                    ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-100"
-                    : "border-white/[0.1] text-slate-400"
-                )}
-                onClick={() => toggleCol(colId)}
-              >
-                {opt.label} ({opt.count})
-              </button>
-            );
-          })}
+        <div className="mt-3 space-y-3 border-t border-white/[0.06] pt-3">
+          <div className="flex flex-wrap gap-2">
+            <p className="w-full text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              Stage
+            </p>
+            {props.filters.staffColumns.map((opt) => {
+              const colId = opt.id.replace(/^col:/, "") as PipelineStaffColumnId;
+              const on = props.active.staffColumnIds.includes(colId);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  data-filter-id={opt.id}
+                  className={cn(
+                    "min-h-11 rounded-full border px-3 py-1.5 text-xs font-medium",
+                    on
+                      ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-100"
+                      : "border-white/[0.1] text-slate-400"
+                  )}
+                  onClick={() => toggleCol(colId)}
+                >
+                  {opt.label} ({opt.count})
+                </button>
+              );
+            })}
+          </div>
+          {props.filters.owners.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              <p className="w-full text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Owner
+              </p>
+              {props.filters.owners.slice(0, 24).map((opt) => {
+                const rawId = opt.id.replace(/^owner:/, "");
+                const on =
+                  props.active.ownerId === rawId ||
+                  props.active.ownerIds.includes(opt.id) ||
+                  props.active.ownerIds.includes(rawId);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={cn(
+                      "min-h-11 rounded-full border px-3 py-1.5 text-xs font-medium",
+                      on
+                        ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-100"
+                        : "border-white/[0.1] text-slate-400"
+                    )}
+                    onClick={() =>
+                      props.onChange({
+                        ...props.active,
+                        ownerId: on ? null : rawId === "unassigned" ? null : rawId,
+                        unassignedOnly: rawId === "unassigned" ? !on : props.active.unassignedOnly,
+                        ownerIds: on ? [] : rawId === "unassigned" ? ["unassigned"] : [opt.id],
+                      })
+                    }
+                  >
+                    {opt.label} ({opt.count})
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+          {props.filters.sources.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              <p className="w-full text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Source
+              </p>
+              {props.filters.sources.slice(0, 16).map((opt) => {
+                const key = opt.id.replace(/^source:/, "");
+                const on =
+                  props.active.sourceKey === key || props.active.sources.includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={cn(
+                      "min-h-11 rounded-full border px-3 py-1.5 text-xs font-medium",
+                      on
+                        ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-100"
+                        : "border-white/[0.1] text-slate-400"
+                    )}
+                    onClick={() =>
+                      props.onChange({
+                        ...props.active,
+                        sourceKey: on ? null : key === "unknown" ? null : key,
+                        sources: on ? [] : [opt.id],
+                      })
+                    }
+                  >
+                    {opt.label} ({opt.count})
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
       ) : null}
       {props.view === "follow_ups" ? (
         <p className="mt-2 text-xs text-slate-500">
           Follow-ups filters apply to task buckets from the presentation.
+        </p>
+      ) : null}
+      {props.view === "inactive_review" ? (
+        <p className="mt-2 text-xs text-slate-500">
+          Inactive review lists older enquiries with no upcoming work. Status is not changed
+          automatically.
         </p>
       ) : null}
     </div>
@@ -364,8 +557,15 @@ export function PipelineBoard(props: {
   }>;
   /** Close menus when presentation identity changes (refresh). */
   presentationKey?: string;
+  /**
+   * Desktop-only stage drag (fine pointer + large viewport). Never required on tablet/phone.
+   * Keyboard users continue to use Move stage.
+   */
+  desktopDragEnabled?: boolean;
+  onDesktopDrop?: (leadId: string, fromColumnId: PipelineStaffColumnId, toColumnId: PipelineStaffColumnId) => void;
 }) {
   const [openMenuLeadId, setOpenMenuLeadId] = useState<string | null>(null);
+  const [dragLeadId, setDragLeadId] = useState<string | null>(null);
 
   useEffect(() => {
     setOpenMenuLeadId(null);
@@ -377,6 +577,11 @@ export function PipelineBoard(props: {
   const columnProps = {
     busyLeadId: props.busyLeadId,
     loadTier: props.loadTier,
+    desktopDragEnabled: Boolean(props.desktopDragEnabled),
+    dragLeadId,
+    onDragLeadStart: (leadId: string) => setDragLeadId(leadId),
+    onDragLeadEnd: () => setDragLeadId(null),
+    onDesktopDrop: props.onDesktopDrop,
     nowMs: props.nowMs,
     onAction: props.onAction,
     onMoveToColumn: props.onMoveToColumn,
@@ -445,6 +650,15 @@ export function PipelineColumn(props: {
   openMenuLeadId?: string | null;
   onOpenMenuLeadIdChange?: (leadId: string | null) => void;
   layout: "desktop" | "desktop-section" | "stack";
+  desktopDragEnabled?: boolean;
+  dragLeadId?: string | null;
+  onDragLeadStart?: (leadId: string) => void;
+  onDragLeadEnd?: () => void;
+  onDesktopDrop?: (
+    leadId: string,
+    fromColumnId: PipelineStaffColumnId,
+    toColumnId: PipelineStaffColumnId
+  ) => void;
 }) {
   const { column } = props;
   const defaultCollapsed =
@@ -453,10 +667,16 @@ export function PipelineColumn(props: {
     (props.layout === "stack" && column.kind !== "active");
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [showAll, setShowAll] = useState(false);
+  const [dropHover, setDropHover] = useState(false);
   const headingId = useId();
   const cap = 12;
   const cards = showAll ? column.cards : column.cards.slice(0, cap);
   const hidden = Math.max(0, column.cards.length - cards.length);
+  // Drag only on desktop board layout — never on tablet/phone stack
+  const allowDrop =
+    Boolean(props.desktopDragEnabled) &&
+    props.layout === "desktop" &&
+    Boolean(props.onDesktopDrop);
 
   if (
     (column.kind === "terminal_won" ||
@@ -474,7 +694,43 @@ export function PipelineColumn(props: {
       : "rounded-2xl border border-white/[0.08] bg-[#0b1220]/90";
 
   return (
-    <section className={shell} aria-labelledby={headingId}>
+    <section
+      className={cn(shell, dropHover && allowDrop ? "ring-2 ring-cyan-500/40" : null)}
+      aria-labelledby={headingId}
+      data-pipeline-column={column.id}
+      data-pipeline-drop={allowDrop ? "true" : undefined}
+      onDragOver={
+        allowDrop
+          ? (e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setDropHover(true);
+            }
+          : undefined
+      }
+      onDragLeave={allowDrop ? () => setDropHover(false) : undefined}
+      onDrop={
+        allowDrop
+          ? (e) => {
+              e.preventDefault();
+              setDropHover(false);
+              const raw = e.dataTransfer.getData("application/x-pipeline-lead");
+              if (!raw) return;
+              try {
+                const parsed = JSON.parse(raw) as {
+                  leadId?: string;
+                  fromColumnId?: PipelineStaffColumnId;
+                };
+                if (!parsed.leadId || !parsed.fromColumnId) return;
+                props.onDesktopDrop?.(parsed.leadId, parsed.fromColumnId, column.id);
+              } catch {
+                /* invalid payload — snap back by doing nothing */
+              }
+              props.onDragLeadEnd?.();
+            }
+          : undefined
+      }
+    >
       <div className="sticky top-0 z-[1] flex items-center justify-between gap-2 border-b border-white/[0.06] bg-[#0b1220]/95 px-3 py-3 backdrop-blur">
         <h2 id={headingId} className="text-sm font-semibold text-slate-100">
           {column.label}
@@ -511,6 +767,10 @@ export function PipelineColumn(props: {
                 onMenuOpenChange={(open) => {
                   props.onOpenMenuLeadIdChange?.(open ? card.leadId : null);
                 }}
+                desktopDragEnabled={allowDrop}
+                isDragging={props.dragLeadId === card.leadId}
+                onPipelineDragStart={() => props.onDragLeadStart?.(card.leadId)}
+                onPipelineDragEnd={() => props.onDragLeadEnd?.()}
               />
             ))
           )}
@@ -547,6 +807,11 @@ export function PipelineLeadCardView(props: {
   /** Controlled More-menu open state (single open menu per board). */
   menuOpen?: boolean;
   onMenuOpenChange?: (open: boolean) => void;
+  /** Desktop fine-pointer drag only (not used on tablet stack). */
+  desktopDragEnabled?: boolean;
+  isDragging?: boolean;
+  onPipelineDragStart?: () => void;
+  onPipelineDragEnd?: () => void;
 }) {
   const { card } = props;
   const [uncontrolledMenuOpen, setUncontrolledMenuOpen] = useState(false);
@@ -568,14 +833,38 @@ export function PipelineLeadCardView(props: {
   const primary = card.primaryAction;
   const secondary = card.secondaryActions;
 
+  const canDrag = Boolean(props.desktopDragEnabled) && !props.busy;
+
   return (
     <article
       data-lead-id={card.leadId}
+      data-pipeline-draggable={canDrag ? "true" : undefined}
       tabIndex={-1}
       aria-busy={props.busy || undefined}
+      // HTML5 drag is desktop-only (parent never enables on tablet stack).
+      // Keyboard users use "Move stage destinations" menu below.
+      draggable={canDrag}
+      onDragStart={
+        canDrag
+          ? (e) => {
+              e.dataTransfer.setData(
+                "application/x-pipeline-lead",
+                JSON.stringify({
+                  leadId: card.leadId,
+                  fromColumnId: card.stage.staffColumnId,
+                })
+              );
+              e.dataTransfer.effectAllowed = "move";
+              props.onPipelineDragStart?.();
+            }
+          : undefined
+      }
+      onDragEnd={canDrag ? () => props.onPipelineDragEnd?.() : undefined}
       className={cn(
         "rounded-xl border border-white/[0.1] bg-white/[0.03] p-3 shadow-sm",
-        props.busy && "opacity-70"
+        props.busy && "opacity-70",
+        props.isDragging && "opacity-40",
+        canDrag && "cursor-grab active:cursor-grabbing"
       )}
     >
       <div className="flex items-start justify-between gap-2">

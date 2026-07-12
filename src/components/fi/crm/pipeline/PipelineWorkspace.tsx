@@ -33,6 +33,12 @@ import {
   comparePipelineTierIdentity,
   createPipelineRefreshCoordinator,
 } from "@/src/lib/crm/pipelineLoader";
+import { resolvePipelineDragDrop } from "@/src/lib/crm/pipelineDrag";
+import {
+  applyPipelineOpsToPresentation,
+  collectInactiveReviewCards,
+} from "@/src/lib/crm/pipelineOperationsApply";
+import type { PipelineOpsSortMode } from "@/src/lib/crm/pipelineOperationsQuery";
 import {
   pipelineMoveableStaffColumns,
   resolvePipelineColumnEntryStage,
@@ -116,6 +122,9 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   const [presentation, setPresentation] = useState(props.initialPresentation);
   const [view, setView] = useState<PipelineWorkspaceView>(initialView);
   const [filters, setFilters] = useState<PipelineActiveFilters>(emptyPipelineActiveFilters);
+  const [sortMode, setSortMode] = useState<PipelineOpsSortMode>("newest_first");
+  const [userSortSelected, setUserSortSelected] = useState(false);
+  const [desktopDragEnabled, setDesktopDragEnabled] = useState(false);
   const [busyLeadId, setBusyLeadId] = useState<string | null>(null);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -127,6 +136,16 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     card: PipelineLeadCard;
     reason: string;
   } | null>(null);
+
+  // Desktop fine-pointer only — never enable drag on tablet/phone
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
+    const apply = () => setDesktopDragEnabled(mq.matches && permissions.canMutate);
+    apply();
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
+  }, [permissions.canMutate]);
 
   const slideOver = useCrmLeadSlideOverOptional();
   const presentationRef = useRef(presentation);
@@ -254,9 +273,32 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     });
   }, [tenantStages]);
 
+  const nowMs = Date.parse(presentation.generatedAt) || Date.now();
+
+  const opsApplied = useMemo(() => {
+    const lifecycleCol =
+      filters.staffColumnIds.length === 1 ? filters.staffColumnIds[0]! : null;
+    return applyPipelineOpsToPresentation(
+      presentation,
+      {
+        view: view === "inactive_review" ? "inactive_review" : "board",
+        sort: sortMode,
+        lifecycle: lifecycleCol,
+        stageSlug: null,
+        age: (filters.ageBucket as never) ?? null,
+        ownerId: filters.ownerId,
+        sourceKey: filters.sourceKey,
+        activity: (filters.activity as never) ?? null,
+        inactiveAgeDays: 30,
+        userSortSelected: userSortSelected || view === "inactive_review",
+      },
+      nowMs
+    );
+  }, [presentation, view, sortMode, filters, userSortSelected, nowMs]);
+
   const filteredColumns = useMemo(
-    () => filterPipelineColumns(presentation.columns, filters),
-    [presentation.columns, filters]
+    () => filterPipelineColumns(opsApplied.presentation.columns, filters, nowMs),
+    [opsApplied.presentation.columns, filters, nowMs]
   );
 
   const cardMap = useMemo(() => buildLeadCardMap(presentation), [presentation]);
@@ -266,12 +308,24 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     [presentation.followUps, filters, cardMap]
   );
 
+  const inactiveCards = useMemo(
+    () =>
+      view === "inactive_review"
+        ? collectInactiveReviewCards(presentation, nowMs, 30)
+        : [],
+    [view, presentation, nowMs]
+  );
+
   const boardCount = filteredColumns.reduce((n, c) => n + c.count, 0);
   const followUpCount =
     filteredFollowUps.summary.overdue +
     filteredFollowUps.summary.dueToday +
     filteredFollowUps.summary.upcoming +
     filteredFollowUps.summary.noDueDate;
+  const inactiveCount =
+    view === "inactive_review"
+      ? inactiveCards.length
+      : collectInactiveReviewCards(presentation, nowMs, 30).length;
 
   const focusLead = (leadId: string) => {
     window.setTimeout(() => {
@@ -436,7 +490,77 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   }, [presentation.generatedAt]);
 
   const hasFilters = countActivePipelineFilters(filters) > 0;
-  const nowMs = Date.parse(presentation.generatedAt) || Date.now();
+
+  const handleDesktopDrop = (
+    leadId: string,
+    fromColumnId: PipelineStaffColumnId,
+    toColumnId: PipelineStaffColumnId
+  ) => {
+    const card = cardMap.get(leadId);
+    if (!card) {
+      announce("Could not move lead. No changes were made.");
+      return;
+    }
+    const intent = resolvePipelineDragDrop({
+      leadId,
+      fromColumnId,
+      toColumnId,
+      tenantStages,
+      canMutate: permissions.canMutate,
+      desktopPointer: desktopDragEnabled,
+      bookedRequiresWorkflow: true,
+    });
+    if (intent.kind === "reject") {
+      announce(
+        intent.reason === "read_only"
+          ? "You do not have permission to move leads."
+          : intent.reason === "tablet_or_touch"
+            ? "Use Move stage on this device."
+            : "Could not move lead. No changes were made."
+      );
+      return;
+    }
+    if (intent.kind === "open_lost_reason") {
+      setConfirm({ action: "mark_lost", card, reason: "" });
+      announce("Enter a lost reason to continue.");
+      return;
+    }
+    if (intent.kind === "open_conversion") {
+      setConfirm({ action: "convert", card, reason: "" });
+      announce("Open conversion to continue.");
+      return;
+    }
+    if (intent.kind === "open_booked_workflow") {
+      if (slideOver?.openLead) slideOver.openLead(card.leadId);
+      else window.location.assign(card.links.lead);
+      announce("Opened lead to complete booking or deposit steps.");
+      return;
+    }
+    // Safe move — real backend stage UUID only
+    void (async () => {
+      setBusyLeadId(card.leadId);
+      try {
+        const mover =
+          props.moveLeadStage ??
+          (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
+        const result = await mover(tenantId, card.leadId, {
+          toStageId: intent.toStageId,
+          source: "pipeline_workspace",
+        });
+        if (!result.ok) {
+          announce("Could not move lead. No changes were made.");
+          return;
+        }
+        await refresh();
+        const label =
+          PIPELINE_STAFF_COLUMNS.find((c) => c.id === toColumnId)?.label ?? toColumnId;
+        announce(`Lead moved to ${label}.`);
+        focusLead(card.leadId);
+      } finally {
+        setBusyLeadId(null);
+      }
+    })();
+  };
 
   return (
     <div className="space-y-4 p-4 sm:p-6">
@@ -457,6 +581,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
         view={view}
         boardCount={boardCount}
         followUpCount={followUpCount}
+        inactiveCount={inactiveCount}
         onChange={setView}
       />
       <PipelineFilterBar
@@ -464,6 +589,12 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
         active={filters}
         onChange={setFilters}
         view={view}
+        sortMode={sortMode}
+        lostMode={filters.staffColumnIds.includes("closed_lost")}
+        onSortChange={(mode) => {
+          setSortMode(mode as PipelineOpsSortMode);
+          setUserSortSelected(true);
+        }}
       />
 
       {view === "board" ? (
@@ -483,8 +614,93 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
             onAction={(a, c) => void handleCardAction(a, c)}
             onMoveToColumn={(c, col) => void runMove(c, col)}
             moveDestinations={moveDestinations}
-            presentationKey={`${presentation.generatedAt}:${view}`}
+            presentationKey={`${presentation.generatedAt}:${view}:${sortMode}`}
+            desktopDragEnabled={desktopDragEnabled}
+            onDesktopDrop={handleDesktopDrop}
           />
+        )
+      ) : view === "inactive_review" ? (
+        inactiveCards.length === 0 ? (
+          <PipelineEmptyState
+            canCreate={false}
+            onNewEnquiry={() => setNewEnquiryOpen(true)}
+            hasFilters={true}
+            onClearFilters={() => setView("board")}
+          />
+        ) : (
+          <div className="space-y-2" aria-label="Inactive review">
+            <p className="text-sm text-slate-400">
+              {inactiveCards.length} inactive enquir
+              {inactiveCards.length === 1 ? "y" : "ies"} — review without auto-changing status.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {inactiveCards.map((card) => (
+                <div
+                  key={card.leadId}
+                  className="rounded-xl border border-white/[0.1] bg-[#0b1220]/90 p-3"
+                  data-lead-id={card.leadId}
+                >
+                  <p className="text-sm font-semibold text-slate-100">
+                    {card.person.displayName}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {card.stage.staffColumnLabel}
+                    {" · "}
+                    {card.owner.unassigned ? "Unassigned" : card.owner.displayName ?? "Owner"}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="min-h-11 rounded-lg border border-white/[0.12] px-3 text-xs font-medium text-slate-200"
+                      onClick={() => void handleCardAction("open_lead", card)}
+                    >
+                      Open lead
+                    </button>
+                    {permissions.canMutate ? (
+                      <>
+                        <button
+                          type="button"
+                          className="min-h-11 rounded-lg border border-white/[0.12] px-3 text-xs font-medium text-slate-200"
+                          disabled={busyLeadId === card.leadId}
+                          onClick={() => void runMove(card, "nurture")}
+                        >
+                          Move to Nurture
+                        </button>
+                        <button
+                          type="button"
+                          className="min-h-11 rounded-lg border border-white/[0.12] px-3 text-xs font-medium text-slate-200"
+                          onClick={() => void handleCardAction("mark_lost", card)}
+                        >
+                          Mark lost
+                        </button>
+                        <button
+                          type="button"
+                          className="min-h-11 rounded-lg border border-white/[0.12] px-3 text-xs font-medium text-slate-200"
+                          onClick={() => void handleCardAction("schedule_follow_up", card)}
+                        >
+                          Schedule follow-up
+                        </button>
+                        <button
+                          type="button"
+                          className="min-h-11 rounded-lg border border-white/[0.12] px-3 text-xs font-medium text-slate-200"
+                          onClick={() => void handleCardAction("assign_owner", card)}
+                        >
+                          Assign owner
+                        </button>
+                        <button
+                          type="button"
+                          className="min-h-11 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 text-xs font-medium text-cyan-100"
+                          onClick={() => announce("Kept active — no status change.")}
+                        >
+                          Keep active
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )
       ) : (
         <PipelineFollowUps
