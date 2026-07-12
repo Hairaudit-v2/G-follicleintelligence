@@ -248,38 +248,11 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "crm",
       featureKey: "crm",
-      label: "Enquiries",
-      shortLabel: "Enq",
-      href: hrefFor(b, "leadflow"),
-      disabled: !showCrmNav,
-      hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
-      subItems: !showCrmNav
-        ? undefined
-        : [
-            {
-              id: "leadflow-dashboard",
-              label: "Enquiries",
-              href: hrefFor(b, "leadflow"),
-              featureKey: "crm",
-            },
-            {
-              id: "crm-workspace",
-              label: "Enquiries",
-              href: hrefFor(b, "crm"),
-              featureKey: "crm",
-            },
-          ],
-    },
-    {
-      id: "follow-up-queue",
-      featureKey: "crm",
-      label: "Follow-ups",
-      shortLabel: "Tasks",
+      label: "Pipeline",
+      shortLabel: "Pipe",
       href: hrefFor(b, "crm"),
       disabled: !showCrmNav,
-      hint: !showCrmNav
-        ? "Requires CRM shell role for this tenant."
-        : "Enquiry pipeline and follow-up tasks live in the same workspace.",
+      hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
     },
     {
       id: "consultations",
@@ -292,17 +265,6 @@ export function resolveFiOsPrimarySidebarItems(
         !showBookingsBoard && !showCrmNav
           ? "Requires bookings operator or CRM shell access for this tenant."
           : undefined,
-      subItems:
-        !showBookingsBoard && !showCrmNav
-          ? undefined
-          : [
-              {
-                id: "consultation-conversion-board",
-                featureKey: "consultations",
-                label: "Conversion board",
-                href: hrefFor(b, "consultation-conversion"),
-              },
-            ],
     },
     {
       id: "prescriptions",
@@ -471,11 +433,15 @@ export function filterFiOsPrimarySidebarItemsByFeatureAccess(
  * Maps legacy horizontal-nav ids (from URL segments) to a single primary sidebar tab.
  */
 export function getFiOsShellActiveSidebarId(pathname: string, base: string): string | null {
+  const pathOnly = pathname.split(/[?#]/)[0] ?? pathname;
   const nb = base.replace(/\/+$/, "") || "";
-  const npRaw = pathname.replace(/\/+$/, "") || "/";
+  const npRaw = pathOnly.replace(/\/+$/, "") || "/";
   if (npRaw.startsWith(nb)) {
     const restEarly = npRaw.slice(nb.length).replace(/^\//, "");
     const firstEarly = restEarly.split("/")[0] ?? "";
+    if (firstEarly === "crm" || firstEarly === "leadflow" || firstEarly === "consultation-conversion") {
+      return "crm";
+    }
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;
@@ -534,6 +500,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "foundationos") return "patient-twin";
   if (legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
+  if (legacy === "leadflow-crm") return "crm";
   if (legacy === "operations-centre") return "operations-centre";
   if (legacy === "reception-os") return "reception-os";
   if (legacy === "surgery-os") return "surgery-os";
@@ -545,7 +512,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";
-  if (legacy === "consultation-conversion-board") return "consultations";
+  if (legacy === "consultation-conversion-board") return "crm";
   if (legacy === "consultations") return "consultations";
   if (legacy === "dashboard") return "dashboard";
   if (legacy === "auditos") return "auditos-legacy";

@@ -140,7 +140,6 @@ const D6_PRIMARY_RAIL_NAV_IDS = new Set([
 ]);
 
 const TOO_GRANULAR_PRIMARY_IDS = new Set([
-  "follow-up-queue",
   "pathology-nav",
 ]);
 
@@ -168,7 +167,6 @@ const HIDDEN_PRESERVE_IDS = new Set([
 
 const DUPLICATE_SURFACE_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ["surgery-os", "cases-worklist"],
-  ["crm", "follow-up-queue"],
   ["reception-os", "reception-board"],
   ["patient-twin", "patients"],
 ];

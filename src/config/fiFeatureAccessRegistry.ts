@@ -120,8 +120,8 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   crm: {
     key: "crm",
-    label: "Enquiries",
-    description: "Enquiries, pipeline, and follow-up workflows.",
+    label: "Pipeline",
+    description: "Enquiry pipeline and follow-up workflows.",
     category: "patient_journey",
     navPath: "crm",
   },

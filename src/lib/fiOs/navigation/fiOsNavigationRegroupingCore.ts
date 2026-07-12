@@ -74,8 +74,7 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   patients: "PATIENTS",
   "patient-twin": "PATIENTS",
   crm: "PIPELINE",
-  "follow-up-queue": "PIPELINE",
-  consultations: "PIPELINE",
+  consultations: "CLINICAL",
   surgery: "SURGERY",
   cases: "SURGERY",
   "surgery-os": "SURGERY",
@@ -152,9 +151,17 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "reports-admin": "REPORTS",
 };
 
+/** S4.5D — legacy pipeline routes hidden from staff More drawer; URLs remain live until S4.5E/S11. */
+export const FI_OS_PIPELINE_LEGACY_MORE_SUB_ITEM_IDS = new Set([
+  "leadflow-dashboard",
+  "crm-workspace",
+  "consultation-conversion-board",
+]);
+
 /** Sub-items hidden from More drawer (routes remain live). */
 export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
   "pathology-email-routes",
+  ...FI_OS_PIPELINE_LEGACY_MORE_SUB_ITEM_IDS,
   ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS,
@@ -200,9 +207,9 @@ export const FI_OS_D6_ADMIN_MORE_NAV_IDS = new Set(
 
 const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   FRONT_DESK: ["front-desk"],
-  PIPELINE: ["crm", "follow-up-queue", "consultations"],
+  PIPELINE: ["crm"],
   PATIENTS: ["patient-twin"],
-  CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav"],
+  CLINICAL: ["doctor-workspace", "consultations", "prescriptions", "pathology-nav"],
   SURGERY: ["surgery"],
   FINANCE: ["payments-inbox", "financial-os"],
   REPORTS: ["reports"],
