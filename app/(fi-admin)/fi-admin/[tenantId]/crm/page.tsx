@@ -136,7 +136,7 @@ export default async function CrmShellPage({
               Enquiries
             </p>
             <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
-              {isBoard ? "Conversion board view" : "Enquiry index"}
+              {isBoard ? "Board view" : "Enquiry index"}
             </h1>
             <p className="max-w-2xl text-sm text-[#94A3B8]">
               {isBoard
@@ -147,7 +147,7 @@ export default async function CrmShellPage({
               href={base}
               className="inline-block text-sm font-medium text-[#22C1FF] hover:underline"
             >
-              ← Back to Enquiries workspace
+              ← Back to Pipeline
             </Link>
           </div>
           <div className="flex flex-col items-stretch gap-3 sm:items-end">

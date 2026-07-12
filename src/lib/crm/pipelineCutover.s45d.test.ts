@@ -19,6 +19,7 @@ const PRIMARY_NAV = "src/lib/fiAdmin/fiOsShellPrimaryNav.ts";
 const LEADFLOW_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/leadflow/page.tsx";
 const CONVERSION_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/consultation-conversion/page.tsx";
 const CRM_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx";
+const FI_ADMIN_TENANT_NAV = "src/components/fi-admin/FiAdminTenantNav.tsx";
 const PIPELINE_WS = "src/components/fi/crm/pipeline/PipelineWorkspace.tsx";
 
 const TENANT = "c2615b95-b707-4485-aa5f-be8f78ec868a";
@@ -26,6 +27,14 @@ const BASE = `/fi-admin/${TENANT}`;
 
 function read(path: string): string {
   return readFileSync(path, "utf8");
+}
+
+function legacyCrmFallbackSource(): string {
+  const page = read(CRM_PAGE);
+  const marker = "const session = await getCrmShellPageSession(tenantId)";
+  const idx = page.indexOf(marker);
+  assert.ok(idx >= 0, "legacy /crm fallback branch");
+  return page.slice(idx);
 }
 
 function sidebarItems(showCrm = true) {
@@ -144,5 +153,24 @@ describe("S4.5D one Pipeline door", () => {
 
   it("crm page metadata uses Pipeline label", () => {
     assert.match(read(CRM_PAGE), /title:\s*"Pipeline"/);
+  });
+
+  it("legacy /crm fallback avoids prohibited staff terminology", () => {
+    const legacy = legacyCrmFallbackSource();
+    assert.match(legacy, /Board view/);
+    assert.match(legacy, /Back to Pipeline/);
+    assert.doesNotMatch(legacy, /Conversion board/);
+    assert.doesNotMatch(legacy, /Enquiries workspace/);
+    assert.doesNotMatch(legacy, /CRM workspace/);
+  });
+
+  it("FiAdminTenantNav exposes one Pipeline entry without duplicate enquiry doors", () => {
+    const nav = read(FI_ADMIN_TENANT_NAV);
+    const pipelineGroup = nav.slice(nav.indexOf('id: "leadflow"'));
+    assert.match(pipelineGroup, /label: "Pipeline"/);
+    assert.equal((pipelineGroup.match(/href: `\$\{base\}\/crm`/g) ?? []).length, 1);
+    assert.doesNotMatch(pipelineGroup, /label: "Enquiries"/);
+    assert.doesNotMatch(pipelineGroup, /label: "Follow-ups"/);
+    assert.doesNotMatch(pipelineGroup, /consultation-conversion/);
   });
 });
