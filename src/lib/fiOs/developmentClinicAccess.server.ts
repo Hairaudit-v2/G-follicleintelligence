@@ -90,14 +90,28 @@ export async function resolveDevelopmentClinicAccessForTenant(
     };
   }
 
+  // Platform-admin full session: allow ClinicOS mutations only with a valid tenant proxy
+  // (fi_users row resolved for this tenant). No proxy → fail closed (no cross-tenant write).
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authUserId);
+    if (!proxy) {
+      return {
+        allowed: false,
+        blockedReason:
+          "Platform administrators need a valid tenant membership proxy before using ClinicOS mutation tools.",
+        authUserId,
+        fiUserId: null,
+        fiUserRole: null,
+        tenantAdminRole: null,
+        fiOsRole,
+      };
+    }
     return {
-      allowed: false,
-      blockedReason:
-        "Platform administrators must impersonate a tenant member before using ClinicOS mutation tools.",
+      allowed: true,
+      blockedReason: null,
       authUserId,
-      fiUserId: null,
-      fiUserRole: null,
+      fiUserId: proxy.id,
+      fiUserRole: proxy.role?.trim() || "fi_admin",
       tenantAdminRole: null,
       fiOsRole,
     };

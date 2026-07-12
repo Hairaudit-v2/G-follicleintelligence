@@ -262,8 +262,18 @@ export async function assertCrmTenantWriteAllowed(opts: {
     throw new CrmAccessError(401, "Authentication required.");
   }
 
+  // Platform-admin full session may mutate only within an explicitly selected tenant that
+  // has a resolvable membership proxy. Never grant write without that proxy (fail closed).
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
-    throw new CrmAccessError(403, PLATFORM_ADMIN_WRITE_REQUIRES_IMPERSONATION);
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tenantId, authUserId);
+    if (!proxy) {
+      throw new CrmAccessError(
+        403,
+        "Platform administrators need a valid tenant context before mutating tenant data."
+      );
+    }
+    await assertTenantRowExists(tenantId);
+    return;
   }
 
   const principal = await resolveTenantMembershipAuthUserId(authUserId);

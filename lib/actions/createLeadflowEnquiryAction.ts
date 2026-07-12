@@ -80,8 +80,10 @@ export async function loadLeadflowEnquiryFormOptionsAction(tenantId: string): Pr
     const tid = tenantId.trim();
     if (!tid) return { ok: false, error: "Tenant is required." };
 
+    // Align form-options gate with write path: CRM shell session (includes
+    // platform-admin tenant proxy) is enough; create still re-checks via assertCrmTenantWriteAllowed.
     const session = await getCrmShellSessionIfAllowed(tid);
-    if (!session?.canUseClinicFeatures) {
+    if (!session) {
       return { ok: false, error: PERMISSION_DENIED };
     }
 

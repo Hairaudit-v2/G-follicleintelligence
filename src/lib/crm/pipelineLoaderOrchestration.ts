@@ -51,6 +51,11 @@ export type PipelineSessionContext = {
     canUseClinicFeatures: boolean;
   };
   bookingsOperator: boolean;
+  /**
+   * Platform-admin full session with a resolved membership proxy for this tenant.
+   * Required for canCreateEnquiry when the operator role alone would be read-only.
+   */
+  validPlatformAdminTenantProxy?: boolean;
 };
 
 export type CrmShellLeadsBoardIndexResult = {
@@ -97,6 +102,24 @@ function permissionsForSession(ctx: PipelineSessionContext) {
     userRole: ctx.session.role,
     canUseClinicFeatures: ctx.session.canUseClinicFeatures,
     bookingsOperator: ctx.bookingsOperator,
+    validPlatformAdminTenantProxy: Boolean(ctx.validPlatformAdminTenantProxy),
+    onPermissionDiagnostic: (row) => {
+      if (process.env.PIPELINE_PERMISSION_DIAG !== "1") return;
+      console.info(
+        "[pipeline-permission]",
+        JSON.stringify({
+          sessionKind: row.validPlatformAdminTenantProxy
+            ? "platform_admin_tenant_proxy"
+            : "tenant_operator",
+          resolvedRole: row.userRole,
+          isPlatformAdminProxy: row.validPlatformAdminTenantProxy,
+          canUseClinicFeatures: row.canUseClinicFeatures,
+          canMutate: row.canMutate,
+          canCreateEnquiry: row.canCreateEnquiry,
+          denialReasonCode: row.denialReasonCode,
+        })
+      );
+    },
   });
 }
 

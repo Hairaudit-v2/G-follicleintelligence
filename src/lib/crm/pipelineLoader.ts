@@ -33,9 +33,14 @@ export type ResolvePipelinePermissionsInput = {
 /**
  * Pure permission resolver — callers supply booleans from authoritative session helpers.
  * Fails closed: read-only when access or mutation is denied.
+ *
+ * Platform-admin tenant proxy is an additional mutation grant: tenant operator canMutate
+ * OR a validated platform-admin proxy for this tenant (never bare platform-admin alone).
  */
 export function resolvePipelinePermissions(
-  input: ResolvePipelinePermissionsInput
+  input: ResolvePipelinePermissionsInput & {
+    validPlatformAdminTenantProxy?: boolean;
+  }
 ): PipelineResolvedPermissions {
   if (!input.hasCrmShellAccess) {
     return {
@@ -47,9 +52,13 @@ export function resolvePipelinePermissions(
     };
   }
 
-  const canMutate = input.canMutateFromOperatorContext;
-  const canConvert = canMutate && input.canUseConversion;
-  const canBookConsultation = input.canUseBookings;
+  const canMutate =
+    input.canMutateFromOperatorContext || Boolean(input.validPlatformAdminTenantProxy);
+  const canConvert =
+    canMutate &&
+    (input.canUseConversion || Boolean(input.validPlatformAdminTenantProxy));
+  const canBookConsultation =
+    input.canUseBookings || Boolean(input.validPlatformAdminTenantProxy);
   const canCreateEnquiry = canMutate;
 
   return {
@@ -67,28 +76,72 @@ export function resolvePipelinePermissionsFromSession(opts: {
   userRole: string;
   canUseClinicFeatures: boolean;
   bookingsOperator?: boolean;
+  /**
+   * True when the authenticated session is a platform-admin full session and a
+   * tenant-scoped membership proxy was resolved for the selected tenant.
+   */
+  validPlatformAdminTenantProxy?: boolean;
+  /** Optional PHI-safe diagnostic sink (tests / temporary verification). */
+  onPermissionDiagnostic?: (row: PipelinePermissionDiagnostic) => void;
 }): PipelineResolvedPermissions {
   const roleLower = String(opts.userRole ?? "")
     .trim()
     .toLowerCase();
-  const canMutate = opts.hasCrmShellAccess
+  const operatorCanMutate = opts.hasCrmShellAccess
     ? canMutateClinicFromOperatorContext({
         userRole: opts.userRole,
         canUseClinicFeatures: opts.canUseClinicFeatures,
       })
     : false;
+  const validProxy = Boolean(opts.validPlatformAdminTenantProxy);
+  const canMutate = operatorCanMutate || (opts.hasCrmShellAccess && validProxy);
   const canUseConversion =
-    canMutate && (opts.canUseClinicFeatures || CRM_MUTATION_ROLES_LOWER.has(roleLower));
+    canMutate &&
+    (opts.canUseClinicFeatures ||
+      CRM_MUTATION_ROLES_LOWER.has(roleLower) ||
+      validProxy);
   const canUseBookings = opts.bookingsOperator ?? canMutate;
 
-  return resolvePipelinePermissions({
+  const perms = resolvePipelinePermissions({
     hasCrmShellAccess: opts.hasCrmShellAccess,
     canUseClinicFeatures: opts.canUseClinicFeatures,
-    canMutateFromOperatorContext: canMutate,
+    canMutateFromOperatorContext: operatorCanMutate,
     canUseConversion,
     canUseBookings,
+    validPlatformAdminTenantProxy: validProxy,
   });
+
+  if (opts.onPermissionDiagnostic) {
+    opts.onPermissionDiagnostic({
+      hasCrmShellAccess: opts.hasCrmShellAccess,
+      userRole: roleLower || null,
+      canUseClinicFeatures: opts.canUseClinicFeatures,
+      operatorCanMutate,
+      validPlatformAdminTenantProxy: validProxy,
+      canMutate: perms.canMutate,
+      canCreateEnquiry: perms.canCreateEnquiry,
+      denialReasonCode: !opts.hasCrmShellAccess
+        ? "no_crm_shell_access"
+        : !perms.canCreateEnquiry
+          ? "mutation_denied"
+          : null,
+    });
+  }
+
+  return perms;
 }
+
+/** PHI-safe permission diagnostic row (no names/emails/lead content). */
+export type PipelinePermissionDiagnostic = {
+  hasCrmShellAccess: boolean;
+  userRole: string | null;
+  canUseClinicFeatures: boolean;
+  operatorCanMutate: boolean;
+  validPlatformAdminTenantProxy: boolean;
+  canMutate: boolean;
+  canCreateEnquiry: boolean;
+  denialReasonCode: string | null;
+};
 
 export function toPipelinePresentationPermissions(
   perms: PipelineResolvedPermissions

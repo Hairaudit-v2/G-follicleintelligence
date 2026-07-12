@@ -209,6 +209,65 @@ test("5 platform-admin proxy remains supported via session helper shape", () => 
   assert.equal(perms.canConvert, true);
 });
 
+test("5b platform-admin with valid tenant proxy can create even when clinic-features flag is false", () => {
+  const perms = resolvePipelinePermissionsFromSession({
+    hasCrmShellAccess: true,
+    userRole: "member", // proxy may surface a non-mutation membership role
+    canUseClinicFeatures: false,
+    bookingsOperator: false,
+    validPlatformAdminTenantProxy: true,
+  });
+  assert.equal(perms.canView, true);
+  assert.equal(perms.canMutate, true);
+  assert.equal(perms.canCreateEnquiry, true);
+  assert.equal(perms.canConvert, true);
+  assert.equal(perms.canBookConsultation, true);
+});
+
+test("5c platform-admin without tenant proxy cannot create (fail closed)", () => {
+  const perms = resolvePipelinePermissionsFromSession({
+    hasCrmShellAccess: true,
+    userRole: "member",
+    canUseClinicFeatures: false,
+    bookingsOperator: false,
+    validPlatformAdminTenantProxy: false,
+  });
+  assert.equal(perms.canMutate, false);
+  assert.equal(perms.canCreateEnquiry, false);
+});
+
+test("5d bare shell access without operator mutate or proxy is read-only", () => {
+  const perms = resolvePipelinePermissions({
+    hasCrmShellAccess: true,
+    canUseClinicFeatures: false,
+    canMutateFromOperatorContext: false,
+    canUseConversion: false,
+    canUseBookings: false,
+    validPlatformAdminTenantProxy: false,
+  });
+  assert.equal(perms.canView, true);
+  assert.equal(perms.canCreateEnquiry, false);
+});
+
+test("5e permission diagnostic reports denial without PHI", () => {
+  let diag: ReturnType<typeof Object> | null = null;
+  resolvePipelinePermissionsFromSession({
+    hasCrmShellAccess: true,
+    userRole: "member",
+    canUseClinicFeatures: false,
+    validPlatformAdminTenantProxy: false,
+    onPermissionDiagnostic: (row) => {
+      diag = row as unknown as ReturnType<typeof Object>;
+    },
+  });
+  assert.ok(diag);
+  const s = JSON.stringify(diag);
+  assert.ok(!s.includes("@"));
+  assert.ok(!s.includes("phone"));
+  assert.equal((diag as { canCreateEnquiry: boolean }).canCreateEnquiry, false);
+  assert.equal((diag as { denialReasonCode: string | null }).denialReasonCode, "mutation_denied");
+});
+
 test("6 stage adapter returns real stage IDs", () => {
   const rows = [stageRow({ id: "real-uuid-stage", slug: "qualified" })];
   const defs = toPipelineMoveStageDefinitions(rows);
