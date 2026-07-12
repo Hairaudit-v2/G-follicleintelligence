@@ -30,6 +30,7 @@ import {
   refreshPipelinePresentation,
 } from "@/src/lib/crm/pipelineLoader.server";
 import { resolvePipelineInitialView } from "@/src/lib/crm/pipelineQueryCompat";
+import { isPipelineDesktopDragEnabledFromEnv } from "@/src/lib/crm/pipelineDragFlag";
 import { isPipelineV1EnabledForTenant } from "@/src/lib/crm/pipelineRollout.server";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadLeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
@@ -60,6 +61,7 @@ export default async function CrmShellPage({
   if (pipelineEnabled) {
     const shell = await loadPipelineShellPayload(tenantId, resolvedSearchParams);
     const initialView = resolvePipelineInitialView(resolvedSearchParams);
+    const desktopDragFeatureEnabled = isPipelineDesktopDragEnabledFromEnv();
 
     async function refreshPresentation() {
       "use server";
@@ -75,6 +77,7 @@ export default async function CrmShellPage({
         currentUserId={shell.currentUserId}
         canCreateEnquiry={shell.permissions.canCreateEnquiry}
         initialView={initialView}
+        desktopDragFeatureEnabled={desktopDragFeatureEnabled}
         onRefreshPresentation={refreshPresentation}
       />
     );

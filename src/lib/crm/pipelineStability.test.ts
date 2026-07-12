@@ -166,3 +166,32 @@ test("32. Move stage keyboard path remains", () => {
   assert.match(UI, /Move stage destinations/);
   assert.match(UI, /role="menu"/);
 });
+
+// --- Desktop drag kill-switch (FI_PIPELINE_ENABLE_DESKTOP_DRAG) ----------------
+
+const PAGE = readFileSync(
+  join("app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx"),
+  "utf8"
+);
+
+test("33. Desktop drag defaults disabled in workspace", () => {
+  // Prop defaults to false and gates the drag effect.
+  assert.match(WS, /desktopDragFeatureEnabled = false/);
+  assert.match(WS, /if \(!desktopDragFeatureEnabled\) \{\s*setDesktopDragEnabled\(false\);/);
+});
+
+test("34. Drag feature flag resolved server-side, default OFF", () => {
+  assert.match(PAGE, /isPipelineDesktopDragEnabledFromEnv\(\)/);
+  assert.match(PAGE, /desktopDragFeatureEnabled=\{desktopDragFeatureEnabled\}/);
+});
+
+test("35. No card/handle draggable listeners when drag disabled", () => {
+  // All draggable attributes and drop listeners flow from desktopDragEnabled/allowDrop,
+  // which stay false when the feature flag is off — nothing renders draggable.
+  assert.match(UI, /data-pipeline-draggable=\{canDrag \? "handle"/);
+  assert.match(UI, /const canDrag = Boolean\(props\.desktopDragEnabled\)/);
+  assert.match(UI, /const allowDrop =\s*Boolean\(props\.desktopDragEnabled\)/);
+  // Drag/drop DOM handlers are conditional on allowDrop, never unconditional.
+  assert.match(UI, /onDrop=\{\s*allowDrop/);
+  assert.match(UI, /onDragOver=\{\s*allowDrop/);
+});

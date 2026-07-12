@@ -93,6 +93,12 @@ export type PipelineWorkspaceProps = {
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
   /** When true, show New enquiry (canMutate). */
   canCreateEnquiry?: boolean;
+  /**
+   * Desktop stage-drag kill-switch (FI_PIPELINE_ENABLE_DESKTOP_DRAG). Default OFF.
+   * When false, no draggable attributes or drag/drop listeners are attached anywhere —
+   * More / Move stage / Contact remain the operational path.
+   */
+  desktopDragFeatureEnabled?: boolean;
 };
 
 function logPipelineIdentityMismatch(shell: PipelinePresentation, full: PipelinePresentation): void {
@@ -117,6 +123,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     tenantStages,
     canCreateEnquiry = permissions.canMutate,
     initialView = "board",
+    desktopDragFeatureEnabled = false,
   } = props;
 
   const [presentation, setPresentation] = useState(props.initialPresentation);
@@ -137,15 +144,20 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     reason: string;
   } | null>(null);
 
-  // Desktop fine-pointer only — never enable drag on tablet/phone
+  // Desktop fine-pointer only — never enable drag on tablet/phone.
+  // Kill-switch: FI_PIPELINE_ENABLE_DESKTOP_DRAG must be on, else drag stays fully disabled.
   useEffect(() => {
+    if (!desktopDragFeatureEnabled) {
+      setDesktopDragEnabled(false);
+      return;
+    }
     if (typeof window === "undefined" || !window.matchMedia) return;
     const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
     const apply = () => setDesktopDragEnabled(mq.matches && permissions.canMutate);
     apply();
     mq.addEventListener?.("change", apply);
     return () => mq.removeEventListener?.("change", apply);
-  }, [permissions.canMutate]);
+  }, [permissions.canMutate, desktopDragFeatureEnabled]);
 
   const slideOver = useCrmLeadSlideOverOptional();
   const presentationRef = useRef(presentation);
