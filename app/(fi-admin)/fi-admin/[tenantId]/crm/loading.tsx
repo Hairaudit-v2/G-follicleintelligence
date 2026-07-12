@@ -4,7 +4,7 @@ export default function CrmShellLoading() {
       className="mx-auto max-w-6xl animate-pulse space-y-6 py-6"
       aria-busy="true"
       aria-live="polite"
-      aria-label="Loading CRM"
+      aria-label="Loading Pipeline"
     >
       <div className="space-y-2">
         <div className="h-6 w-40 rounded bg-white/[0.08]" />

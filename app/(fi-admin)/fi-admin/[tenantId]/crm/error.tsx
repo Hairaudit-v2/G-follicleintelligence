@@ -13,7 +13,7 @@ export default function FiAdminCrmError({
     <FiAdminSegmentError
       error={error}
       reset={reset}
-      title="Could not load CRM"
+      title="Could not load Pipeline"
       surface="fi_admin_crm"
     />
   );
