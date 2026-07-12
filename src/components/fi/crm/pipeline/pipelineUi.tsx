@@ -6,9 +6,15 @@
  */
 
 import Link from "next/link";
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   formatPipelineDueLabel,
   pipelineCardActionLabel,
@@ -356,9 +362,28 @@ export function PipelineBoard(props: {
     disabled: boolean;
     reason?: string;
   }>;
+  /** Close menus when presentation identity changes (refresh). */
+  presentationKey?: string;
 }) {
+  const [openMenuLeadId, setOpenMenuLeadId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOpenMenuLeadId(null);
+  }, [props.presentationKey, props.loadTier]);
+
   const active = props.columns.filter((c) => c.kind === "active");
   const rest = props.columns.filter((c) => c.kind !== "active");
+
+  const columnProps = {
+    busyLeadId: props.busyLeadId,
+    loadTier: props.loadTier,
+    nowMs: props.nowMs,
+    onAction: props.onAction,
+    onMoveToColumn: props.onMoveToColumn,
+    moveDestinations: props.moveDestinations,
+    openMenuLeadId,
+    onOpenMenuLeadIdChange: setOpenMenuLeadId,
+  };
 
   return (
     <div className="space-y-4">
@@ -372,12 +397,7 @@ export function PipelineBoard(props: {
             <PipelineColumn
               key={col.id}
               column={col}
-              busyLeadId={props.busyLeadId}
-              loadTier={props.loadTier}
-              nowMs={props.nowMs}
-              onAction={props.onAction}
-              onMoveToColumn={props.onMoveToColumn}
-              moveDestinations={props.moveDestinations}
+              {...columnProps}
               layout="desktop"
             />
           ))}
@@ -387,12 +407,7 @@ export function PipelineBoard(props: {
             <PipelineColumn
               key={col.id}
               column={col}
-              busyLeadId={props.busyLeadId}
-              loadTier={props.loadTier}
-              nowMs={props.nowMs}
-              onAction={props.onAction}
-              onMoveToColumn={props.onMoveToColumn}
-              moveDestinations={props.moveDestinations}
+              {...columnProps}
               layout="desktop-section"
             />
           ))}
@@ -405,12 +420,7 @@ export function PipelineBoard(props: {
           <PipelineColumn
             key={col.id}
             column={col}
-            busyLeadId={props.busyLeadId}
-            loadTier={props.loadTier}
-            nowMs={props.nowMs}
-            onAction={props.onAction}
-            onMoveToColumn={props.onMoveToColumn}
-            moveDestinations={props.moveDestinations}
+            {...columnProps}
             layout="stack"
           />
         ))}
@@ -432,6 +442,8 @@ export function PipelineColumn(props: {
     disabled: boolean;
     reason?: string;
   }>;
+  openMenuLeadId?: string | null;
+  onOpenMenuLeadIdChange?: (leadId: string | null) => void;
   layout: "desktop" | "desktop-section" | "stack";
 }) {
   const { column } = props;
@@ -495,6 +507,10 @@ export function PipelineColumn(props: {
                 onAction={props.onAction}
                 onMoveToColumn={props.onMoveToColumn}
                 moveDestinations={props.moveDestinations}
+                menuOpen={props.openMenuLeadId === card.leadId}
+                onMenuOpenChange={(open) => {
+                  props.onOpenMenuLeadIdChange?.(open ? card.leadId : null);
+                }}
               />
             ))
           )}
@@ -528,9 +544,17 @@ export function PipelineLeadCardView(props: {
     disabled: boolean;
     reason?: string;
   }>;
+  /** Controlled More-menu open state (single open menu per board). */
+  menuOpen?: boolean;
+  onMenuOpenChange?: (open: boolean) => void;
 }) {
   const { card } = props;
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [uncontrolledMenuOpen, setUncontrolledMenuOpen] = useState(false);
+  const menuOpen = props.menuOpen ?? uncontrolledMenuOpen;
+  const setMenuOpen = (open: boolean) => {
+    if (props.onMenuOpenChange) props.onMenuOpenChange(open);
+    else setUncontrolledMenuOpen(open);
+  };
   const [moveOpen, setMoveOpen] = useState(false);
   const dueLabel =
     props.loadTier === "full"
@@ -547,6 +571,7 @@ export function PipelineLeadCardView(props: {
   return (
     <article
       data-lead-id={card.leadId}
+      tabIndex={-1}
       aria-busy={props.busy || undefined}
       className={cn(
         "rounded-xl border border-white/[0.1] bg-white/[0.03] p-3 shadow-sm",
@@ -645,41 +670,42 @@ export function PipelineLeadCardView(props: {
           </button>
         ) : null}
         {secondary.length > 0 ? (
-          <div className="relative">
-            <button
-              type="button"
-              className={btnSecondary}
-              disabled={props.busy}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              More
-            </button>
-            {menuOpen ? (
-              <ul
-                role="menu"
-                className="absolute right-0 z-20 mt-1 min-w-[11rem] rounded-xl border border-white/[0.12] bg-[#0f1629] py-1 shadow-xl"
+          <DropdownMenu
+            open={menuOpen}
+            onOpenChange={(open) => {
+              setMenuOpen(open);
+              if (open) setMoveOpen(false);
+            }}
+          >
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={btnSecondary}
+                disabled={props.busy}
+                aria-label="More actions"
               >
-                {secondary.map((a) => (
-                  <li key={a} role="none">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className="block w-full min-h-11 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        if (a === "move_stage") setMoveOpen(true);
-                        else props.onAction(a, card);
-                      }}
-                    >
-                      {pipelineCardActionLabel(a)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+                More
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[11rem] border-white/[0.12] bg-[#0f1629] text-slate-100"
+            >
+              {secondary.map((a) => (
+                <DropdownMenuItem
+                  key={a}
+                  className="min-h-11 cursor-pointer text-sm text-slate-200 focus:bg-white/[0.08] focus:text-slate-50"
+                  onSelect={() => {
+                    setMenuOpen(false);
+                    if (a === "move_stage") setMoveOpen(true);
+                    else props.onAction(a, card);
+                  }}
+                >
+                  {pipelineCardActionLabel(a)}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : null}
       </div>
 

@@ -483,6 +483,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
             onAction={(a, c) => void handleCardAction(a, c)}
             onMoveToColumn={(c, col) => void runMove(c, col)}
             moveDestinations={moveDestinations}
+            presentationKey={`${presentation.generatedAt}:${view}`}
           />
         )
       ) : (
