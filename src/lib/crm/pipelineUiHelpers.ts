@@ -2,6 +2,14 @@
  * FI-UX-REBUILD-1 S4.3 — pure Pipeline UI display helpers (no loaders, no mutations).
  */
 
+import {
+  cardMatchesActivityFilter,
+  cardMatchesAgeBucket,
+} from "@/src/lib/crm/pipelineOperationsFilters";
+import type {
+  PipelineOpsActivityFilter,
+  PipelineOpsAgeBucket,
+} from "@/src/lib/crm/pipelineOperationsQuery";
 import type {
   PipelineCardActionId,
   PipelineFilterOption,
@@ -15,7 +23,7 @@ import type {
   PipelineStaffColumnId,
 } from "@/src/lib/crm/pipelinePresentation.types";
 
-export type PipelineWorkspaceView = "board" | "follow_ups";
+export type PipelineWorkspaceView = "board" | "follow_ups" | "inactive_review";
 
 export type PipelineActiveFilters = {
   staffColumnIds: PipelineStaffColumnId[];
@@ -31,6 +39,14 @@ export type PipelineActiveFilters = {
   consultationDue: boolean;
   highValue: boolean;
   followUpBucket: string | null;
+  /** Lead age bucket (created_at). */
+  ageBucket: string | null;
+  /** Activity filter key from ops query. */
+  activity: string | null;
+  /** Single owner UUID (canonical). */
+  ownerId: string | null;
+  /** Source key. */
+  sourceKey: string | null;
 };
 
 export function emptyPipelineActiveFilters(): PipelineActiveFilters {
@@ -48,6 +64,10 @@ export function emptyPipelineActiveFilters(): PipelineActiveFilters {
     consultationDue: false,
     highValue: false,
     followUpBucket: null,
+    ageBucket: null,
+    activity: null,
+    ownerId: null,
+    sourceKey: null,
   };
 }
 
@@ -144,13 +164,18 @@ export function countActivePipelineFilters(f: PipelineActiveFilters): number {
   if (f.consultationDue) n += 1;
   if (f.highValue) n += 1;
   if (f.followUpBucket) n += 1;
+  if (f.ageBucket) n += 1;
+  if (f.activity) n += 1;
+  if (f.ownerId) n += 1;
+  if (f.sourceKey) n += 1;
   return n;
 }
 
 /** Client-side filter over already-built presentation cards (does not re-derive business state). */
 export function filterPipelineColumns(
   columns: readonly PipelinePresentationColumn[],
-  filters: PipelineActiveFilters
+  filters: PipelineActiveFilters,
+  nowMs: number = Date.now()
 ): PipelinePresentationColumn[] {
   return columns.map((col) => {
     if (
@@ -159,7 +184,7 @@ export function filterPipelineColumns(
     ) {
       return { ...col, cards: [], count: 0 };
     }
-    const cards = col.cards.filter((card) => cardMatchesFilters(card, filters));
+    const cards = col.cards.filter((card) => cardMatchesFilters(card, filters, nowMs));
     return { ...col, cards, count: cards.length };
   });
 }
@@ -213,7 +238,8 @@ export function filterPipelineFollowUps(
 
 function cardMatchesFilters(
   card: PipelineLeadCard,
-  f: PipelineActiveFilters
+  f: PipelineActiveFilters,
+  nowMs: number = Date.now()
 ): boolean {
   if (f.unassignedOnly && !card.owner.unassigned) return false;
   if (f.overdue && card.followUps.overdueCount <= 0 && !card.nextAction.overdue) {
@@ -239,6 +265,11 @@ function cardMatchesFilters(
       return false;
     }
   }
+  if (f.ownerId && (card.owner.userId ?? "") !== f.ownerId) return false;
+  if (f.sourceKey) {
+    const key = (card.source.key ?? "").toLowerCase();
+    if (key !== f.sourceKey.toLowerCase()) return false;
+  }
   if (f.sources.length > 0) {
     const key = card.source.key ? `source:${card.source.key}` : "source:unknown";
     if (!f.sources.includes(key)) return false;
@@ -253,7 +284,23 @@ function cardMatchesFilters(
         : card.lifecycle.state === "converted" || card.lifecycle.state === "lost"
           ? "life:terminal"
           : "life:active";
-    if (!f.lifecycle.includes(life)) return false;
+    // Also accept staff-column ids in lifecycle chips
+    const colLife = card.stage.staffColumnId;
+    const ok =
+      f.lifecycle.includes(life) ||
+      f.lifecycle.includes(colLife) ||
+      f.lifecycle.includes(`col:${colLife}`);
+    if (!ok) return false;
+  }
+  if (f.ageBucket) {
+    if (!cardMatchesAgeBucket(card, f.ageBucket as PipelineOpsAgeBucket, nowMs)) {
+      return false;
+    }
+  }
+  if (f.activity) {
+    if (!cardMatchesActivityFilter(card, f.activity as PipelineOpsActivityFilter, nowMs)) {
+      return false;
+    }
   }
   return true;
 }
