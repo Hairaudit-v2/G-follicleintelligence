@@ -21,6 +21,7 @@ import {
   CRM_ASSIGNEE_INELIGIBLE_USER_MESSAGE,
   isCrmAssigneeEligible,
 } from "./crmAssigneeEligibility";
+import { assertCrmOwnerAssignablePure } from "./crmAssignableOwners";
 
 export type UpdateCrmLeadDetailsInput = {
   tenantId: string;
@@ -126,13 +127,23 @@ async function assertFiUserAssignableAsLeadOwner(
     staffList[0]?.email ??
     null;
 
-  const eligible = isCrmAssigneeEligible({
-    fiUserId,
-    role: membership.role,
+  const pure = assertCrmOwnerAssignablePure({
+    userId: fiUserId,
     email,
+    role: membership.role,
+    displayName: null,
     staffRows: staffSignals,
   });
-  if (!eligible) {
+  // Shared pure gate (seed/system + lifecycle); keep isCrmAssigneeEligible as belt-and-braces.
+  if (
+    !pure.ok ||
+    !isCrmAssigneeEligible({
+      fiUserId,
+      role: membership.role,
+      email,
+      staffRows: staffSignals,
+    })
+  ) {
     throw new Error(CRM_ASSIGNEE_INELIGIBLE_USER_MESSAGE);
   }
 }

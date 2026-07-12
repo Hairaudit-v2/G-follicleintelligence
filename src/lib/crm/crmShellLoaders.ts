@@ -57,7 +57,7 @@ import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
-import { filterCrmAssignableOwnerOptions } from "@/src/lib/crm/crmAssigneeEligibility";
+import { loadCrmAssignableOwnerOptions } from "@/src/lib/crm/crmAssignableOwners.server";
 
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 
@@ -218,91 +218,15 @@ export async function loadCrmShellLeadsBoardIndex(
 }
 
 /**
- * Tenant users eligible for *new* CRM lead ownership (Assign contact / primary owner).
- * Filters inactive, terminated, archived, suspended, and offboarded staff at the loader.
- * Historical owners already on leads are still displayable from lead/person joins (not this list).
+ * Tenant people eligible for *new* CRM lead ownership (Assign contact / primary owner).
+ * Staff-first identity, name-first labels, seed/system excluded. Not a raw fi_users dump.
+ * Historical owners already on leads remain displayable outside this list.
  */
 export async function loadCrmShellUserPickerOptions(
   tenantId: string
 ): Promise<CrmShellUserPickerOption[]> {
-  const supabase = supabaseAdmin();
-  const tid = tenantId.trim();
-  const [usersRes, staffRes, membersRes] = await Promise.all([
-    supabase
-      .from("fi_users")
-      .select("id, email, role")
-      .eq("tenant_id", tid)
-      .order("email", { ascending: true }),
-    supabase
-      .from("fi_staff")
-      .select("id, fi_user_id, is_active")
-      .eq("tenant_id", tid)
-      .not("fi_user_id", "is", null),
-    supabase
-      .from("fi_staff_members")
-      .select("fi_staff_id, employment_status, archived_at")
-      .eq("tenant_id", tid),
-  ]);
-  if (usersRes.error) throw new Error(usersRes.error.message);
-  // Staff/members errors: fail closed to empty assignable set only if users load failed.
-  // If lifecycle tables fail, still filter by fi_staff.is_active when available.
-  if (staffRes.error && !usersRes.error) {
-    console.warn("[loadCrmShellUserPickerOptions] fi_staff load failed", staffRes.error.message);
-  }
-
-  const membersByStaffId = new Map<
-    string,
-    { employment_status: string | null; archived_at: string | null }
-  >();
-  if (!membersRes.error) {
-    for (const raw of membersRes.data ?? []) {
-      const r = raw as {
-        fi_staff_id: string | null;
-        employment_status: string | null;
-        archived_at: string | null;
-      };
-      const sid = r.fi_staff_id?.trim();
-      if (!sid) continue;
-      membersByStaffId.set(sid, {
-        employment_status: r.employment_status != null ? String(r.employment_status) : null,
-        archived_at: r.archived_at != null ? String(r.archived_at) : null,
-      });
-    }
-  }
-
-  // Collect ALL staff rows per fi_user (do not last-write-wins — inactive row must not hide active).
-  const staffByFiUserId = new Map<
-    string,
-    Array<{ isActive: boolean; employmentStatus: string | null; archivedAt: string | null }>
-  >();
-  if (!staffRes.error) {
-    for (const raw of staffRes.data ?? []) {
-      const r = raw as { id: string; fi_user_id: string | null; is_active: boolean };
-      const uid = r.fi_user_id?.trim();
-      if (!uid) continue;
-      const life = membersByStaffId.get(String(r.id));
-      const list = staffByFiUserId.get(uid) ?? [];
-      list.push({
-        isActive: Boolean(r.is_active),
-        employmentStatus: life?.employment_status ?? null,
-        archivedAt: life?.archived_at ?? null,
-      });
-      staffByFiUserId.set(uid, list);
-    }
-  }
-
-  const rows = (usersRes.data ?? []) as {
-    id: string;
-    email: string | null;
-    role: string | null;
-  }[];
-  const mapped = rows.map((r) => ({
-    id: String(r.id),
-    email: r.email != null ? String(r.email) : null,
-    role: r.role != null ? String(r.role) : null,
-  }));
-
-  return filterCrmAssignableOwnerOptions(mapped, staffByFiUserId);
+  const result = await loadCrmAssignableOwnerOptions(tenantId);
+  return result.options;
 }
 
 export async function loadCrmShellStaffPickerOptions(
