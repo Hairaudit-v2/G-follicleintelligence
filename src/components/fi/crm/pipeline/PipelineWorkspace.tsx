@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * FI-UX-REBUILD-1 S4.3 — Pipeline workspace adapter.
+ * FI-UX-REBUILD-1 S4.3 / S4.5A — Pipeline workspace adapter.
  *
  * Sole component allowed to own presentation state, refresh, and mutation runners.
  * Children receive presentation slices + callbacks only.
  *
- * Not mounted on live /crm during S4.3.
+ * S4.5A: mounted on `/crm` only for allowlisted tenants.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   completeCrmTaskAction,
@@ -29,6 +29,10 @@ import {
   PipelineTruncationNotice,
   PipelineViewTabs,
 } from "@/src/components/fi/crm/pipeline/pipelineUi";
+import {
+  comparePipelineTierIdentity,
+  createPipelineRefreshCoordinator,
+} from "@/src/lib/crm/pipelineLoader";
 import {
   pipelineMoveableStaffColumns,
   resolvePipelineColumnEntryStage,
@@ -53,16 +57,21 @@ import {
 } from "@/src/lib/crm/pipelineUiHelpers";
 import { PIPELINE_STAFF_COLUMNS } from "@/src/lib/crm/pipelineStaffModel";
 
+/** Share one in-flight shell→full request across Strict Mode remounts. */
+const pendingFullHydrations = new Map<string, Promise<PipelinePresentation>>();
+
 export type PipelineWorkspaceProps = {
   tenantId: string;
   initialPresentation: PipelinePresentation;
   permissions: PipelinePresentationPermissions;
   /** Tenant pipeline stages for move-target resolution. */
   tenantStages: readonly PipelineMoveStageDefinition[];
-  /** Fetch full (or refreshed) presentation. */
+  /** Fetch full (or refreshed) presentation — single refresh owner. */
   onRefreshPresentation?: () => Promise<PipelinePresentation>;
   /** Optional full presentation available after mount hydration. */
   fullPresentation?: PipelinePresentation | null;
+  /** Initial Board / Follow-ups view (legacy `?view=` compatibility). */
+  initialView?: PipelineWorkspaceView;
   /** Current user id for "assigned to me" (optional). */
   currentUserId?: string | null;
   /** Injected for tests. */
@@ -80,16 +89,32 @@ export type PipelineWorkspaceProps = {
   canCreateEnquiry?: boolean;
 };
 
+function logPipelineIdentityMismatch(shell: PipelinePresentation, full: PipelinePresentation): void {
+  const identity = comparePipelineTierIdentity(shell, full);
+  if (identity.ok) return;
+  // IDs/counts only — no PHI, no staff-facing lead lists.
+  console.info(
+    "[pipeline] shell/full identity mismatch",
+    JSON.stringify({
+      shell_count: shell.diagnostics.visibleLeadCount,
+      full_count: full.diagnostics.visibleLeadCount,
+      missing_count: identity.missingFromFull.length,
+      extra_count: identity.extraInFull.length,
+    })
+  );
+}
+
 export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   const {
     tenantId,
     permissions,
     tenantStages,
     canCreateEnquiry = permissions.canMutate,
+    initialView = "board",
   } = props;
 
   const [presentation, setPresentation] = useState(props.initialPresentation);
-  const [view, setView] = useState<PipelineWorkspaceView>("board");
+  const [view, setView] = useState<PipelineWorkspaceView>(initialView);
   const [filters, setFilters] = useState<PipelineActiveFilters>(emptyPipelineActiveFilters);
   const [busyLeadId, setBusyLeadId] = useState<string | null>(null);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
@@ -104,32 +129,113 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   } | null>(null);
 
   const slideOver = useCrmLeadSlideOverOptional();
+  const presentationRef = useRef(presentation);
+  presentationRef.current = presentation;
 
-  // Shell → full hydration when parent supplies fullPresentation
-  useEffect(() => {
-    if (props.fullPresentation) {
-      setPresentation(props.fullPresentation);
-    }
-  }, [props.fullPresentation]);
+  const refreshFnRef = useRef(props.onRefreshPresentation);
+  refreshFnRef.current = props.onRefreshPresentation;
+
+  const coordinatorRef = useRef<ReturnType<typeof createPipelineRefreshCoordinator> | null>(
+    null
+  );
+  if (!coordinatorRef.current) {
+    coordinatorRef.current = createPipelineRefreshCoordinator(async () => {
+      const fn = refreshFnRef.current;
+      if (!fn) throw new Error("refresh_unavailable");
+      return fn();
+    });
+  }
+
+  const autoHydrateStartedRef = useRef(false);
 
   const announce = useCallback((msg: string) => {
     setLiveMessage(msg);
   }, []);
+
+  const applyFullPresentation = useCallback(
+    (next: PipelinePresentation, mode: "hydrate" | "refresh") => {
+      if (mode === "hydrate") {
+        const current = presentationRef.current;
+        const identity = comparePipelineTierIdentity(current, next);
+        if (!identity.ok) {
+          logPipelineIdentityMismatch(current, next);
+          setRefreshError("identity_mismatch");
+          announce("Could not refresh. Showing the last update.");
+          return false;
+        }
+      }
+      setPresentation(next);
+      setRefreshError(null);
+      return true;
+    },
+    [announce]
+  );
+
+  // Parent-supplied full presentation (tests / alternate wiring)
+  useEffect(() => {
+    if (!props.fullPresentation) return;
+    applyFullPresentation(props.fullPresentation, "hydrate");
+  }, [props.fullPresentation, applyFullPresentation]);
+
+  // One post-mount full hydration via the refresh owner (S4.5A live path).
+  // No default poller. Strict-mode remounts share the same in-flight promise.
+  useEffect(() => {
+    if (!props.onRefreshPresentation) return;
+    if (autoHydrateStartedRef.current) return;
+    autoHydrateStartedRef.current = true;
+
+    const hydrateKey = `${tenantId}:${props.initialPresentation.generatedAt}`;
+    let cancelled = false;
+    setIsRefreshing(true);
+
+    let pending = pendingFullHydrations.get(hydrateKey);
+    if (!pending) {
+      pending = coordinatorRef.current!.refresh().finally(() => {
+        pendingFullHydrations.delete(hydrateKey);
+      });
+      pendingFullHydrations.set(hydrateKey, pending);
+    }
+
+    void (async () => {
+      try {
+        const next = await pending;
+        if (cancelled) return;
+        applyFullPresentation(next, "hydrate");
+      } catch {
+        if (cancelled) return;
+        // Retain shell / last valid presentation on full-load failure.
+        setRefreshError("refresh_failed");
+        announce("Could not refresh. Showing the last update.");
+      } finally {
+        if (!cancelled) setIsRefreshing(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    props.onRefreshPresentation,
+    props.initialPresentation.generatedAt,
+    tenantId,
+    applyFullPresentation,
+    announce,
+  ]);
 
   const refresh = useCallback(async () => {
     if (!props.onRefreshPresentation) return;
     setIsRefreshing(true);
     setRefreshError(null);
     try {
-      const next = await props.onRefreshPresentation();
-      setPresentation(next);
+      const next = await coordinatorRef.current!.refresh();
+      applyFullPresentation(next, "refresh");
     } catch {
       setRefreshError("refresh_failed");
       announce("Could not refresh. Showing the last update.");
     } finally {
       setIsRefreshing(false);
     }
-  }, [props, announce]);
+  }, [props.onRefreshPresentation, applyFullPresentation, announce]);
 
   const moveDestinations = useMemo(() => {
     return pipelineMoveableStaffColumns().map((columnId) => {

@@ -7,6 +7,7 @@ import { CrmLeadIndexViewTabs } from "@/src/components/fi/crm/CrmLeadIndexViewTa
 import { CrmLeadListFilters } from "@/src/components/fi/crm/CrmLeadListFilters";
 import { CrmLeadListPagination } from "@/src/components/fi/crm/CrmLeadListPagination";
 import { CrmLeadListTable } from "@/src/components/fi/crm/CrmLeadListTable";
+import { PipelineWorkspace } from "@/src/components/fi/crm/pipeline/PipelineWorkspace";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import {
@@ -23,6 +24,13 @@ import {
   parseCrmLeadListQuery,
   parsedCrmLeadListToHrefQuery,
 } from "@/src/lib/crm/crmLeadListQuery";
+import { toPipelinePresentationPermissions } from "@/src/lib/crm/pipelineLoader";
+import {
+  loadPipelineShellPayload,
+  refreshPipelinePresentation,
+} from "@/src/lib/crm/pipelineLoader.server";
+import { resolvePipelineInitialView } from "@/src/lib/crm/pipelineQueryCompat";
+import { isPipelineV1EnabledForTenant } from "@/src/lib/crm/pipelineRollout.server";
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadLeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
@@ -44,8 +52,35 @@ export default async function CrmShellPage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const { tenantId } = await params;
-  const session = await getCrmShellPageSession(tenantId);
   const sp = searchParams ?? {};
+  const resolvedSearchParams = { ...sp };
+
+  // S4.5A — allowlisted Pipeline mount (default off). Legacy path unchanged otherwise.
+  const pipelineEnabled = await isPipelineV1EnabledForTenant(tenantId);
+  if (pipelineEnabled) {
+    const shell = await loadPipelineShellPayload(tenantId, resolvedSearchParams);
+    const initialView = resolvePipelineInitialView(resolvedSearchParams);
+
+    async function refreshPresentation() {
+      "use server";
+      return refreshPipelinePresentation(tenantId, resolvedSearchParams);
+    }
+
+    return (
+      <PipelineWorkspace
+        tenantId={tenantId}
+        initialPresentation={shell.presentation}
+        tenantStages={shell.tenantStages}
+        permissions={toPipelinePresentationPermissions(shell.permissions)}
+        currentUserId={shell.currentUserId}
+        canCreateEnquiry={shell.permissions.canCreateEnquiry}
+        initialView={initialView}
+        onRefreshPresentation={refreshPresentation}
+      />
+    );
+  }
+
+  const session = await getCrmShellPageSession(tenantId);
 
   const baseQuery = parseCrmLeadListQuery(sp);
   const esc = baseQuery.searchRaw ? escapeIlikePattern(baseQuery.searchRaw) : null;
