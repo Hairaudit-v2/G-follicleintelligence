@@ -17,7 +17,6 @@ import {
   loadCrmCommunicationHintsByLeadIds,
   loadCrmTasksByLeadIds,
   loadReminderJobsByLeadIds,
-  PIPELINE_BATCH_CHUNK_SIZE,
 } from "@/src/lib/crm/pipelineLoaderBatch.server";
 import type { PipelinePresentation } from "@/src/lib/crm/pipelinePresentation.types";
 import {
