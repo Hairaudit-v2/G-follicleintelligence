@@ -48,7 +48,7 @@ test("domain mapping examples from D6G scope", () => {
   );
 });
 
-test("duplicate surfaces are detected for surgery and pipeline overlaps", () => {
+test("duplicate surfaces are detected for surgery overlaps", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const surgeryOs = items.find((i) => i.id === "surgery-os")!;
   const casesWorklist = items.find((i) => i.id === "cases-worklist")!;
@@ -57,11 +57,19 @@ test("duplicate surfaces are detected for surgery and pipeline overlaps", () => 
   assert.equal(surgeryReport.classification, "duplicate_surface");
   assert.ok(surgeryReport.reasons.some((r) => r.includes("cases-worklist")));
   assert.equal(casesReport.classification, "duplicate_surface");
+});
 
+test("pipeline has no duplicate peer surfaces after S4.5D consolidation", () => {
+  const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const crm = items.find((i) => i.id === "crm")!;
-  const followUps = items.find((i) => i.id === "follow-up-queue")!;
-  assert.equal(classifyNavigationDrift(crm, items).classification, "duplicate_surface");
-  assert.equal(classifyNavigationDrift(followUps, items).classification, "duplicate_surface");
+  assert.ok(crm);
+  assert.equal(crm.label, "Pipeline");
+  assert.ok(crm.href.endsWith("/crm"));
+  assert.equal(items.find((i) => i.id === "follow-up-queue"), undefined);
+  const pipelineLabeled = items.filter(
+    (i) => i.source === "primary_sidebar" && /^(Pipeline|Enquiries)$/i.test(i.label)
+  );
+  assert.equal(pipelineLabeled.length, 1);
 });
 
 test("legacy module language detector still flags architecture terms", () => {

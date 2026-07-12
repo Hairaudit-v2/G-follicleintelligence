@@ -201,9 +201,12 @@ describe("S4.5A /crm route switch contract", () => {
     assert.doesNotMatch(page, /redirect\(/);
     assert.doesNotMatch(leadflow, /redirect\([\s\S]*crm/);
     assert.doesNotMatch(conversion, /redirect\([\s\S]*crm/);
-    assert.match(nav, /follow-up-queue/);
-    assert.match(nav, /consultation-conversion/);
-    assert.match(nav, /leadflow/);
+    assert.doesNotMatch(nav, /id: "follow-up-queue"/);
+    assert.doesNotMatch(nav, /id: "consultation-conversion-board"/);
+    assert.doesNotMatch(nav, /id: "leadflow-dashboard"/);
+    assert.doesNotMatch(nav, /id: "crm-workspace"/);
+    assert.doesNotMatch(nav, /href: hrefFor\(b, "leadflow"\)/);
+    assert.doesNotMatch(nav, /href: hrefFor\(b, "consultation-conversion"\)/);
   });
 
   it("read-only and capability override remain adapter-driven", () => {

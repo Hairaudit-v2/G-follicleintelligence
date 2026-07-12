@@ -97,11 +97,22 @@ test("resolveFiOsPrimarySidebarItems: procedure day tab when FI_PROCEDURE_DAY_EN
   assert.ok(subIds.has("procedure-day-board"));
 });
 
-test("getFiOsShellActiveSidebarId: consultation conversion route stays under Consultations", () => {
-  assert.equal(
-    getFiOsShellActiveSidebarId(`${base}/consultation-conversion`, base),
-    "consultations"
-  );
+test("getFiOsShellActiveSidebarId: pipeline routes map to crm tab", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/crm`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/crm?view=follow_ups`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/crm?view=workspace`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/crm?view=list`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/crm/leads/lead-1`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/leadflow`, base), "crm");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultation-conversion`, base), "crm");
+});
+
+test("resolveFiOsPrimarySidebarItems: single Pipeline door when CRM enabled", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true);
+  const pipeline = items.filter((i) => i.featureKey === "crm" && !i.disabled);
+  assert.equal(pipeline.length, 1);
+  assert.equal(pipeline[0]!.id, "crm");
+  assert.equal(pipeline[0]!.label, "Pipeline");
 });
 
 test("getFiOsShellActiveSidebarId: operations centre maps to Ops sidebar tab", () => {
@@ -130,11 +141,10 @@ test("resolveFiOsPrimarySidebarItems: consolidated front desk entry with preserv
   assert.ok(subIds.has("front-desk-tomorrow"));
 });
 
-test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {
+test("resolveFiOsPrimarySidebarItems: consultations entry has no conversion board sub-link when enabled", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   const consult = items.find((i) => i.id === "consultations");
-  assert.ok(consult?.subItems?.length === 1);
-  assert.ok(consult!.subItems!.some((s) => s.href.endsWith("/consultation-conversion")));
+  assert.equal(consult?.subItems?.length ?? 0, 0);
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations enabled with CRM-only access", () => {
@@ -160,8 +170,9 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   assert.equal(byId.dashboard?.label, "Today");
   assert.equal(byId["front-desk"]?.label, "Front desk");
   assert.equal(byId.surgery?.label, "Surgery");
-  assert.equal(byId.crm?.label, "Enquiries");
-  assert.equal(byId["follow-up-queue"]?.label, "Follow-ups");
+  assert.equal(byId.crm?.label, "Pipeline");
+  assert.equal(byId.crm?.href, `${base}/crm`);
+  assert.equal(byId["follow-up-queue"], undefined);
   assert.equal(byId["patient-twin"]?.label, "Health record");
   const qualityReview = byId.reports?.subItems?.find((s) => s.id === "reports-quality");
   assert.equal(qualityReview?.label, "Quality review");

@@ -20,7 +20,7 @@ export function CrmLeadDetailBreadcrumbs({
         </li>
         <li>
           <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-300 hover:underline">
-            CRM leads
+            Pipeline
           </Link>
         </li>
         <li aria-hidden className="text-gray-400">

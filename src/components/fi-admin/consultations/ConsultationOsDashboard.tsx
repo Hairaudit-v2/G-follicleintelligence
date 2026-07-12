@@ -335,8 +335,8 @@ export function ConsultationOsDashboard({
           <Link href={`${base}/consultations?view=list`} className={consultationOsLinkButtonClass}>
             List view
           </Link>
-          <Link href={`${base}/consultation-conversion`} className={consultationOsLinkButtonClass}>
-            Conversion board
+          <Link href={`${base}/crm`} className={consultationOsLinkButtonClass}>
+            Pipeline
           </Link>
         </div>
       </DashboardCard>

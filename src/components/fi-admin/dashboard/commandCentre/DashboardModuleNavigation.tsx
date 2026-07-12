@@ -46,8 +46,8 @@ export function DashboardModuleNavigation(props: {
     },
     {
       id: "leadflow",
-      label: "Enquiries",
-      description: "Enquiries, conversion, and follow-up.",
+      label: "Pipeline",
+      description: "Enquiry pipeline, follow-ups, and conversion.",
       href: `${base}/crm`,
       icon: UserPlus,
       disabled: !showCrmNav,

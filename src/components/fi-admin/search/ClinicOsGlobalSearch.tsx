@@ -427,7 +427,7 @@ export function ClinicOsGlobalSearch({
                       className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
                     >
                       <LineChart className="h-3.5 w-3.5" aria-hidden />
-                      Enquiries
+                      Pipeline
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.leads.map((l) => (
@@ -495,7 +495,7 @@ export function ClinicOsGlobalSearch({
                 ) : (
                   <span
                     className="flex cursor-not-allowed items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-400"
-                    title="Requires CRM workspace access"
+                    title="Requires Pipeline access"
                   >
                     New enquiry
                   </span>

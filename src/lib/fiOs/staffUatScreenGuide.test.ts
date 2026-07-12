@@ -56,6 +56,8 @@ describe("staffUatScreenGuide", () => {
     assert.equal(staffUatModuleFromPath("/fi-admin/t/calendar"), "calendar");
     assert.equal(staffUatModuleFromPath("/fi-admin/t/reception-board"), "reception_board");
     assert.equal(staffUatModuleFromPath("/fi-admin/t/crm/leads"), "crm");
+    assert.equal(staffUatModuleFromPath("/fi-admin/t/leadflow"), "crm");
+    assert.equal(staffUatModuleFromPath("/fi-admin/t/consultation-conversion"), "crm");
     assert.equal(staffUatModuleFromPath("/fi-admin/t/settings"), "other");
   });
 });

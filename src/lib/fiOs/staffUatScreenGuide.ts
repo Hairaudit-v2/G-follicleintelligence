@@ -93,7 +93,9 @@ export function resolveStaffUatScreenKeyFromPath(pathname: string): StaffUatScre
 export function staffUatModuleFromPath(pathname: string): string {
   const key = resolveStaffUatScreenKeyFromPath(pathname);
   if (key) return key;
-  if (pathname.includes("/crm")) return "crm";
+  if (pathname.includes("/crm") || pathname.includes("/leadflow") || pathname.includes("/consultation-conversion")) {
+    return "crm";
+  }
   if (pathname.includes("/financial")) return "financial";
   if (pathname.includes("/surgery-readiness")) return "surgery_readiness";
   return "other";

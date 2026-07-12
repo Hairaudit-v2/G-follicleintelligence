@@ -161,13 +161,6 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "Consultation workspace.",
       },
       {
-        id: "consultation-conversion-board",
-        label: "Conversion board",
-        path: "consultation-conversion",
-        permissionHint: {},
-        description: "Consultation funnel from booked consult through surgery.",
-      },
-      {
         id: "prescriptions",
         label: "Prescriptions",
         path: "prescriptions",
@@ -186,18 +179,12 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   },
   {
     id: "leadflow",
-    label: "Enquiries",
-    description: "Enquiries, pipeline, tasks, and follow-ups.",
+    label: "Pipeline",
+    description: "Enquiry pipeline, follow-ups, and conversion workflow.",
     items: [
       {
-        id: "leadflow",
-        label: "Enquiries",
-        path: "leadflow",
-        permissionHint: { requiresCrmShellNav: true },
-      },
-      {
         id: "leadflow-crm",
-        label: "Enquiries",
+        label: "Pipeline",
         path: "crm",
         permissionHint: { requiresCrmShellNav: true },
       },
@@ -500,13 +487,13 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "services") return "services";
   if (first === "doctor") return "doctor-workspace";
   if (first === "consultations") return "consultations";
-  if (first === "consultation-conversion") return "consultation-conversion-board";
+  if (first === "consultation-conversion") return "leadflow-crm";
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
   if (first === "surgery-os") return "surgery-os";
   if (first === "surgery-readiness") return "surgery-readiness-board";
   if (first === "procedure-day") return "procedure-day-board";
-  if (first === "leadflow") return "leadflow";
+  if (first === "leadflow") return "leadflow-crm";
   if (first === "crm") return "leadflow-crm";
   if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";
@@ -585,7 +572,7 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
     label: "Lead",
     path: "crm",
     permissionHint: { requiresCrmShellNav: true },
-    description: "Enquiries — enquiries, pipeline, and tasks.",
+    description: "Pipeline — enquiries, follow-ups, and tasks.",
   },
   {
     id: "booking",
@@ -606,7 +593,7 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
     label: "Task",
     path: "crm",
     permissionHint: { requiresCrmShellNav: true },
-    description: "Enquiries — open a lead, then add a task on the Timeline tab.",
+    description: "Pipeline — open an enquiry, then add a task on the Timeline tab.",
   },
   {
     id: "message",

@@ -51,7 +51,7 @@ test("terminology map resolves core legacy → approved terms", () => {
   assert.equal(resolveApprovedStaffTerm("WorkforceOS"), FI_OS_STAFF_TERMS.team);
   assert.equal(resolveApprovedStaffTerm("FinancialOS"), FI_OS_STAFF_TERMS.finances);
   assert.equal(resolveApprovedStaffTerm("Patient Twin"), FI_OS_STAFF_TERMS.healthRecord);
-  assert.equal(resolveApprovedStaffTerm("LeadFlow"), FI_OS_STAFF_TERMS.enquiries);
+  assert.equal(resolveApprovedStaffTerm("LeadFlow"), FI_OS_STAFF_TERMS.pipeline);
   assert.equal(resolveApprovedStaffTerm("Procedure Day"), FI_OS_STAFF_TERMS.surgeryDay);
   assert.equal(resolveApprovedStaffTerm("Readiness Board"), FI_OS_STAFF_TERMS.readyForSurgery);
   assert.equal(resolveApprovedStaffTerm("Audit Intelligence"), FI_OS_STAFF_TERMS.qualityReview);
@@ -205,8 +205,8 @@ test("role-oriented nav smoke: receptionist, clinical, finance, manager labels s
   // CRM operator
   const crm = resolveFiOsPrimarySidebarItems(BASE, true, true, null, false, true, false, false, false);
   const crmLabels = collectLabels(crm);
-  assert.ok(crmLabels.some((l) => /Enquiries|Pipeline/i.test(l)));
-  assert.ok(!crmLabels.some((l) => /LeadFlow/i.test(l)));
+  assert.ok(crmLabels.some((l) => /Pipeline/i.test(l)));
+  assert.ok(!crmLabels.some((l) => /Enquiries|LeadFlow|CRM|Kanban|Conversion board/i.test(l)));
 
   // Finance admin backend role blocks clinical
   const finance = resolveFiOsPrimarySidebarItems(

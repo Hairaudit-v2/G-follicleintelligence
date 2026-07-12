@@ -21,9 +21,9 @@ export async function generateMetadata({
   const { tenantId, leadId } = await params;
   const payload = await loadCrmShellLeadDetailPagePayload(tenantId, leadId);
   const lead = payload?.detail.lead;
-  const title = lead ? leadTitleFromRow(lead.summary, lead.id) : "CRM lead";
+  const title = lead ? leadTitleFromRow(lead.summary, lead.id) : "Enquiry";
   return {
-    title: `${title} · CRM`,
+    title: `${title} · Pipeline`,
     robots: { index: false, follow: false },
   };
 }

@@ -37,7 +37,7 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
     label: "New enquiry",
     description: "Capture a patient enquiry (name, contact, interest).",
     keywords: ["crm", "enquiry", "pipeline", "leadflow"],
-    path: "leadflow",
+    path: "crm",
     hash: "fi-os-crm-create-lead",
     requiresCrmShellNav: true,
   },
@@ -51,8 +51,8 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   {
     id: "task",
     label: "New task",
-    description: "Open Enquiries — open an enquiry, then add a task on the Timeline tab.",
-    keywords: ["todo", "follow-up", "crm", "leadflow"],
+    description: "Open Pipeline — open an enquiry, then add a task on the Timeline tab.",
+    keywords: ["todo", "follow-up", "pipeline"],
     path: "crm",
     requiresCrmShellNav: true,
   },
@@ -119,7 +119,7 @@ export function resolveFiOsQuickCreateItems(
         keywords: def.keywords,
         href: "#",
         enabled: false,
-        disabledReason: "Enquiries access required.",
+        disabledReason: "Pipeline access required.",
       };
     }
     if (needsBookings && !showBookingsBoard) {

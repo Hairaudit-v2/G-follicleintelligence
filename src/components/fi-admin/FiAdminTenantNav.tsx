@@ -120,11 +120,6 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
           label: "Consultations",
           title: "Consultations — clinical consultation records and quotes.",
         },
-        {
-          href: `${base}/consultation-conversion`,
-          label: "Conversion board",
-          title: "Conversion — live view from booked consult through surgery booking.",
-        },
       ],
     });
   }
@@ -152,13 +147,13 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   if (showCrmNav) {
     groups.push({
       id: "leadflow",
-      label: "Enquiries",
-      description: "Enquiries, leads, pipeline, tasks, follow-ups.",
+      label: "Pipeline",
+      description: "Enquiry pipeline, follow-ups, and conversion workflow.",
       items: [
         {
           href: `${base}/crm`,
-          label: "Enquiries",
-          title: "Enquiries — CRM pipeline, leads, tasks, and follow-ups.",
+          label: "Pipeline",
+          title: "Pipeline — enquiry board, follow-ups, and lead workspace.",
         },
       ],
     });

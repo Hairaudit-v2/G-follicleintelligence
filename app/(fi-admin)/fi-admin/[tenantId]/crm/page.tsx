@@ -36,9 +36,9 @@ import { loadLeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboar
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 
 export const metadata = {
-  title: "Enquiries",
+  title: "Pipeline",
   description:
-    "Consultation conversion, follow-up priority, booking readiness, and revenue opportunity across every enquiry.",
+    "Enquiry pipeline — board, follow-ups, stage movement, and lead workspace across every enquiry.",
   robots: { index: false, follow: false },
 };
 
