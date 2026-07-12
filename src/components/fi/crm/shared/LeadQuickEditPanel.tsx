@@ -96,6 +96,11 @@ export function LeadQuickEditPanel({
             className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
           >
             <option value="">Unassigned</option>
+            {ownerId && !owners.some((o) => o.id === ownerId) ? (
+              <option value={ownerId}>
+                Current owner (not available for new assignment · {ownerId.slice(0, 8)}…)
+              </option>
+            ) : null}
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.email ?? o.id}

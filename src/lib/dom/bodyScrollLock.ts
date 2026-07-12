@@ -91,6 +91,9 @@ export function forceUnlockBodyScroll(): void {
   } else {
     document.body.style.paddingRight = "";
   }
+  // Radix RemoveScroll / modal menus may also pin html overflow or body pointer-events.
+  document.documentElement.style.overflow = "";
+  document.body.style.pointerEvents = "";
   savedOverflow = null;
   savedPaddingRight = null;
 }

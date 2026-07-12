@@ -32,6 +32,7 @@ import {
 } from "./shared";
 import type { WorkspacePanelSignalRefresh } from "@/src/components/fi-os/workspace/useWorkspacePanelSignalRefresh";
 import { WorkspaceSignalHeaderHint } from "@/src/components/fi-os/workspace/panels/WorkspaceShellPanelFrame";
+import { forceUnlockBodyScroll } from "@/src/lib/dom/bodyScrollLock";
 
 /** Right-hand slide-over panel (use {@link CrmLeadSlideOverProvider} + {@link useCrmLeadSlideOver} or render directly). */
 export function LeadSlideOverPanel({
@@ -201,9 +202,12 @@ export function LeadSlideOverPanel({
         return;
       }
       setPayload((p) => (p ? { ...p, detail: { ...p.detail, lead: r.lead } } : p));
-      router.refresh();
+      // Soft refresh only — full router.refresh() after owner assign has frozen Pipeline
+      // with stuck body scroll when combined with menus. Payload already updated in-panel.
+      forceUnlockBodyScroll();
     } finally {
       setDetailBusy(false);
+      forceUnlockBodyScroll();
     }
   }
 
@@ -383,6 +387,17 @@ export function LeadSlideOverPanel({
     }
   }
 
+  // Safety: clear any leftover scroll locks (dropdown/modal) when the panel mounts/unmounts.
+  useEffect(() => {
+    if (!open) {
+      forceUnlockBodyScroll();
+      return;
+    }
+    return () => {
+      forceUnlockBodyScroll();
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
@@ -390,7 +405,10 @@ export function LeadSlideOverPanel({
       className="fixed inset-0 z-40 flex justify-end bg-black/30 sm:items-stretch"
       role="presentation"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) {
+          forceUnlockBodyScroll();
+          onClose();
+        }
       }}
     >
       <aside

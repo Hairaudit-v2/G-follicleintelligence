@@ -671,6 +671,9 @@ export function PipelineLeadCardView(props: {
         ) : null}
         {secondary.length > 0 ? (
           <DropdownMenu
+            // Non-modal: avoid Radix RemoveScroll fighting slide-over / body lock
+            // (stuck pointer-events / frozen page after assign or hard refresh).
+            modal={false}
             open={menuOpen}
             onOpenChange={(open) => {
               setMenuOpen(open);

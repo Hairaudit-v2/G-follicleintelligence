@@ -71,20 +71,24 @@ async function assertFiUserAssignableAsLeadOwner(
 
   const { data: staffRows, error: staffErr } = await supabase
     .from("fi_staff")
-    .select("id, is_active")
+    .select("id, is_active, email")
     .eq("tenant_id", tenantId)
-    .eq("fi_user_id", fiUserId.trim())
-    .limit(1);
+    .eq("fi_user_id", fiUserId.trim());
   if (staffErr) throw new Error(staffErr.message);
 
-  const staff = (staffRows ?? [])[0] as { id: string; is_active: boolean } | undefined;
-  let staffSignal: {
+  const staffList = (staffRows ?? []) as {
+    id: string;
+    is_active: boolean;
+    email: string | null;
+  }[];
+
+  const staffSignals: Array<{
     isActive: boolean;
     employmentStatus: string | null;
     archivedAt: string | null;
-  } | null = null;
+  }> = [];
 
-  if (staff) {
+  for (const staff of staffList) {
     const { data: member, error: mErr } = await supabase
       .from("fi_staff_members")
       .select("employment_status, archived_at")
@@ -92,29 +96,41 @@ async function assertFiUserAssignableAsLeadOwner(
       .eq("fi_staff_id", staff.id)
       .maybeSingle();
     if (mErr) {
-      // Lifecycle table optional for some tenants — fall back to is_active only
-      staffSignal = {
+      staffSignals.push({
         isActive: Boolean(staff.is_active),
         employmentStatus: null,
         archivedAt: null,
-      };
-    } else {
-      const m = member as {
-        employment_status: string | null;
-        archived_at: string | null;
-      } | null;
-      staffSignal = {
-        isActive: Boolean(staff.is_active),
-        employmentStatus: m?.employment_status != null ? String(m.employment_status) : null,
-        archivedAt: m?.archived_at != null ? String(m.archived_at) : null,
-      };
+      });
+      continue;
     }
+    const m = member as {
+      employment_status: string | null;
+      archived_at: string | null;
+    } | null;
+    staffSignals.push({
+      isActive: Boolean(staff.is_active),
+      employmentStatus: m?.employment_status != null ? String(m.employment_status) : null,
+      archivedAt: m?.archived_at != null ? String(m.archived_at) : null,
+    });
   }
+
+  // Prefer fi_users.email for synthetic detection
+  const { data: userRow } = await supabase
+    .from("fi_users")
+    .select("email")
+    .eq("tenant_id", tenantId)
+    .eq("id", fiUserId.trim())
+    .maybeSingle();
+  const email =
+    (userRow as { email: string | null } | null)?.email ??
+    staffList[0]?.email ??
+    null;
 
   const eligible = isCrmAssigneeEligible({
     fiUserId,
     role: membership.role,
-    staff: staffSignal,
+    email,
+    staffRows: staffSignals,
   });
   if (!eligible) {
     throw new Error(CRM_ASSIGNEE_INELIGIBLE_USER_MESSAGE);

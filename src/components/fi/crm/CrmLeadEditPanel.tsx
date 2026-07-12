@@ -251,7 +251,9 @@ export function CrmLeadEditPanel({
           >
             <option value="">Unassigned</option>
             {ownerId && !owners.some((o) => o.id === ownerId) ? (
-              <option value={ownerId}>Unknown user ({ownerId.slice(0, 8)}…)</option>
+              <option value={ownerId}>
+                Current owner (not available for new assignment · {ownerId.slice(0, 8)}…)
+              </option>
             ) : null}
             {owners.map((o) => (
               <option key={o.id} value={o.id}>

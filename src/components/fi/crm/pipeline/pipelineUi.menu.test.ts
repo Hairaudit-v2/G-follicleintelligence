@@ -15,6 +15,7 @@ test("1. More menu uses accessible DropdownMenu primitive", () => {
   assert.match(UI, /DropdownMenuTrigger/);
   assert.match(UI, /DropdownMenuContent/);
   assert.match(UI, /DropdownMenuItem/);
+  assert.match(UI, /modal=\{false\}/);
 });
 
 test("2. menu open state is controlled with onOpenChange", () => {

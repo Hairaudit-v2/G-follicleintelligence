@@ -270,9 +270,10 @@ export async function loadCrmShellUserPickerOptions(
     }
   }
 
+  // Collect ALL staff rows per fi_user (do not last-write-wins — inactive row must not hide active).
   const staffByFiUserId = new Map<
     string,
-    { isActive: boolean; employmentStatus: string | null; archivedAt: string | null }
+    Array<{ isActive: boolean; employmentStatus: string | null; archivedAt: string | null }>
   >();
   if (!staffRes.error) {
     for (const raw of staffRes.data ?? []) {
@@ -280,11 +281,13 @@ export async function loadCrmShellUserPickerOptions(
       const uid = r.fi_user_id?.trim();
       if (!uid) continue;
       const life = membersByStaffId.get(String(r.id));
-      staffByFiUserId.set(uid, {
+      const list = staffByFiUserId.get(uid) ?? [];
+      list.push({
         isActive: Boolean(r.is_active),
         employmentStatus: life?.employment_status ?? null,
         archivedAt: life?.archived_at ?? null,
       });
+      staffByFiUserId.set(uid, list);
     }
   }
 
