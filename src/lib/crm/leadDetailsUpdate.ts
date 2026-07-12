@@ -17,6 +17,10 @@ import { loadCrmLeadById } from "./leads";
 import { mapFiCrmLeadRow } from "./leadRow";
 import type { FiCrmLeadRow } from "./types";
 import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
+import {
+  CRM_ASSIGNEE_INELIGIBLE_USER_MESSAGE,
+  isCrmAssigneeEligible,
+} from "./crmAssigneeEligibility";
 
 export type UpdateCrmLeadDetailsInput = {
   tenantId: string;
@@ -38,15 +42,83 @@ async function fiUserBelongsToTenant(
   supabase: SupabaseClient,
   tenantId: string,
   fiUserId: string
-): Promise<boolean> {
+): Promise<{ ok: true; role: string | null } | { ok: false }> {
   const { data, error } = await supabase
     .from("fi_users")
-    .select("id")
+    .select("id, role")
     .eq("tenant_id", tenantId)
     .eq("id", fiUserId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return !!data;
+  if (!data) return { ok: false };
+  const role = (data as { role: string | null }).role;
+  return { ok: true, role: role != null ? String(role) : null };
+}
+
+/**
+ * Server-side assignment gate: tenant membership + active/eligible staff (or CRM operator role).
+ * Historical owners already stored on the lead are not revalidated on unrelated edits.
+ */
+async function assertFiUserAssignableAsLeadOwner(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<void> {
+  const membership = await fiUserBelongsToTenant(supabase, tenantId, fiUserId);
+  if (!membership.ok) {
+    throw new Error("Owner must be a user in this tenant.");
+  }
+
+  const { data: staffRows, error: staffErr } = await supabase
+    .from("fi_staff")
+    .select("id, is_active")
+    .eq("tenant_id", tenantId)
+    .eq("fi_user_id", fiUserId.trim())
+    .limit(1);
+  if (staffErr) throw new Error(staffErr.message);
+
+  const staff = (staffRows ?? [])[0] as { id: string; is_active: boolean } | undefined;
+  let staffSignal: {
+    isActive: boolean;
+    employmentStatus: string | null;
+    archivedAt: string | null;
+  } | null = null;
+
+  if (staff) {
+    const { data: member, error: mErr } = await supabase
+      .from("fi_staff_members")
+      .select("employment_status, archived_at")
+      .eq("tenant_id", tenantId)
+      .eq("fi_staff_id", staff.id)
+      .maybeSingle();
+    if (mErr) {
+      // Lifecycle table optional for some tenants — fall back to is_active only
+      staffSignal = {
+        isActive: Boolean(staff.is_active),
+        employmentStatus: null,
+        archivedAt: null,
+      };
+    } else {
+      const m = member as {
+        employment_status: string | null;
+        archived_at: string | null;
+      } | null;
+      staffSignal = {
+        isActive: Boolean(staff.is_active),
+        employmentStatus: m?.employment_status != null ? String(m.employment_status) : null,
+        archivedAt: m?.archived_at != null ? String(m.archived_at) : null,
+      };
+    }
+  }
+
+  const eligible = isCrmAssigneeEligible({
+    fiUserId,
+    role: membership.role,
+    staff: staffSignal,
+  });
+  if (!eligible) {
+    throw new Error(CRM_ASSIGNEE_INELIGIBLE_USER_MESSAGE);
+  }
 }
 
 /**
@@ -93,8 +165,15 @@ export async function updateCrmLeadDetails(
     }
   }
   if (ownerId) {
-    const ok = await fiUserBelongsToTenant(supabase, tenantId, ownerId);
-    if (!ok) throw new Error("Owner must be a user in this tenant.");
+    // Only re-check eligibility when the owner is being *changed* to a new assignee.
+    // Existing inactive historical owners may remain on the lead until reassigned.
+    const ownerChanging = (lead.primary_owner_user_id ?? null) !== ownerId;
+    if (ownerChanging) {
+      await assertFiUserAssignableAsLeadOwner(supabase, tenantId, ownerId);
+    } else {
+      const membership = await fiUserBelongsToTenant(supabase, tenantId, ownerId);
+      if (!membership.ok) throw new Error("Owner must be a user in this tenant.");
+    }
   }
 
   const merge =

@@ -203,6 +203,8 @@ export type FiCrmMessageRow = {
 export type CrmShellUserPickerOption = {
   id: string;
   email: string | null;
+  /** Optional fi_users.role — used for assignable-owner eligibility (operators without staff). */
+  role?: string | null;
   /** When row is from `fi_staff` (scheduling pickers). */
   full_name?: string | null;
   staff_role?: string | null;
