@@ -2,6 +2,7 @@ import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { getWorkspaceProfileLabel } from "@/src/config/fiWorkspaceProfiles";
 import { DashboardClinicalIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardClinicalIntelligenceSummary";
+import { FiBuildIdentityPanel } from "@/src/components/fi-admin/dashboard/FiBuildIdentityPanel";
 import { DashboardOutcomeIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardOutcomeIntelligenceSummary";
 import { DashboardPlatformDevelopmentProgress } from "@/src/components/fi-admin/dashboard/DashboardPlatformDevelopmentProgress";
 import { DashboardRecentPlatformReleases } from "@/src/components/fi-admin/dashboard/DashboardRecentPlatformReleases";
@@ -151,6 +152,7 @@ export function FiOsControlCentreHome(props: {
 
       {showSystemDiagnostics ? (
         <DashboardSystemDiagnostics>
+          <FiBuildIdentityPanel tenantId={data.tenantId} />
           <DashboardPlatformDevelopmentProgress />
           <DashboardRecentPlatformReleases />
           {clinicalIntelligenceSummary ? (
