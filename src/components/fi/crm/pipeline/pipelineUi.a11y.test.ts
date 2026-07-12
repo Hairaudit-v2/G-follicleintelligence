@@ -13,8 +13,18 @@ const WS = readFileSync(join("src/components/fi/crm/pipeline/PipelineWorkspace.t
 test("keyboard users can move stage without drag", () => {
   assert.match(UI, /Move stage destinations/);
   assert.match(UI, /role="menu"/);
-  assert.doesNotMatch(UI, /onDrag|draggable|dataTransfer/);
-  assert.doesNotMatch(WS, /onDrag|draggable|dataTransfer/);
+  // Desktop HTML5 drag is optional enhancement; Move stage remains for keyboard/tablet.
+  assert.match(UI, /Move stage destinations/);
+  assert.match(WS, /resolvePipelineDragDrop|runMove|onMoveToColumn/);
+});
+
+test("desktop drag is gated; tablet stack has no drag requirement", () => {
+  assert.match(UI, /desktopDragEnabled/);
+  assert.match(UI, /lg:hidden/);
+  assert.match(UI, /layout="stack"/);
+  // Drag only when desktopDragEnabled; tablet stack never enables drop
+  assert.match(UI, /props\.layout === "desktop"/);
+  assert.match(WS, /pointer: fine/);
 });
 
 test("collapsible sections expose aria-expanded", () => {

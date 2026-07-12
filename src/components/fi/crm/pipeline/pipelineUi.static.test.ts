@@ -70,6 +70,13 @@ function fixturePresentation(overrides?: Partial<PipelinePresentation>): Pipelin
       patientId: null,
       lostReason: null,
     },
+    timestamps: {
+      createdAtIso: "2026-07-01T10:00:00.000Z",
+      updatedAtIso: "2026-07-01T10:00:00.000Z",
+      meaningfulActivityAtIso: "2026-07-01T10:00:00.000Z",
+      stageEnteredAtIso: null,
+      lostAtIso: null,
+    },
     score: { value: null, highValue: false },
     blockers: [],
     primaryAction: "open_lead",

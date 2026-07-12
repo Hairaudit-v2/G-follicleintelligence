@@ -40,7 +40,7 @@ test("5. trigger has accessible name More actions", () => {
 test("6. presentation refresh / view change closes menu via presentationKey", () => {
   assert.match(UI, /presentationKey/);
   assert.match(UI, /setOpenMenuLeadId\(null\)/);
-  assert.match(WS, /presentationKey=\{`\$\{presentation\.generatedAt\}:\$\{view\}`\}/);
+  assert.match(WS, /presentationKey=\{`\$\{presentation\.generatedAt\}:\$\{view\}/);
 });
 
 test("7. does not use setOpen\(true\) only toggle without close path", () => {

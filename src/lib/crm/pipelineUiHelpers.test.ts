@@ -77,6 +77,13 @@ function card(partial: Partial<PipelineLeadCard> & Pick<PipelineLeadCard, "leadI
       patientId: null,
       lostReason: null,
     },
+    timestamps: partial.timestamps ?? {
+      createdAtIso: "2026-07-01T10:00:00.000Z",
+      updatedAtIso: "2026-07-01T10:00:00.000Z",
+      meaningfulActivityAtIso: "2026-07-01T10:00:00.000Z",
+      stageEnteredAtIso: null,
+      lostAtIso: null,
+    },
     score: partial.score ?? { value: null, highValue: false },
     blockers: partial.blockers ?? [],
     primaryAction: partial.primaryAction ?? "open_lead",
