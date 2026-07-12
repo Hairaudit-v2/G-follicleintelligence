@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCrmOwnerOptionLabel } from "@/src/lib/crm/crmAssignableOwners";
 import type { CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
 import {
   crmLeadCardClass,
@@ -103,7 +104,7 @@ export function LeadQuickEditPanel({
             ) : null}
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.email ?? o.id}
+                {formatCrmOwnerOptionLabel(o)}
               </option>
             ))}
           </select>

@@ -16,16 +16,18 @@ import {
   LEADFLOW_ENQUIRY_SOURCE_OPTIONS,
 } from "@/src/lib/leadFlow/createLeadflowEnquiryCore";
 import { leadFlowLinkButtonClass } from "@/src/lib/fiAdmin/leadFlowPresentation";
+import { formatCrmOwnerOptionLabel } from "@/src/lib/crm/crmAssignableOwners";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { forceUnlockBodyScroll } from "@/src/lib/dom/bodyScrollLock";
 
 const fieldLabelClass = "mb-1 block text-xs font-medium text-slate-300";
 const selectClass =
-  "block w-full rounded-lg border border-white/[0.12] bg-black/30 px-3 py-2 text-sm text-slate-100 disabled:opacity-60";
+  "relative z-[60] block w-full rounded-lg border border-white/[0.12] bg-black/30 px-3 py-2 text-sm text-slate-100 disabled:opacity-60";
 
-type OwnerOpt = Pick<CrmShellUserPickerOption, "id" | "email" | "full_name">;
+type OwnerOpt = Pick<CrmShellUserPickerOption, "id" | "email" | "full_name" | "staff_role">;
 
 function ownerLabel(owner: OwnerOpt): string {
-  return owner.full_name?.trim() || owner.email?.trim() || `${owner.id.slice(0, 8)}…`;
+  return formatCrmOwnerOptionLabel(owner);
 }
 
 export function NewEnquiryDialog({
@@ -145,9 +147,18 @@ export function NewEnquiryDialog({
       reset();
       setDialogOpen(false);
       setSuccessToast({ leadId: r.leadId });
-      router.refresh();
+      forceUnlockBodyScroll();
+      // Soft path: avoid hard router.refresh() freezes after create in Pipeline.
+      try {
+        router.refresh();
+      } catch {
+        /* ignore */
+      } finally {
+        forceUnlockBodyScroll();
+      }
     } finally {
       setBusy(false);
+      forceUnlockBodyScroll();
     }
   }
 
@@ -302,16 +313,25 @@ export function NewEnquiryDialog({
                   id="new-enquiry-owner"
                   value={primaryOwnerUserId}
                   onChange={(e) => setPrimaryOwnerUserId(e.target.value)}
-                  disabled={busy || loadingOwners}
+                  disabled={busy}
                   className={selectClass}
+                  aria-busy={loadingOwners || undefined}
                 >
                   <option value="">Unassigned</option>
+                  {loadingOwners && owners.length === 0 ? (
+                    <option value="__loading" disabled>
+                      Loading team…
+                    </option>
+                  ) : null}
                   {owners.map((owner) => (
                     <option key={owner.id} value={owner.id}>
                       {ownerLabel(owner)}
                     </option>
                   ))}
                 </select>
+                {loadingOwners ? (
+                  <span className="mt-1 block text-[11px] text-slate-500">Updating team list…</span>
+                ) : null}
               </label>
 
               <label className="block text-sm">

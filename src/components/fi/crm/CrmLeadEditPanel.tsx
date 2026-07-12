@@ -9,6 +9,7 @@ import {
   parseCrmLeadAdminMetadataMergeJson,
   parseCrmLeadMetadataJsonInput,
 } from "@/src/lib/crm/crmLeadDetailsPolicy";
+import { formatCrmOwnerOptionLabel } from "@/src/lib/crm/crmAssignableOwners";
 import type {
   CrmShellClinicOption,
   CrmShellOrgOption,
@@ -257,7 +258,7 @@ export function CrmLeadEditPanel({
             ) : null}
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.email ?? o.id}
+                {formatCrmOwnerOptionLabel(o)}
               </option>
             ))}
           </select>
