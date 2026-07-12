@@ -1,5 +1,7 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { getWorkspaceProfileLabel } from "@/src/config/fiWorkspaceProfiles";
+import { DashboardSystemDiagnostics } from "@/src/components/fi-admin/dashboard/commandCentre";
+import { FiBuildIdentityPanel } from "@/src/components/fi-admin/dashboard/FiBuildIdentityPanel";
 import { ComingUpSection } from "@/src/components/fi-os/today/ComingUpSection";
 import { RightNowSection } from "@/src/components/fi-os/today/RightNowSection";
 import { TodayFeedRefreshMount } from "@/src/components/fi-os/today/TodayFeedRefreshMount";
@@ -32,6 +34,8 @@ export function FiOsTodaySurface(props: {
   todayRealtimeEnabled?: boolean;
   /** FI-UX-REBUILD D6 — revision fingerprint polling. */
   todayRevisionPollEnabled?: boolean;
+  /** Platform-admin only — render the collapsed deployed-build diagnostics panel. */
+  showSystemDiagnostics?: boolean;
 }) {
   const {
     data,
@@ -40,6 +44,7 @@ export function FiOsTodaySurface(props: {
     viewerDisplayName,
     todayRealtimeEnabled = false,
     todayRevisionPollEnabled = false,
+    showSystemDiagnostics = false,
   } = props;
 
   const now = new Date();
@@ -106,6 +111,11 @@ export function FiOsTodaySurface(props: {
       <RightNowSection items={rightNow} />
       <UpNextSection items={upNext} />
       <ComingUpSection items={feed.comingUp} />
+      {showSystemDiagnostics ? (
+        <DashboardSystemDiagnostics>
+          <FiBuildIdentityPanel tenantId={data.tenantId} />
+        </DashboardSystemDiagnostics>
+      ) : null}
     </div>
   );
 }

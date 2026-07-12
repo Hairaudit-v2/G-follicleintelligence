@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isPipelineDesktopDragEnabledFromEnv } from "@/src/lib/crm/pipelineDragFlag";
 import { isPipelineV1EnabledForTenant } from "@/src/lib/crm/pipelineRollout.server";
 import {
   pickBuildEnvironment,
@@ -18,6 +19,7 @@ export async function FiBuildIdentityPanel({ tenantId }: { tenantId: string }) {
     sha: pickBuildSha(process.env),
     environment: pickBuildEnvironment(process.env),
     pipelineRolloutEnabled: await isPipelineV1EnabledForTenant(tenantId),
+    desktopDragEnabled: isPipelineDesktopDragEnabledFromEnv(),
   };
 
   const rows: Array<{ label: string; value: string }> = [
@@ -26,6 +28,10 @@ export async function FiBuildIdentityPanel({ tenantId }: { tenantId: string }) {
     {
       label: "Pipeline rollout",
       value: identity.pipelineRolloutEnabled ? "enabled" : "disabled",
+    },
+    {
+      label: "Desktop drag",
+      value: identity.desktopDragEnabled ? "enabled" : "disabled",
     },
   ];
 

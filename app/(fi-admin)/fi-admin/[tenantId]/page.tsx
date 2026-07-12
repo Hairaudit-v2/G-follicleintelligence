@@ -145,6 +145,7 @@ export default async function FiAdminTenantHomePage({
           viewerDisplayName={viewerDisplayName}
           todayRealtimeEnabled={isTodayRealtimeEnabledForTenant(tenantId)}
           todayRevisionPollEnabled={isTodaySignalRevisionPollEnabled()}
+          showSystemDiagnostics={showSystemDiagnostics}
         />
       </CalendarToastProvider>
     );

@@ -10,6 +10,8 @@ export type FiBuildIdentity = {
   sha: string | null;
   environment: string | null;
   pipelineRolloutEnabled: boolean;
+  /** FI_PIPELINE_ENABLE_DESKTOP_DRAG resolution — confirms the drag kill-switch state. */
+  desktopDragEnabled: boolean;
 };
 
 /**
