@@ -194,6 +194,14 @@ test("9 converted/lost mismatch fails", () => {
   assert.ok(result.conversionMismatches.includes(L1));
 });
 
+test("9b won_closed stage with open status reconciles (terminal stage evidence)", () => {
+  const cards = [kanban({ id: L1, slug: "won_closed", status: "open" })];
+  const pipeline = buildPipeline(cards);
+  const result = compare(cards, pipeline);
+  assert.equal(result.conversionMismatches.length, 0);
+  assert.equal(result.pass, true);
+});
+
 test("10 overdue mismatch fails on full tier", () => {
   const cards = [kanban({ id: L1, overdueTaskCount: 2 })];
   const tasks = new Map<string, PipelineTaskInput[]>([

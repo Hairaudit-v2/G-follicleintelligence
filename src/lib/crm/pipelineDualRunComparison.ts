@@ -131,8 +131,13 @@ function stageDefFromLegacyCard(card: CrmKanbanLeadCard): PipelineStageDefinitio
 
 function legacyConversionState(card: CrmKanbanLeadCard): string {
   const status = String(card.lead.status ?? "open").trim().toLowerCase();
-  if (card.lead.converted_at || status === "converted") return "converted";
-  if (status === "lost") return "lost";
+  const slug = card.stage?.slug?.trim().toLowerCase() ?? "";
+  // Legacy kanban placement uses terminal stage columns — align comparator with board evidence.
+  const stageWon = slug === "won_closed";
+  const stageLost = slug === "lost";
+
+  if (card.lead.converted_at || status === "converted" || stageWon) return "converted";
+  if (status === "lost" || stageLost) return "lost";
   if (status === "archived") return "archived";
   return "active";
 }

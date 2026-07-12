@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "check:env": "node scripts/run-with-system-ca.mjs tsx scripts/check-fi-env.ts",
+    "verify:pipeline-dualrun": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/pipeline-dualrun.ts",
     "check:migrations": "tsx scripts/check-migration-versions.ts",
     "check:env:production-rules": "tsx --test src/lib/env/fiEnv.server.test.ts",
     "smoke:prod": "tsx scripts/fi-production-smoke-test.ts",

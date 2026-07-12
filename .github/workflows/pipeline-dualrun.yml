@@ -1,0 +1,65 @@
+name: Pipeline dual-run (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tenant_id:
+        description: Tenant UUID for read-only Pipeline dual-run
+        required: true
+        type: string
+      search:
+        description: Optional search/filter text (empty = full board window)
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: pipeline-dualrun-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dualrun:
+    name: S4.5B Pipeline dual-run (read-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run controlled dual-run harness
+        run: |
+          set -o pipefail
+          node -r ./scripts/patch-server-only-for-scripts.cjs \
+            ./node_modules/tsx/dist/cli.mjs \
+            scripts/pipeline-dualrun.ts \
+            "${{ inputs.tenant_id }}" \
+            "${{ inputs.search }}" \
+            | tee pipeline-dualrun-report.json
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PIPELINE_DUALRUN_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PIPELINE_DUALRUN_SERVICE_ROLE_KEY }}
+
+      - name: Upload dual-run summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-dualrun-${{ inputs.tenant_id }}
+          path: pipeline-dualrun-report.json
+          retention-days: 14
+          if-no-files-found: ignore
