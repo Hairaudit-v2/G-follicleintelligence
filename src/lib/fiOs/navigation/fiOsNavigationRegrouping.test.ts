@@ -127,7 +127,6 @@ test("secondary workflow routes remain in More drawer after regrouping", () => {
   assert.ok(ids.has("front-desk"));
   for (const expected of [
     "crm",
-    "follow-up-queue",
     "consultations",
     "surgery",
     "reports",
@@ -250,6 +249,14 @@ test("Reports grouping consolidates under one reports destination on primary rai
   for (const d6Id of ["d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"]) {
     assert.ok(adminSettingsSubIds.includes(d6Id), `admin Settings should include ${d6Id}`);
   }
+});
+
+test("Pipeline workflow group consolidates to one door in More drawer", () => {
+  const pipeline = moreSections().find((s) => s.groupId === "PIPELINE");
+  assert.ok(pipeline);
+  assert.deepEqual(pipeline!.items.map((i) => i.id), ["crm"]);
+  assert.equal(pipeline!.items[0]!.label, "Pipeline");
+  assert.ok(pipeline!.items[0]!.href.endsWith("/crm"));
 });
 
 test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in More only", () => {

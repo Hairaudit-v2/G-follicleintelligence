@@ -53,9 +53,7 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.staff?.href, `${base}/staff`);
   assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
-  const conv = items.find((i) => i.id === "consultation-conversion-board");
-  assert.ok(conv);
-  assert.equal(conv!.href, `${base}/consultation-conversion`);
+  assert.equal(items.find((i) => i.id === "consultation-conversion-board"), undefined);
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
   const readiness = items.find((i) => i.id === "surgery-readiness-board");
   assert.ok(readiness);
@@ -91,20 +89,22 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(timelyDiscovery!.href, `${base}/settings/integrations/timely/discovery`);
 });
 
-test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () => {
+test("resolveClinicOsShellNavItems: Pipeline enabled when showCrmNav", () => {
   const items = resolveClinicOsShellNavItems(base, true);
-  const leadflow = items.find((i) => i.id === "leadflow");
-  assert.ok(leadflow);
-  assert.equal(leadflow!.disabled, false);
-  assert.equal(leadflow!.href, `${base}/leadflow`);
+  const pipeline = items.find((i) => i.id === "leadflow-crm");
+  assert.ok(pipeline);
+  assert.equal(pipeline!.disabled, false);
+  assert.equal(pipeline!.href, `${base}/crm`);
+  assert.equal(pipeline!.label, "Pipeline");
+  assert.equal(items.find((i) => i.id === "leadflow"), undefined);
 });
 
-test("resolveClinicOsShellNavItems: LeadFlow disabled without showCrmNav", () => {
+test("resolveClinicOsShellNavItems: Pipeline disabled without showCrmNav", () => {
   const items = resolveClinicOsShellNavItems(base, false);
-  const leadflow = items.find((i) => i.id === "leadflow");
-  assert.ok(leadflow);
-  assert.equal(leadflow!.disabled, true);
-  assert.equal(leadflow!.href, "#");
+  const pipeline = items.find((i) => i.id === "leadflow-crm");
+  assert.ok(pipeline);
+  assert.equal(pipeline!.disabled, true);
+  assert.equal(pipeline!.href, "#");
 });
 
 test("resolveClinicOsShellNavItems: placeholders stay disabled", () => {
@@ -131,8 +131,8 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/reception/extra`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/tomorrow`, base), "tomorrow-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/tomorrow/sub`, base), "tomorrow-board");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow`, base), "leadflow");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow/leads`, base), "leadflow");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow`, base), "leadflow-crm");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/leadflow/leads`, base), "leadflow-crm");
   assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "leadflow-crm");
   assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "leadflow-crm");
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");
@@ -162,7 +162,7 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   );
   assert.equal(
     getClinicOsShellActiveNavId(`${base}/consultation-conversion`, base),
-    "consultation-conversion-board"
+    "leadflow-crm"
   );
   assert.equal(getClinicOsShellActiveNavId(`${base}/consultations/c-1`, base), "consultations");
   assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");
