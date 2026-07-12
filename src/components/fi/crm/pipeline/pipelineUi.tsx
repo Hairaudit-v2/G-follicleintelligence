@@ -567,9 +567,11 @@ export function PipelineBoard(props: {
   const [openMenuLeadId, setOpenMenuLeadId] = useState<string | null>(null);
   const [dragLeadId, setDragLeadId] = useState<string | null>(null);
 
+  // Close menu only when presentation identity / view actually changes — not on every render.
+  // loadTier is intentionally excluded: shell→full must not tear down an open More menu mid-click.
   useEffect(() => {
     setOpenMenuLeadId(null);
-  }, [props.presentationKey, props.loadTier]);
+  }, [props.presentationKey]);
 
   const active = props.columns.filter((c) => c.kind === "active");
   const rest = props.columns.filter((c) => c.kind !== "active");
@@ -833,60 +835,78 @@ export function PipelineLeadCardView(props: {
   const primary = card.primaryAction;
   const secondary = card.secondaryActions;
 
+  // Drag is handle-only — never put draggable on the whole card (breaks More / Contact).
   const canDrag = Boolean(props.desktopDragEnabled) && !props.busy;
+  const stopCardDrag = (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+  };
+  const preventNativeDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <article
       data-lead-id={card.leadId}
-      data-pipeline-draggable={canDrag ? "true" : undefined}
+      data-pipeline-draggable={canDrag ? "handle" : undefined}
       tabIndex={-1}
       aria-busy={props.busy || undefined}
-      // HTML5 drag is desktop-only (parent never enables on tablet stack).
-      // Keyboard users use "Move stage destinations" menu below.
-      draggable={canDrag}
-      onDragStart={
-        canDrag
-          ? (e) => {
-              e.dataTransfer.setData(
-                "application/x-pipeline-lead",
-                JSON.stringify({
-                  leadId: card.leadId,
-                  fromColumnId: card.stage.staffColumnId,
-                })
-              );
-              e.dataTransfer.effectAllowed = "move";
-              props.onPipelineDragStart?.();
-            }
-          : undefined
-      }
-      onDragEnd={canDrag ? () => props.onPipelineDragEnd?.() : undefined}
+      // Card itself is NOT draggable — only the dedicated handle is.
       className={cn(
         "rounded-xl border border-white/[0.1] bg-white/[0.03] p-3 shadow-sm",
         props.busy && "opacity-70",
-        props.isDragging && "opacity-40",
-        canDrag && "cursor-grab active:cursor-grabbing"
+        props.isDragging && "opacity-40"
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <Link
-            href={card.links.lead}
-            className="block truncate text-sm font-semibold text-slate-50 hover:text-cyan-200"
-            onClick={(e) => {
-              if (primary === "open_lead" || secondary.includes("open_lead")) {
-                // allow normal navigation; workspace may intercept via onAction
-              }
-              e.preventDefault();
-              props.onAction("open_lead", card);
-            }}
-          >
-            {card.person.displayName}
-          </Link>
-          <p className="mt-0.5 truncate text-xs text-slate-500">
-            {card.source.label}
-            {" · "}
-            {card.owner.unassigned ? "Unassigned" : card.owner.displayName ?? "Owner"}
-          </p>
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          {canDrag ? (
+            <button
+              type="button"
+              aria-label="Drag to move stage"
+              title="Drag to move stage"
+              data-pipeline-drag-handle="true"
+              draggable
+              className="mt-0.5 inline-flex h-8 w-6 shrink-0 cursor-grab items-center justify-center rounded text-slate-500 hover:bg-white/[0.06] hover:text-slate-300 active:cursor-grabbing"
+              onPointerDown={(e) => e.stopPropagation()}
+              onDragStart={(e) => {
+                e.stopPropagation();
+                e.dataTransfer.setData(
+                  "application/x-pipeline-lead",
+                  JSON.stringify({
+                    leadId: card.leadId,
+                    fromColumnId: card.stage.staffColumnId,
+                  })
+                );
+                e.dataTransfer.effectAllowed = "move";
+                props.onPipelineDragStart?.();
+              }}
+              onDragEnd={() => props.onPipelineDragEnd?.()}
+            >
+              <span aria-hidden className="text-xs leading-none tracking-tighter">
+                ⋮⋮
+              </span>
+            </button>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <Link
+              href={card.links.lead}
+              className="block truncate text-sm font-semibold text-slate-50 hover:text-cyan-200"
+              draggable={false}
+              onDragStart={preventNativeDrag}
+              onClick={(e) => {
+                e.preventDefault();
+                props.onAction("open_lead", card);
+              }}
+            >
+              {card.person.displayName}
+            </Link>
+            <p className="mt-0.5 truncate text-xs text-slate-500">
+              {card.source.label}
+              {" · "}
+              {card.owner.unassigned ? "Unassigned" : card.owner.displayName ?? "Owner"}
+            </p>
+          </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
@@ -944,12 +964,19 @@ export function PipelineLeadCardView(props: {
         </p>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div
+        className="mt-3 flex flex-wrap items-center gap-2"
+        data-pipeline-card-actions="true"
+        onPointerDown={stopCardDrag}
+        onMouseDown={stopCardDrag}
+        onDragStart={preventNativeDrag}
+      >
         {primary ? (
           <button
             type="button"
             className={btnPrimary}
             disabled={props.busy}
+            draggable={false}
             onClick={() => {
               if (primary === "move_stage") setMoveOpen((v) => !v);
               else props.onAction(primary, card);
@@ -974,14 +1001,26 @@ export function PipelineLeadCardView(props: {
                 type="button"
                 className={btnSecondary}
                 disabled={props.busy}
+                draggable={false}
                 aria-label="More actions"
+                data-pipeline-more-trigger="true"
+                onPointerDown={stopCardDrag}
+                onMouseDown={stopCardDrag}
               >
                 More
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-[11rem] border-white/[0.12] bg-[#0f1629] text-slate-100"
+              className="z-[80] min-w-[11rem] border-white/[0.12] bg-[#0f1629] text-slate-100"
+              onCloseAutoFocus={(e) => {
+                // Keep focus restoration predictable after action selection
+                e.preventDefault();
+                const t = document.querySelector<HTMLElement>(
+                  `[data-lead-id="${CSS.escape(card.leadId)}"] [data-pipeline-more-trigger]`
+                );
+                t?.focus?.();
+              }}
             >
               {secondary.map((a) => (
                 <DropdownMenuItem

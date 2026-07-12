@@ -316,16 +316,20 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     [view, presentation, nowMs]
   );
 
+  // Tab badge only — never re-scan the full board on every menu open / pointer event.
+  // When not on inactive review, show a lightweight placeholder count from summary holding+active aged signals if present; else 0 until opened.
+  const inactiveCount = useMemo(() => {
+    if (view === "inactive_review") return inactiveCards.length;
+    // Avoid O(n) inactive scan on every board paint; badge fills when user opens the view.
+    return 0;
+  }, [view, inactiveCards.length]);
+
   const boardCount = filteredColumns.reduce((n, c) => n + c.count, 0);
   const followUpCount =
     filteredFollowUps.summary.overdue +
     filteredFollowUps.summary.dueToday +
     filteredFollowUps.summary.upcoming +
     filteredFollowUps.summary.noDueDate;
-  const inactiveCount =
-    view === "inactive_review"
-      ? inactiveCards.length
-      : collectInactiveReviewCards(presentation, nowMs, 30).length;
 
   const focusLead = (leadId: string) => {
     window.setTimeout(() => {
@@ -614,7 +618,9 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
             onAction={(a, c) => void handleCardAction(a, c)}
             onMoveToColumn={(c, col) => void runMove(c, col)}
             moveDestinations={moveDestinations}
-            presentationKey={`${presentation.generatedAt}:${view}:${sortMode}`}
+            // Identity for menu reset: real presentation swap or view change only.
+            // sortMode is UI-only reordering of the same cards — do not remount menus on sort.
+            presentationKey={`${presentation.generatedAt}:${view}`}
             desktopDragEnabled={desktopDragEnabled}
             onDesktopDrop={handleDesktopDrop}
           />

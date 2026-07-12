@@ -25,6 +25,9 @@ test("desktop drag is gated; tablet stack has no drag requirement", () => {
   // Drag only when desktopDragEnabled; tablet stack never enables drop
   assert.match(UI, /props\.layout === "desktop"/);
   assert.match(WS, /pointer: fine/);
+  // Full-card draggable is forbidden — handle only
+  assert.match(UI, /data-pipeline-drag-handle/);
+  assert.doesNotMatch(UI, /draggable=\{canDrag\}/);
 });
 
 test("collapsible sections expose aria-expanded", () => {
