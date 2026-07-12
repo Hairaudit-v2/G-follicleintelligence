@@ -36,7 +36,6 @@ export type {
 } from "@/src/lib/crm/pipelineLoaderOrchestration";
 
 export {
-  PIPELINE_BATCH_CHUNK_SIZE,
   loadConsultationBookingsByLeadIds,
   loadCrmCommunicationHintsByLeadIds,
   loadCrmTasksByLeadIds,
