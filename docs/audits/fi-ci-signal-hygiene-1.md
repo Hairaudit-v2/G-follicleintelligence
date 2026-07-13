@@ -18,7 +18,7 @@ Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed bu
 
 **Phase 2 (PUB-LABELS / Bucket A):** `fi-ux-audit-labels` re-tagged `@authenticated @smoke` + `authenticatedTest`; included in authenticated `testMatch`. Confirmed on [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344): **126 / 18 / 66** (−60 fails vs post-B).
 
-**Phase 2 (PUB-SEC-STATUS / Bucket C + PUB-PROC-200 / Bucket D):** Expect updates only (intentional 404/503; soft 200 + no Surgery day chrome). See fix notes below.
+**Phase 2 (PUB-SEC-STATUS / Bucket C + PUB-PROC-200 / Bucket D):** Expect updates only (intentional 404/503; soft 200 + no Surgery day chrome). Confirmed on [29291077366](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291077366): **144 passed / 0 failed / 66 skipped** (−18 fails). Trust trio **GREEN**. Milestone overall **AMBER** (DEF-TC-01 open).
 
 ---
 
@@ -245,12 +245,14 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 | Field | Value |
 | ----- | ----- |
-| Status | **Shipped** (await CI confirm on tip after this commit) |
+| Status | **Confirmed** on CI run [29291077366](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291077366) |
 | Date | 2026-07-14 |
+| Commit | `83965f20` |
 | Evidence before | [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344) — **126 / 18 / 66**; C+D only |
 | IDs | PUB-SEC-STATUS, PUB-PROC-200 |
 | Expected delta | **−18** public fails (12+6) → **0** residual public fails from H1 buckets |
-| Trust trio | Must stay **GREEN** (no workflow / trust-spec changes) |
+| Actual public summary | **144 passed / 0 failed / 66 skipped** → **−18 fails** (H1 buckets A–D closed) |
+| Trust trio | **GREEN** (same run) |
 
 ### Disposition table (C+D)
 
@@ -267,7 +269,7 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 1. `e2e/security/unauthenticated-access.spec.ts` — patients accept **404**; cron accept **503**.
 2. `e2e/fi-operational-day.spec.ts` — procedure-day allow **200** + no Surgery day heading when flag off.
 
-**Milestone verdict (after C+D):** Public smoke signal-hygiene goals of H1 **met** (target **0** public fails from buckets A–D). Overall milestone remains **AMBER** while **DEF-TC-01** (6 test-file `tsc` errors) stays open / deferred.
+**Milestone verdict:** Public smoke signal-hygiene goals of H1 **met** (**0** public fails from buckets A–D). Overall milestone **AMBER** while **DEF-TC-01** (6 test-file `tsc` errors) stays open / deferred.
 
 ---
 
