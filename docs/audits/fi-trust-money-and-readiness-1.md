@@ -152,6 +152,28 @@ PASS
 
 **T1 verdict:** **PASS (scoped)** — surface, navigation, and anti-leak copy verified; row-level financial chip matrix deferred (empty tomorrow schedule).
 
+### Nurse live bake — tomorrow board + front desk (2026-07-13T21:02 AEST)
+
+**Path:** `/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/front-desk` (+ `/front-desk/tomorrow`)
+
+**Session:** platform-admin impersonation of **`evieshackleton1@gmail.com`** (Evie Shackleton; Nurse workspace) on Evolved tenant. Tool: cursor-ide-browser MCP. Production: `follicleintelligence.ai`.
+
+| Check | Result |
+| ----- | ------ |
+| Identity — greeting / workspace | **PASS** — Nurse workspace badge; profile `evieshackleton1@g…`; impersonation banner `evieshackleton1` |
+| Landing redirect | **PASS** — bare tenant → `/front-desk` (Today tab) |
+| Front desk today board | **PASS** — loads; KPI tiles (Payment due 0, Blockers 0); no FinancialOS leak |
+| Tomorrow board loads (nurse) | **PASS** — `/front-desk/tomorrow`; Tuesday 14 July 2026 · Australia/Perth |
+| FinancialOS brand leak (tomorrow) | **PASS** — CDP `innerText` check false |
+| Summary KPI copy | **PASS** — "Pathology, timing, or deposit escalation."; surgery payments helper Money-oriented |
+| Surgery row clearance chips (T1) | **NOT EXERCISED** — 0 bookings tomorrow (TMRW-DATA-01); surgery in window is 2026-07-21 |
+| Clearance unavailable copy (DEF-READY-01 live) | **NOT EXERCISED** — no tomorrow rows; golden case deposit cleared |
+| Patients nav | **PASS** — `/patients` loads; journey snapshot + directory |
+| Calendar nav | **PASS** — week view; quick filters (Consultations, PRP, Surgery) |
+| Golden case financial panel (G1) | **PASS** — case `80ae7196-…` accessible; manual payment truth copy; **DEPOSIT CLEARED** overlay; SMOKETEST invoice rows; nurse view-only edit gate |
+
+**Nurse bake verdict:** **PASS (scoped GREEN)** — nurse role parity with surgeon session on tomorrow/front-desk surfaces; T1 row chip matrix and DEF-READY-01 unavailable state remain deferred (same data caveats as §T1 surgeon bake).
+
 ### G1 spot-check — golden patient case (2026-07-13T21:00 AEST)
 
 **Case:** `80ae7196-c15e-4929-8e1d-7ceaad5a2a31` (patient `287348d5-18bd-4434-9bab-7caafacbfe86`)
@@ -235,8 +257,8 @@ Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-liv
 - Money hub subset: **GREEN** (prior + spot-check evidence)
 - Payment row labels: **GREEN** — DEF-MONEY-01 code + M4 live PASS
 - Surgery readiness (R1–R3): **GREEN** — live PASS 2026-07-13 (surgeon session)
-- Tomorrow board (T1 surface): **GREEN (scoped)** — load + anti-leak PASS; row chip matrix not exercised (0 bookings 2026-07-14)
-- Clearance copy consistency: **code fixed** (DEF-READY-01) — unavailable state not triggered live (golden case deposit cleared)
+- Tomorrow board (T1 surface): **GREEN (scoped)** — load + anti-leak PASS; row chip matrix not exercised (0 bookings 2026-07-14); **nurse live bake confirms role parity** (Evie 2026-07-13)
+- Clearance copy consistency: **code fixed** (DEF-READY-01) — unavailable state not triggered live (golden case deposit cleared; nurse bake reconfirms)
 - Open hygiene only: TC-NAV-01 (unit), TMRW-DATA-01 (empty tomorrow data), READY-COPY-01 (internal table name in KPI helper)
 
-**Push:** `5bd339ef` synced to `origin/main` (seed script + M4 evidence). Docs commit follows this bake.
+**Push:** `5bd339ef` synced to `origin/main` (seed script + M4 evidence); `5f6a3340` readiness/tomorrow surgeon bake. Nurse bake docs commit follows.
