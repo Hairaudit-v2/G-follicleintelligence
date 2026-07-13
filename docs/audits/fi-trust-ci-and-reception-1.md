@@ -299,8 +299,17 @@ Reception / nurse / operations_admin resolve to `/front-desk` in pure core — *
 | **CI-TRUST-01** | **CLOSED** — trust trio is the authenticated gate |
 | **9 authenticated UI failures** | **TRIAGED** — expectation/skip fixes + Team nav quarantine; no product P0 |
 | **Reception R1** | **PASS** — Jesika / reception → `/front-desk` on production |
-| **Trust CI gate** | See latest trust-trio run URL below (post narrow push) |
-| **Overall** | **GREEN** when trust trio job exits 0 (public remaining red is non-blocking) |
+| **Trust CI gate** | **GREEN** — [29277960526](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29277960526) on `dfeb6555`: Trust trio **6 passed / 0 failed / 2 skipped** (~57s) |
+| **Overall milestone** | **GREEN** — Reception R1 + Trust trio. Public smoke remains advisory (`continue-on-error`). |
+
+### Trust gate run (push · 2026-07-14)
+
+| Field | Value |
+| ----- | ----- |
+| **Run** | [29277960526](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29277960526) |
+| **Commit** | `dfeb6555` |
+| **Trust trio (authenticated gate)** | **success** — 6 passed / 0 failed / 2 skipped |
+| **Public + security smoke** | Advisory (`continue-on-error`) — may still fail without blocking milestone |
 
 ---
 
