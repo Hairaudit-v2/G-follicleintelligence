@@ -7,7 +7,7 @@
     "clean": "node -e \"require('node:fs').rmSync('.next',{recursive:true,force:true})\"",
     "build": "next build",
     "analyze": "cross-env ANALYZE=true next build",
-    "start": "next start",
+    "start": "node scripts/run-with-system-ca.mjs ./node_modules/next/dist/bin/next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",

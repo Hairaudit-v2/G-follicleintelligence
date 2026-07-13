@@ -271,6 +271,12 @@ Or open next PR / push to `main` and confirm `Authenticated journeys (staging cr
 
 ---
 
+## Follow-up — `npm start` TLS (Windows)
+
+`package.json` `"start"` now mirrors `"dev"` via `scripts/run-with-system-ca.mjs` so local/prod-like `next start` inherits system CAs (same pattern as `dev` / `check:env` / `audit:staff-mapping`).
+
+---
+
 ## Related docs
 
 - [fi-trust-ci-and-reception-1-plan.md](./fi-trust-ci-and-reception-1-plan.md)
