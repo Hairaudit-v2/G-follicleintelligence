@@ -59,7 +59,9 @@ jobs:
     name: Authenticated journeys (staging credentials)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ secrets.FI_E2E_DEMO_ADMIN_EMAIL != '' && secrets.FI_E2E_DEMO_ADMIN_PASSWORD != '' && secrets.FI_E2E_TENANT_ID != '' }}
+    # Job-level `if` cannot reference `secrets` (workflow parse error). Gate on staging host var;
+    # demo credentials still flow via env — Playwright skips when empty (`hasDemoCredentials`).
+    if: ${{ vars.FI_E2E_STAGING_URL != '' }}
 
     env:
       SKIP_ENV_VALIDATION: "1"

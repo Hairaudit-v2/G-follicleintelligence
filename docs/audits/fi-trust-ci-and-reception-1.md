@@ -27,7 +27,7 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 | Job | Workflow | Host | Secrets gate | Trust specs |
 | --- | -------- | ---- | ------------ | ----------- |
 | Public + security smoke | `e2e-smoke.yml` | Builds + starts `127.0.0.1:3000` | Placeholder Supabase env | N/A (public tags) |
-| Authenticated journeys | `e2e-smoke.yml` `authenticated-smoke` | `vars.FI_E2E_STAGING_URL` **or** `http://127.0.0.1:3000` | Requires `FI_E2E_DEMO_ADMIN_*` + `FI_E2E_TENANT_ID` | Runs `--grep @authenticated` (includes `fi-trust-*` via project `testMatch` when credentials present) |
+| Authenticated journeys | `e2e-smoke.yml` `authenticated-smoke` | `vars.FI_E2E_STAGING_URL` **or** localhost fallback | Job `if:` gates on **`vars.FI_E2E_STAGING_URL != ''`** (cannot use `secrets` in job `if` — parse error) | Runs `--grep @authenticated`; Playwright skips when demo creds empty |
 | Lint / typecheck / unit | `ci.yml` | N/A | N/A | `typecheck` currently fails (DEF-TC-01) |
 
 ### Authenticated job host gap (CI-HOST-01)
@@ -48,7 +48,7 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 | CI-TRUST-01 | **P1 (deferred)** | No **dedicated** trust-file step — full `@authenticated` suite runs. Accept for first gate; narrow later. | `npx playwright test --grep @authenticated` |
 | CI-SPINE-01 | **CLOSED** | Workflow env + Actions secrets for `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` both present. | `e2e-smoke.yml` + `gh secret list` |
 | CI-FIX-01 | **P2** | Optional `FI_E2E_UNLINKED_LEAD_ID` and `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` unset → permanent skips (documented acceptable unless ops chooses to enable). | E2E close-out 2 SKIP |
-| CI-SEC-01 | **CLOSED (ops)** | P0 secrets **SET** from local `.env.local` (values never logged). Authenticated job `if:` gate can open. | `gh secret list` 2026-07-14 |
+| CI-SEC-01 | **CLOSED (ops)** | P0 secrets **SET**. Job gate uses staging **var** (secrets illegal in job `if` — fixed after 422 parse failures). | `gh secret list` + workflow `if: vars.FI_E2E_STAGING_URL` |
 
 **Playwright note:** `hasDemoCredentials()` gates `*-authenticated` projects. Trust specs are in `testMatch` for those projects and tagged `@authenticated` — code + host var + P0/spine secrets are ready; remaining barriers are first CI run proof + reception R1.
 
