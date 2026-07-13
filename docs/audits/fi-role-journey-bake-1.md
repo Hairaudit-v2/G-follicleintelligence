@@ -477,7 +477,7 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 
 | BAKE-1-LIVE-01 | **P1 — verified live** | Owner (`member`+`fi_staff.owner`) Pipeline + golden lead **PASS** on production (Paul session) |
 | BAKE-1-LIVE-04 | **P0 — verified live** | Paul impersonation shows target chrome (Paul, Director, `paul@evolvedhair.com.au`); impersonation banner retained |
-| BAKE-1-LIVE-05 | **P2 — verified live** | `b296e13e`: nurse bare tenant → **`/front-desk`**; surgeon bare tenant → **`/doctor`** on production |
+| BAKE-1-LIVE-05 | **P2 — verified live** | `b296e13e`: nurse → **`/front-desk`**; surgeon → **`/doctor`**; consultant → **`/crm`** on production |
 | BAKE-1-LIVE-02 | P2 | Roslyn receptionist session not achieved — impersonation landed on platform admin / auditor |
 | BAKE-1-ENV-01 | P1 (env) | `FI_E2E_DEMO_ADMIN_*` invalid locally — authenticated E2E cannot run |
 | BAKE-1-ENV-02 | P2 (env) | Playwright Supabase magic-link fetch hits TLS interception on Windows |
@@ -539,7 +539,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | Role           | Landing | Navigation | Core journey | Reload integrity | Tablet | Result  |
 | -------------- | ------: | ---------: | -----------: | ---------------: | -----: | ------- |
 | Reception      |       4 |          5 |            4 |                4 |      — | **Amber** (live `crm_operator`; landing not `/front-desk`) |
-| Consultant     |       4 |          5 |            4 |                4 |      — | **Amber→Green** (live: shell + CRM PASS; landing Today) |
+| Consultant     |       5 |          5 |            4 |                4 |      — | **Green** (live: landing `/crm` PASS post-`b296e13e`) |
 | Nurse          |       5 |          5 |            4 |                4 |      — | **Green** (live: landing `/front-desk` PASS post-`b296e13e`) |
 | Doctor         |       5 |          5 |            4 |                4 |      — | **Green** (live: landing `/doctor` PASS post-`b296e13e`) |
 | Finance        |       4 |          4 |            — |                — |      — | Amber   |
@@ -591,7 +591,7 @@ That milestone should address payment-source truth, deposit satisfaction, financ
 
 The new trust-and-spine implementation is suitable for **continued controlled bake testing** with expanding pilot scope. **BAKE-1-LIVE-01** and **BAKE-1-LIVE-04** verified live on production for **owner** (Paul), **consultant** (`manager@`), **surgeon** (Dr Seetal), **nurse** (Evie), and **`crm_operator`** (Jesika): CRM spine holds for CRM-eligible roles; frontline clinical routes hold for nurse/surgeon.
 
-**Not yet full GREEN** because: receptionist (`crm_operator` Jesika) live landing still mismatches unit (`/front-desk` vs Today); consultant landing pending post-`b296e13e` re-bake; finance journey not live-baked; authenticated E2E still blocked.
+**Not yet full GREEN** because: receptionist (`crm_operator` Jesika) live landing still mismatches unit (`/front-desk` vs Today); finance journey not live-baked; authenticated E2E still blocked.
 
 Do **not** mark blanket GREEN until reception landing + finance live session complete.
 
