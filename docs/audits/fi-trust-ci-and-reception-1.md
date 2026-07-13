@@ -74,7 +74,7 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 
 | Field | Value |
 | ----- | ----- |
-| **Choice** | **B — Production** |
+| **Choice** | **B — Production** (**still in force** until Decision A hostname is assigned + confirmed) |
 | **Variable** | `FI_E2E_STAGING_URL` |
 | **Value** | `https://follicleintelligence.ai` |
 | **Rationale** | Matches prior manual trust bake; no dedicated staging host available this milestone |
@@ -85,6 +85,50 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 ```bash
 gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --repo Hairaudit-v2/G-follicleintelligence
 ```
+
+---
+
+## Decision A discovery — dedicated staging/preview (2026-07-14)
+
+**Intent:** Switch `FI_E2E_STAGING_URL` from Decision **B** (production) to Decision **A** (dedicated staging/preview HTTPS host).
+
+**Verdict:** **Blocked — no stable public staging host is assigned.** Did **not** invent or set a dead URL. GH var remains Decision B.
+
+### What exists
+
+| Candidate | Status | Usable for trust CI? |
+| --------- | ------ | -------------------- |
+| `https://follicleintelligence.ai` / `https://www.follicleintelligence.ai` | Project domains; **200** | Yes — Decision B (production blast radius) |
+| `https://staging.follicleintelligence.ai` | DNS → Vercel edge; HTTP **404 NOT_FOUND** (domain **not** assigned to project) | **No** — dead until assigned |
+| `https://preview.follicleintelligence.ai` | Same as staging — DNS only, **404 NOT_FOUND** | **No** |
+| `https://g-follicleintelligence.vercel.app` | **404 NOT_FOUND** (no production `*.vercel.app` alias) | **No** |
+| Latest Preview deploy | e.g. `https://g-follicleintelligence-7swj8fyae-fi-ai-ef8ee84f.vercel.app` (Ready) | **No for CI** — Deployment Protection → Vercel SSO login |
+| Branch alias `…-git-feature-dev-session-….vercel.app` | Exists (`origin/feature/dev-session`); SSO-gated | **No for CI** without protection bypass |
+| Ephemeral PR aliases (`…-git-cursor-…`) | Many Ready / Error; SSO-gated | **No** — not stable |
+
+### Vercel project facts
+
+| Field | Value |
+| ----- | ----- |
+| Team / project | `fi-ai-ef8ee84f` / `g-follicleintelligence` (`prj_ugktdcXOE2r4Dzh8ovXM6GdhRRaA`) |
+| Assigned custom domains | **only** `follicleintelligence.ai`, `www.follicleintelligence.ai` |
+| `vercel.json` | Crons only — no staging domain config |
+| Preview env | Exists; allowlist env already present per prior Pipeline audit |
+
+### Recommended setup (user pick one hostname)
+
+1. **Preferred:** Assign **`staging.follicleintelligence.ai`** to `g-follicleintelligence` (DNS already points at Vercel). Point it at a stable branch (e.g. `staging` or `main` Preview), ensure it is **not** SSO-gated for CI (or add `VERCEL_AUTOMATION_BYPASS_SECRET` to Actions), then:
+   ```bash
+   gh variable set FI_E2E_STAGING_URL --body "https://staging.follicleintelligence.ai" --repo Hairaudit-v2/G-follicleintelligence
+   ```
+2. Same pattern with **`preview.follicleintelligence.ai`** if that name is preferred.
+3. Keep Decision **B** until (1) or (2) is live and returns app HTML (not `404: NOT_FOUND` / Vercel login).
+
+**Do not** set `FI_E2E_STAGING_URL` to any `*.vercel.app` preview URL while Deployment Protection SSO is on — Playwright will hit Vercel login, not FI.
+
+**Secrets check (unchanged):** `FI_E2E_DEMO_ADMIN_*`, `FI_E2E_TENANT_ID`, `FI_E2E_LEAD_ID`, `FI_E2E_PATIENT_ID` remain **SET**. Same Supabase/demo credentials are expected to work once a public staging host shares that backend (typical for this project).
+
+**Awaiting user confirmation** of hostname before `gh variable set` + trust-gate re-dispatch.
 
 ---
 
@@ -292,7 +336,8 @@ Reception / nurse / operations_admin resolve to `/front-desk` in pure core — *
 | Rubric | Assessment |
 | ------ | ---------- |
 | **Phase 1 inventory** | **DONE** |
-| **Decision B** | **APPLIED** — production URL variable SET |
+| **Decision B** | **APPLIED** — production URL variable SET (still in force) |
+| **Decision A** | **BLOCKED** — no assigned public staging host; DNS stubs 404; previews SSO-gated — awaiting hostname confirm |
 | **Workflow harden** | **DONE** — spine IDs wired; staging var consumed |
 | **GH Actions apply** | **DONE** — P0 + spine secrets SET |
 | **CI-PNPM-01** | **CLOSED** |
