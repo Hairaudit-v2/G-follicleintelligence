@@ -19,7 +19,7 @@ import { getWorkspaceProfileLabel } from "../src/config/fiWorkspaceProfiles";
 const AUTH_USER_ID = "66701149-281d-444e-b9d1-a5b5bb3fbaba";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const EMAIL = "harsh@evolvedhair.com.au";
-/** Global position type: FINANCE_ADMIN → default_workspace_profile director + finance_admin_default template */
+/** Global position type: FINANCE_ADMIN → default_workspace_profile finance + finance_admin_default template */
 const FINANCE_ADMIN_POSITION_TYPE_ID = "ca437327-664c-44a8-b687-a3414070a4ca";
 
 const TARGET = {
@@ -30,8 +30,8 @@ const TARGET = {
   tenantAdminStatus: "active" as const,
   displayFullName: "Harsh Singh",
   displayFirstName: "Harsh",
-  /** Omit explicit metadata; FINANCE_ADMIN position type default (director) applies. */
-  workspaceProfile: null as string | null,
+  /** Explicit finance workspace — avoids director chrome from legacy seeds. */
+  workspaceProfile: "finance" as const,
   positionTypeId: FINANCE_ADMIN_POSITION_TYPE_ID,
 };
 
@@ -310,6 +310,7 @@ async function main(): Promise<void> {
   }
 
   const nextStaffMeta = scrubClinicAdminStaffMetadata(before.fiStaff.staff_metadata);
+  nextStaffMeta.workspace_profile = TARGET.workspaceProfile;
 
   const planned = {
     auth: { fi_role: TARGET.authFiRole, fi_tenant_id: TENANT_ID },
@@ -342,9 +343,9 @@ async function main(): Promise<void> {
   console.log(JSON.stringify(planned, null, 2));
 
   const afterPreviewProfile = resolveWorkspaceProfileKeyFromSignals({
-    explicitWorkspaceProfile: null,
-    positionTypeDefaultWorkspaceProfile: "director",
-    featureTemplateWorkspaceProfile: "director",
+    explicitWorkspaceProfile: TARGET.workspaceProfile,
+    positionTypeDefaultWorkspaceProfile: "finance",
+    featureTemplateWorkspaceProfile: "finance",
     staffRole: TARGET.staffRole,
     tenantAdminRole: TARGET.tenantAdminRole,
     fiOsRole: before.fiOsIdentity?.os_role ?? null,

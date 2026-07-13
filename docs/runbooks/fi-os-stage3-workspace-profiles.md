@@ -13,7 +13,7 @@ Source of truth in code: `src/config/fiWorkspaceProfiles.ts`, `src/lib/fi-os/wor
 
 ## Workspace profile list
 
-Registry keys: `director`, `clinic_manager`, `surgeon`, `doctor`, `nurse`, `consultant`, `reception`, `academy_trainer`, `auditor`, `platform_admin`, **`default`**.
+Registry keys: `director`, `clinic_manager`, `surgeon`, `doctor`, `nurse`, `consultant`, `reception`, `academy_trainer`, `auditor`, `finance`, `platform_admin`, **`default`**.
 
 - **`default`** — same home stack order as Stage 1/2 (`FI_DASHBOARD_HOME_WIDGET_ORDER`); no badge on home.
 - **`platform_admin`** — derived from OS identity only; **not** assignable on staff rows (ignored if present in JSON).
@@ -26,7 +26,7 @@ For the signed-in viewer on a tenant, **`resolveWorkspaceProfileKeyFromSignals`*
 
 1. **Explicit** — `staff_metadata.workspace_profile` if set and valid (not `default`, not stored `platform_admin`).
 2. **`fi_staff.staff_role`** — substring heuristics (e.g. “surgeon”, “nurse”, “reception”, “manager” → `clinic_manager`). **Best-effort** until structured job codes exist.
-3. **Tenant backend admin** — `fi_tenant_admin_users.admin_role` when active for this tenant + user, e.g. `clinic_admin` / `finance_admin` → `director`, `operations_admin` → `clinic_manager`, `data_safety_admin` → `auditor`.
+3. **Tenant backend admin** — `fi_tenant_admin_users.admin_role` when active for this tenant + user, e.g. `clinic_admin` → `clinic_manager`, `finance_admin` → `finance`, `operations_admin` → `clinic_manager`, `data_safety_admin` → `auditor`.
 4. **FI OS role** — `fi_platform_admin` → `platform_admin`; `fi_auditor` → `auditor`.
 5. **`default`** — if nothing above applies.
 

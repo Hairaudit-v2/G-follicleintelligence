@@ -57,8 +57,8 @@ describe("resolveFiOsPostLoginPathSuffix", () => {
       "/crm"
     );
     assert.equal(
-      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "finance_admin" }),
-      ""
+      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "finance" }),
+      "/financial-os"
     );
   });
 });

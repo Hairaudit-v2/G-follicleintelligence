@@ -67,6 +67,7 @@ export function resolveFiOsPostLoginPathSuffix(input: {
   if (profile === "consultant") return "/crm";
   if (profile === "doctor" || profile === "surgeon") return "/doctor";
   if (profile === "nurse") return "/front-desk";
+  if (profile === "finance") return "/financial-os";
   if (profile === "director" || profile === "clinic_manager") return "";
   if (profile === "academy_trainer") return "/team";
 

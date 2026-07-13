@@ -318,7 +318,7 @@ export const PREFLIGHT_ROLE_SCENARIOS: readonly FiOsRolePermissionPreflightScena
     persona: "finance_admin",
     staffRoleKey: "manager",
     featureTemplateKey: "finance_admin_default",
-    workspaceProfile: "director",
+    workspaceProfile: "finance",
     tenantBackendAdminRole: "finance_admin",
   },
   {

@@ -53,6 +53,7 @@ export function deriveWorkspaceProfileFromStaffRole(
   if (t.includes("doctor") || t === "dr" || t.startsWith("dr ")) return "doctor";
   if (t.includes("director")) return "director";
   if (t === "owner" || t.includes("owner")) return "director";
+  if (t.includes("cfo") || t.includes("finance") || t.includes("accounts")) return "finance";
   if (t.includes("manager") || t.includes("operations")) return "clinic_manager";
   if (t.includes("trainer") || t.includes("academy")) return "academy_trainer";
   if (t.includes("audit")) return "auditor";
@@ -65,7 +66,7 @@ export function deriveWorkspaceProfileFromTenantAdminRole(
   if (!role || !isFiTenantAdminRoleString(role)) return null;
   const r = role as FiTenantAdminRole;
   if (r === "clinic_admin") return "clinic_manager";
-  if (r === "finance_admin") return "director";
+  if (r === "finance_admin") return "finance";
   if (r === "operations_admin") return "clinic_manager";
   if (r === "data_safety_admin") return "auditor";
   return null;

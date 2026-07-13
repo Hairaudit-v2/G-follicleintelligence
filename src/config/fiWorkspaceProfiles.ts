@@ -16,6 +16,7 @@ export const FI_WORKSPACE_PROFILE_KEYS = [
   "reception",
   "academy_trainer",
   "auditor",
+  "finance",
   "platform_admin",
   "default",
 ] as const;
@@ -34,6 +35,7 @@ export const FI_WORKSPACE_PROFILE_ADMIN_DROPDOWN_KEYS = [
   "reception",
   "academy_trainer",
   "auditor",
+  "finance",
 ] as const satisfies readonly FiWorkspaceProfileKey[];
 
 export function isFiWorkspaceProfileKey(v: string): v is FiWorkspaceProfileKey {
@@ -252,6 +254,32 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
       "Learner follow-ups",
       "Content updates",
       "Clinic coordination",
+    ],
+  },
+  finance: {
+    key: "finance",
+    label: "Finance",
+    description:
+      "Revenue, payments, invoices, and finance reporting with pipeline and analytics visibility.",
+    primaryFocus: "Revenue, payments, invoices, and finance reporting.",
+    defaultDashboardWidgets: [
+      "analytics_summary",
+      "clinic_metrics",
+      "surgery_pipeline",
+      "attention_centre",
+      "operational_workspace",
+      "my_workspace",
+      "quick_actions",
+    ],
+    defaultQuickActions: ["lead", "booking", "case", "patient"],
+    preferredNavFeatures: ["analytics", "crm", "cases", "staff"],
+    hiddenByDefaultFeatures: [],
+    allowedFeatureOverrides: true,
+    priorityTaskTypes: [
+      "Payment and invoice follow-ups",
+      "Revenue pipeline risks",
+      "Finance application escalations",
+      "Deposit and AR exceptions",
     ],
   },
   auditor: {
