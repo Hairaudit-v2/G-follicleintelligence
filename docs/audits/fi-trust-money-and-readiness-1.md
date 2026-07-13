@@ -1,14 +1,96 @@
 # FI-TRUST-MONEY-AND-READINESS-1
 
-**Status:** Implemented  
+**Status:** Phase 1 — Audit-only (in progress)  
 **Date:** 2026-07-13  
-**Depends on:** FI-TRUST-LANDING-AND-SPINE-1  
+**Depends on:** FI-TRUST-LANDING-AND-SPINE-1, FI-ROLE-JOURNEY-BAKE-1 (deferred gaps)  
+**Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)
 
 ## Goal
 
 Make **Money** and **surgery readiness** trustworthy for staff: clear payment truth, staff/room assignment discipline, and clearance language that points to Money (not architecture brands).
 
-## Delivered
+---
+
+## Phase 1 audit-only findings (2026-07-13)
+
+### Initial state summary
+
+| Area | Code / unit state | Live state (prior bake) | Gap |
+| ---- | ----------------- | ----------------------- | --- |
+| Money hub copy | `moneyTrustCopy.ts` + tests **PASS** | **GREEN** — harsh@ finance_admin post-`4e08a911` | Re-verify after any deploy |
+| `FI_PAYMENTS_ENABLED` off | Nav + `/payments` page **PASS** (unit) | **GREEN** — honest disabled + Money link | None |
+| Payment row labels | `/financial/payments` — **Provider** column only | **PARTIAL** — empty list | **DEF-MONEY-01** |
+| Clearance guard | `moneyClearanceBlockedStaffMessage` → Money | Unit **PASS** | Live confirm on booking confirm |
+| Clearance panel | `FinancialClearancePanel` renders `clearance_reason` | Not live-verified on boards | **DEF-READY-01** — unavailable reason cites "FinancialOS signals" |
+| Readiness board model | Staff/room issues + escalation **PASS** (unit) | Not live-verified end-to-end | Live bake required |
+| Tomorrow board | Manual payment copy in model **PASS** | Not live-verified | Live bake required |
+| Procedure day | Flag off non-interference **mostly PASS** | Hidden (expected) | 1 pre-existing unit fail (nav subtest) |
+| Staff mapping | — | **PASS** 10/10 (includes harsh@) | None |
+
+### Code audit — payment source labelling
+
+**`/financial/payments`** (`app/(fi-admin)/fi-admin/[tenantId]/financial/payments/page.tsx`):
+
+- Header: *"Allocated payments on invoices (includes Stripe and manual)."*
+- Table columns: Status, **Provider**, Total, Invoice, Created
+- Loader (`loadFinancialOsPayments`) reads `fi_payments.provider` — raw provider string, no staff-facing **Manual tracking** vs **Provider confirmed (Stripe)** label
+- **Gap:** No `Source` column; no mapping of `provider` values to trust copy aligned with Money banner
+
+**Dual payment truth (documented, not fixed in Phase 1):**
+
+- `fi_payment_records` — manual surgery deposit tracking (`paymentRecordModel.ts`)
+- `fi_payments` — invoice allocations / Stripe path
+- No automatic sync; row labels must not imply either is bank proof
+
+### Code audit — clearance / Money copy
+
+| Surface | Money-aligned? | Notes |
+| ------- | -------------- | ----- |
+| `moneyClearanceBlockedStaffMessage` | **Yes** | Booking confirmation guard uses this |
+| `moneyPaymentTruthBanner` | **Yes** | Manual-only vs dual-path banner |
+| `FINANCIAL_CLEARANCE_STATE_LABELS` | **Yes** | Neutral labels ("Not financially ready", etc.) |
+| `buildFinancialClearance` unavailable `clearance_reason` | **No** | *"…no FinancialOS signals exist for this context."* — staff-visible via `FinancialClearancePanel` on case/readiness/tomorrow |
+| `FinancialSurgeryPipelineInline` links | **Partial** | Links to `/financial/*` sub-routes, not Money hub headline |
+| `SURGERY_READINESS_ISSUE_LABEL` payment issues | **Yes** | Explicit *"manual tracking — not bank/card proof"* |
+| `SURGERY_DEPOSIT_BOARD_COPY` | **Yes** | *"No manual surgery payment record yet."* |
+
+### Unit test baseline (Phase 1)
+
+**Command:** Money + readiness bundle (10 files) — see plan doc §10.
+
+| Metric | Value |
+| ------ | ----- |
+| Tests | 97 |
+| Pass | 96 |
+| Fail | 1 |
+| Failed test | `procedureDayNonInterference` → nav omits procedure day when flag off (pre-existing; `resolveClinicOsShellNavItems` assertion) |
+
+**Staff mapping:**
+
+```
+operators_with_login: 10
+missing_fi_staff: 0
+PASS
+```
+
+### Gaps identified (no fixes in Phase 1)
+
+| ID | Class | Finding | Recommended Phase 2 action |
+| -- | ----- | ------- | -------------------------- |
+| DEF-MONEY-01 | P2 | `/financial/payments` lacks row-level manual vs provider-confirmed staff labels | Add Source column + label map; live verify with seeded rows |
+| DEF-READY-01 | P2 | Clearance unavailable reason + board links still reference FinancialOS / `/financial/*` not Money | Replace staff-facing unavailable copy; optional Money hub link on panels |
+| READY-LIVE-01 | P2 | Surgery readiness board not live-verified post staff/room wiring | Doctor/manager live bake on `/surgery-readiness` |
+| TMRW-LIVE-01 | P2 | Tomorrow board financial chips not live-verified | Nurse live bake on `/front-desk/tomorrow` |
+| MONEY-LIVE-01 | P3 | Prior bake: empty payment list — row labels unproven | Seed `fi_payments` or use tenant data |
+| TC-NAV-01 | P3 | Pre-existing procedure day nav unit fail | Hygiene — out of milestone unless blocking |
+
+---
+
+## Prior implementation + bake history (reference)
+
+The following was delivered and live-baked during the bake-1 overlap window. Phase 1 audit treats Money hub **copy + finance_admin landing** as established; **row labels + readiness live matrix** remain open.
+
+### Delivered (code)
 
 | Item | Change |
 | ---- | ------ |
@@ -18,86 +100,49 @@ Make **Money** and **surgery readiness** trustworthy for staff: clear payment tr
 | Readiness issues | `missing_staff_assignment`, `missing_room_assignment` with 7-day high-risk escalation |
 | Wired loaders | Surgery readiness board, tomorrow board, procedure day |
 
-## Key files
+### Key files
 
 - `src/lib/financialOs/moneyTrustCopy.ts`
 - `src/components/fi-admin/financial-os/FinancialOsCommandCentreDashboard.tsx`
 - `app/(fi-admin)/fi-admin/[tenantId]/financial-os/page.tsx`
 - `src/lib/surgery/surgeryReadinessBoardModel.ts`
 - `src/lib/bookings/bookingSurgeryFinancialClearanceGuardCore.ts`
+- `app/(fi-admin)/fi-admin/[tenantId]/financial/payments/page.tsx`
 
-## Explicit non-goals
+### Explicit non-goals
 
 - Full `/financial/*` tree merge  
 - Hard-block procedure day start (SOP still owns OR-day hold)  
 - Stripe auto-sync to manual payment records  
 
-## Live production bake (2026-07-13 — harsh session)
-
-**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a`. Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
-
-| Check | Result |
-| ----- | ------ |
-| Money hub (`/financial-os`) | **PASS** — title Money, health snapshot, finance CTAs |
-| Manual payment truth banner | **PASS** — amber banner; not POS/bank proof |
-| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** — honest disabled state + Money link |
-| Deposit / clearance language | **PASS** — Deposits due tile + surgery-day verify copy |
-| Payment row source labels | **PARTIAL** — `/financial/payments` empty; header cites Stripe + manual |
-| Finance-admin landing redirect | **PARTIAL (P2)** — bare tenant home stays Today, not `/financial-os` |
-
-**Verdict:** Money trust copy and disabled-payments honesty **PASS** on production. Finance-admin **landing** and **row-level payment-source labelling** remain open until role is confirmed and payment data exists.
-
-### Harsh role fix (2026-07-13)
-
-Reclassified **`harsh@evolvedhair.com.au`** from CFO staff label to **`clinic_admin`** (not `finance_admin`). Auth `fi_tenant_id` was wrongly set to ihrg-global; now Evolved. Expected post-login landing: **Today** (`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a`), not `/financial-os`. Script: `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts`.
-
-**Re-bake (2026-07-13T19:14 AEST, post `34143d64`/`1f0106e1`):** Production now shows **Clinic manager workspace** (not Director). Landing **Today PASS**; CRM Pipeline **PASS** at `/fi-admin/…/crm` (no `/cases` ejection). Money hub still accessible via More → Finance. Harsh is **not** a `finance_admin` persona — finance-admin landing sign-off remains deferred to a dedicated finance session. Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
-
-### Harsh finance_admin reclassification (2026-07-13 — final Money bake)
-
-Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finance_admin`** for the deferred finance-admin live bake. Script: `scripts/reclassify-evolved-harsh-clinic-admin-to-finance-admin.ts` (`--commit`).
-
-| Field | Before | After |
-| ----- | ------ | ----- |
-| `fi_tenant_admin_users.admin_role` | `clinic_admin` | **`finance_admin`** |
-| `fi_staff.staff_role` | `Clinic admin` | **`CFO`** |
-| `fi_staff.position_type_id` | `CLINIC_MANAGER` | **`FINANCE_ADMIN`** |
-| Derived workspace | `clinic_manager` | **`finance`** |
-| Expected landing | Today | **`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/financial-os`** |
-
-**CRM access:** `finance_admin` does **not** grant CRM shell nav (`tenantAdminRoleAllowsCrmShellNav` = false) — unlike `clinic_admin`. Pipeline access may be limited; finance persona focuses on Money hub.
-
-### Finance live bake (2026-07-13T19:31 AEST — post `eaee3da3`)
-
-**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a` after `finance_admin` reclassify (`e8fab6d2`) + finance workspace profile fix (`eaee3da3`; Supabase `workspace_profile=finance`). Tool: cursor-ide-browser MCP.
-
-| Check | Result |
-| ----- | ------ |
-| Money hub (`/financial-os`) | **PASS** — title Money, health snapshot, finance CTAs |
-| Manual payment truth banner | **PASS** — amber banner; not POS/bank proof |
-| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** — honest disabled state + Money link |
-| Deposit / clearance language | **PASS** — Deposits due tile + consultation-to-revenue bridge |
-| Finance-admin landing redirect | **PASS** — bare tenant home → **`/financial-os`** (brief Home flash) |
-| Workspace badge | **FAIL (P1)** — shell shows **Director workspace**, not **Finance** |
-| CRM gate (`/crm`) | **PASS** (expected) — Pipeline flash → **`/cases`** |
-| Primary rail + More drawer | **PASS** — 4-slot rail (Today · Front desk · Team · More); More has Finance → Money, Reports, Pipeline |
-
-**Verdict (pre-deploy):** Money trust copy, disabled-payments honesty, and **`finance_admin` landing redirect PASS** on production. **Workspace badge still resolved to Director** — `eaee3da3` code/migration not yet deployed; re-bake after deploy required.
-
 ### Finance live bake (2026-07-13T20:39 AEST — post `4e08a911` deploy)
 
-**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a` after `finance_admin` reclassify (`e8fab6d2`) + finance workspace profile fix (`eaee3da3`; Supabase `workspace_profile=finance`) + build fix deploy (`4e08a911`). Tool: cursor-ide-browser MCP.
+**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a`. Tool: cursor-ide-browser MCP.
 
 | Check | Result |
 | ----- | ------ |
-| Money hub (`/financial-os`) | **PASS** — title Money, health snapshot, finance CTAs |
-| Manual payment truth banner | **PASS** — amber banner; not POS/bank proof |
-| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** (prior bake) — honest disabled state + Money link |
-| Deposit / clearance language | **PASS** — Deposits due tile + consultation-to-revenue bridge |
-| Finance-admin landing redirect | **PASS** — session lands on **`/financial-os`** |
-| Workspace badge | **PASS** — shell shows **Finance workspace** (not Director) |
-| Primary rail + More drawer | **PASS** — 4-slot rail (Today · Front desk · Team · More); More has Finance → Money, Reports, Pipeline |
+| Money hub (`/financial-os`) | **PASS** |
+| Manual payment truth banner | **PASS** |
+| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** (prior bake) |
+| Deposit / clearance language (hub tiles) | **PASS** |
+| Finance-admin landing redirect | **PASS** |
+| Workspace badge | **PASS** — Finance workspace |
+| Payment row source labels | **PARTIAL** — `/financial/payments` empty |
+| Readiness / tomorrow live matrix | **NOT RUN** — deferred to this milestone |
 
-**Verdict:** **GREEN** — Money trust copy, disabled-payments honesty, **`finance_admin` landing redirect**, and **Finance workspace badge PASS** on production post-`4e08a911` deploy.
+**Verdict (Money hub subset):** **GREEN** for finance_admin Money landing + truth copy. **Full milestone GREEN** requires readiness live matrix + payment row labelling.
 
 Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
+
+---
+
+## Release decision (current)
+
+**AMBER — audit complete, live matrix incomplete**
+
+- Money hub subset: **GREEN** (prior evidence)
+- Payment row labels: **open** (DEF-MONEY-01)
+- Readiness/tomorrow end-to-end: **open** (READY-LIVE-01, TMRW-LIVE-01)
+- Clearance copy consistency: **open** (DEF-READY-01)
+
+Proceed to **Phase 2** — contained fixes for proven P0/P1/P2 + live bake sequence per plan doc §9.
