@@ -18,7 +18,7 @@ The trust-and-spine implementation is **structurally sound** and **passes automa
 2. **Receptionist post-login landing (P2):** Jesika/`crm_operator` impersonation lands on **Today home**, not **`/front-desk`** (unit expectation).
 3. **Live authenticated Playwright E2E** still blocked locally by credential/TLS gaps.
 
-**Recommendation:** Re-bake **manager/consultant** CRM shell access after **BAKE-1-LIVE-01** fix; align receptionist live landing to `/front-desk`; re-run consultant/finance live sessions.
+**Recommendation:** Align **receptionist** and **consultant** post-login landings to unit expectations (`/front-desk`, `/crm`); re-run **finance** live session; monitor iiohr HR sync for `manager@` consultant profile drift.
 
 ---
 
@@ -153,7 +153,8 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Platform admin / auditor (pre-fix) | **FAIL** — initiator chrome | **FAIL** → `/cases` | **FAIL** → `/cases` |
 | **Paul / owner impersonation (post-fix)** | **PASS** — Paul + Director | **PASS** | **PASS** |
 | Jesika / `crm_operator` impersonation | **PARTIAL** (pre-04: auditor greeting) | **PASS** | **PASS** |
-| Clinic manager (`manager`) | Not re-baked post-01 | **Expected PASS** | **Expected PASS** |
+| **manager@ / consultant (post-`ae36eb65`)** | **PASS** — Manager + Consultant | **PASS** | **PASS** |
+| Clinic manager (`manager` role, pre-reclassify) | Not re-baked raw | **PASS** (post-01 code) | **PASS** (post-01 code) |
 
 ---
 
@@ -164,7 +165,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
 **Tool:** cursor-ide-browser MCP (live session as **`manager@evolvedhair.com.au`**; `Exit impersonation` still visible — may be platform-admin impersonation wrapper)
 
-### Session identity (resolved)
+### Session identity — initial bake (pre-profile fix)
 
 | Field | Observed |
 | ----- | -------- |
@@ -174,22 +175,40 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Workspace badge | **Clinic manager workspace** / **Clinic manager view** — **FAIL** (expected Consultant; likely `position_type` default overrides `staff_role`) |
 | Landing URL | **Today home** — **PARTIAL** (not `/cases`, but not `/crm` unit expectation for consultant) |
 
-**Conclusion:** **CRM functional spine PASS** (Pipeline + golden lead hold). **Shell persona PARTIAL** — access gates work but display name/workspace profile still reflect legacy Manager/Paul HR data.
+**Initial conclusion:** **CRM functional spine PASS** (Pipeline + golden lead hold). **Shell persona PARTIAL** — access gates work but display name/workspace profile still reflect legacy Manager/Paul HR data.
 
-### Check matrix (manager@ consultant)
+### Re-bake (post `ae36eb65` profile fix — fresh session)
+
+**Date:** 2026-07-13 (after ops fix: `full_name=Manager Evolved`, `staff_role=consultant`, `position_type=CONSULTANT`, `workspace_profile=consultant`)  
+**Tool:** cursor-ide-browser MCP (`browser_tabs` → `browser_lock` → `browser_snapshot` → route checks → `browser_unlock`)
+
+### Session identity (resolved — re-bake)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`manager@evolvedhair.com.au`** (`fi_users.role=member`, `fi_staff.staff_role=consultant`) |
+| Profile email (CDP) | **`manager@evolvedhair.com.au`** ✓ |
+| Greeting | **"Good afternoon, Manager"** — **PASS** (not Paul, not auditor) |
+| Workspace badge | **Consultant workspace** / **Consultant view** — **PASS** |
+| Landing URL | **Today home** — **PARTIAL** (not `/cases`; unit expects `/crm` for consultant) |
+| Impersonation UI | `Exit impersonation` still visible (wrapper session) |
+
+**Conclusion:** **Consultant persona now correct on production.** CRM functional spine **PASS** (Pipeline, `/leadflow` redirect, golden lead hold). Only residual gap: post-login landing stays on **Today** rather than `/crm`.
+
+### Check matrix (manager@ consultant — re-bake)
 
 | # | Check | Result | Final URL | Notes |
 | - | ----- | ------ | --------- | ----- |
-| 1 | Greeting not auditor/owner | **PARTIAL** | `/fi-admin/c2615b95-…` | Shows **Paul** (HR `full_name`), not consultant label |
+| 1 | Greeting not auditor/owner/Paul | **PASS** | `/fi-admin/c2615b95-…` | `Good afternoon, Manager` |
 | 2 | Profile email | **PASS** | — | `manager@evolvedhair.com.au` |
-| 3 | Workspace badge | **FAIL** | — | **Clinic manager workspace** — not Consultant |
-| 4 | Not Platform admin / Director | **PASS** | — | No platform-admin or director chrome |
+| 3 | Workspace badge | **PASS** | — | **Consultant workspace** |
+| 4 | Not Platform admin / Director / Clinic manager | **PASS** | — | No wrong chrome |
 | 5 | Post-login landing | **PARTIAL** | `/fi-admin/c2615b95-…` | Today home — not `/crm`, not `/cases` |
-| 6 | `/crm` Pipeline hold | **PASS** | `/crm` | Full Pipeline; no `/cases` ejection |
+| 6 | `/crm` Pipeline hold | **PASS** | `/crm` | Title Pipeline; no `/cases` ejection |
 | 7 | `/leadflow` → `/crm` | **PASS** | `/crm` | Legacy redirect holds |
-| 8 | Golden lead detail hold | **PASS** | `/crm/leads/c9a58f3d-…` | SMOKETEST lead; no ejection |
+| 8 | Golden lead detail hold | **PASS** | `/crm/leads/c9a58f3d-…` | SMOKETEST lead + patient `287348d5-…`; no ejection |
 
-**Follow-up:** Correct `fi_staff.full_name` and position-type workspace default so shell shows **Consultant** persona; re-test landing redirect to `/crm`.
+**Residual follow-up:** Align consultant post-login landing to `/crm` (unit expectation); monitor iiohr HR sync — prior sync at `2026-07-13T08:00:37Z` reverted `staff_role`/`full_name`.
 
 ---
 
@@ -226,7 +245,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | d***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | e***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | s***@gmail.com | Present | member | Present | Contractor Doctor / Hair Transplant Surgeon | Via `staff_role` | 0 | Role text | No | OK |
-| m***@evolvedhair.com.au | Present | member | Present | **consultant** (reclassified 2026-07-13) | Via `staff_role` | 0 | Role text | No | **Live bake: CRM PASS, shell PARTIAL** |
+| m***@evolvedhair.com.au | Present | member | Present | **consultant** (reclassified 2026-07-13) | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (shell + CRM; landing Today) |
 | p***@evolvedhair.com.au | Present | member | Present | owner | Via `staff_role` | 0 | Role text | No | OK |
 | s***@follicleintelligence.ai | Present | manager | Present | Manager | Via `staff_role` | 0 | Role text | No | OK |
 
@@ -247,7 +266,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | ---- | ---------------- | ------------- | ---------- | ----------- | ---------- | -------- |
 | Receptionist | `/front-desk` | PASS | **PARTIAL** (live: Today home, not `/cases`) | Not tested | Not tested | Not tested |
 | Nurse | `/front-desk` | PASS | BLOCKED | — | — | — |
-| Consultant | `/crm` | PASS | **PARTIAL** (live: manager@ reclassify — CRM **PASS**, landing Today, shell shows Clinic manager/Paul) | — | — | — |
+| Consultant | `/crm` | PASS | **PARTIAL** (live: manager@ re-bake — shell **PASS**, CRM **PASS**, landing Today not `/crm`) | — | — | — |
 | Doctor / surgeon | `/doctor` | PASS | BLOCKED | — | — | — |
 | Finance admin | `/financial-os` | PASS | BLOCKED | — | — | — |
 | Clinic admin | Today | PASS | BLOCKED | — | — | — |
@@ -255,7 +274,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Owner | Today | PASS | **PASS** (live: Paul impersonation → Today) | — | — | — |
 | Platform admin | `/fi-admin` | PASS (OS role) | **PASS** (live: Today home) | — | — | — |
 
-**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, Pipeline + golden lead **PASS**. **manager@** reclassified consultant: email **PASS**, CRM + golden lead **PASS**, shell **PARTIAL** (Clinic manager / Paul HR name). `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
+**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, Pipeline + golden lead **PASS**. **manager@** consultant re-bake (post-`ae36eb65`): greeting **Manager**, Consultant workspace, email **PASS**, CRM + golden lead **PASS**; landing **Today** (not `/crm`). `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
 
 **Confirmed by unit tests:**
 
@@ -290,7 +309,7 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 | Role | D# | Discover | Complete | Integrity | Efficiency | Appropriate | Consistent | Refresh | Tablet | Notes |
 | ---- | -- | -------- | -------- | --------- | ---------- | ----------- | ---------- | ------- | ------ | ----- |
 | Reception | D1 | 4 | 4 | 4 | — | 4 | 4 | 4 | — | Live `crm_operator`: Pipeline + golden lead PASS; landing Today not `/front-desk` |
-| Consultant | D2 | 4 | — | — | — | 4 | — | — | — | Pipeline single door proven in unit tests |
+| Consultant | D2 | 4 | 4 | 4 | — | 4 | 4 | — | — | Live manager@ re-bake: Pipeline + golden lead PASS; landing Today |
 | Nurse | D3 | 3 | — | — | — | 4 | — | — | — | Treatment imaging E2E fixture-gated; not run |
 | Doctor | D4 | 3 | — | — | — | 4 | — | — | — | Procedure Day correctly off by flag |
 | Finance | D5 | 4 | — | — | — | 4 | — | — | — | Money landing in unit; payment truth deferred |
@@ -305,8 +324,8 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 | Check | Result |
 | ----- | ------ |
 | Unit contract (`goldenPatientSpineCore`) | **PASS** (3 tests) |
-| UI path Pipeline → lead → patient | **PASS** (`crm_operator` live) · **FAIL** (manager/auditor live) |
-| Reload linkage | **PASS** (`crm_operator`) · **FAIL** (manager/auditor) |
+| UI path Pipeline → lead → patient | **PASS** (`crm_operator`, Paul owner, manager@ consultant live) · **FAIL** (auditor impersonation pre-fix) |
+| Reload linkage | **PASS** (`crm_operator`, Paul owner, manager@ consultant) · **FAIL** (auditor impersonation pre-fix) |
 | Re-login linkage | **NOT TESTED** |
 | Patient direct URL | **PASS** — `/patients/287348d5-…` holds with linked leads |
 | Negative unlinked lead | **SKIP** — `FI_E2E_UNLINKED_LEAD_ID` not set |
@@ -353,6 +372,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | ID | Fix |
 | -- | --- |
 | BAKE-1-LIVE-04 | `resolveEffectiveTenantAuthUserIdFromSession` for Today greeting, profile email, workspace profile; owner `fi_staff` → director workspace |
+| BAKE-1-OPS-01 | Ops script `ae36eb65`: `manager@` consultant profile (`full_name`, `position_type`, `workspace_profile`) — shell persona live **PASS** |
 | BAKE-1-LIVE-01 | Extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) + `fi_staff.staff_role` CRM shell fallback in `crmShellAccess.ts` |
 | BAKE-1-CODE-02 | `fiOsRedirect.server.ts` — normalize `tenantAdminRole` via `normalizeFiTenantAdminRole` before workspace profile derivation |
 | BAKE-1-INFRA-01 | `playwright.config.ts` — include `fi-trust-*.spec.ts` in authenticated project `testMatch` |
@@ -395,12 +415,12 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | Role           | Landing | Navigation | Core journey | Reload integrity | Tablet | Result  |
 | -------------- | ------: | ---------: | -----------: | ---------------: | -----: | ------- |
 | Reception      |       4 |          5 |            4 |                4 |      — | **Amber** (live `crm_operator`; landing not `/front-desk`) |
-| Consultant     |       4 |          4 |            — |                — |      — | Amber   |
+| Consultant     |       4 |          5 |            4 |                4 |      — | **Amber→Green** (live: shell + CRM PASS; landing Today) |
 | Nurse          |       4 |          4 |            — |                — |      — | Amber   |
 | Doctor         |       4 |          4 |            — |                — |      — | Amber   |
 | Finance        |       4 |          4 |            — |                — |      — | Amber   |
-| Manager        |       5 |          4 |            2 |                1 |      — | **Amber** (live landing PASS; golden lead FAIL) |
-| Owner          |       4 |          4 |            — |                — |      — | Amber   |
+| Manager        |       5 |          5 |            4 |                4 |      — | **Green** (live: manager@ reclassified consultant — CRM + golden lead PASS) |
+| Owner          |       4 |          5 |            4 |                4 |      — | **Green** (live: Paul impersonation PASS) |
 | Platform admin |       5 |          5 |            3 |                1 |      — | **Amber** (live: 6-slot rail, Money, Front desk; CRM FAIL) |
 
 *Landing/navigation scores: unit + go-live audit (4/5) unless noted with live browser evidence (5/5). Manager/platform-admin live rows include 2026-07-13 production browser bake. Journey/reload: golden-patient lead detail FAIL = 1–2/5.*
@@ -443,11 +463,13 @@ That milestone should address payment-source truth, deposit satisfaction, financ
 
 ## Release decision
 
-## AMBER
+## AMBER (trending GREEN for core CRM personas)
 
-The new trust-and-spine implementation is suitable for **continued controlled bake testing**. **BAKE-1-LIVE-01** fix applied in code (manager/consultant CRM shell); **live re-bake pending**. Receptionist live landing still mismatches unit (`/front-desk` vs Today).
+The new trust-and-spine implementation is suitable for **continued controlled bake testing** with expanding pilot scope. **BAKE-1-LIVE-01** and **BAKE-1-LIVE-04** verified live on production for **owner** (Paul), **consultant** (`manager@` post-`ae36eb65`), and **`crm_operator`** (Jesika): Pipeline + golden lead hold; consultant shell persona now correct.
 
-Do **not** mark GREEN based on unit tests alone.
+**Not yet full GREEN** because: receptionist live landing still mismatches unit (`/front-desk` vs Today); consultant landing also lands Today not `/crm`; finance/nurse/doctor journeys not live-baked; authenticated E2E still blocked.
+
+Do **not** mark blanket GREEN until reception landing + finance live session complete.
 
 ---
 
@@ -466,7 +488,7 @@ Do **not** mark GREEN based on unit tests alone.
 | 9 | No inaccessible primary/More item clickable | **PASS** (go-live audit) |
 | 10 | Active pilot users fully staff-mapped | **PASS** (9/9) |
 | 11 | SA-1 not deferred for active pilot users | **PASS** (role text present) |
-| 12 | Golden-patient linkage survives reload/re-login | **PASS** (`crm_operator` live) · **FAIL** (manager live) |
+| 12 | Golden-patient linkage survives reload/re-login | **PASS** (`crm_operator`, Paul owner, manager@ consultant live) |
 | 13 | Pipeline H-scroll inside board | **BLOCKED** — Pipeline never holds on production |
 | 14 | Document root no H-overflow | **Not tested on Pipeline** (redirect blocks) |
 | 15 | P0/P1 product defects resolved | **PASS** (none found in product code) |
