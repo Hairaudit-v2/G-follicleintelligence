@@ -10,7 +10,9 @@
 
 ## Executive summary
 
-Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed buckets **B → A → C+D**: public fails **126 → 78 → 18 → target 0** (await CI confirm). Failures were **CI signal hygiene** (auth tag on credential-less job; Front Desk labels without session; narrow security status expects; procedure-day final-200 after login redirect), not proven product P0s. Trust trio gate stays **GREEN**. DEF-TC-01 remains open (**6** `tsc` errors in `*.test.ts`) → milestone overall **AMBER**. CI-TRIAGE-TEAM-01 quarantine **in place**. Optional fixtures still **MISSING**.
+**Milestone verdict: GREEN** (2026-07-14).
+
+Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed buckets **B → A → C+D**: public fails **126 → 78 → 18 → 0**. Failures were **CI signal hygiene** (auth tag on credential-less job; Front Desk labels without session; narrow security status expects; procedure-day final-200 after login redirect), not proven product P0s. Trust trio gate stays **GREEN**. **DEF-TC-01 closed** — `npm run typecheck` **0 errors** (test-file typing only). CI-TRIAGE-TEAM-01 quarantine **in place** (deferred beyond milestone acceptance). Optional fixtures still **MISSING** (deferred — CI-FIX-01). HR-DRIFT-01 **deferred** (ops monitor).
 
 **Phase 1 verdict:** **AMBER** for overall CI readability (trust GREEN; public smoke advisory-red); inventory complete for Phase 2.
 
@@ -18,7 +20,9 @@ Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed bu
 
 **Phase 2 (PUB-LABELS / Bucket A):** `fi-ux-audit-labels` re-tagged `@authenticated @smoke` + `authenticatedTest`; included in authenticated `testMatch`. Confirmed on [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344): **126 / 18 / 66** (−60 fails vs post-B).
 
-**Phase 2 (PUB-SEC-STATUS / Bucket C + PUB-PROC-200 / Bucket D):** Expect updates only (intentional 404/503; soft 200 + no Surgery day chrome). Confirmed on [29291077366](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291077366): **144 passed / 0 failed / 66 skipped** (−18 fails). Trust trio **GREEN**. Milestone overall **AMBER** (DEF-TC-01 open).
+**Phase 2 (PUB-SEC-STATUS / Bucket C + PUB-PROC-200 / Bucket D):** Expect updates only (intentional 404/503; soft 200 + no Surgery day chrome). Confirmed on [29291077366](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291077366): **144 passed / 0 failed / 66 skipped** (−18 fails). Trust trio **GREEN**.
+
+**Phase 2 (DEF-TC-01):** Test typing/casts only — bodyScrollLock window mock via `unknown`; nav `"reports"` compares cast to `string`. Local `npm run typecheck` **PASS** (0 errors). Only remaining Phase 2 acceptance item closed → milestone **GREEN**.
 
 ---
 
@@ -85,37 +89,36 @@ gh run view 29275224871 --log
 
 ---
 
-## H2 — DEF-TC-01 typecheck (reconfirmed)
+## H2 — DEF-TC-01 typecheck (**CLOSED**)
 
 **Command:** `npm run typecheck`  
 **Date:** 2026-07-14  
-**Result:** **FAIL** — **6 errors** (unchanged class)
+**Result:** **PASS** — **0 errors**
 
-| File | Errors | Class |
-| ---- | ------ | ----- |
-| `src/lib/dom/bodyScrollLock.test.ts` | 3 | Window mock cast; `delete` operand not optional |
-| `src/lib/fiOs/navigation/fiOsNavigationRegrouping.test.ts` | 1 | Nav slot union vs `"reports"` comparison |
-| `src/lib/fiOs/navigation/fiOsRolePermissionPreflightAudit.test.ts` | 1 | Same `"reports"` overlap |
-| `src/lib/fiOs/reports/fiOsReportsConsolidation.test.ts` | 1 | Same `"reports"` overlap |
+| File | Was | Fix |
+| ---- | --- | --- |
+| `src/lib/dom/bodyScrollLock.test.ts` | 3 | `globalThis` mock via `unknown`; optional `document`/`window` so `delete` is typed |
+| `src/lib/fiOs/navigation/fiOsNavigationRegrouping.test.ts` | 1 | `(i.id as string) === "reports"` (assert absent from rail) |
+| `src/lib/fiOs/navigation/fiOsRolePermissionPreflightAudit.test.ts` | 1 | Same string cast |
+| `src/lib/fiOs/reports/fiOsReportsConsolidation.test.ts` | 1 | Same string cast |
 
-**Status:** **Open** — test-file typing only; does not block trust E2E. Blocks claiming `ci.yml` typecheck **GREEN**.
+**Status:** **Closed** — test-file typing only; no product redesign. `ci.yml` typecheck can claim **GREEN**.
 
 ---
 
-## H3 — CI-TRIAGE-TEAM-01 quarantine
+## H3 — CI-TRIAGE-TEAM-01 quarantine (**DEFERRED**)
 
 **File:** `e2e/journeys/team-workspace-nav.spec.ts`  
-**Status:** **Active** — if neither `team-sub-nav` nor access-denied heading appears within timeout, `test.skip(..., "… (CI-TRIAGE-TEAM-01)")`.
+**Status:** **Deferred (out of milestone acceptance)** — skip still present: if neither `team-sub-nav` nor access-denied heading appears within timeout, `test.skip(..., "… (CI-TRIAGE-TEAM-01)")`.
 
-On public smoke (Bucket B), this spec **does not reach** the quarantine path — it fails earlier in `authenticatedTest` worker setup (`trim` on missing email). Quarantine remains relevant for **credentialed** authenticated projects / manual runs against production.
-
-Trust trio gate does **not** include this spec → **no impact on GREEN trust**.
+Public job no longer selects this `@authenticated` spec (`grepInvert`). Quarantine remains relevant for **credentialed** authenticated projects / manual runs. Not a product P0 for this milestone; trust trio gate does **not** include this spec → **no impact on GREEN trust / milestone GREEN**.
 
 ---
 
-## H4 — Optional fixtures MISSING list
+## H4 — Optional fixtures MISSING list (**DEFERRED** — CI-FIX-01)
 
-**Checked:** `gh secret list` / `gh variable list` (names only) — 2026-07-14
+**Checked:** `gh secret list` / `gh variable list` (names only) — 2026-07-14  
+**Milestone disposition:** Inventory **GREEN**; optional secrets remain **MISSING** by choice — **deferred** (not blocking milestone GREEN).
 
 | Name | Kind | Status | Notes |
 | ---- | ---- | ------ | ----- |
@@ -129,7 +132,7 @@ Trust trio gate does **not** include this spec → **no impact on GREEN trust**.
 | `FI_E2E_UNLINKED_LEAD_ID` | secret | **MISSING** | CI-FIX-01 defer |
 | `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | — | **MISSING** | CI-FIX-01 defer (trust role-home optional assert) |
 
-**Public job:** does **not** wire demo admin secrets (by design for local placeholder build). That is why Bucket B is systematic.
+**Public job:** does **not** wire demo admin secrets (by design for local placeholder build). Bucket B fixed via `grepInvert` + fixture skip.
 
 ---
 
@@ -146,28 +149,30 @@ Trust trio gate does **not** include this spec → **no impact on GREEN trust**.
 
 ---
 
-## H6 — HR sync drift (ops monitor)
+## H6 — HR sync drift (ops monitor) (**DEFERRED**)
 
 **Carry from** `FI-ROLE-JOURNEY-BAKE-1` / trust money readiness: iiohr HR sync can revert Evolved consultant `staff_role` / `full_name` (observed prior sync `2026-07-13T08:00:37Z`).
 
 | ID | Priority | Action |
 | -- | -------- | ------ |
-| HR-DRIFT-01 | **P3 / ops** | Monitor HR sync health dashboard / staff mapping after overnight syncs; not a CI test fix this milestone |
+| HR-DRIFT-01 | **P3 / ops** | **Deferred** — monitor HR sync health / staff mapping after overnight syncs; not a CI test fix; **does not block milestone GREEN** |
 
 No product redesign. Staff mapping gate (`npm run audit:staff-mapping`) remains the ops bar when checking drift.
 
 ---
 
-## Check matrix results (Phase 1)
+## Check matrix results (Phase 2 close)
 
 | ID | Result |
 | -- | ------ |
-| H1 Public buckets | **GREEN** (classified from 29275224871) |
-| H2 DEF-TC-01 | **AMBER** (6 known test errors) |
-| H3 CI-TRIAGE-TEAM-01 | **GREEN** (skip present) |
-| H4 Fixtures inventory | **GREEN** (MISSING list current) |
+| H1 Public buckets | **GREEN** (A–D closed; 0 public fails on 29291077366) |
+| H2 DEF-TC-01 | **GREEN** (0 `tsc` errors) |
+| H3 CI-TRIAGE-TEAM-01 | **GREEN** (skip present; **deferred** beyond acceptance) |
+| H4 Fixtures inventory | **GREEN** (MISSING list current; optional set **deferred**) |
 | H5 Trust trio | **GREEN** (carry + tip run success) |
-| H6 HR drift | **AMBER** (monitor filed; not re-probed this audit) |
+| H6 HR drift | **GREEN** for milestone (**deferred** ops monitor; not a CI blocker) |
+
+**Overall milestone:** **GREEN**
 
 ---
 
@@ -179,8 +184,8 @@ No product redesign. Staff mapping gate (`npm run audit:staff-mapping`) remains 
 | **P1** | PUB-LABELS | `fi-ux-audit-labels`: require auth project **or** skip on login redirect / missing Today | **−60** | Test/quarantine only unless Today board proven broken with session |
 | **P1** | PUB-PROC-200 | Procedure-day unauth **200** — soft login final status + no Surgery day chrome | **−6** | Expect update (mirror reception) |
 | **P2** | PUB-SEC-STATUS | patients **404** / cron **503** expects | **−12** | Expect update (intentional) |
-| **P2** | DEF-TC-01 | Fix 6 test typing errors | N/A (unit CI) | **Deferred** — holds milestone AMBER |
-| **P3** | CI-FIX-01 / HR-DRIFT-01 | Optional secrets + ops sync cadence | Skip→run when set | Ops |
+| **P2** | DEF-TC-01 | Fix 6 test typing errors | N/A (unit CI) | **Closed** — milestone GREEN |
+| **P3** | CI-FIX-01 / HR-DRIFT-01 | Optional secrets + ops sync cadence | Skip→run when set | **Deferred** (ops; not milestone blockers) |
 
 ### Proposed Phase 2 **first** fix
 
@@ -269,7 +274,22 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 1. `e2e/security/unauthenticated-access.spec.ts` — patients accept **404**; cron accept **503**.
 2. `e2e/fi-operational-day.spec.ts` — procedure-day allow **200** + no Surgery day heading when flag off.
 
-**Milestone verdict:** Public smoke signal-hygiene goals of H1 **met** (**0** public fails from buckets A–D). Overall milestone **AMBER** while **DEF-TC-01** (6 test-file `tsc` errors) stays open / deferred.
+**Milestone verdict (post C+D):** Public smoke H1 **met** (**0** public fails). Overall still **AMBER** until DEF-TC-01 closed (see below).
+
+---
+
+## Phase 2 — DEF-TC-01 fix notes
+
+| Field | Value |
+| ----- | ----- |
+| Status | **Closed** — local `npm run typecheck` **PASS** |
+| Date | 2026-07-14 |
+| ID | DEF-TC-01 |
+| Changes | Test-only typing: bodyScrollLock mock via `unknown` + optional globals; rail `"reports"` absence asserts use `(i.id as string)` |
+
+**Deferred (explicit, not blocking GREEN):** CI-TRIAGE-TEAM-01 quarantine remains; CI-FIX-01 optional fixtures MISSING; HR-DRIFT-01 ops monitor.
+
+**Overall milestone verdict:** **GREEN**
 
 ---
 
@@ -277,7 +297,7 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 | Command | Result |
 | ------- | ------ |
-| `npm run typecheck` | **FAIL** — 6 errors (DEF-TC-01) |
+| `npm run typecheck` | **PASS** — 0 errors (DEF-TC-01 closed) |
 | `gh run list --workflow=e2e-smoke.yml --limit 10` | Tip + cancelled chain + **29275224871** complete public |
 | `gh run view 29275224871 --log` | Buckets A–D classified |
 | `gh secret list` / `gh variable list` | MISSING optional fixtures confirmed |

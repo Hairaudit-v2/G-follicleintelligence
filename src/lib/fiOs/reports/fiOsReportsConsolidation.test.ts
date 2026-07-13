@@ -91,7 +91,7 @@ test("primary rail has six slots; Reports is More-only (not on rail)", () => {
   ]);
   assert.equal(primaryRailSlotIds().length, 6);
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find(
-    (i) => i.id === "reports"
+    (i) => (i.id as string) === "reports"
   );
   assert.equal(reportsRail, undefined);
   assert.ok(!isPrimaryRailNavId(FI_OS_REPORTS_NAV_ID));

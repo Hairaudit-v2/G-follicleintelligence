@@ -19,7 +19,7 @@ function installBodyMock() {
     documentElement: { clientWidth: 1000 },
   } as unknown as Document;
 
-  const g = globalThis as typeof globalThis & {
+  const g = globalThis as unknown as {
     document?: Document;
     window?: Window & typeof globalThis;
   };
@@ -30,7 +30,7 @@ function installBodyMock() {
   g.window = {
     innerWidth: 1000,
     getComputedStyle: () => ({ paddingRight: "0px" }) as CSSStyleDeclaration,
-  } as Window & typeof globalThis;
+  } as unknown as Window & typeof globalThis;
 
   return {
     style,

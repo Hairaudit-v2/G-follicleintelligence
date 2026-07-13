@@ -218,7 +218,9 @@ test("Team grouping in More consolidates under one team destination on primary r
 });
 
 test("Reports grouping consolidates under More only; D6 admin when allowed", () => {
-  const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "reports");
+  const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find(
+    (i) => (i.id as string) === "reports"
+  );
   assert.equal(reportsRail, undefined);
 
   const staffSections = moreSections({ showNavigationAdminSurfaces: false });

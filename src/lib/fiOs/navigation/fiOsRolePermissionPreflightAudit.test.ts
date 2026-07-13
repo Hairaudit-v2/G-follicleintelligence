@@ -158,7 +158,7 @@ test("primary rail slots disabled when sidebar item filtered by feature access",
 
   const team = rail.find((i) => i.id === "team");
   if (team?.kind === "link") assert.equal(team.disabled, true);
-  assert.equal(rail.find((i) => i.id === "reports"), undefined);
+  assert.equal(rail.find((i) => (i.id as string) === "reports"), undefined);
 });
 
 test("mutation guards: reception cannot edit roster or staff access", () => {
