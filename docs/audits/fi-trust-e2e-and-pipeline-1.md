@@ -1,8 +1,9 @@
 # FI-TRUST-E2E-AND-PIPELINE-1
 
-**Status:** **GREEN** — authenticated trust E2E bundle PASS on production; staff mapping 10/10 (2026-07-13)  
+**Status:** **GREEN** — authenticated trust E2E + Pipeline allowlist + DEF-NURSE-01 nurse live bake PASS  
 **Date:** 2026-07-13  
 **Phase 1 re-verified:** 2026-07-13 — independent re-run 6 PASS / 0 FAIL / 2 SKIP; Vercel production + preview allowlist confirmed (`hasEvolved: true`); staff mapping 10/10  
+**Nurse live bake:** 2026-07-14 — DEF-NURSE-01 **Closed** (`evieshackleton1` / Nurse workspace on production)  
 **Depends on:** FI-TRUST-MONEY-AND-READINESS-1, FI-ROLE-JOURNEY-BAKE-1 (DEF-E2E-01, DEF-PIPE-01)  
 **Plan:** [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md)
 
@@ -111,13 +112,39 @@ No app-code change required — linkage and profile route are correct; test sele
 
 ---
 
-## Deferred / out of scope (unchanged)
+## Nurse live bake — DEF-NURSE-01 (2026-07-14)
+
+**Session:** Production `https://follicleintelligence.ai` · Evolved `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Identity:** Impersonating `evieshackleton1` (`evieshackleton1@gmail.com`) · **Nurse workspace** · greeting chip `E`  
+**Verdict:** **PASS** — treatment workflow discoverable from Front desk + Calendar; no P0/P1 defects
+
+### Check matrix (live)
+
+| ID | Check | Result | Evidence |
+| -- | ----- | ------ | -------- |
+| Landing | Bare tenant → role home | **PASS** | `/fi-admin/{tenant}` soft-redirects to `/front-desk` |
+| N2 | Front desk treatment CTA | **PASS** | Desk actions always visible: Take payment → `/payments`, Find patient, New booking → `/calendar`, **Open calendar** → `/calendar`. Empty-day component (`FrontDeskTodayEmptyDay`) primary CTA **Open calendar** + secondary Take payment (board had arriving-soon cards today — empty-state not live-observed; code + actions bar cover path). |
+| N1 | Calendar treatment quick filters | **PASS** | Quick filters strip: Consultations (`type=consultation`), PRP (`type=prp`), Surgery (`type=surgery`), Follow-up. Direct nav filters board without dead ends (Surgery keeps 2 HT surgeries; Consultations/PRP empty week with 0 appointments). |
+| Sanity | Tomorrow board | **PASS** | `/front-desk/tomorrow` loads; **Open calendar** CTA present; empty schedule copy clear |
+| Sanity | Patients | **PASS** | Journey snapshot + stages; treatment paths via Consultations / Surgery / Open Calendar |
+
+### Defects
+
+| Severity | Finding | Disposition |
+| -------- | ------- | ----------- |
+| — | None for DEF-NURSE-01 | — |
+| P3 (out of scope) | SMOKETEST today surgeries flag “Appointment missing room assignment” | Fixture/data — not treatment discoverability |
+
+**DEF-NURSE-01:** **Closed** — Calendar PRP/Consultations/Surgery filters usable; Front desk surfaces calendar treatment path without hunting (prior gap: empty Today board alone had no CTA — now empty-state + persistent Desk actions bar).
+
+---
+
+## Deferred / out of scope (remaining)
 
 | ID | Item | Status |
 | -- | ---- | ------ |
-| DEF-NURSE-01 | Treatment workflow discoverability (Front desk / Calendar) | Live bake deferred — not covered by trust E2E bundle |
+| DEF-NURSE-01 | Treatment workflow discoverability (Front desk / Calendar) | **Closed** — nurse live bake PASS 2026-07-14 |
 | DEF-PIPE-01 | Evolved on production `FI_PIPELINE_V1_TENANT_ALLOWLIST` | **Closed** — Vercel production + preview verified 2026-07-13 |
-| N1 / N2 | Nurse calendar filters + front-desk CTA | Phase 2 live browser per plan §8 |
 
 ---
 
@@ -125,16 +152,16 @@ No app-code change required — linkage and profile route are correct; test sele
 
 | Rubric | Assessment |
 | ------ | ---------- |
-| **GREEN** | E1–E3 PASS; S1 PASS; P1–P3 PASS; DEF-E2E-01 + DEF-PIPE-01 closed |
-| Blockers | None for trust E2E automation or Pipeline V1 cutover |
+| **GREEN** | E1–E3 PASS; S1 PASS; P1–P3 PASS; DEF-E2E-01 + DEF-PIPE-01 + **DEF-NURSE-01** closed |
+| Blockers | None for trust E2E automation, Pipeline V1 cutover, or nurse treatment discoverability |
 
 ---
 
 ## Recommended next action
 
-1. **Live bake:** Consultant + nurse sessions per plan §8 (DEF-NURSE-01 calendar treatment filters, front-desk empty-state CTA).
-2. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
-3. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
+1. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
+2. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
+3. **Optional:** Reception landing spot-check (`crm_operator` → `/front-desk`) if still desired outside this milestone.
 
 ---
 

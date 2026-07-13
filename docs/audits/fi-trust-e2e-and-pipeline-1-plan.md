@@ -118,7 +118,7 @@ rg -n "FI_PIPELINE_V1_TENANT_ALLOWLIST" .env.example app src/lib/crm
 | -- | ------ | ------- |
 | DEF-E2E-01 | FI-ROLE-JOURNEY-BAKE-1 | `invalid_credentials` / auth fixture timeout |
 | DEF-PIPE-01 | FI-ROLE-JOURNEY-BAKE-1 | Evolved `FI_PIPELINE_V1_TENANT_ALLOWLIST` not decided in production |
-| DEF-NURSE-01 | FI-ROLE-JOURNEY-BAKE-1 | Treatment workflow discoverability from empty Today board |
+| DEF-NURSE-01 | FI-ROLE-JOURNEY-BAKE-1 | Treatment workflow discoverability from empty Today board — **Closed** 2026-07-14 (nurse live bake) |
 | BAKE-1-INFRA-01 | FI-ROLE-JOURNEY-BAKE-1 | `fi-trust-*.spec.ts` in authenticated project — verify still wired |
 
 ---
@@ -147,7 +147,7 @@ rg -n "FI_PIPELINE_V1_TENANT_ALLOWLIST" .env.example app src/lib/crm
 
 ### Suggested first action for user (Phase 2)
 
-**Consultant live bake** — `manager@evolvedhair.com.au` on `/crm`: confirm Pipeline V1 door (Enquiries board), H-scroll containment, and no dual `/leadflow` entry. Then nurse bake for DEF-NURSE-01 (Calendar treatment filters + front-desk empty-state CTA).
+**Done (2026-07-14):** Nurse live bake closed **DEF-NURSE-01** — see [fi-trust-e2e-and-pipeline-1.md](./fi-trust-e2e-and-pipeline-1.md) nurse matrix (N1/N2 PASS). Consultant Pipeline door already covered by trust E2E + prior live evidence.
 
 ---
 
