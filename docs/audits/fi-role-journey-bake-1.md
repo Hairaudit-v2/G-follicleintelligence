@@ -1,7 +1,7 @@
 # FI-ROLE-JOURNEY-BAKE-1
 
 **Milestone:** `FI-ROLE-JOURNEY-BAKE-1`  
-**Status:** **CLOSED — GREEN (limited pilot; finance deferred)**  
+**Status:** **CLOSED — GREEN (limited pilot; finance GREEN post-`4e08a911`)**  
 **Validates:** `FI-TRUST-LANDING-AND-SPINE-1`  
 **Date:** 2026-07-13  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a`  
@@ -11,9 +11,9 @@
 
 ## 1. Executive verdict
 
-### GREEN — limited pilot (finance deferred)
+### GREEN — limited pilot (finance GREEN post-`4e08a911`)
 
-**FI-ROLE-JOURNEY-BAKE-1 closes with a scoped GREEN** for Evolved operational pilot of the trust-and-spine slice across **reception, consultant, owner, nurse, and doctor** personas. Live production browser evidence (2026-07-13) plus unit/navigation audits support controlled go-live for frontline and CRM clinical roles.
+**FI-ROLE-JOURNEY-BAKE-1 closes with a scoped GREEN** for Evolved operational pilot of the trust-and-spine slice across **reception, consultant, owner, nurse, doctor, and finance** personas. Live production browser evidence (2026-07-13) plus unit/navigation audits support controlled go-live for frontline, CRM clinical, and finance roles.
 
 **Pilot-ready (live GREEN):**
 
@@ -24,16 +24,15 @@
 | Nurse (Evie) | `/front-desk` ✓ | Front desk + Calendar + Patients **PASS** | Landing `b296e13e` |
 | Doctor (Dr Seetal) | `/doctor` ✓ | Doctor workspace + Calendar + Patients **PASS** | Landing `b296e13e` |
 | Reception (`crm_operator` / Jesika) | `/front-desk` **expected** ✓ | CRM + golden lead **PASS** | Landing not re-baked post-`b296e13e`; same redirect path as nurse |
+| Finance (`harsh@` / `finance_admin`) | `/financial-os` ✓ | Money hub + Finance badge **PASS** | Re-bake post-`4e08a911` (`eaee3da3` workspace profile fix) |
 
 **Explicitly deferred (not pilot-blocking for clinical slice):**
-
-- **Finance admin** — not live-baked (no finance session available)
 - **Authenticated Playwright E2E** — blocked by credential/TLS gaps
 - **Platform admin bare CRM** — expected gate (must impersonate tenant member)
 
-**Production fixes landed during bake:** `116a7882` (CRM shell for manager/consultant/owner), `f509ad55` (impersonation target chrome), `ae36eb65` (`manager@` consultant profile), `b296e13e` (bare tenant home → role landing).
+**Production fixes landed during bake:** `116a7882` (CRM shell for manager/consultant/owner), `f509ad55` (impersonation target chrome), `ae36eb65` (`manager@` consultant profile), `b296e13e` (bare tenant home → role landing), `eaee3da3` (finance workspace profile), `4e08a911` (finance badge build fix).
 
-**Recommendation:** Proceed to **`FI-TRUST-MONEY-AND-READINESS-1`** for finance live bake, payment-source truth, and deposit/readiness consistency. Monitor iiohr HR sync for `manager@` consultant profile drift.
+**Recommendation:** Monitor iiohr HR sync for `manager@` consultant profile drift. Finance Money trust signed off in **`FI-TRUST-MONEY-AND-READINESS-1`**.
 
 ---
 
@@ -537,7 +536,42 @@ Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finan
 | 10 | Primary rail | **PASS** | — | **4 visible slots:** Today · Front desk · Team · More (Calendar/Patients not on rail — finance persona) |
 | 11 | More drawer (finance) | **PASS** | — | Reports · Pipeline · Surgery · Clinical · Patients · **Finance → Money** (current) · Settings |
 
-**Verdict:** **AMBER** — finance-admin **landing + Money narrative GREEN**; **workspace badge RED** until Director chrome clears on production post-`eaee3da3` deploy.
+**Verdict (pre-deploy):** **AMBER** — finance-admin **landing + Money narrative GREEN**; **workspace badge RED** until Director chrome clears on production post-`eaee3da3` deploy.
+
+### Finance live bake (2026-07-13T20:39 AEST — post `4e08a911` deploy)
+
+**Timestamp:** 2026-07-13T20:39 AEST (UTC+10)  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (`browser_tabs` → `browser_lock` → `browser_snapshot` → `browser_unlock`)  
+**Session:** Live production impersonation of **`harsh@evolvedhair.com.au`** (`finance_admin`; `Exit impersonation` visible). Post `e8fab6d2` reclassify + `eaee3da3` finance workspace profile fix + `4e08a911` build/deploy.
+
+#### Session identity (resolved — post-deploy re-bake)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`harsh@evolvedhair.com.au`** (`fi_tenant_admin_users.admin_role=finance_admin`, `workspace_profile=finance`) |
+| Greeting | **"Good evening, Harsh"** — **PASS** |
+| Profile email | **`harsh@evolvedhair.com.au`** ✓ |
+| Workspace badge | **Finance workspace** — **PASS** (not Director) |
+| Impersonation UI | `Exit impersonation` + "impersonating harsh" — wrapper session |
+
+**Conclusion:** **`finance_admin` landing, Money spine, and Finance workspace badge PASS** on production post-`4e08a911` deploy.
+
+#### Check matrix (harsh@ finance_admin — post-deploy re-bake)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Greeting + email identity | **PASS** | `/financial-os` | Harsh + `harsh@evolvedhair.com.au` |
+| 2 | Workspace badge | **PASS** | — | **Finance workspace** — not Director |
+| 3 | Bare tenant home landing | **PASS** | `/financial-os` | Session already on Money hub |
+| 4 | `/financial-os` Money hub | **PASS** | `/financial-os` | Title **Money**; health snapshot; manual-tracking banner |
+| 5 | Manual payment truth banner | **PASS** | `/financial-os` | Amber **Manual payment tracking** + surgery-day verify copy |
+| 6 | Deposit / clearance copy | **PASS** | `/financial-os` | **Deposits due** tile; consultation-to-revenue bridge |
+| 7 | Primary rail | **PASS** | — | **4 visible slots:** Today · Front desk · Team · More |
+| 8 | More drawer (finance) | **PASS** | — | Finance → Money (current) · Reports · Pipeline · Surgery |
+
+**Verdict:** **GREEN** — finance-admin **landing + Money narrative + Finance workspace badge PASS** on production.
 
 ## 2. Environment and fixture limitations
 
@@ -746,7 +780,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | `e2e/fi-trust-pipeline-layout.spec.ts` | **FAIL** | Auth fixture timeout |
 | `e2e/fi-ux-audit-labels.spec.ts` | **FAIL** | Unauthenticated — login redirect (production mode) |
 | `e2e/fi-trust-golden-patient-spine.spec.ts` | **SKIP** | No lead/patient fixture IDs |
-| Manual role journeys D1–D8 | **PARTIAL** | 5/8 roles live-baked on production; finance deferred |
+| Manual role journeys D1–D8 | **PARTIAL** | 6/8 roles live-baked on production; finance **GREEN** post-`4e08a911` |
 
 ---
 
@@ -758,7 +792,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | Consultant     |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — `/crm`, Pipeline, golden lead **PASS** (`ae36eb65`, `b296e13e`) |
 | Nurse          |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — `/front-desk`, board, Calendar, Patients **PASS** (`b296e13e`) |
 | Doctor         |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — `/doctor`, workspace, Calendar, Patients **PASS** (`b296e13e`) |
-| Finance        |       — |          — |            — |                — |      — | **Deferred** — no finance-admin session available |
+| Finance        |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — `/financial-os`, Money hub, **Finance workspace badge PASS** (`eaee3da3`, `4e08a911`) |
 | Manager        |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — `manager@` reclassified consultant; CRM + golden lead **PASS** |
 | Owner          |       5 |          5 |            5 |                5 |      — | **Green (pilot)** — Today landing, CRM + golden lead, impersonation chrome **PASS** (`f509ad55`, `116a7882`) |
 | Platform admin |       5 |          5 |            3 |                3 |      — | **Amber** — 6-slot rail, Money, Front desk **PASS**; bare CRM **FAIL** (must impersonate tenant member) |
@@ -787,7 +821,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | Weighted operational score | ~46 / 100 | ~**58 / 100** (+12) |
 | Staff mapping gate | Implemented, unproven live | **PASS 9/9** |
 | Role landing (code + live) | Implemented | **PASS** — 5 roles live; reception expected |
-| Live role journeys | Not scored | **PASS** — 5/8 roles live GREEN; finance deferred |
+| Live role journeys | Not scored | **PASS** — 6/8 roles live GREEN; finance **GREEN** post-`4e08a911` |
 | Golden-patient UI | Unit only | **PASS live** — owner, consultant, reception (`crm_operator`) |
 | CRM shell gating | P1 defect | **FIXED** — `116a7882` |
 | Impersonation chrome | P0 defect | **FIXED** — `f509ad55` |
@@ -821,17 +855,16 @@ Still open for full 8-role GREEN:
 
 ## Release decision
 
-### GREEN — limited pilot (finance explicitly deferred)
+### GREEN — limited pilot (finance GREEN post-`4e08a911`)
 
-**FI-ROLE-JOURNEY-BAKE-1 is approved for controlled operational pilot** on Evolved for **reception, consultant, owner, nurse, and doctor**. Live production evidence (2026-07-13) confirms role landing, CRM spine, golden-patient linkage, and frontline clinical routes for these personas.
+**FI-ROLE-JOURNEY-BAKE-1 is approved for controlled operational pilot** on Evolved for **reception, consultant, owner, nurse, doctor, and finance**. Live production evidence (2026-07-13) confirms role landing, CRM spine, golden-patient linkage, frontline clinical routes, and finance Money hub for these personas.
 
 **Exceptions (not pilot-blocking for clinical slice):**
 
-- **Finance** — not live-tested; sign-off deferred to `FI-TRUST-MONEY-AND-READINESS-1`
 - **Platform admin bare CRM** — expected gate; impersonate tenant member for CRM spine
 - **Authenticated Playwright E2E** — blocked by credential/TLS gaps
 
-Do **not** mark blanket GREEN across all 8 roles until finance live bake completes.
+Finance live bake **GREEN** — `harsh@` `finance_admin` session shows **Finance workspace** badge and lands on `/financial-os` post-`4e08a911` deploy.
 
 ---
 

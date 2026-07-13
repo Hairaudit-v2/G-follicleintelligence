@@ -82,6 +82,22 @@ Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finan
 | CRM gate (`/crm`) | **PASS** (expected) — Pipeline flash → **`/cases`** |
 | Primary rail + More drawer | **PASS** — 4-slot rail (Today · Front desk · Team · More); More has Finance → Money, Reports, Pipeline |
 
-**Verdict:** Money trust copy, disabled-payments honesty, and **`finance_admin` landing redirect PASS** on production. **Workspace badge still resolves to Director** — `eaee3da3` code/migration may not be deployed to production yet, or impersonation session cache stale; re-bake after deploy + hard refresh required for persona sign-off.
+**Verdict (pre-deploy):** Money trust copy, disabled-payments honesty, and **`finance_admin` landing redirect PASS** on production. **Workspace badge still resolved to Director** — `eaee3da3` code/migration not yet deployed; re-bake after deploy required.
+
+### Finance live bake (2026-07-13T20:39 AEST — post `4e08a911` deploy)
+
+**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a` after `finance_admin` reclassify (`e8fab6d2`) + finance workspace profile fix (`eaee3da3`; Supabase `workspace_profile=finance`) + build fix deploy (`4e08a911`). Tool: cursor-ide-browser MCP.
+
+| Check | Result |
+| ----- | ------ |
+| Money hub (`/financial-os`) | **PASS** — title Money, health snapshot, finance CTAs |
+| Manual payment truth banner | **PASS** — amber banner; not POS/bank proof |
+| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** (prior bake) — honest disabled state + Money link |
+| Deposit / clearance language | **PASS** — Deposits due tile + consultation-to-revenue bridge |
+| Finance-admin landing redirect | **PASS** — session lands on **`/financial-os`** |
+| Workspace badge | **PASS** — shell shows **Finance workspace** (not Director) |
+| Primary rail + More drawer | **PASS** — 4-slot rail (Today · Front desk · Team · More); More has Finance → Money, Reports, Pipeline |
+
+**Verdict:** **GREEN** — Money trust copy, disabled-payments honesty, **`finance_admin` landing redirect**, and **Finance workspace badge PASS** on production post-`4e08a911` deploy.
 
 Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
