@@ -59,7 +59,6 @@ test("6-8. Escape / outside / focus — Radix + focus restore", () => {
 
 test("9. More does not start drag", () => {
   assert.match(UI, /data-pipeline-more-trigger/);
-  assert.match(UI, /onPointerDown=\{stopCardDrag\}/);
   assert.match(UI, /data-pipeline-card-actions/);
   assert.doesNotMatch(UI, /draggable=\{canDrag\}/);
 });
@@ -185,7 +184,41 @@ test("34. Drag feature flag resolved server-side, default OFF", () => {
   assert.match(PAGE, /desktopDragFeatureEnabled=\{desktopDragFeatureEnabled\}/);
 });
 
-test("35. No card/handle draggable listeners when drag disabled", () => {
+// --- More immediate-dismiss fix (portal MOUNT→UNMOUNT on open) ----------------
+// Proven live: obsolete stopCardDrag stopPropagation guards on the trigger/action
+// row perturbed Radix's dismissable-layer outside detection, dismissing the menu
+// on the opening pointer cycle. Fix = remove the guards (drag is disabled anyway).
+
+test("36. stopCardDrag pointer guards are fully removed", () => {
+  assert.doesNotMatch(UI, /stopCardDrag/);
+});
+
+test("37. More trigger carries no pointer/mouse stopPropagation guard", () => {
+  // The trigger block must not reattach onPointerDown/onMouseDown handlers.
+  const trigger = UI.slice(UI.indexOf('data-pipeline-more-trigger'));
+  const triggerButton = trigger.slice(0, trigger.indexOf("</button>"));
+  assert.doesNotMatch(triggerButton, /onPointerDown=/);
+  assert.doesNotMatch(triggerButton, /onMouseDown=/);
+});
+
+test("38. Action row does not stopPropagation on pointer/mouse down", () => {
+  const row = UI.slice(UI.indexOf('data-pipeline-card-actions'));
+  const rowOpen = row.slice(0, row.indexOf(">"));
+  assert.doesNotMatch(rowOpen, /onPointerDown=/);
+  assert.doesNotMatch(rowOpen, /onMouseDown=/);
+});
+
+test("39. More stays controlled via openMenuLeadId (not switched to uncontrolled)", () => {
+  assert.match(UI, /open=\{menuOpen\}/);
+  assert.match(UI, /openMenuLeadId === card\.leadId/);
+});
+
+test("40. Contact primary path stays independent of the menu", () => {
+  assert.match(UI, /pipelineCardActionLabel\(primary\)/);
+  assert.match(UI, /props\.onAction\(primary, card\)/);
+});
+
+test("41. No card/handle draggable listeners when drag disabled", () => {
   // All draggable attributes and drop listeners flow from desktopDragEnabled/allowDrop,
   // which stay false when the feature flag is off — nothing renders draggable.
   assert.match(UI, /data-pipeline-draggable=\{canDrag \? "handle"/);

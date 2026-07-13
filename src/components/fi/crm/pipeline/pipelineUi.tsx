@@ -837,9 +837,6 @@ export function PipelineLeadCardView(props: {
 
   // Drag is handle-only — never put draggable on the whole card (breaks More / Contact).
   const canDrag = Boolean(props.desktopDragEnabled) && !props.busy;
-  const stopCardDrag = (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-  };
   const preventNativeDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -967,8 +964,6 @@ export function PipelineLeadCardView(props: {
       <div
         className="mt-3 flex flex-wrap items-center gap-2"
         data-pipeline-card-actions="true"
-        onPointerDown={stopCardDrag}
-        onMouseDown={stopCardDrag}
         onDragStart={preventNativeDrag}
       >
         {primary ? (
@@ -1004,8 +999,6 @@ export function PipelineLeadCardView(props: {
                 draggable={false}
                 aria-label="More actions"
                 data-pipeline-more-trigger="true"
-                onPointerDown={stopCardDrag}
-                onMouseDown={stopCardDrag}
               >
                 More
               </button>
