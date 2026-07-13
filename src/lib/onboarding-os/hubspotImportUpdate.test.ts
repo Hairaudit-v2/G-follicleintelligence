@@ -103,7 +103,7 @@ describe("createFiLeadFromHubspotContact existing mapping update", () => {
               resolve({ data: [], error: null });
               return;
             }
-            if (table === "fi_cases") {
+            if (table === "fi_intakes") {
               resolve({ data: [], error: null });
               return;
             }

@@ -268,12 +268,13 @@ async function loadDuplicateCheckIndex(
 ): Promise<DuplicateCheckCandidateIndex> {
   const tid = tenantId.trim();
 
-  const [personsRes, leadsRes, patientsRes, casesRes, mappingsRes, personSourceRes] =
+  const [personsRes, leadsRes, patientsRes, intakesRes, mappingsRes, personSourceRes] =
     await Promise.all([
       supabase.from("fi_persons").select("id, metadata").eq("tenant_id", tid),
       supabase.from("fi_crm_leads").select("id, person_id, summary, metadata").eq("tenant_id", tid),
       supabase.from("fi_patients").select("id, person_id, metadata").eq("tenant_id", tid),
-      supabase.from("fi_cases").select("id, email, full_name").eq("tenant_id", tid),
+      // Case identity (email / full name) lives on fi_intakes, not fi_cases.
+      supabase.from("fi_intakes").select("case_id, email, full_name").eq("tenant_id", tid),
       supabase
         .from("fi_external_record_mappings")
         .select("external_id, source_entity_type, fi_entity_type, fi_entity_id")
@@ -289,7 +290,7 @@ async function loadDuplicateCheckIndex(
   if (personsRes.error) throw new Error(personsRes.error.message);
   if (leadsRes.error) throw new Error(leadsRes.error.message);
   if (patientsRes.error) throw new Error(patientsRes.error.message);
-  if (casesRes.error) throw new Error(casesRes.error.message);
+  if (intakesRes.error) throw new Error(intakesRes.error.message);
 
   const personCandidates = (personsRes.data ?? []).map((r) =>
     personRowToDuplicateCandidate(r as { id: string; metadata: unknown })
@@ -318,9 +319,14 @@ async function loadDuplicateCheckIndex(
     };
   });
 
-  const cases = (casesRes.data ?? []).map((r) =>
-    caseRowToDuplicateCandidate(r as { id: string; email: string | null; full_name: string | null })
-  );
+  const cases = (intakesRes.data ?? []).map((r) => {
+    const row = r as { case_id: string; email: string | null; full_name: string | null };
+    return caseRowToDuplicateCandidate({
+      id: row.case_id,
+      email: row.email,
+      full_name: row.full_name,
+    });
+  });
 
   const externalMappings: Array<DuplicateCheckCandidateIndex["externalMappings"][number]> = [];
 
