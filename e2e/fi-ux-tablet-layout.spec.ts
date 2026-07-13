@@ -119,22 +119,22 @@ authenticatedTest.describe("FI OS tablet layout @authenticated", () => {
     );
   });
 
-  authenticatedTest("Workforce Intelligence Centre scrolls to page bottom at 1440x900", async ({ page }) => {
+  authenticatedTest("Team overview scrolls to page bottom at 1440x900", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`${BASE()}/workforce-os`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(
-      page.getByRole("heading", { name: "Workforce Intelligence Centre", exact: true }),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "Team overview", exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
 
     await expectMainColumnScrollable(page, page.getByTestId("workforce-os-page-bottom"));
   });
 
-  authenticatedTest("Workforce Intelligence Centre scrolls at tablet width", async ({ page }) => {
+  authenticatedTest("Team overview scrolls at tablet width", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto(`${BASE()}/workforce-os`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await expect(
-      page.getByRole("heading", { name: "Workforce Intelligence Centre", exact: true }),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "Team overview", exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
 
     await expectMainColumnScrollable(page, page.getByTestId("workforce-os-page-bottom"));
   });

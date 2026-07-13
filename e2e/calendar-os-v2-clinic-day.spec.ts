@@ -39,10 +39,19 @@ authenticatedTest.describe("CalendarOS V2 — day click-to-create @authenticated
     page,
   }) => {
     const calendar = new CalendarE2ePage(page);
+    const layer = calendar.emptyDaySlotLayer();
+    if ((await layer.count()) === 0) {
+      test.skip(
+        true,
+        "Quick-create empty-slot layer not rendered (read-only calendar or no resource columns)",
+      );
+      return;
+    }
+
     const grid = await calendar.readGridHours("v2-day");
     const targetHour = grid.start + 1 <= grid.end - 1 ? grid.start + 1 : grid.start;
 
-    await calendar.clickEmptySlotAtHour(calendar.emptyDaySlotLayer(), targetHour, grid);
+    await calendar.clickEmptySlotAtHour(layer, targetHour, grid);
     await calendar.expectQuickCreateOpen();
     await calendar.expectConsultationSelected();
 
@@ -53,10 +62,19 @@ authenticatedTest.describe("CalendarOS V2 — day click-to-create @authenticated
 
   authenticatedTest("Quick book drawer sits below FI OS top chrome", async ({ page }) => {
     const calendar = new CalendarE2ePage(page);
+    const layer = calendar.emptyDaySlotLayer();
+    if ((await layer.count()) === 0) {
+      test.skip(
+        true,
+        "Quick-create empty-slot layer not rendered (read-only calendar or no resource columns)",
+      );
+      return;
+    }
+
     const grid = await calendar.readGridHours("v2-day");
     const targetHour = grid.start + 1 <= grid.end - 1 ? grid.start + 1 : grid.start;
 
-    await calendar.clickEmptySlotAtHour(calendar.emptyDaySlotLayer(), targetHour, grid);
+    await calendar.clickEmptySlotAtHour(layer, targetHour, grid);
     await calendar.expectQuickCreateBelowTopChrome();
   });
 

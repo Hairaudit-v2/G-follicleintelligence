@@ -50,11 +50,14 @@ test.describe("FI operational day — security @smoke", () => {
 authenticatedTest.describe("FI operational day — authenticated @authenticated @smoke", () => {
   authenticatedTest("tenant admin can open reception board", async ({ page }) => {
     const tid = e2eTenantId();
+    // Legacy /reception-board redirects to Front Desk Today (S3.4E).
     await page.goto(`/fi-admin/${tid}/reception-board`);
-    await expect(page.locator("body")).toBeVisible();
-    await expect(page.getByText(/reception|operational|appointments/i).first()).toBeVisible({
+    await expect(page).toHaveURL(new RegExp(`/fi-admin/${tid}/front-desk/?$`), {
       timeout: 20_000,
     });
+    await expect(
+      page.getByText(/today|front desk|arriving soon|take payment|find patient/i).first(),
+    ).toBeVisible({ timeout: 20_000 });
   });
 
   authenticatedTest("procedure day nav hidden when flag off", async ({ page }) => {

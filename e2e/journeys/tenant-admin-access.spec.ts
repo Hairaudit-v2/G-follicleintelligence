@@ -44,7 +44,10 @@ test.describe("tenant admin access @authenticated", () => {
     await login.signIn("e2e-invalid@example.test", "not-a-real-password");
 
     await expect(page).toHaveURL(/error=invalid_credentials/);
-    await expect(page.getByRole("alert")).toContainText(/invalid email or password/i);
+    // Prefer text filter — Next.js `__next-route-announcer__` also uses role="alert".
+    await expect(
+      page.getByRole("alert").filter({ hasText: /invalid email or password/i }),
+    ).toBeVisible();
     await context.close();
   });
 });
