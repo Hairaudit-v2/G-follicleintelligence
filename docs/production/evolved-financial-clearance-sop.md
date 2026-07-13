@@ -34,8 +34,8 @@
   - `booking_type = surgery`
   - Status changes to **confirmed**
   - Procedure is within the **14-day** tenant window
-  - FinancialOS clearance state is explicitly **`not_ready`**
-- The guard does **not** block when clearance is `unavailable` (insufficient financial signal) or when no manual payment record exists.
+  - FinancialOS reports `financially_safe_to_proceed !== true`
+- This means `unavailable`, `attention_required`, `pathway_pending`, `not_ready`, and any other non-safe clearance state blocks confirmation inside the window. Operators must create/repair the Money record, pathway, invoice, or documented finance-admin sign-off before confirming.
 
 ---
 
@@ -93,7 +93,7 @@ Complete **morning of surgery** for each patient on the OR list. Retain copy (pa
 | 1 | Surgery booking status = **confirmed** (or arrived per clinic policy) | | |
 | 2 | Manual surgery payment record exists **or** finance admin documented why N/A | | |
 | 3 | Deposit verified by finance/reception (not UI badge alone) | | |
-| 4 | FinancialOS clearance ≠ `not_ready` / `attention_required` **or** finance admin override on file | | |
+| 4 | Money / FinancialOS clearance is safe to proceed (`financially_safe_to_proceed = true`) **or** finance admin override on file | | |
 | 5 | No open finance dispute on case (refund, chargeback, pathway rejection) | | |
 | 6 | Patient identity and consent proxy verified (separate clinical checklist) | | |
 

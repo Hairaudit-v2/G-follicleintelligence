@@ -3,6 +3,7 @@
  *
  * Tier A: HTTP security + payload validation (deployed host)
  * Tier B: Loader validation (service role, optional)
+ * Tier B2: Staff mapping completeness (service role, fails smoke on gaps)
  * Tier C: Full journey mutations (--execute + FI_OPERATIONAL_SMOKE_ALLOW_MUTATIONS=1)
  *
  * Usage:
@@ -13,7 +14,8 @@
  *   FI_BASE_URL, FI_SMOKE_TENANT_ID — HTTP tier
  *   FI_ADMIN_API_KEY — optional authenticated API checks
  *   FI_SMOKE_OTHER_TENANT_ID — cross-tenant checks
- *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — loader/journey tier
+ *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — loader/journey/staff-mapping tier
+ *   FI_OPERATIONAL_SMOKE_SKIP_STAFF_MAPPING=1 — skip staff mapping audit (local only)
  *   FI_OPERATIONAL_SMOKE_ALLOW_MUTATIONS=1 — required for --execute
  */
 import { spawnSync } from "node:child_process";
@@ -203,6 +205,48 @@ async function runLoaderTier(tid) {
   else skip("loader_tier", `loader exit ${proc.status ?? "unknown"} (network/Supabase — HTTP tier still valid)`);
 }
 
+function runStaffMappingTier(tid) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!url || !key) {
+    skip("staff_mapping_audit", "Supabase credentials not set");
+    return;
+  }
+  if (process.env.FI_OPERATIONAL_SMOKE_SKIP_STAFF_MAPPING === "1") {
+    skip("staff_mapping_audit", "FI_OPERATIONAL_SMOKE_SKIP_STAFF_MAPPING=1");
+    return;
+  }
+
+  console.log("--- Staff mapping tier ---");
+  const patchServer = resolve(process.cwd(), "scripts/patch-server-only-for-scripts.cjs");
+  const tsx = resolve(process.cwd(), "node_modules/tsx/dist/cli.mjs");
+  const script = resolve(process.cwd(), "scripts/audit-staff-mapping-completeness.ts");
+  if (!existsSync(script)) {
+    fail("staff_mapping_audit", "audit-staff-mapping-completeness.ts not found");
+    return;
+  }
+
+  const proc = spawnSync(
+    process.execPath,
+    ["-r", patchServer, tsx, script],
+    {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        FI_SMOKE_TENANT_ID: tid,
+      },
+    }
+  );
+  if (proc.status === 0) {
+    pass("staff_mapping_audit", "all linked operators have fi_staff + access signal");
+  } else {
+    fail(
+      "staff_mapping_audit",
+      `exit ${proc.status ?? "unknown"} — run npm run audit:staff-mapping and repair fi_staff / grants`
+    );
+  }
+}
+
 function runJourneyTier() {
   if (!process.argv.includes("--execute")) {
     skip("journey_tier", "pass --execute to run mutations");
@@ -290,6 +334,7 @@ function writeReport(tid, manifest) {
     "- Reception Board: HTTP API + loader orchestration",
     "- Calendar feed: forbidden-key guard on operational feed items",
     "- Procedure Day: hidden when `FI_PROCEDURE_DAY_ENABLED` is off",
+    "- Staff mapping: `audit-staff-mapping-completeness` when Supabase env is set",
     "- Patient Journey: `procedure_completed` after live workflow completion",
     "",
     "## Run command",
@@ -314,6 +359,7 @@ async function main() {
 
   await runHttpTier(tid);
   await runLoaderTier(tid);
+  runStaffMappingTier(tid);
   const manifest = runJourneyTier();
 
   console.log("---");

@@ -9,6 +9,7 @@
  *
  * Never prints secret values.
  */
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
@@ -250,6 +251,40 @@ async function main(): Promise<void> {
     skip("G Timely positive path", "skipped — discovery POST always persists payload; no dry read endpoint wired");
   } else {
     skip("G Timely positive path", "FI_TIMELY_WEBHOOK_SECRET not set or too short in runner env");
+  }
+
+  // L — Staff mapping completeness (read-only; requires Supabase service role)
+  {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+    if (!supabaseUrl || !serviceKey) {
+      skip(
+        "L staff mapping audit",
+        "NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — run npm run audit:staff-mapping separately"
+      );
+    } else {
+      const patchServer = resolve(process.cwd(), "scripts/patch-server-only-for-scripts.cjs");
+      const tsx = resolve(process.cwd(), "node_modules/tsx/dist/cli.mjs");
+      const script = resolve(process.cwd(), "scripts/audit-staff-mapping-completeness.ts");
+      const proc = spawnSync(
+        process.execPath,
+        ["-r", patchServer, tsx, script],
+        {
+          stdio: "inherit",
+          env: {
+            ...process.env,
+            FI_SMOKE_TENANT_ID: tid,
+          },
+        }
+      );
+      if (proc.status !== 0) {
+        fail(
+          "L staff mapping audit",
+          `exit ${proc.status ?? "unknown"} — linked operators missing fi_staff or access signal`
+        );
+      }
+      pass("L staff mapping audit", "all linked operators mapped");
+    }
   }
 
   console.log("---");

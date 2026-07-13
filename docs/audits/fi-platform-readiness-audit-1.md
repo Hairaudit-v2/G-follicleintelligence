@@ -28,6 +28,27 @@ Follicle Intelligence is a **deep vertical platform codebase** with real multi-t
 
 **Do not treat route existence, dual-run mounts, unit test volume, or smoke PASS as production completeness.**
 
+### Repair pass — 2026-07-13
+
+Recent corrections found in the codebase:
+
+| Audit item | Current evidence | Status |
+| ---------- | ---------------- | ------ |
+| Role-based post-login landing | `src/lib/fiOs/fiOsRedirect.server.ts` + `src/lib/fiOs/fiOsRoleLandingCore.ts` route clinic roles to Front desk / Pipeline / Doctor / Money / Today, not `/cases`; `docs/fi-os-access-production.md` validation table updated. | **Implemented; validate with production-like login smoke.** |
+| Frontline navigation | `src/lib/fiAdmin/fiOsMinimalNav.ts` and `src/lib/fiOs/navigation/fiOsNavigationRegroupingCore.ts` put Front desk on the collapsed rail and move Reports into More. | **Implemented; keep tablet/browser-overflow checks.** |
+| Pipeline canonical door | `/fi-admin/[tenantId]/leadflow` soft-redirects to `/crm`; shell tests map legacy pipeline routes to the Pipeline tab. | **Implemented; still needs Evolved tenant V1 cutover evidence.** |
+| Money/payments narrative | `/payments` now shows an intentional disabled state when `FI_PAYMENTS_ENABLED` is off and directs staff to Money. | **Implemented; SOP/training sign-off still required.** |
+| Surgery financial clearance guard | `updateBooking` now calls `assertSurgeryBookingConfirmationFinancialClearance`; within 14 days, surgery booking confirmation blocks unless `financially_safe_to_proceed === true`. Finance SOP and evidence audit updated to match. | **Partially implemented; staging proof and procedure-day SOP sign-off remain blocking.** |
+| Staff mapping completeness | `scripts/audit-staff-mapping-completeness.ts`; wired into `smoke:operational-day` and `smoke:prod` when Supabase env is set. | **Implemented; fails smoke on unmapped operators — run against Evolved production credentials.** |
+
+Remaining highest-impact blockers before broad daily use:
+
+1. Attach production evidence for real Evolved staff mapping, role-login paths, and staging financial-guard behavior.
+2. Complete DR/PITR/storage restore evidence and cron/secrets evidence.
+3. Decide procedure-day product posture (enabled with staff/room discipline or explicitly out of go-live scope).
+4. Prove reception cold-load performance and manual multi-role UAT.
+5. Close Calendar SoR SOP for Google-staged events versus FI bookings.
+
 ---
 
 ## 2. Readiness scorecard

@@ -165,7 +165,11 @@ With **`NODE_ENV=production`** (e.g. `next start`):
 |----------------|----------------------------------------|
 | OS `fi_admin` | `/fi-admin` |
 | OS `fi_auditor` | `/hair-audit/admin` |
-| OS clinic role or member via `fi_users` only | `/fi-admin/[tenantId]/cases` for first membership row |
+| OS `fi_consultant` | `/fi-admin/[tenantId]/crm` |
+| OS `fi_doctor` | `/fi-admin/[tenantId]/doctor` |
+| OS `fi_nurse` | `/fi-admin/[tenantId]/front-desk` |
+| OS `fi_clinic_admin` | `/fi-admin/[tenantId]` |
+| Member via `fi_users` only | Role/workspace hints choose Front desk, Pipeline, Money, Team, or Today; fallback is `/fi-admin/[tenantId]` |
 
 ### 5. Non-authorised access
 

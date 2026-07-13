@@ -11,12 +11,12 @@
 
 | Question | Answer |
 |----------|--------|
-| Can surgery proceed without verified payment clearance? | **Yes** — no hard server gate blocks procedure progression |
+| Can surgery proceed without verified payment clearance? | **Partially mitigated** — booking confirmation inside the 14-day window is now blocked unless FinancialOS reports `financially_safe_to_proceed === true`; later procedure-day progression still needs SOP sign-off |
 | Can staff mistake manual payments for live card capture? | **Yes, risk remains** — UI shows paid/clear labels from manual rows; copy exists in model layer but enforcement is advisory |
 | Is Stripe required for Evolved go-live? | **No** for FI-PH1 if manual tracking + ops checklist used |
-| Is FinancialOS clearance enforced? | **No** — explicitly advisory |
+| Is FinancialOS clearance enforced? | **Partially** — enforced for surgery booking confirmation within the 14-day window through `updateBooking`; advisory elsewhere |
 
-**Verdict:** BLK-FIN-01 **validated** (risk real, mitigations partial). BLK-FIN-02 **validated** (gate incomplete). Both **still blocking** without ops mitigations + optional P1 code hardening in Task 5.
+**Verdict:** BLK-FIN-01 **validated** (risk real, mitigations partial). BLK-FIN-02 **partially code-mitigated** by the Task 5 confirmation guard, but **still blocking** until SOP/training sign-off and staging evidence are attached.
 
 ---
 
@@ -82,9 +82,9 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 - Handler: `app/api/cron/financial-os/clearance-snapshots/route.ts`
 - Persists snapshots for dashboard/Tomorrow board — **does not block mutations**
 
-### Blocking logic exists but is not wired to surgery mutations
+### Blocking logic now wired to surgery booking confirmation
 
-`buildWorkflowBlockers` can emit *"Surgery within clearance window with unresolved funds"* — surfaced in UI counts (`financialClearanceAttention`) only.
+`updateBooking` calls `assertSurgeryBookingConfirmationFinancialClearance` before a surgery booking can transition to `confirmed` inside the tenant 14-day window. The guard blocks whenever `financially_safe_to_proceed !== true`.
 
 ---
 
@@ -118,14 +118,14 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 | **P0** | Manual `paid` status trusted like bank confirmation | Revenue loss / wrong-day surgery |
 | **P0** | No row = treated as financially OK on procedure day | Unpaid surgery |
 | **P1** | Stripe + manual records diverge | Reconciliation errors |
-| **P1** | Clearance engine advisory only | Ops bypass without audit |
+| **P1** | Clearance engine only hard-blocks booking confirmation | Ops can still bypass later procedure-day steps without SOP/audit |
 | **P2** | `fi-payments/reminders` cron not in `vercel.json` | Missed revenue signals if invoices enabled |
 
 ---
 
 ## Missing safety gates
 
-1. **Hard gate** on surgery booking status transition → `financially_cleared` or verified invoice paid
+1. **Procedure-day hard gate** beyond booking confirmation, or explicit accepted-risk sign-off
 2. **Require** deposit rule + invoice OR manual record before confirming surgery booking
 3. **Stripe → manual record** reconciliation job (or single SoR)
 4. **Staff training** artifact signed (outside code)
@@ -149,7 +149,7 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 | R1 | Staff training: manual records ≠ POS; Stripe separate | Evolved ops | **P0 go-live** |
 | R2 | Mandate manual surgery payment record before booking confirm | Evolved ops SOP | **P0 go-live** |
 | R3 | Vercel env: keep Stripe disabled until dedupe + webhook smoke | Platform | P1 |
-| R4 | Add server guard on surgery status → clearance (minimal diff) | Engineering | **Task 5** candidate |
+| R4 | Add server guard on surgery status → clearance (minimal diff) | Engineering | **Done — verify in staging** |
 | R5 | Schedule `fi-payments/reminders` when invoices live | Platform | P1 |
 
 ---
@@ -187,10 +187,10 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 
 - Blocks only when transitioning **surgery** booking to **`confirmed`**
 - Procedure within tenant **14-day** window (same window as surgery readiness board)
-- FinancialOS clearance state is explicitly **`not_ready`**
-- Does **not** block: `unavailable`, `attention_required`, other states, or surgeries outside 14 days
-- Does **not** block when no payment record exists (clearance stays `unavailable` or non-blocking states)
-- Error message: operational text directing staff to FinancialOS or finance admin sign-off
+- FinancialOS reports `financially_safe_to_proceed !== true`
+- Blocks `unavailable`, `attention_required`, `pathway_pending`, `not_ready`, and any other non-safe state
+- Does **not** block surgeries outside 14 days, or non-confirmation transitions
+- Error message: operational text directing staff to Money or finance admin sign-off
 
 **Deferred (not in scope):** Hard gate on `arrived`/`completed`, Stripe→manual sync, require payment record before confirm.
 
@@ -203,7 +203,7 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 | E1 | Financial SOP signed ([evolved-financial-clearance-sop.md](../evolved-financial-clearance-sop.md)) | SOP §6 sign-off table | Financial ops | | ☐ |
 | E2 | Staff training ack: manual records ≠ Stripe proof | SOP §6 training table | Financial ops | | ☐ |
 | E3 | Procedure-day checklist assigned (reception + finance) | SOP §5 + named contacts | Clinical ops | | ☐ |
-| E4 | Guard behaviour verified in staging (confirm blocked when `not_ready` within 14d) | Test note / screenshot | Engineering | | ☐ |
+| E4 | Guard behaviour verified in staging (confirm blocked when clearance is not financially safe within 14d, including `unavailable`) | Test note / screenshot | Engineering | | ☐ |
 | E5 | Finance admin acknowledges dual-truth if invoices enabled later | SOP or change log | Financial ops | | ☐ |
 
 **Closure rule:**
