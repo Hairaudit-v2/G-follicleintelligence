@@ -349,6 +349,66 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 
 ---
 
+## 1h. Live browser bake (Harsh / admin harsh session)
+
+**Date:** 2026-07-13  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (platform-admin **impersonation** session)
+
+### Session identity (resolved)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`harsh@evolvedhair.com.au`** |
+| Greeting | **"Good afternoon, harsh"** — impersonation target chrome **PASS** |
+| Profile email (CDP) | **`harsh@evolvedhair.com.au`** ✓ |
+| Impersonation UI | **PASS** — `Exit impersonation` + body text "impersonating harsh" |
+| Profile menu | **System administration** · Switch workspace · Sign out |
+| Workspace badge | Not surfaced in shell chrome (no Director/Consultant/Finance workspace label) |
+| Platform signals | **Today home** shows **Platform · System diagnostics** section; Money page shows **Operators · System diagnostics** |
+
+**Conclusion:** First live finance-adjacent session for Evolved. Session is **platform-admin impersonation of harsh**, not a raw staff password login. **`finance_admin` not confirmed** — landing stayed on **Today** (not `/financial-os`); profile retains **System administration** link (platform-operator path). Treat as **tenant admin / finance-adjacent impersonation** until `fi_tenant_admin_users.admin_role` is verified for harsh.
+
+### Check matrix (harsh impersonation)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Session identity | **PASS** | `/fi-admin/c2615b95-…` | Greeting harsh; email `harsh@evolvedhair.com.au`; Exit impersonation |
+| 2 | Bare tenant home landing | **PARTIAL (P2)** | `/fi-admin/c2615b95-…` | Stays **Today home** — unit expects **`/financial-os`** for `finance_admin` |
+| 3 | Primary rail | **PARTIAL** | — | **4 visible slots:** Today · Front desk · Team · More (Calendar/Patients not on rail at viewport width) |
+| 4 | More drawer (finance) | **PASS** | — | Pipeline · Patients · Surgery · **Finance → Money** · Reports · Settings |
+| 5 | `/financial-os` Money hub | **PASS** | `/financial-os` | Title **Money**; single-finance-door copy; health snapshot loads |
+| 6 | Manual payment truth banner | **PASS** | `/financial-os` | **Manual payment tracking** — "Online card capture is off… operational tracking — not POS or bank settlement proof. Verify deposits with finance before surgery day" |
+| 7 | Deposit / clearance copy | **PASS** | `/financial-os` | **Deposits due** tile; "No outstanding surgery deposits"; consultation-to-revenue bridge includes deposit coverage |
+| 8 | `/payments` disabled state | **PASS** | `/payments` | Honest **`FI_PAYMENTS_ENABLED is off`** + link to Money |
+| 9 | Payment records / ledger | **PARTIAL** | `/financial/payments` | Page loads (**Finances · Payments**); header mentions "Stripe and manual"; **no rows** — row-level manual vs provider labels **unverified** |
+| 10 | `/crm` Pipeline hold | **FAIL (expected gate)** | `/cases` | Brief "Pipeline" flash, then **redirect to Surgery** |
+| 11 | `/leadflow` → `/crm` | **PARTIAL** | `/cases` | Legacy redirect fires; CRM shell **does not hold** — settles on `/cases` |
+| 12 | Platform diagnostics on Today | **OBSERVED** | `/fi-admin/c2615b95-…` | Platform-only section visible — consistent with platform-operator wrapper, not pure finance persona |
+
+### Money narrative verdict
+
+| Surface | Result |
+| ------- | ------ |
+| Money hub landing + labels | **PASS** |
+| Manual vs provider truth (banner) | **PASS** |
+| `FI_PAYMENTS_ENABLED` disabled | **PASS** |
+| Deposit / financial clearance copy | **PASS** |
+| Payment row source labelling | **PARTIAL** — empty tenant; no live payment rows |
+
+### Top defects
+
+| ID | Class | Finding |
+| -- | ----- | ------- |
+| BAKE-1-LIVE-06 | **P2** | Bare tenant home for harsh session lands **Today**, not **`/financial-os`** — blocks finance-admin landing sign-off until role confirmed |
+| BAKE-1-LIVE-07 | **P2** | Harsh session retains **System administration** profile + Platform diagnostics — persona ambiguous (platform wrapper vs dedicated `finance_admin`) |
+| MONEY-LIVE-01 | **P3** | Payment list empty — manual vs Stripe **row labels** not live-verified (`DEF-MONEY-01` follow-up) |
+
+**Follow-up:** Confirm `fi_tenant_admin_users.admin_role` for `harsh@evolvedhair.com.au`; re-bake with raw finance-admin login (no platform wrapper) for landing redirect and CRM gate expectations.
+
+---
+
 ## 2. Environment and fixture limitations
 
 | Limitation | Impact | Status |
