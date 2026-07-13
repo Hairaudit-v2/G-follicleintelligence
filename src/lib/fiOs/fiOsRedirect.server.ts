@@ -13,6 +13,10 @@ import {
 import { resolveWorkspaceProfileKeyFromSignals } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import { resolveFiOsPostLoginPathSuffix } from "@/src/lib/fiOs/fiOsRoleLandingCore";
 import { resolveWorkspaceStaffRoleKey } from "@/src/lib/fiOs/workspaceAccessResolverCore";
+import {
+  normalizeFiTenantAdminRole,
+  type FiTenantAdminRole,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 async function loadAuthMetadataTenantId(authUserId: string): Promise<string | null> {
   const supabase = supabaseAdmin();
@@ -31,7 +35,7 @@ async function loadLandingHintsForAuthUser(
   osRole: string | null
 ): Promise<{
   staffRoleKey: string | null;
-  tenantAdminRole: string | null;
+  tenantAdminRole: FiTenantAdminRole | null;
   workspaceProfile: string | null;
 }> {
   if (!preferredTenantId?.trim() || !authUserId.trim()) {
@@ -91,16 +95,18 @@ async function loadLandingHintsForAuthUser(
       roleCode: null,
     });
 
+    const normalizedTenantAdminRole = normalizeFiTenantAdminRole(tenantAdminRole);
+
     const workspaceProfile = resolveWorkspaceProfileKeyFromSignals({
       explicitWorkspaceProfile: staffMetadata?.workspace_profile,
       staffRole,
-      tenantAdminRole,
+      tenantAdminRole: normalizedTenantAdminRole,
       fiOsRole: osRole,
     });
 
     return {
       staffRoleKey: roleKey ?? (staffRole?.trim() || null),
-      tenantAdminRole: tenantAdminRole?.trim() || null,
+      tenantAdminRole: normalizedTenantAdminRole,
       workspaceProfile,
     };
   } catch {

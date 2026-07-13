@@ -93,6 +93,7 @@ function readLocalEnvValue(key) {
 }
 
 const machineIngestKey = readLocalEnvValue("FI_MACHINE_INGEST_MASTER_KEY") ?? secret(48);
+const evolvedTenantId = readLocalEnvValue("EVOLVED_PERTH_TENANT_ID");
 
 const additions = [
   {
@@ -145,6 +146,15 @@ const additions = [
     value: "0",
     environments: ["production", "preview"],
   },
+  ...(evolvedTenantId
+    ? [
+        {
+          name: "FI_PIPELINE_V1_TENANT_ALLOWLIST",
+          value: evolvedTenantId,
+          environments: ["production", "preview"],
+        },
+      ]
+    : []),
   {
     name: "WORKFORCE_COMPLIANCE_CRON_SECRET",
     value: secret(24),
