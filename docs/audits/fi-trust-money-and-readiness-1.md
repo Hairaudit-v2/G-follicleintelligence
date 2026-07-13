@@ -67,4 +67,21 @@ Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finan
 
 **CRM access:** `finance_admin` does **not** grant CRM shell nav (`tenantAdminRoleAllowsCrmShellNav` = false) — unlike `clinic_admin`. Pipeline access may be limited; finance persona focuses on Money hub.
 
-**Live bake:** Pending user re-login. Expect **Money** landing; workspace badge **Finance** (`finance_admin` → `finance` workspace via position type + tenant-admin derivation).
+### Finance live bake (2026-07-13T19:31 AEST — post `eaee3da3`)
+
+**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a` after `finance_admin` reclassify (`e8fab6d2`) + finance workspace profile fix (`eaee3da3`; Supabase `workspace_profile=finance`). Tool: cursor-ide-browser MCP.
+
+| Check | Result |
+| ----- | ------ |
+| Money hub (`/financial-os`) | **PASS** — title Money, health snapshot, finance CTAs |
+| Manual payment truth banner | **PASS** — amber banner; not POS/bank proof |
+| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** — honest disabled state + Money link |
+| Deposit / clearance language | **PASS** — Deposits due tile + consultation-to-revenue bridge |
+| Finance-admin landing redirect | **PASS** — bare tenant home → **`/financial-os`** (brief Home flash) |
+| Workspace badge | **FAIL (P1)** — shell shows **Director workspace**, not **Finance** |
+| CRM gate (`/crm`) | **PASS** (expected) — Pipeline flash → **`/cases`** |
+| Primary rail + More drawer | **PASS** — 4-slot rail (Today · Front desk · Team · More); More has Finance → Money, Reports, Pipeline |
+
+**Verdict:** Money trust copy, disabled-payments honesty, and **`finance_admin` landing redirect PASS** on production. **Workspace badge still resolves to Director** — `eaee3da3` code/migration may not be deployed to production yet, or impersonation session cache stale; re-bake after deploy + hard refresh required for persona sign-off.
+
+Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).

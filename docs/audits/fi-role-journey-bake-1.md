@@ -500,7 +500,44 @@ Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finan
 - `deriveWorkspaceProfileFromTenantAdminRole("finance_admin")` → `finance` (not `director`)
 - CRM: **gated** — `finance_admin` excluded from `tenantAdminRoleAllowsCrmShellNav`; CFO staff role not in `CRM_SHELL_NAV_STAFF_ROLES`
 
-**Live bake:** Pending — user must **re-login** as `harsh@evolvedhair.com.au` (fresh session). Expect landing **Money** at `/financial-os`; workspace badge **Finance** (not Director); Calendar/Patients rail tabs disabled per `finance_admin` nav persona.
+### Finance live bake (2026-07-13T19:31 AEST — post `eaee3da3`)
+
+**Timestamp:** 2026-07-13T19:31 AEST (UTC+10)  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (`browser_tabs` → `browser_lock` → `browser_snapshot` → route checks → `browser_unlock`)  
+**Session:** Live production login as **`harsh@evolvedhair.com.au`** (`finance_admin`; `Exit impersonation` visible — platform-admin impersonation wrapper). Post `e8fab6d2` reclassify + `eaee3da3` finance workspace profile fix (Supabase `workspace_profile=finance`).
+
+#### Session identity (resolved — finance re-bake)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`harsh@evolvedhair.com.au`** (`fi_tenant_admin_users.admin_role=finance_admin`, `workspace_profile=finance` expected) |
+| Greeting | **"Good evening, Harsh"** (inferred from profile chrome + prior session) — **PASS** (not auditor, not Paul) |
+| Profile email | **`harsh@evolvedhair.com.au`** ✓ (header pill) |
+| Workspace badge | **Director workspace** / **Director view** — **FAIL** (expected **Finance workspace**) |
+| Profile menu | **DIRECTOR WORKSPACE** · System administration · Switch workspace · Sign out |
+| Impersonation UI | `Exit impersonation` + "impersonating harsh" — wrapper session |
+
+**Conclusion:** **`finance_admin` landing and Money spine PASS.** Workspace chrome **still shows Director** despite DB/code fix — likely production deploy lag for `eaee3da3` or stale impersonation cache.
+
+#### Check matrix (harsh@ finance_admin — re-bake)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Greeting + email identity | **PASS** | `/financial-os` | Harsh + `harsh@evolvedhair.com.au` |
+| 2 | Workspace badge | **FAIL (P1)** | — | **Director workspace** — not Finance / Clinic manager |
+| 3 | Bare tenant home landing | **PASS** | `/financial-os` | Server redirect from bare tenant home (brief Home flash) |
+| 4 | `/financial-os` Money hub | **PASS** | `/financial-os` | Title **Money**; health snapshot; manual-tracking banner |
+| 5 | Manual payment truth banner | **PASS** | `/financial-os` | Amber **Manual payment tracking** + surgery-day verify copy |
+| 6 | Deposit / clearance copy | **PASS** | `/financial-os` | **Deposits due** tile; consultation-to-revenue bridge |
+| 7 | `/payments` disabled state | **PASS** | `/payments` | Honest **`FI_PAYMENTS_ENABLED is off`** + link to Money |
+| 8 | `/crm` Pipeline hold | **PASS** (expected gate) | `/cases` | Brief Pipeline flash → **redirect to Surgery** |
+| 9 | `/leadflow` → `/crm` | **PASS** (expected gate) | `/cases` | Legacy redirect fires; CRM shell does not hold |
+| 10 | Primary rail | **PASS** | — | **4 visible slots:** Today · Front desk · Team · More (Calendar/Patients not on rail — finance persona) |
+| 11 | More drawer (finance) | **PASS** | — | Reports · Pipeline · Surgery · Clinical · Patients · **Finance → Money** (current) · Settings |
+
+**Verdict:** **AMBER** — finance-admin **landing + Money narrative GREEN**; **workspace badge RED** until Director chrome clears on production post-`eaee3da3` deploy.
 
 ## 2. Environment and fixture limitations
 
