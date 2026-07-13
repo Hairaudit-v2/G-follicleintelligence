@@ -508,10 +508,10 @@ function auditPrimaryRail(
         ? "calendar"
         : item.id === "patients"
           ? "patients"
-          : item.id === "team"
-            ? "team"
-            : item.id === "reports"
-              ? "reports"
+          : item.id === "front-desk"
+            ? "front-desk"
+            : item.id === "team"
+              ? "team"
               : null;
     if (!navId) return false;
     const inSidebar = sidebar.some((s) => s.id === navId);
