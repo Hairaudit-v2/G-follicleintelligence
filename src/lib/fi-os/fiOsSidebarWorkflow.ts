@@ -29,8 +29,11 @@ export type FiOsWorkflowGroupId = FiOsD6gWorkflowGroupId;
 export const FI_OS_WORKFLOW_GROUP_LABELS: Record<FiOsWorkflowGroupId, string> =
   FI_OS_D6G_WORKFLOW_GROUP_LABELS;
 
-/** Consolidated workspaces that stay in More for sub-links while also on the primary rail. */
-const PRIMARY_RAIL_MORE_DRAWER_EXCEPTION_IDS = new Set(["team", "reports"]);
+/**
+ * Consolidated workspaces that stay in More for sub-links while also on the primary rail.
+ * Front desk + Team remain discoverable in More with tab sub-links when collapse is on.
+ */
+const PRIMARY_RAIL_MORE_DRAWER_EXCEPTION_IDS = new Set(["front-desk", "team"]);
 
 export type BuildFiOsSidebarWorkflowSectionsOptions = {
   workspaceProfile?: FiWorkspaceProfileKey | null;

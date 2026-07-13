@@ -82,6 +82,7 @@ test("prohibited detector allows approved operational labels", () => {
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Ready for surgery"), false);
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Team"), false);
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Team overview"), false);
+  assert.equal(staffLabelHasProhibitedArchitectureLanguage("Money"), false);
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Finances"), false);
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Insights"), false);
   assert.equal(staffLabelHasProhibitedArchitectureLanguage("Patients"), false);
@@ -221,7 +222,7 @@ test("role-oriented nav smoke: receptionist, clinical, finance, manager labels s
     false
   );
   const finLabels = collectLabels(finance);
-  assert.ok(finLabels.some((l) => l === "Finances" || l === "Payments"));
+  assert.ok(finLabels.some((l) => l === "Money" || l === "Take payment" || l === "Payments"));
   assert.ok(!finLabels.some((l) => /FinancialOS/i.test(l)));
 
   // Manager with HR + procedure day

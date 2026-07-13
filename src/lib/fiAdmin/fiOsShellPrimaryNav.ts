@@ -345,22 +345,23 @@ export function resolveFiOsPrimarySidebarItems(
       }),
     },
     {
-      id: "payments-inbox",
-      label: "Payments",
-      shortLabel: "Pay",
-      href: hrefFor(b, "payments"),
-      disabled: !showFiPaymentsInboxNav,
-      hint: !showFiPaymentsInboxNav
-        ? "Payments inbox is disabled (FI_PAYMENTS_ENABLED)."
-        : undefined,
-    },
-    {
       id: "financial-os",
       featureKey: "settings",
-      label: "Finances",
-      shortLabel: "Fin",
+      label: "Money",
+      shortLabel: "Money",
       href: hrefFor(b, "financial-os"),
       disabled: false,
+      hint: "Invoices, balances, pathways, and financial clearance.",
+      // When FI_PAYMENTS_ENABLED is off, no separate Payments row — Money is the single door.
+      subItems: showFiPaymentsInboxNav
+        ? [
+            {
+              id: "payments-inbox",
+              label: "Take payment",
+              href: hrefFor(b, "payments"),
+            },
+          ]
+        : undefined,
     },
     {
       id: "settings",

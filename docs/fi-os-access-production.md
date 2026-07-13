@@ -51,8 +51,15 @@ Implemented in `src/lib/fiOs/fiOsRedirect.server.ts` (after `fiOsPasswordSignInA
 |-----------|-----------|
 | OS `fi_auditor` | `/hair-audit/admin` |
 | OS `fi_platform_admin` / `fi_admin` | `/fi-admin` |
-| OS `fi_clinic_admin` / `fi_doctor` / `fi_nurse` / `fi_consultant` | First `fi_users` tenant → `/fi-admin/[tenantId]/cases`, else `/fi-admin` |
-| No OS row | First `fi_users` tenant → `/fi-admin/[tenantId]/cases`, else `/fi-admin` |
+| OS `fi_consultant` | First membership tenant → `/fi-admin/[tenantId]/crm` (Pipeline) |
+| OS `fi_doctor` | → `/fi-admin/[tenantId]/doctor` |
+| OS `fi_nurse` | → `/fi-admin/[tenantId]/front-desk` |
+| OS `fi_clinic_admin` | → `/fi-admin/[tenantId]` (Today) |
+| Staff role / workspace hints (when no OS specialty) | Reception → Front desk; consultant → Pipeline; finance admin → Money (`/financial-os`); default → Today |
+| Explicit safe `next` path | Honoured when membership allows |
+| Multi-tenant ambiguity | `/fi-admin` tenant picker |
+
+**FI-TRUST-LANDING-AND-SPINE-1:** post-login no longer defaults to `/cases`.
 
 ## `GET /api/tenants`
 

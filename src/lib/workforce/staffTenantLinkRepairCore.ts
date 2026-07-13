@@ -80,11 +80,27 @@ export function resolvePostLoginDestination(input: {
   membershipTenantIds: string[];
   metadataTenantId: string | null;
   defaultTenantPickerPath?: string;
+  /**
+   * Path under the tenant home after login (e.g. `/front-desk`, `/crm`).
+   * Empty string = tenant Today (`/fi-admin/[tenantId]`).
+   * @deprecated Prefer {@link defaultTenantHomeSuffix} — still accepted for call-site compat.
+   */
   defaultCasesSuffix?: string;
+  /** FI-TRUST-LANDING-AND-SPINE-1: role-based home suffix (default Today, not `/cases`). */
+  defaultTenantHomeSuffix?: string;
 }): string {
   const explicit = input.explicitNext?.trim() || null;
   const picker = input.defaultTenantPickerPath?.trim() || "/fi-admin";
-  const casesSuffix = input.defaultCasesSuffix?.trim() || "/cases";
+  // Prefer new name; fall back to legacy param; default to Today (empty), never /cases.
+  const rawSuffix =
+    input.defaultTenantHomeSuffix !== undefined
+      ? input.defaultTenantHomeSuffix
+      : input.defaultCasesSuffix !== undefined
+        ? input.defaultCasesSuffix
+        : "";
+  let homeSuffix = String(rawSuffix ?? "").trim();
+  if (homeSuffix === "/") homeSuffix = "";
+  if (homeSuffix && !homeSuffix.startsWith("/")) homeSuffix = `/${homeSuffix}`;
 
   if (explicit) {
     const explicitTenant = extractTenantIdFromFiAdminPath(explicit);
@@ -106,5 +122,5 @@ export function resolvePostLoginDestination(input: {
   }
 
   if (explicit) return explicit;
-  return `/fi-admin/${preferred}${casesSuffix}`;
+  return homeSuffix ? `/fi-admin/${preferred}${homeSuffix}` : `/fi-admin/${preferred}`;
 }

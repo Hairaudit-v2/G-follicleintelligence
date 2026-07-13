@@ -58,19 +58,20 @@ function flattenMoreIds(sections = moreSections()) {
   return new Set([...top, ...subs]);
 }
 
-test("primary rail still has exactly six slots and excludes Front desk", () => {
+test("primary rail has exactly six slots and includes Front desk", () => {
   assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
     "today",
     "calendar",
     "patients",
+    "front-desk",
     "team",
-    "reports",
     "more",
   ]);
   assert.equal(primaryRailSlotIds().length, 6);
   const labels = resolveFiOsMinimalNavItems(base, fullSidebar()).map((i) => i.label);
-  assert.ok(!labels.some((l) => /front desk|clinic flow|reception board|tomorrow/i.test(l)));
-  assert.ok(!isPrimaryRailNavId(FI_OS_FRONT_DESK_NAV_ID));
+  assert.ok(labels.some((l) => l === "Front desk"));
+  assert.ok(isPrimaryRailNavId(FI_OS_FRONT_DESK_NAV_ID));
+  assert.ok(!labels.some((l) => /clinic flow|reception board/i.test(l)));
 });
 
 test("More drawer contains Front desk grouping with consolidated destination", () => {
@@ -149,10 +150,10 @@ test("consolidated front desk paths activate the front-desk nav item", () => {
   );
 });
 
-test("front desk routes do not activate primary minimal rail slots", () => {
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/operations`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/reception-os`, base), null);
+test("front desk routes activate primary Front desk rail slot", () => {
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), "front-desk");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/operations`, base), "front-desk");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reception-os`, base), "front-desk");
 });
 
 test("Calendar route and minimal rail link remain unchanged", () => {

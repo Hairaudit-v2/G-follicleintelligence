@@ -78,8 +78,8 @@ test("primary rail still has exactly six slots and Team remains on rail", () => 
     "today",
     "calendar",
     "patients",
+    "front-desk",
     "team",
-    "reports",
     "more",
   ]);
   assert.equal(primaryRailSlotIds().length, 6);

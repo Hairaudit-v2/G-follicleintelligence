@@ -52,9 +52,9 @@ function linkFromRailSlot(
       ? `${b}/calendar`
       : slotId === "patients"
         ? `${b}/patients`
-        : slotId === "team"
-          ? `${b}/team`
-          : `${b}/reports`;
+        : slotId === "front-desk"
+          ? `${b}/front-desk`
+          : `${b}/team`;
 
   const missingFromSidebar = target == null;
 
@@ -69,8 +69,9 @@ function linkFromRailSlot(
 }
 
 /**
- * D6G-B six-slot primary rail. Calendar href/disabled state is derived from
- * primary sidebar items (unchanged); Search/New live in the top bar only.
+ * D6G-B / FI-TRUST-LANDING-AND-SPINE-1 six-slot primary rail.
+ * Today · Calendar · Patients · Front desk · Team · More
+ * Search/New live in the top bar only; Reports lives in More.
  */
 export function resolveFiOsMinimalNavItems(
   base: string,
@@ -80,8 +81,8 @@ export function resolveFiOsMinimalNavItems(
     linkFromRailSlot(base, "today", "Today", sidebarItems),
     linkFromRailSlot(base, "calendar", "Calendar", sidebarItems),
     linkFromRailSlot(base, "patients", "Patients", sidebarItems),
+    linkFromRailSlot(base, "front-desk", "Front desk", sidebarItems),
     linkFromRailSlot(base, "team", "Team", sidebarItems),
-    linkFromRailSlot(base, "reports", "Reports", sidebarItems),
     { id: "more", kind: "action", label: "More" },
   ];
 }
@@ -112,6 +113,16 @@ export function getFiOsMinimalNavActiveId(
   }
 
   if (
+    np.startsWith(`${nb}/front-desk`) ||
+    np.startsWith(`${nb}/reception`) ||
+    np.startsWith(`${nb}/reception-board`) ||
+    np.startsWith(`${nb}/operations`) ||
+    np.startsWith(`${nb}/tomorrow`)
+  ) {
+    return "front-desk";
+  }
+
+  if (
     np.startsWith(`${nb}/team`) ||
     np.startsWith(`${nb}/workforce-os`) ||
     np.startsWith(`${nb}/hr-os`) ||
@@ -119,18 +130,6 @@ export function getFiOsMinimalNavActiveId(
     np.startsWith(`${nb}/staff/`)
   ) {
     return "team";
-  }
-
-  if (
-    np.startsWith(`${nb}/reports`) ||
-    np.startsWith(`${nb}/analytics`) ||
-    np.startsWith(`${nb}/audit`) ||
-    np.startsWith(`${nb}/intelligence`) ||
-    np.startsWith(`${nb}/financial-os`) ||
-    np === `${nb}/payments` ||
-    np.startsWith(`${nb}/payments/`)
-  ) {
-    return "reports";
   }
 
   return null;

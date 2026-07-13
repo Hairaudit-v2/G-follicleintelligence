@@ -614,12 +614,13 @@ export function PipelineBoard(props: {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Desktop: horizontal board for active columns */}
-      <div className="hidden lg:block">
+    <div className="min-w-0 max-w-full space-y-4" data-testid="pipeline-board-root">
+      {/* Desktop: horizontal board for active columns — scroll stays inside this region, not the page. */}
+      <div className="hidden min-w-0 max-w-full lg:block">
         <div
-          className="flex gap-3 overflow-x-auto pb-2"
+          className="flex max-w-full gap-3 overflow-x-auto overscroll-x-contain pb-2"
           aria-label="Active pipeline stages"
+          data-testid="pipeline-board-h-scroll"
         >
           {active.map((col) => (
             <PipelineColumn

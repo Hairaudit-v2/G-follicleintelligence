@@ -32,8 +32,9 @@ test("receptionist: six-slot rail, staff-safe More, no admin routes", () => {
   const report = buildFiOsRolePermissionPreflightReport(tenantId, scenario);
 
   assert.match(report.matrixRow.primaryRail, /Today/);
+  assert.match(report.matrixRow.primaryRail, /Front desk/);
   assert.match(report.matrixRow.primaryRail, /Team\(off\)/);
-  assert.match(report.matrixRow.primaryRail, /Reports\(off\)/);
+  assert.doesNotMatch(report.matrixRow.primaryRail, /Reports/);
   assert.equal(report.matrixRow.adminIntelligenceAccess, "none");
   assert.equal(report.matrixRow.teamAccess, "no");
   assert.equal(report.matrixRow.surgeryAccess, "no");
@@ -41,7 +42,7 @@ test("receptionist: six-slot rail, staff-safe More, no admin routes", () => {
   assertFiOsRolePermissionPreflightPassed(report);
 });
 
-test("receptionist: team and reports rail slots disabled when feature-filtered", () => {
+test("receptionist: team rail slot disabled when feature-filtered", () => {
   const scenario = PREFLIGHT_ROLE_SCENARIOS.find((s) => s.persona === "receptionist")!;
   const featureMap = buildEffectiveFeatureAccessMapForScenario(scenario);
   assert.ok(featureMap);
@@ -55,11 +56,12 @@ test("receptionist: team and reports rail slots disabled when feature-filtered",
 
   const rail = resolveFiOsMinimalNavItems(base, sidebar);
   const teamRail = rail.find((i) => i.id === "team");
-  const reportsRail = rail.find((i) => i.id === "reports");
+  const frontRail = rail.find((i) => i.id === "front-desk");
   assert.equal(teamRail?.kind, "link");
-  assert.equal(reportsRail?.kind, "link");
+  assert.equal(frontRail?.kind, "link");
   if (teamRail?.kind === "link") assert.equal(teamRail.disabled, true);
-  if (reportsRail?.kind === "link") assert.equal(reportsRail.disabled, true);
+  // Front desk stays available on rail when still present in sidebar
+  if (frontRail?.kind === "link") assert.equal(frontRail.disabled, false);
 });
 
 test("receptionist: SA-1 blocks workforce and analytics modules", () => {
@@ -155,9 +157,8 @@ test("primary rail slots disabled when sidebar item filtered by feature access",
   const rail = resolveFiOsMinimalNavItems(base, filtered);
 
   const team = rail.find((i) => i.id === "team");
-  const reports = rail.find((i) => i.id === "reports");
   if (team?.kind === "link") assert.equal(team.disabled, true);
-  if (reports?.kind === "link") assert.equal(reports.disabled, true);
+  assert.equal(rail.find((i) => i.id === "reports"), undefined);
 });
 
 test("mutation guards: reception cannot edit roster or staff access", () => {

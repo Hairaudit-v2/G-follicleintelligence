@@ -433,13 +433,23 @@ test("repairStaffTenantLinkOnAuthConfirm links existing demo auth user to Evolve
   assert.equal(staff?.fi_user_id, evolvedUser?.id);
 });
 
-test("active staff with valid fi_user_id resolves to tenant cases path", () => {
+test("active staff with valid fi_user_id resolves to tenant Today path by default", () => {
   const dest = resolvePostLoginDestination({
     explicitNext: null,
     membershipTenantIds: [EVOLVED_TENANT],
     metadataTenantId: DEMO_TENANT,
   });
-  assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}/cases`);
+  assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}`);
+});
+
+test("role home suffix lands reception on Front desk", () => {
+  const dest = resolvePostLoginDestination({
+    explicitNext: null,
+    membershipTenantIds: [EVOLVED_TENANT],
+    metadataTenantId: null,
+    defaultTenantHomeSuffix: "/front-desk",
+  });
+  assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}/front-desk`);
 });
 
 test("provisionStaffAuthInviteLink finds existing auth user via RPC", async () => {

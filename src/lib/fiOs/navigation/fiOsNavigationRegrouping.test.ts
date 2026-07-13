@@ -71,14 +71,14 @@ test("primary rail has exactly six slots in canonical order", () => {
     "today",
     "calendar",
     "patients",
+    "front-desk",
     "team",
-    "reports",
     "more",
   ]);
   assert.equal(primaryRailSlotIds().length, 6);
 });
 
-test("minimal nav exposes Today, Calendar, Patients, Team, Reports, More", () => {
+test("minimal nav exposes Today, Calendar, Patients, Front desk, Team, More", () => {
   const sidebar = fullSidebar();
   const items = resolveFiOsMinimalNavItems(base, sidebar);
   assert.equal(items.length, 6);
@@ -86,13 +86,13 @@ test("minimal nav exposes Today, Calendar, Patients, Team, Reports, More", () =>
     "today",
     "calendar",
     "patients",
+    "front-desk",
     "team",
-    "reports",
     "more",
   ]);
   assert.deepEqual(
     items.map((i) => i.label),
-    ["Today", "Calendar", "Patients", "Team", "Reports", "More"]
+    ["Today", "Calendar", "Patients", "Front desk", "Team", "More"]
   );
 });
 
@@ -186,17 +186,17 @@ test("primary rail destinations are excluded from collapsed More drawer", () => 
   assert.ok(ids.has("team"));
   assert.ok(ids.has("reports"));
   assert.ok(isPrimaryRailNavId("team"));
-  assert.ok(isPrimaryRailNavId("reports"));
+  assert.ok(!isPrimaryRailNavId("reports"));
+  assert.ok(isPrimaryRailNavId("front-desk"));
 });
 
-test("no duplicate Front Desk or Surgery rows on primary minimal rail", () => {
+test("exactly one Front desk row on primary rail; no Surgery rows", () => {
   const labels = resolveFiOsMinimalNavItems(base, fullSidebar()).map((i) => i.label);
-  const frontDeskLabels = labels.filter((l) =>
-    /clinic flow|front desk|reception|tomorrow/i.test(l)
-  );
+  const frontDeskLabels = labels.filter((l) => /^front desk$/i.test(l));
   const surgeryLabels = labels.filter((l) => /surgery|cases|procedure/i.test(l));
-  assert.equal(frontDeskLabels.length, 0);
+  assert.equal(frontDeskLabels.length, 1);
   assert.equal(surgeryLabels.length, 0);
+  assert.ok(!labels.some((l) => /clinic flow|reception board|tomorrow/i.test(l)));
 });
 
 test("Team grouping in More consolidates under one team destination on primary rail", () => {
@@ -217,12 +217,9 @@ test("Team grouping in More consolidates under one team destination on primary r
   }
 });
 
-test("Reports grouping consolidates under one reports destination on primary rail; D6 admin when allowed", () => {
+test("Reports grouping consolidates under More only; D6 admin when allowed", () => {
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "reports");
-  assert.equal(reportsRail?.kind, "link");
-  if (reportsRail?.kind === "link") {
-    assert.ok(reportsRail.href.endsWith("/reports"));
-  }
+  assert.equal(reportsRail, undefined);
 
   const staffSections = moreSections({ showNavigationAdminSurfaces: false });
   const staffReports = staffSections.find((s) => s.groupId === "REPORTS");
@@ -309,11 +306,12 @@ test("hidden sub-items stay out of More unless procedure day is explicitly enabl
   assert.ok(subIdsWithDay.includes("procedure-day-board"));
 });
 
-test("minimal nav active ids cover team and reports deep links", () => {
+test("minimal nav active ids cover team and front desk deep links", () => {
   assert.equal(getFiOsMinimalNavActiveId(`${base}/team`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/staff`, base), "team");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), "reports");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/navigation-audit`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), "front-desk");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), null);
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), null);
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/navigation-audit`, base), null);
 });

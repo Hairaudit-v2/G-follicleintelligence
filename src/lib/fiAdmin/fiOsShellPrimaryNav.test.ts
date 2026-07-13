@@ -176,7 +176,7 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
   assert.equal(byId["patient-twin"]?.label, "Health record");
   const qualityReview = byId.reports?.subItems?.find((s) => s.id === "reports-quality");
   assert.equal(qualityReview?.label, "Quality review");
-  assert.equal(byId["financial-os"]?.label, "Finances");
+  assert.equal(byId["financial-os"]?.label, "Money");
   assert.equal(byId.reports?.label, "Reports");
   assert.equal(byId.team?.label, "Team");
 });

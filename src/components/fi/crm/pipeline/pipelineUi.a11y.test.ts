@@ -43,9 +43,12 @@ test("primary touch targets use min-h-11 (44px)", () => {
 test("tablet layout uses vertical stack without nested horizontal column scroll", () => {
   assert.match(UI, /lg:hidden/);
   assert.match(UI, /layout="stack"/);
-  // Desktop board-level horizontal scroll only
+  // Desktop board-level horizontal scroll only — contained region, not page root
   assert.match(UI, /overflow-x-auto/);
-  assert.match(UI, /hidden lg:block/);
+  assert.match(UI, /hidden min-w-0 max-w-full lg:block/);
+  assert.match(UI, /pipeline-board-h-scroll/);
+  assert.match(UI, /pipeline-board-root/);
+  assert.match(UI, /overscroll-x-contain/);
 });
 
 test("live announcements for mutation outcomes", () => {

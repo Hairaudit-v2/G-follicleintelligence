@@ -22,7 +22,7 @@ export const FI_OS_STAFF_TERMS = {
   roster: "Roster",
   onboarding: "Onboarding",
   money: "Money",
-  finances: "Finances",
+  finances: "Money",
   takePayment: "Take payment",
   insights: "Insights",
   patients: "Patients",

@@ -13,13 +13,17 @@ import { FI_OS_SETTINGS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/settings
 import { FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { FI_OS_TEAM_LEGACY_ROUTES } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
-/** Six-slot collapsed primary rail link ids (More is an action). */
+/**
+ * Six-slot collapsed primary rail link ids (More is an action).
+ * FI-TRUST-LANDING-AND-SPINE-1: Front desk on rail for frontline day work;
+ * Reports moves to More only (still linked from Reports hub).
+ */
 export const FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS = [
   "today",
   "calendar",
   "patients",
+  "front-desk",
   "team",
-  "reports",
   "more",
 ] as const;
 
@@ -30,8 +34,8 @@ export const FI_OS_D6G_PRIMARY_RAIL_NAV_IDS = new Set([
   "dashboard",
   "calendar",
   "patients",
+  "front-desk",
   "team",
-  "reports",
 ]);
 
 /** 1B workflow sections for the All areas / More drawer (no module-language buckets). */
@@ -211,7 +215,8 @@ const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   PATIENTS: ["patient-twin"],
   CLINICAL: ["doctor-workspace", "consultations", "prescriptions", "pathology-nav"],
   SURGERY: ["surgery"],
-  FINANCE: ["payments-inbox", "financial-os"],
+  /** Money is the single finance door; Take payment is a sub-link when payments enabled. */
+  FINANCE: ["financial-os", "payments-inbox"],
   REPORTS: ["reports"],
   TEAM: ["team"],
   SETTINGS: ["settings"],
@@ -372,10 +377,10 @@ export function resolvePrimaryRailSidebarTarget(
       return sidebarItems.find((i) => i.id === "calendar") ?? null;
     case "patients":
       return sidebarItems.find((i) => i.id === "patients") ?? null;
+    case "front-desk":
+      return sidebarItems.find((i) => i.id === "front-desk") ?? null;
     case "team":
       return sidebarItems.find((i) => i.id === "team") ?? null;
-    case "reports":
-      return sidebarItems.find((i) => i.id === "reports") ?? null;
     default:
       return null;
   }

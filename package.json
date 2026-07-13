@@ -21,6 +21,7 @@
     "deploy:c4:enable-tenant": "node scripts/enable-evolved-trial-consent-gate.mjs",
     "audit:production-cron": "tsx scripts/audit-production-cron-evidence.ts",
     "audit:evolved-readiness": "tsx scripts/audit-evolved-production-readiness.ts",
+    "audit:staff-mapping": "tsx scripts/audit-staff-mapping-completeness.ts",
     "provision:evolved-operator": "tsx scripts/provision-evolved-operator.ts",
     "smoketest:evolved-journey": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/run-evolved-smoketest-journey.ts",
     "smoke:operational-day": "cross-env NODE_OPTIONS=--max-http-header-size=262144 node scripts/run-fi-operational-day-smoke.mjs",

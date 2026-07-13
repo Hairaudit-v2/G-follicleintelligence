@@ -111,7 +111,7 @@ describe("S4.5D one Pipeline door", () => {
 
   it("20 primary rail count unchanged at six slots", () => {
     assert.equal(primaryRailSlotIds().length, 6);
-    const railIds = new Set(["today", "calendar", "patients", "team", "reports", "more"]);
+    const railIds = new Set(["today", "calendar", "patients", "front-desk", "team", "more"]);
     assert.deepEqual([...primaryRailSlotIds()].sort(), [...railIds].sort());
   });
 
@@ -145,8 +145,10 @@ describe("S4.5D one Pipeline door", () => {
     }
   });
 
-  it("legacy routes remain live without redirects", () => {
-    assert.doesNotMatch(read(LEADFLOW_PAGE), /redirect\(/);
+  it("LeadFlow soft-redirects to Pipeline; conversion and CRM stay live", () => {
+    // FI-TRUST-LANDING-AND-SPINE-1: /leadflow is a bookmark soft-redirect to /crm
+    assert.match(read(LEADFLOW_PAGE), /redirect\(/);
+    assert.match(read(LEADFLOW_PAGE), /\/crm/);
     assert.doesNotMatch(read(CONVERSION_PAGE), /redirect\(/);
     assert.doesNotMatch(read(CRM_PAGE), /redirect\(/);
   });
