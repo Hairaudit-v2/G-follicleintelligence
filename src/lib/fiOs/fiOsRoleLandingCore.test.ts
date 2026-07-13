@@ -34,6 +34,21 @@ describe("resolveFiOsPostLoginPathSuffix", () => {
     assert.equal(resolveFiOsPostLoginPathSuffix({}), "");
     assert.notEqual(resolveFiOsPostLoginPathSuffix({}), "/cases");
   });
+
+  it("maps workspace profile when staff role key is absent", () => {
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "reception" }),
+      "/front-desk"
+    );
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "consultant" }),
+      "/crm"
+    );
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "finance_admin" }),
+      ""
+    );
+  });
 });
 
 describe("buildFiOsTenantHomeHref", () => {

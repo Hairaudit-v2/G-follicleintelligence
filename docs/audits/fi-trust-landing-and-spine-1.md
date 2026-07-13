@@ -17,6 +17,10 @@ Final structural closeout of the UX rebuild and first **Operational Trust and Co
 | Pipeline | `/leadflow` soft-redirects to `/crm`; board H-scroll contained (`pipeline-board-h-scroll`) |
 | Money | Finances → **Money**; payments inbox only as **Take payment** sub-link when `FI_PAYMENTS_ENABLED`; honest disabled page |
 | Staff mapping | `npm run audit:staff-mapping`; enforced in `smoke:operational-day` and `smoke:prod` when Supabase env is set |
+| Post-login workspace profile | `fiOsRedirect.server.ts` derives profile from `staff_metadata` + role signals |
+| Pipeline V1 allowlist | `FI_PIPELINE_V1_TENANT_ALLOWLIST` in `.env.example` |
+| E2E acceptance | `e2e/fi-trust-role-landing.spec.ts`, `e2e/fi-trust-pipeline-layout.spec.ts` |
+| Calendar SoR SOP | `docs/production/evolved-calendar-booking-sop.md` |
 | Golden patient | Spine contract + unit tests (`goldenPatientSpineCore`) |
 
 ## Key files
@@ -43,7 +47,7 @@ node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.
   src/lib/fiOs/navigation/fiOsNavigationGoLiveAudit.test.ts \
   src/lib/crm/pipelineCutover.s45d.test.ts
 # npm run audit:staff-mapping
-# npm run smoke:operational-day   # includes staff mapping tier when Supabase env is set
+# npx playwright test e2e/fi-trust-role-landing.spec.ts e2e/fi-trust-pipeline-layout.spec.ts --project=chromium-authenticated
 ```
 
 ## Explicit non-goals (still later)

@@ -39,7 +39,11 @@ Recent corrections found in the codebase:
 | Pipeline canonical door | `/fi-admin/[tenantId]/leadflow` soft-redirects to `/crm`; shell tests map legacy pipeline routes to the Pipeline tab. | **Implemented; still needs Evolved tenant V1 cutover evidence.** |
 | Money/payments narrative | `/payments` now shows an intentional disabled state when `FI_PAYMENTS_ENABLED` is off and directs staff to Money. | **Implemented; SOP/training sign-off still required.** |
 | Surgery financial clearance guard | `updateBooking` now calls `assertSurgeryBookingConfirmationFinancialClearance`; within 14 days, surgery booking confirmation blocks unless `financially_safe_to_proceed === true`. Finance SOP and evidence audit updated to match. | **Partially implemented; staging proof and procedure-day SOP sign-off remain blocking.** |
-| Staff mapping completeness | `scripts/audit-staff-mapping-completeness.ts`; wired into `smoke:operational-day` and `smoke:prod` when Supabase env is set. | **Implemented; fails smoke on unmapped operators — run against Evolved production credentials.** |
+| Staff mapping completeness | `scripts/audit-staff-mapping-completeness.ts`; wired into `smoke:operational-day` and `smoke:prod` when Supabase env is set. | **Implemented; fails smoke on unmapped operators.** |
+| Workspace profile in post-login | `fiOsRedirect.server.ts` passes `staff_metadata` + role signals into landing resolver. | **Implemented.** |
+| Pipeline V1 allowlist documented | `FI_PIPELINE_V1_TENANT_ALLOWLIST` in `.env.example`; set for Evolved to mount V1-only Pipeline. | **Documented; production env decision pending.** |
+| Role landing + pipeline layout e2e | `e2e/fi-trust-role-landing.spec.ts`, `e2e/fi-trust-pipeline-layout.spec.ts` | **Added; run with demo credentials.** |
+| Calendar booking SoR SOP | `docs/production/evolved-calendar-booking-sop.md` (BLK-CAL-01) | **Drafted; staff sign-off pending.** |
 
 Remaining highest-impact blockers before broad daily use:
 
@@ -47,7 +51,7 @@ Remaining highest-impact blockers before broad daily use:
 2. Complete DR/PITR/storage restore evidence and cron/secrets evidence.
 3. Decide procedure-day product posture (enabled with staff/room discipline or explicitly out of go-live scope).
 4. Prove reception cold-load performance and manual multi-role UAT.
-5. Close Calendar SoR SOP for Google-staged events versus FI bookings.
+5. Set `FI_PIPELINE_V1_TENANT_ALLOWLIST` for Evolved in production if V1 cutover is approved.
 
 ---
 

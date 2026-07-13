@@ -10,6 +10,7 @@ import {
   resolvePreferredLoginTenantId,
   extractTenantIdFromFiAdminPath,
 } from "@/src/lib/workforce/staffTenantLinkRepairCore";
+import { resolveWorkspaceProfileKeyFromSignals } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import { resolveFiOsPostLoginPathSuffix } from "@/src/lib/fiOs/fiOsRoleLandingCore";
 import { resolveWorkspaceStaffRoleKey } from "@/src/lib/fiOs/workspaceAccessResolverCore";
 
@@ -26,10 +27,15 @@ async function loadAuthMetadataTenantId(authUserId: string): Promise<string | nu
  */
 async function loadLandingHintsForAuthUser(
   authUserId: string,
-  preferredTenantId: string | null
-): Promise<{ staffRoleKey: string | null; tenantAdminRole: string | null }> {
+  preferredTenantId: string | null,
+  osRole: string | null
+): Promise<{
+  staffRoleKey: string | null;
+  tenantAdminRole: string | null;
+  workspaceProfile: string | null;
+}> {
   if (!preferredTenantId?.trim() || !authUserId.trim()) {
-    return { staffRoleKey: null, tenantAdminRole: null };
+    return { staffRoleKey: null, tenantAdminRole: null, workspaceProfile: null };
   }
   const supabase = supabaseAdmin();
   const tid = preferredTenantId.trim();
@@ -45,16 +51,24 @@ async function loadLandingHintsForAuthUser(
 
     const fiUserId = fiUser ? String((fiUser as { id: string }).id) : null;
     let staffRole: string | null = null;
+    let staffMetadata: Record<string, unknown> | null = null;
     let tenantAdminRole: string | null = null;
     if (fiUserId) {
       const { data: staff } = await supabase
         .from("fi_staff")
-        .select("staff_role")
+        .select("staff_role, staff_metadata")
         .eq("tenant_id", tid)
         .eq("fi_user_id", fiUserId)
         .limit(1)
         .maybeSingle();
-      staffRole = staff ? String((staff as { staff_role: string | null }).staff_role ?? "") : null;
+      if (staff) {
+        staffRole = String((staff as { staff_role: string | null }).staff_role ?? "");
+        const meta = (staff as { staff_metadata?: unknown }).staff_metadata;
+        staffMetadata =
+          meta && typeof meta === "object" && !Array.isArray(meta)
+            ? (meta as Record<string, unknown>)
+            : null;
+      }
 
       const { data: adminRow } = await supabase
         .from("fi_tenant_admin_users")
@@ -77,12 +91,20 @@ async function loadLandingHintsForAuthUser(
       roleCode: null,
     });
 
+    const workspaceProfile = resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: staffMetadata?.workspace_profile,
+      staffRole,
+      tenantAdminRole,
+      fiOsRole: osRole,
+    });
+
     return {
       staffRoleKey: roleKey ?? (staffRole?.trim() || null),
       tenantAdminRole: tenantAdminRole?.trim() || null,
+      workspaceProfile,
     };
   } catch {
-    return { staffRoleKey: null, tenantAdminRole: null };
+    return { staffRoleKey: null, tenantAdminRole: null, workspaceProfile: null };
   }
 }
 
@@ -119,11 +141,12 @@ export async function resolveFiOsPostLoginRedirect(
     membershipTenantIds,
   });
 
-  const hints = await loadLandingHintsForAuthUser(authUserId, preferredTenantId);
+  const hints = await loadLandingHintsForAuthUser(authUserId, preferredTenantId, r || null);
   const homeSuffix = resolveFiOsPostLoginPathSuffix({
     osRole: r || null,
     staffRoleKey: hints.staffRoleKey,
     tenantAdminRole: hints.tenantAdminRole,
+    workspaceProfile: hints.workspaceProfile,
   });
 
   return resolvePostLoginDestination({
