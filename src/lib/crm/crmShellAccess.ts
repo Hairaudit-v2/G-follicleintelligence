@@ -9,7 +9,7 @@ import {
   loadProxyFiUserRowForPlatformAdminTenant,
   resolveAuthUserId,
 } from "./crmGate";
-import { isCrmShellNavRole } from "./crmGatePolicy";
+import { isCrmShellNavRole, isCrmShellNavStaffRole } from "./crmGatePolicy";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import {
@@ -71,6 +71,33 @@ async function hasActiveFiStaffForFiUser(tenantId: string, fiUserId: string): Pr
   return (count ?? 0) > 0;
 }
 
+async function loadActiveFiStaffRoleForFiUser(
+  tenantId: string,
+  fiUserId: string
+): Promise<string | null> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("staff_role")
+    .eq("tenant_id", tenantId.trim())
+    .eq("fi_user_id", fiUserId.trim())
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  const role = String((data as { staff_role: string | null }).staff_role ?? "").trim();
+  return role || null;
+}
+
+async function isCrmShellEligibleFiUserRow(
+  tenantId: string,
+  row: { id: string; role: string }
+): Promise<boolean> {
+  if (isCrmShellNavRole(row.role)) return true;
+  const staffRole = await loadActiveFiStaffRoleForFiUser(tenantId, row.id);
+  return isCrmShellNavStaffRole(staffRole);
+}
+
 /**
  * Tenant user row allowed to use the bookings operator board and appointment slide-over
  * (CRM shell roles, or clinical `member` linked to active `fi_staff` for this tenant).
@@ -110,7 +137,7 @@ export async function getCrmShellNavAllowed(tenantId: string): Promise<boolean> 
   const navAuth = await resolveShellNavAuthUserId(authId);
   const row = await loadFiUserRow(tid, navAuth);
   if (!row) return false;
-  if (isCrmShellNavRole(row.role)) return true;
+  if (await isCrmShellEligibleFiUserRow(tid, row)) return true;
   const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
   return tenantAdminRoleAllowsCrmShellNav(prof?.adminRole ?? null);
 }
@@ -141,7 +168,7 @@ export const getCrmShellPageSession = cache(async (tenantId: string): Promise<Cr
   if (!row) {
     redirect(`/fi-admin/${tid}/cases`);
   }
-  if (isCrmShellNavRole(row.role)) {
+  if (await isCrmShellEligibleFiUserRow(tid, row)) {
     return shellSession(tid, authId, row.id, row.role);
   }
   const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
@@ -175,7 +202,7 @@ export async function getCrmShellSessionIfAllowed(
   const navAuth = await resolveShellNavAuthUserId(authId);
   const row = await loadFiUserRow(tid, navAuth);
   if (!row) return null;
-  if (isCrmShellNavRole(row.role)) {
+  if (await isCrmShellEligibleFiUserRow(tid, row)) {
     return shellSession(tid, authId, row.id, row.role);
   }
   const prof = await loadActiveTenantAdminProfileForSession(tid, authId);

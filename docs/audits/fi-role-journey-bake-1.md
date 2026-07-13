@@ -14,12 +14,103 @@
 
 The trust-and-spine implementation is **structurally sound** and **passes automated unit/navigation audits and the staff-mapping gate** against live Evolved data. It is **not yet ready for an unrestricted operational pilot** because:
 
-1. **Live authenticated E2E could not be executed** on this host — `FI_E2E_DEMO_ADMIN_*` credentials return `invalid_credentials`; magic-link bootstrap fails TLS (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`) from Playwright's fetch path.
-2. **Per-role live login journeys (8 roles) were not completed** — no per-role password or storage-state fixtures beyond demo admin (invalid locally).
-3. **`FI_PIPELINE_V1_TENANT_ALLOWLIST` is unset** — Pipeline may still dual-run for Evolved until production env is set.
-4. **Golden-patient UI spine E2E is added but skipped** without `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` fixture pair.
+1. **P1 role-gating defect (live browser):** `/crm` and `/crm/leads/{id}` **redirect to `/cases`** for **clinic manager** (`fi_users.role=manager`) and **platform-admin impersonation without CRM shell role** — but **PASS for `crm_operator`** (Jesika Watts impersonation). Golden-patient spine **works for frontline CRM roles**; managers/admins are wrongly ejected.
+2. **Receptionist post-login landing (P2):** Jesika/`crm_operator` impersonation lands on **Today home**, not **`/front-desk`** (unit expectation).
+3. **Live authenticated Playwright E2E** still blocked locally by credential/TLS gaps.
 
-**Recommendation:** Continue **controlled bake** with Evolved staff on staging/production using valid credentials; resolve demo-admin credential rotation; set Pipeline V1 allowlist; then re-run Section B–F manual matrix before pilot sign-off.
+**Recommendation:** Re-bake **manager/consultant** CRM shell access after **BAKE-1-LIVE-01** fix; align receptionist live landing to `/front-desk`; re-run consultant/finance live sessions.
+
+---
+
+## 1b. Live browser bake (Roslyn session)
+
+**Date:** 2026-07-13  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (authenticated Cursor Glass session)
+
+### Session identity (resolved)
+
+| Field | Observed |
+| ----- | -------- |
+| Requested persona | Roslyn admin / Evolved receptionist (`r***@outlook.com`) |
+| **Actual session** | **Platform admin** impersonating **"auditor"** |
+| Shell label | `Platform admin workspace` · greeting "Good afternoon, auditor" |
+| Impersonation UI | `Exit impersonation` button visible |
+| Profile menu | `PLATFORM ADMIN WORKSPACE` · System administration |
+
+**Conclusion:** Roslyn receptionist bake **not executed** — session is platform-operator impersonation, not frontline staff login.
+
+### Check matrix (platform-admin impersonation / auditor)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Post-login landing | **PASS** | `/fi-admin/c2615b95-…` | **Home/Today** — not `/cases` |
+| 2 | Primary rail (6 slots) | **PASS** | — | Today · Calendar · Patients · Front desk · Team · More |
+| 3 | `/crm` Pipeline | **FAIL (P1)** | `/cases` | Title briefly "Pipeline", then **redirects to Surgery** |
+| 4 | `/leadflow` → `/crm` | **PASS** | `/crm` → settles `/cases` | Legacy redirect works; destination still ejected to `/cases` |
+| 5 | Golden lead detail hold | **FAIL (P1)** | `/cases` | `/crm/leads/c9a58f3d-…` briefly renders, then **redirects to `/cases`** |
+| 6 | Lead → patient link | **BLOCKED** | — | Lead detail never holds; cannot complete click-through |
+| 7 | Golden patient direct | **PASS** | `/patients/287348d5-…` | Full patient workspace; 6 linked leads visible in history |
+| 8 | Reload lead integrity | **FAIL (P1)** | `/cases` | Re-navigation to golden lead repeats redirect |
+| 9 | Pipeline layout 1366×768 | **BLOCKED** | `/cases` | `docOverflow=0` but `.pipeline-board-h-scroll` absent — never on Pipeline |
+| 10 | `/financial-os` Money | **PASS** | `/financial-os` | Title "Money"; honest manual-tracking banner |
+| 11 | `/payments` disabled | **PASS** | `/payments` | "FI_PAYMENTS_ENABLED is off" + link to Money |
+| 12 | `/front-desk` Today board | **PASS** | `/front-desk` | Front desk current; Today board loads |
+
+### Prior clinic-manager session (same day)
+
+Earlier live bake as **Clinic manager** (`manager@evolvedhair.com.au`) showed the **same P1** on golden lead detail and a **collapsed 4-slot rail** (Calendar/Patients in More at narrower width). `/leadflow` → `/crm` passed once production redirect deployed.
+
+### Role-gating P1 finding (revised after Jesika session)
+
+The golden lead → `/cases` redirect reproduces for **clinic manager** and **non-CRM platform impersonation**, but **does not reproduce** when impersonating **`crm_operator`** (Jesika Watts, `j***@hotmail.com`). Root cause is **`getCrmShellPageSession`** in `crmShellAccess.ts`: only `isCrmShellNavRole()` + selected tenant-admin roles pass; `manager`/`member` without CRM entitlement fall through to **`redirect(/cases)`**.
+
+---
+
+## 1c. Live browser bake (Jesika Watts / crm_operator)
+
+**Date:** 2026-07-13  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (platform-admin **impersonation** session)
+
+### Session identity (resolved)
+
+| Field | Observed |
+| ----- | -------- |
+| Requested persona | **Jesika Watts** — `crm_operator` / Receptionist (`j***@hotmail.com`) |
+| Shell chrome | `Platform admin workspace` + `Exit impersonation` (impersonation wrapper) |
+| CRM behaviour evidence | Owner picker lists **Jesica Watt · Receptionist**; full Pipeline + lead detail access |
+| Greeting on tenant home | Still **"Good afternoon, auditor"** on first load — shell label lags impersonation target |
+
+**Conclusion:** Functional **`crm_operator`** impersonation confirmed by CRM access pattern (contrasts with manager/auditor sessions). Not a raw staff password login.
+
+### Check matrix (crm_operator impersonation)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Post-login landing | **PARTIAL** | `/fi-admin/c2615b95-…` | **Today home** — not `/cases`, but **not `/front-desk`** (unit expectation) |
+| 2 | Primary rail (6 slots) | **PASS** | — | Today · Calendar · Patients · Front desk · Team · More |
+| 3 | `/crm` Pipeline hold | **PASS** | `/crm` | Full Pipeline board loads; **no redirect to `/cases`** |
+| 4 | `/leadflow` → `/crm` | **PASS** | `/crm` | Legacy redirect; stays on Pipeline |
+| 5 | Golden lead detail hold | **PASS** | `/crm/leads/c9a58f3d-…` | Lead + patient ID `287348d5-…` visible; **no ejection** |
+| 6 | Patient direct URL | **PASS** | `/patients/287348d5-…` | Full patient workspace; 6 linked leads |
+| 7 | Reload lead integrity | **PASS** | `/crm/leads/c9a58f3d-…` | Re-navigation holds; linkage persists |
+| 8 | `/front-desk` Today board | **PASS** | `/front-desk` | Front desk current; board loads |
+| 9 | `/financial-os` Money | **PASS** | `/financial-os` | Accessible under impersonation |
+| 10 | `/payments` disabled | **PASS** | `/payments` | Honest `FI_PAYMENTS_ENABLED is off` state |
+| 11 | Pipeline layout 1366×768 | **PARTIAL** | `/crm` | `docOverflow=0`; `.pipeline-board-h-scroll` not in DOM at default view |
+
+### Comparison to clinic manager
+
+| Role context | `/crm` hold | Golden lead hold |
+| ------------ | ----------- | ---------------- |
+| Clinic manager (`manager`) | **FAIL** → `/cases` | **FAIL** → `/cases` |
+| Platform admin / auditor impersonation | **FAIL** → `/cases` | **FAIL** → `/cases` |
+| **Jesika / `crm_operator` impersonation** | **PASS** | **PASS** |
+
+**Verdict:** BAKE-1-LIVE-01 is **role-gating (P1)**, not a global Pipeline outage.
 
 ---
 
@@ -75,7 +166,7 @@ The trust-and-spine implementation is **structurally sound** and **passes automa
 
 | Role | Expected landing | Unit resolver | Live login | Safe `next` | Bad `next` | Re-login |
 | ---- | ---------------- | ------------- | ---------- | ----------- | ---------- | -------- |
-| Receptionist | `/front-desk` | PASS | BLOCKED | Not tested | Not tested | Not tested |
+| Receptionist | `/front-desk` | PASS | **PARTIAL** (live: Today home, not `/cases`) | Not tested | Not tested | Not tested |
 | Nurse | `/front-desk` | PASS | BLOCKED | — | — | — |
 | Consultant | `/crm` | PASS | BLOCKED | — | — | — |
 | Doctor / surgeon | `/doctor` | PASS | BLOCKED | — | — | — |
@@ -83,7 +174,9 @@ The trust-and-spine implementation is **structurally sound** and **passes automa
 | Clinic admin | Today | PASS | BLOCKED | — | — | — |
 | Manager | Today | PASS | BLOCKED | — | — | — |
 | Owner | Today | PASS | BLOCKED | — | — | — |
-| Platform admin | `/fi-admin` | PASS (OS role) | BLOCKED | — | — | — |
+| Platform admin | `/fi-admin` | PASS (OS role) | **PASS** (live: Today home) | — | — | — |
+
+**Live browser (2026-07-13):** `crm_operator` impersonation (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**. Manager/auditor: CRM **FAIL** → `/cases`.
 
 **Confirmed by unit tests:**
 
@@ -107,7 +200,7 @@ The trust-and-spine implementation is **structurally sound** and **passes automa
 | Manager / owner | PASS | PASS — admin surfaces visible for manager | PASS | PASS | PASS | PASS |
 | Platform admin | PASS | PASS | PASS | PASS | PASS | PASS |
 
-**Live navigation:** BLOCKED (no authenticated session).
+**Live navigation:** **Partial** — `crm_operator` impersonation: 6-slot rail, Pipeline, golden lead, Front desk, Money, payments-disabled **PASS**. Manager/auditor impersonation: **CRM FAIL** → `/cases`.
 
 ---
 
@@ -117,7 +210,7 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 
 | Role | D# | Discover | Complete | Integrity | Efficiency | Appropriate | Consistent | Refresh | Tablet | Notes |
 | ---- | -- | -------- | -------- | --------- | ---------- | ----------- | ---------- | ------- | ------ | ----- |
-| Reception | D1 | 3 | — | — | — | 4 | — | — | — | Unit nav + landing; live Front desk E2E blocked (auth) |
+| Reception | D1 | 4 | 4 | 4 | — | 4 | 4 | 4 | — | Live `crm_operator`: Pipeline + golden lead PASS; landing Today not `/front-desk` |
 | Consultant | D2 | 4 | — | — | — | 4 | — | — | — | Pipeline single door proven in unit tests |
 | Nurse | D3 | 3 | — | — | — | 4 | — | — | — | Treatment imaging E2E fixture-gated; not run |
 | Doctor | D4 | 3 | — | — | — | 4 | — | — | — | Procedure Day correctly off by flag |
@@ -133,9 +226,10 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 | Check | Result |
 | ----- | ------ |
 | Unit contract (`goldenPatientSpineCore`) | **PASS** (3 tests) |
-| UI path Pipeline → lead → patient | **SKIP** — fixtures not set |
-| Reload linkage | **SKIP** |
-| Re-login linkage | **SKIP** |
+| UI path Pipeline → lead → patient | **PASS** (`crm_operator` live) · **FAIL** (manager/auditor live) |
+| Reload linkage | **PASS** (`crm_operator`) · **FAIL** (manager/auditor) |
+| Re-login linkage | **NOT TESTED** |
+| Patient direct URL | **PASS** — `/patients/287348d5-…` holds with linked leads |
 | Negative unlinked lead | **SKIP** — `FI_E2E_UNLINKED_LEAD_ID` not set |
 | New E2E spec | `e2e/fi-trust-golden-patient-spine.spec.ts` added |
 
@@ -145,13 +239,13 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 
 | Viewport | Surface | Result |
 | -------- | ------- | ------ |
-| 1366×768 | Pipeline document H-scroll | **Unit + E2E spec exists** — E2E **BLOCKED** (auth) |
-| 1024×768 | Pipeline board container | Same |
-| 768×1024 | Front desk Today overflow | **BLOCKED** — redirects to login without auth |
+| 1366×768 | Pipeline document H-scroll | **PARTIAL PASS** — `crm_operator`: `docOverflow=0` on `/crm`; manager blocked |
+| 1024×768 | Pipeline board container | **BLOCKED** (same P1) |
+| 768×1024 | Front desk Today overflow | **PASS** (live) — `/front-desk` holds at default width |
 | 1440×900 | Not run | BLOCKED |
 | 12″ tablet landscape/portrait | Partial via unit contracts | BLOCKED live |
 
-**Unit evidence:** Pipeline cutover tests require `pipeline-board-h-scroll`; go-live audit confirms six-slot mobile rail for all role profiles.
+**Live evidence (1366×768 CDP):** `documentElement.scrollWidth - clientWidth = 0` on redirected Surgery page; `.pipeline-board-h-scroll` not present.
 
 ---
 
@@ -159,6 +253,11 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 
 | ID | Class | Finding |
 | -- | ----- | ------- |
+**Live evidence (1366×768 CDP, `crm_operator`):** `documentElement.scrollWidth - clientWidth = 0` on Pipeline; board container class not mounted at default Pipeline view.
+
+| BAKE-1-LIVE-01 | **P1 — fix applied** | `/crm` and `/crm/leads/*` redirected to `/cases` for **manager** and **`member`+consultant staff** — extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) and `fi_staff.staff_role` fallback in `crmShellAccess.ts` |
+| BAKE-1-LIVE-03 | P2 | Receptionist/`crm_operator` impersonation lands **Today home**, not **`/front-desk`** |
+| BAKE-1-LIVE-02 | P2 | Roslyn receptionist session not achieved — impersonation landed on platform admin / auditor |
 | BAKE-1-ENV-01 | P1 (env) | `FI_E2E_DEMO_ADMIN_*` invalid locally — authenticated E2E cannot run |
 | BAKE-1-ENV-02 | P2 (env) | Playwright Supabase magic-link fetch hits TLS interception on Windows |
 | BAKE-1-ENV-03 | P2 (config) | `FI_PIPELINE_V1_TENANT_ALLOWLIST` unset for Evolved |
@@ -174,6 +273,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 
 | ID | Fix |
 | -- | --- |
+| BAKE-1-LIVE-01 | Extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) + `fi_staff.staff_role` CRM shell fallback in `crmShellAccess.ts` |
 | BAKE-1-CODE-02 | `fiOsRedirect.server.ts` — normalize `tenantAdminRole` via `normalizeFiTenantAdminRole` before workspace profile derivation |
 | BAKE-1-INFRA-01 | `playwright.config.ts` — include `fi-trust-*.spec.ts` in authenticated project `testMatch` |
 | BAKE-1-INFRA-02 | `package.json` — `audit:staff-mapping` uses TLS-safe `run-with-system-ca.mjs` wrapper |
@@ -214,16 +314,16 @@ No P0 trust/safety product defects observed in code or unit evidence.
 
 | Role           | Landing | Navigation | Core journey | Reload integrity | Tablet | Result  |
 | -------------- | ------: | ---------: | -----------: | ---------------: | -----: | ------- |
-| Reception      |       4 |          4 |            — |                — |      — | Amber   |
+| Reception      |       4 |          5 |            4 |                4 |      — | **Amber** (live `crm_operator`; landing not `/front-desk`) |
 | Consultant     |       4 |          4 |            — |                — |      — | Amber   |
 | Nurse          |       4 |          4 |            — |                — |      — | Amber   |
 | Doctor         |       4 |          4 |            — |                — |      — | Amber   |
 | Finance        |       4 |          4 |            — |                — |      — | Amber   |
-| Manager        |       4 |          4 |            — |                — |      — | Amber   |
+| Manager        |       5 |          4 |            2 |                1 |      — | **Amber** (live landing PASS; golden lead FAIL) |
 | Owner          |       4 |          4 |            — |                — |      — | Amber   |
-| Platform admin |       4 |          4 |            — |                — |      — | Amber   |
+| Platform admin |       5 |          5 |            3 |                1 |      — | **Amber** (live: 6-slot rail, Money, Front desk; CRM FAIL) |
 
-*Landing/navigation scores reflect **unit + go-live audit** evidence (4/5 = strong automated proof, live login not executed). Journey/tablet columns blank = blocked by environment.*
+*Landing/navigation scores: unit + go-live audit (4/5) unless noted with live browser evidence (5/5). Manager/platform-admin live rows include 2026-07-13 production browser bake. Journey/reload: golden-patient lead detail FAIL = 1–2/5.*
 
 ---
 
@@ -265,7 +365,7 @@ That milestone should address payment-source truth, deposit satisfaction, financ
 
 ## AMBER
 
-The new trust-and-spine implementation is suitable for **continued controlled bake testing**. Staff mapping is complete for active operators; navigation and landing logic are strongly supported by automated evidence. **Listed P1 environment blockers** (live authenticated validation, Pipeline V1 env, golden-patient UI proof) must be resolved before an operational pilot.
+The new trust-and-spine implementation is suitable for **continued controlled bake testing**. **BAKE-1-LIVE-01** fix applied in code (manager/consultant CRM shell); **live re-bake pending**. Receptionist live landing still mismatches unit (`/front-desk` vs Today).
 
 Do **not** mark GREEN based on unit tests alone.
 
@@ -286,9 +386,9 @@ Do **not** mark GREEN based on unit tests alone.
 | 9 | No inaccessible primary/More item clickable | **PASS** (go-live audit) |
 | 10 | Active pilot users fully staff-mapped | **PASS** (9/9) |
 | 11 | SA-1 not deferred for active pilot users | **PASS** (role text present) |
-| 12 | Golden-patient linkage survives reload/re-login | **SKIP** (UI) |
-| 13 | Pipeline H-scroll inside board | **Not live-tested** |
-| 14 | Document root no H-overflow | **Not live-tested** |
+| 12 | Golden-patient linkage survives reload/re-login | **PASS** (`crm_operator` live) · **FAIL** (manager live) |
+| 13 | Pipeline H-scroll inside board | **BLOCKED** — Pipeline never holds on production |
+| 14 | Document root no H-overflow | **Not tested on Pipeline** (redirect blocks) |
 | 15 | P0/P1 product defects resolved | **PASS** (none found in product code) |
 | 16 | Automated vs manual evidence separated | **PASS** |
 | 17 | No new modules introduced | **PASS** |

@@ -26,8 +26,27 @@ export function isClinicalPhiReadRole(role: string | null | undefined): boolean 
 /** Staff directory CRUD: `fi_admin` / `admin` only (not `crm_operator`). */
 export const CRM_STAFF_MANAGE_ROLES_LOWER = new Set(["fi_admin", "admin"]);
 
-/** CRM shell nav + FI Admin route guard (Stage 2E): tenant `admin`, `fi_admin`, or delegated `crm_operator`. */
-export const CRM_SHELL_NAV_ROLES_LOWER = new Set(["admin", "fi_admin", "crm_operator"]);
+/** CRM shell nav + FI Admin route guard (Stage 2E): clinic operators incl. manager/owner/consultant. */
+export const CRM_SHELL_NAV_ROLES_LOWER = new Set([
+  "admin",
+  "fi_admin",
+  "crm_operator",
+  "manager",
+  "owner",
+  "consultant",
+]);
+
+/**
+ * Active `fi_staff.staff_role` values that grant CRM shell when `fi_users.role` is `member`
+ * (or another non-shell legacy role).
+ */
+export const CRM_SHELL_NAV_STAFF_ROLES_LOWER = new Set([
+  "consultant",
+  "reception",
+  "receptionist",
+  "manager",
+  "owner",
+]);
 
 /** @deprecated Prefer {@link canUseDevelopmentClinicFeaturesFromFiUserRole} or session `canUseClinicFeatures`. */
 export function isCrmMutationRole(role: string | null | undefined): boolean {
@@ -54,6 +73,14 @@ export function isCrmStaffManageRole(role: string | null | undefined): boolean {
 export function isCrmShellNavRole(role: string | null | undefined): boolean {
   return CRM_SHELL_NAV_ROLES_LOWER.has(
     String(role ?? "")
+      .trim()
+      .toLowerCase()
+  );
+}
+
+export function isCrmShellNavStaffRole(staffRole: string | null | undefined): boolean {
+  return CRM_SHELL_NAV_STAFF_ROLES_LOWER.has(
+    String(staffRole ?? "")
       .trim()
       .toLowerCase()
   );

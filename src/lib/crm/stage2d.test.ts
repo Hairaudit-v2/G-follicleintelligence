@@ -6,7 +6,7 @@ import {
   crmMoveLeadStageBodySchema,
 } from "./crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
-import { isCrmMutationRole, isCrmShellNavRole } from "./crmGatePolicy";
+import { isCrmMutationRole, isCrmShellNavRole, isCrmShellNavStaffRole } from "./crmGatePolicy";
 import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 import { validateCrmMessagePreviewInput } from "./validation";
 
@@ -24,11 +24,25 @@ describe("Stage 2D CRM gates (pure)", () => {
 });
 
 describe("Stage 2E CRM shell nav policy (pure)", () => {
-  it("allows fi_admin and crm_operator only for shell nav", () => {
+  it("allows clinic CRM operator fi_users roles for shell nav", () => {
     assert.equal(isCrmShellNavRole("fi_admin"), true);
     assert.equal(isCrmShellNavRole("crm_operator"), true);
     assert.equal(isCrmShellNavRole("admin"), true);
+    assert.equal(isCrmShellNavRole("manager"), true);
+    assert.equal(isCrmShellNavRole("owner"), true);
+    assert.equal(isCrmShellNavRole("consultant"), true);
     assert.equal(isCrmShellNavRole("member"), false);
+    assert.equal(isCrmShellNavRole("nurse"), false);
+  });
+
+  it("allows CRM shell via active fi_staff.staff_role when fi_users.role is member", () => {
+    assert.equal(isCrmShellNavStaffRole("consultant"), true);
+    assert.equal(isCrmShellNavStaffRole("reception"), true);
+    assert.equal(isCrmShellNavStaffRole("receptionist"), true);
+    assert.equal(isCrmShellNavStaffRole("manager"), true);
+    assert.equal(isCrmShellNavStaffRole("owner"), true);
+    assert.equal(isCrmShellNavStaffRole("nurse"), false);
+    assert.equal(isCrmShellNavStaffRole("doctor"), false);
   });
 });
 
