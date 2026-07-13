@@ -51,7 +51,7 @@
 | ------------- | ---------------- | ---------------- |
 | `FI_E2E_DEMO_ADMIN_EMAIL` / `PASSWORD` | Present in GH Actions secrets (rotated) | Authenticated projects materialize; DEF-E2E-01 stay closed |
 | `FI_E2E_TENANT_ID` | Evolved UUID in GH secrets | Tenant-scoped journeys |
-| `FI_E2E_STAGING_URL` (repo var) | HTTPS staging (or demo) host — **not** bare localhost without a server job | Authenticated job must have a reachable host |
+| `FI_E2E_STAGING_URL` (repo var) | **Keep Decision B:** `https://follicleintelligence.ai` (production). Decision A (dedicated staging) **deferred indefinitely** / ops-only if revisited. | Authenticated job must have a reachable host |
 | `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` | SMOKETEST golden pair in CI secrets/vars | Spine tests executable (not skip) |
 | `FI_E2E_UNLINKED_LEAD_ID` | Optional unlinked lead | Negative linkage case |
 | `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | Consultant: `/crm`; reception bake uses live session | Optional role-home assert |

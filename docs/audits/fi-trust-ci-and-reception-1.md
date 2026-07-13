@@ -70,14 +70,15 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 
 ---
 
-## Decision B — `FI_E2E_STAGING_URL` (recorded 2026-07-14)
+## Decision B — `FI_E2E_STAGING_URL` (recorded 2026-07-14 · **Keep B confirmed**)
 
 | Field | Value |
 | ----- | ----- |
-| **Choice** | **B — Production** (**still in force** until Decision A hostname is assigned + confirmed) |
+| **Choice** | **B — Production** (**confirmed Keep B** 2026-07-14 — user: *"Keep b"*) |
 | **Variable** | `FI_E2E_STAGING_URL` |
 | **Value** | `https://follicleintelligence.ai` |
-| **Rationale** | Matches prior manual trust bake; no dedicated staging host available this milestone |
+| **Confirmed** | `gh variable get` 2026-07-14 → still `https://follicleintelligence.ai` (**unchanged**; no subdomain assign / no var rewrite) |
+| **Rationale** | Matches prior manual trust bake; no dedicated staging host; user confirmed keep production host |
 | **Blast radius** | Authenticated CI (when secrets exist) hits **production**. Prefer workflow_dispatch / careful PR usage until a staging host exists. |
 
 **Apply command (repo variable — not a secret):**
@@ -88,11 +89,13 @@ gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --re
 
 ---
 
-## Decision A discovery — dedicated staging/preview (2026-07-14)
+## Decision A discovery — dedicated staging/preview (2026-07-14) — **DEFERRED**
 
-**Intent:** Switch `FI_E2E_STAGING_URL` from Decision **B** (production) to Decision **A** (dedicated staging/preview HTTPS host).
+**Intent (superseded):** Switch `FI_E2E_STAGING_URL` from Decision **B** (production) to Decision **A** (dedicated staging/preview HTTPS host).
 
-**Verdict:** **Blocked — no stable public staging host is assigned.** Did **not** invent or set a dead URL. GH var remains Decision B.
+**User confirmation (2026-07-14):** **Keep Decision B.** Do **not** assign a staging/preview subdomain or change the GH variable away from production.
+
+**Verdict:** **Deferred indefinitely** — Decision A is **ops-only** if revisited later. Did **not** invent or set a dead URL. GH var remains Decision B (`https://follicleintelligence.ai`).
 
 ### What exists
 
@@ -115,20 +118,19 @@ gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --re
 | `vercel.json` | Crons only — no staging domain config |
 | Preview env | Exists; allowlist env already present per prior Pipeline audit |
 
-### Recommended setup (user pick one hostname)
+### Ops-only path if Decision A is revisited later
 
-1. **Preferred:** Assign **`staging.follicleintelligence.ai`** to `g-follicleintelligence` (DNS already points at Vercel). Point it at a stable branch (e.g. `staging` or `main` Preview), ensure it is **not** SSO-gated for CI (or add `VERCEL_AUTOMATION_BYPASS_SECRET` to Actions), then:
+*(Not in flight — Keep B is locked. Resume only when ops deliberately assigns a public host.)*
+
+1. Assign **`staging.follicleintelligence.ai`** (or `preview.…`) to `g-follicleintelligence` (DNS already points at Vercel). Point at a stable branch; ensure it is **not** SSO-gated for CI (or add `VERCEL_AUTOMATION_BYPASS_SECRET`), then:
    ```bash
    gh variable set FI_E2E_STAGING_URL --body "https://staging.follicleintelligence.ai" --repo Hairaudit-v2/G-follicleintelligence
    ```
-2. Same pattern with **`preview.follicleintelligence.ai`** if that name is preferred.
-3. Keep Decision **B** until (1) or (2) is live and returns app HTML (not `404: NOT_FOUND` / Vercel login).
+2. Host must return app HTML (not `404: NOT_FOUND` / Vercel login) before switching the var.
 
 **Do not** set `FI_E2E_STAGING_URL` to any `*.vercel.app` preview URL while Deployment Protection SSO is on — Playwright will hit Vercel login, not FI.
 
-**Secrets check (unchanged):** `FI_E2E_DEMO_ADMIN_*`, `FI_E2E_TENANT_ID`, `FI_E2E_LEAD_ID`, `FI_E2E_PATIENT_ID` remain **SET**. Same Supabase/demo credentials are expected to work once a public staging host shares that backend (typical for this project).
-
-**Awaiting user confirmation** of hostname before `gh variable set` + trust-gate re-dispatch.
+**Secrets check (unchanged):** `FI_E2E_DEMO_ADMIN_*`, `FI_E2E_TENANT_ID`, `FI_E2E_LEAD_ID`, `FI_E2E_PATIENT_ID` remain **SET**.
 
 ---
 
@@ -336,8 +338,8 @@ Reception / nurse / operations_admin resolve to `/front-desk` in pure core — *
 | Rubric | Assessment |
 | ------ | ---------- |
 | **Phase 1 inventory** | **DONE** |
-| **Decision B** | **APPLIED** — production URL variable SET (still in force) |
-| **Decision A** | **BLOCKED** — no assigned public staging host; DNS stubs 404; previews SSO-gated — awaiting hostname confirm |
+| **Decision B** | **CONFIRMED Keep B** — `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` (unchanged) |
+| **Decision A** | **DEFERRED indefinitely** — ops-only if revisited; no subdomain assign / no var change |
 | **Workflow harden** | **DONE** — spine IDs wired; staging var consumed |
 | **GH Actions apply** | **DONE** — P0 + spine secrets SET |
 | **CI-PNPM-01** | **CLOSED** |
