@@ -249,6 +249,21 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 
 **Follow-up:** Align surgeon post-login redirect to `/doctor` (unit expectation). CRM ejection is consistent with non-CRM `staff_role` — not a P1 defect for doctor persona.
 
+### Re-bake (post `b296e13e` landing fix — fresh session)
+
+**Date:** 2026-07-13 (after deploy `b296e13e`)  
+**Tool:** cursor-ide-browser MCP
+
+| Field | Observed |
+| ----- | -------- |
+| Session URL after opening `/fi-admin/c2615b95-…` | **`/doctor`** — server redirect **PASS** |
+| Workspace | **Surgeon workspace** ✓ |
+| Profile email | **`seetskd@gmail.com`** ✓ |
+| `/doctor` workspace | **PASS** — Doctor Workspace + physician queues |
+| Calendar | **PASS** |
+
+**Landing redirect verdict:** **PASS** — bare tenant home now redirects surgeon to **`/doctor`** (no longer stays on Today home).
+
 ---
 
 ## 1g. Live browser bake (Evie Shackleton / nurse)
@@ -335,7 +350,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | c***@icloud.com | Present | tenant_backend | Present | consultant | Via `staff_role` | 0 | Role text | No | OK |
 | d***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | e***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (Evie; landing `/front-desk` post-`b296e13e`) |
-| s***@gmail.com | Present | member | Present | Contractor Doctor / Hair Transplant Surgeon | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (shell + clinical; landing Today) |
+| s***@gmail.com | Present | member | Present | Contractor Doctor / Hair Transplant Surgeon | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (landing `/doctor` post-`b296e13e`) |
 | m***@evolvedhair.com.au | Present | member | Present | **consultant** (reclassified 2026-07-13) | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (shell + CRM; landing Today) |
 | p***@evolvedhair.com.au | Present | member | Present | owner | Via `staff_role` | 0 | Role text | No | OK |
 | s***@follicleintelligence.ai | Present | manager | Present | Manager | Via `staff_role` | 0 | Role text | No | OK |
@@ -358,14 +373,14 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Receptionist | `/front-desk` | PASS | **PARTIAL** (live: Today home, not `/cases`) | Not tested | Not tested | Not tested |
 | Nurse | `/front-desk` | PASS | **PASS** (live: Evie post-`b296e13e` — bare tenant → **`/front-desk`**; Calendar/Patients **PASS**) | — | — | — |
 | Consultant | `/crm` | PASS | **PARTIAL** (live: manager@ re-bake — shell **PASS**, CRM **PASS**, landing Today not `/crm`) | — | — | — |
-| Doctor / surgeon | `/doctor` | PASS | **PARTIAL** (live: Dr Seetal — shell **PASS**, `/doctor`/Patients/Calendar/golden patient **PASS**; landing Today not `/doctor`; `/crm` → `/cases`) | — | — | — |
+| Doctor / surgeon | `/doctor` | PASS | **PASS** (live: Dr Seetal post-`b296e13e` — bare tenant → **`/doctor`**; Calendar/Patients **PASS**) | — | — | — |
 | Finance admin | `/financial-os` | PASS | BLOCKED | — | — | — |
 | Clinic admin | Today | PASS | BLOCKED | — | — | — |
 | Manager | Today | PASS | BLOCKED | — | — | — |
 | Owner | Today | PASS | **PASS** (live: Paul impersonation → Today) | — | — | — |
 | Platform admin | `/fi-admin` | PASS (OS role) | **PASS** (live: Today home) | — | — | — |
 
-**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, Pipeline + golden lead **PASS**. **manager@** consultant re-bake (post-`ae36eb65`): greeting **Manager**, Consultant workspace, email **PASS**, CRM + golden lead **PASS**; landing **Today** (not `/crm`). **Dr Seetal** surgeon: greeting **Dr**, Surgeon workspace, `/doctor`/Patients/Calendar/golden patient **PASS**; landing **Today** (not `/doctor`); `/crm` → `/cases`. **Evie Shackleton** nurse: greeting **Evie**, Nurse workspace, bare tenant → **`/front-desk` PASS** (post-`b296e13e`); Calendar/Patients **PASS**. `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
+**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, Pipeline + golden lead **PASS**. **manager@** consultant re-bake (post-`ae36eb65`): greeting **Manager**, Consultant workspace, email **PASS**, CRM + golden lead **PASS**; landing **Today** (not `/crm`). **Dr Seetal** surgeon: Surgeon workspace, bare tenant → **`/doctor` PASS** (post-`b296e13e`); Calendar **PASS**. **Evie Shackleton** nurse: greeting **Evie**, Nurse workspace, bare tenant → **`/front-desk` PASS** (post-`b296e13e`); Calendar/Patients **PASS**. `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
 
 **Confirmed by unit tests:**
 
@@ -510,7 +525,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 | Reception      |       4 |          5 |            4 |                4 |      — | **Amber** (live `crm_operator`; landing not `/front-desk`) |
 | Consultant     |       4 |          5 |            4 |                4 |      — | **Amber→Green** (live: shell + CRM PASS; landing Today) |
 | Nurse          |       5 |          5 |            4 |                4 |      — | **Green** (live: landing `/front-desk` PASS post-`b296e13e`) |
-| Doctor         |       4 |          5 |            4 |                4 |      — | **Amber→Green** (live: shell + clinical PASS; landing Today; CRM gated) |
+| Doctor         |       5 |          5 |            4 |                4 |      — | **Green** (live: landing `/doctor` PASS post-`b296e13e`) |
 | Finance        |       4 |          4 |            — |                — |      — | Amber   |
 | Manager        |       5 |          5 |            4 |                4 |      — | **Green** (live: manager@ reclassified consultant — CRM + golden lead PASS) |
 | Owner          |       4 |          5 |            4 |                4 |      — | **Green** (live: Paul impersonation PASS) |
