@@ -15,6 +15,11 @@ import { e2eTenantId, requireE2eBaseUrl } from "./fixtures/baseUrl";
 const TENANT = () => e2eTenantId();
 const BASE = () => `/fi-admin/${TENANT()}`;
 
+/** Profile route — exclude Health record (`/twin`) links in CRM lead header. */
+function patientProfileLink(page: import("@playwright/test").Page, patientId: string) {
+  return page.locator(`a[href="${BASE()}/patients/${patientId}"]`).first();
+}
+
 function spineFixturesReady(): boolean {
   return Boolean(
     hasDemoCredentials() &&
@@ -37,7 +42,7 @@ authenticatedTest.describe("FI trust golden patient spine @authenticated @smoke"
     await page.goto(`${BASE()}/crm/leads/${leadId}`, { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(new RegExp(`/crm/leads/${leadId}`));
 
-    const patientLink = page.locator(`a[href*="/patients/${patientId}"]`).first();
+    const patientLink = patientProfileLink(page, patientId);
     await expect(patientLink).toBeVisible({ timeout: 30_000 });
     await patientLink.click();
     await page.waitForURL(new RegExp(`/patients/${patientId}(?:/|$|\\?)`), { timeout: 30_000 });
@@ -48,18 +53,18 @@ authenticatedTest.describe("FI trust golden patient spine @authenticated @smoke"
     const patientId = process.env.FI_E2E_PATIENT_ID!.trim();
 
     await page.goto(`${BASE()}/crm/leads/${leadId}`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(`a[href*="/patients/${patientId}"]`).first()).toBeVisible({
+    await expect(patientProfileLink(page, patientId)).toBeVisible({
       timeout: 30_000,
     });
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator(`a[href*="/patients/${patientId}"]`).first()).toBeVisible({
+    await expect(patientProfileLink(page, patientId)).toBeVisible({
       timeout: 30_000,
     });
 
     await page.goto(`${BASE()}/crm`, { waitUntil: "domcontentloaded" });
     await page.goto(`${BASE()}/crm/leads/${leadId}`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(`a[href*="/patients/${patientId}"]`).first()).toBeVisible({
+    await expect(patientProfileLink(page, patientId)).toBeVisible({
       timeout: 30_000,
     });
   });

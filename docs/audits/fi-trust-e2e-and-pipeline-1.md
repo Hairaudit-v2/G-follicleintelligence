@@ -1,0 +1,123 @@
+# FI-TRUST-E2E-AND-PIPELINE-1
+
+**Status:** **GREEN** — authenticated trust E2E bundle PASS on production; staff mapping 10/10 (2026-07-13)  
+**Date:** 2026-07-13  
+**Depends on:** FI-TRUST-MONEY-AND-READINESS-1, FI-ROLE-JOURNEY-BAKE-1 (DEF-E2E-01, DEF-PIPE-01)  
+**Plan:** [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md)
+
+## Goal
+
+Prove operational trust automation: authenticated Playwright can validate role landing, Pipeline layout containment, and golden-patient CRM spine without manual browser bakes. Close DEF-E2E-01 (`invalid_credentials`) and document Pipeline V1 allowlist readiness.
+
+---
+
+## Environment audit
+
+| Variable | Local `.env.local` | Plan requirement | Status |
+| -------- | ------------------ | ---------------- | ------ |
+| `FI_E2E_BASE_URL` | `http://localhost:3000` (overridden to production for bake) | HTTPS production or staging | **PASS** — bake used `https://follicleintelligence.ai` |
+| `FI_E2E_TENANT_ID` | `c2615b95-b707-4485-aa5f-be8f78ec868a` | Evolved UUID | **PASS** |
+| `FI_E2E_DEMO_ADMIN_EMAIL` | `manager@evolvedhair.com.au` | Valid rotated credentials | **PASS** — login succeeds (DEF-E2E-01 **closed**) |
+| `FI_E2E_DEMO_ADMIN_PASSWORD` | Set (non-placeholder) | Valid rotated credentials | **PASS** |
+| `FI_E2E_LEAD_ID` | `c9a58f3d-e1e4-4187-9986-59faed41565d` | SMOKETEST golden lead | **PASS** |
+| `FI_E2E_PATIENT_ID` | `287348d5-18bd-4434-9bab-7caafacbfe86` | SMOKETEST golden patient | **PASS** |
+| `FI_PIPELINE_V1_TENANT_ALLOWLIST` | Evolved UUID included | Decision required | **Local PASS** — production evidenced by Pipeline E2E (Enquiries board mounted) |
+| `FI_E2E_UNLINKED_LEAD_ID` | Unset | Optional negative case | **SKIP** |
+| `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | Unset | Optional role-home assert | **SKIP** |
+
+**Prior blocker (DEF-E2E-01):** `invalid_credentials` from FI-ROLE-JOURNEY-BAKE-1 — **resolved**. Current `manager@evolvedhair.com.au` credentials authenticate against production. No TLS wrapper needed for Playwright (browser handles TLS); `run-with-system-ca.mjs` used only for `audit:staff-mapping`.
+
+---
+
+## E2E trust bundle — production
+
+**Command:**
+
+```bash
+FI_E2E_BASE_URL=https://follicleintelligence.ai \
+FI_E2E_BROWSERS=chromium \
+npm run test:e2e -- \
+  --project=chromium-authenticated \
+  e2e/fi-trust-role-landing.spec.ts \
+  e2e/fi-trust-pipeline-layout.spec.ts \
+  e2e/fi-trust-golden-patient-spine.spec.ts
+```
+
+**Note:** `fi-trust-role-landing.spec.ts` also matches the public `chromium` project (`@authenticated` grep); both projects ran. All executable cases **PASS**.
+
+### Results by spec (`chromium-authenticated`)
+
+| Spec | Pass | Fail | Skip | Notes |
+| ---- | ---- | ---- | ---- | ----- |
+| `fi-trust-role-landing.spec.ts` | 2 | 0 | 1 | Skip: optional `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` |
+| `fi-trust-pipeline-layout.spec.ts` | 2 | 0 | 0 | Desktop + tablet H-scroll containment |
+| `fi-trust-golden-patient-spine.spec.ts` | 2 | 0 | 1 | Skip: `FI_E2E_UNLINKED_LEAD_ID` unset |
+| **Total (authenticated project)** | **6** | **0** | **2** | |
+
+### Check matrix (automated)
+
+| ID | Check | Result | Evidence |
+| -- | ----- | ------ | -------- |
+| E1 | Role landing | **PASS** | Post-login not `/cases`; `/leadflow` → `/crm` |
+| E2 | Pipeline layout | **PASS** | No `documentElement` H-overflow; `pipeline-board-h-scroll` at tablet |
+| E3 | Golden-patient spine | **PASS** | Lead `c9a58f3d-…` links to patient `287348d5-…`; reload + re-navigation stable |
+| S1 | Staff mapping | **PASS** | `operators_with_login: 10`, `missing_fi_staff: 0` |
+| P1 | Pipeline allowlist | **AMBER → evidenced ON** | Local env includes Evolved UUID; production `/crm` Enquiries board mounts in E2E |
+| P2 | `/leadflow` redirect | **PASS** | Unconditional soft-redirect to `/crm` (E1) |
+| P3 | Pipeline H-scroll | **PASS** | E2 |
+
+---
+
+## Failure diagnosis and fix (Phase 2)
+
+### Initial run — 2 failures (P2 test)
+
+| Failure | Class | Root cause |
+| ------- | ----- | ---------- |
+| `lead detail links to canonical patient workspace` | **P2** | Locator `a[href*="/patients/{id}"]`.first()` matched CRM header **Health record** link (`/patients/{id}/twin`) before **Profile →** (`/patients/{id}`). Consultant persona lacks `patient_twin`; navigation landed on `module-unavailable?featureDenied=patient_twin`. |
+
+### Fix applied
+
+**File:** `e2e/fi-trust-golden-patient-spine.spec.ts`
+
+- Added `patientProfileLink()` helper targeting exact profile href (excludes `/twin`).
+- Re-run: **6/6 executable authenticated tests PASS**.
+
+No app-code change required — linkage and profile route are correct; test selector was ambiguous.
+
+---
+
+## Deferred / out of scope (unchanged)
+
+| ID | Item | Status |
+| -- | ---- | ------ |
+| DEF-NURSE-01 | Treatment workflow discoverability (Front desk / Calendar) | Live bake deferred — not covered by trust E2E bundle |
+| DEF-PIPE-01 (ops) | Production env var sign-off in deployment secret store | **Evidenced ON** via E2E; formal ops doc still recommended |
+| N1 / N2 | Nurse calendar filters + front-desk CTA | Phase 2 live browser per plan §8 |
+
+---
+
+## Release verdict
+
+| Rubric | Assessment |
+| ------ | ---------- |
+| **GREEN** | E1–E3 PASS; S1 PASS; P2–P3 PASS; DEF-E2E-01 closed |
+| Blockers | None for trust E2E automation |
+
+---
+
+## Recommended next action
+
+1. **Ops:** Record Evolved UUID in production `FI_PIPELINE_V1_TENANT_ALLOWLIST` deployment config (if not already committed in Vercel/host secrets) — E2E evidence suggests it is active.
+2. **Live bake:** Consultant + nurse sessions per plan §8 (DEF-NURSE-01 calendar treatment filters, front-desk empty-state CTA).
+3. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
+4. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
+
+---
+
+## Related docs
+
+- [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md)
+- [fi-role-journey-bake-1.md](./fi-role-journey-bake-1.md) — DEF-E2E-01 origin
+- [fi-trust-money-and-readiness-1.md](./fi-trust-money-and-readiness-1.md) — prior milestone
+- [e2e/README.md](../../e2e/README.md)
