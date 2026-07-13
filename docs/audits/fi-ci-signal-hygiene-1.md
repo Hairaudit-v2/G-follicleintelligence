@@ -190,10 +190,14 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 | Field | Value |
 | ----- | ----- |
-| Status | **Landed** (await CI confirmation on public-smoke) |
+| Status | **Confirmed** on CI run [29282145316](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29282145316) |
 | Date | 2026-07-14 |
+| Commit | `16b29652` |
 | ID | PUB-AUTH-CRASH |
-| Expected delta | **−48** public fails (8×6); residual advisory fails ≈ **78** (A+C+D) if baseline 126 holds |
+| Expected delta | **−48** public fails (8×6) |
+| Actual public summary | **132 passed / 78 failed / 66 skipped** (was 132 / **126** / 186 on 29275224871) → **−48 fails** |
+| Auth `trim` crashes | **0** (was Bucket B systematic) |
+| Trust trio | **GREEN** (same run) |
 
 **Changes:**
 
@@ -201,11 +205,11 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 2. `e2e/fixtures/auth.ts` — auto `testInfo.skip` when `!hasDemoCredentials()`; worker fixture returns empty storage state instead of calling `.trim()` on unset env; login uses `demoAdminEmail()` / `demoAdminPassword()`.
 3. `e2e/helpers/credentials.test.ts` — unit guard for unset / whitespace / present demo creds.
 
-**Trust trio:** Unchanged — still `authenticated-smoke` → `--project=chromium-authenticated` with secrets. Do not regress trust-trio-only scope.
+**Trust trio:** Unchanged — still `authenticated-smoke` → `--project=chromium-authenticated` with secrets. Confirmed GREEN on the fix run.
 
-**Bucket C (deferred — next PR):** patients API **404** and cron **503** vs narrow expect lists — not widened here; need intentional-status proof on prod-like middleware before changing expects (avoid masking real holes).
+**Bucket C (deferred — next PR):** patients API **404** and cron **503** vs narrow expect lists — still present in the 78 (×6 browsers = 12). Not widened here; need intentional-status proof on prod-like middleware before changing expects.
 
-**Bucket A / D:** Still open (labels unauth ~60; procedure-day HTTP 200 ~6).
+**Bucket A / D:** Still open in the 78 (labels unauth ~60; procedure-day HTTP 200 ~6).
 
 ---
 
