@@ -114,6 +114,49 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 
 ---
 
+## 1d. Live browser bake (Paul Green / owner) — post-deploy verification
+
+**Date:** 2026-07-13 (after deploy `f509ad55` + `116a7882`)  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (platform-admin **impersonation** of Paul Green)
+
+### Session identity (resolved)
+
+| Field | Observed |
+| ----- | -------- |
+| Target persona | **Paul Green** — `paul@evolvedhair.com.au` (`fi_users.role=member`, `fi_staff.staff_role=owner`) |
+| Auth user id | `d10045e8-3984-4439-ad15-1fe376830463` |
+| Greeting | **"Good afternoon, Paul"** — not auditor |
+| Profile email (CDP) | **`paul@evolvedhair.com.au`** — not `auditor@hairaudit.com` |
+| Workspace badge | **Director workspace** / **Director view** — not Platform admin |
+| Impersonation UI | **PASS** — `Exit impersonation` + body text "impersonating paul" |
+
+**Conclusion:** **BAKE-1-LIVE-04 fix verified** — shell chrome shows impersonation **target** identity. Owner CRM shell (**BAKE-1-LIVE-01**) also holds on production.
+
+### Check matrix (owner impersonation)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Greeting not auditor | **PASS** | `/fi-admin/c2615b95-…` | `Good afternoon, Paul` |
+| 2 | Profile email | **PASS** | — | `paul@evolvedhair.com.au` |
+| 3 | Workspace badge | **PASS** | — | Director workspace (owner `fi_staff`) |
+| 4 | Impersonation banner | **PASS** | — | Exit impersonation visible |
+| 5 | Post-login landing | **PASS** | `/fi-admin/c2615b95-…` | **Today home** — not `/cases` |
+| 6 | `/crm` Pipeline hold | **PASS** | `/crm` | Title Pipeline; no redirect |
+| 7 | Golden lead detail hold | **PASS** | `/crm/leads/c9a58f3d-…` | SMOKETEST lead + patient `287348d5-…`; no ejection |
+
+### Updated comparison (post-fix)
+
+| Role context | Shell identity | `/crm` hold | Golden lead hold |
+| ------------ | -------------- | ----------- | ---------------- |
+| Platform admin / auditor (pre-fix) | **FAIL** — initiator chrome | **FAIL** → `/cases` | **FAIL** → `/cases` |
+| **Paul / owner impersonation (post-fix)** | **PASS** — Paul + Director | **PASS** | **PASS** |
+| Jesika / `crm_operator` impersonation | **PARTIAL** (pre-04: auditor greeting) | **PASS** | **PASS** |
+| Clinic manager (`manager`) | Not re-baked post-01 | **Expected PASS** | **Expected PASS** |
+
+---
+
 ## 2. Environment and fixture limitations
 
 | Limitation | Impact | Status |
@@ -173,10 +216,10 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Finance admin | `/financial-os` | PASS | BLOCKED | — | — | — |
 | Clinic admin | Today | PASS | BLOCKED | — | — | — |
 | Manager | Today | PASS | BLOCKED | — | — | — |
-| Owner | Today | PASS | BLOCKED | — | — | — |
+| Owner | Today | PASS | **PASS** (live: Paul impersonation → Today) | — | — | — |
 | Platform admin | `/fi-admin` | PASS (OS role) | **PASS** (live: Today home) | — | — | — |
 
-**Live browser (2026-07-13):** `crm_operator` impersonation (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**. Manager/auditor: CRM **FAIL** → `/cases`.
+**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, `paul@evolvedhair.com.au`, Pipeline + golden lead **PASS**. `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
 
 **Confirmed by unit tests:**
 
@@ -255,8 +298,8 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 | -- | ----- | ------- |
 **Live evidence (1366×768 CDP, `crm_operator`):** `documentElement.scrollWidth - clientWidth = 0` on Pipeline; board container class not mounted at default Pipeline view.
 
-| BAKE-1-LIVE-01 | **P1 — fix applied** | `/crm` and `/crm/leads/*` redirected to `/cases` for **manager** and **`member`+consultant staff** — extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) and `fi_staff.staff_role` fallback in `crmShellAccess.ts` |
-| BAKE-1-LIVE-04 | **P0 — fix applied** | Impersonating clinic users (e.g. Paul Green owner) showed **initiator** chrome (`auditor`, `Platform admin workspace`) — Today greeting, profile email, and workspace profile used `resolveAuthUserId` instead of impersonation target |
+| BAKE-1-LIVE-01 | **P1 — verified live** | Owner (`member`+`fi_staff.owner`) Pipeline + golden lead **PASS** on production (Paul session) |
+| BAKE-1-LIVE-04 | **P0 — verified live** | Paul impersonation shows target chrome (Paul, Director, `paul@evolvedhair.com.au`); impersonation banner retained |
 | BAKE-1-LIVE-02 | P2 | Roslyn receptionist session not achieved — impersonation landed on platform admin / auditor |
 | BAKE-1-ENV-01 | P1 (env) | `FI_E2E_DEMO_ADMIN_*` invalid locally — authenticated E2E cannot run |
 | BAKE-1-ENV-02 | P2 (env) | Playwright Supabase magic-link fetch hits TLS interception on Windows |
