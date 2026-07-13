@@ -1,10 +1,10 @@
 # FI-TRUST-CI-AND-RECEPTION-1
 
-**Status:** **Phase 1+ ops APPLY DONE** — Decision B recorded; `FI_E2E_STAGING_URL` + P0/spine secrets **SET** in Actions; workflow spine wired; reception R1 still open  
+**Status:** **CI dry-run FAIL** — Authenticated job **ran** (gate open); both smoke jobs failed at Setup pnpm (v9 vs packageManager 10.30.3). Trust E2E not reached. Reception R1 blocked on CI fix.  
 **Date:** 2026-07-14  
 **Depends on:** FI-TRUST-E2E-AND-PIPELINE-1 (GREEN — E2E, Pipeline allowlist, DEF-NURSE-01)  
 **Plan:** [fi-trust-ci-and-reception-1-plan.md](./fi-trust-ci-and-reception-1-plan.md)  
-**Inventory at:** `d9fdc346` (secrets MISSING) · Harden `0e012575` · GH apply confirmed 2026-07-14 (names only)
+**Inventory at:** `d9fdc346` (secrets MISSING) · Harden `0e012575` · Wire-up `8edf938b` · CI dry-run [29273920709](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29273920709)
 
 ## Goal
 
@@ -49,8 +49,9 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 | CI-SPINE-01 | **CLOSED** | Workflow env + Actions secrets for `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` both present. | `e2e-smoke.yml` + `gh secret list` |
 | CI-FIX-01 | **P2** | Optional `FI_E2E_UNLINKED_LEAD_ID` and `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` unset → permanent skips (documented acceptable unless ops chooses to enable). | E2E close-out 2 SKIP |
 | CI-SEC-01 | **CLOSED (ops)** | P0 secrets **SET**. Job gate uses staging **var** (secrets illegal in job `if` — fixed after 422 parse failures). | `gh secret list` + workflow `if: vars.FI_E2E_STAGING_URL` |
+| CI-PNPM-01 | **P0 open** | `e2e-smoke.yml` pins `pnpm/action-setup` **version: 9** while `package.json` `packageManager` is **pnpm@10.30.3** → Setup pnpm fails on both jobs. | Run [29273920709](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29273920709) annotations |
 
-**Playwright note:** `hasDemoCredentials()` gates `*-authenticated` projects. Trust specs are in `testMatch` for those projects and tagged `@authenticated` — code + host var + P0/spine secrets are ready; remaining barriers are first CI run proof + reception R1.
+**Playwright note:** `hasDemoCredentials()` gates `*-authenticated` projects. Trust specs are in `testMatch` for those projects and tagged `@authenticated` — code + host var + P0/spine secrets are ready; remaining barrier is CI-PNPM-01 then a GREEN trust run + reception R1.
 
 ---
 
@@ -94,6 +95,43 @@ gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --re
 **Vercel notes:** Unchanged — `FI_E2E_*` belong in GitHub Actions, not Vercel app runtime.
 
 **Implication:** `authenticated-smoke` credential gate can open. First GREEN claim still needs a successful workflow run against production.
+
+---
+
+## CI dry-run (workflow_dispatch · 2026-07-14)
+
+| Field | Value |
+| ----- | ----- |
+| **Run** | [29273920709](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29273920709) |
+| **Commit** | `8edf938b` (FI_E2E wire-up / staging-var gate) |
+| **Trigger** | `workflow_dispatch` on `main` |
+| **Overall** | **failure** (completed ~17s — never reached Playwright) |
+
+### Job outcomes
+
+| Job | Status | Notes |
+| --- | ------ | ----- |
+| Authenticated journeys (staging credentials) | **RAN → failure** | **Not skipped** — `vars.FI_E2E_STAGING_URL` gate **worked**. Failed at **Setup pnpm**; “Authenticated e2e against staging” **skipped**. |
+| Public + security smoke | **failure** | Same Setup pnpm failure; public Playwright never ran. |
+
+### Trust E2E steps
+
+| Check | Result |
+| ----- | ------ |
+| Trust / `@authenticated` Playwright | **Not executed** (upstream Setup pnpm failed) |
+| Pass/fail of trust trio | **N/A** — no Playwright result this run |
+
+### Root cause (CI-PNPM-01)
+
+Annotation on both jobs:
+
+> Multiple versions of pnpm specified: `version: 9` in `e2e-smoke.yml` (`pnpm/action-setup@v4`) vs `packageManager: pnpm@10.30.3+…` in `package.json`.
+
+| ID | Class | Finding | Fix |
+| -- | ----- | ------- | --- |
+| CI-PNPM-01 | **P0 blocker** | Workflow pins pnpm **9**; repo declares pnpm **10.30.3** → Setup pnpm aborts. | Align `pnpm/action-setup` with `packageManager` (prefer omit `version:` or set `10` / `10.30.3` to match package.json). Re-run `e2e-smoke.yml`. |
+
+**Gate proof (positive):** Decision B + secrets apply successfully opened `authenticated-smoke` (job executed; not skipped).
 
 ---
 
@@ -174,8 +212,10 @@ Reception / nurse / operations_admin resolve to `/front-desk` in pure core — l
 | **Decision B** | **APPLIED** — production URL variable SET |
 | **Workflow harden** | **DONE** — spine IDs wired; staging var consumed |
 | **GH Actions apply** | **DONE** — P0 + spine secrets SET |
-| **Overall** | **AMBER → CI path unblocked** — claim durable gate GREEN only after first successful `authenticated-smoke` run; reception R1 still open |
-| Blockers for GREEN | Successful authenticated CI run on production; reception R1 live |
+| **CI dry-run** | **FAIL** — run `29273920709`; auth job ran; Setup pnpm mismatch (CI-PNPM-01); trust E2E not reached |
+| **Overall** | **RED on CI** — gate open proven; install toolchain broken. Fix CI-PNPM-01 → re-dispatch → then reception R1 |
+| Blockers for GREEN | Fix pnpm version alignment; successful authenticated CI run on production; reception R1 live |
+| **Next action** | **CI fix needed** (not reception-bake-ready) — align `e2e-smoke.yml` pnpm with `package.json` `packageManager`, re-run workflow |
 
 ---
 
