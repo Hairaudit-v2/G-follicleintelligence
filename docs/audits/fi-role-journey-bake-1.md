@@ -157,6 +157,42 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 
 ---
 
+## 1e. Live browser bake (manager@ → consultant reclassification)
+
+**Date:** 2026-07-13 (after DB reclassify + deploy `563776a9` / `116a7882`)  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (live session as **`manager@evolvedhair.com.au`**; `Exit impersonation` still visible — may be platform-admin impersonation wrapper)
+
+### Session identity (resolved)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`manager@evolvedhair.com.au`** (`fi_users.role=member`, `fi_staff.staff_role=consultant` post-reclassify) |
+| Profile email (CDP) | **`manager@evolvedhair.com.au`** ✓ |
+| Greeting | **"Good afternoon, Paul"** — **FAIL** for consultant (stale `fi_staff.full_name=Paul`; not auditor/owner chrome) |
+| Workspace badge | **Clinic manager workspace** / **Clinic manager view** — **FAIL** (expected Consultant; likely `position_type` default overrides `staff_role`) |
+| Landing URL | **Today home** — **PARTIAL** (not `/cases`, but not `/crm` unit expectation for consultant) |
+
+**Conclusion:** **CRM functional spine PASS** (Pipeline + golden lead hold). **Shell persona PARTIAL** — access gates work but display name/workspace profile still reflect legacy Manager/Paul HR data.
+
+### Check matrix (manager@ consultant)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Greeting not auditor/owner | **PARTIAL** | `/fi-admin/c2615b95-…` | Shows **Paul** (HR `full_name`), not consultant label |
+| 2 | Profile email | **PASS** | — | `manager@evolvedhair.com.au` |
+| 3 | Workspace badge | **FAIL** | — | **Clinic manager workspace** — not Consultant |
+| 4 | Not Platform admin / Director | **PASS** | — | No platform-admin or director chrome |
+| 5 | Post-login landing | **PARTIAL** | `/fi-admin/c2615b95-…` | Today home — not `/crm`, not `/cases` |
+| 6 | `/crm` Pipeline hold | **PASS** | `/crm` | Full Pipeline; no `/cases` ejection |
+| 7 | `/leadflow` → `/crm` | **PASS** | `/crm` | Legacy redirect holds |
+| 8 | Golden lead detail hold | **PASS** | `/crm/leads/c9a58f3d-…` | SMOKETEST lead; no ejection |
+
+**Follow-up:** Correct `fi_staff.full_name` and position-type workspace default so shell shows **Consultant** persona; re-test landing redirect to `/crm`.
+
+---
+
 ## 2. Environment and fixture limitations
 
 | Limitation | Impact | Status |
@@ -190,7 +226,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | d***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | e***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | s***@gmail.com | Present | member | Present | Contractor Doctor / Hair Transplant Surgeon | Via `staff_role` | 0 | Role text | No | OK |
-| m***@evolvedhair.com.au | Present | manager | Present | Manager | Via `staff_role` | 0 | Role text | No | OK |
+| m***@evolvedhair.com.au | Present | member | Present | **consultant** (reclassified 2026-07-13) | Via `staff_role` | 0 | Role text | No | **Live bake: CRM PASS, shell PARTIAL** |
 | p***@evolvedhair.com.au | Present | member | Present | owner | Via `staff_role` | 0 | Role text | No | OK |
 | s***@follicleintelligence.ai | Present | manager | Present | Manager | Via `staff_role` | 0 | Role text | No | OK |
 
@@ -211,7 +247,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | ---- | ---------------- | ------------- | ---------- | ----------- | ---------- | -------- |
 | Receptionist | `/front-desk` | PASS | **PARTIAL** (live: Today home, not `/cases`) | Not tested | Not tested | Not tested |
 | Nurse | `/front-desk` | PASS | BLOCKED | — | — | — |
-| Consultant | `/crm` | PASS | BLOCKED | — | — | — |
+| Consultant | `/crm` | PASS | **PARTIAL** (live: manager@ reclassify — CRM **PASS**, landing Today, shell shows Clinic manager/Paul) | — | — | — |
 | Doctor / surgeon | `/doctor` | PASS | BLOCKED | — | — | — |
 | Finance admin | `/financial-os` | PASS | BLOCKED | — | — | — |
 | Clinic admin | Today | PASS | BLOCKED | — | — | — |
@@ -219,7 +255,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Owner | Today | PASS | **PASS** (live: Paul impersonation → Today) | — | — | — |
 | Platform admin | `/fi-admin` | PASS (OS role) | **PASS** (live: Today home) | — | — | — |
 
-**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, `paul@evolvedhair.com.au`, Pipeline + golden lead **PASS**. `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
+**Live browser (2026-07-13):** Paul **owner** impersonation (post-`f509ad55`): greeting **Paul**, Director workspace, Pipeline + golden lead **PASS**. **manager@** reclassified consultant: email **PASS**, CRM + golden lead **PASS**, shell **PARTIAL** (Clinic manager / Paul HR name). `crm_operator` (Jesika): lands **Today** not `/front-desk`; Pipeline + golden lead **PASS**.
 
 **Confirmed by unit tests:**
 
