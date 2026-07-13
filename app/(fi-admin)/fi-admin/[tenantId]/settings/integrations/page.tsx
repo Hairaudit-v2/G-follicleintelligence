@@ -10,8 +10,10 @@ import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/setting
 import { GoogleCalendarMonitoringCard } from "@/src/components/fi-admin/settings/GoogleCalendarMonitoringCard";
 import { GoogleCalendarSyncReviewCard } from "@/src/components/fi-admin/settings/GoogleCalendarSyncReviewCard";
 import { LiveDataHealthDiagnosticsCard } from "@/src/components/fi-admin/settings/LiveDataHealthDiagnosticsCard";
+import { OtherIntegrationsSection } from "@/src/components/fi-admin/settings/OtherIntegrationsSection";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import { loadGoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
 import {
   assertGoogleCalendarTenantAdminAccess,
@@ -23,6 +25,11 @@ import { loadGoogleCalendarSyncReviewPage } from "@/src/lib/googleCalendar/googl
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { parseGoogleCalendarBackfillDiagnostics } from "@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore";
 import { loadLiveDataHealthSummary } from "@/src/lib/integrations/liveDataHealth.server";
+import {
+  readFiPaymentProviderId,
+  readFiPaymentsEnabled,
+  readStripeWebhookSecret,
+} from "@/src/lib/payments/fiPaymentEnv.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const metadata = {
@@ -120,7 +127,17 @@ export default async function TenantIntegrationsSettingsPage({
     canManage: canManageCalendarLinks,
   });
 
-  const liveDataHealth = await loadLiveDataHealthSummary(tenantId);
+  const [liveDataHealth, appOrigin] = await Promise.all([
+    loadLiveDataHealthSummary(tenantId),
+    resolveFiOsPublicOrigin(),
+  ]);
+
+  const hubSpotWebhookSecretConfigured = Boolean(
+    process.env.FI_HUBSPOT_WEBHOOK_SECRET?.trim()
+  );
+  const stripeCheckoutEnabled =
+    readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
+  const stripeWebhookSecretConfigured = Boolean(readStripeWebhookSecret());
 
   const { data: syncHealthRow } = await supabase
     .from("fi_calendar_sync_health")
@@ -186,29 +203,14 @@ export default async function TenantIntegrationsSettingsPage({
 
       <LiveDataHealthDiagnosticsCard tenantId={tenantId} health={liveDataHealth} />
 
-      <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/40 p-4 sm:p-5">
-        <h2 className="text-base font-semibold text-[#F8FAFC]">Other integrations</h2>
-        <ul className="mt-3 space-y-2 text-sm text-[#94A3B8]">
-          <li>
-            <Link
-              href={`/fi-admin/${tenantId}/settings/integrations/timely`}
-              className="text-[#22C1FF] hover:underline"
-            >
-              Timely · Zapier setup
-            </Link>
-            — webhook URLs and manual Timely wiring.
-          </li>
-          <li>
-            <Link
-              href={`/fi-admin/${tenantId}/settings/integrations/timely/discovery`}
-              className="text-[#22C1FF] hover:underline"
-            >
-              Timely · Zapier discovery
-            </Link>
-            — raw payload capture for mapping work.
-          </li>
-        </ul>
-      </section>
+      <OtherIntegrationsSection
+        tenantId={tenantId}
+        appOrigin={appOrigin}
+        hubSpotConnected={liveDataHealth.hubSpotConnected}
+        hubSpotWebhookSecretConfigured={hubSpotWebhookSecretConfigured}
+        stripeCheckoutEnabled={stripeCheckoutEnabled}
+        stripeWebhookSecretConfigured={stripeWebhookSecretConfigured}
+      />
     </div>
   );
 }
