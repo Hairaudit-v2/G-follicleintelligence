@@ -21,11 +21,34 @@ Prove operational trust automation: authenticated Playwright can validate role l
 | `FI_E2E_DEMO_ADMIN_PASSWORD` | Set (non-placeholder) | Valid rotated credentials | **PASS** |
 | `FI_E2E_LEAD_ID` | `c9a58f3d-e1e4-4187-9986-59faed41565d` | SMOKETEST golden lead | **PASS** |
 | `FI_E2E_PATIENT_ID` | `287348d5-18bd-4434-9bab-7caafacbfe86` | SMOKETEST golden patient | **PASS** |
-| `FI_PIPELINE_V1_TENANT_ALLOWLIST` | Evolved UUID included | Decision required | **Local PASS** — production evidenced by Pipeline E2E (Enquiries board mounted) |
+| `FI_PIPELINE_V1_TENANT_ALLOWLIST` | Evolved UUID included | Evolved UUID on production + preview | **PASS** — local + Vercel production/preview confirmed (2026-07-13) |
 | `FI_E2E_UNLINKED_LEAD_ID` | Unset | Optional negative case | **SKIP** |
 | `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | Unset | Optional role-home assert | **SKIP** |
 
 **Prior blocker (DEF-E2E-01):** `invalid_credentials` from FI-ROLE-JOURNEY-BAKE-1 — **resolved**. Current `manager@evolvedhair.com.au` credentials authenticate against production. No TLS wrapper needed for Playwright (browser handles TLS); `run-with-system-ca.mjs` used only for `audit:staff-mapping`.
+
+### Pipeline V1 allowlist sign-off (DEF-PIPE-01)
+
+| Surface | `FI_PIPELINE_V1_TENANT_ALLOWLIST` | Evolved UUID `c2615b95-…868a` |
+| ------- | --------------------------------- | ----------------------------- |
+| Local `.env.local` | **Set** | **Present** |
+| Vercel **production** | **Set** (sensitive; added ~6h before sign-off) | **Present** — `vercel env run -e production` |
+| Vercel **preview** | **Set** | **Present** — `vercel env run -e preview` |
+
+**Verification commands (2026-07-13):**
+
+```bash
+# List var presence (encrypted values — no plaintext in output)
+npx vercel env ls production
+npx vercel env ls preview
+
+# Live value check (Evolved UUID only — do not log full allowlist in tickets)
+npx vercel env run -e production -- node -e "const v=process.env.FI_PIPELINE_V1_TENANT_ALLOWLIST||''; console.log(v.includes('c2615b95-b707-4485-aa5f-be8f78ec868a')?'PRESENT':'ABSENT')"
+```
+
+**Sync actions:** None required — Evolved UUID already on production and preview allowlists. No `--vercel` / `--vercel-update` run.
+
+**DEF-PIPE-01:** **Closed** — production allowlist includes Evolved; E2E P1 (Enquiries board mounted) + env sign-off align.
 
 ---
 
@@ -62,7 +85,7 @@ npm run test:e2e -- \
 | E2 | Pipeline layout | **PASS** | No `documentElement` H-overflow; `pipeline-board-h-scroll` at tablet |
 | E3 | Golden-patient spine | **PASS** | Lead `c9a58f3d-…` links to patient `287348d5-…`; reload + re-navigation stable |
 | S1 | Staff mapping | **PASS** | `operators_with_login: 10`, `missing_fi_staff: 0` |
-| P1 | Pipeline allowlist | **AMBER → evidenced ON** | Local env includes Evolved UUID; production `/crm` Enquiries board mounts in E2E |
+| P1 | Pipeline allowlist | **PASS** | Local + Vercel production/preview include Evolved UUID; E2E Enquiries board mounts |
 | P2 | `/leadflow` redirect | **PASS** | Unconditional soft-redirect to `/crm` (E1) |
 | P3 | Pipeline H-scroll | **PASS** | E2 |
 
@@ -92,7 +115,7 @@ No app-code change required — linkage and profile route are correct; test sele
 | ID | Item | Status |
 | -- | ---- | ------ |
 | DEF-NURSE-01 | Treatment workflow discoverability (Front desk / Calendar) | Live bake deferred — not covered by trust E2E bundle |
-| DEF-PIPE-01 (ops) | Production env var sign-off in deployment secret store | **Evidenced ON** via E2E; formal ops doc still recommended |
+| DEF-PIPE-01 | Evolved on production `FI_PIPELINE_V1_TENANT_ALLOWLIST` | **Closed** — Vercel production + preview verified 2026-07-13 |
 | N1 / N2 | Nurse calendar filters + front-desk CTA | Phase 2 live browser per plan §8 |
 
 ---
@@ -101,17 +124,16 @@ No app-code change required — linkage and profile route are correct; test sele
 
 | Rubric | Assessment |
 | ------ | ---------- |
-| **GREEN** | E1–E3 PASS; S1 PASS; P2–P3 PASS; DEF-E2E-01 closed |
-| Blockers | None for trust E2E automation |
+| **GREEN** | E1–E3 PASS; S1 PASS; P1–P3 PASS; DEF-E2E-01 + DEF-PIPE-01 closed |
+| Blockers | None for trust E2E automation or Pipeline V1 cutover |
 
 ---
 
 ## Recommended next action
 
-1. **Ops:** Record Evolved UUID in production `FI_PIPELINE_V1_TENANT_ALLOWLIST` deployment config (if not already committed in Vercel/host secrets) — E2E evidence suggests it is active.
-2. **Live bake:** Consultant + nurse sessions per plan §8 (DEF-NURSE-01 calendar treatment filters, front-desk empty-state CTA).
-3. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
-4. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
+1. **Live bake:** Consultant + nurse sessions per plan §8 (DEF-NURSE-01 calendar treatment filters, front-desk empty-state CTA).
+2. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
+3. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
 
 ---
 
