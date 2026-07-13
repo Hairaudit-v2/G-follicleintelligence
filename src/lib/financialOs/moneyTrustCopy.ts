@@ -63,6 +63,11 @@ export function moneyPaymentRowSourceLabel(provider: string | null | undefined):
   return { label: `Provider confirmed (${raw})`, providerConfirmed: true };
 }
 
+/** Tomorrow board KPI helper — manual surgery payment records only. */
+export function moneyTomorrowSurgeryPaymentsKpiHelper(): string {
+  return "Manual surgery payment records when tracked — operational tracking, not bank proof.";
+}
+
 /** Guard / readiness language — avoid FinancialOS brand in staff errors. */
 export function moneyClearanceBlockedStaffMessage(detail?: string | null): string {
   const d = detail?.trim();

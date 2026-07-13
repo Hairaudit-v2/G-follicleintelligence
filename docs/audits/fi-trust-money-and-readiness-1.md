@@ -1,9 +1,10 @@
 # FI-TRUST-MONEY-AND-READINESS-1
 
-**Status:** Phase 2 complete — scoped **GREEN** (Money + M4 + readiness/tomorrow live bakes PASS with documented data caveats)  
+**Status:** **GREEN** — Money + M4 + readiness/tomorrow live bakes PASS; all scoped caveats closed (2026-07-13 close-out)  
 **Date:** 2026-07-13  
 **Depends on:** FI-TRUST-LANDING-AND-SPINE-1, FI-ROLE-JOURNEY-BAKE-1 (deferred gaps)  
-**Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)
+**Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)  
+**Next:** [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md)
 
 ## Goal
 
@@ -82,9 +83,9 @@ PASS
 | READY-LIVE-01 | P2 | Surgery readiness board not live-verified post staff/room wiring | **CLOSED** — R1–R3 PASS 2026-07-13 |
 | TMRW-LIVE-01 | P2 | Tomorrow board financial chips not live-verified | **CLOSED (scoped)** — surface PASS; T1 row chips not exercised (empty tomorrow) |
 | MONEY-LIVE-01 | P3 | Prior bake: empty payment list — row labels unproven | **CLOSED** — seed script + M4 PASS 2026-07-13 |
-| TC-NAV-01 | P3 | Pre-existing procedure day nav unit fail | Hygiene — out of milestone unless blocking |
-| TMRW-DATA-01 | P3 | Tomorrow board empty on 2026-07-14 — chip matrix unproven | Seed or wait for next-day surgery booking to exercise T1 row compare |
-| READY-COPY-01 | P3 | Tomorrow KPI helper cites internal `fi_payment_records` table name | Optional copy hygiene — not FinancialOS leak |
+| TC-NAV-01 | P3 | Pre-existing procedure day nav unit fail | **CLOSED** — test updated for consolidated `surgery` nav id |
+| TMRW-DATA-01 | P3 | Tomorrow board empty on 2026-07-14 — chip matrix unproven | **CLOSED** — seed script + live bake 2026-07-13 |
+| READY-COPY-01 | P3 | Tomorrow KPI helper cites internal `fi_payment_records` table name | **CLOSED (code)** — `moneyTomorrowSurgeryPaymentsKpiHelper()`; live after deploy |
 
 ---
 
@@ -196,7 +197,43 @@ PASS
 
 - `moneyTrustCopy.test.ts` — new case: source label map (stripe, Stripe, manual, null, whitespace, unknown provider).
 - `financialClearanceCore.test.ts` — new case: unavailable staff copy matches `/Money/`, does not match `/FinancialOS/` (reason + next action).
-- Bundle re-run (10 files): **98/99 pass** — only failure remains pre-existing `procedureDayNonInterference` nav subtest (TC-NAV-01).
+- Bundle re-run (10 files): **100/100 pass** — TC-NAV-01 fixed (`procedureDayNonInterference` uses `surgery` nav id).
+
+### READY-COPY-01 — tomorrow KPI helper — **FIXED (code)**
+
+- New `moneyTomorrowSurgeryPaymentsKpiHelper()` in `moneyTrustCopy.ts`: *"Manual surgery payment records when tracked — operational tracking, not bank proof."*
+- `TomorrowBoard.tsx` Surgery payments due tile uses helper (replaces ``Manual `fi_payment_records` only when present.``).
+- Unit test asserts no `fi_payment_records` or `FinancialOS` in helper string.
+
+### TMRW-DATA-01 + DEF-READY-01 — tomorrow seed + live exercise — **CLOSED**
+
+**Seed:** `scripts/seed-evolved-smoketest-tomorrow-board.ts` (`npm run seed:evolved-smoketest-tomorrow -- --commit`)
+
+| Key | Booking ID | Case | Payment record | Purpose |
+| --- | ---------- | ---- | -------------- | ------- |
+| SMOKETEST-TMRW-UNAVAILABLE | `e6340615-b3f2-41a3-9f11-60bc78146011` | `0eb78271-…` | none | Clearance unavailable copy |
+| SMOKETEST-TMRW-DEPOSIT-DUE | `c938b486-a217-485f-bb50-f79e585be730` | `2ff0eba9-…` | `e0ad1bfa-…` pending | Payment due + deposit chips |
+
+Golden patient `287348d5-…` / case `80ae7196-…` untouched.
+
+### T1 close-out live bake — tomorrow board (2026-07-13T21:30 AEST)
+
+**Path:** `/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/front-desk/tomorrow`
+
+**Session:** platform-admin impersonation of **`evieshackleton1@gmail.com`** (Nurse workspace). Tool: cursor-ide-browser MCP. Production: `follicleintelligence.ai`.
+
+| Check | Result |
+| ----- | ------ |
+| Board loads — 2026-07-14 Perth | **PASS** |
+| Surgery count (summary) | **PASS** — 2 surgeries |
+| T1 row chips — UNAVAILABLE row | **PASS** — Scheduled, Missing staff, Financial status unavailable, **Clearance unavailable**, No pathway selected |
+| T1 row chips — DEPOSIT-DUE row | **PASS** — **Payment due**, Missing staff, Clearance unavailable, manual deposit issue in readiness list |
+| DEF-READY-01 unavailable copy | **PASS** — "Clearance unavailable" (no FinancialOS brand; CDP `hasFinancialOS: false`) |
+| READY-COPY-01 KPI helper | **PASS (code)** — production still shows legacy `fi_payment_records` sub until deploy; fix in `moneyTomorrowSurgeryPaymentsKpiHelper()` |
+| FinancialOS brand leak | **PASS** — CDP check false |
+| Surgery readiness (tomorrow) section | **PASS** — both SMOKETEST rows with staff/room/deposit issues |
+
+**T1 close-out verdict:** **PASS** — TMRW-DATA-01 and DEF-READY-01 live exercised; READY-COPY-01 code fix pending deploy for KPI sub text.
 
 ---
 
@@ -252,13 +289,14 @@ Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-liv
 
 ## Release decision (current)
 
-**Scoped GREEN — Money + payment rows + readiness/tomorrow surfaces verified**
+**GREEN — Money + payment rows + readiness/tomorrow fully verified**
 
 - Money hub subset: **GREEN** (prior + spot-check evidence)
 - Payment row labels: **GREEN** — DEF-MONEY-01 code + M4 live PASS
 - Surgery readiness (R1–R3): **GREEN** — live PASS 2026-07-13 (surgeon session)
-- Tomorrow board (T1 surface): **GREEN (scoped)** — load + anti-leak PASS; row chip matrix not exercised (0 bookings 2026-07-14); **nurse live bake confirms role parity** (Evie 2026-07-13)
-- Clearance copy consistency: **code fixed** (DEF-READY-01) — unavailable state not triggered live (golden case deposit cleared; nurse bake reconfirms)
-- Open hygiene only: TC-NAV-01 (unit), TMRW-DATA-01 (empty tomorrow data), READY-COPY-01 (internal table name in KPI helper)
+- Tomorrow board (T1): **GREEN** — row chip matrix PASS with seeded SMOKETEST bookings (nurse session 2026-07-13 close-out)
+- Clearance copy consistency: **GREEN** — DEF-READY-01 unavailable state live on SMOKETEST-TMRW-UNAVAILABLE row
+- READY-COPY-01: **GREEN (code)** — staff-facing KPI helper; deploy to surface live
+- TC-NAV-01: **CLOSED** — unit bundle 100/100
 
-**Push:** `5bd339ef` synced to `origin/main` (seed script + M4 evidence); `5f6a3340` readiness/tomorrow surgeon bake. Nurse bake docs commit follows.
+**Recommended next milestone:** **`FI-TRUST-E2E-AND-PIPELINE-1`** — see [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md). First action: restore E2E credentials + decide Evolved Pipeline V1 allowlist.

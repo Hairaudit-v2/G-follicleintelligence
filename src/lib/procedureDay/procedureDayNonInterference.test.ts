@@ -141,9 +141,12 @@ describe("procedure day non-interference", () => {
 
   it("(d) nav omits procedure day when showProcedureDayNav is false", () => {
     const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, false);
-    const cases = items.find((i) => i.id === "cases");
-    assert.ok(cases?.subItems?.length);
-    assert.ok(!cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
+    const surgery = items.find((i) => i.id === "surgery");
+    assert.ok(surgery?.subItems?.length);
+    const subIds = new Set(surgery!.subItems!.map((s) => s.id));
+    assert.ok(!subIds.has("surgery-procedure-day"));
+    assert.ok(!subIds.has("procedure-day-board"));
+    assert.ok(!surgery!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
 
     const shellItems = resolveClinicOsShellNavItems(base, true, true, false, false);
     assert.ok(!shellItems.some((i) => i.id === "procedure-day-board"));

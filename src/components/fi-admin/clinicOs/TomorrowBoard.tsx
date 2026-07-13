@@ -9,6 +9,7 @@ import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/Fi
 import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
+import { moneyTomorrowSurgeryPaymentsKpiHelper } from "@/src/lib/financialOs/moneyTrustCopy";
 import { FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import { SURGERY_READINESS_ISSUE_LABEL } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
@@ -124,7 +125,7 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
           <SummaryTile
             label="Surgery payments due"
             value={data.summary.paymentsDueSurgery}
-            sub="Manual `fi_payment_records` only when present."
+            sub={moneyTomorrowSurgeryPaymentsKpiHelper()}
           />
         </div>
       </DashboardCard>

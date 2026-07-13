@@ -7,9 +7,17 @@ import {
   moneyPaymentRowSourceLabel,
   moneyPaymentTruthBanner,
   moneyTakePaymentHref,
+  moneyTomorrowSurgeryPaymentsKpiHelper,
 } from "@/src/lib/financialOs/moneyTrustCopy";
 
 describe("moneyTrustCopy", () => {
+  it("tomorrow board KPI helper avoids internal table names", () => {
+    const helper = moneyTomorrowSurgeryPaymentsKpiHelper();
+    assert.match(helper, /Manual surgery payment records/);
+    assert.doesNotMatch(helper, /fi_payment_records/);
+    assert.doesNotMatch(helper, /FinancialOS/);
+  });
+
   it("uses Money not FinancialOS in staff messages", () => {
     assert.equal(moneyHubHeadline(), "Money");
     const msg = moneyClearanceBlockedStaffMessage("Deposit outstanding");
