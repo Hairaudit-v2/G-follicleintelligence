@@ -56,6 +56,35 @@ test("pickSurgeryReadinessPrimaryColumn: missing case_id → on_hold_not_linked"
   );
 });
 
+test("FI-TRUST-MONEY-AND-READINESS-1: missing staff/room assignment → needs_attention", () => {
+  const raw = buildSurgeryReadinessIssues({
+    caseId: "c1",
+    patientIdForPathology: "p1",
+    hasPathologyResult: true,
+    abnormalPathologyMarkerCount: 0,
+    hasConsentProxy: true,
+    hasSurgeryPlanRow: true,
+    surgeryPlanningComplete: true,
+    bookingStatus: "confirmed",
+    surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
+    hasAssignedStaff: false,
+    hasAssignedRoom: false,
+  });
+  assert.ok(raw.some((i) => i.kind === "missing_staff_assignment"));
+  assert.ok(raw.some((i) => i.kind === "missing_room_assignment"));
+  const issues = escalateSurgeryReadinessIssues(raw, 10, "confirmed");
+  assert.equal(
+    pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }),
+    "needs_attention"
+  );
+  const escalated = escalateSurgeryReadinessIssues(raw, 3, "confirmed");
+  assert.ok(
+    escalated.some((i) => i.kind === "missing_staff_assignment" && i.severity === "high_risk")
+  );
+});
+
 test("pickSurgeryReadinessPrimaryColumn: missing pathology before consent", () => {
   const raw = buildSurgeryReadinessIssues({
     caseId: "c1",

@@ -381,6 +381,8 @@ export async function loadProcedureDayBoardShellPayload(
         surgeryPlanPlanningStatus: null,
         surgeryPaymentRecord: null,
         todayYmd,
+        hasAssignedStaff: hasBookingAssignee || hasProcedureSurgeon,
+        hasAssignedRoom: !roomRequired || hasRoom,
       });
 
       const pipeline = buildFinancialSurgeryPipelineStatus({
@@ -692,6 +694,11 @@ export async function loadProcedureDayBoardPayload(
     const payByCase = caseId ? (surgeryPayments.byCaseId.get(caseId) ?? null) : null;
     const surgeryPaymentRow: PaymentRecordRow | null = payByBooking ?? payByCase;
 
+    const hasBookingAssignee = Boolean(b.assigned_staff_id?.trim() || b.assigned_user_id?.trim());
+    const hasProcedureSurgeon = Boolean(surgeonUserId);
+    const hasRoom = Boolean(rid);
+    const roomRequired = Boolean(b.room_required);
+
     const issues = buildTodayProcedureReadinessIssues({
       caseId,
       patientIdForPathology,
@@ -704,12 +711,9 @@ export async function loadProcedureDayBoardPayload(
       surgeryPlanPlanningStatus: work?.surgeryPlan?.planning_status ?? null,
       surgeryPaymentRecord: surgeryPaymentRow,
       todayYmd,
+      hasAssignedStaff: hasBookingAssignee || hasProcedureSurgeon,
+      hasAssignedRoom: !roomRequired || hasRoom,
     });
-
-    const hasBookingAssignee = Boolean(b.assigned_staff_id?.trim() || b.assigned_user_id?.trim());
-    const hasProcedureSurgeon = Boolean(surgeonUserId);
-    const hasRoom = Boolean(rid);
-    const roomRequired = Boolean(b.room_required);
 
     const preOp = buildPreOpChecklistFlags({
       caseId,

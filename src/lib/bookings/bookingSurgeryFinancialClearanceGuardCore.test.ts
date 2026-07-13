@@ -162,5 +162,7 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
     assert.ok(msg.startsWith(SURGERY_CONFIRMATION_FINANCIAL_CLEARANCE_BLOCKED_PREFIX));
     assert.match(msg, /Collect surgery deposit/);
     assert.match(msg, /finance admin sign-off/);
+    assert.match(msg, /Money/);
+    assert.doesNotMatch(msg, /FinancialOS/);
   });
 });

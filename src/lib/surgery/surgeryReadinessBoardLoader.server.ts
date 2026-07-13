@@ -466,6 +466,8 @@ export async function loadSurgeryReadinessBoardPayload(
       surgeryPlanPlanningStatus: work?.surgeryPlan?.planning_status ?? null,
       surgeryPaymentRecord: surgeryPaymentRow,
       todayYmd: window.todayYmd,
+      hasAssignedStaff: Boolean(b.assigned_staff_id?.trim() || b.assigned_user_id?.trim()),
+      hasAssignedRoom: Boolean(b.room_id?.trim()),
     });
     const issues = escalateSurgeryReadinessIssues(rawIssues, daysUntil, b.booking_status);
 

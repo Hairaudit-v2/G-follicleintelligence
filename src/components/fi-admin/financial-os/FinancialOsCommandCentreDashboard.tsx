@@ -21,22 +21,37 @@ import {
   fmtFinancialWhen,
   hasUrgentFinancialAttention,
 } from "@/src/lib/fiAdmin/financialPresentation";
+import {
+  moneyHubEyebrow,
+  moneyHubHeadline,
+  moneyHubSubtitle,
+  moneyPaymentTruthBanner,
+  moneyTakePaymentCtaLabel,
+  moneyTakePaymentHref,
+} from "@/src/lib/financialOs/moneyTrustCopy";
 
-function FinancialOsPrimaryActions({ base }: { base: string }) {
+function FinancialOsPrimaryActions(props: {
+  base: string;
+  paymentsInboxEnabled: boolean;
+}) {
+  const { base, paymentsInboxEnabled } = props;
   const financialModule = `${base}/financial`;
   return (
     <div className="mt-6 flex flex-wrap gap-2">
-      <Link href={`${base}/payments`} className={financialOsLinkButtonClass}>
-        Open Payments Inbox
+      <Link
+        href={moneyTakePaymentHref(base, paymentsInboxEnabled)}
+        className={financialOsLinkButtonClass}
+      >
+        {moneyTakePaymentCtaLabel(paymentsInboxEnabled)}
       </Link>
-      <Link href={`${base}/crm?view=workspace`} className={financialOsLinkButtonClass}>
-        Open enquiries
+      <Link href={`${base}/crm`} className={financialOsLinkButtonClass}>
+        Open Pipeline
       </Link>
-      <Link href={`${base}/surgery-os`} className={financialOsLinkButtonClass}>
-        Open surgery
+      <Link href={`${base}/surgery`} className={financialOsLinkButtonClass}>
+        Open Surgery
       </Link>
-      <Link href={`${base}/analytics`} className={financialOsLinkButtonClass}>
-        Open Insights
+      <Link href={`${base}/reports`} className={financialOsLinkButtonClass}>
+        Open Reports
       </Link>
       <Link href={`${financialModule}/payment-requests`} className={financialOsLinkButtonClass}>
         Create payment request
@@ -60,12 +75,15 @@ export function FinancialOsCommandCentreDashboard(props: {
     procedureTypes: string[];
   };
   showDiagnosticsExpanded?: boolean;
+  /** FI-TRUST-MONEY-AND-READINESS-1 — Stripe payments inbox flag */
+  paymentsInboxEnabled?: boolean;
 }) {
   const {
     data,
     surgeryEconomicsFilterOptions,
     revenueAttributionFilterOptions,
     showDiagnosticsExpanded = false,
+    paymentsInboxEnabled = false,
   } = props;
   const base = `/fi-admin/${data.tenantId}`;
 
@@ -77,6 +95,7 @@ export function FinancialOsCommandCentreDashboard(props: {
   const consultationBridge = buildConsultationRevenueBridge(data);
   const recentActivity = buildRecentFinancialActivity(data, 8);
   const reportNavCards = buildFinancialReportNavCards(base);
+  const truth = moneyPaymentTruthBanner({ paymentsInboxEnabled });
 
   return (
     <div className="mx-auto min-w-0 max-w-[88rem] space-y-8 pb-10 sm:space-y-10 sm:pb-14">
@@ -87,16 +106,23 @@ export function FinancialOsCommandCentreDashboard(props: {
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">
-            FI OS
+            {moneyHubEyebrow()}
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
-            Finances
+            {moneyHubHeadline()}
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Revenue, payments, deposits, profitability, and collection priorities across clinic
-            operations.
+            {moneyHubSubtitle()}
           </p>
-          <FinancialOsPrimaryActions base={base} />
+          <div
+            className="mt-4 max-w-3xl rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-50/95"
+            role="note"
+            data-testid="money-payment-truth-banner"
+          >
+            <p className="font-semibold text-amber-100">{truth.title}</p>
+            <p className="mt-1 leading-relaxed text-amber-50/85">{truth.body}</p>
+          </div>
+          <FinancialOsPrimaryActions base={base} paymentsInboxEnabled={paymentsInboxEnabled} />
         </div>
       </DashboardCard>
 

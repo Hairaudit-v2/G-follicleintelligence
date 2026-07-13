@@ -290,6 +290,8 @@ export function buildTodayProcedureReadinessIssues(input: {
     "status" | "due_date" | "amount_expected" | "amount_paid"
   > | null;
   todayYmd: string;
+  hasAssignedStaff?: boolean;
+  hasAssignedRoom?: boolean;
 }): SurgeryReadinessIssue[] {
   const raw = buildSurgeryReadinessIssues({
     caseId: input.caseId,
@@ -303,6 +305,8 @@ export function buildTodayProcedureReadinessIssues(input: {
     surgeryPlanPlanningStatus: input.surgeryPlanPlanningStatus,
     surgeryPaymentRecord: input.surgeryPaymentRecord,
     todayYmd: input.todayYmd,
+    hasAssignedStaff: input.hasAssignedStaff,
+    hasAssignedRoom: input.hasAssignedRoom,
   });
   return escalateSurgeryReadinessIssues(raw, 0, input.bookingStatus);
 }

@@ -36,7 +36,10 @@ export type SurgeryReadinessIssueKind =
   | "no_payment_tracking"
   | "surgery_deposit_pending"
   | "booking_unconfirmed"
-  | "case_on_hold";
+  | "case_on_hold"
+  /** FI-TRUST-MONEY-AND-READINESS-1 — calendar assignment discipline */
+  | "missing_staff_assignment"
+  | "missing_room_assignment";
 
 export type SurgeryReadinessIssueSeverity = "info" | "warning" | "high_risk";
 
@@ -51,10 +54,13 @@ export const SURGERY_READINESS_ISSUE_LABEL: Record<SurgeryReadinessIssueKind, st
   abnormal_pathology: "Pathology markers flagged abnormal",
   missing_consent_proxy: "Consultation / quote acceptance (consent proxy)",
   missing_surgery_plan: "Surgery plan incomplete or missing",
-  no_payment_tracking: "No manual surgery payment record yet.",
-  surgery_deposit_pending: "Recorded deposit not satisfied (manual tracking)",
+  no_payment_tracking:
+    "No surgery payment record yet (manual tracking — not bank/card proof)",
+  surgery_deposit_pending: "Recorded deposit not satisfied (manual tracking — verify funds)",
   booking_unconfirmed: "Booking not confirmed",
   case_on_hold: "Surgery plan on hold",
+  missing_staff_assignment: "No surgeon or clinical staff assigned on the booking",
+  missing_room_assignment: "No room assigned on the booking",
 };
 
 export type SurgeryReadinessManagerFilter =
@@ -168,11 +174,18 @@ export type BuildSurgeryReadinessIssuesInput = {
   > | null;
   /** Tenant-local `YYYY-MM-DD` for overdue derivation on manual payment rows. */
   todayYmd: string;
+  /**
+   * FI-TRUST-MONEY-AND-READINESS-1 — when false, surface assignment gaps.
+   * Omit (undefined) to skip the check (unknown / non-booking contexts).
+   */
+  hasAssignedStaff?: boolean;
+  hasAssignedRoom?: boolean;
 };
 
 /**
  * Base severities before days-to-surgery escalation.
  * Deposit blocking signals apply only when a manual payment record exists.
+ * Manual payment rows are operational tracking — not bank settlement proof.
  */
 export function buildSurgeryReadinessIssues(
   input: BuildSurgeryReadinessIssuesInput
@@ -184,6 +197,13 @@ export function buildSurgeryReadinessIssues(
     issues.push({ kind: "no_payment_tracking", severity: "info" });
   } else if (paymentRecordNeedsCollection(input.surgeryPaymentRecord, todayY)) {
     issues.push({ kind: "surgery_deposit_pending", severity: "warning" });
+  }
+
+  if (input.hasAssignedStaff === false) {
+    issues.push({ kind: "missing_staff_assignment", severity: "warning" });
+  }
+  if (input.hasAssignedRoom === false) {
+    issues.push({ kind: "missing_room_assignment", severity: "warning" });
   }
 
   if (!input.caseId?.trim()) {
@@ -243,6 +263,12 @@ export function escalateSurgeryReadinessIssues(
     if (it.kind === "surgery_deposit_pending" && daysUntil <= 7) {
       return { ...it, severity: "high_risk" };
     }
+    if (
+      (it.kind === "missing_staff_assignment" || it.kind === "missing_room_assignment") &&
+      daysUntil <= 7
+    ) {
+      return { ...it, severity: "high_risk" };
+    }
     return it;
   });
 }
@@ -290,7 +316,9 @@ export function pickSurgeryReadinessPrimaryColumn(
     hasIssueKind(issues, "missing_surgery_plan") ||
     hasIssueKind(issues, "case_on_hold") ||
     hasIssueKind(issues, "booking_unconfirmed") ||
-    hasIssueKind(issues, "surgery_deposit_pending");
+    hasIssueKind(issues, "surgery_deposit_pending") ||
+    hasIssueKind(issues, "missing_staff_assignment") ||
+    hasIssueKind(issues, "missing_room_assignment");
 
   if (
     input.readinessBucket === "needs_attention" ||

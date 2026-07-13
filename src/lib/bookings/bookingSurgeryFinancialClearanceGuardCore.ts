@@ -4,6 +4,7 @@
  */
 
 import type { FinancialClearanceResult } from "@/src/lib/financialOs/financialClearanceCore";
+import { moneyClearanceBlockedStaffMessage } from "@/src/lib/financialOs/moneyTrustCopy";
 import { isInstantInTenantInclusiveDayWindow } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 export const SURGERY_CONFIRMATION_FINANCIAL_CLEARANCE_BLOCKED_PREFIX =
@@ -61,6 +62,6 @@ export function surgeryConfirmationFinancialClearanceBlockedMessage(
   clearance: Pick<FinancialClearanceResult, "clearance_reason" | "next_required_action">
 ): string {
   const detail = clearance.next_required_action?.trim() || clearance.clearance_reason?.trim();
-  const suffix = detail ? ` ${detail}.` : "";
-  return `${SURGERY_CONFIRMATION_FINANCIAL_CLEARANCE_BLOCKED_PREFIX} financial clearance is not ready (procedure within 14 days).${suffix} Resolve deposit, pathway, or invoice setup in FinancialOS, or obtain finance admin sign-off before confirming.`;
+  // FI-TRUST-MONEY-AND-READINESS-1 — staff language uses Money hub, not FinancialOS brand.
+  return moneyClearanceBlockedStaffMessage(detail);
 }

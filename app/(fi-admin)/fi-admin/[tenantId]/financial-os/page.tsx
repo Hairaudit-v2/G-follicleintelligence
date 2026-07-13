@@ -11,9 +11,11 @@ import type { SurgeryEconomicsDashboardFilters } from "@/src/lib/financialOs/fin
 import { loadSurgeryEconomicsFilterOptions } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
 import type { RevenueAttributionDashboardFilters } from "@/src/lib/financialOs/financialRevenueAttribution.server";
 import { loadRevenueAttributionFilterOptions } from "@/src/lib/financialOs/financialRevenueAttribution.server";
+import { moneyHubPageTitle } from "@/src/lib/financialOs/moneyTrustCopy";
+import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 
 export const metadata = {
-  title: "Finances",
+  title: moneyHubPageTitle(),
   robots: { index: false, follow: false },
 };
 
@@ -109,9 +111,9 @@ export default async function FiAdminFinancialOsPage({
     console.error("[FiAdminFinancialOsPage]", msg || "load failed");
     return (
       <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="Finances could not load">
+        <InfoNotice variant="danger" title="Money could not load">
           <p className="text-sm">
-            The command centre failed to load. Apply migration{" "}
+            The Money hub failed to load. Apply migration{" "}
             <code className="rounded bg-white/10 px-1 text-xs">
               20260920120001_fi_financial_os_core_infrastructure.sql
             </code>{" "}
@@ -123,6 +125,8 @@ export default async function FiAdminFinancialOsPage({
     );
   }
 
+  const paymentsInboxEnabled = readFiPaymentsEnabled();
+
   return (
     <div className="p-4 sm:p-6">
       <Suspense fallback={null}>
@@ -131,6 +135,7 @@ export default async function FiAdminFinancialOsPage({
           surgeryEconomicsFilterOptions={filterOptions}
           revenueAttributionFilterOptions={attributionFilterOptions}
           showDiagnosticsExpanded={showDiagnosticsExpanded}
+          paymentsInboxEnabled={paymentsInboxEnabled}
         />
       </Suspense>
     </div>
