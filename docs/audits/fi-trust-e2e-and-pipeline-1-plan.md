@@ -141,15 +141,13 @@ rg -n "FI_PIPELINE_V1_TENANT_ALLOWLIST" .env.example app src/lib/crm
 4. **Consultant live bake** — Pipeline door + scroll containment.
 5. **Nurse live bake** — Calendar filters + front-desk treatment path.
 
-### Suggested first action for user
+### Phase 1 status (2026-07-13)
 
-**Rotate or restore `FI_E2E_DEMO_ADMIN_EMAIL` / `FI_E2E_DEMO_ADMIN_PASSWORD`** in the deployment secret store, then run:
+**GREEN** — see [fi-trust-e2e-and-pipeline-1.md](./fi-trust-e2e-and-pipeline-1.md). DEF-E2E-01 and DEF-PIPE-01 closed; trust E2E bundle 6 PASS / 0 FAIL / 2 SKIP on production; staff mapping 10/10.
 
-```bash
-FI_E2E_BASE_URL=https://follicleintelligence.ai npm run test:e2e -- --project=chromium-authenticated e2e/fi-trust-role-landing.spec.ts
-```
+### Suggested first action for user (Phase 2)
 
-In parallel, **decide Evolved Pipeline V1 allowlist** (`DEF-PIPE-01`) with platform ops before consultant live bake.
+**Consultant live bake** — `manager@evolvedhair.com.au` on `/crm`: confirm Pipeline V1 door (Enquiries board), H-scroll containment, and no dual `/leadflow` entry. Then nurse bake for DEF-NURSE-01 (Calendar treatment filters + front-desk empty-state CTA).
 
 ---
 

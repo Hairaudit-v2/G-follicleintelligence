@@ -2,6 +2,7 @@
 
 **Status:** **GREEN** — authenticated trust E2E bundle PASS on production; staff mapping 10/10 (2026-07-13)  
 **Date:** 2026-07-13  
+**Phase 1 re-verified:** 2026-07-13 — independent re-run 6 PASS / 0 FAIL / 2 SKIP; Vercel production + preview allowlist confirmed (`hasEvolved: true`); staff mapping 10/10  
 **Depends on:** FI-TRUST-MONEY-AND-READINESS-1, FI-ROLE-JOURNEY-BAKE-1 (DEF-E2E-01, DEF-PIPE-01)  
 **Plan:** [fi-trust-e2e-and-pipeline-1-plan.md](./fi-trust-e2e-and-pipeline-1-plan.md)
 
