@@ -37,9 +37,9 @@ test("2. More opens via controlled DropdownMenu", () => {
 });
 
 test("3. More remains open — not reset on loadTier alone", () => {
-  assert.doesNotMatch(UI, /\[props\.presentationKey, props\.loadTier\]/);
+  assert.doesNotMatch(UI, /\[props\.menuDismissKey, props\.loadTier\]/);
   assert.match(UI, /setOpenMenuLeadId\(null\)/);
-  assert.match(UI, /\[props\.presentationKey\]/);
+  assert.match(UI, /\[props\.menuDismissKey\]/);
 });
 
 test("4. More only renders when secondary actions exist", () => {
@@ -74,18 +74,21 @@ test("11. Selecting an action closes menu then dispatches", () => {
   assert.match(UI, /props\.onAction\(a, card\)/);
 });
 
-test("12-13. Sort does not remount menu via presentationKey", () => {
-  assert.match(WS, /presentationKey=\{`\$\{presentation\.generatedAt\}:\$\{view\}`\}/);
-  assert.doesNotMatch(WS, /sortMode\}`\}/);
+test("12-13. Sort does not remount menu via menuDismissKey", () => {
+  assert.match(WS, /buildPipelineMenuDismissKey/);
+  assert.match(WS, /menuDismissKey=\{menuDismissKey\}/);
+  assert.doesNotMatch(WS, /menuDismissKey=\{`\$\{presentation\.generatedAt\}/);
+  assert.doesNotMatch(WS, /sortMode.*menuDismiss/);
 });
 
 test("14. Shell-to-full does not reset menu via loadTier", () => {
-  assert.doesNotMatch(UI, /\[props\.presentationKey, props\.loadTier\]/);
+  assert.doesNotMatch(UI, /\[props\.menuDismissKey, props\.loadTier\]/);
 });
 
-test("15. Mutation refresh uses presentation generatedAt identity", () => {
-  assert.match(WS, /presentation\.generatedAt/);
-  assert.match(UI, /presentationKey/);
+test("15. Explicit refresh bumps menuDismissEpoch; hydrate does not", () => {
+  assert.match(WS, /shouldBumpMenuDismissEpochOnPresentationApply/);
+  assert.match(WS, /setMenuDismissEpoch\(\(value\) => value \+ 1\)/);
+  assert.doesNotMatch(WS, /generatedAt.*menuDismiss/);
 });
 
 test("16. Read-only: drag disabled when canMutate false", () => {
@@ -194,10 +197,9 @@ test("36. stopCardDrag pointer guards are fully removed", () => {
 });
 
 test("37. More trigger carries no pointer/mouse stopPropagation guard", () => {
-  // The trigger block must not reattach onPointerDown/onMouseDown handlers.
   const trigger = UI.slice(UI.indexOf('data-pipeline-more-trigger'));
   const triggerButton = trigger.slice(0, trigger.indexOf("</button>"));
-  assert.doesNotMatch(triggerButton, /onPointerDown=/);
+  assert.doesNotMatch(triggerButton, /stopPropagation/);
   assert.doesNotMatch(triggerButton, /onMouseDown=/);
 });
 

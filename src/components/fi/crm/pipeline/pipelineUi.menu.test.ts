@@ -37,12 +37,13 @@ test("5. trigger has accessible name More actions", () => {
   assert.match(UI, /aria-label="More actions"/);
 });
 
-test("6. presentation refresh / view change closes menu via presentationKey", () => {
-  assert.match(UI, /presentationKey/);
+test("6. view change / deliberate refresh closes menu via menuDismissKey", () => {
+  assert.match(UI, /menuDismissKey/);
   assert.match(UI, /setOpenMenuLeadId\(null\)/);
-  assert.match(WS, /presentationKey=\{`\$\{presentation\.generatedAt\}:\$\{view\}`\}/);
+  assert.match(WS, /buildPipelineMenuDismissKey/);
+  assert.match(WS, /menuDismissKey=\{menuDismissKey\}/);
   // Must not reset on loadTier alone (shell→full would kill open menus)
-  assert.doesNotMatch(UI, /\[props\.presentationKey, props\.loadTier\]/);
+  assert.doesNotMatch(UI, /\[props\.menuDismissKey, props\.loadTier\]/);
 });
 
 test("7. does not use setOpen\(true\) only toggle without close path", () => {
