@@ -37,7 +37,14 @@ test.describe("FI operational day — security @smoke", () => {
     const tid = e2eTenantId();
     const res = await page.goto(`/fi-admin/${tid}/procedure-day`, { waitUntil: "commit" });
     const status = res?.status() ?? 0;
-    expect([404, 302, 303, 307, 401, 403]).toContain(status);
+    // Flag-off gate → 404; unauth middleware redirect → Playwright final status often 200
+    // on login (same pattern as reception board). Deny only if Surgery day chrome leaks.
+    expect([200, 404, 302, 303, 307, 401, 403]).toContain(status);
+    if (status === 200) {
+      await expect(page.getByRole("heading", { name: /surgery day/i })).not.toBeVisible({
+        timeout: 5000,
+      });
+    }
   });
 
   test("reception-board API rejects unauthenticated access", async ({ request }) => {

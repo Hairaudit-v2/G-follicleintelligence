@@ -107,9 +107,9 @@ npm run typecheck
 | -------- | ------ | --------- |
 | **P0** | Guard public job against `@authenticated @smoke` credential crash (fixture skip **or** exclude dual-tagged tests from public projects) | Immediate ~48/126 fail reduction; pure signal hygiene — **DONE** (Bucket B) |
 | **P1** | Re-tag or auth-wrap `fi-ux-audit-labels` (protected `/fi-admin/.../front-desk` on placeholder CI) | ~60/126; labels need session — **DONE** (Bucket A / PUB-LABELS: `@authenticated @smoke` + authenticated `testMatch`) |
-| **P1** | Investigate procedure-day unauth **HTTP 200** (security `@smoke`) | 6 fails; may be soft page vs fail-closed — prove before product change |
-| **P2** | Widen/tighten security expects for patients **404** + cron **503** only after confirming intended status | 12 fails; avoid masking real holes |
-| **P2** | Close DEF-TC-01 test typing | Restores `ci.yml` typecheck claim |
+| **P1** | Investigate procedure-day unauth **HTTP 200** (security `@smoke`) | **DONE** (PUB-PROC-200) — soft 200 + no Surgery day chrome |
+| **P2** | Widen/tighten security expects for patients **404** + cron **503** only after confirming intended status | **DONE** (PUB-SEC-STATUS) — 404/503 intentional |
+| **P2** | Close DEF-TC-01 test typing | Restores `ci.yml` typecheck claim — **still open** (overall AMBER) |
 | **P3** | Optional fixtures (CI-FIX-01) + HR drift ops cadence | Coverage / ops only |
 
 ---

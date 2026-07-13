@@ -1,7 +1,7 @@
 # FI-CI-SIGNAL-HYGIENE-1 — Findings
 
 **Milestone:** `FI-CI-SIGNAL-HYGIENE-1`  
-**Phase:** 2 — Buckets B+A fixes (2026-07-14); Phase 1 audit 2026-07-14  
+**Phase:** 2 — Buckets B+A+C+D fixes (2026-07-14); Phase 1 audit 2026-07-14  
 **HEAD at audit:** `4fb3b6b4` (`docs(audit): confirm Keep Decision B for FI_E2E_STAGING_URL.`)  
 **Prior milestone:** `FI-TRUST-CI-AND-RECEPTION-1` **GREEN** (trust trio + reception R1)  
 **Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` — confirmed Keep B
@@ -10,13 +10,15 @@
 
 ## Executive summary
 
-Public smoke remains **advisory** (`continue-on-error: true`) and was very red (~**126 failed** on the last completed cross-browser run before Phase 2). Failures cluster into a small number of root causes — mostly **CI signal hygiene** (authenticated `@smoke` on a credential-less public job; Front Desk label specs hitting protected routes without a session), not proven product P0s. Trust trio gate stays **GREEN**. DEF-TC-01 reconfirmed (**6** `tsc` errors, all in `*.test.ts`). CI-TRIAGE-TEAM-01 quarantine **in place**. Optional fixtures still **MISSING**.
+Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed buckets **B → A → C+D**: public fails **126 → 78 → 18 → target 0** (await CI confirm). Failures were **CI signal hygiene** (auth tag on credential-less job; Front Desk labels without session; narrow security status expects; procedure-day final-200 after login redirect), not proven product P0s. Trust trio gate stays **GREEN**. DEF-TC-01 remains open (**6** `tsc` errors in `*.test.ts`) → milestone overall **AMBER**. CI-TRIAGE-TEAM-01 quarantine **in place**. Optional fixtures still **MISSING**.
 
 **Phase 1 verdict:** **AMBER** for overall CI readability (trust GREEN; public smoke advisory-red); inventory complete for Phase 2.
 
 **Phase 2 (PUB-AUTH-CRASH / Bucket B):** Public projects now `grepInvert: /@authenticated/`; `authenticatedTest` skips cleanly when `!hasDemoCredentials()` (no `.trim()` TypeError). Confirmed on [29282145316](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29282145316): **132 / 78 / 66** (−48 fails).
 
-**Phase 2 (PUB-LABELS / Bucket A):** `fi-ux-audit-labels` re-tagged `@authenticated @smoke` + `authenticatedTest`; included in authenticated `testMatch`. Confirmed on [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344): **126 / 18 / 66** (−60 fails vs post-B). Remaining: C security status (~12), D procedure-day 200 (~6).
+**Phase 2 (PUB-LABELS / Bucket A):** `fi-ux-audit-labels` re-tagged `@authenticated @smoke` + `authenticatedTest`; included in authenticated `testMatch`. Confirmed on [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344): **126 / 18 / 66** (−60 fails vs post-B).
+
+**Phase 2 (PUB-SEC-STATUS / Bucket C + PUB-PROC-200 / Bucket D):** Expect updates only (intentional 404/503; soft 200 + no Surgery day chrome). See fix notes below.
 
 ---
 
@@ -62,8 +64,8 @@ gh run view 29275224871 --log
 | ------ | ------------- | ---------- | ---------- | ---------------------------- | --------------------- |
 | **A. Front Desk labels @smoke** | 10 | 6 | **60** | `fi-ux-audit-labels` — timeout waiting for `heading "Today"` on `/fi-admin/{tenant}/front-desk` | Re-tag `@authenticated` **or** skip when no session / login wall; not a product redesign |
 | **B. Auth `@smoke` on public job (no creds)** | 8 | 6 | **48** | `fixtures/auth.ts:44` — `Cannot read properties of undefined (reading 'trim')` on `FI_E2E_DEMO_ADMIN_*` | **P0 first fix:** skip/guard fixture when `!hasDemoCredentials()` **or** exclude dual-tagged `@authenticated @smoke` from public projects |
-| **C. Security status mismatch** | 2 | 6 | **12** | patients API → **404** (want 401/403/redirect); cron → **503** (want 401/403/500) | P2 — confirm intended status before widening expect |
-| **D. Procedure-day unauth HTTP 200** | 1 | 6 | **6** | `procedure-day` goto status **200**, not in deny list `[404,302,303,307,401,403]` | P1 investigate — soft page vs fail-closed; fix test **or** prove product gap |
+| **C. Security status mismatch** | 2 | 6 | **12** | patients API → **404** (want 401/403/redirect); cron → **503** (want 401/403/500) | **Closed** — widen expects (intentional) |
+| **D. Procedure-day unauth HTTP 200** | 1 | 6 | **6** | `procedure-day` goto status **200**, not in deny list `[404,302,303,307,401,403]` | **Closed** — allow 200 + assert no Surgery day chrome |
 
 **Spec counts (raw):**
 
@@ -175,9 +177,9 @@ No product redesign. Staff mapping gate (`npm run audit:staff-mapping`) remains 
 | --- | -- | --- | ---------------------------- | ---------- |
 | **P0** | PUB-AUTH-CRASH | Auth fixture: skip worker login when `!hasDemoCredentials()` **and/or** public projects exclude `@authenticated` | **−48** | No product change |
 | **P1** | PUB-LABELS | `fi-ux-audit-labels`: require auth project **or** skip on login redirect / missing Today | **−60** | Test/quarantine only unless Today board proven broken with session |
-| **P1** | PUB-PROC-200 | Procedure-day unauth **200** — inspect response (login soft-render vs open module) | **−6** | Product fix **only** if fail-closed proven broken on real host |
-| **P2** | PUB-SEC-STATUS | patients **404** / cron **503** expects | **−12** | Prove status intentional on prod-like middleware |
-| **P2** | DEF-TC-01 | Fix 6 test typing errors | N/A (unit CI) | Test types only |
+| **P1** | PUB-PROC-200 | Procedure-day unauth **200** — soft login final status + no Surgery day chrome | **−6** | Expect update (mirror reception) |
+| **P2** | PUB-SEC-STATUS | patients **404** / cron **503** expects | **−12** | Expect update (intentional) |
+| **P2** | DEF-TC-01 | Fix 6 test typing errors | N/A (unit CI) | **Deferred** — holds milestone AMBER |
 | **P3** | CI-FIX-01 / HR-DRIFT-01 | Optional secrets + ops sync cadence | Skip→run when set | Ops |
 
 ### Proposed Phase 2 **first** fix
@@ -209,9 +211,7 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 **Trust trio:** Unchanged — still `authenticated-smoke` → `--project=chromium-authenticated` with secrets. Confirmed GREEN on the fix run.
 
-**Bucket C (deferred):** patients API **404** and cron **503** vs narrow expect lists — still present after A+B (×6 browsers = 12). Not widened here; need intentional-status proof on prod-like middleware before changing expects.
-
-**Bucket D (deferred):** procedure-day unauth HTTP **200** (~6). Soft page vs fail-closed — prove before product change.
+**Bucket C+D:** Closed after A+B residual — see PUB-SEC-STATUS / PUB-PROC-200 notes below.
 
 ---
 
@@ -237,7 +237,37 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 **Not done:** product UI redesign; keeping labels on public with soft skip (would leave dead `@smoke` selects). Auth tag + `grepInvert` is the same pattern as Bucket B.
 
-**Next residual (~18):** Bucket C security expects (~12) + Bucket D procedure-day HTTP 200 (~6).
+**Next residual (~18):** Bucket C security expects (~12) + Bucket D procedure-day HTTP 200 (~6) — closed in PUB-SEC-STATUS / PUB-PROC-200.
+
+---
+
+## Phase 2 — PUB-SEC-STATUS (Bucket C) + PUB-PROC-200 (Bucket D) fix notes
+
+| Field | Value |
+| ----- | ----- |
+| Status | **Shipped** (await CI confirm on tip after this commit) |
+| Date | 2026-07-14 |
+| Evidence before | [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344) — **126 / 18 / 66**; C+D only |
+| IDs | PUB-SEC-STATUS, PUB-PROC-200 |
+| Expected delta | **−18** public fails (12+6) → **0** residual public fails from H1 buckets |
+| Trust trio | Must stay **GREEN** (no workflow / trust-spec changes) |
+
+### Disposition table (C+D)
+
+| Case | Observed | Root cause | Disposition |
+| ---- | -------- | ---------- | ----------- |
+| Patients `GET /api/tenants/{tid}/patients` | **404** | No collection Route Handler (only `/patients/[patientId]/…`); Next 404 | **Expect update** — treat 404 as fail-closed (no leak). Aligns with `fi-production-smoke-test` accept list. |
+| Cron `GET /api/cron/fi-reminder-jobs` | **503** | `assertCronAuthorized` returns 503 when no valid-length cron secrets (CI placeholder unset) | **Expect update** — 503 intentional deny; unit-tested in `cronAuth.test.ts`. |
+| Procedure-day unauth goto | **200** | Prod middleware redirects to login; Playwright final status after follow is often 200; board chrome absent | **Expect update** — allow 200 + assert `heading "Surgery day"` not visible (mirror reception-board soft check). No product gate change. |
+
+**Not product defects:** No route-gate redesign; no fail-open proven.
+
+**Changes:**
+
+1. `e2e/security/unauthenticated-access.spec.ts` — patients accept **404**; cron accept **503**.
+2. `e2e/fi-operational-day.spec.ts` — procedure-day allow **200** + no Surgery day heading when flag off.
+
+**Milestone verdict (after C+D):** Public smoke signal-hygiene goals of H1 **met** (target **0** public fails from buckets A–D). Overall milestone remains **AMBER** while **DEF-TC-01** (6 test-file `tsc` errors) stays open / deferred.
 
 ---
 

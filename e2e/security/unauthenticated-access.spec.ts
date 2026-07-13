@@ -62,6 +62,8 @@ test.describe("unauthenticated access — fails closed @security", () => {
 
   test("protected tenant patients API fails closed without a session", async ({ request }) => {
     const tenantId = e2eTenantId();
+    // Collection path has no Route Handler (only /patients/[patientId]/…);
+    // Next returns 404 — intentional fail-closed (PUB-SEC-STATUS / Bucket C).
     const response = await request.get(`/api/tenants/${tenantId}/patients`, {
       maxRedirects: 0,
       failOnStatusCode: false,
@@ -70,8 +72,8 @@ test.describe("unauthenticated access — fails closed @security", () => {
     const status = response.status();
     expect(status, "patients API should never return 200 with no session").not.toBe(200);
     expect(
-      [401, 403, 302, 303, 307].includes(status),
-      `expected 401/403 (or redirect) for unauthenticated patients API, got ${status}`
+      [401, 403, 404, 302, 303, 307].includes(status),
+      `expected 401/403/404 (or redirect) for unauthenticated patients API, got ${status}`
     ).toBe(true);
   });
 
@@ -83,9 +85,11 @@ test.describe("unauthenticated access — fails closed @security", () => {
 
     const status = response.status();
     expect(status, "cron route must not return 200 without Bearer secret").not.toBe(200);
+    // 503 = assertCronAuthorized when CRON / reminder secrets unset (CI placeholder);
+    // 401/403 = secret configured but caller unauthorized; 500 = processor fault.
     expect(
-      [401, 403, 500].includes(status),
-      `expected 401/403/500 for unauthenticated cron, got ${status}`
+      [401, 403, 500, 503].includes(status),
+      `expected 401/403/500/503 for unauthenticated cron, got ${status}`
     ).toBe(true);
   });
 
