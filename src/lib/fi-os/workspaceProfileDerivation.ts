@@ -52,6 +52,7 @@ export function deriveWorkspaceProfileFromStaffRole(
   if (t.includes("reception")) return "reception";
   if (t.includes("doctor") || t === "dr" || t.startsWith("dr ")) return "doctor";
   if (t.includes("director")) return "director";
+  if (t === "owner" || t.includes("owner")) return "director";
   if (t.includes("manager") || t.includes("operations")) return "clinic_manager";
   if (t.includes("trainer") || t.includes("academy")) return "academy_trainer";
   if (t.includes("audit")) return "auditor";

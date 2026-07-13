@@ -5,7 +5,7 @@ import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { isFiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
-import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { resolveEffectiveTenantAuthUserIdFromSession } from "@/src/lib/crm/crmGate";
 import { assertStaffFeatureAccessMutationAllowed } from "@/src/lib/fi-os/featureAccess.server";
 import { loadLinkedStaffOrganisationalSignalsForFiUser } from "@/src/lib/fi-os/organisationalProfile.server";
 import { resolveWorkspaceProfileKeyFromSignals } from "@/src/lib/fi-os/workspaceProfileDerivation";
@@ -38,7 +38,7 @@ async function loadWorkspaceProfileKeyForViewerImpl(
   const tid = tenantId.trim();
   if (!tid) return "default";
   try {
-    const authId = await resolveAuthUserId(null);
+    const authId = await resolveEffectiveTenantAuthUserIdFromSession();
     if (!authId) return "default";
 
     const fiUser = await loadFiUserRow(tid, authId);

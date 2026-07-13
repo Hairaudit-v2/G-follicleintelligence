@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  resolveAuthUserId,
+  resolveEffectiveTenantAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { resolvePersonDisplayNameForToday } from "@/src/lib/fiOs/todayPersonLabels";
 import { loadStaffPersonProfileForAuthUserInTenant } from "@/src/lib/fiOs/todayStaffPersonHydration.server";
 
@@ -11,6 +15,22 @@ import { loadStaffPersonProfileForAuthUserInTenant } from "@/src/lib/fiOs/todayS
  * Auth user email for FI OS chrome (profile menu). Mirrors cookie session used by CRM gate.
  */
 export async function resolveFiOsAuthUserEmail(): Promise<string | null> {
+  const sessionId = await resolveAuthUserId(null);
+  if (!sessionId) return null;
+
+  const viewerId = await resolveEffectiveTenantAuthUserId(sessionId);
+  if (viewerId !== sessionId) {
+    try {
+      const supabase = supabaseAdmin();
+      const { data, error } = await supabase.auth.admin.getUserById(viewerId);
+      if (error) return null;
+      const email = data.user?.email?.trim();
+      return email && email.length > 0 ? email : null;
+    } catch {
+      return null;
+    }
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url || !anon) return null;

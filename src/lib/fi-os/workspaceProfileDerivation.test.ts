@@ -29,6 +29,18 @@ test("staff role heuristics", () => {
   assert.equal(deriveWorkspaceProfileFromStaffRole("Lead Surgeon"), "surgeon");
   assert.equal(deriveWorkspaceProfileFromStaffRole("Registered Nurse"), "nurse");
   assert.equal(deriveWorkspaceProfileFromStaffRole("Front desk reception"), "reception");
+  assert.equal(deriveWorkspaceProfileFromStaffRole("owner"), "director");
+});
+
+test("clinic owner staff resolves director workspace without platform os role", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      staffRole: "owner",
+      tenantAdminRole: null,
+      fiOsRole: null,
+    }),
+    "director"
+  );
 });
 
 test("tenant admin mapping", () => {

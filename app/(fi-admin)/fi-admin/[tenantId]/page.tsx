@@ -21,7 +21,7 @@ import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 
-import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { resolveEffectiveTenantAuthUserIdFromSession } from "@/src/lib/crm/crmGate";
 
 import {
   resolveFiOsAuthUserDisplayNameForTenant,
@@ -131,7 +131,7 @@ export default async function FiAdminTenantHomePage({
     : false;
 
   if (todaySurfaceTenantEnabled && todaySurfaceBakeAllowed) {
-    const authUserId = await resolveAuthUserId(null);
+    const authUserId = await resolveEffectiveTenantAuthUserIdFromSession();
     const viewerDisplayName = authUserId
       ? await resolveFiOsAuthUserDisplayNameForTenant(authUserId, tenantId)
       : null;

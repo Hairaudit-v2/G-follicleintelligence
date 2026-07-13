@@ -198,6 +198,23 @@ async function resolveTenantMembershipAuthUserId(sessionAuthUserId: string): Pro
 }
 
 /**
+ * Impersonation-aware auth user id for tenant viewer chrome (greeting, workspace profile, profile menu).
+ * When a platform admin impersonates a tenant member, returns the impersonation target.
+ */
+export async function resolveEffectiveTenantAuthUserId(
+  sessionAuthUserId: string
+): Promise<string> {
+  return resolveTenantMembershipAuthUserId(sessionAuthUserId);
+}
+
+/** {@link resolveEffectiveTenantAuthUserId} for the current Supabase session cookie. */
+export async function resolveEffectiveTenantAuthUserIdFromSession(): Promise<string | null> {
+  const sessionId = await resolveAuthUserId(null);
+  if (!sessionId) return null;
+  return resolveEffectiveTenantAuthUserId(sessionId);
+}
+
+/**
  * Reads: valid `FI_ADMIN_API_KEY` **or** signed-in user with `fi_users` row for the tenant (any role).
  */
 export async function assertCrmTenantReadAllowed(opts: {

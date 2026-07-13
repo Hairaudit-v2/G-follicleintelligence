@@ -256,7 +256,7 @@ Scoring: 0–5 per dimension; **automated/unit proxy** where live journey blocke
 **Live evidence (1366×768 CDP, `crm_operator`):** `documentElement.scrollWidth - clientWidth = 0` on Pipeline; board container class not mounted at default Pipeline view.
 
 | BAKE-1-LIVE-01 | **P1 — fix applied** | `/crm` and `/crm/leads/*` redirected to `/cases` for **manager** and **`member`+consultant staff** — extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) and `fi_staff.staff_role` fallback in `crmShellAccess.ts` |
-| BAKE-1-LIVE-03 | P2 | Receptionist/`crm_operator` impersonation lands **Today home**, not **`/front-desk`** |
+| BAKE-1-LIVE-04 | **P0 — fix applied** | Impersonating clinic users (e.g. Paul Green owner) showed **initiator** chrome (`auditor`, `Platform admin workspace`) — Today greeting, profile email, and workspace profile used `resolveAuthUserId` instead of impersonation target |
 | BAKE-1-LIVE-02 | P2 | Roslyn receptionist session not achieved — impersonation landed on platform admin / auditor |
 | BAKE-1-ENV-01 | P1 (env) | `FI_E2E_DEMO_ADMIN_*` invalid locally — authenticated E2E cannot run |
 | BAKE-1-ENV-02 | P2 (env) | Playwright Supabase magic-link fetch hits TLS interception on Windows |
@@ -273,6 +273,7 @@ No P0 trust/safety product defects observed in code or unit evidence.
 
 | ID | Fix |
 | -- | --- |
+| BAKE-1-LIVE-04 | `resolveEffectiveTenantAuthUserIdFromSession` for Today greeting, profile email, workspace profile; owner `fi_staff` → director workspace |
 | BAKE-1-LIVE-01 | Extended `CRM_SHELL_NAV_ROLES_LOWER` (manager/owner/consultant) + `fi_staff.staff_role` CRM shell fallback in `crmShellAccess.ts` |
 | BAKE-1-CODE-02 | `fiOsRedirect.server.ts` — normalize `tenantAdminRole` via `normalizeFiTenantAdminRole` before workspace profile derivation |
 | BAKE-1-INFRA-01 | `playwright.config.ts` — include `fi-trust-*.spec.ts` in authenticated project `testMatch` |
