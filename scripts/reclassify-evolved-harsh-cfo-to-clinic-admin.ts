@@ -13,6 +13,7 @@ import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { resolveWorkspaceProfileKeyFromSignals } from "../src/lib/fi-os/workspaceProfileDerivation";
 import { buildFiOsTenantHomeHref, resolveFiOsPostLoginPathSuffix } from "../src/lib/fiOs/fiOsRoleLandingCore";
 import { normalizeStaffRoleKey } from "../src/lib/staffAccess/staffAccessRegistry";
+import { normalizeFiTenantAdminRole } from "../src/lib/tenantAdmin/tenantAdminRoles";
 
 const AUTH_USER_ID = "66701149-281d-444e-b9d1-a5b5bb3fbaba";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
@@ -224,7 +225,7 @@ async function loadProfileSnapshot(
     .eq("auth_user_id", AUTH_USER_ID)
     .maybeSingle();
 
-  const tenantAdminRole = tenantAdmin?.admin_role ?? null;
+  const tenantAdminRole = normalizeFiTenantAdminRole(tenantAdmin?.admin_role ?? null);
   const derivedWorkspaceProfile = resolveWorkspaceProfileKeyFromSignals({
     explicitWorkspaceProfile: fiStaff?.staff_metadata.workspace_profile,
     positionTypeDefaultWorkspaceProfile: positionType?.default_workspace_profile ?? null,

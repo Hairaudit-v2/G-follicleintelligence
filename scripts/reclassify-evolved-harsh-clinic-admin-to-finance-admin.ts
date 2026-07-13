@@ -13,7 +13,10 @@ import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { resolveWorkspaceProfileKeyFromSignals } from "../src/lib/fi-os/workspaceProfileDerivation";
 import { buildFiOsTenantHomeHref, resolveFiOsPostLoginPathSuffix } from "../src/lib/fiOs/fiOsRoleLandingCore";
 import { normalizeStaffRoleKey } from "../src/lib/staffAccess/staffAccessRegistry";
-import { tenantAdminRoleAllowsCrmShellNav } from "../src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  normalizeFiTenantAdminRole,
+  tenantAdminRoleAllowsCrmShellNav,
+} from "../src/lib/tenantAdmin/tenantAdminRoles";
 import { getWorkspaceProfileLabel } from "../src/config/fiWorkspaceProfiles";
 
 const AUTH_USER_ID = "66701149-281d-444e-b9d1-a5b5bb3fbaba";
@@ -240,7 +243,7 @@ async function loadProfileSnapshot(
     .eq("auth_user_id", AUTH_USER_ID)
     .maybeSingle();
 
-  const tenantAdminRole = tenantAdmin?.admin_role ?? null;
+  const tenantAdminRole = normalizeFiTenantAdminRole(tenantAdmin?.admin_role ?? null);
   const derivedWorkspaceProfile = resolveWorkspaceProfileKeyFromSignals({
     explicitWorkspaceProfile: fiStaff?.staff_metadata.workspace_profile,
     positionTypeDefaultWorkspaceProfile: positionType?.default_workspace_profile ?? null,
@@ -259,9 +262,7 @@ async function loadProfileSnapshot(
     tenantAdminRole,
   });
 
-  const crmShellAccess = tenantAdminRoleAllowsCrmShellNav(
-    tenantAdminRole as Parameters<typeof tenantAdminRoleAllowsCrmShellNav>[0]
-  );
+  const crmShellAccess = tenantAdminRoleAllowsCrmShellNav(tenantAdminRole);
 
   return {
     auth: authData.user

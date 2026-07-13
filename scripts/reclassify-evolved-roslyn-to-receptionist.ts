@@ -15,6 +15,7 @@ import { resolveWorkspaceProfileKeyFromSignals } from "../src/lib/fi-os/workspac
 import { resolveFiOsPostLoginPathSuffix } from "../src/lib/fiOs/fiOsRoleLandingCore";
 import { normalizeStaffRoleKey } from "../src/lib/staffAccess/staffAccessRegistry";
 import { isCrmShellNavRole, isCrmShellNavStaffRole } from "../src/lib/crm/crmGatePolicy";
+import { normalizeFiTenantAdminRole } from "../src/lib/tenantAdmin/tenantAdminRoles";
 
 const AUTH_USER_ID = "092216fb-6afb-42d2-afc0-bcbf6f30ba2b";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
@@ -249,12 +250,13 @@ async function loadProfileSnapshot(
     .eq("auth_user_id", AUTH_USER_ID)
     .maybeSingle();
 
+  const tenantAdminRole = normalizeFiTenantAdminRole(tenantAdmin?.admin_role ?? null);
   const derivedWorkspaceProfile = resolveWorkspaceProfileKeyFromSignals({
     explicitWorkspaceProfile: fiStaff?.staff_metadata.workspace_profile,
     positionTypeDefaultWorkspaceProfile: positionType?.default_workspace_profile ?? null,
     featureTemplateWorkspaceProfile: featureTemplate?.workspace_profile ?? null,
     staffRole: fiStaff?.staff_role ?? null,
-    tenantAdminRole: tenantAdmin?.admin_role ?? null,
+    tenantAdminRole,
     fiOsRole: osRow ? String((osRow as { os_role: string }).os_role) : null,
   });
 
@@ -264,7 +266,7 @@ async function loadProfileSnapshot(
     osRole: osRow ? String((osRow as { os_role: string }).os_role) : null,
     staffRoleKey: staffKey,
     workspaceProfile: derivedWorkspaceProfile,
-    tenantAdminRole: tenantAdmin?.admin_role ?? null,
+    tenantAdminRole,
   });
 
   const crmShellAccess =
