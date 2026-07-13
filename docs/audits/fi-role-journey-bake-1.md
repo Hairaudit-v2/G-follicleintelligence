@@ -56,6 +56,8 @@
 
 **Conclusion:** Roslyn receptionist bake **not executed** — session is platform-operator impersonation, not frontline staff login.
 
+**Follow-up (2026-07-13):** `scripts/reclassify-evolved-roslyn-to-receptionist.ts` applied — `roslynhrichards@outlook.com` normalized to `fi_users.role=crm_operator`, `fi_staff.staff_role=reception`, `workspace_profile=reception`, RECEPTION position type; no `fi_tenant_admin_users` row. Expected bare-tenant landing **`/front-desk`** (parity with Jesika / nurse post-`b296e13e`).
+
 ### Check matrix (platform-admin impersonation / auditor)
 
 | # | Check | Result | Final URL | Notes |
@@ -450,7 +452,7 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | Login (redacted) | Tenant membership | OS role | `fi_staff` | Staff role | Capability template | Grants | SA-1 enforcement | Duplicate | Action |
 | ---------------- | ----------------- | ------- | ---------- | ---------- | ------------------- | ------ | ---------------- | ----------- | ------ |
 | j***@hotmail.com | Present | — (member) | Present | Receptionist | Via `staff_role` | 0 | Role text (deferred template) | No | OK |
-| r***@outlook.com | Present | — | Present | Receptionist | Via `staff_role` | 0 | Role text | No | OK |
+| r***@outlook.com (`roslynhrichards@outlook.com`) | Present | — (`crm_operator`) | Present | **reception** (reclassified 2026-07-13) | Via `staff_role` + position type | 0 | Role text | No | **Profile fix** — landing `/front-desk` expected |
 | c***@icloud.com | Present | tenant_backend | Present | consultant | Via `staff_role` | 0 | Role text | No | OK |
 | d***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | OK |
 | e***@gmail.com | Present | member | Present | Nurse | Via `staff_role` | 0 | Role text | No | **Live bake: PASS** (Evie; landing `/front-desk` post-`b296e13e`) |
