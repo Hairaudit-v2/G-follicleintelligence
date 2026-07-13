@@ -46,3 +46,7 @@ Make **Money** and **surgery readiness** trustworthy for staff: clear payment tr
 | Finance-admin landing redirect | **PARTIAL (P2)** — bare tenant home stays Today, not `/financial-os` |
 
 **Verdict:** Money trust copy and disabled-payments honesty **PASS** on production. Finance-admin **landing** and **row-level payment-source labelling** remain open until role is confirmed and payment data exists.
+
+### Harsh role fix (2026-07-13)
+
+Reclassified **`harsh@evolvedhair.com.au`** from CFO staff label to **`clinic_admin`** (not `finance_admin`). Auth `fi_tenant_id` was wrongly set to ihrg-global; now Evolved. Expected post-login landing: **Today** (`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a`), not `/financial-os`. Script: `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts`.

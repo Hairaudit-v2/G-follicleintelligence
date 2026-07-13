@@ -405,7 +405,20 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | BAKE-1-LIVE-07 | **P2** | Harsh session retains **System administration** profile + Platform diagnostics — persona ambiguous (platform wrapper vs dedicated `finance_admin`) |
 | MONEY-LIVE-01 | **P3** | Payment list empty — manual vs Stripe **row labels** not live-verified (`DEF-MONEY-01` follow-up) |
 
-**Follow-up:** Confirm `fi_tenant_admin_users.admin_role` for `harsh@evolvedhair.com.au`; re-bake with raw finance-admin login (no platform wrapper) for landing redirect and CRM gate expectations.
+**Follow-up:** ~~Confirm `fi_tenant_admin_users.admin_role` for `harsh@evolvedhair.com.au`~~ **Done (2026-07-13)** — reclassified from CFO staff label to **`clinic_admin`** via `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts` (auth tenant fixed from ihrg-global → Evolved; landing **Today**, not `/financial-os`). Re-bake with raw clinic-admin login (no platform wrapper) for CRM gate expectations.
+
+### Harsh role reclassification (2026-07-13)
+
+| Field | Before | After |
+| ----- | ------ | ----- |
+| `auth.users.user_metadata.fi_tenant_id` | `bef98775-…` (ihrg-global) | `c2615b95-…` (Evolved) |
+| `fi_users.role` | `member` | `tenant_backend` |
+| `fi_users.auth_user_id` | null | linked |
+| `fi_staff.staff_role` | `CFO` | `Clinic admin` |
+| `fi_staff.position_type_id` | null | `DIRECTOR` |
+| `fi_staff.staff_metadata.workspace_profile` | — | `director` |
+| `fi_tenant_admin_users.admin_role` | *(missing)* | `clinic_admin` (active) |
+| Expected landing | Today (CFO had no finance_admin row) | **Today** `/fi-admin/c2615b95-…` |
 
 ---
 
