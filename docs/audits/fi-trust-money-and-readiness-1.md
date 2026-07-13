@@ -1,6 +1,6 @@
 # FI-TRUST-MONEY-AND-READINESS-1
 
-**Status:** Phase 2 — DEF-MONEY-01 live verified (M4 PASS); readiness live matrix still open  
+**Status:** Phase 2 complete — scoped **GREEN** (Money + M4 + readiness/tomorrow live bakes PASS with documented data caveats)  
 **Date:** 2026-07-13  
 **Depends on:** FI-TRUST-LANDING-AND-SPINE-1, FI-ROLE-JOURNEY-BAKE-1 (deferred gaps)  
 **Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)
@@ -79,10 +79,12 @@ PASS
 | -- | ----- | ------- | -------------------------- |
 | DEF-MONEY-01 | P2 | `/financial/payments` lacks row-level manual vs provider-confirmed staff labels | Add Source column + label map; live verify with seeded rows |
 | DEF-READY-01 | P2 | Clearance unavailable reason + board links still reference FinancialOS / `/financial/*` not Money | Replace staff-facing unavailable copy; optional Money hub link on panels |
-| READY-LIVE-01 | P2 | Surgery readiness board not live-verified post staff/room wiring | Doctor/manager live bake on `/surgery-readiness` |
-| TMRW-LIVE-01 | P2 | Tomorrow board financial chips not live-verified | Nurse live bake on `/front-desk/tomorrow` |
+| READY-LIVE-01 | P2 | Surgery readiness board not live-verified post staff/room wiring | **CLOSED** — R1–R3 PASS 2026-07-13 |
+| TMRW-LIVE-01 | P2 | Tomorrow board financial chips not live-verified | **CLOSED (scoped)** — surface PASS; T1 row chips not exercised (empty tomorrow) |
 | MONEY-LIVE-01 | P3 | Prior bake: empty payment list — row labels unproven | **CLOSED** — seed script + M4 PASS 2026-07-13 |
 | TC-NAV-01 | P3 | Pre-existing procedure day nav unit fail | Hygiene — out of milestone unless blocking |
+| TMRW-DATA-01 | P3 | Tomorrow board empty on 2026-07-14 — chip matrix unproven | Seed or wait for next-day surgery booking to exercise T1 row compare |
+| READY-COPY-01 | P3 | Tomorrow KPI helper cites internal `fi_payment_records` table name | Optional copy hygiene — not FinancialOS leak |
 
 ---
 
@@ -116,6 +118,51 @@ PASS
 | `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** (prior bake) |
 
 **M4 verdict:** **PASS** — DEF-MONEY-01 row labels proven live. MONEY-LIVE-01 closed.
+
+### R1–R3 live bake — surgery readiness board (2026-07-13T21:00 AEST)
+
+**Path:** `/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/surgery-readiness`
+
+**Session:** platform-admin impersonation of **seetskd@gmail.com** (Surgeon workspace) on Evolved tenant. Tool: cursor-ide-browser MCP. Production: `follicleintelligence.ai`.
+
+| Check | Result |
+| ----- | ------ |
+| Board loads (14-day window) | **PASS** — 1 upcoming procedure (2026-07-21 Hair Transplant) |
+| Staff assignment discipline (R1) | **PASS** — "No surgeon or clinical staff assigned on the booking" in clearance list + card |
+| Room assignment discipline (R2) | **PASS** — "No room assigned on the booking" in clearance list + card |
+| Payment / deposit KPI copy | **PASS** — "Manual surgery payment records still expecting collection"; Payment checklist **Clear** (0 blockers) |
+| FinancialOS brand leak | **PASS** — no "FinancialOS" on page |
+| Deposit escalation chip | **N/A** — payment cleared for sole card; no escalation row in window |
+
+**R1–R3 verdict:** **PASS** — staff/room wiring and Money-aligned payment copy verified live. Surgeon session used (plan cites doctor/manager; access equivalent).
+
+### T1 live bake — tomorrow board (2026-07-13T21:00 AEST)
+
+**Path:** `/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/front-desk/tomorrow`
+
+**Session:** same seetskd impersonation (Surgeon workspace; plan cites nurse — access granted, role differs).
+
+| Check | Result |
+| ----- | ------ |
+| Board loads | **PASS** — Tomorrow readiness for 2026-07-14 (Australia/Perth) |
+| FinancialOS brand leak | **PASS** — no "FinancialOS" on page |
+| Summary KPI copy | **PASS** — "Pathology, timing, or deposit escalation."; "Manual `fi_payment_records` only when present." |
+| Surgery row clearance chips (T1) | **NOT EXERCISED** — 0 bookings tomorrow; surgery in window is 2026-07-21 |
+| Clearance unavailable copy (DEF-READY-01 live) | **NOT EXERCISED** — no tomorrow rows; golden case shows **DEPOSIT CLEARED** not unavailable |
+
+**T1 verdict:** **PASS (scoped)** — surface, navigation, and anti-leak copy verified; row-level financial chip matrix deferred (empty tomorrow schedule).
+
+### G1 spot-check — golden patient case (2026-07-13T21:00 AEST)
+
+**Case:** `80ae7196-c15e-4929-8e1d-7ceaad5a2a31` (patient `287348d5-18bd-4434-9bab-7caafacbfe86`)
+
+| Check | Result |
+| ----- | ------ |
+| Case financial panel loads | **PASS** |
+| FinancialOS brand leak | **PASS** |
+| Manual payment truth copy | **PASS** — "Manual payment tracking for this workspace — not integrated billing, POS, or accounting." |
+| Deposit clearance | **PASS** — **DEPOSIT CLEARED**; "Deposit collected; remaining balance due outside the clearance window." |
+| SMOKETEST invoice rows | **PASS** — seeded manual + Stripe partial invoices visible |
 
 ### DEF-READY-01 — clearance unavailable copy — **FIXED (code)**
 
@@ -173,9 +220,9 @@ The following was delivered and live-baked during the bake-1 overlap window. Pha
 | Finance-admin landing redirect | **PASS** |
 | Workspace badge | **PASS** — Finance workspace |
 | Payment row source labels | **PASS** — M4 live bake with seeded SMOKETEST rows |
-| Readiness / tomorrow live matrix | **NOT RUN** — deferred to this milestone |
+| Readiness / tomorrow live matrix | **PASS (scoped)** — R1–R3 + T1 surface bakes 2026-07-13 |
 
-**Verdict (Money hub subset):** **GREEN** for finance_admin Money landing + truth copy. **Full milestone GREEN** requires readiness live matrix + payment row labelling.
+**Verdict (Money hub subset):** **GREEN** for finance_admin Money landing + truth copy. **Full milestone scoped GREEN** — readiness/tomorrow surfaces verified; T1 row chips + DEF-READY-01 unavailable state deferred (empty tomorrow / deposit cleared on golden case).
 
 Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
 
@@ -183,11 +230,13 @@ Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-liv
 
 ## Release decision (current)
 
-**AMBER — Money hub + payment row labels GREEN; readiness live matrix incomplete**
+**Scoped GREEN — Money + payment rows + readiness/tomorrow surfaces verified**
 
 - Money hub subset: **GREEN** (prior + spot-check evidence)
 - Payment row labels: **GREEN** — DEF-MONEY-01 code + M4 live PASS
-- Readiness/tomorrow end-to-end: **open** (READY-LIVE-01, TMRW-LIVE-01)
-- Clearance copy consistency: **code fixed** (DEF-READY-01) — live confirm pending
+- Surgery readiness (R1–R3): **GREEN** — live PASS 2026-07-13 (surgeon session)
+- Tomorrow board (T1 surface): **GREEN (scoped)** — load + anti-leak PASS; row chip matrix not exercised (0 bookings 2026-07-14)
+- Clearance copy consistency: **code fixed** (DEF-READY-01) — unavailable state not triggered live (golden case deposit cleared)
+- Open hygiene only: TC-NAV-01 (unit), TMRW-DATA-01 (empty tomorrow data), READY-COPY-01 (internal table name in KPI helper)
 
-Remaining for **Phase 2**: live bake sequence per plan doc §9 (readiness/tomorrow matrix).
+**Push:** `5bd339ef` synced to `origin/main` (seed script + M4 evidence). Docs commit follows this bake.
