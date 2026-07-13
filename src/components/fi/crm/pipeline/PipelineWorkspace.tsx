@@ -61,6 +61,10 @@ import {
   type PipelineActiveFilters,
   type PipelineWorkspaceView,
 } from "@/src/lib/crm/pipelineUiHelpers";
+import {
+  buildPipelineMenuDismissKey,
+  shouldBumpMenuDismissEpochOnPresentationApply,
+} from "@/src/lib/crm/pipelineMenuDismiss";
 import { PIPELINE_STAFF_COLUMNS } from "@/src/lib/crm/pipelineStaffModel";
 
 /** Share one in-flight shell→full request across Strict Mode remounts. */
@@ -143,6 +147,9 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     card: PipelineLeadCard;
     reason: string;
   } | null>(null);
+  /** Advances only on explicit/mutation refresh — not shell→full hydrate. */
+  const [menuDismissEpoch, setMenuDismissEpoch] = useState(0);
+  const menuDismissKey = buildPipelineMenuDismissKey(view, menuDismissEpoch);
 
   // Desktop fine-pointer only — never enable drag on tablet/phone.
   // Kill-switch: FI_PIPELINE_ENABLE_DESKTOP_DRAG must be on, else drag stays fully disabled.
@@ -197,6 +204,9 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
       }
       setPresentation(next);
       setRefreshError(null);
+      if (shouldBumpMenuDismissEpochOnPresentationApply(mode)) {
+        setMenuDismissEpoch((value) => value + 1);
+      }
       return true;
     },
     [announce]
@@ -630,9 +640,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
             onAction={(a, c) => void handleCardAction(a, c)}
             onMoveToColumn={(c, col) => void runMove(c, col)}
             moveDestinations={moveDestinations}
-            // Identity for menu reset: real presentation swap or view change only.
-            // sortMode is UI-only reordering of the same cards — do not remount menus on sort.
-            presentationKey={`${presentation.generatedAt}:${view}`}
+            menuDismissKey={menuDismissKey}
             desktopDragEnabled={desktopDragEnabled}
             onDesktopDrop={handleDesktopDrop}
           />

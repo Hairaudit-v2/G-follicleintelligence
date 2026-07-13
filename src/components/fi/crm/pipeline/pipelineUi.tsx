@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -24,6 +24,8 @@ import {
   type PipelineActiveFilters,
   type PipelineWorkspaceView,
 } from "@/src/lib/crm/pipelineUiHelpers";
+import { moreLog } from "@/src/lib/crm/pipelineMoreDiagnostic";
+import { isOpenMenuLeadStillOnBoard } from "@/src/lib/crm/pipelineMenuDismiss";
 import type {
   PipelineCardActionId,
   PipelineFilterOptions,
@@ -555,8 +557,8 @@ export function PipelineBoard(props: {
     disabled: boolean;
     reason?: string;
   }>;
-  /** Close menus when presentation identity changes (refresh). */
-  presentationKey?: string;
+  /** `${view}:${epoch}` — changes on view switch or deliberate refresh only. */
+  menuDismissKey?: string;
   /**
    * Desktop-only stage drag (fine pointer + large viewport). Never required on tablet/phone.
    * Keyboard users continue to use Move stage.
@@ -567,11 +569,30 @@ export function PipelineBoard(props: {
   const [openMenuLeadId, setOpenMenuLeadId] = useState<string | null>(null);
   const [dragLeadId, setDragLeadId] = useState<string | null>(null);
 
-  // Close menu only when presentation identity / view actually changes — not on every render.
-  // loadTier is intentionally excluded: shell→full must not tear down an open More menu mid-click.
+  // Close menu only when menuDismissKey changes (view or deliberate refresh epoch).
+  // loadTier / generatedAt / sort must not flow into this key.
+  const menuDismissInitializedRef = useRef(false);
   useEffect(() => {
+    if (!menuDismissInitializedRef.current) {
+      menuDismissInitializedRef.current = true;
+      return;
+    }
+    moreLog("menuDismissKey changed", {
+      detail: props.menuDismissKey ?? "unset",
+      dismissalReason: "menu-dismiss-key",
+    });
     setOpenMenuLeadId(null);
-  }, [props.presentationKey]);
+  }, [props.menuDismissKey]);
+
+  // Close if the open card left the board (move, filter, removal).
+  useEffect(() => {
+    if (!openMenuLeadId) return;
+    if (isOpenMenuLeadStillOnBoard(openMenuLeadId, props.columns)) return;
+    moreLog("openMenuLeadId cleared", {
+      dismissalReason: "card-removed",
+    });
+    setOpenMenuLeadId(null);
+  }, [openMenuLeadId, props.columns]);
 
   const active = props.columns.filter((c) => c.kind === "active");
   const rest = props.columns.filter((c) => c.kind !== "active");
@@ -755,9 +776,10 @@ export function PipelineColumn(props: {
           {cards.length === 0 ? (
             <p className="px-1 py-4 text-center text-xs text-slate-500">No enquiries</p>
           ) : (
-            cards.map((card) => (
+            cards.map((card, cardIndex) => (
               <PipelineLeadCardView
                 key={card.leadId}
+                cardIndex={cardIndex}
                 card={card}
                 busy={props.busyLeadId === card.leadId}
                 loadTier={props.loadTier}
@@ -795,6 +817,8 @@ export function PipelineColumn(props: {
 
 export function PipelineLeadCardView(props: {
   card: PipelineLeadCard;
+  /** PHI-safe render position for live More diagnostics. */
+  cardIndex?: number;
   busy: boolean;
   loadTier: "shell" | "full";
   nowMs: number;
@@ -816,12 +840,30 @@ export function PipelineLeadCardView(props: {
   onPipelineDragEnd?: () => void;
 }) {
   const { card } = props;
+  const instanceRef = useRef(
+    `more-instance-${Math.random().toString(36).slice(2, 8)}`
+  );
   const [uncontrolledMenuOpen, setUncontrolledMenuOpen] = useState(false);
   const menuOpen = props.menuOpen ?? uncontrolledMenuOpen;
   const setMenuOpen = (open: boolean) => {
+    moreLog("controlled open state", {
+      instance: instanceRef.current,
+      cardIndex: props.cardIndex,
+      open,
+      loadTier: props.loadTier,
+    });
     if (props.onMenuOpenChange) props.onMenuOpenChange(open);
     else setUncontrolledMenuOpen(open);
   };
+  useEffect(() => {
+    moreLog(menuOpen ? "portal-MOUNT" : "portal-UNMOUNT", {
+      instance: instanceRef.current,
+      cardIndex: props.cardIndex,
+      open: menuOpen,
+      loadTier: props.loadTier,
+    });
+  }, [menuOpen, props.cardIndex, props.loadTier]);
+
   const [moveOpen, setMoveOpen] = useState(false);
   const dueLabel =
     props.loadTier === "full"
@@ -987,6 +1029,12 @@ export function PipelineLeadCardView(props: {
             modal={false}
             open={menuOpen}
             onOpenChange={(open) => {
+              moreLog(open ? "onOpenChange:true" : "onOpenChange:false", {
+                instance: instanceRef.current,
+                cardIndex: props.cardIndex,
+                open,
+                loadTier: props.loadTier,
+              });
               setMenuOpen(open);
               if (open) setMoveOpen(false);
             }}
@@ -999,6 +1047,29 @@ export function PipelineLeadCardView(props: {
                 draggable={false}
                 aria-label="More actions"
                 data-pipeline-more-trigger="true"
+                onPointerDown={() => {
+                  moreLog("trigger:pointerdown", {
+                    instance: instanceRef.current,
+                    cardIndex: props.cardIndex,
+                    loadTier: props.loadTier,
+                  });
+                }}
+                onClick={() => {
+                  moreLog("trigger:click", {
+                    instance: instanceRef.current,
+                    cardIndex: props.cardIndex,
+                    loadTier: props.loadTier,
+                  });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    moreLog("trigger:keydown Enter", {
+                      instance: instanceRef.current,
+                      cardIndex: props.cardIndex,
+                      loadTier: props.loadTier,
+                    });
+                  }
+                }}
               >
                 More
               </button>
@@ -1006,7 +1077,44 @@ export function PipelineLeadCardView(props: {
             <DropdownMenuContent
               align="end"
               className="z-[80] min-w-[11rem] border-white/[0.12] bg-[#0f1629] text-slate-100"
+              onPointerDownOutside={(e) => {
+                const orig = (e as { detail?: { originalEvent?: PointerEvent } }).detail
+                  ?.originalEvent;
+                moreLog("onPointerDownOutside", {
+                  instance: instanceRef.current,
+                  cardIndex: props.cardIndex,
+                  dismissalReason: "outside-pointer",
+                  detail: orig ? `trusted=${orig.isTrusted}` : undefined,
+                });
+              }}
+              onInteractOutside={(e) => {
+                const orig = (e as { detail?: { originalEvent?: Event } }).detail?.originalEvent;
+                moreLog("onInteractOutside", {
+                  instance: instanceRef.current,
+                  cardIndex: props.cardIndex,
+                  dismissalReason: "outside-interact",
+                  detail: orig ? `type=${orig.type}` : undefined,
+                });
+              }}
+              onEscapeKeyDown={() => {
+                moreLog("onEscapeKeyDown", {
+                  instance: instanceRef.current,
+                  cardIndex: props.cardIndex,
+                  dismissalReason: "escape",
+                });
+              }}
+              onFocusOutside={() => {
+                moreLog("focusOutside", {
+                  instance: instanceRef.current,
+                  cardIndex: props.cardIndex,
+                });
+              }}
               onCloseAutoFocus={(e) => {
+                moreLog("onCloseAutoFocus", {
+                  instance: instanceRef.current,
+                  cardIndex: props.cardIndex,
+                  dismissalReason: "close-auto-focus",
+                });
                 // Keep focus restoration predictable after action selection
                 e.preventDefault();
                 const t = document.querySelector<HTMLElement>(
