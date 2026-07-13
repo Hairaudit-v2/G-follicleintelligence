@@ -10,6 +10,7 @@ import {
 import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadFinancialOsPayments } from "@/src/lib/financialOs/financialListLoaders.server";
+import { moneyPaymentRowSourceLabel } from "@/src/lib/financialOs/moneyTrustCopy";
 
 export const metadata: Metadata = {
   title: "Finances · Payments",
@@ -39,7 +40,7 @@ export default async function FinancialOsPaymentsPage({
       <FinancialOsSubPageHeader
         kicker="Revenue"
         title="Payments"
-        description="Allocated payments on invoices (includes Stripe and manual)."
+        description="Allocated payments on invoices. Manual tracking rows are operational records — not bank/card proof. Provider confirmed rows come from the payment provider (Stripe)."
       />
       <FinancialOsTable
         isEmpty={rows.length === 0}
@@ -47,24 +48,31 @@ export default async function FinancialOsPaymentsPage({
         head={
           <>
             <FinancialOsTh>Status</FinancialOsTh>
-            <FinancialOsTh>Provider</FinancialOsTh>
+            <FinancialOsTh>Source</FinancialOsTh>
             <FinancialOsTh>Total</FinancialOsTh>
             <FinancialOsTh>Invoice</FinancialOsTh>
             <FinancialOsTh>Created</FinancialOsTh>
           </>
         }
       >
-        {rows.map((r) => (
+        {rows.map((r) => {
+          const source = moneyPaymentRowSourceLabel(r.provider);
+          return (
           <tr key={r.id} className={financialOsClasses.tableRow}>
             <td className={financialOsClasses.tableCell}>
               <FinancialOsRecordStatusBadge status={r.status} />
             </td>
-            <td className={financialOsClasses.tableCellMono}>{r.provider ?? "—"}</td>
+            <td className={financialOsClasses.tableCell}>
+              <span className={source.providerConfirmed ? "text-emerald-300" : "text-amber-300"}>
+                {source.label}
+              </span>
+            </td>
             <td className={financialOsClasses.tableCell}>{fmtMoney(r.total_cents, r.currency)}</td>
             <td className={financialOsClasses.tableCellMono}>{r.invoice_id.slice(0, 8)}…</td>
             <td className={financialOsClasses.tableCell}>{r.created_at.slice(0, 19)}</td>
           </tr>
-        ))}
+          );
+        })}
       </FinancialOsTable>
     </div>
   );

@@ -1,6 +1,6 @@
 # FI-TRUST-MONEY-AND-READINESS-1
 
-**Status:** Phase 1 — Audit-only (in progress)  
+**Status:** Phase 2 — Contained P2 fixes landed (DEF-MONEY-01, DEF-READY-01); live bake pending  
 **Date:** 2026-07-13  
 **Depends on:** FI-TRUST-LANDING-AND-SPINE-1, FI-ROLE-JOURNEY-BAKE-1 (deferred gaps)  
 **Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)
@@ -86,6 +86,32 @@ PASS
 
 ---
 
+## Phase 2 fix notes (2026-07-13)
+
+### DEF-MONEY-01 — payment row source labels — **FIXED (code)**
+
+- New pure helper `moneyPaymentRowSourceLabel(provider)` in `src/lib/financialOs/moneyTrustCopy.ts`:
+  - `null` / empty / `manual` → **Manual tracking**
+  - `stripe` (case-insensitive) → **Provider confirmed (Stripe)**
+  - other providers → **Provider confirmed (\<provider\>)**
+- `/financial/payments` page: **Provider** column replaced with **Source** column rendering the label (amber for manual, emerald for provider-confirmed); header description now states manual rows are operational tracking, not bank/card proof.
+- No new modules; label map lives in existing Money trust copy module.
+- Live verification (M4) still blocked on seeded `fi_payments` rows (MONEY-LIVE-01).
+
+### DEF-READY-01 — clearance unavailable copy — **FIXED (code)**
+
+- `buildFinancialClearance` unavailable `clearance_reason` no longer cites "FinancialOS signals"; now: *"Financial data could not be loaded or no payment or invoice records exist for this booking yet. Check deposits and invoices in Money."*
+- Unavailable `next_required_action` (both emit sites in `financialClearanceCore.ts`) now: *"Check deposits and invoices in Money, or reload financial data"*.
+- Board links portion of DEF-READY-01 (`FinancialSurgeryPipelineInline` `/financial/*` sub-links) unchanged — panel links are functional routes, not brand copy; out of contained scope.
+
+### Unit tests
+
+- `moneyTrustCopy.test.ts` — new case: source label map (stripe, Stripe, manual, null, whitespace, unknown provider).
+- `financialClearanceCore.test.ts` — new case: unavailable staff copy matches `/Money/`, does not match `/FinancialOS/` (reason + next action).
+- Bundle re-run (10 files): **98/99 pass** — only failure remains pre-existing `procedureDayNonInterference` nav subtest (TC-NAV-01).
+
+---
+
 ## Prior implementation + bake history (reference)
 
 The following was delivered and live-baked during the bake-1 overlap window. Phase 1 audit treats Money hub **copy + finance_admin landing** as established; **row labels + readiness live matrix** remain open.
@@ -141,8 +167,8 @@ Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-liv
 **AMBER — audit complete, live matrix incomplete**
 
 - Money hub subset: **GREEN** (prior evidence)
-- Payment row labels: **open** (DEF-MONEY-01)
+- Payment row labels: **code fixed** (DEF-MONEY-01) — live verify pending seeded rows (MONEY-LIVE-01)
 - Readiness/tomorrow end-to-end: **open** (READY-LIVE-01, TMRW-LIVE-01)
-- Clearance copy consistency: **open** (DEF-READY-01)
+- Clearance copy consistency: **code fixed** (DEF-READY-01) — live confirm pending
 
-Proceed to **Phase 2** — contained fixes for proven P0/P1/P2 + live bake sequence per plan doc §9.
+Remaining for **Phase 2**: live bake sequence per plan doc §9 (readiness/tomorrow matrix + M4 with seeded rows).

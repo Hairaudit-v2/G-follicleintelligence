@@ -301,7 +301,7 @@ function resolveNextRequiredAction(
     if (input.balance_due_cents > 0) return "Issue or collect surgery invoice payment";
     return "Confirm financial setup before surgery";
   }
-  if (state === "unavailable") return "Reload financial data or link revenue invoices";
+  if (state === "unavailable") return "Check deposits and invoices in Money, or reload financial data";
   return null;
 }
 
@@ -320,12 +320,12 @@ export function buildFinancialClearance(
       clearance_state: "unavailable",
       clearance_label: FINANCIAL_CLEARANCE_STATE_LABELS.unavailable,
       clearance_reason:
-        "Financial data could not be loaded or no FinancialOS signals exist for this context.",
+        "Financial data could not be loaded or no payment or invoice records exist for this booking yet. Check deposits and invoices in Money.",
       blocking_factors: [],
       warning_factors: [],
       amount_paid_cents,
       balance_due_cents,
-      next_required_action: "Reload financial data or link revenue invoices",
+      next_required_action: "Check deposits and invoices in Money, or reload financial data",
       financially_safe_to_proceed: false,
       paid_in_full: false,
       requires_staff_attention: false,

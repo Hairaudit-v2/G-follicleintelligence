@@ -44,6 +44,25 @@ export function moneyTakePaymentHref(tenantBase: string, paymentsInboxEnabled: b
   return paymentsInboxEnabled ? `${b}/payments` : `${b}/financial/payments`;
 }
 
+export type MoneyPaymentRowSource = {
+  label: string;
+  /** True when the row came from a payment provider (e.g. Stripe), not manual entry. */
+  providerConfirmed: boolean;
+};
+
+/** Row-level source label for payment lists — manual tracking vs provider confirmed. */
+export function moneyPaymentRowSourceLabel(provider: string | null | undefined): MoneyPaymentRowSource {
+  const raw = provider?.trim() ?? "";
+  const p = raw.toLowerCase();
+  if (!p || p === "manual") {
+    return { label: "Manual tracking", providerConfirmed: false };
+  }
+  if (p === "stripe") {
+    return { label: "Provider confirmed (Stripe)", providerConfirmed: true };
+  }
+  return { label: `Provider confirmed (${raw})`, providerConfirmed: true };
+}
+
 /** Guard / readiness language — avoid FinancialOS brand in staff errors. */
 export function moneyClearanceBlockedStaffMessage(detail?: string | null): string {
   const d = detail?.trim();

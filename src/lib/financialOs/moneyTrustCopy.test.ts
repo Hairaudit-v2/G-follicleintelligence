@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   moneyClearanceBlockedStaffMessage,
   moneyHubHeadline,
+  moneyPaymentRowSourceLabel,
   moneyPaymentTruthBanner,
   moneyTakePaymentHref,
 } from "@/src/lib/financialOs/moneyTrustCopy";
@@ -22,6 +23,33 @@ describe("moneyTrustCopy", () => {
     assert.match(off.body, /Online card capture is off/i);
     const on = moneyPaymentTruthBanner({ paymentsInboxEnabled: true });
     assert.match(on.body, /Take payment/i);
+  });
+
+  it("payment row source label distinguishes manual tracking vs provider confirmed", () => {
+    assert.deepEqual(moneyPaymentRowSourceLabel("stripe"), {
+      label: "Provider confirmed (Stripe)",
+      providerConfirmed: true,
+    });
+    assert.deepEqual(moneyPaymentRowSourceLabel("Stripe"), {
+      label: "Provider confirmed (Stripe)",
+      providerConfirmed: true,
+    });
+    assert.deepEqual(moneyPaymentRowSourceLabel("manual"), {
+      label: "Manual tracking",
+      providerConfirmed: false,
+    });
+    assert.deepEqual(moneyPaymentRowSourceLabel(null), {
+      label: "Manual tracking",
+      providerConfirmed: false,
+    });
+    assert.deepEqual(moneyPaymentRowSourceLabel("  "), {
+      label: "Manual tracking",
+      providerConfirmed: false,
+    });
+    assert.deepEqual(moneyPaymentRowSourceLabel("square"), {
+      label: "Provider confirmed (square)",
+      providerConfirmed: true,
+    });
   });
 
   it("take payment href follows inbox flag", () => {

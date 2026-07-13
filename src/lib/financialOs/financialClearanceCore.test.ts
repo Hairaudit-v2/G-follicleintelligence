@@ -152,6 +152,15 @@ describe("financialClearanceCore", () => {
     assert.equal(c.financially_safe_to_proceed, false);
   });
 
+  it("unavailable staff copy points to Money, not FinancialOS", () => {
+    const c = clearanceFromPipeline(pipelineFromInput({}));
+    assert.equal(c.clearance_state, "unavailable");
+    assert.match(c.clearance_reason, /Money/);
+    assert.doesNotMatch(c.clearance_reason, /FinancialOS/);
+    assert.match(c.next_required_action ?? "", /Money/);
+    assert.doesNotMatch(c.next_required_action ?? "", /FinancialOS/);
+  });
+
   it("unpaid invoice/no pathway → not_ready", () => {
     const pipeline = pipelineFromInput({
       financial_os_status: "tentative",
