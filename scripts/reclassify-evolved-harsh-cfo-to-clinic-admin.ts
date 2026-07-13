@@ -17,8 +17,8 @@ import { normalizeStaffRoleKey } from "../src/lib/staffAccess/staffAccessRegistr
 const AUTH_USER_ID = "66701149-281d-444e-b9d1-a5b5bb3fbaba";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const EMAIL = "harsh@evolvedhair.com.au";
-/** Global Evolved position type: DIRECTOR → default_workspace_profile director */
-const DIRECTOR_POSITION_TYPE_ID = "569d2ad2-aa94-4442-8219-906ab9335209";
+/** Global Evolved position type: CLINIC_MANAGER → default_workspace_profile clinic_manager */
+const CLINIC_MANAGER_POSITION_TYPE_ID = "8d958d3f-e641-4ede-83cb-6d73c55a75f6";
 
 const TARGET = {
   authFiRole: "tenant_backend",
@@ -28,8 +28,8 @@ const TARGET = {
   tenantAdminStatus: "active" as const,
   displayFullName: "Harsh Singh",
   displayFirstName: "Harsh",
-  workspaceProfile: "director",
-  positionTypeId: DIRECTOR_POSITION_TYPE_ID,
+  workspaceProfile: "clinic_manager",
+  positionTypeId: CLINIC_MANAGER_POSITION_TYPE_ID,
 };
 
 function loadRepoEnvFiles(): void {
@@ -317,7 +317,7 @@ async function main(): Promise<void> {
 
   const afterPreviewProfile = resolveWorkspaceProfileKeyFromSignals({
     explicitWorkspaceProfile: TARGET.workspaceProfile,
-    positionTypeDefaultWorkspaceProfile: "director",
+    positionTypeDefaultWorkspaceProfile: "clinic_manager",
     featureTemplateWorkspaceProfile: null,
     staffRole: TARGET.staffRole,
     tenantAdminRole: TARGET.tenantAdminRole,

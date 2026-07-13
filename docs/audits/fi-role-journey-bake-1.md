@@ -422,7 +422,18 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 | `fi_tenant_admin_users.admin_role` | *(missing)* | `clinic_admin` (active) |
 | Expected landing | Today (CFO had no finance_admin row) | **Today** `/fi-admin/c2615b95-…` |
 
----
+**Follow-up (2026-07-13, post-reclassify re-bake):** Production showed **Director workspace** for harsh@ — root cause: reclassify script used `DIRECTOR` position type + `workspace_profile=director` instead of **`CLINIC_MANAGER` / `clinic_manager`**. `resolveWorkspaceProfileKeyFromSignals` honours explicit metadata and position-type defaults before tenant-admin fallback (`clinic_admin` alone would still map to `director` only when no explicit/position signals). Fix applied via updated `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts` (`--commit`):
+
+| Field | Before (wrong) | After (correct) |
+| ----- | -------------- | --------------- |
+| `fi_staff.position_type_id` | `569d2ad2-…` (`DIRECTOR`) | `8d958d3f-…` (`CLINIC_MANAGER`) |
+| `fi_staff.staff_metadata.workspace_profile` | `director` | `clinic_manager` |
+| `fi_tenant_admin_users.admin_role` | `clinic_admin` | `clinic_admin` (unchanged) |
+| Derived workspace | `director` | **`clinic_manager`** |
+| Expected UI badge | Director workspace | **Clinic manager workspace** |
+| Expected landing | Today | **Today** `/fi-admin/c2615b95-…` |
+
+Re-bake harsh@ session to confirm **Clinic manager workspace** badge (not Director).
 
 ## 2. Environment and fixture limitations
 

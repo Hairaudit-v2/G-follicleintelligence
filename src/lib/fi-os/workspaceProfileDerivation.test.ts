@@ -107,3 +107,17 @@ test("feature template workspace used when position type profile absent", () => 
     "consultant"
   );
 });
+
+test("clinic_admin tenant admin with clinic_manager profile resolves clinic manager workspace", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: "clinic_manager",
+      positionTypeDefaultWorkspaceProfile: "clinic_manager",
+      featureTemplateWorkspaceProfile: null,
+      staffRole: "Clinic admin",
+      tenantAdminRole: "clinic_admin",
+      fiOsRole: null,
+    }),
+    "clinic_manager"
+  );
+});
