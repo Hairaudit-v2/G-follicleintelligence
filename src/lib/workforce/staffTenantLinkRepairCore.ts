@@ -11,6 +11,13 @@ export function extractTenantIdFromFiAdminPath(path: string | null | undefined):
   return match?.[1] ? String(match[1]).toLowerCase() : null;
 }
 
+/** True when path is tenant Today home only — `/fi-admin/{tenantId}` with no role suffix. */
+export function isBareFiAdminTenantHomePath(path: string | null | undefined): boolean {
+  const raw = String(path ?? "").trim();
+  if (!raw) return false;
+  return /^\/fi-admin\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/i.test(raw);
+}
+
 export function readMetadataTenantId(
   metadata: Record<string, unknown> | null | undefined
 ): string | null {
@@ -102,7 +109,7 @@ export function resolvePostLoginDestination(input: {
   if (homeSuffix === "/") homeSuffix = "";
   if (homeSuffix && !homeSuffix.startsWith("/")) homeSuffix = `/${homeSuffix}`;
 
-  if (explicit) {
+  if (explicit && !isBareFiAdminTenantHomePath(explicit)) {
     const explicitTenant = extractTenantIdFromFiAdminPath(explicit);
     const memberships = input.membershipTenantIds.map((id) => id.trim().toLowerCase());
     if (!explicitTenant || memberships.length === 0 || memberships.includes(explicitTenant)) {
@@ -121,6 +128,6 @@ export function resolvePostLoginDestination(input: {
     return picker;
   }
 
-  if (explicit) return explicit;
+  if (explicit && !isBareFiAdminTenantHomePath(explicit)) return explicit;
   return homeSuffix ? `/fi-admin/${preferred}${homeSuffix}` : `/fi-admin/${preferred}`;
 }

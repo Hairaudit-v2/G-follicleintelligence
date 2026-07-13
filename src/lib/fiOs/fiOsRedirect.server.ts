@@ -162,3 +162,35 @@ export async function resolveFiOsPostLoginRedirect(
     defaultTenantHomeSuffix: homeSuffix,
   });
 }
+
+/**
+ * When a tenant member hits bare `/fi-admin/[tenantId]` (Today), redirect to their role home
+ * when the resolver yields a non-empty suffix. Returns null when Today is correct (owner/manager).
+ * Impersonation-aware: pass the effective tenant auth user id (target when impersonating).
+ */
+export async function resolveFiOsRoleHomeHrefForAuthUser(
+  tenantId: string,
+  authUserId: string | null | undefined
+): Promise<string | null> {
+  const tid = tenantId.trim();
+  const uid = String(authUserId ?? "").trim();
+  if (!tid || !uid) return null;
+
+  const os = await loadFiOsIdentity(uid);
+  const r = os ? normalizeFiOsRole(os.osRole) : "";
+
+  if (r === "fi_admin" || r === "fi_platform_admin") {
+    return null;
+  }
+
+  const hints = await loadLandingHintsForAuthUser(uid, tid, r || null);
+  const suffix = resolveFiOsPostLoginPathSuffix({
+    osRole: r || null,
+    staffRoleKey: hints.staffRoleKey,
+    tenantAdminRole: hints.tenantAdminRole,
+    workspaceProfile: hints.workspaceProfile,
+  });
+
+  if (!suffix) return null;
+  return `/fi-admin/${tid}${suffix}`;
+}

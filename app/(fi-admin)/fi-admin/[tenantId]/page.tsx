@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 
-import { notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
 import { FiTenantOperationalHome } from "@/src/components/fi-admin/FiTenantOperationalHome";
 
@@ -49,6 +49,7 @@ import { resolveDashboardQuickActions } from "@/src/lib/fiAdmin/dashboardQuickAc
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { resolveFiOsRoleHomeHrefForAuthUser } from "@/src/lib/fiOs/fiOsRedirect.server";
 
 export const metadata = {
   title: "Home",
@@ -70,6 +71,12 @@ export default async function FiAdminTenantHomePage({
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
+
+  const authUserId = await resolveEffectiveTenantAuthUserIdFromSession();
+  const roleHomeHref = await resolveFiOsRoleHomeHrefForAuthUser(tenantId, authUserId);
+  if (roleHomeHref) {
+    redirect(roleHomeHref);
+  }
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||

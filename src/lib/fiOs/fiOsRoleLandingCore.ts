@@ -45,6 +45,13 @@ export function resolveFiOsPostLoginPathSuffix(input: {
   if (staff === "trainer") return "/team";
   if (staff === "auditor") return "";
 
+  // Unnormalized production labels (e.g. "Contractor Doctor / Hair Transplant Surgeon").
+  const staffLower = staffRaw.toLowerCase();
+  if (staffLower.includes("reception")) return "/front-desk";
+  if (staffLower.includes("consultant")) return "/crm";
+  if (staffLower.includes("surgeon") || staffLower.includes("doctor")) return "/doctor";
+  if (staffLower.includes("nurse")) return "/front-desk";
+
   const admin = String(input.tenantAdminRole ?? "")
     .trim()
     .toLowerCase();

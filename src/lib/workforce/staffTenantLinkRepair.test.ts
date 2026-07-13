@@ -9,6 +9,7 @@ import {
   blocksStaffAccessLoginForEmploymentStatus,
   extractTenantIdFromFiAdminPath,
   formatCrossTenantInviteWarning,
+  isBareFiAdminTenantHomePath,
   resolvePostLoginDestination,
   resolvePreferredLoginTenantId,
   shouldPreferMembershipOverMetadata,
@@ -450,6 +451,22 @@ test("role home suffix lands reception on Front desk", () => {
     defaultTenantHomeSuffix: "/front-desk",
   });
   assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}/front-desk`);
+});
+
+test("bare tenant explicit next still applies role home suffix", () => {
+  const dest = resolvePostLoginDestination({
+    explicitNext: `/fi-admin/${EVOLVED_TENANT}`,
+    membershipTenantIds: [EVOLVED_TENANT],
+    metadataTenantId: null,
+    defaultTenantHomeSuffix: "/crm",
+  });
+  assert.equal(dest, `/fi-admin/${EVOLVED_TENANT}/crm`);
+});
+
+test("isBareFiAdminTenantHomePath detects tenant Today only", () => {
+  assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${EVOLVED_TENANT}`), true);
+  assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${EVOLVED_TENANT}/`), true);
+  assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${EVOLVED_TENANT}/crm`), false);
 });
 
 test("provisionStaffAuthInviteLink finds existing auth user via RPC", async () => {

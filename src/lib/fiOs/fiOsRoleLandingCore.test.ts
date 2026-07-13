@@ -5,6 +5,7 @@ import {
   buildFiOsTenantHomeHref,
   resolveFiOsPostLoginPathSuffix,
 } from "@/src/lib/fiOs/fiOsRoleLandingCore";
+import { isBareFiAdminTenantHomePath } from "@/src/lib/workforce/staffTenantLinkRepairCore";
 
 const TID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 
@@ -28,6 +29,17 @@ describe("resolveFiOsPostLoginPathSuffix", () => {
       resolveFiOsPostLoginPathSuffix({ tenantAdminRole: "finance_admin" }),
       "/financial-os"
     );
+  });
+
+  it("maps free-text surgeon staff labels to doctor home", () => {
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({
+        staffRoleKey: "Contractor Doctor / Hair Transplant Surgeon",
+      }),
+      "/doctor"
+    );
+    assert.equal(resolveFiOsPostLoginPathSuffix({ staffRoleKey: "Nurse" }), "/front-desk");
+    assert.equal(resolveFiOsPostLoginPathSuffix({ staffRoleKey: "consultant" }), "/crm");
   });
 
   it("defaults to Today (empty suffix), never /cases", () => {
@@ -56,5 +68,13 @@ describe("buildFiOsTenantHomeHref", () => {
     assert.equal(buildFiOsTenantHomeHref(TID, ""), `/fi-admin/${TID}`);
     assert.equal(buildFiOsTenantHomeHref(TID, "/front-desk"), `/fi-admin/${TID}/front-desk`);
     assert.equal(buildFiOsTenantHomeHref(TID, "/crm"), `/fi-admin/${TID}/crm`);
+  });
+});
+
+describe("isBareFiAdminTenantHomePath", () => {
+  it("detects tenant Today-only paths", () => {
+    assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${TID}`), true);
+    assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${TID}/`), true);
+    assert.equal(isBareFiAdminTenantHomePath(`/fi-admin/${TID}/crm`), false);
   });
 });
