@@ -63,11 +63,15 @@ jobs:
 
     env:
       SKIP_ENV_VALIDATION: "1"
+      # Prefer deployed HTTPS host (repo var). Localhost fallback only works if a server is listening.
       FI_E2E_BASE_URL: ${{ vars.FI_E2E_STAGING_URL || 'http://127.0.0.1:3000' }}
       FI_E2E_TENANT_ID: ${{ secrets.FI_E2E_TENANT_ID }}
       FI_E2E_DEMO_ADMIN_EMAIL: ${{ secrets.FI_E2E_DEMO_ADMIN_EMAIL }}
       FI_E2E_DEMO_ADMIN_PASSWORD: ${{ secrets.FI_E2E_DEMO_ADMIN_PASSWORD }}
       FI_E2E_OTHER_TENANT_ID: ${{ secrets.FI_E2E_OTHER_TENANT_ID }}
+      # Optional spine fixtures — empty secret → spine specs skip (CI-SPINE-01)
+      FI_E2E_LEAD_ID: ${{ secrets.FI_E2E_LEAD_ID }}
+      FI_E2E_PATIENT_ID: ${{ secrets.FI_E2E_PATIENT_ID }}
       FI_E2E_BROWSERS: chromium
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
