@@ -49,6 +49,11 @@ function morePipelineItems() {
   return sections.find((s) => s.groupId === "PIPELINE")?.items ?? [];
 }
 
+function assertLegacyRedirectToCrm(pageSource: string, routeLabel: string) {
+  assert.match(pageSource, /redirect\(/, `${routeLabel} must redirect`);
+  assert.match(pageSource, /\/crm/, `${routeLabel} must target /crm`);
+}
+
 describe("S4.5D one Pipeline door", () => {
   it("1 exactly one visible Pipeline primary entry", () => {
     const items = sidebarItems();
@@ -145,11 +150,9 @@ describe("S4.5D one Pipeline door", () => {
     }
   });
 
-  it("LeadFlow soft-redirects to Pipeline; conversion and CRM stay live", () => {
-    // FI-TRUST-LANDING-AND-SPINE-1: /leadflow is a bookmark soft-redirect to /crm
-    assert.match(read(LEADFLOW_PAGE), /redirect\(/);
-    assert.match(read(LEADFLOW_PAGE), /\/crm/);
-    assert.doesNotMatch(read(CONVERSION_PAGE), /redirect\(/);
+  it("legacy routes soft-redirect to Pipeline; /crm stays canonical", () => {
+    assertLegacyRedirectToCrm(read(LEADFLOW_PAGE), "/leadflow");
+    assertLegacyRedirectToCrm(read(CONVERSION_PAGE), "/consultation-conversion");
     assert.doesNotMatch(read(CRM_PAGE), /redirect\(/);
   });
 

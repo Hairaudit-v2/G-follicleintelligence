@@ -19,8 +19,6 @@ import type { CrmKanbanLeadCard, FiCrmLeadRow } from "@/src/lib/crm/types";
 const CRM_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx";
 const CRM_LAYOUT = "app/(fi-admin)/fi-admin/[tenantId]/crm/layout.tsx";
 const CRM_LEAD_DETAIL = "app/(fi-admin)/fi-admin/[tenantId]/crm/leads/[leadId]/page.tsx";
-const LEADFLOW_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/leadflow/page.tsx";
-const CONVERSION_PAGE = "app/(fi-admin)/fi-admin/[tenantId]/consultation-conversion/page.tsx";
 const PIPELINE_WS = "src/components/fi/crm/pipeline/PipelineWorkspace.tsx";
 const PRIMARY_NAV = "src/lib/fiAdmin/fiOsShellPrimaryNav.ts";
 
@@ -106,8 +104,6 @@ describe("S4.5A /crm route switch contract", () => {
   const layout = read(CRM_LAYOUT);
   const workspace = read(PIPELINE_WS);
   const leadDetail = read(CRM_LEAD_DETAIL);
-  const leadflow = read(LEADFLOW_PAGE);
-  const conversion = read(CONVERSION_PAGE);
   const nav = read(PRIMARY_NAV);
 
   it("enabled path mounts PipelineWorkspace via allowlist gate", () => {
@@ -197,10 +193,8 @@ describe("S4.5A /crm route switch contract", () => {
     assert.match(leadDetail, /getCrmShellPageSession/);
   });
 
-  it("no Pipeline/legacy route redirects are added", () => {
+  it("no Pipeline route switch redirects on /crm during S4.5A", () => {
     assert.doesNotMatch(page, /redirect\(/);
-    assert.doesNotMatch(leadflow, /redirect\([\s\S]*crm/);
-    assert.doesNotMatch(conversion, /redirect\([\s\S]*crm/);
     assert.doesNotMatch(nav, /id: "follow-up-queue"/);
     assert.doesNotMatch(nav, /id: "consultation-conversion-board"/);
     assert.doesNotMatch(nav, /id: "leadflow-dashboard"/);
