@@ -1,10 +1,10 @@
 # FI-TRUST-CI-AND-RECEPTION-1
 
-**Status:** **Phase 1+ — decision B recorded; workflow spine wired; GH Actions apply BLOCKED (no `gh` auth)** — local `.env.local` has all P0 + spine values; Commands below ready for ops  
+**Status:** **Phase 1+ ops APPLY DONE** — Decision B recorded; `FI_E2E_STAGING_URL` + P0/spine secrets **SET** in Actions; workflow spine wired; reception R1 still open  
 **Date:** 2026-07-14  
 **Depends on:** FI-TRUST-E2E-AND-PIPELINE-1 (GREEN — E2E, Pipeline allowlist, DEF-NURSE-01)  
 **Plan:** [fi-trust-ci-and-reception-1-plan.md](./fi-trust-ci-and-reception-1-plan.md)  
-**Inventory at:** `d9fdc346` (secrets MISSING) · Decision B + workflow harden this commit · GitHub apply pending ops login
+**Inventory at:** `d9fdc346` (secrets MISSING) · Harden `0e012575` · GH apply confirmed 2026-07-14 (names only)
 
 ## Goal
 
@@ -36,21 +36,21 @@ Make authenticated trust E2E a durable CI/ops gate (not only manual production b
 | ---- | -------- |
 | Host source | `FI_E2E_BASE_URL: ${{ vars.FI_E2E_STAGING_URL \|\| 'http://127.0.0.1:3000' }}` |
 | Build / start | **None** on `authenticated-smoke` (public job builds + starts; authenticated does not) |
-| Effect after Decision B | Once `FI_E2E_STAGING_URL` is set to production HTTPS, job hits real host (no localhost). **Until GH var is applied, still MISSING → localhost + skip via empty credentials.** |
+| Effect after Decision B | `FI_E2E_STAGING_URL` **SET** → `https://follicleintelligence.ai`. Authenticated job hits production HTTPS (no localhost fallback when var present). |
 | Playwright | Config does **not** start a server; tests require a reachable `FI_E2E_BASE_URL` |
-| Spine fixtures | Workflow **now wires** `secrets.FI_E2E_LEAD_ID` / `secrets.FI_E2E_PATIENT_ID` into job `env` (CI-SPINE-01 code path closed; secrets still need to be set in Actions) |
+| Spine fixtures | Workflow wires `secrets.FI_E2E_LEAD_ID` / `secrets.FI_E2E_PATIENT_ID`; both secrets **SET** in Actions (CI-SPINE-01 closed) |
 
 ### Gap matrix (code / config)
 
 | ID | Class | Finding | Evidence |
 | -- | ----- | ------- | -------- |
-| CI-HOST-01 | **P1 → ops apply** | Host path is correct in workflow (`vars.FI_E2E_STAGING_URL`). Decision **B** chosen: production URL. Gap remains until repo **variable** is set. | Decision B below; `.github/workflows/e2e-smoke.yml` |
+| CI-HOST-01 | **CLOSED (ops)** | Decision **B** applied: `FI_E2E_STAGING_URL` = production HTTPS. | `gh variable list` 2026-07-14 |
 | CI-TRUST-01 | **P1 (deferred)** | No **dedicated** trust-file step — full `@authenticated` suite runs. Accept for first gate; narrow later. | `npx playwright test --grep @authenticated` |
-| CI-SPINE-01 | **P2 → code DONE / secrets pending** | Workflow env now passes `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` from secrets. Spine still skips until those secrets exist in Actions. | `e2e-smoke.yml` `authenticated-smoke` env |
+| CI-SPINE-01 | **CLOSED** | Workflow env + Actions secrets for `FI_E2E_LEAD_ID` / `FI_E2E_PATIENT_ID` both present. | `e2e-smoke.yml` + `gh secret list` |
 | CI-FIX-01 | **P2** | Optional `FI_E2E_UNLINKED_LEAD_ID` and `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` unset → permanent skips (documented acceptable unless ops chooses to enable). | E2E close-out 2 SKIP |
-| CI-SEC-01 | **P0 (ops)** | **OPEN for apply** — agent session has no `gh` login (`GH_TOKEN` / `hosts.yml` missing). Local `.env.local` has P0 + spine values **PRESENT**. Until ops runs commands below, Actions store still empty from last API inventory. | Apply blocked 2026-07-14 |
+| CI-SEC-01 | **CLOSED (ops)** | P0 secrets **SET** from local `.env.local` (values never logged). Authenticated job `if:` gate can open. | `gh secret list` 2026-07-14 |
 
-**Playwright note:** `hasDemoCredentials()` gates `*-authenticated` projects. Trust specs are in `testMatch` for those projects and tagged `@authenticated` — wiring is code-ready; CI host var + secrets apply are the remaining barriers.
+**Playwright note:** `hasDemoCredentials()` gates `*-authenticated` projects. Trust specs are in `testMatch` for those projects and tagged `@authenticated` — code + host var + P0/spine secrets are ready; remaining barriers are first CI run proof + reception R1.
 
 ---
 
@@ -74,84 +74,34 @@ gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --re
 
 ## Phase 1 — CI secrets / vars matrix (C1) — updated
 
-**Method:** Authenticated GitHub Actions API (inventory at `d9fdc346`) + local presence check (names only) + Decision B.  
+**Method:** Post-apply `gh variable list` / `gh secret list` (names only) after piping from local `.env.local`.  
 **Repo:** `Hairaudit-v2/G-follicleintelligence` · **Date:** 2026-07-14  
-**Agent apply:** **BLOCKED** — `gh` not logged in this session; cannot confirm post-apply state without ops login.
+**Agent apply:** **DONE** — variable + 5 secrets set in this session.
 
-| Name | Kind (workflow expects) | GitHub Actions (last known) | Local `.env.local` | Target after ops apply |
-| ---- | ----------------------- | --------------------------- | ------------------ | ---------------------- |
-| `FI_E2E_DEMO_ADMIN_EMAIL` | **secret** | **MISSING** | **PRESENT** | **SET** from local |
-| `FI_E2E_DEMO_ADMIN_PASSWORD` | **secret** | **MISSING** | **PRESENT** | **SET** from local |
-| `FI_E2E_TENANT_ID` | **secret** | **MISSING** | **PRESENT** | **SET** from local |
+| Name | Kind (workflow expects) | GitHub Actions | Local `.env.local` | Notes |
+| ---- | ----------------------- | -------------- | ------------------ | ----- |
+| `FI_E2E_DEMO_ADMIN_EMAIL` | **secret** | **SET** | **PRESENT** | P0 |
+| `FI_E2E_DEMO_ADMIN_PASSWORD` | **secret** | **SET** | **PRESENT** | P0 |
+| `FI_E2E_TENANT_ID` | **secret** | **SET** | **PRESENT** | P0 / Evolved |
 | `FI_E2E_OTHER_TENANT_ID` | secret (optional) | **MISSING** | **MISSING** | leave unset |
-| `FI_E2E_STAGING_URL` | **repository variable** → `FI_E2E_BASE_URL` | **MISSING** | N/A (Decision B = production URL) | **SET** `https://follicleintelligence.ai` |
-| `FI_E2E_BASE_URL` | derived in CI from staging var | N/A (set in workflow) | **PRESENT** (local bake) | from var after apply |
-| `FI_E2E_LEAD_ID` | **secret** (spine; wired in workflow) | **MISSING** | **PRESENT** | **SET** from local |
-| `FI_E2E_PATIENT_ID` | **secret** (spine; wired in workflow) | **MISSING** | **PRESENT** | **SET** from local |
-| `FI_E2E_UNLINKED_LEAD_ID` | optional | **MISSING** | **MISSING** | defer |
-| `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | optional | **MISSING** | **MISSING** | defer |
+| `FI_E2E_STAGING_URL` | **repository variable** | **SET** = `https://follicleintelligence.ai` | N/A | Decision B |
+| `FI_E2E_BASE_URL` | derived in CI from staging var | N/A (workflow) | **PRESENT** (local bake) | from var in CI |
+| `FI_E2E_LEAD_ID` | **secret** (spine) | **SET** | **PRESENT** | wired in workflow |
+| `FI_E2E_PATIENT_ID` | **secret** (spine) | **SET** | **PRESENT** | wired in workflow |
+| `FI_E2E_UNLINKED_LEAD_ID` | optional | **MISSING** | **MISSING** | defer (CI-FIX-01) |
+| `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX` | optional | **MISSING** | **MISSING** | defer (CI-FIX-01) |
 
 **Vercel notes:** Unchanged — `FI_E2E_*` belong in GitHub Actions, not Vercel app runtime.
 
-**Implication:** Until ops applies variable + secrets, `authenticated-smoke` `if:` gate still skips — no durable authenticated trust gate in CI yet.
+**Implication:** `authenticated-smoke` credential gate can open. First GREEN claim still needs a successful workflow run against production.
 
 ---
 
-## Ops apply commands (secrets — values never echoed)
+## Ops apply (completed 2026-07-14)
 
-Requires: `gh auth login` (or `GH_TOKEN` with `repo` + Actions secrets/vars scopes).  
-Run from repo root with `.env.local` present. PowerShell-safe (pipes value; does not print):
+Applied via `gh variable set` / `gh secret set` piping from `.env.local` (values never logged). Commands retained in git history of this audit for rotate/re-apply.
 
-```powershell
-$gh = "C:\Program Files\GitHub CLI\gh.exe"
-$repo = "Hairaudit-v2/G-follicleintelligence"
-
-# 1) Decision B — repository variable
-& $gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai" --repo $repo
-
-# 2) Load keys from .env.local without printing values
-function Get-DotEnvValue([string]$key) {
-  $line = Get-Content .env.local | Where-Object { $_ -match "^$key=" } | Select-Object -First 1
-  if (-not $line) { throw "Missing $key in .env.local" }
-  return ($line -replace "^$key=", "").Trim().Trim('"').Trim("'")
-}
-
-foreach ($key in @(
-  "FI_E2E_DEMO_ADMIN_EMAIL",
-  "FI_E2E_DEMO_ADMIN_PASSWORD",
-  "FI_E2E_TENANT_ID",
-  "FI_E2E_LEAD_ID",
-  "FI_E2E_PATIENT_ID"
-)) {
-  $val = Get-DotEnvValue $key
-  $val | & $gh secret set $key --repo $repo
-  Write-Output "SET $key (value not shown)"
-}
-
-# 3) Verify names only
-& $gh variable list --repo $repo
-& $gh secret list --repo $repo
-```
-
-Bash equivalent:
-
-```bash
-gh variable set FI_E2E_STAGING_URL --body "https://follicleintelligence.ai"
-
-set -a
-# shellcheck disable=SC1091
-source <(grep -E '^(FI_E2E_DEMO_ADMIN_EMAIL|FI_E2E_DEMO_ADMIN_PASSWORD|FI_E2E_TENANT_ID|FI_E2E_LEAD_ID|FI_E2E_PATIENT_ID)=' .env.local | sed 's/\r$//')
-set +a
-
-printf '%s' "$FI_E2E_DEMO_ADMIN_EMAIL" | gh secret set FI_E2E_DEMO_ADMIN_EMAIL
-printf '%s' "$FI_E2E_DEMO_ADMIN_PASSWORD" | gh secret set FI_E2E_DEMO_ADMIN_PASSWORD
-printf '%s' "$FI_E2E_TENANT_ID" | gh secret set FI_E2E_TENANT_ID
-printf '%s' "$FI_E2E_LEAD_ID" | gh secret set FI_E2E_LEAD_ID
-printf '%s' "$FI_E2E_PATIENT_ID" | gh secret set FI_E2E_PATIENT_ID
-
-gh variable list
-gh secret list
-```
+**Still MISSING (optional / defer):** `FI_E2E_OTHER_TENANT_ID`, `FI_E2E_UNLINKED_LEAD_ID`, `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX`.
 
 ---
 
@@ -221,11 +171,11 @@ Reception / nurse / operations_admin resolve to `/front-desk` in pure core — l
 | Rubric | Assessment |
 | ------ | ---------- |
 | **Phase 1 inventory** | **DONE** |
-| **Decision B** | **RECORDED** — production URL |
-| **Workflow harden** | **DONE** — spine IDs wired; staging var already wired |
-| **GH Actions apply** | **BLOCKED** — no `gh` auth in agent session; commands documented |
-| **Overall** | **AMBER** — cannot claim CI trust gate until ops sets variable + P0/spine secrets; reception R1 still open |
-| Blockers for GREEN | Ops apply commands above; then verify `authenticated-smoke` runs; reception R1 live |
+| **Decision B** | **APPLIED** — production URL variable SET |
+| **Workflow harden** | **DONE** — spine IDs wired; staging var consumed |
+| **GH Actions apply** | **DONE** — P0 + spine secrets SET |
+| **Overall** | **AMBER → CI path unblocked** — claim durable gate GREEN only after first successful `authenticated-smoke` run; reception R1 still open |
+| Blockers for GREEN | Successful authenticated CI run on production; reception R1 live |
 
 ---
 
