@@ -159,6 +159,8 @@ No app-code change required — linkage and profile route are correct; test sele
 
 ## Recommended next action
 
+**Next milestone:** **`FI-TRUST-CI-AND-RECEPTION-1`** — see [fi-trust-ci-and-reception-1-plan.md](./fi-trust-ci-and-reception-1-plan.md).
+
 1. **CI:** Wire `chromium-authenticated` trust bundle in CI once `FI_E2E_DEMO_ADMIN_*` secrets are in the deployment secret store.
 2. **Optional:** Set `FI_E2E_UNLINKED_LEAD_ID` for negative linkage case; set `FI_E2E_EXPECTED_LANDING_PATH_SUFFIX=/crm` for consultant role-home assert.
 3. **Optional:** Reception landing spot-check (`crm_operator` → `/front-desk`) if still desired outside this milestone.
