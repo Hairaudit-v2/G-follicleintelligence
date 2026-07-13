@@ -1,6 +1,6 @@
 # FI-TRUST-MONEY-AND-READINESS-1
 
-**Status:** Phase 2 — Contained P2 fixes landed (DEF-MONEY-01, DEF-READY-01); live bake pending  
+**Status:** Phase 2 — DEF-MONEY-01 live verified (M4 PASS); readiness live matrix still open  
 **Date:** 2026-07-13  
 **Depends on:** FI-TRUST-LANDING-AND-SPINE-1, FI-ROLE-JOURNEY-BAKE-1 (deferred gaps)  
 **Plan:** [fi-trust-money-and-readiness-1-plan.md](./fi-trust-money-and-readiness-1-plan.md)
@@ -19,7 +19,7 @@ Make **Money** and **surgery readiness** trustworthy for staff: clear payment tr
 | ---- | ----------------- | ----------------------- | --- |
 | Money hub copy | `moneyTrustCopy.ts` + tests **PASS** | **GREEN** — harsh@ finance_admin post-`4e08a911` | Re-verify after any deploy |
 | `FI_PAYMENTS_ENABLED` off | Nav + `/payments` page **PASS** (unit) | **GREEN** — honest disabled + Money link | None |
-| Payment row labels | `/financial/payments` — **Provider** column only | **PARTIAL** — empty list | **DEF-MONEY-01** |
+| Payment row labels | `/financial/payments` — **Source** column + label map | **PASS** — M4 live bake 2026-07-13 (seeded rows) | None |
 | Clearance guard | `moneyClearanceBlockedStaffMessage` → Money | Unit **PASS** | Live confirm on booking confirm |
 | Clearance panel | `FinancialClearancePanel` renders `clearance_reason` | Not live-verified on boards | **DEF-READY-01** — unavailable reason cites "FinancialOS signals" |
 | Readiness board model | Staff/room issues + escalation **PASS** (unit) | Not live-verified end-to-end | Live bake required |
@@ -81,7 +81,7 @@ PASS
 | DEF-READY-01 | P2 | Clearance unavailable reason + board links still reference FinancialOS / `/financial/*` not Money | Replace staff-facing unavailable copy; optional Money hub link on panels |
 | READY-LIVE-01 | P2 | Surgery readiness board not live-verified post staff/room wiring | Doctor/manager live bake on `/surgery-readiness` |
 | TMRW-LIVE-01 | P2 | Tomorrow board financial chips not live-verified | Nurse live bake on `/front-desk/tomorrow` |
-| MONEY-LIVE-01 | P3 | Prior bake: empty payment list — row labels unproven | Seed `fi_payments` or use tenant data |
+| MONEY-LIVE-01 | P3 | Prior bake: empty payment list — row labels unproven | **CLOSED** — seed script + M4 PASS 2026-07-13 |
 | TC-NAV-01 | P3 | Pre-existing procedure day nav unit fail | Hygiene — out of milestone unless blocking |
 
 ---
@@ -96,7 +96,26 @@ PASS
   - other providers → **Provider confirmed (\<provider\>)**
 - `/financial/payments` page: **Provider** column replaced with **Source** column rendering the label (amber for manual, emerald for provider-confirmed); header description now states manual rows are operational tracking, not bank/card proof.
 - No new modules; label map lives in existing Money trust copy module.
-- Live verification (M4) still blocked on seeded `fi_payments` rows (MONEY-LIVE-01).
+- Live verification (M4) **PASS** — seeded `fi_payments` rows (see §M4 live bake below).
+
+### M4 live bake — payment row source labels (2026-07-13T20:53 AEST)
+
+**Seed:** `scripts/seed-evolved-smoketest-payments.ts` (`npm run seed:evolved-smoketest-payments -- --commit`)
+
+| Row | Payment ID | Provider | Total | Source label (live) | Colour |
+| --- | ---------- | -------- | ----- | ------------------- | ------ |
+| SMOKETEST-PAYMENT-MANUAL | `230631c0-f850-45e6-bbff-30347fad61d7` | `null` | AUD 550.00 | **Manual tracking** | amber |
+| SMOKETEST-PAYMENT-STRIPE | `2abda5f6-48c5-468d-8455-22917ee0f6ff` | `stripe` | AUD 825.00 | **Provider confirmed (Stripe)** | emerald |
+
+**Session:** platform-admin impersonation of **`harsh@evolvedhair.com.au`** on Evolved tenant `c2615b95-b707-4485-aa5f-be8f78ec868a`. Tool: cursor-ide-browser MCP. Production: `follicleintelligence.ai`.
+
+| Check | Result |
+| ----- | ------ |
+| M4 — `/financial/payments` Source column | **PASS** — manual amber + Stripe emerald labels |
+| Money hub (`/financial-os`) spot-check | **PASS** — title, truth banner, Finance workspace |
+| `FI_PAYMENTS_ENABLED` off (`/payments`) | **PASS** (prior bake) |
+
+**M4 verdict:** **PASS** — DEF-MONEY-01 row labels proven live. MONEY-LIVE-01 closed.
 
 ### DEF-READY-01 — clearance unavailable copy — **FIXED (code)**
 
@@ -153,7 +172,7 @@ The following was delivered and live-baked during the bake-1 overlap window. Pha
 | Deposit / clearance language (hub tiles) | **PASS** |
 | Finance-admin landing redirect | **PASS** |
 | Workspace badge | **PASS** — Finance workspace |
-| Payment row source labels | **PARTIAL** — `/financial/payments` empty |
+| Payment row source labels | **PASS** — M4 live bake with seeded SMOKETEST rows |
 | Readiness / tomorrow live matrix | **NOT RUN** — deferred to this milestone |
 
 **Verdict (Money hub subset):** **GREEN** for finance_admin Money landing + truth copy. **Full milestone GREEN** requires readiness live matrix + payment row labelling.
@@ -164,11 +183,11 @@ Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-liv
 
 ## Release decision (current)
 
-**AMBER — audit complete, live matrix incomplete**
+**AMBER — Money hub + payment row labels GREEN; readiness live matrix incomplete**
 
-- Money hub subset: **GREEN** (prior evidence)
-- Payment row labels: **code fixed** (DEF-MONEY-01) — live verify pending seeded rows (MONEY-LIVE-01)
+- Money hub subset: **GREEN** (prior + spot-check evidence)
+- Payment row labels: **GREEN** — DEF-MONEY-01 code + M4 live PASS
 - Readiness/tomorrow end-to-end: **open** (READY-LIVE-01, TMRW-LIVE-01)
 - Clearance copy consistency: **code fixed** (DEF-READY-01) — live confirm pending
 
-Remaining for **Phase 2**: live bake sequence per plan doc §9 (readiness/tomorrow matrix + M4 with seeded rows).
+Remaining for **Phase 2**: live bake sequence per plan doc §9 (readiness/tomorrow matrix).
