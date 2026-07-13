@@ -336,7 +336,7 @@ export function buildConsultationHealthCards(
         quotesFollowUpsDue > 0
           ? "Quotes to send or patient follow-ups awaiting response"
           : "No outstanding quote follow-ups",
-      href: `${base}/consultation-conversion`,
+      href: `${base}/crm`,
     },
     {
       id: "surgery_ready",
@@ -346,7 +346,7 @@ export function buildConsultationHealthCards(
         readyForSurgery > 0
           ? "Accepted quotes ready to move into surgery planning"
           : "No consultations ready for surgery pathway",
-      href: `${base}/consultation-conversion`,
+      href: `${base}/crm`,
     },
   ];
 }
@@ -427,7 +427,7 @@ export function buildConsultationAttentionPriorities(
       headline: (n) =>
         plural(n, "completed consultation", "completed consultations") + " need a treatment quote",
       detail: "Draft pricing and send the quote to the patient.",
-      href: `${base}/consultation-conversion`,
+      href: `${base}/crm`,
     },
     {
       id: "quote_followup",
@@ -436,7 +436,7 @@ export function buildConsultationAttentionPriorities(
       severity: "info",
       headline: (n) => plural(n, "patient", "patients") + " need quote follow-up",
       detail: "Check in on sent quotes and capture acceptance.",
-      href: `${base}/consultation-conversion`,
+      href: `${base}/crm`,
     },
     {
       id: "surgery_convert",
@@ -446,7 +446,7 @@ export function buildConsultationAttentionPriorities(
       headline: (n) =>
         plural(n, "consultation", "consultations") + " are ready to convert to surgery planning",
       detail: "Create or link the case and schedule the procedure.",
-      href: `${base}/consultation-conversion`,
+      href: `${base}/crm`,
     },
   ];
 

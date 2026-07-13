@@ -155,7 +155,7 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "reports-admin": "REPORTS",
 };
 
-/** S4.5D — legacy pipeline routes hidden from staff More drawer; URLs remain live until S4.5E/S11. */
+/** S4.5E — legacy pipeline routes redirect to /crm; hidden from staff More drawer until S11 retirement. */
 export const FI_OS_PIPELINE_LEGACY_MORE_SUB_ITEM_IDS = new Set([
   "leadflow-dashboard",
   "crm-workspace",

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 /**
- * FI-TRUST-LANDING-AND-SPINE-1 / S4.5E — LeadFlow operator URL soft-redirects to Pipeline.
+ * FI-UX-REBUILD-1 S4.5E — LeadFlow operator URL soft-redirects to Pipeline.
  * Canonical enquiry workspace is `/crm` (Pipeline). Route kept for bookmarks.
  */
 export default async function LeadFlowOperatorLegacyRedirectPage({
