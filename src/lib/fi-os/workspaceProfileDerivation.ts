@@ -64,7 +64,8 @@ export function deriveWorkspaceProfileFromTenantAdminRole(
 ): FiWorkspaceProfileKey | null {
   if (!role || !isFiTenantAdminRoleString(role)) return null;
   const r = role as FiTenantAdminRole;
-  if (r === "clinic_admin" || r === "finance_admin") return "director";
+  if (r === "clinic_admin") return "clinic_manager";
+  if (r === "finance_admin") return "director";
   if (r === "operations_admin") return "clinic_manager";
   if (r === "data_safety_admin") return "auditor";
   return null;

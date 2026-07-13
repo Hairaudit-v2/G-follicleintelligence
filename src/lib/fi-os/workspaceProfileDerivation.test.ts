@@ -56,7 +56,8 @@ test("clinic owner staff resolves director workspace without platform os role", 
 });
 
 test("tenant admin mapping", () => {
-  assert.equal(deriveWorkspaceProfileFromTenantAdminRole("clinic_admin"), "director");
+  assert.equal(deriveWorkspaceProfileFromTenantAdminRole("clinic_admin"), "clinic_manager");
+  assert.equal(deriveWorkspaceProfileFromTenantAdminRole("finance_admin"), "director");
   assert.equal(deriveWorkspaceProfileFromTenantAdminRole("operations_admin"), "clinic_manager");
   assert.equal(deriveWorkspaceProfileFromTenantAdminRole("dashboard_viewer"), null);
 });
@@ -113,6 +114,20 @@ test("clinic_admin tenant admin with clinic_manager profile resolves clinic mana
     resolveWorkspaceProfileKeyFromSignals({
       explicitWorkspaceProfile: "clinic_manager",
       positionTypeDefaultWorkspaceProfile: "clinic_manager",
+      featureTemplateWorkspaceProfile: null,
+      staffRole: "Clinic admin",
+      tenantAdminRole: "clinic_admin",
+      fiOsRole: null,
+    }),
+    "clinic_manager"
+  );
+});
+
+test("clinic_admin tenant admin fallback resolves clinic manager not director", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: null,
+      positionTypeDefaultWorkspaceProfile: null,
       featureTemplateWorkspaceProfile: null,
       staffRole: "Clinic admin",
       tenantAdminRole: "clinic_admin",
