@@ -1,7 +1,7 @@
 # FI-CI-SIGNAL-HYGIENE-1 — Findings
 
 **Milestone:** `FI-CI-SIGNAL-HYGIENE-1`  
-**Phase:** 1 — audit-only (2026-07-14)  
+**Phase:** 2 started — Bucket B fix (2026-07-14); Phase 1 audit 2026-07-14  
 **HEAD at audit:** `4fb3b6b4` (`docs(audit): confirm Keep Decision B for FI_E2E_STAGING_URL.`)  
 **Prior milestone:** `FI-TRUST-CI-AND-RECEPTION-1` **GREEN** (trust trio + reception R1)  
 **Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` — confirmed Keep B
@@ -10,9 +10,11 @@
 
 ## Executive summary
 
-Public smoke remains **advisory** (`continue-on-error: true`) and is still very red (~**126 failed** on the last completed cross-browser run). Failures cluster into a small number of root causes — mostly **CI signal hygiene** (authenticated `@smoke` on a credential-less public job; Front Desk label specs hitting protected routes without a session), not proven product P0s. Trust trio gate stays **GREEN**. DEF-TC-01 reconfirmed (**6** `tsc` errors, all in `*.test.ts`). CI-TRIAGE-TEAM-01 quarantine **in place**. Optional fixtures still **MISSING**.
+Public smoke remains **advisory** (`continue-on-error: true`) and was very red (~**126 failed** on the last completed cross-browser run before Phase 2). Failures cluster into a small number of root causes — mostly **CI signal hygiene** (authenticated `@smoke` on a credential-less public job; Front Desk label specs hitting protected routes without a session), not proven product P0s. Trust trio gate stays **GREEN**. DEF-TC-01 reconfirmed (**6** `tsc` errors, all in `*.test.ts`). CI-TRIAGE-TEAM-01 quarantine **in place**. Optional fixtures still **MISSING**.
 
 **Phase 1 verdict:** **AMBER** for overall CI readability (trust GREEN; public smoke advisory-red); inventory complete for Phase 2.
+
+**Phase 2 (PUB-AUTH-CRASH / Bucket B):** Public projects now `grepInvert: /@authenticated/`; `authenticatedTest` skips cleanly when `!hasDemoCredentials()` (no `.trim()` TypeError). **Expected public-job delta ≈ −48** (8 logical × 6 browsers). Remaining noise: Bucket A labels (~60), C security status (~12), D procedure-day 200 (~6).
 
 ---
 
@@ -181,6 +183,29 @@ No product redesign. Staff mapping gate (`npm run audit:staff-mapping`) remains 
 **Harden `e2e/fixtures/auth.ts` (and/or public project grep) so missing `FI_E2E_DEMO_ADMIN_*` yields a clean skip instead of `trim` TypeError on every `@authenticated @smoke` case in the public job.**
 
 This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does not touch product UI.
+
+---
+
+## Phase 2 — PUB-AUTH-CRASH (Bucket B) fix notes
+
+| Field | Value |
+| ----- | ----- |
+| Status | **Landed** (await CI confirmation on public-smoke) |
+| Date | 2026-07-14 |
+| ID | PUB-AUTH-CRASH |
+| Expected delta | **−48** public fails (8×6); residual advisory fails ≈ **78** (A+C+D) if baseline 126 holds |
+
+**Changes:**
+
+1. `playwright.config.ts` — public projects add `grepInvert: /@authenticated/` so dual-tagged `@authenticated @smoke` never select into the credential-less job.
+2. `e2e/fixtures/auth.ts` — auto `testInfo.skip` when `!hasDemoCredentials()`; worker fixture returns empty storage state instead of calling `.trim()` on unset env; login uses `demoAdminEmail()` / `demoAdminPassword()`.
+3. `e2e/helpers/credentials.test.ts` — unit guard for unset / whitespace / present demo creds.
+
+**Trust trio:** Unchanged — still `authenticated-smoke` → `--project=chromium-authenticated` with secrets. Do not regress trust-trio-only scope.
+
+**Bucket C (deferred — next PR):** patients API **404** and cron **503** vs narrow expect lists — not widened here; need intentional-status proof on prod-like middleware before changing expects (avoid masking real holes).
+
+**Bucket A / D:** Still open (labels unauth ~60; procedure-day HTTP 200 ~6).
 
 ---
 

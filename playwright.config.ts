@@ -15,7 +15,8 @@ loadRepoEnvFiles();
  * Test tiers (grep tags):
  *   @security      — unauthenticated fail-closed checks (CI security workflow)
  *   @smoke         — public read-only business surfaces (cross-browser CI)
- *   @authenticated — tenant-admin journeys (requires demo credentials env)
+ *   @authenticated — tenant-admin journeys (requires demo credentials env;
+ *                    excluded from public projects via grepInvert)
  *
  * Does NOT start a dev/build server — tests run against FI_E2E_BASE_URL
  * (local `next start` production build or staging). Auth middleware only
@@ -59,7 +60,10 @@ const publicProjects: PlaywrightTestConfig["projects"] = activeBrowsers().flatMa
   {
     name: browser.name,
     use: { ...browser.use },
+    // Public job has no FI_E2E_DEMO_ADMIN_* — exclude dual-tagged @authenticated @smoke
+    // so credentialed journeys only run on *-authenticated projects (PUB-AUTH-CRASH).
     grep: /@security|@smoke|@a11y/,
+    grepInvert: /@authenticated/,
   },
 ]);
 

@@ -12,7 +12,7 @@ value and tagged for selective execution.
 | `@security` | Unauthenticated fail-closed (admin shell, tenant dashboard, API) | None | `e2e-security.yml` (Chromium) |
 | `@smoke` | Public business surfaces (marketing, login, payment link) | None | `e2e-smoke.yml` (cross-browser) |
 | `@a11y` | Keyboard + semantic markup on public pages | None | Included in smoke CI |
-| `@authenticated` | Tenant admin login → dashboard, cross-tenant, staff PIN | Demo env secrets | Optional job when secrets configured |
+| `@authenticated` | Tenant admin login → dashboard, cross-tenant, staff PIN | Demo env secrets | Authenticated projects only (public projects `grepInvert`); trust-trio job when secrets + staging URL set |
 | `@mutation` | Patient create (demo tenant, opt-in) | `FI_E2E_ALLOW_MUTATIONS=1` | Optional |
 
 Critical revenue path (lead → case → consultation → payment) remains in the
