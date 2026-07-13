@@ -1,26 +1,34 @@
 #!/usr/bin/env tsx
 /**
- * One-shot: reclassify manager@evolvedhair.com.au from tenant_backend/manager to consultant.
+ * Reclassify + profile-fix for manager@evolvedhair.com.au as Evolved consultant.
  * Dry-run by default; pass --commit to apply.
  *
  *   node scripts/run-with-system-ca.mjs tsx scripts/reclassify-evolved-manager-to-consultant.ts
  *   node scripts/run-with-system-ca.mjs tsx scripts/reclassify-evolved-manager-to-consultant.ts --commit
+ *   node scripts/run-with-system-ca.mjs tsx scripts/reclassify-evolved-manager-to-consultant.ts --profile-only --commit
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin";
+import { resolveWorkspaceProfileKeyFromSignals } from "../src/lib/fi-os/workspaceProfileDerivation";
 import { resolveFiOsPostLoginPathSuffix } from "../src/lib/fiOs/fiOsRoleLandingCore";
 import { normalizeStaffRoleKey } from "../src/lib/staffAccess/staffAccessRegistry";
 
 const AUTH_USER_ID = "af1f9179-8441-4027-b434-4a3ccdb6ca66";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const EMAIL = "manager@evolvedhair.com.au";
+/** Global Evolved position type: CONSULTANT → default_workspace_profile consultant */
+const CONSULTANT_POSITION_TYPE_ID = "3714582f-f6d7-4ceb-9c43-edcfd9761698";
 
 const TARGET = {
   authFiRole: "member",
   fiUsersRole: "member",
   staffRole: "consultant",
+  displayFullName: "Manager Evolved",
+  displayFirstName: "Manager",
+  workspaceProfile: "consultant",
+  positionTypeId: CONSULTANT_POSITION_TYPE_ID,
 } as const;
 
 function loadRepoEnvFiles(): void {
@@ -46,42 +54,45 @@ function loadRepoEnvFiles(): void {
   }
 }
 
-type Snapshot = {
+type ProfileSnapshot = {
   auth: {
     email: string | null;
     fi_role: string | null;
     fi_tenant_id: string | null;
-    user_metadata: Record<string, unknown>;
   } | null;
-  fiUser: {
-    id: string;
-    role: string;
-    email: string | null;
-  } | null;
+  fiUser: { id: string; role: string; email: string | null } | null;
   fiStaff: {
     id: string;
     staff_role: string | null;
     full_name: string | null;
+    position_type_id: string | null;
+    staff_metadata: Record<string, unknown>;
     is_active: boolean;
   } | null;
-  fiStaffMember: { id: string; role_code: string | null } | null;
-  tenantAdmin: {
-    admin_role: string;
-    status: string;
+  fiStaffMember: {
+    id: string;
+    role_code: string | null;
+    full_name: string | null;
+    first_name: string | null;
+    source_synced_at: string | null;
   } | null;
+  positionType: {
+    id: string;
+    code: string;
+    default_workspace_profile: string | null;
+  } | null;
+  featureTemplate: { template_key: string; workspace_profile: string | null } | null;
+  tenantAdmin: { admin_role: string; status: string } | null;
   fiOsIdentity: { os_role: string } | null;
-  referenceConsultants: Array<{
-    email: string | null;
-    fi_users_role: string;
-    staff_role: string | null;
-    auth_fi_role: string | null;
-  }>;
+  derivedWorkspaceProfile: string;
+  landingPath: string;
 };
 
-async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise<Snapshot> {
+async function loadProfileSnapshot(
+  supabase: ReturnType<typeof supabaseAdmin>
+): Promise<ProfileSnapshot> {
   const { data: authData, error: authErr } = await supabase.auth.admin.getUserById(AUTH_USER_ID);
   if (authErr) throw new Error(`auth lookup: ${authErr.message}`);
-
   const meta = (authData.user?.user_metadata ?? {}) as Record<string, unknown>;
 
   const { data: fiUser } = await supabase
@@ -91,11 +102,11 @@ async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise
     .eq("auth_user_id", AUTH_USER_ID)
     .maybeSingle();
 
-  let fiStaff: Snapshot["fiStaff"] = null;
+  let fiStaff: ProfileSnapshot["fiStaff"] = null;
   if (fiUser) {
     const { data: staff } = await supabase
       .from("fi_staff")
-      .select("id, staff_role, full_name, is_active")
+      .select("id, staff_role, full_name, position_type_id, staff_metadata, is_active")
       .eq("tenant_id", TENANT_ID)
       .eq("fi_user_id", String((fiUser as { id: string }).id))
       .maybeSingle();
@@ -104,34 +115,91 @@ async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise
         id: string;
         staff_role: string | null;
         full_name: string | null;
+        position_type_id: string | null;
+        staff_metadata: unknown;
         is_active: boolean;
       };
+      const md =
+        s.staff_metadata && typeof s.staff_metadata === "object" && !Array.isArray(s.staff_metadata)
+          ? (s.staff_metadata as Record<string, unknown>)
+          : {};
       fiStaff = {
         id: String(s.id),
         staff_role: s.staff_role,
         full_name: s.full_name,
+        position_type_id: s.position_type_id,
+        staff_metadata: md,
         is_active: Boolean(s.is_active),
       };
     }
   }
 
-  let fiStaffMember: Snapshot["fiStaffMember"] = null;
+  let fiStaffMember: ProfileSnapshot["fiStaffMember"] = null;
   if (fiStaff) {
     const { data: member } = await supabase
       .from("fi_staff_members")
-      .select("id, role_code")
+      .select("id, role_code, full_name, first_name, source_synced_at")
       .eq("fi_staff_id", fiStaff.id)
       .is("archived_at", null)
       .maybeSingle();
     if (member) {
+      const m = member as {
+        id: string;
+        role_code: string | null;
+        full_name: string | null;
+        first_name: string | null;
+        source_synced_at: string | null;
+      };
       fiStaffMember = {
-        id: String((member as { id: string }).id),
-        role_code: (member as { role_code: string | null }).role_code,
+        id: String(m.id),
+        role_code: m.role_code,
+        full_name: m.full_name,
+        first_name: m.first_name,
+        source_synced_at: m.source_synced_at,
       };
     }
   }
 
-  let tenantAdmin: Snapshot["tenantAdmin"] = null;
+  let positionType: ProfileSnapshot["positionType"] = null;
+  let featureTemplate: ProfileSnapshot["featureTemplate"] = null;
+  const posId = fiStaff?.position_type_id?.trim() ?? "";
+  if (posId) {
+    const { data: pt } = await supabase
+      .from("fi_staff_position_types")
+      .select("id, code, default_workspace_profile, default_feature_template_key")
+      .eq("id", posId)
+      .maybeSingle();
+    if (pt) {
+      positionType = {
+        id: String((pt as { id: string }).id),
+        code: String((pt as { code: string }).code),
+        default_workspace_profile:
+          (pt as { default_workspace_profile: string | null }).default_workspace_profile ?? null,
+      };
+      const tk = String(
+        (pt as { default_feature_template_key: string | null }).default_feature_template_key ?? ""
+      ).trim();
+      if (tk) {
+        const { data: tpl } = await supabase
+          .from("fi_staff_feature_templates")
+          .select("template_key, workspace_profile")
+          .eq("template_key", tk)
+          .or(`tenant_id.is.null,tenant_id.eq.${TENANT_ID}`)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+        if (tpl) {
+          featureTemplate = {
+            template_key: String((tpl as { template_key: string }).template_key),
+            workspace_profile:
+              (tpl as { workspace_profile: string | null }).workspace_profile ?? null,
+          };
+        }
+      }
+    }
+  }
+
+  let tenantAdmin: ProfileSnapshot["tenantAdmin"] = null;
   if (fiUser) {
     const { data: admin } = await supabase
       .from("fi_tenant_admin_users")
@@ -153,38 +221,22 @@ async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise
     .eq("auth_user_id", AUTH_USER_ID)
     .maybeSingle();
 
-  const { data: consultantStaffRows } = await supabase
-    .from("fi_staff")
-    .select("id, staff_role, fi_user_id")
-    .eq("tenant_id", TENANT_ID)
-    .ilike("staff_role", "%consultant%")
-    .eq("is_active", true)
-    .limit(5);
+  const derivedWorkspaceProfile = resolveWorkspaceProfileKeyFromSignals({
+    explicitWorkspaceProfile: fiStaff?.staff_metadata.workspace_profile,
+    positionTypeDefaultWorkspaceProfile: positionType?.default_workspace_profile ?? null,
+    featureTemplateWorkspaceProfile: featureTemplate?.workspace_profile ?? null,
+    staffRole: fiStaff?.staff_role ?? null,
+    tenantAdminRole: null,
+    fiOsRole: osRow ? String((osRow as { os_role: string }).os_role) : null,
+  });
 
-  const referenceConsultants: Snapshot["referenceConsultants"] = [];
-  for (const row of consultantStaffRows ?? []) {
-    const fiUserId = String((row as { fi_user_id: string }).fi_user_id);
-    const { data: u } = await supabase
-      .from("fi_users")
-      .select("email, role, auth_user_id")
-      .eq("id", fiUserId)
-      .maybeSingle();
-    let authFiRole: string | null = null;
-    const authId = (u as { auth_user_id: string | null } | null)?.auth_user_id;
-    if (authId) {
-      const { data: refAuth } = await supabase.auth.admin.getUserById(authId);
-      authFiRole =
-        typeof refAuth.user?.user_metadata?.fi_role === "string"
-          ? refAuth.user.user_metadata.fi_role
-          : null;
-    }
-    referenceConsultants.push({
-      email: (u as { email: string | null } | null)?.email ?? null,
-      fi_users_role: String((u as { role: string } | null)?.role ?? ""),
-      staff_role: String((row as { staff_role: string | null }).staff_role ?? ""),
-      auth_fi_role: authFiRole,
-    });
-  }
+  const staffKey =
+    normalizeStaffRoleKey(fiStaff?.staff_role) ?? fiStaff?.staff_role?.trim().toLowerCase() ?? null;
+  const landingPath = resolveFiOsPostLoginPathSuffix({
+    osRole: osRow ? String((osRow as { os_role: string }).os_role) : null,
+    staffRoleKey: staffKey,
+    workspaceProfile: derivedWorkspaceProfile,
+  });
 
   return {
     auth: authData.user
@@ -192,7 +244,6 @@ async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise
           email: authData.user.email ?? null,
           fi_role: typeof meta.fi_role === "string" ? meta.fi_role : null,
           fi_tenant_id: typeof meta.fi_tenant_id === "string" ? meta.fi_tenant_id : null,
-          user_metadata: meta,
         }
       : null,
     fiUser: fiUser
@@ -204,27 +255,23 @@ async function loadSnapshot(supabase: ReturnType<typeof supabaseAdmin>): Promise
       : null,
     fiStaff,
     fiStaffMember,
+    positionType,
+    featureTemplate,
     tenantAdmin,
     fiOsIdentity: osRow ? { os_role: String((osRow as { os_role: string }).os_role) } : null,
-    referenceConsultants,
+    derivedWorkspaceProfile,
+    landingPath,
   };
-}
-
-function landingPreview(staffRole: string | null, fiUsersRole: string, osRole: string | null) {
-  const staffKey = normalizeStaffRoleKey(staffRole) ?? staffRole?.trim().toLowerCase() ?? null;
-  return resolveFiOsPostLoginPathSuffix({
-    osRole: osRole,
-    staffRoleKey: staffKey,
-  });
 }
 
 async function main(): Promise<void> {
   loadRepoEnvFiles();
   const commit = process.argv.includes("--commit");
+  const profileOnly = process.argv.includes("--profile-only");
   const supabase = supabaseAdmin();
 
   console.log("=== BEFORE ===");
-  const before = await loadSnapshot(supabase);
+  const before = await loadProfileSnapshot(supabase);
   console.log(JSON.stringify(before, null, 2));
 
   if (before.tenantAdmin) {
@@ -233,60 +280,98 @@ async function main(): Promise<void> {
       before.tenantAdmin
     );
   }
-
-  if (!before.fiUser) {
-    console.error("FAIL: no fi_users row for auth user in tenant");
-    process.exit(1);
-  }
-  if (!before.fiStaff) {
-    console.error("FAIL: no fi_staff row linked to fi_user");
+  if (!before.fiUser || !before.fiStaff) {
+    console.error("FAIL: missing fi_users or fi_staff row");
     process.exit(1);
   }
 
   const planned = {
-    auth: {
-      fi_role: TARGET.authFiRole,
-      fi_tenant_id: TENANT_ID,
+    auth: profileOnly ? "unchanged" : { fi_role: TARGET.authFiRole, fi_tenant_id: TENANT_ID },
+    fi_users: profileOnly ? "unchanged" : { role: TARGET.fiUsersRole },
+    fi_staff: {
+      staff_role: TARGET.staffRole,
+      full_name: TARGET.displayFullName,
+      position_type_id: TARGET.positionTypeId,
+      staff_metadata: { workspace_profile: TARGET.workspaceProfile },
     },
-    fi_users: { role: TARGET.fiUsersRole },
-    fi_staff: { staff_role: TARGET.staffRole },
-    fi_staff_members: { role_code: TARGET.staffRole },
-    fi_os_identities: before.fiOsIdentity
-      ? "unchanged (staff_role drives landing)"
-      : "no row — not creating (match Evolved consultant pattern)",
+    fi_staff_members: before.fiStaffMember
+      ? {
+          role_code: TARGET.staffRole,
+          full_name: TARGET.displayFullName,
+          first_name: TARGET.displayFirstName,
+        }
+      : "no active member row",
   };
+
   console.log("\n=== PLANNED CHANGES ===");
   console.log(JSON.stringify(planned, null, 2));
+
+  const afterPreview = resolveWorkspaceProfileKeyFromSignals({
+    explicitWorkspaceProfile: TARGET.workspaceProfile,
+    positionTypeDefaultWorkspaceProfile: "consultant",
+    featureTemplateWorkspaceProfile: null,
+    staffRole: TARGET.staffRole,
+    tenantAdminRole: null,
+    fiOsRole: before.fiOsIdentity?.os_role ?? null,
+  });
+  console.log("\nPost-fix workspace preview:", afterPreview);
   console.log(
-    "\nLanding preview after:",
-    landingPreview(TARGET.staffRole, TARGET.fiUsersRole, before.fiOsIdentity?.os_role ?? null)
+    "Post-fix landing preview:",
+    resolveFiOsPostLoginPathSuffix({
+      osRole: before.fiOsIdentity?.os_role ?? null,
+      staffRoleKey: TARGET.staffRole,
+      workspaceProfile: afterPreview,
+    })
   );
+
+  if (before.fiStaffMember?.source_synced_at) {
+    console.warn(
+      "\nWARN: fi_staff_members last HR sync:",
+      before.fiStaffMember.source_synced_at,
+      "— iiohr may overwrite staff_role/full_name on next sync."
+    );
+  }
 
   if (!commit) {
     console.log("\nDRY-RUN complete. Re-run with --commit to apply.");
     return;
   }
 
+  if (!profileOnly && before.auth) {
+    const { data: authData } = await supabase.auth.admin.getUserById(AUTH_USER_ID);
+    const nextMeta = {
+      ...((authData.user?.user_metadata ?? {}) as Record<string, unknown>),
+      fi_role: TARGET.authFiRole,
+      fi_tenant_id: TENANT_ID,
+    };
+    const { error } = await supabase.auth.admin.updateUserById(AUTH_USER_ID, {
+      user_metadata: nextMeta,
+    });
+    if (error) throw new Error(`auth update: ${error.message}`);
+  }
+
+  if (!profileOnly) {
+    const { error } = await supabase
+      .from("fi_users")
+      .update({ role: TARGET.fiUsersRole, updated_at: new Date().toISOString() })
+      .eq("id", before.fiUser.id)
+      .eq("tenant_id", TENANT_ID);
+    if (error) throw new Error(`fi_users update: ${error.message}`);
+  }
+
   const nextMeta = {
-    ...before.auth?.user_metadata,
-    fi_role: TARGET.authFiRole,
-    fi_tenant_id: TENANT_ID,
+    ...before.fiStaff.staff_metadata,
+    workspace_profile: TARGET.workspaceProfile,
   };
-  const { error: authUpdateErr } = await supabase.auth.admin.updateUserById(AUTH_USER_ID, {
-    user_metadata: nextMeta,
-  });
-  if (authUpdateErr) throw new Error(`auth update: ${authUpdateErr.message}`);
-
-  const { error: fiUserErr } = await supabase
-    .from("fi_users")
-    .update({ role: TARGET.fiUsersRole, updated_at: new Date().toISOString() })
-    .eq("id", before.fiUser.id)
-    .eq("tenant_id", TENANT_ID);
-  if (fiUserErr) throw new Error(`fi_users update: ${fiUserErr.message}`);
-
   const { error: staffErr } = await supabase
     .from("fi_staff")
-    .update({ staff_role: TARGET.staffRole, updated_at: new Date().toISOString() })
+    .update({
+      staff_role: TARGET.staffRole,
+      full_name: TARGET.displayFullName,
+      position_type_id: TARGET.positionTypeId,
+      staff_metadata: nextMeta,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", before.fiStaff.id)
     .eq("tenant_id", TENANT_ID);
   if (staffErr) throw new Error(`fi_staff update: ${staffErr.message}`);
@@ -294,23 +379,20 @@ async function main(): Promise<void> {
   if (before.fiStaffMember) {
     const { error: memberErr } = await supabase
       .from("fi_staff_members")
-      .update({ role_code: TARGET.staffRole, updated_at: new Date().toISOString() })
+      .update({
+        role_code: TARGET.staffRole,
+        full_name: TARGET.displayFullName,
+        first_name: TARGET.displayFirstName,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", before.fiStaffMember.id);
     if (memberErr) throw new Error(`fi_staff_members update: ${memberErr.message}`);
   }
 
   console.log("\n=== AFTER ===");
-  const after = await loadSnapshot(supabase);
+  const after = await loadProfileSnapshot(supabase);
   console.log(JSON.stringify(after, null, 2));
-  console.log(
-    "\nLanding preview verified:",
-    landingPreview(
-      after.fiStaff?.staff_role ?? null,
-      after.fiUser?.role ?? "",
-      after.fiOsIdentity?.os_role ?? null
-    )
-  );
-  console.log("\nPASS: updates applied for", EMAIL);
+  console.log("\nPASS: profile updates applied for", EMAIL);
 }
 
 main().catch((e) => {

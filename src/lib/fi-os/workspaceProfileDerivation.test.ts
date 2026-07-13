@@ -32,6 +32,18 @@ test("staff role heuristics", () => {
   assert.equal(deriveWorkspaceProfileFromStaffRole("owner"), "director");
 });
 
+test("explicit workspace_profile consultant overrides Manager staff_role text", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: "consultant",
+      staffRole: "Manager",
+      tenantAdminRole: null,
+      fiOsRole: null,
+    }),
+    "consultant"
+  );
+});
+
 test("clinic owner staff resolves director workspace without platform os role", () => {
   assert.equal(
     resolveWorkspaceProfileKeyFromSignals({
