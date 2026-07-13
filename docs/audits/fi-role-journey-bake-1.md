@@ -435,6 +435,46 @@ The golden lead → `/cases` redirect reproduces for **clinic manager** and **no
 
 Re-bake harsh@ session to confirm **Clinic manager workspace** badge (not Director).
 
+### Re-bake (post `34143d64` + `1f0106e1` — clinic_manager workspace fix)
+
+**Timestamp:** 2026-07-13T19:14 AEST (UTC+10)  
+**Host:** `https://follicleintelligence.ai`  
+**Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
+**Tool:** cursor-ide-browser MCP (`browser_tabs` → `browser_lock` → `browser_snapshot` → route checks → `browser_unlock`)  
+**Session:** Live production login as **`harsh@evolvedhair.com.au`** (`Exit impersonation` still visible — platform-admin impersonation wrapper)
+
+#### Session identity (resolved — re-bake)
+
+| Field | Observed |
+| ----- | -------- |
+| Target login | **`harsh@evolvedhair.com.au`** (`fi_tenant_admin_users.admin_role=clinic_admin`, `workspace_profile=clinic_manager`) |
+| Greeting | **"Good evening, Harsh"** — **PASS** (not auditor, not Paul) |
+| Profile email | **`harsh@evolvedhair.com.au`** ✓ (header pill + profile menu) |
+| Workspace badge | **Clinic manager workspace** / **Clinic manager view** — **PASS** (not Director) |
+| Profile menu | **CLINIC MANAGER WORKSPACE** · System administration · Switch workspace · Sign out |
+| Impersonation UI | `Exit impersonation` + "impersonating harsh" — wrapper session |
+
+**Conclusion:** **`clinic_manager` workspace fix verified on production.** Badge no longer shows Director. Clinic-admin landing and CRM shell access **PASS**.
+
+#### Check matrix (harsh@ clinic_manager — re-bake)
+
+| # | Check | Result | Final URL | Notes |
+| - | ----- | ------ | --------- | ----- |
+| 1 | Greeting + email identity | **PASS** | `/fi-admin/c2615b95-…` | `Good evening, Harsh`; `harsh@evolvedhair.com.au` |
+| 2 | Workspace badge | **PASS** | — | **Clinic manager workspace** — not Director / Consultant / Finance |
+| 3 | Bare tenant home landing | **PASS** | `/fi-admin/c2615b95-…` | Stays **Today home** — clinic-admin expected landing |
+| 4 | `/crm` Pipeline hold | **PASS** | `/fi-admin/c2615b95-…/crm` | Title **Pipeline**; full board; **no `/cases` ejection** |
+| 5 | More drawer (admin) | **PASS** | — | **Reports** · **Pipeline** · **Finance → Money** · **Settings** (+ Surgery, Patients, Clinical, Team) |
+| 6 | Primary rail (6 slots) | **PASS** | — | Today · Calendar · Patients · Front desk · Team · More |
+
+**Residual observations (not blocking this bake):**
+
+- Bare root `/crm` returns **404 Not Found** — functional CRM access is tenant-scoped (`/fi-admin/{tenantId}/crm`); in-app nav uses tenant path.
+- **System administration** profile link + **Platform · System diagnostics** on Today — consistent with platform-operator impersonation wrapper, not raw staff password session.
+- Prior P2 items (finance-admin landing, payment row labels) **N/A** — harsh is **`clinic_admin`**, not `finance_admin`; landing **Today** is correct.
+
+**Verdict:** **GREEN** — clinic_manager workspace re-bake **PASS** (commits `34143d64`, `1f0106e1`).
+
 ## 2. Environment and fixture limitations
 
 | Limitation | Impact | Status |

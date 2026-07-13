@@ -50,3 +50,5 @@ Make **Money** and **surgery readiness** trustworthy for staff: clear payment tr
 ### Harsh role fix (2026-07-13)
 
 Reclassified **`harsh@evolvedhair.com.au`** from CFO staff label to **`clinic_admin`** (not `finance_admin`). Auth `fi_tenant_id` was wrongly set to ihrg-global; now Evolved. Expected post-login landing: **Today** (`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a`), not `/financial-os`. Script: `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts`.
+
+**Re-bake (2026-07-13T19:14 AEST, post `34143d64`/`1f0106e1`):** Production now shows **Clinic manager workspace** (not Director). Landing **Today PASS**; CRM Pipeline **PASS** at `/fi-admin/…/crm` (no `/cases` ejection). Money hub still accessible via More → Finance. Harsh is **not** a `finance_admin` persona — finance-admin landing sign-off remains deferred to a dedicated finance session. Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
