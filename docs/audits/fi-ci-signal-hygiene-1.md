@@ -1,7 +1,7 @@
 # FI-CI-SIGNAL-HYGIENE-1 — Findings
 
 **Milestone:** `FI-CI-SIGNAL-HYGIENE-1`  
-**Phase:** 2 started — Bucket B fix (2026-07-14); Phase 1 audit 2026-07-14  
+**Phase:** 2 — Buckets B+A fixes (2026-07-14); Phase 1 audit 2026-07-14  
 **HEAD at audit:** `4fb3b6b4` (`docs(audit): confirm Keep Decision B for FI_E2E_STAGING_URL.`)  
 **Prior milestone:** `FI-TRUST-CI-AND-RECEPTION-1` **GREEN** (trust trio + reception R1)  
 **Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` — confirmed Keep B
@@ -14,7 +14,9 @@ Public smoke remains **advisory** (`continue-on-error: true`) and was very red (
 
 **Phase 1 verdict:** **AMBER** for overall CI readability (trust GREEN; public smoke advisory-red); inventory complete for Phase 2.
 
-**Phase 2 (PUB-AUTH-CRASH / Bucket B):** Public projects now `grepInvert: /@authenticated/`; `authenticatedTest` skips cleanly when `!hasDemoCredentials()` (no `.trim()` TypeError). **Expected public-job delta ≈ −48** (8 logical × 6 browsers). Remaining noise: Bucket A labels (~60), C security status (~12), D procedure-day 200 (~6).
+**Phase 2 (PUB-AUTH-CRASH / Bucket B):** Public projects now `grepInvert: /@authenticated/`; `authenticatedTest` skips cleanly when `!hasDemoCredentials()` (no `.trim()` TypeError). Confirmed on [29282145316](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29282145316): **132 / 78 / 66** (−48 fails).
+
+**Phase 2 (PUB-LABELS / Bucket A):** `fi-ux-audit-labels` re-tagged `@authenticated @smoke` + `authenticatedTest`; included in authenticated `testMatch`. Public job no longer selects Front Desk label cases (need session). **Expected public-job delta ≈ −60** (10 logical × 6 browsers). Remaining noise after A+B: C security status (~12), D procedure-day 200 (~6) → ~18 fails.
 
 ---
 
@@ -207,9 +209,30 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 **Trust trio:** Unchanged — still `authenticated-smoke` → `--project=chromium-authenticated` with secrets. Confirmed GREEN on the fix run.
 
-**Bucket C (deferred — next PR):** patients API **404** and cron **503** vs narrow expect lists — still present in the 78 (×6 browsers = 12). Not widened here; need intentional-status proof on prod-like middleware before changing expects.
+**Bucket C (deferred):** patients API **404** and cron **503** vs narrow expect lists — still present after A+B (×6 browsers = 12). Not widened here; need intentional-status proof on prod-like middleware before changing expects.
 
-**Bucket A / D:** Still open in the 78 (labels unauth ~60; procedure-day HTTP 200 ~6).
+**Bucket D (deferred):** procedure-day unauth HTTP **200** (~6). Soft page vs fail-closed — prove before product change.
+
+---
+
+## Phase 2 — PUB-LABELS (Bucket A) fix notes
+
+| Field | Value |
+| ----- | ----- |
+| Status | **Implemented** — pending CI confirm on next `e2e-smoke` run |
+| Date | 2026-07-14 |
+| ID | PUB-LABELS |
+| Evidence before | [29282145316](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29282145316) — **132 passed / 78 failed / 66 skipped**; all `fi-ux-audit-labels` fails = timeout on `heading "Today"` / Front Desk nav (no session on placeholder public build). One case per browser passed unauth: `staff cannot open /reception-os`. |
+| Classification | **Needs auth** — not outdated selectors/copy, not flaky timeout of a broken board, not wrong product surface. Spec asserts live Front Desk chrome on protected `/fi-admin/{tenant}/front-desk*`. |
+| Expected delta | **−60** public fails (10×6); also **−6** public passes (reception-os was the only labels pass) → expect ~**126 passed / 18 failed** residual (C+D) |
+| Trust trio | Unchanged — still three explicit trust files on `chromium-authenticated` |
+
+**Changes:**
+
+1. `e2e/fi-ux-audit-labels.spec.ts` — switch to `authenticatedTest`; describe tag `@authenticated @smoke` (was bare `@smoke`).
+2. `playwright.config.ts` — add `fi-ux-audit-labels.spec.ts` to authenticated projects `testMatch` so credentialed local/CI projects still select the file.
+
+**Not done:** product UI redesign; keeping labels on public with soft skip (would leave dead `@smoke` selects). Auth tag + `grepInvert` is the same pattern as Bucket B.
 
 ---
 

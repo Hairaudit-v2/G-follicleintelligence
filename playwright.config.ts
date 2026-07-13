@@ -73,7 +73,7 @@ const authenticatedProjects: PlaywrightTestConfig["projects"] = hasDemoCredentia
       use: { ...browser.use },
       grep: /@authenticated|@mutation/,
       grepInvert: /@roster-manager|@roster-view-only/,
-      testMatch: /journeys\/.*\.spec\.ts|fi-operational-day\.spec\.ts|fi-ux-workspace-shell-validation\.spec\.ts|fi-ux-tablet-layout\.spec\.ts|fi-trust-.*\.spec\.ts|calendar-os-.*\.spec\.ts/,
+      testMatch: /journeys\/.*\.spec\.ts|fi-operational-day\.spec\.ts|fi-ux-workspace-shell-validation\.spec\.ts|fi-ux-tablet-layout\.spec\.ts|fi-ux-audit-labels\.spec\.ts|fi-trust-.*\.spec\.ts|calendar-os-.*\.spec\.ts/,
     }))
   : [];
 
