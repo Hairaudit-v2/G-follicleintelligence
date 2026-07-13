@@ -52,3 +52,19 @@ Make **Money** and **surgery readiness** trustworthy for staff: clear payment tr
 Reclassified **`harsh@evolvedhair.com.au`** from CFO staff label to **`clinic_admin`** (not `finance_admin`). Auth `fi_tenant_id` was wrongly set to ihrg-global; now Evolved. Expected post-login landing: **Today** (`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a`), not `/financial-os`. Script: `scripts/reclassify-evolved-harsh-cfo-to-clinic-admin.ts`.
 
 **Re-bake (2026-07-13T19:14 AEST, post `34143d64`/`1f0106e1`):** Production now shows **Clinic manager workspace** (not Director). Landing **Today PASS**; CRM Pipeline **PASS** at `/fi-admin/…/crm` (no `/cases` ejection). Money hub still accessible via More → Finance. Harsh is **not** a `finance_admin` persona — finance-admin landing sign-off remains deferred to a dedicated finance session. Full matrix: [fi-role-journey-bake-1.md §1h](./fi-role-journey-bake-1.md#1h-live-browser-bake-harsh--admin-harsh-session).
+
+### Harsh finance_admin reclassification (2026-07-13 — final Money bake)
+
+Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finance_admin`** for the deferred finance-admin live bake. Script: `scripts/reclassify-evolved-harsh-clinic-admin-to-finance-admin.ts` (`--commit`).
+
+| Field | Before | After |
+| ----- | ------ | ----- |
+| `fi_tenant_admin_users.admin_role` | `clinic_admin` | **`finance_admin`** |
+| `fi_staff.staff_role` | `Clinic admin` | **`CFO`** |
+| `fi_staff.position_type_id` | `CLINIC_MANAGER` | **`FINANCE_ADMIN`** |
+| Derived workspace | `clinic_manager` | **`director`** |
+| Expected landing | Today | **`/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/financial-os`** |
+
+**CRM access:** `finance_admin` does **not** grant CRM shell nav (`tenantAdminRoleAllowsCrmShellNav` = false) — unlike `clinic_admin`. Pipeline access may be limited; finance persona focuses on Money hub.
+
+**Live bake:** Pending user re-login. Expect **Money** landing; workspace badge **Director** (codebase maps `finance_admin` → `director` workspace via position type + tenant-admin derivation).

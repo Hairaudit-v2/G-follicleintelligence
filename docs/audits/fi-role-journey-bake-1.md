@@ -475,6 +475,33 @@ Re-bake harsh@ session to confirm **Clinic manager workspace** badge (not Direct
 
 **Verdict:** **GREEN** — clinic_manager workspace re-bake **PASS** (commits `34143d64`, `1f0106e1`).
 
+### Harsh finance_admin reclassification (2026-07-13 — final Money bake)
+
+Reclassified **`harsh@evolvedhair.com.au`** from **`clinic_admin`** → **`finance_admin`** for the deferred FI-ROLE-JOURNEY-BAKE-1 finance journey. Script: `scripts/reclassify-evolved-harsh-clinic-admin-to-finance-admin.ts` (`--commit`).
+
+| Field | Before (clinic_admin) | After (finance_admin) |
+| ----- | --------------------- | --------------------- |
+| `fi_tenant_admin_users.admin_role` | `clinic_admin` | **`finance_admin`** (active) |
+| `fi_staff.staff_role` | `Clinic admin` | **`CFO`** |
+| `fi_staff.position_type_id` | `8d958d3f-…` (`CLINIC_MANAGER`) | **`ca437327-…` (`FINANCE_ADMIN`)** |
+| `fi_staff.staff_metadata.workspace_profile` | `clinic_manager` | *(removed — position-type default applies)* |
+| `fi_staff_feature_templates` | `clinic_manager_default` | **`finance_admin_default`** |
+| Derived workspace | `clinic_manager` | **`director`** (codebase standard for `finance_admin` / `FINANCE_ADMIN` position type) |
+| Workspace badge label | Clinic manager | **Director** |
+| Expected landing | Today `/fi-admin/c2615b95-…` | **`/fi-admin/c2615b95-…/financial-os`** |
+| CRM shell access (`tenantAdminRoleAllowsCrmShellNav`) | **true** | **false** — finance_admin is not a CRM-shell tenant-admin role |
+
+**Identity pattern (finance_admin):**
+
+- `fi_tenant_admin_users.admin_role` = `finance_admin` — drives post-login landing via `resolveFiOsPostLoginPathSuffix` → `/financial-os`
+- `fi_users.role` = `tenant_backend` (not `crm_operator`)
+- `fi_staff.staff_role` = `CFO` (finance label; no normalized staff-role key)
+- `fi_staff_position_types.code` = `FINANCE_ADMIN` → `default_workspace_profile=director`, template `finance_admin_default`
+- `deriveWorkspaceProfileFromTenantAdminRole("finance_admin")` → `director` (not `clinic_manager`)
+- CRM: **gated** — `finance_admin` excluded from `tenantAdminRoleAllowsCrmShellNav`; CFO staff role not in `CRM_SHELL_NAV_STAFF_ROLES`
+
+**Live bake:** Pending — user must **re-login** as `harsh@evolvedhair.com.au` (fresh session). Expect landing **Money** at `/financial-os`; Calendar/Patients rail tabs disabled per `finance_admin` nav persona.
+
 ## 2. Environment and fixture limitations
 
 | Limitation | Impact | Status |
