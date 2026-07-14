@@ -22,6 +22,8 @@
     "audit:production-cron": "tsx scripts/audit-production-cron-evidence.ts",
     "audit:evolved-readiness": "tsx scripts/audit-evolved-production-readiness.ts",
     "audit:staff-mapping": "node scripts/run-with-system-ca.mjs tsx scripts/audit-staff-mapping-completeness.ts",
+    "audit:restore-drill": "node scripts/run-with-system-ca.mjs tsx scripts/dr/validate-restored-database.ts",
+    "audit:restore-drill:app": "node scripts/run-with-system-ca.mjs tsx scripts/dr/validate-restored-application.ts",
     "sync:bake-env": "node scripts/sync-bake-env-gaps.mjs",
     "compare:bake-env": "node scripts/compare-bake-env.mjs",
     "provision:evolved-operator": "tsx scripts/provision-evolved-operator.ts",

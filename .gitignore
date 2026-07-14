@@ -52,6 +52,9 @@ supabase/.branches/
 /playwright/.cache/
 .playwright/
 
+# Local disaster-recovery drill evidence (do not commit)
+/docs/security/restore-drill-evidence/
+
 # Local agent / IDE artifacts (do not commit)
 /mcps/
 /terminals/
