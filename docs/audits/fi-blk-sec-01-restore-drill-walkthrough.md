@@ -51,12 +51,13 @@ Do **not** re-screenshot PITR or re-sign RPO/RTO unless settings changed.
 
 1. Confirm you are on the **authorised backup-operator** list (backup setup §8 — update names if still a template).
 2. Open production Supabase only to **read backup metadata** (timestamp to restore from). Do not click Restore on the production project itself for this drill.
-3. Identify:
-   - **Source backup / PITR timestamp** (UTC) you will restore from.
+3. **Recovery marker (E4 prep):** runbooks do not define a marker insert table. Register/verify the existing production `SMOKETEST-JOURNEY-001-20260630` lead (`fi_crm_leads` `66b47348-bf0e-48b7-a188-accbee0db4a3`, created `2026-06-30T12:26:30Z`) via `scripts/verify-blk-sec-01-recovery-marker.ts` (read-only). Evidence: [`docs/production/evidence/blk-sec-01-recovery-marker-2026-07-14.md`](../production/evidence/blk-sec-01-recovery-marker-2026-07-14.md). Choose a restore timestamp **after** the marker.
+4. Identify:
+   - **Source backup / PITR timestamp** (UTC) you will restore from (≥ marker time).
    - **Buckets:** `fi-intakes` (or env `FI_STORAGE_BUCKET_INTAKES`); optionally note `patient-images` if in scope.
    - **Sample tenant** — prefer synthetic staging tenant; if using a prod-shaped copy, restrict access immediately.
-4. Create or select **isolated staging Supabase project** (blank / dedicated drill project). Name it clearly (e.g. `fi-os-drill-YYYY-MM-DD`).
-5. Ensure drill service-role keys stay on the same least-privilege access list as production backups.
+5. Create or select **isolated staging Supabase project** (blank / dedicated drill project). Name it clearly (e.g. `fi-os-drill-YYYY-MM-DD`).
+6. Ensure drill service-role keys stay on the same least-privilege access list as production backups.
 
 ---
 

@@ -142,16 +142,35 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 | Field | Value |
 |-------|-------|
 | Operator | Paul Green (scheduled) |
-| Date (UTC) | — |
-| Environment | Isolated staging only |
-| Source backup timestamp | — |
+| Date (UTC) | 2026-07-14 — **prep only** (marker registered); restore TBD |
+| Environment | Isolated staging only (restore not started) |
+| Source backup timestamp | Choose PITR/backup **≥** `2026-06-30T12:26:45Z` (after marker) |
 | DB restore result | ☐ Pass / ☐ Fail |
-| Row count / checksum sample | Pending drill |
+| Row count / checksum sample | Pending drill — post-restore use marker SQL below |
 | Storage bucket restored | `fi-intakes` (pending) |
 | Signed URL read test | ☐ Pass / ☐ Fail |
 | Verifier | — |
 
+### Recovery marker (E4 prep — 2026-07-14)
+
+Runbooks define **no** separate marker insert table. Prep used existing production `SMOKETEST-` synthetic journey rows as the recoverability probe (read-only verify; **no production restore**).
+
+| Field | Value |
+|-------|-------|
+| Marker ID | `SMOKETEST-JOURNEY-001-20260630` |
+| Primary table / id | `fi_crm_leads` / `66b47348-bf0e-48b7-a188-accbee0db4a3` |
+| Marker created_at (UTC) | `2026-06-30T12:26:30.431814+00:00` |
+| Verified at (UTC) | `2026-07-14T06:13:58.653Z` — **PASS** |
+| Env | Production (`iqqvzgxoimxchhcnbzxl.supabase.co`) — verify only |
+| Evidence | [`blk-sec-01-recovery-marker-2026-07-14.md`](./blk-sec-01-recovery-marker-2026-07-14.md), [`attachments/blk-sec-01-recovery-marker-verify.json`](./attachments/blk-sec-01-recovery-marker-verify.json) |
+| Verify command | `scripts/verify-blk-sec-01-recovery-marker.ts` (read-only) |
+| Staging SQL | [`attachments/blk-sec-01-recovery-marker-verify.sql`](./attachments/blk-sec-01-recovery-marker-verify.sql) |
+
+**Next E4 step:** Restore / clone production DB into a **new isolated staging** Supabase project from a PITR timestamp after the marker; confirm marker SQL Pass in staging; capture walkthrough Phase B artifacts. Do **not** restore onto production.
+
 **2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3). DB + storage restore drill (E4–E5) scheduled per [`fi-os-storage-backup-restore-drill.md`](../../runbooks/fi-os-storage-backup-restore-drill.md) — requires isolated staging project; not executed in this session.
+
+**2026-07-14 status:** Recovery marker registered and verified on production (read-only). E4 restore into staging still pending.
 
 ### RPO / RTO Operational Sign-Off
 
