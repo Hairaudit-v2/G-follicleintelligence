@@ -11,7 +11,7 @@
 
 ## Executive summary
 
-Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. Help-needed: **0**. Doctor **MD-04** left deferred/optional SKIP (no separate Doctor raw-login bake required for GREEN).
+Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. Help-needed: **0**. Doctor **MD-04** left deferred/optional SKIP. **Operational constraint:** no raw passwords available for Reception, Nurse, or Doctor — those roles bake via platform impersonation only; ordinary raw-password sessions remain Consultant `manager@` (and Finance `harsh@` when needed).
 
 ---
 
@@ -20,9 +20,9 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | ID | Role | Identity | Mutation target | Status |
 | -- | ---- | -------- | --------------- | ------ |
 | MD-01 | Consultant | `manager@evolvedhair.com.au` (impersonation) · Consultant workspace | Pipeline stage-move + hard reload (golden SMOKETEST) | **PASS** |
-| MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** |
+| MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** (impersonation — no raw Nurse password) |
 | MD-03 | Finance | `harsh@evolvedhair.com.au` (impersonation) · Finance workspace / `finance_admin` | Money/invoice safe mutation + hard reload | **PASS** (re-bake after `6df88546`) |
-| MD-04 | Doctor | — | Only if safe fixture | **SKIP** (optional; deferred) |
+| MD-04 | Doctor | — | Only if safe fixture | **SKIP** (optional; deferred — no raw Doctor password) |
 | MD-05 | Raw password | `manager@evolvedhair.com.au` (ordinary login) · Consultant workspace | Identity / landing / Pipeline spot-check (no impersonation) | **PASS** |
 
 ---
@@ -34,7 +34,7 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | MD-01 | Consultant Pipeline stage-move + hard reload | **PASS** | Golden lead stage held after full reload; reverted; help-needed 0 |
 | MD-02 | Nurse safe clinical + reload | **PASS** | SMOKETEST Front desk check-in held after full reload; ImagingOS reachability OK; help-needed 0 |
 | MD-03 | Finance Money/invoice + reload | **PASS** | Due date mutate + hard reload held; Source labels OK; write gate fix live; help-needed 0 |
-| MD-04 | Doctor safe mutation | **SKIP** | Optional; no safe Doctor fixture bake this milestone |
+| MD-04 | Doctor safe mutation | **SKIP** | Optional; no raw Doctor password / no separate Doctor fixture bake this milestone |
 | MD-05 | ≥1 raw-password login | **PASS** | `manager@` ordinary session; no Exit impersonation; bare → `/crm`; Pipeline held |
 | MD-06 | No P0 | **PASS** | No identity / security / patient-record loss |
 
@@ -182,9 +182,21 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | 3 | MD-03 Finance PASS or safe SKIP | **PASS** |
 | 4 | MD-05 raw-password login | **PASS** |
 | 5 | MD-06 no P0 | **PASS** |
-| 6 | MD-04 Doctor PASS or SKIP | **SKIP** (optional / deferred) |
+| 6 | MD-04 Doctor PASS or SKIP | **SKIP** (optional / deferred; no raw Doctor password) |
 
 **Overall verdict:** **GREEN (scoped)** — MD-01–03 + MD-05 closed; MD-04 Doctor deferred/optional SKIP; no P0
+
+---
+
+## Operational constraint — raw login availability
+
+| Role | Raw-password session | Available bake path |
+| ---- | -------------------- | ------------------- |
+| Consultant | **Yes** — `manager@evolvedhair.com.au` | Ordinary login (MD-05 / OW-*) |
+| Finance | As available (`harsh@`) | Impersonation (MD-03) · raw if credentials held |
+| Reception | **No** | Platform impersonation only |
+| Nurse | **No** | Platform impersonation only (MD-02) |
+| Doctor | **No** | Platform impersonation only (pilot S4); MD-04 SKIP |
 
 ---
 

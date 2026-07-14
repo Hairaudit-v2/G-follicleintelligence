@@ -62,6 +62,7 @@ Mirror prior pilots — do **not** expand:
 - Soft-nav P2 backlog
 - Doctor ordinary-write (unless it falls out of the same root cause)
 - Re-litigating MD-01–MD-03 impersonation results
+- Reception / Nurse / Doctor **raw-password** ordinary-write — no passwords available for those roles; bake via platform impersonation only. Ordinary raw sessions remain Consultant `manager@` (+ Finance when held)
 
 ---
 
@@ -90,8 +91,8 @@ Likely code anchors (start points, not exhaustive):
 | Priority | Role | Identity | Expectation |
 | -------- | ---- | -------- | ----------- |
 | **Primary** | Consultant | `manager@evolvedhair.com.au` **raw password** (no impersonation) | Pipeline writes + stage-move + reload parity with MD-01 |
-| Optional | Reception | Known raw-password receptionist if available | One Front desk / Calendar write if Consultant path GREEN early |
-| Optional | Nurse | Known raw-password nurse if available | One safe clinical mutation if Consultant path GREEN early |
+| Optional | Reception | *(no raw password available — impersonation-only)* | SKIP for ordinary-write; Front desk covered under pilot/impersonation |
+| Optional | Nurse | *(no raw password available — impersonation-only)* | SKIP for ordinary-write; clinical path covered under MD-02 impersonation |
 
 Do **not** score Consultant ordinary write as PASS while Exit impersonation is visible.
 

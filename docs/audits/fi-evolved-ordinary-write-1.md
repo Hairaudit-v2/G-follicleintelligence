@@ -23,7 +23,7 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 | OW-01 | Consultant purity | `manager@` raw | Session / claims | **PASS** |
 | OW-02 | Consultant write gate | `manager@` raw | Pipeline writable | **PASS** (post-fix) |
 | OW-03 | Consultant stage-move + reload | `manager@` raw | Golden SMOKETEST | **PASS** |
-| OW-06 | Reception/Nurse (optional) | — | — | **SKIP** (Consultant path solid) |
+| OW-06 | Reception/Nurse (optional) | — | — | **SKIP** — no raw Reception/Nurse passwords available; impersonation-only |
 
 ---
 
@@ -36,7 +36,7 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 | OW-03 | Stage-move + reload (raw) | **PASS** | Golden `c9a58f3d-…` SMOKETEST-OPDAY-20260702: Treatment planning → Quote sent (`fi_admin_lead_slideover`); hard reload held Quote sent; reverted → Treatment planning |
 | OW-04 | No impersonation required | **PASS** | Entire bake under ordinary raw session |
 | OW-05 | True read-only preserved | **PASS** | Unit: `member` alone, `nurse`, `doctor`, `dashboard_viewer` still denied |
-| OW-06 | Optional ordinary write | **SKIP** | Not needed for GREEN |
+| OW-06 | Optional ordinary write | **SKIP** | No raw Reception/Nurse passwords available — those roles are impersonation-only; Consultant `manager@` raw login remains the ordinary-write bake path |
 | OW-07 | No P0 | **PASS** | SMOKETEST-only; reverted |
 
 ---
@@ -81,7 +81,7 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 | 4 | OW-04 no impersonation required | **PASS** |
 | 5 | OW-05 true read-only preserved | **PASS** |
 | 6 | OW-07 no P0 | **PASS** |
-| 7 | OW-06 optional PASS or SKIP | **SKIP** |
+| 7 | OW-06 optional PASS or SKIP | **SKIP** (no raw Reception/Nurse passwords; impersonation-only) |
 
 **Overall verdict:** **GREEN**
 
