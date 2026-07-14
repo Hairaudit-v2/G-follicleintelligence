@@ -70,8 +70,9 @@ test("Calendar quick create submit shows creating pending copy", () => {
 test("navigation provider is backed by site-wide RouteProgress", () => {
   const src = readFileSync(PROVIDER, "utf8");
   assert.match(src, /useRouteProgress/);
-  assert.match(src, /startPending/);
+  assert.match(src, /onInternalNavClick/);
   assert.match(src, /isNavigationPending: isPending/);
+  assert.doesNotMatch(src, /startPending\(/);
 });
 
 test("FiOsPageLoading keeps visible non-animated busy state hooks", () => {

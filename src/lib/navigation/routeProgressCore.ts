@@ -10,6 +10,8 @@ export type RouteLocation = {
 
 export const ROUTE_PROGRESS_MIN_VISIBLE_MS = 350;
 export const ROUTE_PROGRESS_MAX_MS = 12_000;
+/** Soft App Router click showed busy but URL lagged — hard-nav after this (F-PILOT soft-nav P2). */
+export const ROUTE_PROGRESS_SOFT_FALLBACK_MS = 2_000;
 
 export function normalizeRoutePath(pathname: string): string {
   const trimmed = pathname.replace(/\/+$/, "");
@@ -76,4 +78,22 @@ export function routeProgressClearDelayMs(
   if (startedAtMs <= 0) return 0;
   const elapsed = Math.max(0, nowMs - startedAtMs);
   return Math.max(0, minVisibleMs - elapsed);
+}
+
+/**
+ * True when a soft navigation stayed on the prior route past the fallback budget.
+ * Used to recover from App Router click lag (URL unchanged while aria-busy).
+ */
+export function shouldHardNavigateSoftNavFallback(input: {
+  intendedPathname: string;
+  currentPathname: string;
+  startedAtMs: number;
+  nowMs: number;
+  fallbackMs?: number;
+}): boolean {
+  const fallbackMs = input.fallbackMs ?? ROUTE_PROGRESS_SOFT_FALLBACK_MS;
+  if (input.startedAtMs <= 0) return false;
+  if (input.nowMs - input.startedAtMs < fallbackMs) return false;
+  if (!input.intendedPathname.trim()) return false;
+  return normalizeRoutePath(input.currentPathname) !== normalizeRoutePath(input.intendedPathname);
 }

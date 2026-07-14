@@ -7,6 +7,9 @@ import { e2eTenantId, isLocalE2eHost, requireE2eBaseUrl } from "../fixtures/base
  * @authenticated — requires FI_E2E_BASE_URL, FI_E2E_TENANT_ID,
  * FI_E2E_DEMO_ADMIN_EMAIL, FI_E2E_DEMO_ADMIN_PASSWORD (entitled manager/admin).
  *
+ * CI-TRIAGE-TEAM-01: prior forever-skip when sub-nav missing is removed.
+ * Entitlement deny remains an intentional skip; missing shell now fails honestly.
+ *
  * Run:
  *   FI_E2E_BASE_URL=http://localhost:3000 FI_E2E_TENANT_ID=<uuid> \
  *     FI_E2E_DEMO_ADMIN_EMAIL=... FI_E2E_DEMO_ADMIN_PASSWORD=... \
@@ -32,6 +35,8 @@ const TEAM_TABS: TeamTabSpec[] = [
 
 const ACCESS_DENIED_HEADING =
   /Access unavailable|Insufficient role|Module not enabled|Clinic not activated|Subscription inactive/i;
+
+const LOGIN_HEADING = /sign in|log in|welcome back/i;
 
 function teamBasePath(tenantId: string): string {
   return `/fi-admin/${tenantId}/team`;
@@ -68,33 +73,42 @@ test.describe("Team workspace navigation @authenticated @smoke", () => {
     page,
   }) => {
     const localDev = isLocalE2eHost();
-    const navTimeout = localDev ? 60_000 : 30_000;
-    const tabContentTimeout = localDev ? 90_000 : 30_000;
-    test.setTimeout(localDev ? 300_000 : 60_000);
+    const navTimeout = localDev ? 60_000 : 45_000;
+    const tabContentTimeout = localDev ? 90_000 : 45_000;
+    test.setTimeout(localDev ? 300_000 : 180_000);
 
     const tenantId = e2eTenantId();
     const teamBase = teamBasePath(tenantId);
 
     await page.goto(teamBase, { waitUntil: "domcontentloaded" });
 
+    const shell = page.getByTestId("fi-os-shell");
+    const loginCue = page.getByRole("heading", { name: LOGIN_HEADING });
     const nav = page.getByTestId("team-sub-nav");
     const accessDenied = page.getByRole("heading", { name: ACCESS_DENIED_HEADING });
 
-    // Wait for Team shell or an explicit access-denied surface before deciding.
-    try {
-      await expect(nav.or(accessDenied)).toBeVisible({ timeout: navTimeout });
-    } catch {
-      test.skip(
-        true,
-        "team-sub-nav not mounted — Team consolidated shell missing or redirected (CI-TRIAGE-TEAM-01)",
+    await expect(
+      shell.or(loginCue).or(nav).or(accessDenied),
+      `expected FI OS shell, login, Team sub-nav, or access-denied after goto ${teamBase} (landed ${page.url()})`
+    ).toBeVisible({ timeout: navTimeout });
+
+    if (await loginCue.isVisible().catch(() => false)) {
+      throw new Error(
+        `authenticated session missing on Team workspace — got login wall at ${page.url()}`
       );
-      return;
     }
+
     if (await accessDenied.isVisible().catch(() => false)) {
       test.skip(true, "Demo admin session lacks Team workspace entitlement on this tenant");
       return;
     }
-    await expect(nav).toBeVisible();
+
+    // Fail honestly if shell mounted but Team workspace never rendered (CI-TRIAGE-TEAM-01 closed).
+    await expect(
+      nav,
+      `team-sub-nav missing after authenticated settle at ${page.url()} — Team layout did not mount`
+    ).toBeVisible({ timeout: navTimeout });
+
     for (const tab of TEAM_TABS) {
       await expect(nav.getByTestId(`team-tab-${tab.id}`)).toBeVisible();
     }

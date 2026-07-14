@@ -77,6 +77,9 @@ jobs:
       # Optional spine fixtures — empty secret → spine specs skip (CI-SPINE-01)
       FI_E2E_LEAD_ID: ${{ secrets.FI_E2E_LEAD_ID }}
       FI_E2E_PATIENT_ID: ${{ secrets.FI_E2E_PATIENT_ID }}
+      # Optional trust asserts — empty → skip (CI-FIX-01); set only when real IDs exist
+      FI_E2E_UNLINKED_LEAD_ID: ${{ secrets.FI_E2E_UNLINKED_LEAD_ID }}
+      FI_E2E_EXPECTED_LANDING_PATH_SUFFIX: ${{ vars.FI_E2E_EXPECTED_LANDING_PATH_SUFFIX }}
       FI_E2E_BROWSERS: chromium
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

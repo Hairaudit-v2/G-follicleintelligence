@@ -138,7 +138,7 @@ gh run view 29291826292 --json conclusion,jobs     # ci.yml format gate
 
 | ID | Owner (suggested) | Status | Note |
 | -- | ----------------- | ------ | ---- |
-| **CI-TRIAGE-TEAM-01** | Eng / CI | **Deferred** | Quarantine skip in `team-workspace-nav.spec.ts`; not in trust trio; do not expand unless credentialed workflow blocked |
+| **CI-TRIAGE-TEAM-01** | Eng / CI | **CLOSED (spec)** | Forever-skip removed from `team-workspace-nav.spec.ts`; missing sub-nav now fails honestly; entitlement deny remains intentional skip |
 | **CI-FIX-01** | Eng / CI | **Deferred** | Optional secrets still MISSING (`OTHER_TENANT`, `UNLINKED_LEAD`, landing suffix); inventory GREEN; set only if ops wants coverage |
 | **HR-DRIFT-01** | Ops / HR | **Deferred** | Monitor iiohr sync vs staff mapping; ops bar = `audit:staff-mapping`; not a CI test fix |
 

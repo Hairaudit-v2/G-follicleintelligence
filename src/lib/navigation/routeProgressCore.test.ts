@@ -6,6 +6,7 @@ import {
   isSameRoute,
   normalizeRoutePath,
   routeProgressClearDelayMs,
+  shouldHardNavigateSoftNavFallback,
   shouldStartRouteProgress,
 } from "./routeProgressCore";
 
@@ -69,4 +70,37 @@ test("routeProgressClearDelayMs enforces minimum visible time", () => {
   assert.equal(routeProgressClearDelayMs(1000, 1100, 350), 250);
   assert.equal(routeProgressClearDelayMs(1000, 1400, 350), 0);
   assert.equal(routeProgressClearDelayMs(0, 2000, 350), 0);
+});
+
+test("shouldHardNavigateSoftNavFallback recovers stuck soft nav", () => {
+  assert.equal(
+    shouldHardNavigateSoftNavFallback({
+      intendedPathname: "/fi-admin/t1/front-desk",
+      currentPathname: "/fi-admin/t1/crm",
+      startedAtMs: 1000,
+      nowMs: 3500,
+      fallbackMs: 2000,
+    }),
+    true
+  );
+  assert.equal(
+    shouldHardNavigateSoftNavFallback({
+      intendedPathname: "/fi-admin/t1/front-desk",
+      currentPathname: "/fi-admin/t1/crm",
+      startedAtMs: 1000,
+      nowMs: 2500,
+      fallbackMs: 2000,
+    }),
+    false
+  );
+  assert.equal(
+    shouldHardNavigateSoftNavFallback({
+      intendedPathname: "/fi-admin/t1/front-desk/",
+      currentPathname: "/fi-admin/t1/front-desk",
+      startedAtMs: 1000,
+      nowMs: 5000,
+      fallbackMs: 2000,
+    }),
+    false
+  );
 });
