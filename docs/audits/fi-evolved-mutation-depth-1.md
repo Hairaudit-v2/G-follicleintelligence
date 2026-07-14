@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Findings
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **GREEN (scoped)** — MD-01 + MD-02 + MD-03 + MD-05 PASS; MD-04 Doctor deferred/optional SKIP  
+**Status:** **GREEN (scoped)** — MD-01 + MD-02 + MD-03 + MD-04 + MD-05 PASS  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)  
@@ -11,7 +11,7 @@
 
 ## Executive summary
 
-Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. Help-needed: **0**. Doctor **MD-04** left deferred/optional SKIP. **Operational constraint:** no raw passwords available for Reception, Nurse, or Doctor — those roles bake via platform impersonation only; ordinary raw-password sessions remain Consultant `manager@` (and Finance `harsh@` when needed).
+Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, **MD-04 Doctor**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. **MD-04** closed via raw-password Doctor `tlbpmg@gmail.com` (reclassify `c5bf4e56`): identity/landing/ordinary paths PASS; no safe reversible SMOKETEST doctor mutation available — scored nav/landing/write-capability observe only (Calendar ClinicOS READ-ONLY; consultation intake locked on Completed fixture). Help-needed: **0**. **Operational constraint:** no raw passwords for Reception or Nurse (impersonation only); Doctor raw now available (`tlbpmg@`); Consultant `manager@` (and Finance `harsh@` when needed).
 
 ---
 
@@ -22,7 +22,7 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | MD-01 | Consultant | `manager@evolvedhair.com.au` (impersonation) · Consultant workspace | Pipeline stage-move + hard reload (golden SMOKETEST) | **PASS** |
 | MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** (impersonation — no raw Nurse password) |
 | MD-03 | Finance | `harsh@evolvedhair.com.au` (impersonation) · Finance workspace / `finance_admin` | Money/invoice safe mutation + hard reload | **PASS** (re-bake after `6df88546`) |
-| MD-04 | Doctor | — | Only if safe fixture | **SKIP** (optional; deferred — no raw Doctor password) |
+| MD-04 | Doctor | `tlbpmg@gmail.com` (ordinary raw login) · Doctor workspace | Nav/landing/write-capability observe (no safe mutation fixture) | **PASS** (observe) |
 | MD-05 | Raw password | `manager@evolvedhair.com.au` (ordinary login) · Consultant workspace | Identity / landing / Pipeline spot-check (no impersonation) | **PASS** |
 
 ---
@@ -34,7 +34,7 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | MD-01 | Consultant Pipeline stage-move + hard reload | **PASS** | Golden lead stage held after full reload; reverted; help-needed 0 |
 | MD-02 | Nurse safe clinical + reload | **PASS** | SMOKETEST Front desk check-in held after full reload; ImagingOS reachability OK; help-needed 0 |
 | MD-03 | Finance Money/invoice + reload | **PASS** | Due date mutate + hard reload held; Source labels OK; write gate fix live; help-needed 0 |
-| MD-04 | Doctor safe mutation | **SKIP** | Optional; no raw Doctor password / no separate Doctor fixture bake this milestone |
+| MD-04 | Doctor safe mutation / observe bake | **PASS** (observe) | Raw `tlbpmg@`; bare → `/doctor`; Patients/Calendar/Surgery readiness/consultation reachable; no safe Rx/clinical mutation exercised |
 | MD-05 | ≥1 raw-password login | **PASS** | `manager@` ordinary session; no Exit impersonation; bare → `/crm`; Pipeline held |
 | MD-06 | No P0 | **PASS** | No identity / security / patient-record loss |
 
@@ -173,6 +173,58 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 
 ---
 
+## Session MD-04 — Doctor raw-password observe bake
+
+**Host:** `https://follicleintelligence.ai`  
+**Surface:** Doctor chrome · bare tenant → `/doctor` · Patients · Calendar · Surgery readiness · consultation hub  
+**Identity:** Ordinary raw-password session · profile **`tlbpmg@gmail.com`** · badge **Doctor workspace** · auth UUID `b6c79e17-0fb2-46b3-835a-f7626c79b52b` · reclassify commit `c5bf4e56`  
+**Help-needed count:** **0**  
+**Bake:** 2026-07-14 (cursor-ide-browser)  
+**Mutation:** **None** — no safely reversible SMOKETEST doctor write (Rx / pathway Start / clinical note) available; scored nav/landing/write-capability observe
+
+| Step | Result |
+| ---- | ------ |
+| Session present | **PASS** — chrome `tlbpmg@gmail.com`; **Doctor workspace**; profile menu Switch workspace / Sign out only — **no Exit impersonation** |
+| Bare tenant home | Navigate `…/fi-admin/c2615b95-…` → brief Home/Today flash → settles **`/doctor`** |
+| Doctor Workspace queues | **PASS** — awaiting review **3**; consults today **2**; SMOKETEST-TMRW rows in physician queue |
+| Patients | **PASS** — hub under Doctor workspace; **823** active; SMOKETEST journey queue readable |
+| Calendar | **PASS** — settle **Today · 2 appointments**; SMOKETEST HT Surgery cards; ClinicOS banner **READ-ONLY** (view; cannot create/move bookings) |
+| Surgery readiness | **PASS** — board loads; 3 upcoming / SMOKETEST blockers; **Open surgery day** visible — deliberately **not** exercised (Procedure Day out of scope) |
+| Consultation | **PASS** — golden `26660e8e-…` Consultation hub under Doctor workspace; pathway Start links present; intake/Consultant locked on Completed; **No patient linked** (same fixture gap as pilot S2/S4) |
+| Hard reload `/doctor` | **PASS** — Doctor workspace + same queues; still no impersonation chrome |
+| Verdict | **PASS** (observe) |
+
+### Evidence URLs
+
+- Bare tenant (landing settle): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a` → `/doctor`
+- Doctor Workspace: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/doctor`
+- Patients: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/patients`
+- Calendar: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/calendar`
+- Surgery readiness: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/surgery-readiness`
+- Consultation hub: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/consultations/26660e8e-62ca-4de5-a93d-3d0410cfc2f6`
+
+### Observe (not scored as MD-04 fail)
+
+- Calendar ClinicOS **READ-ONLY** for booking create/move — expected Doctor staff gate; not identity failure.
+- Consultation **No patient linked** / Link patient disabled — fixture honesty gap (F-PILOT-08 class).
+- No doctor mutation+reload depth claim — deferred until a reversible SMOKETEST clinical write exists.
+
+### Doctor PASS / PARTIAL matrix (MD-04)
+
+| Check | Result |
+| ----- | ------ |
+| Identity (`tlbpmg@`, Doctor workspace, no Exit impersonation) | **PASS** |
+| Bare landing → `/doctor` | **PASS** (after settle) |
+| Patients hub | **PASS** |
+| Calendar (Surgery / SMOKETEST) | **PASS** |
+| Surgery readiness (not Procedure Day) | **PASS** |
+| Consultation path | **PASS** |
+| Safe SMOKETEST mutation + hard reload | **N/A** (observe only) |
+| Help-needed | **0** |
+| Wrong turns / blockers | **None** P0/P1 |
+
+---
+
 ## Exit checklist
 
 | # | Criterion | Result |
@@ -182,9 +234,9 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | 3 | MD-03 Finance PASS or safe SKIP | **PASS** |
 | 4 | MD-05 raw-password login | **PASS** |
 | 5 | MD-06 no P0 | **PASS** |
-| 6 | MD-04 Doctor PASS or SKIP | **SKIP** (optional / deferred; no raw Doctor password) |
+| 6 | MD-04 Doctor PASS or SKIP | **PASS** (observe — raw `tlbpmg@`; no safe mutation fixture) |
 
-**Overall verdict:** **GREEN (scoped)** — MD-01–03 + MD-05 closed; MD-04 Doctor deferred/optional SKIP; no P0
+**Overall verdict:** **GREEN (scoped)** — MD-01–05 closed; MD-04 Doctor observe PASS (no safe clinical mutation); no P0
 
 ---
 
@@ -196,7 +248,7 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | Finance | As available (`harsh@`) | Impersonation (MD-03) · raw if credentials held |
 | Reception | **No** | Platform impersonation only |
 | Nurse | **No** | Platform impersonation only (MD-02) |
-| Doctor | **No** | Platform impersonation only (pilot S4); MD-04 SKIP |
+| Doctor | **Yes** — `tlbpmg@gmail.com` | Ordinary login (MD-04 observe); pilot S4 Seetal remains impersonation-only |
 
 ---
 

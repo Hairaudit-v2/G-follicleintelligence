@@ -117,7 +117,8 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 
 **Date:** 2026-07-14  
 **Script:** `scripts/reclassify-evolved-tlbpmg-to-doctor.ts` (`--commit`)  
-**Auth user:** `b6c79e17-0fb2-46b3-835a-f7626c79b52b` · `tlbpmg@gmail.com`
+**Auth user:** `b6c79e17-0fb2-46b3-835a-f7626c79b52b` · `tlbpmg@gmail.com`  
+**Provision commit:** `c5bf4e56`
 
 | Field | Before | After |
 | ----- | ------ | ----- |
@@ -129,4 +130,19 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 | Derived workspace | `default` | `doctor` |
 | Derived landing | _(empty)_ | `/doctor` |
 
-**Next:** re-login as `tlbpmg@gmail.com` (raw password) and bake Doctor workspace / ordinary-write paths.
+### Live bake (raw Doctor) — 2026-07-14
+
+**Session:** Ordinary raw-password `tlbpmg@gmail.com` · **Doctor workspace** · **no Exit impersonation**  
+**Hosts:** cursor-ide-browser on Evolved `c2615b95-…`  
+**Also closes:** mutation-depth **MD-04** as **PASS (observe)** — see [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md)
+
+| Check | Result |
+| ----- | ------ |
+| Identity purity | **PASS** — `tlbpmg@gmail.com`; Doctor workspace; profile = Switch workspace / Sign out only |
+| Bare tenant settle | **PASS** — brief Home flash → **`/doctor`** |
+| Ordinary paths | **PASS** — Patients (823 active + SMOKETEST queue); Calendar (settle Today · 2 SMOKETEST HT); Surgery readiness (3 upcoming; Procedure Day **not** opened); consultation hub `26660e8e-…` |
+| Write capability (observe) | Calendar ClinicOS **READ-ONLY** (cannot create/move bookings); consultation intake locked on Completed fixture; **New Prescription** / pathway Start present but **not** exercised (no safe reversible SMOKETEST doctor mutation) |
+| Mutation + hard reload | **N/A** — observe-only score |
+| Help-needed / wrong turns / blockers | **0** / none / no P0 |
+
+**Verdict:** Doctor ordinary raw session **provisioned + landing/nav bake PASS**. Not scored as OW Consultant write-parity; Doctor ClinicOS booking writes expected read-only under staff gate.
