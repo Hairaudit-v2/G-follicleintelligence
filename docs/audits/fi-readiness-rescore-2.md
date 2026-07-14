@@ -15,7 +15,7 @@
 | Question | Answer |
 | -------- | ------ |
 | Did GREEN pilots prove more daily capability? | **Yes** — scoped Evolved pilot, mutation-depth, and ordinary Consultant write are GREEN |
-| Does that clear go-live (≥ 95)? | **No** — security P0s (e.g. **BLK-SEC-01** backup/PITR/restore) remain open |
+| Does that clear go-live (≥ 95)? | **No** — **BLK-SEC-01** still open (PITR/RPO E1–E3 done; **restore drill E4–E6 missing**) |
 | Formal production scorecard | **48 → 63 / 100** — still **NO-GO** (&lt; 85) |
 | Weighted operational (audit-1 model) | **≈ 46 → ≈ 66 / 100** — still **NOT READY** for unrestricted daily use |
 | Weighted commercial (audit-1 model) | **≈ 38 → ≈ 55 / 100** — still **NOT READY** for self-serve multi-clinic |
@@ -42,7 +42,7 @@
 | `FI-EVOLVED-OPERATIONAL-PILOT-1` | GREEN (scoped) | `1149d125` + findings | S1–S5 doorways; FD check-in; F-PILOT-06/11/18 live PASS |
 | `FI-EVOLVED-MUTATION-DEPTH-1` | GREEN (scoped) | `6df88546` + findings | MD-01/02/03/05 mutate+reload; MD-04 SKIP |
 | `FI-EVOLVED-ORDINARY-WRITE-1` | GREEN | `8432111a` / `5d619625` | Raw Consultant Pipeline write parity; OW-06 SKIP |
-| Formal P0 registry | Open | risk / evidence registry | **BLK-SEC-01** (and related SEC/LEG) still Block |
+| Formal P0 registry | Partial | operator checklist + backup audit | **BLK-SEC-01** Block (E4–E6); SEC-02 / SEC-05 / LEG-01 Complete 2026-06-30 |
 
 ---
 
@@ -61,7 +61,7 @@
 | Consultation | 10 | 5 | **6** | +1 | Consult hub reachable; F-PILOT-08 patient-link honesty still open |
 | Surgery | 15 | 8 | **8** | 0 | Readiness observed; **procedure day still out of scope / flag off** — no lift |
 | Financial | 15 | 10 | **13** | +3 | Money trust GREEN; MD-03 due-date mutate+reload (`6df88546`) |
-| Security | 10 | 0 | **0** | 0 | **Open P0** BLK-SEC-01 (and SEC-02/05, LEG-01) — rubric: open P0 = 0 |
+| Security | 10 | 0 | **0** | 0 | **Open P0** BLK-SEC-01 only (E4–E6 restore drill) — SEC-02/05/LEG-01 Complete; rubric: any open P0 = 0 |
 | Performance | 5 | 0 | **1** | +1 | Desktop bake usable; soft-nav lag / cold-load **not** staff-signed |
 | Monitoring | 5 | 3 | **4** | +1 | CI hygiene GREEN; trust e2e; formal `smoke:prod` prod URL still not fully closed |
 | **Total** | **100** | **48** | **63** | **+15** | Still **NO-GO** |
@@ -70,7 +70,7 @@
 
 | Gap | Points still lost | Blocker |
 | --- | ----------------: | ------- |
-| Security open P0 | 10 | BLK-SEC-01 restore drill / PITR proof missing |
+| Security open P0 | 10 | BLK-SEC-01 **E4–E6** — DB/storage restore drill + master checklist tick (E1–E3 PITR/RPO already attached) |
 | Surgery / procedure day | 7 | Explicit non-goal; flag off |
 | CRM / Calendar / Patient residual | ~12 | Soft-nav P2s; fixture linkage; production checklist rows not all signed |
 | Performance | 4 | No staff latency sign-off |
@@ -130,7 +130,7 @@
 
 | Item | Why score not raised further |
 | ---- | ---------------------------- |
-| Security / BLK-SEC-01 | Open P0 — production Security dimension stays **0** |
+| Security / BLK-SEC-01 | Open P0 — E1–E3 attached (`blk-sec-01-pitr-*.png`, RPO/RTO sign-off); E4–E6 drill log empty — Security stays **0** |
 | Procedure Day / Stripe / AI | Explicit non-goals for this rescore window |
 | OW-06 Reception/Nurse ordinary write | **SKIP** — no raw passwords; impersonation path deferred to Phase B |
 | Soft-nav P2s (F-PILOT-03/09/12/16, Money soft-click) | Observe-only; UX/performance only +1 partial |

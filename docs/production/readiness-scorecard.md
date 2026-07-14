@@ -60,7 +60,7 @@
 | Consultation | 10 | 6 | 10 | Consult hub reachable; F-PILOT-08 linkage honesty still open |
 | Surgery | 15 | 8 | 15 | Readiness observed; procedure day still flag-off / out of scope — **no lift** |
 | Financial | 15 | 13 | 15 | Money trust GREEN; MD-03 due-date mutate+reload (`6df88546`); Stripe inbox still off |
-| Security | 10 | 0 | 10 | **Open P0:** BLK-SEC-01, BLK-SEC-02, BLK-SEC-05, BLK-LEG-01 — rubric: open P0 = 0 |
+| Security | 10 | 0 | 10 | **Open P0:** BLK-SEC-01 only (E1–E3 ✓ PITR/RPO; **E4–E6 restore drill missing**). BLK-SEC-02 / BLK-SEC-05 / BLK-LEG-01 Complete in operator checklist — rubric: any open P0 = 0 |
 | Performance | 5 | 1 | 5 | Desktop bake usable; soft-nav lag / cold-load not staff-signed |
 | Monitoring | 5 | 4 | 5 | CI hygiene + trust e2e GREEN; formal `smoke:prod` evidence still incomplete |
 | **Total** | **100** | **63** | **100** | **Target: ≥ 95 — NOT MET** · decision class **NO-GO** (&lt; 85) |
@@ -86,7 +86,7 @@ Retained for audit trail. Superseded by FI-READINESS-RESCORE-2 above.
 
 | Gap | Points lost | Blocker / action |
 |-----|------------:|------------------|
-| Security (open P0) | 10 | BLK-SEC-01, BLK-SEC-02, BLK-SEC-05, BLK-LEG-01 |
+| Security (open P0) | 10 | **BLK-SEC-01** restore drill (E4–E6) — SEC-02/05/LEG-01 already Complete in checklist |
 | Surgery | 7 | Procedure day production dry-run or explicit accepted deferral |
 | CRM / LeadFlow | 3 | Soft-nav / OW-06 / remaining checklist rows |
 | Calendar | 3 | Soft-nav + sync health review |
@@ -96,7 +96,7 @@ Retained for audit trail. Superseded by FI-READINESS-RESCORE-2 above.
 | Performance | 4 | Staff latency sign-off |
 | Monitoring | 1 | Production `smoke:prod` green close-out |
 
-**Primary blockers preventing ≥ 95:** Open security/DR P0s (especially **BLK-SEC-01**) in [production-evidence-registry.md](./production-evidence-registry.md). Clinic bake GREEN does **not** clear DR P0.
+**Primary blockers preventing ≥ 95:** **BLK-SEC-01** DB + storage restore drill (E4–E6) still open — see [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md). PITR screenshots alone do **not** close DR P0. Clinic bake GREEN does **not** clear DR P0.
 
 ---
 

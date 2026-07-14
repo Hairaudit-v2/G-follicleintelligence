@@ -12,14 +12,14 @@
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| PITR enabled on production Supabase project | **Not verified** | No automated probe; dashboard access required |
-| Daily automated backups succeeding | **Not verified** | Same |
+| PITR enabled on production Supabase project | **Yes (E1)** | `attachments/blk-sec-01-pitr-2026-06-30.png` |
+| Daily automated backups succeeding | **Yes (E2)** | `attachments/blk-sec-01-daily-backups-2026-06-30.png` (PITR mode) |
 | Documented restore procedure exists | **Yes** | Runbooks present and cross-linked |
-| Storage restore drill executed | **No** | Master checklist unchecked; no drill log in repo |
-| DB restore drill executed | **No** | Same |
-| RPO/RTO signed | **Not verified** | Template in runbook only |
+| Storage restore drill executed | **No (E5)** | Drill log template empty; no signed-URL artifact |
+| DB restore drill executed | **No (E4)** | Drill log template empty; no staging restore record |
+| RPO/RTO signed | **Yes (E3)** | Paul Green 30 June 2026 — § RPO/RTO below |
 
-**Verdict:** BLK-SEC-01 **remains blocking**. Documentation is mature; **operational proof is missing**.
+**Verdict:** BLK-SEC-01 **remains blocking**. PITR + RPO/RTO (E1–E3) are attached; **DB + storage restore drill (E4–E5) and master checklist tick (E6) are still missing**.
 
 ---
 
@@ -119,8 +119,8 @@ No destructive or production restore operations were run.
 |-------|-------|
 | Validated | Yes — gap confirmed against runbooks + checklist |
 | Resolved automatically | **No** — requires Supabase/Vercel operator access |
-| Still blocking production | **Yes** |
-| Task 5 disposition | **Still blocking** — operator checklist §1–3; evidence attachments pending |
+| Still blocking production | **Yes** — E4–E6 only |
+| Task 5 disposition | **Still blocking** — operator checklist §2–3 (restore drills); E1–E3 complete 2026-06-30 |
 
 ---
 

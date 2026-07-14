@@ -44,9 +44,9 @@
 | **Blocker** | BLK-SEC-01 |
 | **Evidence source** | Supabase Dashboard → Project Settings → Database → Backups |
 | **Expected artifact** | `evidence/attachments/blk-sec-01-pitr-<YYYY-MM-DD>.png` |
-| **Verification date** | — |
-| **Verified by** | — |
-| **Status** | **Pending** |
+| **Verification date** | 2026-06-30 |
+| **Verified by** | Paul Green |
+| **Status** | **Complete** — `attachments/blk-sec-01-pitr-2026-06-30.png` (+ daily `blk-sec-01-daily-backups-2026-06-30.png`) |
 
 ### E-INF-02 — Database restore drill log
 
