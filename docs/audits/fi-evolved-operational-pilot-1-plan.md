@@ -1,7 +1,7 @@
 # FI-EVOLVED-OPERATIONAL-PILOT-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-OPERATIONAL-PILOT-1`  
-**Status:** **IN PROGRESS** — live bake started 2026-07-14  
+**Status:** **IN PROGRESS — day-1 role roster complete (AMBER vs exit GREEN)**  
 **Date:** 2026-07-14  
 **Mode:** Live clinic-day bake in progress (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
@@ -119,12 +119,13 @@ This milestone **assumes** those gates hold and gathers **real clinic-day usage*
 ## 8. Method (live bake — started 2026-07-14)
 
 1. Confirm staff mapping gate before clinic day — **done (PASS)** at kickoff
-2. Observe / time-box ordinary workflows per role on production (Decision B host) — **S1 Reception PARTIAL** (mutation TBD); **S2 Consultant PARTIAL** (landing Today not `/crm`); **S3 Nurse PARTIAL** (PRP filter honesty); **S4 Doctor PASS** (`/doctor` + clinical spine)
-3. Log evidence against §5–§6; score help-needed metric — S1–S4 help needed **0**
+2. Observe / time-box ordinary workflows per role on production (Decision B host) — **S1 Reception PARTIAL** (mutation TBD); **S2 Consultant PARTIAL** (landing Today not `/crm`); **S3 Nurse PARTIAL** (PRP filter honesty); **S4 Doctor PASS**; **S5 Finance PARTIAL** (Money PASS; Patients→Surgery F-PILOT-18)
+3. Log evidence against §5–§6; score help-needed metric — S1–S5 help needed **0**
 4. File findings in [fi-evolved-operational-pilot-1.md](./fi-evolved-operational-pilot-1.md)
 5. Only then decide GREEN / AMBER / RED on exit criteria
 
-**Next role:** Finance / clinic admin Harsh.
+**Day-1 planned role roster:** Reception · Consultant · Nurse · Doctor · Finance — **complete**.  
+**Next role / gap closer:** Reception Calendar **mutation + reload**; open P1 triage (F-PILOT-06, 11, 18). HR-DRIFT monitor only.
 
 ---
 
