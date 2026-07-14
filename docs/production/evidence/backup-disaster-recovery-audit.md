@@ -144,7 +144,7 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 | Operator | Paul Green (scheduled) |
 | Date (UTC) | 2026-07-14 — **prep only** (marker registered); restore TBD |
 | Environment | Isolated staging only (restore not started) |
-| Source backup timestamp | Choose PITR/backup **≥** `2026-06-30T12:26:45Z` (after marker) |
+| Source backup timestamp | Choose PITR **after** `2026-07-14T06:21:38.292Z` and **within 7-day retention** |
 | DB restore result | ☐ Pass / ☐ Fail |
 | Row count / checksum sample | Pending drill — post-restore use marker SQL below |
 | Storage bucket restored | `fi-intakes` (pending) |
@@ -153,24 +153,27 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 
 ### Recovery marker (E4 prep — 2026-07-14)
 
-Runbooks define **no** separate marker insert table. Prep used existing production `SMOKETEST-` synthetic journey rows as the recoverability probe (read-only verify; **no production restore**).
+PITR retention is **7 days** (not extended). The Jun-30 journey marker is outside that window and is **superseded** for this drill. A new non-PHI SMOKETEST lead was inserted on production Evolved so the probe sits inside retention.
 
 | Field | Value |
 |-------|-------|
-| Marker ID | `SMOKETEST-JOURNEY-001-20260630` |
-| Primary table / id | `fi_crm_leads` / `66b47348-bf0e-48b7-a188-accbee0db4a3` |
-| Marker created_at (UTC) | `2026-06-30T12:26:30.431814+00:00` |
-| Verified at (UTC) | `2026-07-14T06:13:58.653Z` — **PASS** |
-| Env | Production (`iqqvzgxoimxchhcnbzxl.supabase.co`) — verify only |
-| Evidence | [`blk-sec-01-recovery-marker-2026-07-14.md`](./blk-sec-01-recovery-marker-2026-07-14.md), [`attachments/blk-sec-01-recovery-marker-verify.json`](./attachments/blk-sec-01-recovery-marker-verify.json) |
-| Verify command | `scripts/verify-blk-sec-01-recovery-marker.ts` (read-only) |
+| Marker ID (canonical) | `SMOKETEST-RECOVERY-MARKER-20260714` |
+| Primary table / id | `fi_crm_leads` / `70f2e1b0-e8b7-472e-8f3e-bb59c4b92511` |
+| Marker created_at (UTC) | `2026-07-14T06:21:38.292185+00:00` |
+| Earliest PITR (UTC) | `2026-07-14T06:21:39.292Z` (must also be within 7d retention) |
+| Verified at (UTC) | `2026-07-14T06:21:47.809Z` — **PASS** |
+| Env | Production (`iqqvzgxoimxchhcnbzxl.supabase.co`) |
+| Seed | `scripts/seed-blk-sec-01-recovery-marker.ts` |
+| Evidence | [`blk-sec-01-recovery-marker-2026-07-14.md`](./blk-sec-01-recovery-marker-2026-07-14.md), [`attachments/blk-sec-01-recovery-marker-verify.json`](./attachments/blk-sec-01-recovery-marker-verify.json), [`attachments/blk-sec-01-recovery-marker-seed.json`](./attachments/blk-sec-01-recovery-marker-seed.json) |
+| Verify command | `scripts/verify-blk-sec-01-recovery-marker.ts` (read-only; primary marker required) |
 | Staging SQL | [`attachments/blk-sec-01-recovery-marker-verify.sql`](./attachments/blk-sec-01-recovery-marker-verify.sql) |
+| Legacy (superseded) | `SMOKETEST-JOURNEY-001-20260630` / `66b47348-bf0e-48b7-a188-accbee0db4a3` (`2026-06-30T12:26:30Z`) — outside 7d PITR |
 
-**Next E4 step:** Restore / clone production DB into a **new isolated staging** Supabase project from a PITR timestamp after the marker; confirm marker SQL Pass in staging; capture walkthrough Phase B artifacts. Do **not** restore onto production.
+**Next E4 step:** Restore / clone production DB into a **new isolated staging** Supabase project from a PITR timestamp **after** the new marker and **within 7-day retention**; confirm marker SQL Pass in staging; capture walkthrough Phase B artifacts. Do **not** restore onto production. Do **not** extend retention for this drill.
 
 **2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3). DB + storage restore drill (E4–E5) scheduled per [`fi-os-storage-backup-restore-drill.md`](../../runbooks/fi-os-storage-backup-restore-drill.md) — requires isolated staging project; not executed in this session.
 
-**2026-07-14 status:** Recovery marker registered and verified on production (read-only). E4 restore into staging still pending.
+**2026-07-14 status:** Fresh recovery marker seeded and verified on production (within 7-day PITR). E4 restore into staging still pending.
 
 ### RPO / RTO Operational Sign-Off
 

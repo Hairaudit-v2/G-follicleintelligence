@@ -51,7 +51,7 @@ Do **not** re-screenshot PITR or re-sign RPO/RTO unless settings changed.
 
 1. Confirm you are on the **authorised backup-operator** list (backup setup §8 — update names if still a template).
 2. Open production Supabase only to **read backup metadata** (timestamp to restore from). Do not click Restore on the production project itself for this drill.
-3. **Recovery marker (E4 prep):** runbooks do not define a marker insert table. Register/verify the existing production `SMOKETEST-JOURNEY-001-20260630` lead (`fi_crm_leads` `66b47348-bf0e-48b7-a188-accbee0db4a3`, created `2026-06-30T12:26:30Z`) via `scripts/verify-blk-sec-01-recovery-marker.ts` (read-only). Evidence: [`docs/production/evidence/blk-sec-01-recovery-marker-2026-07-14.md`](../production/evidence/blk-sec-01-recovery-marker-2026-07-14.md). Choose a restore timestamp **after** the marker.
+3. **Recovery marker (E4 prep):** PITR retention is **7 days**. Canonical production probe is `SMOKETEST-RECOVERY-MARKER-20260714` (`fi_crm_leads` `70f2e1b0-e8b7-472e-8f3e-bb59c4b92511`, created `2026-07-14T06:21:38.292Z`). Legacy `SMOKETEST-JOURNEY-001-20260630` is outside the 7-day window and is superseded for this drill. Seed/verify: `scripts/seed-blk-sec-01-recovery-marker.ts`, `scripts/verify-blk-sec-01-recovery-marker.ts`. Evidence: [`docs/production/evidence/blk-sec-01-recovery-marker-2026-07-14.md`](../production/evidence/blk-sec-01-recovery-marker-2026-07-14.md). Choose a PITR timestamp **after** the new marker and **within 7-day retention** (do not extend retention).
 4. Identify:
    - **Source backup / PITR timestamp** (UTC) you will restore from (≥ marker time).
    - **Buckets:** `fi-intakes` (or env `FI_STORAGE_BUCKET_INTAKES`); optionally note `patient-images` if in scope.

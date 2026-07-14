@@ -1,31 +1,42 @@
 {
-  "markerId": "SMOKETEST-JOURNEY-001-20260630",
+  "markerId": "SMOKETEST-RECOVERY-MARKER-20260714",
+  "legacyMarkerId": "SMOKETEST-JOURNEY-001-20260630",
   "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
   "envHost": "iqqvzgxoimxchhcnbzxl.supabase.co",
-  "verifiedAtUtc": "2026-07-14T06:13:58.653Z",
+  "verifiedAtUtc": "2026-07-14T06:21:47.809Z",
   "mode": "read-only",
+  "primaryPass": true,
+  "legacyPresent": true,
+  "pass": true,
+  "earliestPitrAfterMarkerUtc": "2026-07-14T06:21:39.292Z",
+  "note": "PASS requires primary SMOKETEST-RECOVERY-MARKER lead (7-day PITR window). Legacy Jun-30 journey is informational only.",
   "rows": {
-    "fi_crm_leads": {
+    "primary_fi_crm_leads": {
+      "id": "70f2e1b0-e8b7-472e-8f3e-bb59c4b92511",
+      "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+      "summary": "SMOKETEST-RECOVERY-MARKER-20260714 SMOKETEST-LEAD recovery probe (non-PHI)",
+      "created_at": "2026-07-14T06:21:38.292185+00:00"
+    },
+    "legacy_fi_crm_leads": {
       "id": "66b47348-bf0e-48b7-a188-accbee0db4a3",
       "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
       "summary": "SMOKETEST-JOURNEY-001-20260630 SMOKETEST-LEAD-001",
       "created_at": "2026-06-30T12:26:30.431814+00:00"
     },
-    "fi_cases": {
+    "legacy_fi_cases": {
       "id": "efa25110-9dbc-4599-8fbd-3670e8921efd",
       "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
       "created_at": "2026-06-30T12:26:42.237155+00:00"
     },
-    "fi_patients": {
+    "legacy_fi_patients": {
       "id": "51a44cf6-e4de-4282-960c-be220909f9a0",
       "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
       "created_at": "2026-06-30T12:26:41.461381+00:00"
     },
-    "fi_bookings": {
+    "legacy_fi_bookings": {
       "id": "f53f63aa-3d8a-4e36-9646-f26dd5e16af9",
       "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
       "created_at": "2026-06-30T12:26:45.267003+00:00"
     }
-  },
-  "pass": true
+  }
 }

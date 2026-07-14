@@ -1,7 +1,15 @@
 -- BLK-SEC-01 E4 — recovery marker verify (staging SQL editor only after restore)
--- Marker: SMOKETEST-JOURNEY-001-20260630 / fi_crm_leads 66b47348-bf0e-48b7-a188-accbee0db4a3
+-- Primary (7-day PITR): SMOKETEST-RECOVERY-MARKER-20260714 / fi_crm_leads 70f2e1b0-e8b7-472e-8f3e-bb59c4b92511
+-- Legacy (superseded for this drill): SMOKETEST-JOURNEY-001-20260630 / 66b47348-bf0e-48b7-a188-accbee0db4a3
 -- Do not run as a production write. Read-only checks.
 
+-- Primary marker (required for E4 PASS)
+SELECT id, tenant_id, left(summary, 100) AS summary_prefix, created_at
+FROM public.fi_crm_leads
+WHERE id = '70f2e1b0-e8b7-472e-8f3e-bb59c4b92511'
+   OR summary ILIKE 'SMOKETEST-RECOVERY-MARKER-20260714%';
+
+-- Legacy journey rows (informational; outside 7-day PITR as of 2026-07-14)
 SELECT id, tenant_id, left(summary, 80) AS summary_prefix, created_at
 FROM public.fi_crm_leads
 WHERE id = '66b47348-bf0e-48b7-a188-accbee0db4a3';

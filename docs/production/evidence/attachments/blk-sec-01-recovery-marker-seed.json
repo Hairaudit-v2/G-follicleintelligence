@@ -1,0 +1,13 @@
+{
+  "markerId": "SMOKETEST-RECOVERY-MARKER-20260714",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "envHost": "iqqvzgxoimxchhcnbzxl.supabase.co",
+  "mode": "inserted",
+  "lead": {
+    "id": "70f2e1b0-e8b7-472e-8f3e-bb59c4b92511",
+    "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+    "summary": "SMOKETEST-RECOVERY-MARKER-20260714 SMOKETEST-LEAD recovery probe (non-PHI)",
+    "created_at": "2026-07-14T06:21:38.292185+00:00"
+  },
+  "committed": true
+}

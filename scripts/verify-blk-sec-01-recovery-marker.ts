@@ -1,9 +1,9 @@
 /**
  * BLK-SEC-01 E4 — recovery marker verify (read-only).
  *
- * Runbooks do not define a separate marker insert table. This drill uses the
- * existing Evolved SMOKETEST journey synthetic rows already on production
- * (SMOKETEST- prefix per clinic readiness) as the recoverability probe.
+ * Canonical probe (within 7-day PITR): SMOKETEST-RECOVERY-MARKER-20260714 lead.
+ * Legacy probe (outside 7d as of 2026-07-14): SMOKETEST-JOURNEY-001-20260630
+ * journey rows — still reported for history, not required for PASS.
  *
  * Usage (production pre-restore or staging post-restore):
  *   node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/verify-blk-sec-01-recovery-marker.ts
@@ -15,12 +15,20 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
-const MARKER_ID = "SMOKETEST-JOURNEY-001-20260630";
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
-const LEAD_ID = "66b47348-bf0e-48b7-a188-accbee0db4a3";
-const CASE_ID = "efa25110-9dbc-4599-8fbd-3670e8921efd";
-const PATIENT_ID = "51a44cf6-e4de-4282-960c-be220909f9a0";
-const BOOKING_ID = "f53f63aa-3d8a-4e36-9646-f26dd5e16af9";
+
+/** Primary E4 marker — must sit inside current PITR retention (7 days). */
+const PRIMARY_MARKER_ID = "SMOKETEST-RECOVERY-MARKER-20260714";
+
+/** Optional override if a later seed wrote a different lead UUID. */
+const PRIMARY_LEAD_ID_ENV = process.env.BLK_SEC_01_RECOVERY_LEAD_ID?.trim() || null;
+
+/** Legacy journey marker (superseded for 7-day PITR drills). */
+const LEGACY_MARKER_ID = "SMOKETEST-JOURNEY-001-20260630";
+const LEGACY_LEAD_ID = "66b47348-bf0e-48b7-a188-accbee0db4a3";
+const LEGACY_CASE_ID = "efa25110-9dbc-4599-8fbd-3670e8921efd";
+const LEGACY_PATIENT_ID = "51a44cf6-e4de-4282-960c-be220909f9a0";
+const LEGACY_BOOKING_ID = "f53f63aa-3d8a-4e36-9646-f26dd5e16af9";
 
 function loadRepoEnvFiles(): void {
   for (const name of [".env.local", ".env"] as const) {
@@ -63,55 +71,97 @@ async function main(): Promise<void> {
   const sb = createClient(url, key, { auth: { persistSession: false } });
   const verifiedAtUtc = new Date().toISOString();
 
-  const [lead, cse, patient, booking] = await Promise.all([
-    sb.from("fi_crm_leads").select("id, tenant_id, summary, created_at").eq("id", LEAD_ID).maybeSingle(),
-    sb.from("fi_cases").select("id, tenant_id, created_at").eq("id", CASE_ID).maybeSingle(),
-    sb.from("fi_patients").select("id, tenant_id, created_at").eq("id", PATIENT_ID).maybeSingle(),
-    sb.from("fi_bookings").select("id, tenant_id, created_at").eq("id", BOOKING_ID).maybeSingle(),
+  let primaryLeadQuery = sb
+    .from("fi_crm_leads")
+    .select("id, tenant_id, summary, created_at")
+    .eq("tenant_id", TENANT_ID);
+
+  if (PRIMARY_LEAD_ID_ENV) {
+    primaryLeadQuery = primaryLeadQuery.eq("id", PRIMARY_LEAD_ID_ENV);
+  } else {
+    primaryLeadQuery = primaryLeadQuery.ilike("summary", `${PRIMARY_MARKER_ID}%`);
+  }
+
+  const [primaryLead, legacyLead, legacyCase, legacyPatient, legacyBooking] = await Promise.all([
+    primaryLeadQuery.order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    sb.from("fi_crm_leads").select("id, tenant_id, summary, created_at").eq("id", LEGACY_LEAD_ID).maybeSingle(),
+    sb.from("fi_cases").select("id, tenant_id, created_at").eq("id", LEGACY_CASE_ID).maybeSingle(),
+    sb.from("fi_patients").select("id, tenant_id, created_at").eq("id", LEGACY_PATIENT_ID).maybeSingle(),
+    sb.from("fi_bookings").select("id, tenant_id, created_at").eq("id", LEGACY_BOOKING_ID).maybeSingle(),
   ]);
 
+  const primaryOk =
+    !!primaryLead.data?.id &&
+    primaryLead.data.tenant_id === TENANT_ID &&
+    typeof primaryLead.data.summary === "string" &&
+    primaryLead.data.summary.includes(PRIMARY_MARKER_ID);
+
+  const legacyOk =
+    !!legacyLead.data?.id &&
+    legacyLead.data.tenant_id === TENANT_ID &&
+    !!legacyCase.data?.id &&
+    legacyCase.data.tenant_id === TENANT_ID &&
+    !!legacyPatient.data?.id &&
+    legacyPatient.data.tenant_id === TENANT_ID &&
+    !!legacyBooking.data?.id &&
+    legacyBooking.data.tenant_id === TENANT_ID;
+
+  const createdAt = primaryLead.data?.created_at ?? null;
+  const earliestPitrAfterMarkerUtc = createdAt
+    ? new Date(new Date(createdAt).getTime() + 1000).toISOString()
+    : null;
+
   const result = {
-    markerId: MARKER_ID,
+    markerId: PRIMARY_MARKER_ID,
+    legacyMarkerId: LEGACY_MARKER_ID,
     tenantId: TENANT_ID,
     envHost: new URL(url).host,
     verifiedAtUtc,
     mode: "read-only",
+    primaryPass: primaryOk,
+    legacyPresent: legacyOk,
+    pass: primaryOk,
+    earliestPitrAfterMarkerUtc,
+    note:
+      "PASS requires primary SMOKETEST-RECOVERY-MARKER lead (7-day PITR window). Legacy Jun-30 journey is informational only.",
     rows: {
-      fi_crm_leads: (lead.error ? { error: lead.error.message } : lead.data) as Row | { error: string },
-      fi_cases: (cse.error ? { error: cse.error.message } : cse.data) as Row | { error: string },
-      fi_patients: (patient.error ? { error: patient.error.message } : patient.data) as Row | {
-        error: string;
-      },
-      fi_bookings: (booking.error ? { error: booking.error.message } : booking.data) as Row | {
-        error: string;
-      },
+      primary_fi_crm_leads: (primaryLead.error
+        ? { error: primaryLead.error.message }
+        : primaryLead.data) as Row | { error: string },
+      legacy_fi_crm_leads: (legacyLead.error
+        ? { error: legacyLead.error.message }
+        : legacyLead.data) as Row | { error: string },
+      legacy_fi_cases: (legacyCase.error
+        ? { error: legacyCase.error.message }
+        : legacyCase.data) as Row | { error: string },
+      legacy_fi_patients: (legacyPatient.error
+        ? { error: legacyPatient.error.message }
+        : legacyPatient.data) as Row | { error: string },
+      legacy_fi_bookings: (legacyBooking.error
+        ? { error: legacyBooking.error.message }
+        : legacyBooking.data) as Row | { error: string },
     },
   };
 
-  const pass =
-    !!lead.data?.id &&
-    lead.data.tenant_id === TENANT_ID &&
-    !!cse.data?.id &&
-    cse.data.tenant_id === TENANT_ID &&
-    !!patient.data?.id &&
-    patient.data.tenant_id === TENANT_ID &&
-    !!booking.data?.id &&
-    booking.data.tenant_id === TENANT_ID;
-
-  console.log(JSON.stringify({ ...result, pass }, null, 2));
+  console.log(JSON.stringify(result, null, 2));
 
   const outPath = resolve(
     process.cwd(),
     "docs/production/evidence/attachments/blk-sec-01-recovery-marker-verify.json"
   );
-  writeFileSync(outPath, JSON.stringify({ ...result, pass }, null, 2) + "\n", "utf8");
+  writeFileSync(outPath, JSON.stringify(result, null, 2) + "\n", "utf8");
   console.log(`Wrote ${outPath}`);
 
-  if (!pass) {
-    console.error("FAIL: recovery marker rows missing or tenant mismatch");
+  if (!primaryOk) {
+    console.error("FAIL: primary recovery marker lead missing or tenant mismatch");
     process.exit(2);
   }
-  console.log("PASS: recovery marker present");
+  console.log("PASS: primary recovery marker present");
+  if (createdAt && earliestPitrAfterMarkerUtc) {
+    console.log(`Marker created_at (UTC): ${createdAt}`);
+    console.log(`Earliest PITR restore timestamp (UTC, after marker): ${earliestPitrAfterMarkerUtc}`);
+    console.log("Constraint: PITR timestamp must also be within 7-day retention.");
+  }
 }
 
 main().catch((e) => {
