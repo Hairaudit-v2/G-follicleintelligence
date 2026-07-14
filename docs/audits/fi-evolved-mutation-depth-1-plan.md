@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **IN PROGRESS / AMBER** (MD-01+MD-02+MD-03 PASS; MD-05 raw-password pending; MD-04 optional)  
+**Status:** **GREEN (scoped)** — MD-01+MD-02+MD-03+MD-05 PASS; MD-04 Doctor optional SKIP  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
@@ -64,6 +64,8 @@ All mutations **SMOKETEST-only** (or explicitly known golden lead/patient). No p
 4. **MD-05 PASS** — ≥1 raw-password login evidence
 5. **MD-06** — No P0 identity / security / patient-record issue
 6. Doctor **MD-04** PASS or explicit SKIP (not blocking if no safe fixture)
+
+**Exit met 2026-07-14:** MD-01–03 + MD-05 PASS; MD-04 SKIP; MD-06 PASS → **GREEN (scoped)**
 
 ---
 

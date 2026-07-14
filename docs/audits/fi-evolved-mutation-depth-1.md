@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Findings
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **IN PROGRESS / AMBER** (MD-01 + MD-02 + MD-03 PASS; MD-05 raw-password pending)  
+**Status:** **GREEN (scoped)** — MD-01 + MD-02 + MD-03 + MD-05 PASS; MD-04 Doctor deferred/optional SKIP  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)  
@@ -11,7 +11,7 @@
 
 ## Executive summary
 
-Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, and **MD-03 Finance** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. Re-bake: Harsh (`finance_admin` / Finance workspace) set SMOKETEST manual invoice due date **empty → 2026-08-15**, banner “Due date saved.”, hard reload held `due_date=2026-08-15` (invoice `6815cad5-…`). Source labels still OK. Help-needed: **0**. Remaining for GREEN: **MD-05** raw-password login (MD-04 Doctor optional).
+Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. Help-needed: **0**. Doctor **MD-04** left deferred/optional SKIP (no separate Doctor raw-login bake required for GREEN).
 
 ---
 
@@ -22,8 +22,8 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 N
 | MD-01 | Consultant | `manager@evolvedhair.com.au` (impersonation) · Consultant workspace | Pipeline stage-move + hard reload (golden SMOKETEST) | **PASS** |
 | MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** |
 | MD-03 | Finance | `harsh@evolvedhair.com.au` (impersonation) · Finance workspace / `finance_admin` | Money/invoice safe mutation + hard reload | **PASS** (re-bake after `6df88546`) |
-| MD-04 | Doctor | TBD | Only if safe fixture | Pending / optional SKIP |
-| MD-05 | Raw password | Reception or Consultant preferred | Ordinary login (no impersonation) | Pending |
+| MD-04 | Doctor | — | Only if safe fixture | **SKIP** (optional; deferred) |
+| MD-05 | Raw password | `manager@evolvedhair.com.au` (ordinary login) · Consultant workspace | Identity / landing / Pipeline spot-check (no impersonation) | **PASS** |
 
 ---
 
@@ -34,9 +34,9 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 N
 | MD-01 | Consultant Pipeline stage-move + hard reload | **PASS** | Golden lead stage held after full reload; reverted; help-needed 0 |
 | MD-02 | Nurse safe clinical + reload | **PASS** | SMOKETEST Front desk check-in held after full reload; ImagingOS reachability OK; help-needed 0 |
 | MD-03 | Finance Money/invoice + reload | **PASS** | Due date mutate + hard reload held; Source labels OK; write gate fix live; help-needed 0 |
-| MD-04 | Doctor safe mutation | Pending | Optional |
-| MD-05 | ≥1 raw-password login | Pending | — |
-| MD-06 | No P0 | **PASS (so far)** | No identity / security / patient-record loss |
+| MD-04 | Doctor safe mutation | **SKIP** | Optional; no safe Doctor fixture bake this milestone |
+| MD-05 | ≥1 raw-password login | **PASS** | `manager@` ordinary session; no Exit impersonation; bare → `/crm`; Pipeline held |
+| MD-06 | No P0 | **PASS** | No identity / security / patient-record loss |
 
 ---
 
@@ -147,6 +147,32 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 N
 
 ---
 
+## Session MD-05 — Raw-password Consultant login
+
+**Host:** `https://follicleintelligence.ai`  
+**Surface:** Consultant chrome · bare tenant landing · `/crm` Pipeline  
+**Identity:** Ordinary raw-password session · profile **`manager@evolvedhair.com.au`** · **Consultant workspace** · **no** platform-admin impersonation  
+**Help-needed count:** **0**  
+**Bake:** 2026-07-14 (cursor-ide-browser)
+
+| Step | Result |
+| ---- | ------ |
+| Session present | **PASS** — profile menu / chrome show `manager@evolvedhair.com.au`; badge **Consultant workspace**; CDP: no “Exit impersonation”, no impersonating text; not Platform admin / Auditor |
+| Bare tenant home | Navigate `…/fi-admin/c2615b95-…` → brief Home/Today flash → settles **`/crm`** (Pipeline) — F-PILOT-06 landing held for raw login |
+| Pipeline spot-check | **PASS** — Visible **300** / Active **265**; Board (300); SMOKETEST-TMRW + SMOKETEST-OPDAY cards present; Planning / quote (1) held |
+| Verdict | **PASS** |
+
+### Evidence URLs
+
+- Bare tenant (landing settle): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a` → `/crm`
+- Pipeline: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/crm`
+
+### Observe (not scored as MD-05 fail)
+
+- Raw-password Consultant session shows Pipeline **Read-only** banner (“browse Pipeline and open leads, but changes are unavailable”) — identity/landing purity for MD-05 still PASS; mutation depth already covered under MD-01 impersonation path. Not treated as P0 identity/security loss.
+
+---
+
 ## Exit checklist
 
 | # | Criterion | Result |
@@ -154,11 +180,11 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 N
 | 1 | MD-01 Consultant stage-move + reload | **PASS** |
 | 2 | MD-02 Nurse safe clinical + reload | **PASS** |
 | 3 | MD-03 Finance PASS or safe SKIP | **PASS** |
-| 4 | MD-05 raw-password login | Pending |
-| 5 | MD-06 no P0 | **PASS (so far)** |
-| 6 | MD-04 Doctor PASS or SKIP | Pending |
+| 4 | MD-05 raw-password login | **PASS** |
+| 5 | MD-06 no P0 | **PASS** |
+| 6 | MD-04 Doctor PASS or SKIP | **SKIP** (optional / deferred) |
 
-**Overall verdict:** **IN PROGRESS / AMBER** — MD-01 + MD-02 + MD-03 closed; continue **MD-05** raw-password (MD-04 Doctor optional)
+**Overall verdict:** **GREEN (scoped)** — MD-01–03 + MD-05 closed; MD-04 Doctor deferred/optional SKIP; no P0
 
 ---
 
