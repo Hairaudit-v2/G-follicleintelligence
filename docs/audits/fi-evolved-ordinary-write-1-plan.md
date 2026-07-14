@@ -1,7 +1,7 @@
 # FI-EVOLVED-ORDINARY-WRITE-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-ORDINARY-WRITE-1`  
-**Status:** **GREEN**  
+**Status:** **GREEN (complete)** — Consultant ordinary-write + OW-06 impersonation Reception/Nurse write PASS  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
@@ -118,7 +118,7 @@ Do **not** score Consultant ordinary write as PASS while Exit impersonation is v
 | OW-03 | Stage-move + hard reload (raw) | Stage holds after full reload on SMOKETEST/golden lead (MD-01 parity) |
 | OW-04 | Impersonation ≠ required for write | Ordinary session succeeds without platform-admin proxy |
 | OW-05 | True read-only preserved | Sessions that should be read-only still gated (no over-broad write grant) |
-| OW-06 | Optional Reception/Nurse ordinary write | PASS if exercised; else SKIP with reason |
+| OW-06 | Optional Reception/Nurse ordinary write | **PASS** (impersonation Jesika then Evie — Front desk Start treatment + reload; soft-nav FD→Calendar) |
 | OW-07 | No P0 | No identity, security, or patient-record loss |
 
 ---
