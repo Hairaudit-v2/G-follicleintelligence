@@ -12,7 +12,8 @@
  *
  * Env:
  *   FI_BASE_URL, FI_SMOKE_TENANT_ID — HTTP tier
- *   FI_ADMIN_API_KEY — optional authenticated API checks
+ *   FI_ADMIN_API_KEY — optional authenticated API checks (must match the key on the
+ *     process serving FI_BASE_URL; empty shell placeholders block Next .env.local load)
  *   FI_SMOKE_OTHER_TENANT_ID — cross-tenant checks
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — loader/journey/staff-mapping tier
  *   FI_OPERATIONAL_SMOKE_SKIP_STAFF_MAPPING=1 — skip staff mapping audit (local only)
@@ -148,7 +149,11 @@ async function runHttpTier(tid) {
       headers: hdrs,
     });
     if (status !== 200) {
-      fail("http_reception_board_api_auth", `status ${status}`);
+      const authHint =
+        status === 401 || status === 403
+          ? " — runner sent x-fi-admin-key but host rejected it. Align FI_ADMIN_API_KEY on the process serving FI_BASE_URL with the runner (do not leave an empty FI_ADMIN_API_KEY= in the shell/Vercel pull; restart next start/dev after changing env). This is an audit harness/env gap, not proof of incomplete DB restore."
+          : "";
+      fail("http_reception_board_api_auth", `status ${status}${authHint}`);
     } else {
       try {
         const json = JSON.parse(text);

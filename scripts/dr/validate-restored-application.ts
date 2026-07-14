@@ -11,7 +11,12 @@ import { resolve } from "node:path";
 
 const PRODUCTION_PROJECT_REF = "iqqvzgxoimxchhcnbzxl";
 
-function loadEnvFile(path: string): void {
+/**
+ * Load a dotenv-style file into process.env.
+ * - override=true: drill file wins over ambient shell (including empty placeholders).
+ * - override=false: only fill keys that are undefined or blank after trim.
+ */
+function loadEnvFile(path: string, override = false): void {
   if (!existsSync(path)) return;
   let raw = readFileSync(path, "utf8");
   if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
@@ -29,12 +34,16 @@ function loadEnvFile(path: string): void {
     ) {
       value = value.slice(1, -1);
     }
-    if (process.env[key] === undefined) process.env[key] = value;
+    const existing = process.env[key];
+    if (override || existing === undefined || existing.trim() === "") {
+      process.env[key] = value;
+    }
   }
 }
 
-loadEnvFile(resolve(process.cwd(), ".env.restore-drill.local"));
-loadEnvFile(resolve(process.cwd(), ".env.restore-drill"));
+// Drill-local always wins so empty/stale shell or Vercel-pulled placeholders cannot pin the runner.
+loadEnvFile(resolve(process.cwd(), ".env.restore-drill.local"), true);
+loadEnvFile(resolve(process.cwd(), ".env.restore-drill"), false);
 
 function requiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -63,6 +72,19 @@ function assertSafety(): string {
   }
   requiredEnv("FI_BASE_URL");
   requiredEnv("FI_SMOKE_TENANT_ID");
+  const adminKey = process.env.FI_ADMIN_API_KEY?.trim();
+  if (adminKey) {
+    console.log(
+      "[restore-drill:app] FI_ADMIN_API_KEY is set on the runner. " +
+        "The process serving FI_BASE_URL must have the same non-empty key " +
+        "(empty shell/Vercel placeholders block Next from loading .env.local — restart next start/dev after fixing)."
+    );
+  } else {
+    console.log(
+      "[restore-drill:app] FI_ADMIN_API_KEY unset — http_reception_board_api_auth will SKIP. " +
+        "Set it in .env.restore-drill.local and on the app at FI_BASE_URL to exercise auth."
+    );
+  }
   return ref;
 }
 
