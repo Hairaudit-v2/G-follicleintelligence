@@ -1,18 +1,21 @@
 # FI-CI-SIGNAL-HYGIENE-1 — Findings
 
 **Milestone:** `FI-CI-SIGNAL-HYGIENE-1`  
-**Phase:** 2 — Buckets B+A+C+D fixes (2026-07-14); Phase 1 audit 2026-07-14  
+**Status:** **COMPLETE / CLOSED — GREEN** (2026-07-14)  
+**Phase:** 2 closed + post-push verify on `87ce552e`; Phase 1 audit 2026-07-14  
 **HEAD at audit:** `4fb3b6b4` (`docs(audit): confirm Keep Decision B for FI_E2E_STAGING_URL.`)  
+**Close commit:** `87ce552e` (`fix(ci): close DEF-TC-01 test typing so typecheck is green.`)  
 **Prior milestone:** `FI-TRUST-CI-AND-RECEPTION-1` **GREEN** (trust trio + reception R1)  
-**Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` — confirmed Keep B
+**Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` — confirmed Keep B  
+**CI cleanup:** **STOPPED** — do not polish optional fixtures / quarantined tests unless they block a real workflow. Deferred items stay backlog only and **must not delay** operational testing (`FI-EVOLVED-OPERATIONAL-PILOT-1`).
 
 ---
 
 ## Executive summary
 
-**Milestone verdict: GREEN** (2026-07-14).
+**Milestone verdict: GREEN — COMPLETE / CLOSED** (2026-07-14).
 
-Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed buckets **B → A → C+D**: public fails **126 → 78 → 18 → 0**. Failures were **CI signal hygiene** (auth tag on credential-less job; Front Desk labels without session; narrow security status expects; procedure-day final-200 after login redirect), not proven product P0s. Trust trio gate stays **GREEN**. **DEF-TC-01 closed** — `npm run typecheck` **0 errors** (test-file typing only). CI-TRIAGE-TEAM-01 quarantine **in place** (deferred beyond milestone acceptance). Optional fixtures still **MISSING** (deferred — CI-FIX-01). HR-DRIFT-01 **deferred** (ops monitor).
+Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed buckets **B → A → C+D**: public fails **126 → 78 → 18 → 0**. Failures were **CI signal hygiene** (auth tag on credential-less job; Front Desk labels without session; narrow security status expects; procedure-day final-200 after login redirect), not proven product P0s. Trust trio gate stays **GREEN**. **DEF-TC-01 closed** — `npm run typecheck` **0 errors** (test-file typing only). Post-push on `87ce552e` confirmed trust trio + completed public smoke **0 failed**. CI-TRIAGE-TEAM-01 / CI-FIX-01 / HR-DRIFT-01 remain **deferred backlog** (not milestone blockers).
 
 **Phase 1 verdict:** **AMBER** for overall CI readability (trust GREEN; public smoke advisory-red); inventory complete for Phase 2.
 
@@ -28,24 +31,49 @@ Public smoke remains **advisory** (`continue-on-error: true`). Phase 2 closed bu
 
 ## Evidence — GH Actions
 
-### Latest e2e-smoke runs (audit window)
+### Final external evidence — post-push verify on `87ce552e` (2026-07-14)
 
-| Run | Commit | Trust trio | Public smoke | Notes |
-| --- | ------ | ---------- | ------------ | ----- |
-| [29281462736](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29281462736) | `4fb3b6b4` | **success** (in progress at audit start) | in progress / may complete later | Current tip |
-| [29279984484](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29279984484) | `0584739e` | (narrow gate) | **cancelled** | concurrency cancel-in-progress |
-| [29278655946](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29278655946) | `1a953eed` | success path | **cancelled** | same |
-| [29277960526](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29277960526) | `dfeb6555` | **success** 6/0/2 | **cancelled** | Trust GREEN documented prior |
-| [29275224871](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29275224871) | `31d8d8ad` | failure (full suite era) | **completed failure** | **Last full public Playwright summary** |
+Prefer verifying the run that built this SHA (push, not ad-hoc dispatch).
 
-**Primary public-smoke classification source:** run **29275224871** job *Public + security smoke (production build)* — **132 passed / 126 failed / 186 skipped** (~18.0m). Later pushes repeatedly **cancelled** the long public job before finish; bucket analysis therefore uses this completed run (still representative of current public grep + 6 browsers).
+| Check | Result | Evidence |
+| ----- | ------ | -------- |
+| 1. Authenticated trust trio | **PASS** — 6 passed / 0 failed / 2 skipped | [e2e-smoke 29291826298](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291826298) job *Trust trio* (`86956942114`) |
+| 2. Public smoke completes (not cancelled) | **PASS** — job `completed` / `success` | Same run job *Public + security smoke* (`86956942154`) |
+| 3. Missing credentials → skips, not fixture crashes | **PASS** — 66 skipped; no `trim` / `TypeError` in public log; `hasDemoCredentials` unit ok | Public Playwright summary **144 passed / 0 failed / 66 skipped** |
+| 4. Typecheck in CI path | **Documented** — `ci.yml` has Typecheck step (`pnpm run typecheck`); on this SHA the step was **skipped** because Format check failed first (pre-existing Prettier drift across ~1181 files — **not** introduced by hygiene). Local `npm run typecheck` **PASS** (0 errors) for DEF-TC-01. | [CI 29291826292](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291826292) — Format fail → Typecheck skipped; same pattern on prior tip runs |
+| 5. No new unexplained failure bucket | **PASS** — public residual fails **0** (same as post C+D on 29291077366); Format-check red is **pre-existing** known CI noise, not a new smoke bucket | Compare public **144/0/66** vs prior **144/0/66** |
+
+**Run IDs (record permanently):**
+
+| Workflow | Run ID | SHA | Conclusion |
+| -------- | ------ | --- | ---------- |
+| `e2e-smoke.yml` | **29291826298** | `87ce552e` | **success** (trust + public both success) |
+| `ci.yml` | **29291826292** | `87ce552e` | **failure** (Format check only; typecheck not reached) |
 
 Commands:
 
 ```bash
-gh run list --workflow=e2e-smoke.yml --limit 10
-gh run view 29275224871 --log
+gh run view 29291826298 --json conclusion,status,headSha,jobs
+gh run view 29291826298 --job 86956942114 --log   # trust trio
+gh run view 29291826298 --job 86956942154 --log   # public smoke
+gh run view 29291826292 --json conclusion,jobs     # ci.yml format gate
 ```
+
+### Latest e2e-smoke runs (audit window + close)
+
+| Run | Commit | Trust trio | Public smoke | Notes |
+| --- | ------ | ---------- | ------------ | ----- |
+| [29291826298](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291826298) | `87ce552e` | **success** 6/0/2 | **completed success** 144/0/66 | **Final verify** — milestone close |
+| [29291077366](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29291077366) | `83965f20` | **success** | **completed** 144/0/66 | C+D confirm |
+| [29290007344](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29290007344) | dispatch / post-A | **success** | **completed** 126/18/66 | PUB-LABELS |
+| [29282145316](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29282145316) | `16b29652` | **success** | **completed** 132/78/66 | PUB-AUTH-CRASH |
+| [29281462736](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29281462736) | `4fb3b6b4` | **success** (in progress at audit start) | in progress / may complete later | Phase 1 tip |
+| [29279984484](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29279984484) | `0584739e` | (narrow gate) | **cancelled** | concurrency cancel-in-progress |
+| [29278655946](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29278655946) | `1a953eed` | success path | **cancelled** | same |
+| [29277960526](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29277960526) | `dfeb6555` | **success** 6/0/2 | **cancelled** | Trust GREEN documented prior |
+| [29275224871](https://github.com/Hairaudit-v2/G-follicleintelligence/actions/runs/29275224871) | `31d8d8ad` | failure (full suite era) | **completed failure** | **Phase 1 bucket source** 132/126/186 |
+
+**Primary public-smoke classification source (Phase 1):** run **29275224871** — **132 passed / 126 failed / 186 skipped**. Later pushes often **cancelled** the long public job; Phase 2 used completed confirmation runs (above) once hygiene fixes landed.
 
 ---
 
@@ -102,20 +130,32 @@ gh run view 29275224871 --log
 | `src/lib/fiOs/navigation/fiOsRolePermissionPreflightAudit.test.ts` | 1 | Same string cast |
 | `src/lib/fiOs/reports/fiOsReportsConsolidation.test.ts` | 1 | Same string cast |
 
-**Status:** **Closed** — test-file typing only; no product redesign. `ci.yml` typecheck can claim **GREEN**.
+**Status:** **Closed** — test-file typing only; no product redesign. Local typecheck **GREEN**. `ci.yml` Typecheck step exists but was not reached on tip runs due to pre-existing Format check failure (see final evidence).
+
+---
+
+## Deferred backlog (explicit — must not delay operational testing)
+
+| ID | Owner (suggested) | Status | Note |
+| -- | ----------------- | ------ | ---- |
+| **CI-TRIAGE-TEAM-01** | Eng / CI | **Deferred** | Quarantine skip in `team-workspace-nav.spec.ts`; not in trust trio; do not expand unless credentialed workflow blocked |
+| **CI-FIX-01** | Eng / CI | **Deferred** | Optional secrets still MISSING (`OTHER_TENANT`, `UNLINKED_LEAD`, landing suffix); inventory GREEN; set only if ops wants coverage |
+| **HR-DRIFT-01** | Ops / HR | **Deferred** | Monitor iiohr sync vs staff mapping; ops bar = `audit:staff-mapping`; not a CI test fix |
+
+**Stop rule:** No further optional-fixture polishing or quarantine expansion as part of CI hygiene. Next work is operational pilot evidence, not CI signal cleanup.
 
 ---
 
 ## H3 — CI-TRIAGE-TEAM-01 quarantine (**DEFERRED**)
 
 **File:** `e2e/journeys/team-workspace-nav.spec.ts`  
-**Status:** **Deferred (out of milestone acceptance)** — skip still present: if neither `team-sub-nav` nor access-denied heading appears within timeout, `test.skip(..., "… (CI-TRIAGE-TEAM-01)")`.
+**Status:** **Deferred (backlog — Eng/CI)** — skip still present: if neither `team-sub-nav` nor access-denied heading appears within timeout, `test.skip(..., "… (CI-TRIAGE-TEAM-01)")`.
 
 Public job no longer selects this `@authenticated` spec (`grepInvert`). Quarantine remains relevant for **credentialed** authenticated projects / manual runs. Not a product P0 for this milestone; trust trio gate does **not** include this spec → **no impact on GREEN trust / milestone GREEN**.
 
 ---
 
-## H4 — Optional fixtures MISSING list (**DEFERRED** — CI-FIX-01)
+## H4 — Optional fixtures MISSING list (**DEFERRED** — CI-FIX-01 · Eng/CI)
 
 **Checked:** `gh secret list` / `gh variable list` (names only) — 2026-07-14  
 **Milestone disposition:** Inventory **GREEN**; optional secrets remain **MISSING** by choice — **deferred** (not blocking milestone GREEN).
@@ -149,30 +189,31 @@ Public job no longer selects this `@authenticated` spec (`grepInvert`). Quaranti
 
 ---
 
-## H6 — HR sync drift (ops monitor) (**DEFERRED**)
+## H6 — HR sync drift (ops monitor) (**DEFERRED** · Ops/HR)
 
 **Carry from** `FI-ROLE-JOURNEY-BAKE-1` / trust money readiness: iiohr HR sync can revert Evolved consultant `staff_role` / `full_name` (observed prior sync `2026-07-13T08:00:37Z`).
 
 | ID | Priority | Action |
 | -- | -------- | ------ |
-| HR-DRIFT-01 | **P3 / ops** | **Deferred** — monitor HR sync health / staff mapping after overnight syncs; not a CI test fix; **does not block milestone GREEN** |
+| HR-DRIFT-01 | **P3 / Ops/HR** | **Deferred backlog** — monitor HR sync health / staff mapping after overnight syncs; not a CI test fix; **does not block milestone GREEN** or operational pilot start |
 
 No product redesign. Staff mapping gate (`npm run audit:staff-mapping`) remains the ops bar when checking drift.
 
 ---
 
-## Check matrix results (Phase 2 close)
+## Check matrix results (Phase 2 close + post-push)
 
 | ID | Result |
 | -- | ------ |
-| H1 Public buckets | **GREEN** (A–D closed; 0 public fails on 29291077366) |
-| H2 DEF-TC-01 | **GREEN** (0 `tsc` errors) |
-| H3 CI-TRIAGE-TEAM-01 | **GREEN** (skip present; **deferred** beyond acceptance) |
-| H4 Fixtures inventory | **GREEN** (MISSING list current; optional set **deferred**) |
-| H5 Trust trio | **GREEN** (carry + tip run success) |
-| H6 HR drift | **GREEN** for milestone (**deferred** ops monitor; not a CI blocker) |
+| H1 Public buckets | **GREEN** (A–D closed; 0 public fails on 29291077366 + **29291826298**) |
+| H2 DEF-TC-01 | **GREEN** (0 `tsc` errors locally; closed on `87ce552e`) |
+| H3 CI-TRIAGE-TEAM-01 | **GREEN** for milestone (skip present; **deferred backlog** Eng/CI) |
+| H4 Fixtures inventory | **GREEN** (MISSING list current; optional set **deferred backlog** Eng/CI) |
+| H5 Trust trio | **GREEN** (**29291826298** — 6/0/2) |
+| H6 HR drift | **GREEN** for milestone (**deferred backlog** Ops/HR; not a CI blocker) |
+| Post-push verify | **GREEN** — see final external evidence table |
 
-**Overall milestone:** **GREEN**
+**Overall milestone:** **GREEN — COMPLETE / CLOSED**
 
 ---
 
@@ -287,9 +328,9 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 | ID | DEF-TC-01 |
 | Changes | Test-only typing: bodyScrollLock mock via `unknown` + optional globals; rail `"reports"` absence asserts use `(i.id as string)` |
 
-**Deferred (explicit, not blocking GREEN):** CI-TRIAGE-TEAM-01 quarantine remains; CI-FIX-01 optional fixtures MISSING; HR-DRIFT-01 ops monitor.
+**Deferred (explicit backlog, not blocking GREEN — Eng/CI / Ops/HR):** CI-TRIAGE-TEAM-01 · CI-FIX-01 · HR-DRIFT-01. Must not delay operational testing.
 
-**Overall milestone verdict:** **GREEN**
+**Overall milestone verdict:** **GREEN — COMPLETE / CLOSED** (post-push verify on `87ce552e` / run **29291826298**)
 
 ---
 
@@ -297,9 +338,11 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 
 | Command | Result |
 | ------- | ------ |
-| `npm run typecheck` | **PASS** — 0 errors (DEF-TC-01 closed) |
-| `gh run list --workflow=e2e-smoke.yml --limit 10` | Tip + cancelled chain + **29275224871** complete public |
-| `gh run view 29275224871 --log` | Buckets A–D classified |
+| `npm run typecheck` | **PASS** — 0 errors (DEF-TC-01 closed; reconfirmed at close) |
+| `gh run view 29291826298` | Final post-push: trust 6/0/2; public 144/0/66 completed |
+| `gh run view 29291826292` | `ci.yml` Format check fail (pre-existing); Typecheck step skipped |
+| `gh run list --workflow=e2e-smoke.yml --limit 10` | Tip + cancelled chain + completed confirm runs |
+| `gh run view 29275224871 --log` | Buckets A–D classified (Phase 1) |
 | `gh secret list` / `gh variable list` | MISSING optional fixtures confirmed |
 | `rg CI-TRIAGE-TEAM-01 e2e/journeys/team-workspace-nav.spec.ts` | Quarantine present |
 
@@ -308,5 +351,7 @@ This is the highest-leverage, lowest-risk signal win (~38% of the 126) and does 
 ## Related
 
 - [fi-ci-signal-hygiene-1-plan.md](./fi-ci-signal-hygiene-1-plan.md)
+- [fi-evolved-operational-pilot-1-plan.md](./fi-evolved-operational-pilot-1-plan.md) — **next** (ops pilot; do not expand CI hygiene)
 - [fi-trust-ci-and-reception-1.md](./fi-trust-ci-and-reception-1.md)
 - [.github/workflows/e2e-smoke.yml](../../.github/workflows/e2e-smoke.yml)
+- [.github/workflows/ci.yml](../../.github/workflows/ci.yml)

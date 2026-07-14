@@ -1,11 +1,14 @@
 # FI-CI-SIGNAL-HYGIENE-1 — Audit plan
 
 **Milestone:** `FI-CI-SIGNAL-HYGIENE-1`  
+**Status:** **COMPLETE / CLOSED — GREEN** (2026-07-14)  
 **Validates:** Readable CI signal — narrow public/advisory smoke noise, close known hygiene defects, keep trust gate GREEN  
 **Date:** 2026-07-14  
-**Mode:** Audit-first (Phase 1), then evidence-backed test/CI fixes only (Phase 2)  
+**Mode:** Audit-first (Phase 1), then evidence-backed test/CI fixes only (Phase 2) — **Phase 2 done; CI cleanup stopped**  
 **Prior:** `FI-TRUST-CI-AND-RECEPTION-1` **GREEN** (trust trio + reception R1)  
-**Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` (production) — **Keep B**
+**Decision B:** `FI_E2E_STAGING_URL` = `https://follicleintelligence.ai` (production) — **Keep B**  
+**Close evidence:** `87ce552e` → e2e-smoke run **29291826298** (trust GREEN; public **144/0/66** completed)  
+**Next:** `FI-EVOLVED-OPERATIONAL-PILOT-1` — deferred backlog (CI-TRIAGE-TEAM-01, CI-FIX-01, HR-DRIFT-01) must not delay ops pilot
 
 ---
 
@@ -29,6 +32,7 @@
 - Decision A staging host (deferred indefinitely)
 - Force-blocking PRs on public smoke until Phase 2 acceptance explicitly flips advisory → gate
 - Broad `@authenticated` suite as a required CI gate
+- **Further polishing of deferred backlog items** once milestone GREEN (quarantine / optional fixtures / HR ops) unless they block a real workflow
 
 ### Constraint (hard)
 
@@ -38,13 +42,13 @@
 
 ## 2. Defect inventory targets
 
-| ID | Source | Symptom | Phase 1 goal |
-| -- | ------ | ------- | ------------ |
-| PUB-SMOKE-01 | Public smoke ~126 fails | Advisory job red; bucket classifications needed | Bucket counts + root causes from GH run logs |
-| DEF-TC-01 | Prior bake / trust CI | `tsc --noEmit` 6 errors in `*.test.ts` | Reconfirm locally |
-| CI-TRIAGE-TEAM-01 | Authenticated triage | `team-sub-nav` missing → skip | Confirm quarantine code present |
-| CI-FIX-01 | Optional fixtures | Permanent skips for unlinked lead / landing suffix | Document MISSING list |
-| HR-DRIFT-01 | Role bake | iiohr sync can revert `staff_role` / `full_name` | Ops monitor note only |
+| ID | Source | Symptom | Phase 1 goal | Close disposition |
+| -- | ------ | ------- | ------------ | ----------------- |
+| PUB-SMOKE-01 | Public smoke ~126 fails | Advisory job red; bucket classifications needed | Bucket counts + root causes from GH run logs | **CLOSED** — A–D fixed; public **0** fails |
+| DEF-TC-01 | Prior bake / trust CI | `tsc --noEmit` 6 errors in `*.test.ts` | Reconfirm locally | **CLOSED** — `87ce552e` |
+| CI-TRIAGE-TEAM-01 | Authenticated triage | `team-sub-nav` missing → skip | Confirm quarantine code present | **Deferred backlog** — Eng/CI |
+| CI-FIX-01 | Optional fixtures | Permanent skips for unlinked lead / landing suffix | Document MISSING list | **Deferred backlog** — Eng/CI |
+| HR-DRIFT-01 | Role bake | iiohr sync can revert `staff_role` / `full_name` | Ops monitor note only | **Deferred backlog** — Ops/HR |
 
 ---
 
@@ -59,9 +63,9 @@
 | H5 | Trust trio unchanged | Latest `authenticated-smoke` | GREEN (6 pass / 0 fail) | Skipped (no staging var) | Fail on trust trio |
 | H6 | HR drift | Ops note / prior bake | Monitor filed | Unobserved recently | Proven mapping break untreated as P0 |
 
-**Phase 1 acceptance:** H1–H4 documented; H5 remains GREEN from prior; H6 recorded. No code fixes required for Phase 1 close.
+**Phase 1 acceptance:** H1–H4 documented; H5 remains GREEN from prior; H6 recorded. No code fixes required for Phase 1 close. **MET.**
 
-**Phase 2 acceptance (preview):** Reduce public-smoke logical fails via quarantine/narrowing; DEF-TC-01 GREEN or deferred IDs; advisory job still `continue-on-error` unless explicitly promoted.
+**Phase 2 acceptance:** Reduce public-smoke logical fails via quarantine/narrowing; DEF-TC-01 GREEN or deferred IDs; advisory job still `continue-on-error` unless explicitly promoted. **MET** → milestone **COMPLETE / CLOSED**.
 
 ---
 
@@ -99,24 +103,32 @@ gh run list --workflow=e2e-smoke.yml --limit 3
 npm run typecheck
 ```
 
+### Post-push final verify (`87ce552e`)
+
+```bash
+gh run view 29291826298 --json conclusion,status,headSha,jobs
+gh run view 29291826292 --json conclusion,jobs   # ci.yml (format gate; typecheck skipped)
+```
+
 ---
 
-## 5. Recommended Phase 2 order (audit→fix)
+## 5. Recommended Phase 2 order (audit→fix) — **DONE**
 
 | Priority | Action | Rationale |
 | -------- | ------ | --------- |
 | **P0** | Guard public job against `@authenticated @smoke` credential crash (fixture skip **or** exclude dual-tagged tests from public projects) | Immediate ~48/126 fail reduction; pure signal hygiene — **DONE** (Bucket B) |
-| **P1** | Re-tag or auth-wrap `fi-ux-audit-labels` (protected `/fi-admin/.../front-desk` on placeholder CI) | ~60/126; labels need session — **DONE** (Bucket A / PUB-LABELS: `@authenticated @smoke` + authenticated `testMatch`) |
-| **P1** | Investigate procedure-day unauth **HTTP 200** (security `@smoke`) | **DONE** (PUB-PROC-200) — soft 200 + no Surgery day chrome |
-| **P2** | Widen/tighten security expects for patients **404** + cron **503** only after confirming intended status | **DONE** (PUB-SEC-STATUS) — 404/503 intentional |
-| **P2** | Close DEF-TC-01 test typing | Restores `ci.yml` typecheck claim — **still open** (overall AMBER) |
-| **P3** | Optional fixtures (CI-FIX-01) + HR drift ops cadence | Coverage / ops only |
+| **P1** | Re-tag or auth-wrap `fi-ux-audit-labels` (protected `/fi-admin/.../front-desk` on placeholder CI) | ~60/126; labels need session — **DONE** (Bucket A / PUB-LABELS) |
+| **P1** | Investigate procedure-day unauth **HTTP 200** (security `@smoke`) | **DONE** (PUB-PROC-200) |
+| **P2** | Widen/tighten security expects for patients **404** + cron **503** only after confirming intended status | **DONE** (PUB-SEC-STATUS) |
+| **P2** | Close DEF-TC-01 test typing | **DONE** — `87ce552e`; local typecheck 0 errors |
+| **P3** | Optional fixtures (CI-FIX-01) + HR drift ops cadence | **Deferred backlog** — Eng/CI + Ops/HR; **do not delay** ops pilot |
 
 ---
 
 ## 6. Related docs
 
-- [fi-ci-signal-hygiene-1.md](./fi-ci-signal-hygiene-1.md) — Phase 1 findings
+- [fi-ci-signal-hygiene-1.md](./fi-ci-signal-hygiene-1.md) — findings + final run IDs
+- [fi-evolved-operational-pilot-1-plan.md](./fi-evolved-operational-pilot-1-plan.md) — next milestone
 - [fi-trust-ci-and-reception-1.md](./fi-trust-ci-and-reception-1.md) — trust GREEN baseline
 - [.github/workflows/e2e-smoke.yml](../../.github/workflows/e2e-smoke.yml)
 - [e2e/README.md](../../e2e/README.md)
