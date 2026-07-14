@@ -1,7 +1,7 @@
 # FI-EVOLVED-OPERATIONAL-PILOT-1 — Findings
 
 **Milestone:** `FI-EVOLVED-OPERATIONAL-PILOT-1`  
-**Status:** **AMBER → path-to-GREEN (fixes landed; live P1 re-bake pending deploy)**  
+**Status:** **AMBER → path-to-GREEN (F-PILOT-06 live PASS; 11/18 re-bake open)**  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-operational-pilot-1-plan.md](./fi-evolved-operational-pilot-1-plan.md)  
@@ -12,7 +12,7 @@
 
 ## Executive summary
 
-Live clinic-day bake **day-1 planned roles complete** 2026-07-14. **S1 Reception (Jesika)** **PASS** — Front desk + Calendar OK; **check-in mutation + reload PASS** (08:00 SMOKETEST → Waiting held after full reload). **S2–S5:** prior evidence stands; **F-PILOT-06 / 11 / 18 code fixes landed** (unit tests green) — **live re-bake pending production deploy**. Staff-mapping gate **PASS**. **No P0.** Verdict remains **AMBER** until P1s re-verified live.
+Live clinic-day bake **day-1 planned roles complete** 2026-07-14. **S1 Reception (Jesika)** **PASS** — Front desk + Calendar OK; **check-in mutation + reload PASS** (08:00 SMOKETEST → Waiting held after full reload). **F-PILOT-06 live re-bake PASS** (Consultant bare → `/crm` after settle; Pipeline held). **F-PILOT-11 / 18** code fixes landed — **live re-bake still open**. Staff-mapping gate **PASS**. **No P0.** Verdict remains **AMBER** until Nurse PRP + Finance Patients re-verified live.
 
 **Core question:** Can Evolved staff use agreed core workflows during a real clinic day without developer intervention?
 
@@ -26,10 +26,10 @@ Live clinic-day bake **day-1 planned roles complete** 2026-07-14. **S1 Reception
 | Item | Result |
 | ---- | ------ |
 | Plan read | Done |
-| Findings status | **AMBER** — S1 mutation PASS; P1 code fixes landed; live P1 re-bake pending deploy |
+| Findings status | **AMBER** — S1 mutation PASS; **F-PILOT-06 live PASS**; F-PILOT-11/18 live re-bake open |
 | Browser login | **Yes** — S1 Jesika; S2 `manager` (Consultant); S3 Evie (Nurse); S4 Seetal (Doctor); S5 Harsh (Finance) impersonation |
 | Raw staff password login | **Not this session** — Exit impersonation visible |
-| First gate | Reception — **PASS** (check-in + reload); Consultant — **PARTIAL** (landing fix pending bake); Nurse — **PARTIAL** (PRP fix pending bake); Doctor — **PASS**; Finance — **PARTIAL** (Patients fix pending bake) |
+| First gate | Reception — **PASS** (check-in + reload); Consultant — **PASS** (bare → `/crm`); Nurse — **PARTIAL** (PRP fix pending bake); Doctor — **PASS**; Finance — **PARTIAL** (Patients fix pending bake) |
 | Staff mapping `npm run audit:staff-mapping` | **PASS** — 10 operators, 0 missing `fi_staff`, 0 missing access signal (HR-DRIFT monitor only; no fix) |
 
 ### Pilot day roster (Evolved)
@@ -37,13 +37,13 @@ Live clinic-day bake **day-1 planned roles complete** 2026-07-14. **S1 Reception
 | Role | Who to exercise | Email (known) | Surfaces | Session status |
 | ---- | --------------- | ------------- | -------- | -------------- |
 | Reception | Roslyn / Jesika | `roslynhrichards@outlook.com` / Jesika `j***@hotmail.com` (`jesika.watt11`) | Front desk, Today, Calendar/bookings, Patients | **S1 PASS** — doorway + Calendar view OK; **check-in mutation + reload PASS** |
-| Consultant | manager@ | `manager@evolvedhair.com.au` | Pipeline, Consultations, Patients, Calendar | **S2 PARTIAL** — CRM usable; bare→Today (F-PILOT-06 fix landed; re-bake pending) |
+| Consultant | manager@ | `manager@evolvedhair.com.au` | Pipeline, Consultations, Patients, Calendar | **S2 PASS (doorway)** — bare → `/crm` after settle; Pipeline spot-check held (F-PILOT-06 **PASS**) |
 | Nurse | Evie | `evieshackleton1@gmail.com` | Treatment appointments, imaging, Patients, Today | **S3 PARTIAL** — FD+Calendar+Imaging OK; PRP filter fix landed (re-bake pending) |
 | Doctor | Dr Seetal | `seetskd@gmail.com` | Doctor workspace, Calendar, Patients | **S4 PASS** — `/doctor` landing + clinical spine usable; no new P0/P1 |
 | Finance / clinic admin | Harsh | `harsh@evolvedhair.com.au` (`finance_admin` — **Finance workspace**, not clinic_admin) | Money (+ balances) | **S5 PARTIAL** — Money OK; Patients→Surgery fix landed (re-bake pending) |
 | Manager / mapping | Paul / mapped pilot staff | `paul@evolvedhair.com.au` (owner) | Team access + staff mapping | Mapping gate only so far |
 
-**Exact next session ask:** Deploy P1 fixes → live re-bake bare `/crm` (consultant), Calendar `type=prp` (nurse), Finance `/patients` (Harsh). HR-DRIFT remains monitor-only.
+**Exact next session ask:** Nurse (Evie) live re-bake Calendar `type=prp` (F-PILOT-11), then Finance `/patients` (Harsh / F-PILOT-18). HR-DRIFT remains monitor-only.
 
 ---
 
@@ -93,7 +93,7 @@ Roles seen (masked emails in script): Manager, consultant, Receptionist×2, owne
 | Session | Role | Doorway OK? | Tasks completed | Help needed? | Blockers / notes |
 | ------- | ---- | ----------- | --------------- | ------------ | ---------------- |
 | S1 | Reception (Jesika impersonation) | **YES** — Reception workspace → `/front-desk` | View Front desk board; open Calendar (week); confirm 2 SMOKETEST surgeries; **Check in** 08:00 SMOKETEST-TMRW Unavailable → Waiting; **full reload held** Waiting=1 / Running late=1 | **0** (auditor bake) | Mutation+reload **PASS**; tablet N/A desktop |
-| S2 | Consultant (manager@ impersonation) | **PARTIAL** — Consultant workspace + greeting; bare tenant → **Today** (expected `/crm`) | Pipeline board (H-scroll contained); `/leadflow`→`/crm`; golden lead+patient; consultation hub; Calendar (2 appts after settle); Money hub; reload lead held | **0** (auditor bake) | Pipeline under More (not primary rail); soft-nav on some consultation links; see F-PILOT-06..09 |
+| S2 | Consultant (manager@ impersonation) | **YES** — Consultant workspace; bare → **`/crm`** after settle (F-PILOT-06 re-bake **PASS**) | Pipeline board (H-scroll contained); `/leadflow`→`/crm`; golden lead+patient; consultation hub; Calendar (2 appts after settle); Money hub; reload lead held; **re-bake** Pipeline Visible 300 held | **0** (auditor bake) | Pipeline under More (not primary rail); soft-nav on some consultation links; see F-PILOT-07..09 |
 | S3 | Nurse (Evie impersonation) | **YES** — Nurse workspace; bare → `/front-desk` after settle | Front desk board; Calendar Surgery filter + 2 HT surgeries; PRP filter URL toggles; ImagingOS on golden patient; Patients hub; Tomorrow board (empty Jul 15); ImagingOS reload held | **0** (auditor bake) | Soft-nav ImagingOS / Open calendar; `type=prp` still showed Surgery cards (F-PILOT-11); Payment due hydrate flicker |
 | S4 | Doctor (Seetal impersonation) | **YES** — Surgeon/Doctor workspace; bare → `/doctor` after brief Today flash | Doctor Workspace queues; Patients hub; Calendar Surgery (2 HT + readiness %); Surgery readiness board; golden patient + consultation hub; Doctor re-nav held | **0** (auditor bake) | Soft-nav Open surgery delayed then Calendar; readiness Room summary vs card blockers (F-PILOT-15); did not open Procedure Day automation |
 | S5 | Finance (Harsh impersonation) | **YES** — Finance workspace; bare → `/financial-os` after brief Today flash | Money hub (manual tracking banner); payment Source labels; invoices balances = hub tiles; `/payments` FI_PAYMENTS honesty; Money re-nav held | **0** (auditor bake) | Direct `/patients` + `/patients/{id}` settle to Surgery `/cases` (F-PILOT-18); rail Calendar/Patients non-link labels |
@@ -102,7 +102,7 @@ Roles seen (masked emails in script): Manager, consultant, Receptionist×2, owne
 
 | Check | Reception S1 | Consultant S2 | Nurse S3 | Doctor S4 | Finance S5 |
 | ----- | ------------ | ------------- | -------- | --------- | ---------- |
-| Correct login landing (P1) | **PASS** — Front desk / Reception workspace (impersonation) | **PARTIAL** — Consultant workspace OK; bare → Today not `/crm` (F-PILOT-06; fix landed) | **PASS** — Nurse workspace; bare → `/front-desk` after settle | **PASS** — Surgeon workspace; bare → `/doctor` after settle | **PASS** — Finance workspace; bare → `/financial-os` after settle |
+| Correct login landing (P1) | **PASS** — Front desk / Reception workspace (impersonation) | **PASS** — Consultant workspace; bare → `/crm` after settle (F-PILOT-06 live) | **PASS** — Nurse workspace; bare → `/front-desk` after settle | **PASS** — Surgeon workspace; bare → `/doctor` after settle | **PASS** — Finance workspace; bare → `/financial-os` after settle |
 | Ordinary tasks completed (P2) | **PASS** — view board + Calendar + **check-in mutation** | **PASS** — Pipeline view/work; lead/patient/consult path; Calendar; Money readable | **PASS** — Front desk; Calendar Surgery; ImagingOS; Patients; Tomorrow | **PASS** — Doctor queues; Patients; Calendar; Surgery readiness; consult path | **PASS** — Money hub; payment records Source labels; invoices/balances; `/payments` honesty |
 | Wrong turns / missing data (P3) | Soft-nav Calendar rail briefly stayed on Front desk; direct `/calendar` OK | Pipeline not on primary rail (More); soft click on some patient consult links stayed on patient page; direct `/consultations/…` OK | Soft-nav ImagingOS + Open calendar; PRP filter still shows Surgery (F-PILOT-11; fix landed) | Soft-nav Open surgery delayed; rail Today → bare then `/doctor`; Procedure Day not expanded | Patients rail was non-link / `/patients` → `/cases` Surgery (F-PILOT-18; fix landed); Money path no wrong turn |
 | Contradictory statuses (P4) | See findings F-PILOT-01 / F-PILOT-02 | Lead status **open** + stage **Consult completed**; consult hub **Completed** + **No patient linked** (F-PILOT-07/08) | Front desk **Payment due** 1→0 across revisits (hydrate); PRP filter vs Surgery badges | Readiness Room summary Clear vs cards “No room assigned” (F-PILOT-15); consult hub still No patient linked (F-PILOT-08) | Outstanding AUD 125 = deposits due AUD 125 = invoice balances 50+75 — **consistent**; manual vs provider Source labels honest |
@@ -154,7 +154,7 @@ Roles seen (masked emails in script): Manager, consultant, Receptionist×2, owne
 
 | Step | Observation |
 | ---- | ----------- |
-| Bare tenant URL | Stays on **Today / Home** (`…/c2615b95-…`) — **not** redirect to `/crm` (vs prior role-bake expectation) |
+| Bare tenant URL | Brief **Home/Today** flash → settles to **`/crm`** (Pipeline) — canonical Consultant doorway OK (was Today-only before `1149d125`) |
 | Identity | Consultant workspace; Manager greeting; `manager@` profile chip |
 | `/crm` Pipeline | Loads Enquiries board: Visible 300 / Active 265 / columns with cards; New / Contacting / Qualified / Consultation / … columns |
 | H-scroll | Board scroller `overflow-x: auto` + `overscroll-x-contain`; page `scrollWidth` ≈ viewport — **containment OK** |
@@ -166,25 +166,26 @@ Roles seen (masked emails in script): Manager, consultant, Receptionist×2, owne
 | Calendar | First paint **Today · 0 appointments**; after settle **Today · 2 appointments** (SMOKETEST-TMRW) — same flicker pattern as S1 |
 | Money | `/financial-os` title **Money**; truth banner (manual tracking / card capture off); deposits/outstanding tiles readable while Consultant workspace |
 | Reload | Re-navigate golden lead after Money visit — still Consultant workspace, same lead/patient, Status open |
+| **Live re-bake (F-PILOT-06)** | 2026-07-14 post-`1149d125`: Consultant workspace + `manager@` held; bare `/fi-admin/{tenantId}` ×3 hard navigates — brief Today flash → **`/crm` Pipeline**; spot-check **Visible 300** / Enquiries board / SMOKETEST cards held |
 
 ### Observations / findings
 
 | ID | Severity | Note |
 | -- | -------- | ---- |
-| F-PILOT-06 | **P1 (fix landed)** | Consultant bare-tenant landing was **Today**, not expected canonical **`/crm`**. Cause: `staff_role` manager/owner returned Today before `workspace_profile=consultant`. Fix: defer manager/owner Today until after workspace profile / tenant admin resolution (`fiOsRoleLandingCore`). Unit test added. **Live re-bake pending deploy.** |
+| F-PILOT-06 | **PASS (live)** | Consultant bare-tenant landing now settles on canonical **`/crm`** (brief Today flash, same pattern as Nurse/Doctor). Cause was `staff_role` manager/owner returning Today before `workspace_profile=consultant`. Fix in `fiOsRoleLandingCore` (`1149d125`). **Live re-bake PASS** 2026-07-14. |
 | F-PILOT-07 | **P2 (observe)** | Lead status dropdown **open** while operational stage shows **Consult completed** — vocabulary contradiction for staff. |
 | F-PILOT-08 | **P2 (observe)** | Consultation hub shows visit **Completed** + lead stage Consult completed, but **Patient: No patient linked** / Link patient disabled — while patient record path clearly links the same SMOKETEST person. Fixture / linkage honesty gap. |
 | F-PILOT-09 | **note** | Soft click on patient-page Scalp consultation / View consultations often left URL on patient page; direct consultation URL succeeded (mirrors Reception soft-nav note). |
 | F-PILOT-10 | **note** | Impersonation session (not raw `manager@` password) — chrome still valid for Consultant doorway; System diagnostics visible (platform operator overlay). |
 
-**No P0** identity/security/patient-record loss in S2. **No CRM mutation** (save/stage-move) exercised — P5 scored only for re-navigation integrity. **No code fix** applied.
+**No P0** identity/security/patient-record loss in S2. **No CRM mutation** (save/stage-move) exercised — P5 scored only for re-navigation integrity. **F-PILOT-06 closed live.**
 
 ### Consultant PASS / PARTIAL matrix (S2)
 
 | Surface / check | Result |
 | --------------- | ------ |
 | Identity (greeting, email, Consultant workspace) | **PASS** |
-| Bare landing → `/crm` | **PARTIAL** (Today) |
+| Bare landing → `/crm` | **PASS** (after settle; F-PILOT-06 live re-bake) |
 | Pipeline board usable + H-scroll containment | **PASS** |
 | `/leadflow` → `/crm` | **PASS** |
 | Golden lead / enquiry progress without CRM eject | **PASS** |
@@ -352,34 +353,33 @@ Roles seen (masked emails in script): Manager, consultant, Receptionist×2, owne
 | - | --------- | ------ |
 | 1 | No P0 identity, security, or patient-record issue | **Hold** — S1–S5: none observed |
 | 2 | No core mutation lost after reload | **PASS (S1)** — Reception check-in held after reload; other roles nav reload only |
-| 3 | Staff identify correct canonical doorway | *partial* — Reception/Nurse/Doctor/Finance YES; Consultant identity YES but `/crm` landing miss (**fix landed**, re-bake pending) |
+| 3 | Staff identify correct canonical doorway | *partial* — Reception/Nurse/Doctor/Finance/Consultant YES for doorway; Nurse PRP + Finance Patients honesty still open |
 | 4 | Reception: Front Desk + Calendar reliable | **PASS** — both reachable; check-in mutation + reload PASS |
-| 5 | Consultants: enquiries + consultations progress | *partial* — Pipeline + paths usable; landing fix landed; consult linkage P2 observe |
+| 5 | Consultants: enquiries + consultations progress | **PASS (doorway)** — bare → `/crm`; Pipeline usable; consult linkage P2 observe |
 | 6 | Nurses: treatment appointments + imaging reachable | *partial* — reachable; PRP filter fix landed (re-bake pending) |
 | 7 | Money states understandable and consistent | *partial* — Money hub PASS; Finance Patients fix landed (re-bake pending) |
 | 8 | Active pilot staff correctly mapped after HR sync | **PASS at kickoff** (HR-DRIFT monitor) |
-| 9 | Critical issues resolved or have safe SOPs | *partial* — P1 fixes code-landed (06/11/18); live re-verify open |
-| 10 | Readiness rescore supported by real usage evidence | *pending* — S1 mutation PASS; wait deploy + P1 live bake for GREEN |
+| 9 | Critical issues resolved or have safe SOPs | *partial* — F-PILOT-06 live PASS; 11/18 code-landed, live re-verify open |
+| 10 | Readiness rescore supported by real usage evidence | *pending* — S1 mutation + F-PILOT-06 PASS; wait Nurse/Finance P1 live bake for GREEN |
 
-**Overall verdict:** **AMBER — path to GREEN** (Reception mutation PASS; P1 code fixes landed; not RED — no P0). **Not GREEN** until live re-verify of F-PILOT-06 / 11 / 18 on production.
+**Overall verdict:** **AMBER — path to GREEN** (Reception mutation PASS; F-PILOT-06 live PASS; not RED — no P0). **Not GREEN** until live re-verify of F-PILOT-11 / 18 on production.
 
 ### Remaining gaps (post fix slice)
 
 | Gap | Severity | Owner hint |
 | --- | -------- | ---------- |
-| Live re-bake F-PILOT-06 Consultant bare → `/crm` | **P1 re-verify** | After deploy |
-| Live re-bake F-PILOT-11 Calendar `type=prp` | **P1 re-verify** | After deploy |
-| Live re-bake F-PILOT-18 Finance `/patients` | **P1 re-verify** | After deploy |
+| Live re-bake F-PILOT-11 Calendar `type=prp` | **P1 re-verify** | **Next** — Nurse (Evie) |
+| Live re-bake F-PILOT-18 Finance `/patients` | **P1 re-verify** | After Nurse |
 | HR-DRIFT-01 mapping after HR sync | Monitor | Ops / HR — not code |
 | Raw password logins / tablet | Observability | Optional purity / P7 |
 
 ### P1 fix summary (engineering)
 
-| ID | Before | After (code) | Tests |
-| -- | ------ | ------------ | ----- |
-| F-PILOT-06 | `manager` staff_role → bare Today before consultant workspace | workspace `consultant` / job homes win over manager/owner Today | `fiOsRoleLandingCore.test.ts` |
-| F-PILOT-11 | CalendarOS rows ignored `type=prp` filter | excluded IDs applied via `applyCalendarOsBookingUrlFilters` | `calendarOsDisplayPipeline.test.ts` |
-| F-PILOT-18 | `finance_admin` Patients → `/cases`; rail disabled | bookings gate allows finance_admin; Patients nav → `/patients` enabled | `tenantAdminRoles.test.ts`, `fiOsShellPrimaryNav.test.ts` |
+| ID | Before | After (code) | Live |
+| -- | ------ | ------------ | ---- |
+| F-PILOT-06 | `manager` staff_role → bare Today before consultant workspace | workspace `consultant` / job homes win over manager/owner Today | **PASS** 2026-07-14 |
+| F-PILOT-11 | CalendarOS rows ignored `type=prp` filter | excluded IDs applied via `applyCalendarOsBookingUrlFilters` | re-bake open |
+| F-PILOT-18 | `finance_admin` Patients → `/cases`; rail disabled | bookings gate allows finance_admin; Patients nav → `/patients` enabled | re-bake open |
 
 ---
 
