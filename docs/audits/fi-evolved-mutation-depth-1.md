@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Findings
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **IN PROGRESS** (MD-01 + MD-02 PASS; MD-03 FAIL — P1 fix landed, mutation re-bake after deploy)  
+**Status:** **IN PROGRESS / AMBER** (MD-01 + MD-02 + MD-03 PASS; MD-05 raw-password pending)  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)  
@@ -11,7 +11,7 @@
 
 ## Executive summary
 
-Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant** and **MD-02 Nurse** PASS. **MD-03 Finance Money mutation FAIL** — Harsh (`finance_admin` / Finance workspace) can open Money + confirm SMOKETEST Source labels, but **cannot mutate** payment/invoice controls: UI shows “finance or a manager must sign in to edit” / “Finance or manager access is required…”. Root cause: payment write gate checked only legacy `fi_users.role` (`PAYMENT_MUTATION_ROLES_LOWER`); Harsh is `tenant_backend` + active `fi_tenant_admin_users.admin_role=finance_admin`. **P1 fix landed in code** (allow active `finance_admin` / `clinic_admin` tenant admin). Mutation+reload **not re-verified on production** until deploy. Help-needed: **0**.
+Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, and **MD-03 Finance** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. Re-bake: Harsh (`finance_admin` / Finance workspace) set SMOKETEST manual invoice due date **empty → 2026-08-15**, banner “Due date saved.”, hard reload held `due_date=2026-08-15` (invoice `6815cad5-…`). Source labels still OK. Help-needed: **0**. Remaining for GREEN: **MD-05** raw-password login (MD-04 Doctor optional).
 
 ---
 
@@ -21,7 +21,7 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant** and **MD-0
 | -- | ---- | -------- | --------------- | ------ |
 | MD-01 | Consultant | `manager@evolvedhair.com.au` (impersonation) · Consultant workspace | Pipeline stage-move + hard reload (golden SMOKETEST) | **PASS** |
 | MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** |
-| MD-03 | Finance | `harsh@evolvedhair.com.au` (impersonation) · Finance workspace / `finance_admin` | Money/invoice safe mutation + hard reload | **FAIL** (P1 fixed in code; re-bake after deploy) |
+| MD-03 | Finance | `harsh@evolvedhair.com.au` (impersonation) · Finance workspace / `finance_admin` | Money/invoice safe mutation + hard reload | **PASS** (re-bake after `6df88546`) |
 | MD-04 | Doctor | TBD | Only if safe fixture | Pending / optional SKIP |
 | MD-05 | Raw password | Reception or Consultant preferred | Ordinary login (no impersonation) | Pending |
 
@@ -33,10 +33,10 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant** and **MD-0
 | -- | ----- | ------ | ----- |
 | MD-01 | Consultant Pipeline stage-move + hard reload | **PASS** | Golden lead stage held after full reload; reverted; help-needed 0 |
 | MD-02 | Nurse safe clinical + reload | **PASS** | SMOKETEST Front desk check-in held after full reload; ImagingOS reachability OK; help-needed 0 |
-| MD-03 | Finance Money/invoice + reload | **FAIL** | Identity + Source labels OK; mutate blocked for `finance_admin`; P1 gate fix committed; help-needed 0 |
+| MD-03 | Finance Money/invoice + reload | **PASS** | Due date mutate + hard reload held; Source labels OK; write gate fix live; help-needed 0 |
 | MD-04 | Doctor safe mutation | Pending | Optional |
 | MD-05 | ≥1 raw-password login | Pending | — |
-| MD-06 | No P0 | **PASS (so far)** | No identity / security / patient-record loss; MD-03 is P1 access gap (not data loss) |
+| MD-06 | No P0 | **PASS (so far)** | No identity / security / patient-record loss |
 
 ---
 
@@ -105,43 +105,45 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant** and **MD-0
 ## Session MD-03 — Finance Money mutation + hard reload
 
 **Host:** `https://follicleintelligence.ai`  
-**Surface:** `/financial-os` Money hub → `/financial/payments` → golden case finances  
+**Surface:** `/financial/payments` + golden case finances `cases/80ae7196-…`  
 **Identity:** Impersonating **harsh** · badge **Finance workspace** · profile `harsh@evolvedhair.com.au` · Exit impersonation visible · `finance_admin`  
-**Fixtures:** SMOKETEST payment rows Manual `230631c0-…` / Stripe `2abda5f6-…`; open surgery-deposit invoices AUD 50 + AUD 75; golden case `80ae7196-…` / patient `287348d5-…`  
+**Fixtures:** SMOKETEST payment rows Manual `230631c0-…` / Stripe `2abda5f6-…`; invoice `6815cad5-ed06-4ae0-9964-f664ab4757fa` (SMOKETEST manual · surgery_deposit · partially_paid); golden case `80ae7196-…` / patient `287348d5-…`  
 **Help-needed count:** **0**  
-**FI_PAYMENTS_ENABLED:** OFF — Manual payment tracking banner present (expected)
+**FI_PAYMENTS_ENABLED:** OFF — Manual payment tracking path (expected)  
+**Prior:** **FAIL** (mutate blocked) · P1 fix `6df88546` · **re-bake PASS** 2026-07-14
 
 | Step | Result |
 | ---- | ------ |
-| Session present | **PASS** — Finance workspace; impersonating harsh; profile `harsh@evolvedhair.c…`; landing Money `/financial-os` |
-| Money hub baseline | Manual payment tracking banner; Outstanding / Deposits due **AUD 125.00** (2 open); collection: SMOKETEST manual AUD 50 + Stripe AUD 75 awaiting payment |
+| Session present | **PASS** — Finance workspace; impersonating harsh; profile `harsh@evolvedhair.c…` |
 | Source labels | **PASS** — `/financial/payments`: **Manual tracking** (MANUALLY RECORDED · AUD 550.00) + **Provider confirmed (Stripe)** (SUCCEEDED · AUD 825.00) |
-| Mutation attempt | **BLOCKED** — Case `80ae7196-…` Recorded payment status: *“You can view recorded payment status; finance or a manager must sign in to edit.”* Invoices & payment requests: *“Finance or manager access is required to create payment links and invoices.”* No due-date / Record payment controls (`canMutate=false`) |
-| Hard reload held | **N/A** — no mutation exercised (would not invent PASS) |
-| Revert | N/A |
-| Verdict | **FAIL** |
+| Write gate live | **PASS** — `canMutate` UI present: Due date Save, Record payment…, Send payment link; no “finance or a manager must sign in to edit” / “Finance or manager access is required…” |
+| Before mutation | SMOKETEST manual invoice `6815cad5-…` due date **empty/null** |
+| Mutation | Set due date **2026-08-15** → Save → banner **Due date saved.** |
+| Hard reload | Full navigate to `cases/80ae7196-…` |
+| After reload | Due date input **2026-08-15**; RSC/payload `due_date: "2026-08-15"` on invoice `6815cad5-…` |
+| Revert | **Not available via UI** — Save disabled when due empty; clearing to null not exposed. Left `2026-08-15` on SMOKETEST fixture — acceptable (non-destructive additive) |
+| Verdict | **PASS** |
 
-### P1 — finance_admin cannot mutate Money writes
+### P1 — finance_admin Money writes (closed)
 
 | Field | Detail |
 | ----- | ------ |
 | ID | **MD-03-P1** |
-| Severity | **P1** |
-| Symptom | Finance workspace / `finance_admin` (Harsh) cannot record payments, edit invoice due dates, or create payment links — despite product copy granting finance_admin “Revenue, invoices, payments…” |
-| root cause | `assertPaymentRecordWriteAllowed` / `getPaymentRecordMutationCapability` only accepted legacy `fi_users.role` in `PAYMENT_MUTATION_ROLES_LOWER`. Harsh’s `fi_users.role` is `tenant_backend` (by design for tenant-backend admins); mutation capability lives on `fi_tenant_admin_users.admin_role=finance_admin` and was ignored. |
-| Fix (code) | Allow active `finance_admin` / `clinic_admin` tenant-admin rows in the payment write gate (`tenantAdminRoleAllowsPaymentMutation` + `paymentRecordAccess.server.ts`). Unit coverage added. |
-| Deploy / re-bake | **Required** before MD-03 can score PASS — exercise reversible SMOKETEST invoice due-date (or Record payment note) → hard reload → revert |
+| Severity | **P1** (was open; **CLOSED** on re-bake) |
+| Symptom | Finance workspace / `finance_admin` (Harsh) could not mutate payment/invoice controls |
+| root cause | Write gate only accepted legacy `fi_users.role`; ignored active `fi_tenant_admin_users.admin_role=finance_admin` |
+| Fix | `6df88546` — allow active `finance_admin` / `clinic_admin` in payment write gate |
+| Re-bake | **PASS** — due-date mutate + hard reload held on production |
 
 ### Evidence URLs
 
-- Money hub: `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/financial-os`
 - Payment records (Source labels): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/financial/payments`
-- Golden case finances (mutate blocked): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/cases/80ae7196-c15e-4929-8e1d-7ceaad5a2a31`
+- Golden case finances (mutation + reload): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/cases/80ae7196-c15e-4929-8e1d-7ceaad5a2a31`
 
 ### Observe (not scored as separate fail)
 
 - Soft-click on Money hub **Payment records** / **Open invoice** sometimes fails to navigate (SPA click lag); direct URL navigation works — P2 soft-nav class, not MD-03 score driver.
-- `/financial/payments` and `/financial/invoices` remain list/read-only surfaces; mutation UX is on case / patient PaymentRecordPanel + CaseRevenuePaymentsCard (gated by same capability).
+- `/financial/payments` and `/financial/invoices` remain list/read-only surfaces; mutation UX is on case PaymentRecordPanel + CaseRevenuePaymentsCard.
 
 ---
 
@@ -151,12 +153,12 @@ Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant** and **MD-0
 | - | --------- | ------ |
 | 1 | MD-01 Consultant stage-move + reload | **PASS** |
 | 2 | MD-02 Nurse safe clinical + reload | **PASS** |
-| 3 | MD-03 Finance PASS or safe SKIP | **FAIL** — mutate blocked; P1 fix landed; re-bake after deploy |
+| 3 | MD-03 Finance PASS or safe SKIP | **PASS** |
 | 4 | MD-05 raw-password login | Pending |
 | 5 | MD-06 no P0 | **PASS (so far)** |
 | 6 | MD-04 Doctor PASS or SKIP | Pending |
 
-**Overall verdict:** **IN PROGRESS / AMBER** — MD-01 + MD-02 closed; MD-03 FAIL until deploy + mutation re-bake; continue MD-05 (and MD-03 re-bake)
+**Overall verdict:** **IN PROGRESS / AMBER** — MD-01 + MD-02 + MD-03 closed; continue **MD-05** raw-password (MD-04 Doctor optional)
 
 ---
 
