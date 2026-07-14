@@ -119,12 +119,12 @@ This milestone **assumes** those gates hold and gathers **real clinic-day usage*
 ## 8. Method (live bake — started 2026-07-14)
 
 1. Confirm staff mapping gate before clinic day — **done (PASS)** at kickoff
-2. Observe / time-box ordinary workflows per role on production (Decision B host) — **S1 Reception Jesika in progress**
-3. Log evidence against §5–§6; score help-needed metric
+2. Observe / time-box ordinary workflows per role on production (Decision B host) — **S1 Reception PARTIAL** (mutation TBD); **S2 Consultant PARTIAL** (landing Today not `/crm`)
+3. Log evidence against §5–§6; score help-needed metric — S1+S2 help needed **0**
 4. File findings in [fi-evolved-operational-pilot-1.md](./fi-evolved-operational-pilot-1.md)
 5. Only then decide GREEN / AMBER / RED on exit criteria
 
-**Kickoff:** findings marked IN PROGRESS; roster initialized; reception first gate underway.
+**Next role:** Nurse Evie.
 
 ---
 
