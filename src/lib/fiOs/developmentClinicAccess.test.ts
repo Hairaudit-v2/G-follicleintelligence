@@ -5,6 +5,7 @@ import {
   canUseDevelopmentClinicFeatures,
   canUseDevelopmentClinicFeaturesFromFiUserRole,
   isConfiguredDevelopmentAdminAuthUser,
+  isDevelopmentClinicStaffRole,
 } from "./developmentClinicAccess";
 
 describe("developmentClinicAccess (pure)", () => {
@@ -16,10 +17,80 @@ describe("developmentClinicAccess (pure)", () => {
   });
 
   it("allows CRM mutation roles and owner during development", () => {
-    for (const role of ["fi_admin", "admin", "crm_operator", "owner"] as const) {
+    for (const role of [
+      "fi_admin",
+      "admin",
+      "crm_operator",
+      "owner",
+      "manager",
+      "consultant",
+    ] as const) {
       assert.equal(canUseDevelopmentClinicFeaturesFromFiUserRole(role), true, role);
     }
     assert.equal(canUseDevelopmentClinicFeaturesFromFiUserRole("member"), false);
+  });
+
+  it("allows ordinary CRM staff roles when fi_users.role is member (OW parity)", () => {
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "consultant",
+      }),
+      true
+    );
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "reception",
+      }),
+      true
+    );
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "receptionist",
+      }),
+      true
+    );
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "manager",
+      }),
+      true
+    );
+  });
+
+  it("keeps true read-only / clinical staff roles from ClinicOS mutations", () => {
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "nurse",
+      }),
+      false
+    );
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+        staffRole: "doctor",
+      }),
+      false
+    );
+    assert.equal(
+      canUseDevelopmentClinicFeatures({
+        isAuthenticated: true,
+        fiUserRole: "member",
+      }),
+      false
+    );
+    assert.equal(isDevelopmentClinicStaffRole("consultant"), true);
+    assert.equal(isDevelopmentClinicStaffRole("nurse"), false);
   });
 
   it("allows tenant clinic_admin and operations_admin", () => {

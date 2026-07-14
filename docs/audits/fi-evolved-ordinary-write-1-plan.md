@@ -1,7 +1,7 @@
 # FI-EVOLVED-ORDINARY-WRITE-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-ORDINARY-WRITE-1`  
-**Status:** **PLAN READY / NOT STARTED**  
+**Status:** **IN PROGRESS — FIX LANDED, AWAITING PROD RE-BAKE**  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  

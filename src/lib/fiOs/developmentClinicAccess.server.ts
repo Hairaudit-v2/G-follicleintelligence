@@ -21,6 +21,7 @@ export type DevelopmentClinicAccessResult = {
   authUserId: string | null;
   fiUserId: string | null;
   fiUserRole: string | null;
+  staffRole: string | null;
   tenantAdminRole: FiTenantAdminRole | null;
   fiOsRole: string | null;
 };
@@ -48,6 +49,24 @@ async function loadFiUserForTenant(
   };
 }
 
+async function loadActiveStaffRoleForFiUser(
+  tenantId: string,
+  fiUserId: string
+): Promise<string | null> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("staff_role")
+    .eq("tenant_id", tenantId.trim())
+    .eq("fi_user_id", fiUserId.trim())
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  const role = String((data as { staff_role: string | null }).staff_role ?? "").trim();
+  return role || null;
+}
+
 const BLOCKED_UNAUTHENTICATED =
   "Sign in to use ClinicOS scheduling and booking tools. The calendar is view-only until you are authenticated.";
 
@@ -66,6 +85,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
     authUserId: null,
     fiUserId: null,
     fiUserRole: null,
+    staffRole: null,
     tenantAdminRole: null,
     fiOsRole: null,
   };
@@ -85,6 +105,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
       authUserId,
       fiUserId: proxy?.id ?? null,
       fiUserRole: proxy?.role ?? "fi_admin",
+      staffRole: null,
       tenantAdminRole: null,
       fiOsRole,
     };
@@ -102,6 +123,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
         authUserId,
         fiUserId: null,
         fiUserRole: null,
+        staffRole: null,
         tenantAdminRole: null,
         fiOsRole,
       };
@@ -112,6 +134,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
       authUserId,
       fiUserId: proxy.id,
       fiUserRole: proxy.role?.trim() || "fi_admin",
+      staffRole: null,
       tenantAdminRole: null,
       fiOsRole,
     };
@@ -119,12 +142,16 @@ export async function resolveDevelopmentClinicAccessForTenant(
 
   const principal = await resolvePrincipalAuthUserId(authUserId);
   const fiUser = await loadFiUserForTenant(tid, principal);
+  const staffRole = fiUser
+    ? await loadActiveStaffRoleForFiUser(tid, fiUser.id)
+    : null;
   const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authUserId);
   const tenantAdminRole = tenantAdmin?.adminRole ?? null;
 
   const allowed = canUseDevelopmentClinicFeatures({
     isAuthenticated: true,
     fiUserRole: fiUser?.role ?? null,
+    staffRole,
     fiOsRole,
     tenantAdminRole,
     isConfiguredDevelopmentAdmin: false,
@@ -137,6 +164,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
       authUserId,
       fiUserId: null,
       fiUserRole: null,
+      staffRole: null,
       tenantAdminRole,
       fiOsRole,
     };
@@ -150,6 +178,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
       authUserId,
       fiUserId: fiUser?.id ?? null,
       fiUserRole: fiUser?.role ?? null,
+      staffRole,
       tenantAdminRole,
       fiOsRole,
     };
@@ -161,6 +190,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
     authUserId,
     fiUserId: fiUser?.id ?? null,
     fiUserRole: fiUser?.role ?? null,
+    staffRole,
     tenantAdminRole,
     fiOsRole,
   };

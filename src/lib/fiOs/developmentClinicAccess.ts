@@ -16,6 +16,23 @@ export const DEVELOPMENT_CLINIC_FI_USER_ROLES_LOWER = new Set([
   "admin",
   "crm_operator",
   "owner",
+  /** Ordinary clinic personas that already get CRM shell nav via `fi_users.role`. */
+  "manager",
+  "consultant",
+]);
+
+/**
+ * Active `fi_staff.staff_role` values that grant ClinicOS mutations when `fi_users.role`
+ * is a non-operator membership (typically `member`). Keep aligned with
+ * `CRM_SHELL_NAV_STAFF_ROLES_LOWER` in `crmGatePolicy` so shell-eligible ordinary staff
+ * can mutate Pipeline/calendar the same way platform-admin tenant proxy can.
+ */
+export const DEVELOPMENT_CLINIC_STAFF_ROLES_LOWER = new Set([
+  "consultant",
+  "reception",
+  "receptionist",
+  "manager",
+  "owner",
 ]);
 
 /** `fi_tenant_admin_users.admin_role` values with operational ClinicOS access during development. */
@@ -28,6 +45,8 @@ export type DevelopmentClinicAccessContext = {
   /** Must be true — never grant access to anonymous users. */
   isAuthenticated: boolean;
   fiUserRole?: string | null;
+  /** Active `fi_staff.staff_role` for the tenant membership (ordinary staff path). */
+  staffRole?: string | null;
   fiOsRole?: string | null;
   tenantAdminRole?: FiTenantAdminRole | null;
   /** Auth user id listed in `FI_DEVELOPMENT_ADMIN_AUTH_USER_IDS`. */
@@ -70,10 +89,18 @@ export function canUseDevelopmentClinicFeatures(ctx: DevelopmentClinicAccessCont
   const fiRole = normRole(ctx.fiUserRole);
   if (fiRole && DEVELOPMENT_CLINIC_FI_USER_ROLES_LOWER.has(fiRole)) return true;
 
+  const staffRole = normRole(ctx.staffRole);
+  if (staffRole && DEVELOPMENT_CLINIC_STAFF_ROLES_LOWER.has(staffRole)) return true;
+
   const adminRole = normalizeFiTenantAdminRole(ctx.tenantAdminRole ?? null);
   if (adminRole && DEVELOPMENT_CLINIC_TENANT_ADMIN_ROLES_LOWER.has(adminRole)) return true;
 
   return false;
+}
+
+/** True when active `fi_staff.staff_role` is a ClinicOS operational staff persona. */
+export function isDevelopmentClinicStaffRole(staffRole: string | null | undefined): boolean {
+  return DEVELOPMENT_CLINIC_STAFF_ROLES_LOWER.has(normRole(staffRole));
 }
 
 /** Client/server helper when only `fi_users.role` is known (e.g. CRM shell session). */
