@@ -72,7 +72,9 @@ function transectionQualityScore(rate: number | null): number {
   if (rate == null || !Number.isFinite(rate)) return 50;
   if (rate <= OPTIMAL_TRANSECTION_RATE) return 100;
   if (rate >= 15) return 0;
-  return clampScore(100 - ((rate - OPTIMAL_TRANSECTION_RATE) / (15 - OPTIMAL_TRANSECTION_RATE)) * 100);
+  return clampScore(
+    100 - ((rate - OPTIMAL_TRANSECTION_RATE) / (15 - OPTIMAL_TRANSECTION_RATE)) * 100
+  );
 }
 
 function durationScore(minutes: number | null, clinicAverage: number | null): number {

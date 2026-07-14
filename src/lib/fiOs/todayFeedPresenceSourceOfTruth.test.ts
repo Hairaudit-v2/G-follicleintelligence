@@ -11,7 +11,9 @@ import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationa
 
 const NOW = new Date("2026-06-10T12:00:00.000Z");
 
-function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): TenantOperationalDashboard {
+function baseDashboard(
+  overrides: Partial<TenantOperationalDashboard> = {}
+): TenantOperationalDashboard {
   return {
     tenantId: "00000000-0000-0000-0000-000000000001",
     tenantName: "Test Clinic",
@@ -67,8 +69,16 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [],
     ...overrides,
@@ -139,7 +149,11 @@ test("buildTodayFeedWithPresence: raw item loader runs exactly once per request"
     now: NOW,
   });
 
-  assert.equal(rawLoadPass, 1, "raw items must be derived once — a second pass would swap Sarah for James");
+  assert.equal(
+    rawLoadPass,
+    1,
+    "raw items must be derived once — a second pass would swap Sarah for James"
+  );
   assert.ok(
     feed.rightNow.some((i) => i.personLabel === "Sarah Chen"),
     "feed must reflect the first (and only) raw derivation"
@@ -203,7 +217,9 @@ test("buildTodayFeedWithPresence: header chip counts align with feed-derived arr
     now: NOW,
   });
 
-  const hasArrivalIntent = presence.snapshots.some((s) => s.signalKind === "patient_arrival_intent");
+  const hasArrivalIntent = presence.snapshots.some(
+    (s) => s.signalKind === "patient_arrival_intent"
+  );
   const arrivalChip = presence.operationalStatus.chips.find((c) => c.id === "arrival_active");
   const feedArrivalItems = [...feed.rightNow, ...feed.upNext, ...feed.comingUp].filter((i) =>
     /says they're here|waiting/i.test(i.actionLabel)

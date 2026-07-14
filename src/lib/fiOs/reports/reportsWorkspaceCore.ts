@@ -132,19 +132,13 @@ export function isFiOsReportsConsolidatedPath(pathname: string, tenantBase: stri
   return path === `${base}/reports` || path.startsWith(`${base}/reports/`);
 }
 
-export function isReportsTabActive(
-  pathname: string,
-  tenantBase: string,
-  segment: string
-): boolean {
+export function isReportsTabActive(pathname: string, tenantBase: string, segment: string): boolean {
   const base = tenantBase.replace(/\/+$/, "");
   const path = pathname.replace(/\/+$/, "") || "/";
   if (!segment) {
     return path === `${base}/reports` || path === `${base}/reports/`;
   }
-  return (
-    path === `${base}/reports/${segment}` || path.startsWith(`${base}/reports/${segment}/`)
-  );
+  return path === `${base}/reports/${segment}` || path.startsWith(`${base}/reports/${segment}/`);
 }
 
 export type FiOsReportsSidebarSubItem = {

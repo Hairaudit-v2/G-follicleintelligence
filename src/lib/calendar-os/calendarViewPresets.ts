@@ -110,7 +110,10 @@ export function calendarOsViewPresetById(id: string): CalendarOsViewPreset | nul
   return CALENDAR_OS_VIEW_PRESETS.find((p) => p.id === id) ?? null;
 }
 
-function queryMatchesPresetPatch(query: ParsedCalendarQuery, preset: CalendarOsViewPreset): boolean {
+function queryMatchesPresetPatch(
+  query: ParsedCalendarQuery,
+  preset: CalendarOsViewPreset
+): boolean {
   const p = preset.patch;
   if (p.view != null && query.view !== p.view) return false;
   if (p.resourceView != null && query.resourceView !== p.resourceView) return false;

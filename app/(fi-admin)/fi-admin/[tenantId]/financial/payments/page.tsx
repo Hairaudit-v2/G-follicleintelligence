@@ -58,19 +58,21 @@ export default async function FinancialOsPaymentsPage({
         {rows.map((r) => {
           const source = moneyPaymentRowSourceLabel(r.provider);
           return (
-          <tr key={r.id} className={financialOsClasses.tableRow}>
-            <td className={financialOsClasses.tableCell}>
-              <FinancialOsRecordStatusBadge status={r.status} />
-            </td>
-            <td className={financialOsClasses.tableCell}>
-              <span className={source.providerConfirmed ? "text-emerald-300" : "text-amber-300"}>
-                {source.label}
-              </span>
-            </td>
-            <td className={financialOsClasses.tableCell}>{fmtMoney(r.total_cents, r.currency)}</td>
-            <td className={financialOsClasses.tableCellMono}>{r.invoice_id.slice(0, 8)}…</td>
-            <td className={financialOsClasses.tableCell}>{r.created_at.slice(0, 19)}</td>
-          </tr>
+            <tr key={r.id} className={financialOsClasses.tableRow}>
+              <td className={financialOsClasses.tableCell}>
+                <FinancialOsRecordStatusBadge status={r.status} />
+              </td>
+              <td className={financialOsClasses.tableCell}>
+                <span className={source.providerConfirmed ? "text-emerald-300" : "text-amber-300"}>
+                  {source.label}
+                </span>
+              </td>
+              <td className={financialOsClasses.tableCell}>
+                {fmtMoney(r.total_cents, r.currency)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>{r.invoice_id.slice(0, 8)}…</td>
+              <td className={financialOsClasses.tableCell}>{r.created_at.slice(0, 19)}</td>
+            </tr>
           );
         })}
       </FinancialOsTable>

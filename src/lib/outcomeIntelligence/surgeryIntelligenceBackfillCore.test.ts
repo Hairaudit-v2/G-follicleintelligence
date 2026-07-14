@@ -20,10 +20,7 @@ function surgeryRow(id: string, scheduledDate: string, caseId: string | null = C
 
 describe("surgeryIntelligenceBackfillCore", () => {
   it("date range filter keeps surgeries in scope", () => {
-    const rows = [
-      surgeryRow(SURGERY_A, "2026-06-15"),
-      surgeryRow(SURGERY_B, "2026-07-10"),
-    ];
+    const rows = [surgeryRow(SURGERY_A, "2026-06-15"), surgeryRow(SURGERY_B, "2026-07-10")];
     const filtered = filterSurgeriesForBackfillScope(rows, {
       procedureDateFrom: "2026-07-01",
       procedureDateTo: "2026-07-31",

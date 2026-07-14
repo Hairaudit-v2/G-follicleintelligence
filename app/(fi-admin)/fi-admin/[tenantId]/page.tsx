@@ -23,9 +23,7 @@ import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm
 
 import { resolveEffectiveTenantAuthUserIdFromSession } from "@/src/lib/crm/crmGate";
 
-import {
-  resolveFiOsAuthUserDisplayNameForTenant,
-} from "@/src/lib/fiOs/fiOsAuthDisplay.server";
+import { resolveFiOsAuthUserDisplayNameForTenant } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
 
 import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 

@@ -174,11 +174,7 @@ describe("hairAuditOutcomeReportWorkflowCore", () => {
             missing_comparison_views: ["follow_up:top"],
           },
         },
-        missing_outcome_evidence: [
-          "donor_follow_up",
-          "recipient_follow_up",
-          "follow_up_evidence",
-        ],
+        missing_outcome_evidence: ["donor_follow_up", "recipient_follow_up", "follow_up_evidence"],
         donor_recovery_ready: false,
         recipient_growth_ready: false,
       }),
@@ -226,10 +222,7 @@ describe("hairAuditOutcomeReportWorkflowCore", () => {
       dryRun: true,
     });
     assert.equal(planned.outcome.kind, "skipped_legacy_report");
-    assert.equal(
-      (planned.outcome as { fiReportId: string }).fiReportId,
-      LEGACY_REPORT
-    );
+    assert.equal((planned.outcome as { fiReportId: string }).fiReportId, LEGACY_REPORT);
   });
 
   it("conflict is surfaced, not overwritten", () => {
@@ -309,10 +302,7 @@ describe("hairAuditOutcomeReportWorkflowCore", () => {
     });
 
     assert.equal(planned.outcome.kind, "skipped_already_linked");
-    assert.equal(
-      (planned.outcome as { fiReportId: string }).fiReportId,
-      LEGACY_REPORT
-    );
+    assert.equal((planned.outcome as { fiReportId: string }).fiReportId, LEGACY_REPORT);
   });
 
   it("dashboard loader remains read-only", () => {

@@ -24,10 +24,7 @@ export type OutcomeSignalSummary = {
   generated_at: string;
 };
 
-const STAFF_LIMITATIONS = [
-  "Not a predictive simulation",
-  "For staff review only",
-] as const;
+const STAFF_LIMITATIONS = ["Not a predictive simulation", "For staff review only"] as const;
 
 export type ImagingLiveProviderFlags = {
   liveDensityEnabled: boolean;
@@ -150,7 +147,9 @@ export function buildLiveDensitySignalSummary(input: LiveDensitySignalInput): Ou
         ...STAFF_LIMITATIONS,
         "Live density provider is enabled but unavailable for this image.",
       ],
-      observations: ["Provider could not produce a density staff signal — manual review recommended."],
+      observations: [
+        "Provider could not produce a density staff signal — manual review recommended.",
+      ],
       provider: "unavailable",
     });
   }
@@ -217,7 +216,9 @@ export function buildLiveOutcomeScoreSignalSummary(
         ...STAFF_LIMITATIONS,
         "Live outcome provider is enabled but unavailable for this image.",
       ],
-      observations: ["Provider could not produce an outcome staff signal — manual review recommended."],
+      observations: [
+        "Provider could not produce an outcome staff signal — manual review recommended.",
+      ],
       provider: "unavailable",
     });
   }

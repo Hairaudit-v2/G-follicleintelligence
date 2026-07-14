@@ -43,9 +43,7 @@ test("arrival_intent maps to patient + appointment targets", () => {
   );
   assert.ok(signal);
   assert.equal(signal.signalType, "arrival_intent");
-  assert.ok(
-    signal.targetRefs.some((r) => r.kind === "appointment" && r.id === APPOINTMENT)
-  );
+  assert.ok(signal.targetRefs.some((r) => r.kind === "appointment" && r.id === APPOINTMENT));
   assert.ok(signal.targetRefs.some((r) => r.kind === "patient" && r.id === PATIENT));
 });
 
@@ -80,9 +78,7 @@ test("pathology_review_pending maps to pathology_result + patient kinds", () => 
   );
   assert.ok(signal);
   assert.equal(signal.signalType, "pathology_review_pending");
-  assert.ok(
-    signal.targetRefs.some((r) => r.kind === "pathology_result" && r.id === PATHOLOGY)
-  );
+  assert.ok(signal.targetRefs.some((r) => r.kind === "pathology_result" && r.id === PATHOLOGY));
   assert.ok(signal.targetRefs.some((r) => r.kind === "patient" && r.id === PATIENT));
 });
 
@@ -160,10 +156,7 @@ test("shouldWorkspaceRevalidateForSignal matches only targeted open workspaces",
   );
   assert.ok(signal);
 
-  assert.equal(
-    shouldWorkspaceRevalidateForSignal({ kind: "patient", id: PATIENT }, signal),
-    true
-  );
+  assert.equal(shouldWorkspaceRevalidateForSignal({ kind: "patient", id: PATIENT }, signal), true);
   assert.equal(
     shouldWorkspaceRevalidateForSignal(
       { kind: "patient", id: "99999999-0000-0000-0000-000000000099" },
@@ -171,10 +164,7 @@ test("shouldWorkspaceRevalidateForSignal matches only targeted open workspaces",
     ),
     false
   );
-  assert.equal(
-    shouldWorkspaceRevalidateForSignal({ kind: "lead", id: LEAD }, signal),
-    false
-  );
+  assert.equal(shouldWorkspaceRevalidateForSignal({ kind: "lead", id: LEAD }, signal), false);
 });
 
 test("payment blocker revalidates surgery_case when targeted", () => {

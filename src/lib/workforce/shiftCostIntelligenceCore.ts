@@ -193,14 +193,10 @@ export function computeLabourEfficiencyMetrics(
 ): LabourEfficiencyMetrics {
   const shiftCount = dailyRoster.shiftCount;
   const profileCoveragePercent =
-    shiftCount === 0
-      ? 100
-      : Math.round((dailyRoster.staffedCount / shiftCount) * 1000) / 10;
+    shiftCount === 0 ? 100 : Math.round((dailyRoster.staffedCount / shiftCount) * 1000) / 10;
   const scheduledHours = dailyRoster.totalScheduledMinutes / 60;
   const costPerScheduledHourCents =
-    scheduledHours > 0
-      ? Math.round(dailyRoster.totalGrossCostCents / scheduledHours)
-      : 0;
+    scheduledHours > 0 ? Math.round(dailyRoster.totalGrossCostCents / scheduledHours) : 0;
   const averageCostPerShiftCents =
     shiftCount > 0 ? Math.round(dailyRoster.totalGrossCostCents / shiftCount) : 0;
   const labourEfficiencyIndex = Math.round(
@@ -240,10 +236,7 @@ export function computeWeeklyWageExposure(input: {
     (sum, d) => sum + d.forecastGrossCostCents,
     0
   );
-  const totalScheduledMinutes = daySummaries.reduce(
-    (sum, d) => sum + d.totalScheduledMinutes,
-    0
-  );
+  const totalScheduledMinutes = daySummaries.reduce((sum, d) => sum + d.totalScheduledMinutes, 0);
 
   return {
     weekStart: input.weekStart,
@@ -251,9 +244,7 @@ export function computeWeeklyWageExposure(input: {
     totalForecastGrossCostCents,
     totalScheduledMinutes,
     averageDailyCostCents:
-      daySummaries.length > 0
-        ? Math.round(totalForecastGrossCostCents / daySummaries.length)
-        : 0,
+      daySummaries.length > 0 ? Math.round(totalForecastGrossCostCents / daySummaries.length) : 0,
     days: daySummaries,
   };
 }

@@ -132,11 +132,8 @@ export default async function TenantIntegrationsSettingsPage({
     resolveFiOsPublicOrigin(),
   ]);
 
-  const hubSpotWebhookSecretConfigured = Boolean(
-    process.env.FI_HUBSPOT_WEBHOOK_SECRET?.trim()
-  );
-  const stripeCheckoutEnabled =
-    readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
+  const hubSpotWebhookSecretConfigured = Boolean(process.env.FI_HUBSPOT_WEBHOOK_SECRET?.trim());
+  const stripeCheckoutEnabled = readFiPaymentsEnabled() && readFiPaymentProviderId() === "stripe";
   const stripeWebhookSecretConfigured = Boolean(readStripeWebhookSecret());
 
   const { data: syncHealthRow } = await supabase

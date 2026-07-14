@@ -1,9 +1,6 @@
 import type { EvolvedStaffRecord } from "./iiohrStaffHrLinkReconciliationTypes";
 import { normaliseStaffEmail } from "./iiohrStaffHrLinkReconciliationCore";
-import {
-  isStaffArchived,
-  isStaffHrLinkedForReconciliation,
-} from "./hrReconciliationEligibleCore";
+import { isStaffArchived, isStaffHrLinkedForReconciliation } from "./hrReconciliationEligibleCore";
 import type {
   HrReconciliationSuggestion,
   StaffEmploymentStatus,
@@ -28,7 +25,9 @@ export const EXTERNALLY_LOCKED_PROFILE_FIELDS = [
 
 export type ExternallyLockedProfileField = (typeof EXTERNALLY_LOCKED_PROFILE_FIELDS)[number];
 
-export function isExternallyManagedStaff(row: Pick<StaffMemberLifecycleRow, "identity_source" | "source_system">): boolean {
+export function isExternallyManagedStaff(
+  row: Pick<StaffMemberLifecycleRow, "identity_source" | "source_system">
+): boolean {
   if (IIOHR_MANAGED_IDENTITY_SOURCES.has(row.identity_source)) return true;
   return row.source_system === "iiohr_evolved_hr";
 }
@@ -42,7 +41,15 @@ export function resolveEditableProfileFields(
   if (isExternallyManagedStaff(row)) {
     return {
       locked: EXTERNALLY_LOCKED_PROFILE_FIELDS,
-      editable: ["notes", "timezone", "internal_tags", "clinic_id", "professional_title", "phone", "employment_type"],
+      editable: [
+        "notes",
+        "timezone",
+        "internal_tags",
+        "clinic_id",
+        "professional_title",
+        "phone",
+        "employment_type",
+      ],
     };
   }
   return {
@@ -79,7 +86,9 @@ export function filterProfilePatchForSource(
 }
 
 export function parseStaffEmploymentStatus(raw: unknown): StaffEmploymentStatus {
-  const value = String(raw ?? "active").trim().toLowerCase();
+  const value = String(raw ?? "active")
+    .trim()
+    .toLowerCase();
   if ((STAFF_EMPLOYMENT_STATUSES as readonly string[]).includes(value)) {
     return value as StaffEmploymentStatus;
   }
@@ -87,7 +96,9 @@ export function parseStaffEmploymentStatus(raw: unknown): StaffEmploymentStatus 
 }
 
 export function parseStaffIdentitySource(raw: unknown): StaffIdentitySource {
-  const value = String(raw ?? "local").trim().toLowerCase();
+  const value = String(raw ?? "local")
+    .trim()
+    .toLowerCase();
   if (value === "iiohr_evolved_hr") return "iiohr_evolved_hr";
   if (value === "academy_sync") return "academy_sync";
   if (value === "manual_import") return "manual_import";
@@ -103,7 +114,10 @@ export function splitFullName(fullName: string): { first_name: string; last_name
   return { first_name: parts[0]!, last_name: parts.slice(1).join(" ") };
 }
 
-export function composeFullName(firstName: string | null | undefined, lastName: string | null | undefined): string {
+export function composeFullName(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined
+): string {
   return [firstName?.trim(), lastName?.trim()].filter(Boolean).join(" ").trim();
 }
 

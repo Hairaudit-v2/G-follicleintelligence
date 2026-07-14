@@ -61,9 +61,8 @@ export function HrReconciliationClient({
 
   const actionableCount = useMemo(
     () =>
-      suggestions.filter(
-        (s) => s.matchType === "exact_email" || s.matchType === "name_suggestion"
-      ).length,
+      suggestions.filter((s) => s.matchType === "exact_email" || s.matchType === "name_suggestion")
+        .length,
     [suggestions]
   );
 
@@ -132,8 +131,8 @@ export function HrReconciliationClient({
           <h2 className="text-sm font-semibold text-amber-100">IIOHR feed unavailable</h2>
           <p className="mt-2 text-sm text-amber-50/90">{diagnostics.feedBlockedMessage}</p>
           <p className="mt-3 text-xs text-amber-100/80">
-            Reconciliation actions are hidden until IIOHR candidate rows are available — this prevents
-            false &quot;No match&quot; results when the feed is empty or misconfigured.
+            Reconciliation actions are hidden until IIOHR candidate rows are available — this
+            prevents false &quot;No match&quot; results when the feed is empty or misconfigured.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
@@ -216,7 +215,9 @@ export function HrReconciliationClient({
           </div>
           <div>
             <dt className="text-[#64748B]">Archived excluded</dt>
-            <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">{metrics.archivedExcluded}</dd>
+            <dd className="mt-1 text-xl font-semibold text-[#F8FAFC]">
+              {metrics.archivedExcluded}
+            </dd>
           </div>
         </dl>
       </DashboardCard>
@@ -236,11 +237,15 @@ export function HrReconciliationClient({
             </div>
             <div>
               <dt className="text-[#64748B]">IIOHR feed rows (raw)</dt>
-              <dd className="mt-1 font-semibold text-[#F8FAFC]">{diagnostics.iiohrRawFeedRowCount}</dd>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">
+                {diagnostics.iiohrRawFeedRowCount}
+              </dd>
             </div>
             <div>
               <dt className="text-[#64748B]">IIOHR candidates (UUID)</dt>
-              <dd className="mt-1 font-semibold text-[#F8FAFC]">{diagnostics.iiohrCandidateCount}</dd>
+              <dd className="mt-1 font-semibold text-[#F8FAFC]">
+                {diagnostics.iiohrCandidateCount}
+              </dd>
             </div>
             <div>
               <dt className="text-[#64748B]">Exact email pairs</dt>
@@ -278,14 +283,20 @@ export function HrReconciliationClient({
         ) : null}
         {showDiagnostics ? (
           <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Env checks</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+              Env checks
+            </p>
             <EnvFlag label="IIOHR feed URL" ok={diagnostics.feedUrlConfigured} />
             <EnvFlag label="IIOHR feed key (optional)" ok={diagnostics.feedKeyConfigured} />
             <EnvFlag label="CRON_SECRET" ok={diagnostics.cronSecretConfigured} />
-            <EnvFlag label="EVOLVED_PERTH_TENANT_ID" ok={diagnostics.evolvedPerthTenantIdConfigured} />
+            <EnvFlag
+              label="EVOLVED_PERTH_TENANT_ID"
+              ok={diagnostics.evolvedPerthTenantIdConfigured}
+            />
             {diagnostics.legacyFeedUrlConfigured ? (
               <p className="text-xs text-amber-200/90">
-                Legacy IIOHR_HR_STAFF_FEED_URL is set — prefer IIOHR_HR_PERTH_STAFF_FEED_URL in production.
+                Legacy IIOHR_HR_STAFF_FEED_URL is set — prefer IIOHR_HR_PERTH_STAFF_FEED_URL in
+                production.
               </p>
             ) : null}
           </div>
@@ -352,7 +363,9 @@ export function HrReconciliationClient({
                   <td className="px-4 py-3">
                     {row.suggestedIiohrRecord ? (
                       <>
-                        <p className="text-[#E2E8F0]">{row.suggestedIiohrRecord.full_name ?? "—"}</p>
+                        <p className="text-[#E2E8F0]">
+                          {row.suggestedIiohrRecord.full_name ?? "—"}
+                        </p>
                         <p className="text-xs text-[#64748B]">
                           {row.suggestedIiohrRecord.email ?? "No email"}
                         </p>
@@ -368,15 +381,16 @@ export function HrReconciliationClient({
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       {row.canAutoApprove ? (
-                        <Button
-                          size="sm"
-                          disabled={pending}
-                          onClick={() => onApprove(row)}
-                        >
+                        <Button size="sm" disabled={pending} onClick={() => onApprove(row)}>
                           Approve link
                         </Button>
                       ) : null}
-                      <Button size="sm" variant="outline" disabled={pending} onClick={() => onReject(row)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={pending}
+                        onClick={() => onReject(row)}
+                      >
                         Reject
                       </Button>
                       {row.fiStaffId ? (
@@ -400,17 +414,15 @@ export function HrReconciliationClient({
         <DashboardCard className="p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-[#F8FAFC]">Archived / historical records</h2>
+              <h2 className="text-sm font-semibold text-[#F8FAFC]">
+                Archived / historical records
+              </h2>
               <p className="mt-1 text-xs text-[#64748B]">
                 {initialArchivedHistorical.length} archived staff excluded from reconciliation
                 totals. These records are informational only — no action required.
               </p>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowArchived((prev) => !prev)}
-            >
+            <Button size="sm" variant="outline" onClick={() => setShowArchived((prev) => !prev)}>
               {showArchived ? "Hide" : "Show"} archived
             </Button>
           </div>

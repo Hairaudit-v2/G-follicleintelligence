@@ -2,18 +2,22 @@
  * ImagingOS Phase 4 — staff-facing clinical intelligence view models for workspace UI.
  */
 
-import { collectImagingReviewReasons, readImagingClinicalAiMetadata } from "./clinicalImageAnalysisCore";
+import {
+  collectImagingReviewReasons,
+  readImagingClinicalAiMetadata,
+} from "./clinicalImageAnalysisCore";
 import type { DonorRecipientAssessmentSummary } from "./clinicalImageAnalysisCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
-import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
+import {
+  buildImagingDeepLinks,
+  listAvailableImagingDeepLinks,
+  type ImagingDeepLink,
+} from "./imagingDeepLinksCore";
 import {
   readImagingJobSummaries,
   type ImagingJobSummariesMetadata,
 } from "./imagingJobReadOnlySummaries";
-import {
-  readImagingStaffReviewRecord,
-  staffReviewClearsQueue,
-} from "./imagingStaffReviewCore";
+import { readImagingStaffReviewRecord, staffReviewClearsQueue } from "./imagingStaffReviewCore";
 
 export type ImagingClinicalIntelligenceView = {
   imageId: string;
@@ -69,8 +73,7 @@ export function buildImagingClinicalIntelligenceView(input: {
   const staffReview = readImagingStaffReviewRecord(input.metadata);
   const jobSummaries = readImagingJobSummaries(input.metadata);
 
-  const classificationConfidence =
-    input.aiImageCategoryConfidence ?? clinical?.confidence ?? null;
+  const classificationConfidence = input.aiImageCategoryConfidence ?? clinical?.confidence ?? null;
 
   const reviewReasons = collectImagingReviewReasons({
     classificationConfidence,
@@ -81,7 +84,8 @@ export function buildImagingClinicalIntelligenceView(input: {
   });
 
   const cleared = staffReviewClearsQueue(staffReview);
-  const reviewRequired = !cleared && (reviewReasons.length > 0 || clinical?.review_required === true);
+  const reviewRequired =
+    !cleared && (reviewReasons.length > 0 || clinical?.review_required === true);
 
   return {
     imageId: input.imageId,

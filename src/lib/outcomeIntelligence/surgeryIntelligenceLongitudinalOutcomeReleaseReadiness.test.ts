@@ -41,10 +41,7 @@ function readRepoFile(relativePath: string): string {
   return readFileSync(join(process.cwd(), relativePath), "utf8");
 }
 
-function image(
-  id: string,
-  overrides: Record<string, string | boolean | null | undefined> = {}
-) {
+function image(id: string, overrides: Record<string, string | boolean | null | undefined> = {}) {
   return {
     imageId: id,
     canonicalCategory: overrides.canonicalCategory as string | undefined,
@@ -240,9 +237,7 @@ describe("surgeryIntelligenceLongitudinalOutcomeReleaseReadiness", () => {
   });
 
   it("legacy HairAudit link wins on conflict for longitudinal outcome resolution", () => {
-    const core = readRepoFile(
-      "src/lib/outcomeIntelligence/longitudinalOutcomeComparisonCore.ts"
-    );
+    const core = readRepoFile("src/lib/outcomeIntelligence/longitudinalOutcomeComparisonCore.ts");
     assert.equal(core.includes("resolveHairAuditLinkForSurgery"), true);
 
     const resolution = resolveHairAuditLinkForSurgery({
@@ -310,9 +305,7 @@ describe("surgeryIntelligenceLongitudinalOutcomeReleaseReadiness", () => {
       tenantId: TENANT,
       surgeryId: SURGERY,
       procedureDate: "2025-07-01",
-      images: completeLongitudinalImages().filter(
-        (entry) => entry.imageId !== IMG_FOLLOWUP_DONOR
-      ),
+      images: completeLongitudinalImages().filter((entry) => entry.imageId !== IMG_FOLLOWUP_DONOR),
       referenceDate: REFERENCE_DATE,
     });
 

@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import {
+  getFiOsShellActiveSidebarId,
+  resolveFiOsPrimarySidebarItems,
+} from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { buildOnboardingInviteUrl } from "@/src/lib/workforce/onboarding/onboardingInviteUrlCore";
 
 const base = "/fi-admin/t-1";
 
-function withEnv(
-  patch: Record<string, string | undefined>,
-  fn: () => void
-): void {
+function withEnv(patch: Record<string, string | undefined>, fn: () => void): void {
   const prev = new Map<string, string | undefined>();
   for (const key of Object.keys(patch)) {
     prev.set(key, process.env[key]);
@@ -39,10 +39,7 @@ test("resolveFiOsPrimarySidebarItems: includes onboarding tab when HR OS nav vis
 });
 
 test("getFiOsShellActiveSidebarId: hr-os onboarding maps to onboarding-centre sidebar tab", () => {
-  assert.equal(
-    getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base),
-    "onboarding-centre"
-  );
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "onboarding-centre");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/offboarding`, base), "hr-os-dashboard");
 });
 

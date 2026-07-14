@@ -559,8 +559,7 @@ export async function runPatientImagePostCapturePipeline(
     },
   });
 
-  const caseId =
-    existingRow.case_id != null ? String(existingRow.case_id).trim() : "";
+  const caseId = existingRow.case_id != null ? String(existingRow.case_id).trim() : "";
   if (caseId) {
     const { resolveReportTypesForEligibleCapture } =
       await import("@/src/lib/imaging-os/patientVisualSummaryCaptureEligibilityCore");

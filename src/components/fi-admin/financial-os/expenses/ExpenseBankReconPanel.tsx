@@ -160,12 +160,8 @@ export function ExpenseBankReconPanel(props: ExpenseBankReconPanelProps) {
           {props.persistedMatches.map((m) => (
             <tr key={m.id} className={financialOsClasses.tableRow}>
               <td className={financialOsClasses.tableCell}>{m.status}</td>
-              <td className={financialOsClasses.tableCellMono}>
-                {m.import_line_id.slice(0, 8)}…
-              </td>
-              <td className={financialOsClasses.tableCellMono}>
-                {m.expense_id.slice(0, 8)}…
-              </td>
+              <td className={financialOsClasses.tableCellMono}>{m.import_line_id.slice(0, 8)}…</td>
+              <td className={financialOsClasses.tableCellMono}>{m.expense_id.slice(0, 8)}…</td>
               <td className={financialOsClasses.tableCell}>
                 {m.confidence != null ? `${Math.round(m.confidence * 100)}%` : "—"}
               </td>

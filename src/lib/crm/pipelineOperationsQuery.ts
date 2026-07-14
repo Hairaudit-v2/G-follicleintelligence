@@ -168,7 +168,11 @@ export function parsePipelineOpsQuery(
   }
 
   // Lost view defaults sort when lifecycle is lost and no explicit sort
-  const lifecycleRaw = (getParam(searchParams, "lifecycle") ?? getParam(searchParams, "stage") ?? "")
+  const lifecycleRaw = (
+    getParam(searchParams, "lifecycle") ??
+    getParam(searchParams, "stage") ??
+    ""
+  )
     .trim()
     .toLowerCase()
     .replace(/-/g, "_")
@@ -231,8 +235,7 @@ export function parsePipelineOpsQuery(
   const ownerRaw = (getParam(searchParams, "owner") ?? "").trim();
   const ownerId = isNonEmptyUuid(ownerRaw) ? ownerRaw : null;
 
-  const sourceKey =
-    (getParam(searchParams, "source") ?? "").trim().slice(0, 80) || null;
+  const sourceKey = (getParam(searchParams, "source") ?? "").trim().slice(0, 80) || null;
 
   const activityRaw = (getParam(searchParams, "activity") ?? "")
     .trim()
@@ -286,9 +289,7 @@ export function parsePipelineOpsQuery(
  * Serialize ops query to URL search params (omits defaults).
  * Never includes lead or patient names.
  */
-export function pipelineOpsQueryToSearchParams(
-  state: PipelineOpsQueryState
-): URLSearchParams {
+export function pipelineOpsQueryToSearchParams(state: PipelineOpsQueryState): URLSearchParams {
   const sp = new URLSearchParams();
   if (state.view !== "board") sp.set("view", state.view);
   if (state.userSortSelected || state.sort !== "newest_first") {

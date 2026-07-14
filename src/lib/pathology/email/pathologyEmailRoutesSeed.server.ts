@@ -74,8 +74,7 @@ export async function seedEvolvedPathologyEmailRoute(options?: {
     };
   }
 
-  const inboundDomain =
-    options?.inboundDomain?.trim() || readPathologyEmailInboundDomainFromEnv();
+  const inboundDomain = options?.inboundDomain?.trim() || readPathologyEmailInboundDomainFromEnv();
   if (!inboundDomain) {
     return {
       created: false,

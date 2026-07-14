@@ -32,10 +32,7 @@ const IMG_FOLLOWUP_FRONT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa08";
 const IMG_FOLLOWUP_TOP = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa09";
 const IMG_FOLLOWUP_DONOR = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa10";
 
-function image(
-  id: string,
-  overrides: Record<string, string | boolean | null | undefined> = {}
-) {
+function image(id: string, overrides: Record<string, string | boolean | null | undefined> = {}) {
   return {
     imageId: id,
     canonicalCategory: overrides.canonicalCategory as string | undefined,
@@ -185,7 +182,10 @@ describe("longitudinalOutcomeComparisonCore", () => {
 
     assert.equal(comparison.comparison_readiness.ready_for_comparison, true);
     assert.equal(comparison.comparison_readiness.outcome_measured, true);
-    assert.equal(formatLongitudinalComparisonReadinessLabel(comparison.comparison_readiness), "Outcome measured");
+    assert.equal(
+      formatLongitudinalComparisonReadinessLabel(comparison.comparison_readiness),
+      "Outcome measured"
+    );
     assert.equal(comparison.before_after_ready, true);
     assert.equal(comparison.active_follow_up_window, "month_12");
   });

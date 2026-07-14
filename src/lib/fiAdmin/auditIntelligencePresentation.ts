@@ -246,8 +246,7 @@ export function buildAuditAttentionPriorities(
     items.push({
       id: "bootstrap",
       headline: "More follow-up evidence is needed before outcome trends are reliable.",
-      detail:
-        "Link surgery cases and capture consistent photo sets to strengthen quality review.",
+      detail: "Link surgery cases and capture consistent photo sets to strengthen quality review.",
       href: `${base}/cases`,
       severity: "info",
       priorityScore: 30,

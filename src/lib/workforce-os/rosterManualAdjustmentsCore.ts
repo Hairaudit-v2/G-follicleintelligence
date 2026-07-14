@@ -78,8 +78,7 @@ export function isValidRosterShiftEditReason(
   reason: string | null | undefined
 ): reason is RosterShiftEditReason {
   return (
-    typeof reason === "string" &&
-    (ROSTER_SHIFT_EDIT_REASONS as readonly string[]).includes(reason)
+    typeof reason === "string" && (ROSTER_SHIFT_EDIT_REASONS as readonly string[]).includes(reason)
   );
 }
 
@@ -155,9 +154,7 @@ function isReplacementShift(shift: RosterShiftSnapshot): boolean {
   return shift.adjustment_reason === "sick_cover";
 }
 
-export type RosterShiftEditEligibility =
-  | { editable: true }
-  | { editable: false; reason: string };
+export type RosterShiftEditEligibility = { editable: true } | { editable: false; reason: string };
 
 export function canEditRosterShift(shift: RosterShiftSnapshot): RosterShiftEditEligibility {
   if (shift.status === "cancelled") {

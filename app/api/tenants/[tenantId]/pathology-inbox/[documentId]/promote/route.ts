@@ -61,9 +61,7 @@ export async function POST(
     }
 
     const actingUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), req);
-    const resultDate =
-      parsed.data.result_date?.trim() ||
-      new Date().toISOString().slice(0, 10);
+    const resultDate = parsed.data.result_date?.trim() || new Date().toISOString().slice(0, 10);
 
     const out = await promoteInboundPathologyDocument({
       tenantId: tenantId.trim(),

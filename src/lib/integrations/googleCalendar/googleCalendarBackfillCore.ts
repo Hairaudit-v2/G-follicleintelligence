@@ -170,7 +170,12 @@ export function isTimedGoogleCalendarEvent(event: GoogleCalendarApiEvent): boole
 }
 
 export function looksLikeGoogleCalendarAppointment(event: GoogleCalendarApiEvent): boolean {
-  if (String(event.status ?? "").trim().toLowerCase() === "cancelled") return false;
+  if (
+    String(event.status ?? "")
+      .trim()
+      .toLowerCase() === "cancelled"
+  )
+    return false;
   if (!isTimedGoogleCalendarEvent(event)) return false;
 
   const title = (event.summary ?? "").trim();
@@ -345,16 +350,14 @@ export function parseGoogleCalendarBackfillDiagnostics(
     : [];
 
   return {
-    googleCalendarBackfillLastRunAt:
-      typeof raw.last_run_at === "string" ? raw.last_run_at : null,
+    googleCalendarBackfillLastRunAt: typeof raw.last_run_at === "string" ? raw.last_run_at : null,
     googleCalendarBackfillLastRangeStart:
       typeof raw.last_range_start === "string" ? raw.last_range_start : null,
     googleCalendarBackfillLastRangeEnd:
       typeof raw.last_range_end === "string" ? raw.last_range_end : null,
     googleCalendarBackfillImportedCount:
       typeof raw.imported_count === "number" ? raw.imported_count : 0,
-    googleCalendarBackfillReviewCount:
-      typeof raw.review_count === "number" ? raw.review_count : 0,
+    googleCalendarBackfillReviewCount: typeof raw.review_count === "number" ? raw.review_count : 0,
     warnings,
   };
 }

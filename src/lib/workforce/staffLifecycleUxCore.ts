@@ -129,7 +129,9 @@ export function resolveStaffUnifiedStatus(input: {
       input.systemAccessRevoked ||
       input.authLoginStatus === "suspended" ||
       input.authLoginStatus === "revoked" ||
-      String(input.employmentStatus ?? "").trim().toLowerCase() === "suspended",
+      String(input.employmentStatus ?? "")
+        .trim()
+        .toLowerCase() === "suspended",
     isOnboardingComplete: Boolean(input.onboardingChecklistComplete),
   };
 }
@@ -145,7 +147,9 @@ export function resolveOnboardingCentreActions(input: {
 
   if (
     input.systemAccessRevoked ||
-    String(input.employmentStatus ?? "").trim().toLowerCase() === "suspended"
+    String(input.employmentStatus ?? "")
+      .trim()
+      .toLowerCase() === "suspended"
   ) {
     actions.push({
       id: "open_access_centre",
@@ -242,8 +246,7 @@ export function staffDirectoryLifecycleGuidance(): {
 } {
   return {
     headline: "One staff member · one lifecycle",
-    body:
-      "New staff start in Onboarding. Access is managed in Staff Access. Readiness combines documents, training, SOPs, permissions, identity, and roster eligibility.",
+    body: "New staff start in Onboarding. Access is managed in Staff Access. Readiness combines documents, training, SOPs, permissions, identity, and roster eligibility.",
     emptyState: "No staff records yet. New staff start in Onboarding Centre.",
   };
 }

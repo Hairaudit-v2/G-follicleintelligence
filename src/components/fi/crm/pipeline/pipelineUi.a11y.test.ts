@@ -77,6 +77,9 @@ test("no technical CRM / LeadFlow / Kanban / OS language in UI copy", () => {
 });
 
 test("raw diagnostics IDs are not rendered in UI", () => {
-  assert.doesNotMatch(UI, /duplicateLeadIds|orphanTaskIds|unknownStageLeadIds|conversionInconsistencies/);
+  assert.doesNotMatch(
+    UI,
+    /duplicateLeadIds|orphanTaskIds|unknownStageLeadIds|conversionInconsistencies/
+  );
   assert.match(UI, /hiddenLeadCount/);
 });

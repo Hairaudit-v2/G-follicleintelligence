@@ -170,7 +170,15 @@ describe("workforceIntelligenceEngineCore", () => {
       tenantId: "tenant-1",
       horizonStart: "2026-07-01",
       horizonEnd: "2026-07-14",
-      staffingShortages: [{ role: "nurse", shortageCount: 3, affectedDates: ["2026-07-03"], confidence: 80, reason: "Gap" }],
+      staffingShortages: [
+        {
+          role: "nurse",
+          shortageCount: 3,
+          affectedDates: ["2026-07-03"],
+          confidence: 80,
+          reason: "Gap",
+        },
+      ],
       credentialRisks: [],
       recruitmentForecast: {
         activePipelineCount: 1,

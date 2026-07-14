@@ -265,17 +265,11 @@ function baseState(): TableState {
     fi_staff_feature_access: [
       { tenant_id: TENANT, staff_id: FI_STAFF_A, feature_key: "surgery_os", enabled: true },
     ],
-    fi_staff_access_grants: [
-      { tenant_id: TENANT, staff_member_id: FI_STAFF_A, revoked_at: null },
-    ],
+    fi_staff_access_grants: [{ tenant_id: TENANT, staff_member_id: FI_STAFF_A, revoked_at: null }],
     fi_staff_field_access_grants: [],
-    fi_staff_shifts: [
-      { tenant_id: TENANT, staff_id: FI_STAFF_A, status: "scheduled" },
-    ],
+    fi_staff_shifts: [{ tenant_id: TENANT, staff_id: FI_STAFF_A, status: "scheduled" }],
     fi_staff_event_assignments: [],
-    fi_staff_calendar_links: [
-      { tenant_id: TENANT, staff_member_id: FI_STAFF_A, is_active: true },
-    ],
+    fi_staff_calendar_links: [{ tenant_id: TENANT, staff_member_id: FI_STAFF_A, is_active: true }],
     fi_staff_pins: [
       {
         tenant_id: TENANT,
@@ -319,9 +313,7 @@ test("manual linking removes unlinked status for staff member", async () => {
     client,
   });
 
-  const linkedIds = new Set(
-    (state.fi_staff_identity_links ?? []).map((l) => l.staff_member_id)
-  );
+  const linkedIds = new Set((state.fi_staff_identity_links ?? []).map((l) => l.staff_member_id));
   assert.equal(linkedIds.has(STAFF_A), true);
 });
 
@@ -496,11 +488,10 @@ test("offboarding unassigns future bookings but preserves past assignments", asy
   assert.equal(other?.assigned_staff_id, FI_STAFF_B);
   assert.equal(state.fi_booking_resource_assignments?.length, 0);
 
-  const auditEvents = (client as unknown as { __auditEvents: Record<string, unknown>[] }).__auditEvents;
+  const auditEvents = (client as unknown as { __auditEvents: Record<string, unknown>[] })
+    .__auditEvents;
   assert.ok(
-    auditEvents.some(
-      (e) => e.event_type === "workforce_future_bookings_unassigned_on_offboard"
-    )
+    auditEvents.some((e) => e.event_type === "workforce_future_bookings_unassigned_on_offboard")
   );
 });
 

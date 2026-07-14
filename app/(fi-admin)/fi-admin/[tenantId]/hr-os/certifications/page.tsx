@@ -34,11 +34,7 @@ export default async function HrOsCertificationsPage({
       WORKFORCE_HR_MANAGE_ROLES.some((r) => r === access.userRole.trim().toLowerCase());
 
     return (
-      <StaffCertificationClient
-        tenantId={tid}
-        staffRows={model.staffRows}
-        canManage={canManage}
-      />
+      <StaffCertificationClient tenantId={tid} staffRows={model.staffRows} canManage={canManage} />
     );
   } catch (e) {
     if (e instanceof CrmAccessError && (e.status === 401 || e.status === 403)) {

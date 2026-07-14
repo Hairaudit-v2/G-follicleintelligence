@@ -28,7 +28,11 @@ describe("wageProfileCore", () => {
       80000
     );
     assert.equal(
-      computeBaseLabourCostCents({ rateType: "contractor", baseRateCents: 120000, minutesWorked: 240 }),
+      computeBaseLabourCostCents({
+        rateType: "contractor",
+        baseRateCents: 120000,
+        minutesWorked: 240,
+      }),
       60000
     );
   });

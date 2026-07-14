@@ -30,9 +30,7 @@ const upsertSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export async function loadReceptionTemplatesAction(
-  tenantId: string
-): Promise<
+export async function loadReceptionTemplatesAction(tenantId: string): Promise<
   | {
       ok: true;
       templates: Awaited<ReturnType<typeof loadReceptionCommunicationTemplatesForTenant>>;
@@ -50,9 +48,7 @@ export async function loadReceptionTemplatesAction(
   }
 }
 
-export async function upsertReceptionTemplateAction(
-  body: unknown
-): Promise<
+export async function upsertReceptionTemplateAction(body: unknown): Promise<
   | {
       ok: true;
       template: Awaited<ReturnType<typeof upsertReceptionCommunicationTemplate>>;
@@ -93,10 +89,7 @@ export async function resetReceptionTemplateAction(
       .parse(body);
     const gate = await assertTemplateSettingsAccess(parsed.tenantId);
     if (gate) return { ok: false, error: gate };
-    await resetReceptionCommunicationTemplateToDefault(
-      parsed.tenantId,
-      parsed.templateKey
-    );
+    await resetReceptionCommunicationTemplateToDefault(parsed.tenantId, parsed.templateKey);
     revalidatePath(`/fi-admin/${parsed.tenantId}/settings/templates`);
     return { ok: true };
   } catch (e) {

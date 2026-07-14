@@ -96,10 +96,20 @@ function paymentBadgeClass(status: ReceptionBoardAppointmentCard["paymentStatus"
   }
 }
 
-function MetricTile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function MetricTile({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+}) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0f1729]/80 px-4 py-3">
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </p>
       <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-50">{value}</p>
       {sub ? <p className="mt-0.5 text-xs text-slate-500">{sub}</p> : null}
     </div>
@@ -226,10 +236,7 @@ export function ReceptionBoardCommandCenter(props: {
                 : "—"
             }
           />
-          <MetricTile
-            label="Follow-ups flagged"
-            value={data.intelligence.upcomingFollowUps}
-          />
+          <MetricTile label="Follow-ups flagged" value={data.intelligence.upcomingFollowUps} />
         </div>
       </section>
 
@@ -249,7 +256,10 @@ export function ReceptionBoardCommandCenter(props: {
                   title="No appointments scheduled today"
                   description="Open the calendar to plan the day, or find a patient to book their next visit."
                   action={{ label: "Open calendar", href: `${base}/calendar` }}
-                  secondaryAction={{ label: "Returning patient follow-up", href: `${base}/patients/returning` }}
+                  secondaryAction={{
+                    label: "Returning patient follow-up",
+                    href: `${base}/patients/returning`,
+                  }}
                   icon={<Calendar className="h-10 w-10 opacity-40" aria-hidden />}
                 />
               ) : (
@@ -301,7 +311,9 @@ export function ReceptionBoardCommandCenter(props: {
                           <li key={item.bookingId}>
                             <article className="rounded-lg border border-cyan-500/15 bg-[#141c33]/90 px-3 py-2.5">
                               <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm font-semibold text-slate-50">{item.patientName}</p>
+                                <p className="text-sm font-semibold text-slate-50">
+                                  {item.patientName}
+                                </p>
                                 <span className="text-xs tabular-nums text-slate-500">
                                   {item.appointmentTime}
                                 </span>
@@ -316,7 +328,9 @@ export function ReceptionBoardCommandCenter(props: {
                                 <button
                                   type="button"
                                   disabled={busyBookingId === item.bookingId}
-                                  onClick={() => void advancePatient(item.bookingId, item.nextFlowAction!)}
+                                  onClick={() =>
+                                    void advancePatient(item.bookingId, item.nextFlowAction!)
+                                  }
                                   className="mt-2 w-full rounded-lg bg-cyan-500/20 px-2 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/30 disabled:opacity-40"
                                 >
                                   {receptionBoardFlowActionLabel(item.nextFlowAction!)}
@@ -324,11 +338,17 @@ export function ReceptionBoardCommandCenter(props: {
                               ) : null}
                               <div className="mt-2 flex gap-2 text-[0.65rem] font-semibold">
                                 {item.hrefs.patient ? (
-                                  <Link href={item.hrefs.patient} className="text-cyan-400/90 hover:underline">
+                                  <Link
+                                    href={item.hrefs.patient}
+                                    className="text-cyan-400/90 hover:underline"
+                                  >
                                     Patient
                                   </Link>
                                 ) : null}
-                                <Link href={item.hrefs.appointment} className="text-cyan-400/90 hover:underline">
+                                <Link
+                                  href={item.hrefs.appointment}
+                                  className="text-cyan-400/90 hover:underline"
+                                >
                                   Booking
                                 </Link>
                               </div>
@@ -353,7 +373,9 @@ export function ReceptionBoardCommandCenter(props: {
             </div>
             <div className="space-y-3 px-4 py-4 sm:px-5">
               {data.tomorrowSurgeries.length === 0 ? (
-                <p className="py-6 text-center text-sm text-slate-500">No surgeries scheduled for tomorrow.</p>
+                <p className="py-6 text-center text-sm text-slate-500">
+                  No surgeries scheduled for tomorrow.
+                </p>
               ) : (
                 data.tomorrowSurgeries.map((s) => (
                   <article
@@ -363,7 +385,10 @@ export function ReceptionBoardCommandCenter(props: {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         {s.hrefs.patient ? (
-                          <Link href={s.hrefs.patient} className="text-lg font-semibold text-slate-50 hover:underline">
+                          <Link
+                            href={s.hrefs.patient}
+                            className="text-lg font-semibold text-slate-50 hover:underline"
+                          >
                             {s.patientLabel}
                           </Link>
                         ) : (
@@ -373,7 +398,12 @@ export function ReceptionBoardCommandCenter(props: {
                           {s.procedureType} · {s.surgeryTime} · {s.surgeon ?? "Surgeon TBC"}
                         </p>
                       </div>
-                      <p className={cn("text-2xl font-bold tabular-nums", readinessToneClass(s.readinessTone))}>
+                      <p
+                        className={cn(
+                          "text-2xl font-bold tabular-nums",
+                          readinessToneClass(s.readinessTone)
+                        )}
+                      >
                         {s.readinessPercent}%
                       </p>
                     </div>
@@ -390,7 +420,9 @@ export function ReceptionBoardCommandCenter(props: {
                     </div>
                     {s.missingItems.length > 0 ? (
                       <ul className="mt-3 space-y-1">
-                        <li className="text-xs font-semibold uppercase tracking-wide text-rose-300/90">Missing</li>
+                        <li className="text-xs font-semibold uppercase tracking-wide text-rose-300/90">
+                          Missing
+                        </li>
                         {s.missingItems.map((m) => (
                           <li key={m} className="text-sm text-rose-200/80">
                             · {m}
@@ -437,7 +469,9 @@ export function ReceptionBoardCommandCenter(props: {
               {data.actionAlerts.length === 0 ? (
                 <li className="py-6 text-center">
                   <p className="text-sm font-medium text-emerald-300/90">All clear for today</p>
-                  <p className="mt-1 text-xs text-slate-500">No operational blockers need attention.</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    No operational blockers need attention.
+                  </p>
                 </li>
               ) : (
                 data.actionAlerts.map((alert) => {
@@ -460,15 +494,23 @@ export function ReceptionBoardCommandCenter(props: {
                           alertRowClass(alert.severity)
                         )}
                       >
-                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden />
+                        <AlertTriangle
+                          className="mt-0.5 h-5 w-5 shrink-0 text-amber-300"
+                          aria-hidden
+                        />
                         <div className="min-w-0">
-                          <p className="text-base font-semibold leading-snug text-slate-50">{human.title}</p>
+                          <p className="text-base font-semibold leading-snug text-slate-50">
+                            {human.title}
+                          </p>
                           <p className="mt-1 text-sm text-slate-400">{human.detail}</p>
                           <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-cyan-400/90">
                             {human.resolveLabel}
                           </p>
                         </div>
-                        <ArrowRight className="ml-auto h-5 w-5 shrink-0 text-slate-500" aria-hidden />
+                        <ArrowRight
+                          className="ml-auto h-5 w-5 shrink-0 text-slate-500"
+                          aria-hidden
+                        />
                       </Link>
                     </li>
                   );
@@ -546,7 +588,9 @@ function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) 
           >
             {priorityStyle.label}
           </span>
-          <span className="text-xl font-bold tabular-nums text-cyan-300">{appt.appointmentTime}</span>
+          <span className="text-xl font-bold tabular-nums text-cyan-300">
+            {appt.appointmentTime}
+          </span>
           {appt.durationMinutes ? (
             <span className="text-xs text-slate-500">{appt.durationMinutes} min</span>
           ) : null}
@@ -563,12 +607,7 @@ function AppointmentHeroCard({ appt }: { appt: ReceptionBoardAppointmentCard }) 
         <p className="mt-0.5 text-sm text-slate-400">
           {appt.appointmentType} · <Users className="mr-1 inline h-3.5 w-3.5" aria-hidden />
           {appt.clinician}
-          {appt.room ? (
-            <>
-              {" "}
-              · Room {appt.room}
-            </>
-          ) : null}
+          {appt.room ? <> · Room {appt.room}</> : null}
         </p>
         <p className={cn("mt-1 text-xs font-medium", paymentBadgeClass(appt.paymentStatus))}>
           <CreditCard className="mr-1 inline h-3.5 w-3.5" aria-hidden />

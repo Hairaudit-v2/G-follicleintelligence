@@ -41,8 +41,7 @@ function mapStaffMemberRow(raw: Record<string, unknown>): StaffMemberSnapshot {
     sourceSystem: raw.source_system != null ? String(raw.source_system) : null,
     mergedInto: raw.merged_into != null ? String(raw.merged_into) : null,
     archivedAt: raw.archived_at != null ? String(raw.archived_at) : null,
-    employmentStatus:
-      raw.employment_status != null ? String(raw.employment_status) : null,
+    employmentStatus: raw.employment_status != null ? String(raw.employment_status) : null,
   };
 }
 
@@ -290,9 +289,7 @@ export async function enrichImportSnapshotsWithIdentityLinks(
     staffMembers.filter((m) => m.fiStaffId).map((m) => [m.id, m.fiStaffId!])
   );
   const existingExtKeys = new Set(
-    snapshots.existingStaffSourceIds.map(
-      (s) => `${s.source_system}:${s.source_staff_id}`
-    )
+    snapshots.existingStaffSourceIds.map((s) => `${s.source_system}:${s.source_staff_id}`)
   );
 
   let injected = 0;

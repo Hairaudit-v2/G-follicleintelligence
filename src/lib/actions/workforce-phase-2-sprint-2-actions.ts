@@ -61,8 +61,7 @@ export async function upsertWorkforceWageProfileAction(
     const row = await upsertWorkforceWageProfile({
       tenantId,
       staffMemberId,
-      wageProfileId:
-        String((b as { wageProfileId?: string }).wageProfileId ?? "").trim() || null,
+      wageProfileId: String((b as { wageProfileId?: string }).wageProfileId ?? "").trim() || null,
       rateType,
       baseRateCents,
       currency: String((b as { currency?: string }).currency ?? "AUD").trim() || "AUD",
@@ -95,8 +94,7 @@ export async function upsertAwardLoadingPlaceholderAction(
 
     const row = await upsertAwardLoadingPlaceholder({
       tenantId,
-      placeholderId:
-        String((b as { placeholderId?: string }).placeholderId ?? "").trim() || null,
+      placeholderId: String((b as { placeholderId?: string }).placeholderId ?? "").trim() || null,
       awardCode,
       loadingCode,
       displayName,

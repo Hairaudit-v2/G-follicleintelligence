@@ -10,10 +10,7 @@ import {
 
 import { canEnterTeamWorkspace } from "./staffCapabilityCore";
 import { getStaffEffectiveAccess } from "./staffAccess.server";
-import {
-  resolveTeamWorkspaceTabAccess,
-  type TeamWorkspaceTabAccess,
-} from "./staffTeamAccessCore";
+import { resolveTeamWorkspaceTabAccess, type TeamWorkspaceTabAccess } from "./staffTeamAccessCore";
 
 export type TeamWorkspaceAccessDecision =
   | {

@@ -13,11 +13,7 @@ import type { WorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCa
 
 const rosterCadenceSchema = z.enum(["weekly", "fortnightly", "monthly"]);
 const weekStartDaySchema = z.enum(["monday", "sunday"]);
-const generationModeSchema = z.enum([
-  "standard_hours_only",
-  "copy_previous_period",
-  "hybrid",
-]);
+const generationModeSchema = z.enum(["standard_hours_only", "copy_previous_period", "hybrid"]);
 const fullTimePatternSchema = z.enum(["five_eight", "four_ten", "custom"]);
 
 const saveRosterPlanningSchema = z.object({

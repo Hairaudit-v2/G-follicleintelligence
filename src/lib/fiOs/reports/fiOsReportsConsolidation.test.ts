@@ -24,10 +24,7 @@ import {
   FI_OS_SURGERY_NAV_ID,
   buildFiOsSurgeryBase,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
-import {
-  FI_OS_TEAM_NAV_ID,
-  buildFiOsTeamBase,
-} from "@/src/lib/fiOs/team/teamWorkspaceCore";
+import { FI_OS_TEAM_NAV_ID, buildFiOsTeamBase } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import {
   FI_OS_REPORTS_ADMIN_LEGACY_ROUTES,
   FI_OS_REPORTS_LEGACY_ROUTES,
@@ -81,14 +78,10 @@ function flattenMoreIds(sections = moreSections()) {
 }
 
 test("primary rail has six slots; Reports is More-only (not on rail)", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find(
     (i) => (i.id as string) === "reports"
@@ -111,7 +104,10 @@ test("no extra Analytics, Insights, or Intelligence rows on primary minimal rail
 test("More contains one Reports group with consolidated destination", () => {
   const reports = moreSections().find((s) => s.groupId === "REPORTS");
   assert.ok(reports);
-  assert.deepEqual(reports!.items.map((i) => i.id), [FI_OS_REPORTS_NAV_ID]);
+  assert.deepEqual(
+    reports!.items.map((i) => i.id),
+    [FI_OS_REPORTS_NAV_ID]
+  );
   assert.equal(reports!.items[0]!.href, `${base}/reports`);
 });
 
@@ -127,7 +123,10 @@ test("Reports workspace exposes overview, analytics, quality, surgery, performan
   }
   assert.ok(subIds.has("reports-library"));
   assert.equal(buildFiOsReportsBase(tenantId), `${base}/reports`);
-  assert.equal(buildFiOsReportsTabHref(tenantId, FI_OS_REPORTS_TABS.find((t) => t.id === "library")!), `${base}/reports/library`);
+  assert.equal(
+    buildFiOsReportsTabHref(tenantId, FI_OS_REPORTS_TABS.find((t) => t.id === "library")!),
+    `${base}/reports/library`
+  );
 });
 
 test("legacy reporting routes remain in nav catalog; staff More hides direct links", () => {
@@ -139,10 +138,7 @@ test("legacy reporting routes remain in nav catalog; staff More hides direct lin
   );
   for (const legacy of FI_OS_REPORTS_LEGACY_ROUTES) {
     assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
-    assert.equal(
-      buildFiOsReportsLegacyHref(tenantId, legacy.suffix),
-      `${base}/${legacy.suffix}`
-    );
+    assert.equal(buildFiOsReportsLegacyHref(tenantId, legacy.suffix), `${base}/${legacy.suffix}`);
   }
   const staffMoreIds = flattenMoreIds();
   for (const legacy of FI_OS_REPORTS_LEGACY_ROUTES) {
@@ -158,7 +154,10 @@ test("legacy reporting routes remain in nav catalog; staff More hides direct lin
 
 test("consolidated reports paths activate the reports nav item", () => {
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reports`, base), FI_OS_REPORTS_NAV_ID);
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/reports/analytics`, base), FI_OS_REPORTS_NAV_ID);
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/reports/analytics`, base),
+    FI_OS_REPORTS_NAV_ID
+  );
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reports/quality`, base), FI_OS_REPORTS_NAV_ID);
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reports/surgery`, base), FI_OS_REPORTS_NAV_ID);
   assert.equal(

@@ -92,17 +92,17 @@ export function OnboardingCentreClient({
     setCreatePending(true);
     startTransition(async () => {
       try {
-      const result = await createOnboardingStaffAction(tenantId, {
-        ...form,
-        clinicId: form.clinicId.trim() || null,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setMessage("Staff member created. Send an onboarding invite when ready.");
-      setForm((f) => ({ ...f, fullName: "", email: "" }));
-      router.refresh();
+        const result = await createOnboardingStaffAction(tenantId, {
+          ...form,
+          clinicId: form.clinicId.trim() || null,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setMessage("Staff member created. Send an onboarding invite when ready.");
+        setForm((f) => ({ ...f, fullName: "", email: "" }));
+        router.refresh();
       } finally {
         setCreatePending(false);
       }
@@ -118,53 +118,54 @@ export function OnboardingCentreClient({
       setPendingActionKey(actionKey);
       startTransition(async () => {
         try {
-        let result:
-          | { ok: true; inviteUrl?: string; emailSent?: boolean; wasExpired?: boolean }
-          | { ok: false; error: string };
+          let result:
+            | { ok: true; inviteUrl?: string; emailSent?: boolean; wasExpired?: boolean }
+            | { ok: false; error: string };
 
-        if (action === "send") result = await sendOnboardingInviteAction(tenantId, staffMemberId);
-        else if (action === "resend") result = await resendOnboardingInviteAction(tenantId, staffMemberId);
-        else result = await copyOnboardingInviteLinkAction(tenantId, staffMemberId);
+          if (action === "send") result = await sendOnboardingInviteAction(tenantId, staffMemberId);
+          else if (action === "resend")
+            result = await resendOnboardingInviteAction(tenantId, staffMemberId);
+          else result = await copyOnboardingInviteLinkAction(tenantId, staffMemberId);
 
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-
-        if (action === "copy" && result.inviteUrl) {
-          try {
-            await navigator.clipboard.writeText(result.inviteUrl);
-            setCopiedStaffId(staffMemberId);
-            setMessage("Invite link copied to clipboard.");
-          } catch {
-            setInviteUrl(result.inviteUrl);
-            setMessage(result.inviteUrl);
+          if (!result.ok) {
+            setError(result.error);
+            return;
           }
-        } else if (action === "send") {
-          setInviteUrl(result.inviteUrl ?? null);
-          setMessage(
-            result.emailSent
-              ? "Invitation email sent."
-              : "Email delivery is not configured. Copy and send the invite link manually."
-          );
-        } else if (action === "resend") {
-          setInviteUrl(result.inviteUrl ?? null);
-          if (result.wasExpired) {
+
+          if (action === "copy" && result.inviteUrl) {
+            try {
+              await navigator.clipboard.writeText(result.inviteUrl);
+              setCopiedStaffId(staffMemberId);
+              setMessage("Invite link copied to clipboard.");
+            } catch {
+              setInviteUrl(result.inviteUrl);
+              setMessage(result.inviteUrl);
+            }
+          } else if (action === "send") {
+            setInviteUrl(result.inviteUrl ?? null);
             setMessage(
               result.emailSent
-                ? "This invite has expired. A new secure link has been generated and emailed."
-                : "This invite has expired. A new secure link has been generated — copy and send it manually."
+                ? "Invitation email sent."
+                : "Email delivery is not configured. Copy and send the invite link manually."
             );
-          } else {
-            setMessage(
-              result.emailSent
-                ? "Invite resent."
-                : "Invite resent. Email delivery is not configured. Copy and send the invite link manually."
-            );
+          } else if (action === "resend") {
+            setInviteUrl(result.inviteUrl ?? null);
+            if (result.wasExpired) {
+              setMessage(
+                result.emailSent
+                  ? "This invite has expired. A new secure link has been generated and emailed."
+                  : "This invite has expired. A new secure link has been generated — copy and send it manually."
+              );
+            } else {
+              setMessage(
+                result.emailSent
+                  ? "Invite resent."
+                  : "Invite resent. Email delivery is not configured. Copy and send the invite link manually."
+              );
+            }
           }
-        }
 
-        router.refresh();
+          router.refresh();
         } finally {
           setPendingActionKey(null);
         }
@@ -180,13 +181,13 @@ export function OnboardingCentreClient({
       setPendingActionKey(actionKey);
       startTransition(async () => {
         try {
-        const result = await markOnboardingTrainingCompleteAction(tenantId, staffMemberId);
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        setMessage("Training marked complete.");
-        router.refresh();
+          const result = await markOnboardingTrainingCompleteAction(tenantId, staffMemberId);
+          if (!result.ok) {
+            setError(result.error);
+            return;
+          }
+          setMessage("Training marked complete.");
+          router.refresh();
         } finally {
           setPendingActionKey(null);
         }
@@ -200,9 +201,7 @@ export function OnboardingCentreClient({
       <HrOsSubNav tenantId={tenantId} />
 
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-50">
-          Onboarding
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-50">Onboarding</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Create staff, send onboarding invites, resend when needed, and track checklist progress
           through PIN setup and permissions.
@@ -305,7 +304,11 @@ export function OnboardingCentreClient({
                 </select>
               </label>
             </div>
-            <Button className="mt-4" disabled={createPending || pendingActionKey !== null} onClick={onCreate}>
+            <Button
+              className="mt-4"
+              disabled={createPending || pendingActionKey !== null}
+              onClick={onCreate}
+            >
               {createPending ? "Creating…" : "Create staff member"}
             </Button>
           </DashboardCard>
@@ -330,10 +333,7 @@ export function OnboardingCentreClient({
             <tbody className="divide-y divide-white/[0.06]">
               {staff.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={canManage ? 7 : 6}
-                    className="px-4 py-8 text-center text-slate-400"
-                  >
+                  <td colSpan={canManage ? 7 : 6} className="px-4 py-8 text-center text-slate-400">
                     No staff pending onboarding.
                   </td>
                 </tr>
@@ -378,7 +378,10 @@ export function OnboardingCentreClient({
                     </td>
                     <td className="px-4 py-3">
                       <ul className="space-y-1">
-                        <ChecklistItem done={row.checklist.accountCreated} label="Account created" />
+                        <ChecklistItem
+                          done={row.checklist.accountCreated}
+                          label="Account created"
+                        />
                         <ChecklistItem done={row.checklist.pinChosen} label="PIN chosen" />
                         <ChecklistItem
                           done={row.checklist.permissionsAssigned}

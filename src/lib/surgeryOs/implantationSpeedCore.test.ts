@@ -5,9 +5,7 @@ import { buildImplantationSpeed } from "@/src/lib/surgeryOs/implantationSpeedCor
 
 const surgeryId = "00000000-0000-4000-8000-000000000042";
 
-function baseInput(
-  overrides: Partial<Parameters<typeof buildImplantationSpeed>[0]> = {}
-) {
+function baseInput(overrides: Partial<Parameters<typeof buildImplantationSpeed>[0]> = {}) {
   return {
     surgeryId,
     patientLabel: "Jordan Patient",

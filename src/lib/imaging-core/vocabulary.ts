@@ -5,7 +5,10 @@
  * → legacy aliases (FiUploadType, HairAudit labels, HLI document kinds).
  */
 
-import { FI_AI_IMAGE_CATEGORIES, type FiAiImageCategory } from "@/src/lib/hair-intelligence/imageClassification/types";
+import {
+  FI_AI_IMAGE_CATEGORIES,
+  type FiAiImageCategory,
+} from "@/src/lib/hair-intelligence/imageClassification/types";
 import {
   CANONICAL_HAIR_IMAGE_CATEGORIES,
   mapExternalCategoryToCanonical,
@@ -15,11 +18,7 @@ import {
 import type { FiUploadType } from "@/lib/fi/uploadTypes";
 import type { PatientImageCategory } from "@/src/lib/patientImages/patientImageTypes";
 
-export {
-  CANONICAL_HAIR_IMAGE_CATEGORIES,
-  FI_AI_IMAGE_CATEGORIES,
-  mapExternalCategoryToCanonical,
-};
+export { CANONICAL_HAIR_IMAGE_CATEGORIES, FI_AI_IMAGE_CATEGORIES, mapExternalCategoryToCanonical };
 export type { CanonicalHairImageCategory, ExternalCategoryMappingResult, FiAiImageCategory };
 
 /** UI-facing patient image library buckets stored on fi_patient_images.image_category. */

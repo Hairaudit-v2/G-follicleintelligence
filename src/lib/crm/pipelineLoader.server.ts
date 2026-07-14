@@ -53,20 +53,15 @@ async function resolvePipelineSessionContext(tenantId: string) {
   const bookingsSession = await getBookingsOperatorSessionIfAllowed(tenantId);
   // getCrmShellPageSession already required a tenant proxy for platform-admin bypass;
   // fiUserId present + full-session bypass ⇒ valid tenant-scoped proxy.
-  const platformAdminBypass = await isFiOsPlatformAdminFullSessionBypass(
-    session.authUserId
-  );
-  const validPlatformAdminTenantProxy =
-    platformAdminBypass && Boolean(session.fiUserId?.trim());
+  const platformAdminBypass = await isFiOsPlatformAdminFullSessionBypass(session.authUserId);
+  const validPlatformAdminTenantProxy = platformAdminBypass && Boolean(session.fiUserId?.trim());
 
   if (process.env.PIPELINE_PERMISSION_DIAG === "1") {
     console.info(
       "[pipeline-permission-session]",
       JSON.stringify({
         tenantId: tenantId.trim(),
-        sessionKind: platformAdminBypass
-          ? "platform_admin_full_session"
-          : "tenant_operator",
+        sessionKind: platformAdminBypass ? "platform_admin_full_session" : "tenant_operator",
         isPlatformAdmin: platformAdminBypass,
         hasTenantProxy: Boolean(session.fiUserId?.trim()),
         proxyTenantMatches: validPlatformAdminTenantProxy,

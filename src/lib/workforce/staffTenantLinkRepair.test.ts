@@ -37,7 +37,12 @@ type TableState = Record<string, Record<string, unknown>[]>;
 function makeMockClient(
   state: TableState,
   authUsers: Record<string, unknown>[] = [],
-  rpcHandlers: Record<string, (args: Record<string, unknown>) => Promise<{ data: unknown; error: null } | { data: null; error: { message: string } }>> = {}
+  rpcHandlers: Record<
+    string,
+    (
+      args: Record<string, unknown>
+    ) => Promise<{ data: unknown; error: null } | { data: null; error: { message: string } }>
+  > = {}
 ): SupabaseClient {
   const from = (table: string) => {
     const filters: Array<(row: Record<string, unknown>) => boolean> = [];
@@ -160,7 +165,10 @@ function makeMockClient(
           },
           error: null,
         }),
-        updateUserById: async (id: string, payload: { user_metadata?: Record<string, unknown> }) => {
+        updateUserById: async (
+          id: string,
+          payload: { user_metadata?: Record<string, unknown> }
+        ) => {
           const user = authUsers.find((u) => u.id === id);
           if (user && payload.user_metadata) {
             user.user_metadata = payload.user_metadata;
@@ -183,10 +191,7 @@ function makeMockClient(
 }
 
 test("extractTenantIdFromFiAdminPath reads tenant from next path", () => {
-  assert.equal(
-    extractTenantIdFromFiAdminPath(`/fi-admin/${EVOLVED_TENANT}/cases`),
-    EVOLVED_TENANT
-  );
+  assert.equal(extractTenantIdFromFiAdminPath(`/fi-admin/${EVOLVED_TENANT}/cases`), EVOLVED_TENANT);
 });
 
 test("resolvePreferredLoginTenantId prefers FI membership over stale metadata", () => {

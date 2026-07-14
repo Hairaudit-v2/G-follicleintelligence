@@ -22,10 +22,10 @@ test("ONBOARDING_FI_CLINICS_SELECT: production schema uses id and display_name o
 });
 
 test("mapOnboardingClinicOption: uses display_name for clinic label", () => {
-  assert.deepEqual(
-    mapOnboardingClinicOption({ id: CLINIC_ID, display_name: "Perth Clinic" }),
-    { id: CLINIC_ID, name: "Perth Clinic" }
-  );
+  assert.deepEqual(mapOnboardingClinicOption({ id: CLINIC_ID, display_name: "Perth Clinic" }), {
+    id: CLINIC_ID,
+    name: "Perth Clinic",
+  });
 });
 
 test("mapOnboardingClinicOption: falls back to Clinic when display_name is empty", () => {
@@ -56,7 +56,7 @@ test("onboardingPage.server.ts: fi_clinics loader does not reference fi_clinics.
     "utf8"
   );
   assert.ok(
-    source.includes('select(ONBOARDING_FI_CLINICS_SELECT)'),
+    source.includes("select(ONBOARDING_FI_CLINICS_SELECT)"),
     "loadClinics must select via ONBOARDING_FI_CLINICS_SELECT"
   );
   assert.ok(!source.includes('"id, display_name, name"'), "must not select fi_clinics.name");

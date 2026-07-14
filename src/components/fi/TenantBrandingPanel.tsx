@@ -10,7 +10,10 @@ import {
 import { TenantLogoPreviewStrip } from "@/src/components/brand/TenantBrandMark";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { TENANT_BRANDING_LOGO_FALLBACK_ORDER } from "@/src/lib/fi/foundation/tenantBrandingFormCore";
-import { buildNormalizedBrandingCssVariables, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
+import {
+  buildNormalizedBrandingCssVariables,
+  safeBrandingColourHex,
+} from "@/src/lib/fi/foundation/brandingCss";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] file:mr-3 file:rounded-md file:border-0 file:bg-[#141C33] file:px-2 file:py-1 file:text-xs file:text-[#22C1FF] disabled:opacity-50";
@@ -233,9 +236,7 @@ export function TenantBrandingLogoUpload({
               type="button"
               disabled={!clearLegacyEnabled}
               title={
-                legacyLogoUrl
-                  ? "Clear the legacy logo_url column"
-                  : "No legacy logo URL to clear"
+                legacyLogoUrl ? "Clear the legacy logo_url column" : "No legacy logo URL to clear"
               }
               className="rounded-lg border border-white/[0.14] px-3 py-1.5 text-xs font-medium text-[#94A3B8] hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
               onClick={() => void onClearLegacy()}
@@ -251,7 +252,9 @@ export function TenantBrandingLogoUpload({
       )}
       {legacyLogoUrl ? (
         <p className="text-xs text-[#64748B]">
-          {hasUploadedLogo ? "Legacy logo URL (fallback, not currently shown): " : "Legacy logo URL (currently active): "}
+          {hasUploadedLogo
+            ? "Legacy logo URL (fallback, not currently shown): "
+            : "Legacy logo URL (currently active): "}
           <code className="break-all text-[#94A3B8]">{legacyLogoUrl}</code>
         </p>
       ) : null}
@@ -349,9 +352,7 @@ export function TenantBrandingPreviewPanel({
                 <div
                   key={row.label}
                   className={`rounded-md px-2 py-1 text-[0.7rem] font-medium ${
-                    row.active
-                      ? "fi-tenant-nav-active text-slate-50"
-                      : "text-slate-400"
+                    row.active ? "fi-tenant-nav-active text-slate-50" : "text-slate-400"
                   }`}
                 >
                   {row.label}

@@ -87,7 +87,9 @@ type FiStaffSourceRow = {
 
 function isAuditableStaffMember(row: MemberSourceRow): boolean {
   if (isArchivedStaff(row.archived_at)) return false;
-  const status = String(row.employment_status ?? "").trim().toLowerCase();
+  const status = String(row.employment_status ?? "")
+    .trim()
+    .toLowerCase();
   if (status === "merged") return false;
   if (isDepartedStaff(status)) return false;
   return true;
@@ -97,7 +99,9 @@ function loginExpectedForStaff(row: MemberSourceRow): boolean {
   if (isArchivedStaff(row.archived_at)) return false;
   if (isDepartedStaff(row.employment_status)) return false;
   if (Boolean(row.system_access_revoked)) return false;
-  const status = String(row.employment_status ?? "").trim().toLowerCase();
+  const status = String(row.employment_status ?? "")
+    .trim()
+    .toLowerCase();
   if (SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES.has(status as never)) return false;
   return status === "active" || status === "pending_onboarding";
 }
@@ -107,7 +111,9 @@ function mapAuthLoginToAuditStatus(
   loginExpected: boolean,
   member: MemberSourceRow
 ): StaffIdentityReadinessAuditRow["loginStatus"] {
-  const employment = String(member.employment_status ?? "").trim().toLowerCase();
+  const employment = String(member.employment_status ?? "")
+    .trim()
+    .toLowerCase();
   if (employment === "suspended" || Boolean(member.system_access_revoked)) return "suspended";
   if (authStatus === "suspended" || authStatus === "revoked") return "suspended";
   if (!loginExpected) return "not_required";
@@ -180,7 +186,9 @@ function evaluatePinStatus(input: {
   pinRequired: boolean;
 }): StaffIdentityReadinessAuditRow["pinStatus"] {
   if (!input.pinRequired) return "not_required";
-  const status = String(input.pinRawStatus ?? "not_set").trim().toLowerCase();
+  const status = String(input.pinRawStatus ?? "not_set")
+    .trim()
+    .toLowerCase();
   if (status === "active" || status === "locked") return "ready";
   if (status === "not_set" || status === "disabled") return "missing";
   return "unknown";
@@ -194,15 +202,13 @@ function evaluateOnboardingStatus(input: {
   loginExpected: boolean;
   systemAccessRevoked: boolean;
 }): StaffIdentityReadinessAuditRow["onboardingStatus"] {
-  const employment = String(input.employmentStatus ?? "").trim().toLowerCase();
+  const employment = String(input.employmentStatus ?? "")
+    .trim()
+    .toLowerCase();
 
   if (employment === "suspended" || input.systemAccessRevoked) return "blocked";
 
-  if (
-    input.loginExpected &&
-    input.loginStatus === "ready" &&
-    employment === "pending_onboarding"
-  ) {
+  if (input.loginExpected && input.loginStatus === "ready" && employment === "pending_onboarding") {
     return "blocked";
   }
 
@@ -421,7 +427,9 @@ export function summarizeStaffTestingReadiness(
   return allReady ? "ready" : "watch";
 }
 
-function buildAuditSummary(rows: StaffIdentityReadinessAuditRow[]): StaffIdentityReadinessAuditSummary {
+function buildAuditSummary(
+  rows: StaffIdentityReadinessAuditRow[]
+): StaffIdentityReadinessAuditSummary {
   const activeRows = rows.filter((r) => isActiveStaffMemberFromAuditRow(r));
   return {
     readyCount: activeRows.filter(
@@ -525,7 +533,9 @@ export async function runStaffIdentityReadinessAudit(
       fiStaffById.set(String(r.id), {
         ...r,
         staff_metadata:
-          r.staff_metadata && typeof r.staff_metadata === "object" && !Array.isArray(r.staff_metadata)
+          r.staff_metadata &&
+          typeof r.staff_metadata === "object" &&
+          !Array.isArray(r.staff_metadata)
             ? (r.staff_metadata as Record<string, unknown>)
             : null,
       });
@@ -534,9 +544,7 @@ export async function runStaffIdentityReadinessAudit(
 
   const positionIds = [
     ...new Set(
-      [...fiStaffById.values()]
-        .map((s) => s.position_type_id?.trim())
-        .filter(Boolean) as string[]
+      [...fiStaffById.values()].map((s) => s.position_type_id?.trim()).filter(Boolean) as string[]
     ),
   ];
   const positionProfileById = new Map<string, string | null>();
@@ -561,9 +569,7 @@ export async function runStaffIdentityReadinessAudit(
 
   const templateKeys = [
     ...new Set(
-      [...positionTemplateKeyById.values()]
-        .map((k) => k?.trim())
-        .filter(Boolean) as string[]
+      [...positionTemplateKeyById.values()].map((k) => k?.trim()).filter(Boolean) as string[]
     ),
   ];
   const templateProfileByKey = new Map<string, string | null>();
@@ -582,11 +588,7 @@ export async function runStaffIdentityReadinessAudit(
   }
 
   const fiUserIds = [
-    ...new Set(
-      [...fiStaffById.values()]
-        .map((s) => s.fi_user_id)
-        .filter(Boolean) as string[]
-    ),
+    ...new Set([...fiStaffById.values()].map((s) => s.fi_user_id).filter(Boolean) as string[]),
   ];
   const fiUserById = new Map<string, { auth_user_id: string | null }>();
   if (fiUserIds.length) {
@@ -605,11 +607,7 @@ export async function runStaffIdentityReadinessAudit(
   }
 
   const authUserIds = [
-    ...new Set(
-      [...fiUserById.values()]
-        .map((u) => u.auth_user_id)
-        .filter(Boolean) as string[]
-    ),
+    ...new Set([...fiUserById.values()].map((u) => u.auth_user_id).filter(Boolean) as string[]),
   ];
   const authSnapshots = await loadAuthSnapshots(authUserIds, supabase);
 
@@ -648,7 +646,9 @@ export async function runStaffIdentityReadinessAudit(
   if (memberIds.length) {
     const { data: checklistRows, error: clErr } = await supabase
       .from("fi_staff_onboarding_checklists")
-      .select("staff_member_id, account_created, pin_chosen, permissions_assigned, training_pending")
+      .select(
+        "staff_member_id, account_created, pin_chosen, permissions_assigned, training_pending"
+      )
       .eq("tenant_id", tid)
       .in("staff_member_id", memberIds);
     if (clErr) throw new Error(clErr.message);
@@ -661,10 +661,7 @@ export async function runStaffIdentityReadinessAudit(
         training_pending: boolean;
       };
       const pending =
-        !r.account_created ||
-        !r.permissions_assigned ||
-        !r.pin_chosen ||
-        r.training_pending;
+        !r.account_created || !r.permissions_assigned || !r.pin_chosen || r.training_pending;
       checklistPendingByMember.set(String(r.staff_member_id), pending);
     }
   }
@@ -678,7 +675,7 @@ export async function runStaffIdentityReadinessAudit(
     const fiUserId = fiStaff?.fi_user_id ?? null;
     const fiUser = fiUserId ? fiUserById.get(fiUserId) : null;
     const authUserId = fiUser?.auth_user_id ?? null;
-    const authSnapshot = authUserId ? authSnapshots.get(authUserId) ?? null : null;
+    const authSnapshot = authUserId ? (authSnapshots.get(authUserId) ?? null) : null;
 
     const latestInvite = latestInviteByMember.get(String(member.id));
     const inviteStatus = resolveInviteStatus({
@@ -705,7 +702,9 @@ export async function runStaffIdentityReadinessAudit(
         inviteStatus,
         pinRawStatus,
         positionDefaultProfile: positionId ? (positionProfileById.get(positionId) ?? null) : null,
-        templateDefaultProfile: templateKey ? (templateProfileByKey.get(templateKey) ?? null) : null,
+        templateDefaultProfile: templateKey
+          ? (templateProfileByKey.get(templateKey) ?? null)
+          : null,
         featureAccessCount: fiStaffId ? (featureAccessCountByStaffId.get(fiStaffId) ?? 0) : 0,
         checklistPending: checklistPendingByMember.get(String(member.id)) ?? false,
       })

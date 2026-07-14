@@ -90,7 +90,10 @@ function scan(): { totalFrom: number; scannedFiles: number; violations: Violatio
   let totalFrom = 0;
 
   for (const abs of files) {
-    const rel = abs.slice(ROOT.length + 1).split("\\").join("/");
+    const rel = abs
+      .slice(ROOT.length + 1)
+      .split("\\")
+      .join("/");
     if (FILE_ALLOWLIST.has(rel)) continue;
 
     let src: string;
@@ -140,9 +143,7 @@ test("WorkforceOS service-role queries are tenant-scoped (WORKFORCE-GUARD-1)", (
   assert.ok(totalFrom > 50, `expected many .from() queries, only saw ${totalFrom}`);
 
   if (violations.length > 0) {
-    const detail = violations
-      .map((v) => `  • ${v.file}:${v.line} -> ${v.table}`)
-      .join("\n");
+    const detail = violations.map((v) => `  • ${v.file}:${v.line} -> ${v.table}`).join("\n");
     assert.fail(
       `Found ${violations.length} WorkforceOS service-role query/queries with no tenant guarantee.\n` +
         `Each must be tenant-scoped (use workforceTenantClient or an explicit tenant_id filter) or\n` +

@@ -67,8 +67,12 @@ export function readImagingStaffReviewRecord(
     status,
     reviewed_by: typeof m.reviewed_by === "string" ? m.reviewed_by : null,
     reviewed_at: typeof m.reviewed_at === "string" ? m.reviewed_at : new Date().toISOString(),
-    ...(typeof m.previous_view_type === "string" ? { previous_view_type: m.previous_view_type } : {}),
-    ...(typeof m.assigned_view_type === "string" ? { assigned_view_type: m.assigned_view_type } : {}),
+    ...(typeof m.previous_view_type === "string"
+      ? { previous_view_type: m.previous_view_type }
+      : {}),
+    ...(typeof m.assigned_view_type === "string"
+      ? { assigned_view_type: m.assigned_view_type }
+      : {}),
     ...(typeof m.staff_note === "string" && m.staff_note.trim()
       ? { staff_note: m.staff_note.trim().slice(0, 2000) }
       : {}),
@@ -109,8 +113,12 @@ export function buildStaffReviewRecord(input: {
     status: input.status,
     reviewed_by: input.reviewedByUserId,
     reviewed_at: input.reviewedAt ?? new Date().toISOString(),
-    ...(input.previousViewType?.trim() ? { previous_view_type: input.previousViewType.trim() } : {}),
-    ...(input.assignedViewType?.trim() ? { assigned_view_type: input.assignedViewType.trim() } : {}),
+    ...(input.previousViewType?.trim()
+      ? { previous_view_type: input.previousViewType.trim() }
+      : {}),
+    ...(input.assignedViewType?.trim()
+      ? { assigned_view_type: input.assignedViewType.trim() }
+      : {}),
     ...(input.staffNote?.trim() ? { staff_note: input.staffNote.trim().slice(0, 2000) } : {}),
     review_version: IMAGINGOS_STAFF_REVIEW_VERSION,
   };

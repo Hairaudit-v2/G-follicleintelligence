@@ -142,8 +142,7 @@ export function AuditOsDashboard({
             Quality review
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Clinical quality, outcome review, patient evidence, and readiness across surgical
-            cases.
+            Clinical quality, outcome review, patient evidence, and readiness across surgical cases.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/hair-audit/admin" className={auditOsLinkButtonClass}>

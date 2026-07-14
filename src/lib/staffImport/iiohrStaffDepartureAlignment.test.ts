@@ -83,7 +83,10 @@ function makeMockClient(state: TableState): SupabaseClient {
       single() {
         applyPendingMutation();
         const rows = (state[table] ?? []).filter((r) => filters.every((f) => f(r)));
-        return Promise.resolve({ data: rows[0] ?? null, error: rows.length ? null : { message: "not found" } });
+        return Promise.resolve({
+          data: rows[0] ?? null,
+          error: rows.length ? null : { message: "not found" },
+        });
       },
       insert(row: Record<string, unknown> | Record<string, unknown>[]) {
         const rows = Array.isArray(row) ? row : [row];
@@ -118,7 +121,10 @@ function makeMockClient(state: TableState): SupabaseClient {
   return {
     from,
     rpc() {
-      return { then: (resolve: (v: { data: unknown; error: null }) => void) => resolve({ data: null, error: null }) };
+      return {
+        then: (resolve: (v: { data: unknown; error: null }) => void) =>
+          resolve({ data: null, error: null }),
+      };
     },
   } as unknown as SupabaseClient;
 }

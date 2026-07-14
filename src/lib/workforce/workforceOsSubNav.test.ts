@@ -51,7 +51,10 @@ describe("WorkforceOsSubNav", () => {
 
   it("hides Identity Audit nav item when showIdentityAudit is false", () => {
     const items = buildWorkforceOsNavItems(tenantId, { showIdentityAudit: false });
-    assert.equal(items.some((i) => i.segment === "identity-audit"), false);
+    assert.equal(
+      items.some((i) => i.segment === "identity-audit"),
+      false
+    );
     assert.equal(items.length, 10);
   });
 
@@ -119,10 +122,7 @@ describe("staffLifecycleCopy nav integrity", () => {
   });
 
   it("Staff Access links point to Staff Access Centre", () => {
-    assert.equal(
-      buildStaffAccessCentreHref(adminBase),
-      `${adminBase}/workforce-os/staff-access`
-    );
+    assert.equal(buildStaffAccessCentreHref(adminBase), `${adminBase}/workforce-os/staff-access`);
     const link = buildStaffLifecycleNavIntegrityLinks(tenantId).find(
       (l) => l.id === "staff_access_centre"
     );

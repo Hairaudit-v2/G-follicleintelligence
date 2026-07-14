@@ -249,11 +249,7 @@ test("reception profile session marks reception as covered", () => {
     receptionCards: [],
   });
 
-  assert.ok(
-    snapshots.some(
-      (s) => s.role === "reception" && s.signalKind === "role_covered"
-    )
-  );
+  assert.ok(snapshots.some((s) => s.role === "reception" && s.signalKind === "role_covered"));
   assert.ok(!snapshots.some((s) => s.signalKind === "clinic_unattended"));
 });
 
@@ -280,9 +276,7 @@ test("summarizePresenceForToday: unknown clinic avoids generic Ready for consult
     !summary.operationalStatus.chips.some((c) => c.label === "Ready for consult"),
     "generic consult-ready chip should not appear when clinic status is unknown"
   );
-  assert.ok(
-    summary.operationalStatus.chips.some((c) => c.label === "Consult readiness watch")
-  );
+  assert.ok(summary.operationalStatus.chips.some((c) => c.label === "Consult readiness watch"));
 });
 
 test("summarizePresenceForToday: patient in consultation keeps Ready for consult chip", () => {

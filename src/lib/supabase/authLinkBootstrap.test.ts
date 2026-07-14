@@ -71,7 +71,10 @@ test("root auth hash redirects to update-password preserving hash", () => {
     buildFiOsUpdatePasswordRecoveryUrl(hash, "?foo=bar"),
     "/follicle-intelligence/update-password?foo=bar" + hash
   );
-  assert.equal(shouldRedirectAuthHashToUpdatePassword(credentials, FI_OS_UPDATE_PASSWORD_PATH), false);
+  assert.equal(
+    shouldRedirectAuthHashToUpdatePassword(credentials, FI_OS_UPDATE_PASSWORD_PATH),
+    false
+  );
 });
 
 test("missing recovery token maps to safe user message without secrets", () => {

@@ -171,11 +171,10 @@ export async function loadSurgeryBookingPrefillAction(
       if (caseRow) {
         prefill.caseId = String(caseRow.id);
         prefill.patientId =
-          caseRow.patient_id != null ? String(caseRow.patient_id) : prefill.patientId ?? null;
+          caseRow.patient_id != null ? String(caseRow.patient_id) : (prefill.patientId ?? null);
         prefill.clinicId = caseRow.clinic_id != null ? String(caseRow.clinic_id) : null;
         prefill.leadId = caseRow.lead_id != null ? String(caseRow.lead_id) : null;
-        prefill.caseLabel =
-          caseRow.case_type != null ? String(caseRow.case_type) : "Surgery case";
+        prefill.caseLabel = caseRow.case_type != null ? String(caseRow.case_type) : "Surgery case";
       }
 
       const { data: plan } = await supabase
@@ -195,7 +194,10 @@ export async function loadSurgeryBookingPrefillAction(
         else if (min != null) prefill.graftEstimate = String(min);
         else if (max != null) prefill.graftEstimate = String(max);
         if (Array.isArray(plan.planned_zones)) {
-          prefill.plannedZones = plan.planned_zones as Array<{ key: string; label?: string | null }>;
+          prefill.plannedZones = plan.planned_zones as Array<{
+            key: string;
+            label?: string | null;
+          }>;
         }
         prefill.clinicalNotes =
           plan.planning_notes != null ? String(plan.planning_notes) : prefill.clinicalNotes;

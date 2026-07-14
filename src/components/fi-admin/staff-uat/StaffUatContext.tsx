@@ -11,10 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import {
-  staffUatModuleFromPath,
-  type StaffUatScreenKey,
-} from "@/src/lib/fiOs/staffUatScreenGuide";
+import { staffUatModuleFromPath, type StaffUatScreenKey } from "@/src/lib/fiOs/staffUatScreenGuide";
 import type { StaffUatFrictionType } from "@/src/lib/fiOs/staffUatFrictionCore";
 
 type StaffUatContextValue = {
@@ -31,10 +28,7 @@ type StaffUatContextValue = {
 
 const StaffUatContext = createContext<StaffUatContextValue | null>(null);
 
-async function postTelemetry(
-  tenantId: string,
-  body: Record<string, unknown>
-): Promise<void> {
+async function postTelemetry(tenantId: string, body: Record<string, unknown>): Promise<void> {
   try {
     await fetch(`/api/tenants/${tenantId}/staff-uat/telemetry`, {
       method: "POST",

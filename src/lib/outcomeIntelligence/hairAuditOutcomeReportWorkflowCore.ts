@@ -82,7 +82,10 @@ const IN_REVIEW_REPORT_STATUSES = new Set([
 
 function normalizeReportStatus(value: string | null | undefined): string | null {
   if (!value || !value.trim()) return null;
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 export function collectHairAuditOutcomeMissingEvidence(input: {
@@ -103,7 +106,10 @@ export function collectHairAuditOutcomeMissingEvidence(input: {
       missing.add("comparison_views");
     }
   }
-  if (longitudinal?.hairaudit_report_ready === false && longitudinal.follow_up_windows.some((w) => w.window === "month_12" && w.captured)) {
+  if (
+    longitudinal?.hairaudit_report_ready === false &&
+    longitudinal.follow_up_windows.some((w) => w.window === "month_12" && w.captured)
+  ) {
     if (!input.hairAuditLink.fi_report_id && !input.hairAuditLink.audit_report_id) {
       missing.add("hairaudit_report");
     }
@@ -215,9 +221,17 @@ export function resolveHairAuditOutcomeReportWorkflow(
 
   if (input.hairAuditLink.linkage_conflict) {
     reportStatus = "linkage_conflict";
-  } else if (reportLink && normalizedReportStatus && COMPLETE_REPORT_STATUSES.has(normalizedReportStatus)) {
+  } else if (
+    reportLink &&
+    normalizedReportStatus &&
+    COMPLETE_REPORT_STATUSES.has(normalizedReportStatus)
+  ) {
     reportStatus = "report_complete";
-  } else if (reportLink && normalizedReportStatus && IN_REVIEW_REPORT_STATUSES.has(normalizedReportStatus)) {
+  } else if (
+    reportLink &&
+    normalizedReportStatus &&
+    IN_REVIEW_REPORT_STATUSES.has(normalizedReportStatus)
+  ) {
     reportStatus = "in_review";
   } else if (longitudinal?.hairaudit_report_ready) {
     reportStatus = reportLink ? "in_review" : "ready_for_review";
@@ -241,9 +255,9 @@ export function resolveHairAuditOutcomeReportWorkflow(
 
   const reportReady = Boolean(
     !input.hairAuditLink.linkage_conflict &&
-      (longitudinal?.hairaudit_report_ready ||
-        (reportStatus === "report_complete" && reportLink) ||
-        (longitudinal?.comparison_readiness.outcome_measured && reportLink))
+    (longitudinal?.hairaudit_report_ready ||
+      (reportStatus === "report_complete" && reportLink) ||
+      (longitudinal?.comparison_readiness.outcome_measured && reportLink))
   );
 
   const partial = {
@@ -343,11 +357,7 @@ export function planHairAuditOutcomeReportLink(input: PlanHairAuditOutcomeReport
   const legacy = parseLegacyHairAuditLinkMetadata(input.caseMetadata);
   const legacyReportId = legacy.fi_report_id ?? legacy.audit_report_id;
 
-  if (
-    legacyReportId &&
-    input.fiReportId &&
-    input.fiReportId.trim() !== legacyReportId
-  ) {
+  if (legacyReportId && input.fiReportId && input.fiReportId.trim() !== legacyReportId) {
     return {
       outcome: { kind: "skipped_legacy_report", fiReportId: legacyReportId },
     };
@@ -387,9 +397,7 @@ export function planHairAuditOutcomeReportLink(input: PlanHairAuditOutcomeReport
         ...input.hairAuditLink,
         fi_report_id: legacyReportId,
         audit_report_id: legacy.audit_report_id ?? legacyReportId,
-        ...(input.sendToReview
-          ? { patient_review_pathway: "hairaudit_outcome_review" }
-          : {}),
+        ...(input.sendToReview ? { patient_review_pathway: "hairaudit_outcome_review" } : {}),
       },
       surgeryId,
     });

@@ -44,7 +44,9 @@ export type RunImagingQualityEvaluationResult = {
   fingerprint: { content_hash: string; perceptual_hash: string } | null;
 };
 
-function buildProtocolContext(input: RunImagingQualityEvaluationInput): ImagingQualityProtocolContext {
+function buildProtocolContext(
+  input: RunImagingQualityEvaluationInput
+): ImagingQualityProtocolContext {
   const template = input.protocol_template_slug?.trim();
   const slot = input.protocol_slot_slug?.trim();
   const protocol = template ? getVieProtocol(template) : null;
@@ -64,20 +66,24 @@ function buildProtocolContext(input: RunImagingQualityEvaluationInput): ImagingQ
     is_audit_context:
       String(input.capture_source ?? "")
         .toLowerCase()
-        .includes("hairaudit") ||
-      String(input.metadata?.upload_source ?? "") === "hairaudit",
+        .includes("hairaudit") || String(input.metadata?.upload_source ?? "") === "hairaudit",
   };
 }
 
 export async function runImagingQualityEvaluation(
   input: RunImagingQualityEvaluationInput
 ): Promise<RunImagingQualityEvaluationResult> {
-  const policy = input.policy ?? (await loadImagingQualityPolicyForTenant(input.tenantId, input.client));
+  const policy =
+    input.policy ?? (await loadImagingQualityPolicyForTenant(input.tenantId, input.client));
   const metadata = input.metadata ?? {};
   const clientHints = readClientCaptureHintsFromMetadata(metadata);
 
   const heuristic = input.skip_server_heuristic
-    ? { blur_status: "unknown" as const, exposure_status: "unknown" as const, sharpness_score: null }
+    ? {
+        blur_status: "unknown" as const,
+        exposure_status: "unknown" as const,
+        sharpness_score: null,
+      }
     : await evaluateImageSharpnessHeuristic(input.imageBuffer ?? null);
 
   const fingerprint = input.imageBuffer ? await computeImageFingerprint(input.imageBuffer) : null;

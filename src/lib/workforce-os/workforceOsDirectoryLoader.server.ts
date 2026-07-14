@@ -30,8 +30,7 @@ export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   return {
     rows: ((data ?? []) as unknown as Record<string, unknown>[]).map(mapLifecycleRow),
@@ -60,8 +59,7 @@ export async function loadWorkforceOsStaffProfilePage(
   const audit = await loadStaffMemberAuditTimeline(tid, lifecycle.id);
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   // Placeholder candidates — production loads from IIOHR feed API.
   const iiohrCandidates: { id: string; full_name: string | null; email: string | null }[] = [];
@@ -81,13 +79,11 @@ export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Pro
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
   if (!canManage) return null;
 
-  const { loadHrReconciliationPageData } = await import(
-    "@/src/lib/workforce-os/hrReconciliation.server"
-  );
+  const { loadHrReconciliationPageData } =
+    await import("@/src/lib/workforce-os/hrReconciliation.server");
   const [pageData, projectionHealth] = await Promise.all([
     loadHrReconciliationPageData({ tenantId }),
     loadTenantHrProjectionHealth(tenantId),

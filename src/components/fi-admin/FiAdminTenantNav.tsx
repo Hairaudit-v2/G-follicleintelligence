@@ -182,7 +182,8 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   groups.push({
     id: "analyticsos",
     label: "Insights",
-    description: "Executive KPIs across clinic operations, enquiries, patients, surgery, and quality.",
+    description:
+      "Executive KPIs across clinic operations, enquiries, patients, surgery, and quality.",
     items: [
       {
         href: `${base}/analytics`,

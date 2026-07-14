@@ -153,7 +153,10 @@ function localOffsetMinutesAt(instant: Date, tz: string): number {
     timeZoneName: "shortOffset",
   });
   const parts = Object.fromEntries(
-    dtf.formatToParts(instant).filter((p) => p.type !== "literal").map((p) => [p.type, p.value])
+    dtf
+      .formatToParts(instant)
+      .filter((p) => p.type !== "literal")
+      .map((p) => [p.type, p.value])
   );
   const offsetRaw = parts.timeZoneName ?? "GMT";
   const match = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(offsetRaw);
@@ -287,9 +290,7 @@ export function generateRosterFromStandardHours(
       continue;
     }
 
-    const tz =
-      input.staffTimezoneById.get(staffId)?.trim() ||
-      DEFAULT_STAFF_HOURS_FALLBACK_TZ;
+    const tz = input.staffTimezoneById.get(staffId)?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ;
     const staffBlocks = input.availabilityBlocks;
     const staffShifts = input.existingShifts.filter((s) => s.staff_id === staffId);
     const localDates = enumerateLocalDates(input.rangeStartIso, input.rangeEndIso, tz);
@@ -408,9 +409,7 @@ export function copyPreviousRosterPeriodShifts(
   const out: RosterShiftCandidate[] = [];
 
   for (const staffId of input.staffIds) {
-    const tz =
-      input.staffTimezoneById.get(staffId)?.trim() ||
-      DEFAULT_STAFF_HOURS_FALLBACK_TZ;
+    const tz = input.staffTimezoneById.get(staffId)?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ;
     const staffShifts = input.existingShifts.filter((s) => s.staff_id === staffId);
 
     for (const shift of staffShifts) {
@@ -488,7 +487,10 @@ function formatHmInTz(iso: string, tz: string): string {
     hour12: false,
   });
   const parts = Object.fromEntries(
-    dtf.formatToParts(new Date(iso)).filter((p) => p.type !== "literal").map((p) => [p.type, p.value])
+    dtf
+      .formatToParts(new Date(iso))
+      .filter((p) => p.type !== "literal")
+      .map((p) => [p.type, p.value])
   );
   return `${parts.hour}:${parts.minute}`;
 }
@@ -517,7 +519,9 @@ function formatRoleGapLabel(role: string): string {
   return role.replace(/_/g, " ");
 }
 
-export function shiftSourceDisplayLabel(source: StandardHoursShiftSource | null | undefined): string {
+export function shiftSourceDisplayLabel(
+  source: StandardHoursShiftSource | null | undefined
+): string {
   switch (source) {
     case "standard_hours":
       return "Generated from standard hours";

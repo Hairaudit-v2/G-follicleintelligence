@@ -81,9 +81,7 @@ export default async function CaseSummaryDocumentRoutePage({
   });
 
   const patientId =
-    detail.patient?.foundation_patient_id?.trim() ??
-    detail.foundation_patient_id?.trim() ??
-    null;
+    detail.patient?.foundation_patient_id?.trim() ?? detail.foundation_patient_id?.trim() ?? null;
   let patientSafeImagingCards: Awaited<
     ReturnType<typeof loadPatientSafeImagingExportCardsForPatient>
   >["cards"] = [];

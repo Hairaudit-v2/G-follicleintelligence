@@ -13,9 +13,7 @@ import type { SurgeryIntelligenceDashboardTableRow } from "@/src/lib/outcomeInte
 
 function actionButtonClass(disabled: boolean): string {
   return `rounded-md border border-white/10 px-2 py-1 text-xs ${
-    disabled
-      ? "cursor-not-allowed text-[#64748B]"
-      : "text-[#22C1FF] hover:border-[#22C1FF]/40"
+    disabled ? "cursor-not-allowed text-[#64748B]" : "text-[#22C1FF] hover:border-[#22C1FF]/40"
   }`;
 }
 
@@ -61,11 +59,7 @@ export function SurgeryIntelligenceOutcomeReportActions({
     switch (action) {
       case "open_report":
         return row.outcomeReportLink ? (
-          <Link
-            key={action}
-            href={row.outcomeReportLink}
-            className={actionButtonClass(false)}
-          >
+          <Link key={action} href={row.outcomeReportLink} className={actionButtonClass(false)}>
             {formatHairAuditOutcomeReportActionLabel(action)}
           </Link>
         ) : null;
@@ -95,11 +89,7 @@ export function SurgeryIntelligenceOutcomeReportActions({
         );
       case "mark_missing_follow_up_imaging":
         return row.imagingHref ? (
-          <Link
-            key={action}
-            href={row.imagingHref}
-            className={actionButtonClass(false)}
-          >
+          <Link key={action} href={row.imagingHref} className={actionButtonClass(false)}>
             {formatHairAuditOutcomeReportActionLabel(action)}
           </Link>
         ) : null;
@@ -146,9 +136,7 @@ export function SurgeryIntelligenceOutcomeReportActions({
           </div>
         ) : null}
       </div>
-      <div className="flex flex-wrap gap-2">
-        {actions.map((action) => renderAction(action))}
-      </div>
+      <div className="flex flex-wrap gap-2">{actions.map((action) => renderAction(action))}</div>
       {checklistOpen ? (
         <ul className="rounded-md border border-white/10 bg-[#0c1426]/60 px-2 py-2 text-xs text-[#94A3B8]">
           {row.outcomeReportMissingEvidence.length ? (

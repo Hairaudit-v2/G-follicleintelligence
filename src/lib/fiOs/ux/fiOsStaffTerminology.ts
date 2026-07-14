@@ -64,7 +64,11 @@ export const FI_OS_LEGACY_TO_STAFF_TERM: ReadonlyArray<{
   { legacy: "AnalyticsOS", approved: FI_OS_STAFF_TERMS.insights },
   { legacy: "PatientOS", approved: FI_OS_STAFF_TERMS.patients },
   { legacy: "OnboardingOS", approved: FI_OS_STAFF_TERMS.onboarding },
-  { legacy: "LeadFlow", approved: FI_OS_STAFF_TERMS.pipeline, notes: "Staff nav label after S4.5D" },
+  {
+    legacy: "LeadFlow",
+    approved: FI_OS_STAFF_TERMS.pipeline,
+    notes: "Staff nav label after S4.5D",
+  },
   { legacy: "Patient Twin", approved: FI_OS_STAFF_TERMS.healthRecord },
   { legacy: "Digital Twin", approved: FI_OS_STAFF_TERMS.healthRecord },
   { legacy: "Procedure Day", approved: FI_OS_STAFF_TERMS.surgeryDay },

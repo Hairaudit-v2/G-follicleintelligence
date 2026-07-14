@@ -11,7 +11,10 @@ import type {
   PipelinePresentation,
   PipelinePresentationColumn,
 } from "@/src/lib/crm/pipelinePresentation.types";
-import type { PipelineOpsQueryState, PipelineOpsSortMode } from "@/src/lib/crm/pipelineOperationsQuery";
+import type {
+  PipelineOpsQueryState,
+  PipelineOpsSortMode,
+} from "@/src/lib/crm/pipelineOperationsQuery";
 import { cardMatchesOpsQuery } from "@/src/lib/crm/pipelineOperationsFilters";
 import {
   compareNewColumnDefault,
@@ -39,9 +42,7 @@ function sortColumnCards(
   // User selected a sort mode → apply globally
   if (query.userSortSelected || query.view === "inactive_review") {
     const mode: PipelineOpsSortMode =
-      query.view === "inactive_review" && !query.userSortSelected
-        ? "oldest_untouched"
-        : query.sort;
+      query.view === "inactive_review" && !query.userSortSelected ? "oldest_untouched" : query.sort;
     return sortPipelineCardsByOpsMode(list, mode);
   }
 
@@ -82,9 +83,7 @@ export function applyPipelineOpsToPresentation(
   nowMs: number
 ): ApplyPipelineOpsResult {
   const enrichmentFilterApplied =
-    query.activity != null ||
-    query.view === "inactive_review" ||
-    query.age != null;
+    query.activity != null || query.view === "inactive_review" || query.age != null;
 
   const columns: PipelinePresentationColumn[] = presentation.columns.map((col) => {
     let cards = col.cards.filter((card) => cardMatchesOpsQuery(card, query, nowMs));
@@ -123,12 +122,8 @@ export function applyPipelineOpsToPresentation(
     byColumn[col.id] = col.count;
   }
 
-  const active = columns
-    .filter((c) => c.kind === "active")
-    .reduce((n, c) => n + c.count, 0);
-  const holding = columns
-    .filter((c) => c.kind === "holding")
-    .reduce((n, c) => n + c.count, 0);
+  const active = columns.filter((c) => c.kind === "active").reduce((n, c) => n + c.count, 0);
+  const holding = columns.filter((c) => c.kind === "holding").reduce((n, c) => n + c.count, 0);
   const converted = columns.find((c) => c.id === "converted")?.count ?? 0;
   const lost = columns.find((c) => c.id === "closed_lost")?.count ?? 0;
 

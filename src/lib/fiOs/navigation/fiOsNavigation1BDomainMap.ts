@@ -78,7 +78,10 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   "surgery-readiness-board": { domain: "Surgery" },
   "procedure-day-board": { domain: "Surgery", notes: "Procedure day tab inside surgery workflow" },
   "pathology-inbox": { domain: "Clinical" },
-  "pathology-email-routes": { domain: "Settings", notes: "Admin configuration under clinical labs" },
+  "pathology-email-routes": {
+    domain: "Settings",
+    notes: "Admin configuration under clinical labs",
+  },
   "front-desk-today": { domain: "Front Desk" },
   "front-desk-tomorrow": { domain: "Front Desk" },
   "front-desk-reception-operations": { domain: "Front Desk" },

@@ -84,7 +84,8 @@ export function FollowUpEncounterAiReviewPanel({
 
       <ul className="space-y-2">
         {sessions.map((sess) => {
-          const reviewStatus = (sess.ai_review_status as ImagingSessionAiReviewStatus | null) ?? "ai_pending";
+          const reviewStatus =
+            (sess.ai_review_status as ImagingSessionAiReviewStatus | null) ?? "ai_pending";
           const needsReview =
             reviewStatus === "ai_pending" || reviewStatus === "ai_ready_for_review";
           return (
@@ -92,9 +93,7 @@ export function FollowUpEncounterAiReviewPanel({
               key={sess.id}
               className="rounded-lg border border-white/[0.06] bg-[#0F1629]/60 px-3 py-2 text-sm"
             >
-              <p className="font-medium text-slate-200">
-                {sess.template_slug.replace(/_/g, " ")}
-              </p>
+              <p className="font-medium text-slate-200">{sess.template_slug.replace(/_/g, " ")}</p>
               <p className="text-xs text-slate-400">{imagingAiReviewStatusLabel(reviewStatus)}</p>
               {sess.session_completeness_status ? (
                 <p className="text-xs text-slate-500">

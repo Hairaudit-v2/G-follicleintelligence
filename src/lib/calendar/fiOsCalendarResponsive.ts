@@ -15,12 +15,10 @@ export const fiOsCalTabletChipScroll =
   "flex max-w-full items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] xl:flex-wrap xl:overflow-visible xl:whitespace-normal";
 
 /** Bottom padding so floating Guided Assist does not cover calendar grid / feed rows. */
-export const fiOsCalFloatingAssistScrollPad =
-  "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]";
+export const fiOsCalFloatingAssistScrollPad = "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]";
 
 /** Minimum visible grid height on tablet when chrome is stacked. */
-export const fiOsCalTabletGridMinHeight =
-  "min-h-[min(28rem,calc(100dvh-17rem))] xl:min-h-0";
+export const fiOsCalTabletGridMinHeight = "min-h-[min(28rem,calc(100dvh-17rem))] xl:min-h-0";
 
 export function isFiOsCalendarTabletCompactWidth(widthPx: number): boolean {
   return widthPx >= 768 && widthPx < 1280;

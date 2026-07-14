@@ -1,8 +1,6 @@
 import "server-only";
 
-import {
-  buildTodaySignalLearningSummaryView,
-} from "@/src/lib/fiOs/todaySignal/todaySignalLearningSummary";
+import { buildTodaySignalLearningSummaryView } from "@/src/lib/fiOs/todaySignal/todaySignalLearningSummary";
 import {
   isTodaySignalLearningEnabledForTenant,
   loadTodaySignalLearningSummary,

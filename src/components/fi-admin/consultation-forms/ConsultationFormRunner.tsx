@@ -230,10 +230,7 @@ export function ConsultationFormRunner({
     [scheduleAutosave]
   );
 
-  const allSchemaFields = useMemo(
-    () => sections.flatMap((s) => s.fields ?? []),
-    [sections]
-  );
+  const allSchemaFields = useMemo(() => sections.flatMap((s) => s.fields ?? []), [sections]);
 
   useEffect(
     () => () => {

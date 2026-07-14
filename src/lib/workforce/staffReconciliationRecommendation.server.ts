@@ -151,7 +151,9 @@ export async function buildReconciliationDecisionCard(input: {
     .maybeSingle();
 
   const linkedStaffMemberId =
-    existingLink != null ? String((existingLink as { staff_member_id: string }).staff_member_id) : null;
+    existingLink != null
+      ? String((existingLink as { staff_member_id: string }).staff_member_id)
+      : null;
 
   const iiohrHistory = await buildIiohrShadowOperationalHistory({
     tenantId: tid,
@@ -173,13 +175,10 @@ export async function buildReconciliationDecisionCard(input: {
     },
     match: {
       emailExactMatch:
-        input.emailMatch ||
-        normalizeEmail(fiRecord.email) === normalizeEmail(input.externalEmail),
+        input.emailMatch || normalizeEmail(fiRecord.email) === normalizeEmail(input.externalEmail),
       nameMatch: input.nameMatch,
       matchScore: input.matchScore,
-      hasConflicts: Boolean(
-        linkedStaffMemberId && linkedStaffMemberId !== input.staffMemberId
-      ),
+      hasConflicts: Boolean(linkedStaffMemberId && linkedStaffMemberId !== input.staffMemberId),
     },
   });
 

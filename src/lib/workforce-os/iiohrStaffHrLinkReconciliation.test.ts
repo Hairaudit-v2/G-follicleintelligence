@@ -91,9 +91,7 @@ test("blank email staff is skipped", () => {
 test("name-only match is skipped", () => {
   const result = planIiohrStaffHrLinkReconciliation({
     staffMembers: [staff("s-1", "fi-only@example.com", { full_name: "Jane Doe" })],
-    evolvedStaffRecords: [
-      evolved("iiohr-1", "hr-only@example.com", { full_name: "Jane Doe" }),
-    ],
+    evolvedStaffRecords: [evolved("iiohr-1", "hr-only@example.com", { full_name: "Jane Doe" })],
   });
 
   assert.equal(result.summary.skipped_no_match, 1);

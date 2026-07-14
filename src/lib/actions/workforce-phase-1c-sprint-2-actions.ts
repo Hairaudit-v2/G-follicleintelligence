@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { approveDuplicateCandidateForMerge, dismissDuplicateCandidate, keepDuplicateCandidatesSeparate } from "@/src/lib/workforce/duplicateReview.server";
+import {
+  approveDuplicateCandidateForMerge,
+  dismissDuplicateCandidate,
+  keepDuplicateCandidatesSeparate,
+} from "@/src/lib/workforce/duplicateReview.server";
 import { manuallyLinkStaffIdentity } from "@/src/lib/workforce/staffReconciliationPage.server";
 import { mergeStaffRecords } from "@/src/lib/workforce/staffMerge.server";
 import { offboardStaffMember } from "@/src/lib/workforce/staffOffboarding.server";

@@ -40,7 +40,11 @@ export function buildCalendarBlockerFixHref(
     case "missing_consent":
       return pid ? `${base}/patients/${pid}?tab=consent` : `${base}/appointments/${bid}`;
     case "incomplete_pre_op":
-      return cid ? `${base}/cases/${cid}` : pid ? `${base}/patients/${pid}` : `${base}/appointments/${bid}`;
+      return cid
+        ? `${base}/cases/${cid}`
+        : pid
+          ? `${base}/patients/${pid}`
+          : `${base}/appointments/${bid}`;
     case "room_conflict":
     case "surgeon_conflict":
     case "staff_conflict":
@@ -108,7 +112,8 @@ export function detectCalendarOverlapConflicts(
     if (!overlapsWithBuffer(s, e, os, oe, bufferMs)) continue;
 
     const oStaff = o.assigned_staff_id?.trim() || null;
-    const oUser = o.assigned_user_id?.trim() || (oStaff ? staffMap.get(oStaff)?.trim() || null : null);
+    const oUser =
+      o.assigned_user_id?.trim() || (oStaff ? staffMap.get(oStaff)?.trim() || null : null);
     const oRoom = o.room_id?.trim() || null;
     const oPatient = o.patient_id?.trim() || null;
 

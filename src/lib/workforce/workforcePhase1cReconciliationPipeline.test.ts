@@ -57,13 +57,10 @@ test("exact email match returns score 100 and emailExactMatch", () => {
 });
 
 test("normalized email match works with casing and whitespace", () => {
-  const scored = scoreExternalMatch(
-    member(STAFF_CANONICAL, { email: "  SeetsKD@Gmail.COM " }),
-    {
-      ...IIOHR_SEETAL,
-      externalEmail: "SEETSKD@GMAIL.COM",
-    }
-  );
+  const scored = scoreExternalMatch(member(STAFF_CANONICAL, { email: "  SeetsKD@Gmail.COM " }), {
+    ...IIOHR_SEETAL,
+    externalEmail: "SEETSKD@GMAIL.COM",
+  });
   assert.equal(scored.emailExactMatch, true);
   assert.equal(scored.score, 100);
 });
@@ -157,7 +154,11 @@ function makeMockClient(state: TableState): SupabaseClient {
       },
       maybeSingle() {
         const rows = (state[table] ?? []).filter((r) => filters.every((f) => f(r)));
-        return Promise.resolve({ data: rows[0] ?? null, error: null, count: isHeadCount ? rows.length : null });
+        return Promise.resolve({
+          data: rows[0] ?? null,
+          error: null,
+          count: isHeadCount ? rows.length : null,
+        });
       },
       then(resolve: (v: unknown) => void) {
         const rows = (state[table] ?? []).filter((r) => filters.every((f) => f(r)));
@@ -241,10 +242,7 @@ test("page loader returns exact email match for Dr Seetal scenario", async () =>
   const canonical = queue.unlinkedStaff.find((row) => row.id === STAFF_CANONICAL);
   assert.ok(canonical);
   assert.equal(canonical?.matchSuggestions[0]?.score, 100);
-  assert.equal(
-    normalizeEmail(canonical?.matchSuggestions[0]?.externalEmail),
-    "seetskd@gmail.com"
-  );
+  assert.equal(normalizeEmail(canonical?.matchSuggestions[0]?.externalEmail), "seetskd@gmail.com");
 
   const unmatched = queue.unlinkedStaff.find((row) => row.id === STAFF_UNMATCHED);
   assert.ok(unmatched);

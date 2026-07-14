@@ -88,9 +88,7 @@ export async function loadPatientTimelineSources(
       follow_up_encounter_id: followUpEncounterId,
       booking_id: x.booking_id != null ? String(x.booking_id) : null,
       imaging_protocol_template_slug:
-        x.imaging_protocol_template_slug != null
-          ? String(x.imaging_protocol_template_slug)
-          : null,
+        x.imaging_protocol_template_slug != null ? String(x.imaging_protocol_template_slug) : null,
       imaging_protocol_slot_slug:
         x.imaging_protocol_slot_slug != null ? String(x.imaging_protocol_slot_slug) : null,
     };

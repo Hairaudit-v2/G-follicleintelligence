@@ -60,9 +60,7 @@ export function isAwsTextractPathologyExtractionConfigured(
   env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice
 ): boolean {
   return Boolean(
-    env.AWS_ACCESS_KEY_ID?.trim() &&
-      env.AWS_SECRET_ACCESS_KEY?.trim() &&
-      env.AWS_REGION?.trim()
+    env.AWS_ACCESS_KEY_ID?.trim() && env.AWS_SECRET_ACCESS_KEY?.trim() && env.AWS_REGION?.trim()
   );
 }
 

@@ -54,8 +54,7 @@ function mapScheduleRow(raw: Record<string, unknown>): FiReportScheduleRow {
     id: String(raw.id),
     tenant_id: String(raw.tenant_id),
     report_id: String(raw.report_id),
-    period_preset:
-      preset === "90d" || preset === "ytd" || preset === "30d" ? preset : "30d",
+    period_preset: preset === "90d" || preset === "ytd" || preset === "30d" ? preset : "30d",
     filters:
       raw.filters && typeof raw.filters === "object" && !Array.isArray(raw.filters)
         ? (raw.filters as Record<string, unknown>)
@@ -164,9 +163,11 @@ export async function loadReportRunById(
   return mapRunRow(data as Record<string, unknown>);
 }
 
-export async function listActiveReportSchedules(
-  options?: { tenantId?: string | null; limit?: number; supabase?: SupabaseClient }
-): Promise<FiReportScheduleRow[]> {
+export async function listActiveReportSchedules(options?: {
+  tenantId?: string | null;
+  limit?: number;
+  supabase?: SupabaseClient;
+}): Promise<FiReportScheduleRow[]> {
   const db = client(options?.supabase);
   const limit = Math.min(500, Math.max(1, options?.limit ?? 100));
   let q = db
@@ -238,8 +239,7 @@ export async function runScheduledReport(
     tenantId: schedule.tenant_id,
     periodStart: period_start,
     periodEnd: period_end,
-    procedureType:
-      typeof filters.procedureType === "string" ? filters.procedureType : null,
+    procedureType: typeof filters.procedureType === "string" ? filters.procedureType : null,
     attributionSource:
       typeof filters.attributionSource === "string" ? filters.attributionSource : null,
     campaign: typeof filters.campaign === "string" ? filters.campaign : null,

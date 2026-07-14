@@ -140,7 +140,17 @@ describe("procedure day non-interference", () => {
   });
 
   it("(d) nav omits procedure day when showProcedureDayNav is false", () => {
-    const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, false);
+    const items = resolveFiOsPrimarySidebarItems(
+      base,
+      true,
+      true,
+      null,
+      true,
+      true,
+      false,
+      false,
+      false
+    );
     const surgery = items.find((i) => i.id === "surgery");
     assert.ok(surgery?.subItems?.length);
     const subIds = new Set(surgery!.subItems!.map((s) => s.id));
@@ -159,10 +169,7 @@ describe("procedure day non-interference", () => {
   });
 
   it("live workflow derive works when session tables are empty", () => {
-    assert.equal(
-      deriveProcedureDayStageFromBooking({ bookingStatus: "confirmed" }),
-      "scheduled"
-    );
+    assert.equal(deriveProcedureDayStageFromBooking({ bookingStatus: "confirmed" }), "scheduled");
     const live = buildProcedureDayLiveCardState(
       {
         bookingId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",

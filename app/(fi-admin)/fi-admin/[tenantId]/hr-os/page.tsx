@@ -59,9 +59,9 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Team</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-          Team operations, staff readiness, and HR sync health for your clinic. This workspace
-          is protected by platform entitlements — only verified clinics with an active subscription
-          and enabled Team access can use it.
+          Team operations, staff readiness, and HR sync health for your clinic. This workspace is
+          protected by platform entitlements — only verified clinics with an active subscription and
+          enabled Team access can use it.
         </p>
       </header>
 
@@ -173,10 +173,7 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
             </a>
           </li>
           <li>
-            <a
-              className="text-cyan-400 hover:text-cyan-300"
-              href={`${base}/staff-reconciliation`}
-            >
+            <a className="text-cyan-400 hover:text-cyan-300" href={`${base}/staff-reconciliation`}>
               Staff Reconciliation
             </a>
           </li>

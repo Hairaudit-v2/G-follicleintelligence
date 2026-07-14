@@ -1,10 +1,7 @@
 import { isAffirmative } from "@/src/lib/env/zod-helpers";
 
 export type GenericEmailActivityIngestionEnvSlice = Partial<
-  Record<
-    "GENERIC_CLINIC_EMAIL_INGESTION_ENABLED" | "GENERIC_CLINIC_EMAIL_WEBHOOK_SECRET",
-    string
-  >
+  Record<"GENERIC_CLINIC_EMAIL_INGESTION_ENABLED" | "GENERIC_CLINIC_EMAIL_WEBHOOK_SECRET", string>
 >;
 
 /** When true, POST /api/tenants/[tenantId]/integrations/generic-email/ingest accepts payloads. */

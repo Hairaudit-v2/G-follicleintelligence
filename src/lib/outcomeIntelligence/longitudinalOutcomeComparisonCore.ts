@@ -110,7 +110,10 @@ function readString(value: unknown): string | null {
 }
 
 function normalizeKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function resolveCanonicalView(input: SurgeryImagingIntelligenceImageInput): string {
@@ -127,7 +130,12 @@ function isImageUsable(input: SurgeryImagingIntelligenceImageInput): boolean {
   if (input.isClinicallyUsable === false) return false;
   const quality = normalizeKey(readString(input.qualityStatus) ?? "");
   if (!quality || quality === "not_evaluated" || quality === "unknown") return true;
-  return quality === "excellent" || quality === "acceptable" || quality === "suitable" || quality === "pass";
+  return (
+    quality === "excellent" ||
+    quality === "acceptable" ||
+    quality === "suitable" ||
+    quality === "pass"
+  );
 }
 
 function isPoorQuality(input: SurgeryImagingIntelligenceImageInput): boolean {
@@ -221,7 +229,9 @@ function buildImageSetSummary(input: {
   };
 }
 
-function resolveHairAuditLink(input: BuildLongitudinalOutcomeComparisonInput): HairAuditLinkResolution {
+function resolveHairAuditLink(
+  input: BuildLongitudinalOutcomeComparisonInput
+): HairAuditLinkResolution {
   if (input.hairAuditLink && "audit_readiness" in input.hairAuditLink) {
     return input.hairAuditLink;
   }
@@ -419,10 +429,7 @@ export function buildLongitudinalOutcomeComparison(
     !hairAuditLink.linkage_conflict;
 
   const outcomeMeasured =
-    readyForComparison &&
-    baselineSet.complete &&
-    immediateSet.complete &&
-    followUpSet.complete;
+    readyForComparison && baselineSet.complete && immediateSet.complete && followUpSet.complete;
 
   const donorRecoveryStatus = deriveEvidenceStatus({
     baselineSet: donorBaseline,
@@ -454,9 +461,9 @@ export function buildLongitudinalOutcomeComparison(
   const month12Window = followUpWindows.find((entry) => entry.window === "month_12");
   const hairAuditReportReady = Boolean(
     month12Window?.outcome_measured &&
-      hairAuditLink.hairaudit_case_id &&
-      (hairAuditLink.fi_report_id || hairAuditLink.audit_report_id) &&
-      !hairAuditLink.linkage_conflict
+    hairAuditLink.hairaudit_case_id &&
+    (hairAuditLink.fi_report_id || hairAuditLink.audit_report_id) &&
+    !hairAuditLink.linkage_conflict
   );
 
   const missingOutcomeEvidence: string[] = [];

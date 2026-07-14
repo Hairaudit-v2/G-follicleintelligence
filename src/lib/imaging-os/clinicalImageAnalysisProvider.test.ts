@@ -27,7 +27,10 @@ describe("clinicalImageAnalysisProvider paths", () => {
   });
 
   it("merges donor assessment into clinical result", () => {
-    const base = buildStubClinicalImageAnalysis({ externalCategory: "donor", idempotencyKey: "d1" });
+    const base = buildStubClinicalImageAnalysis({
+      externalCategory: "donor",
+      idempotencyKey: "d1",
+    });
     const merged = mergeClinicalAnalysisWithAssessments(base, {
       donor: buildDonorAssessmentSummary({
         confidence: 0.5,

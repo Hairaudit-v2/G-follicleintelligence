@@ -36,9 +36,7 @@ export function CrmLeadSlideOverProvider({
     close();
   }, [workspaceShell, close]);
 
-  const activeLeadId = workspaceShell
-    ? (workspaceShell.activeOfKind("lead")?.id ?? null)
-    : leadId;
+  const activeLeadId = workspaceShell ? (workspaceShell.activeOfKind("lead")?.id ?? null) : leadId;
 
   const value = useMemo(
     () => ({
@@ -50,7 +48,15 @@ export function CrmLeadSlideOverProvider({
       openLead: bridgedOpenLead,
       close: bridgedClose,
     }),
-    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, activeLeadId, bridgedOpenLead, bridgedClose]
+    [
+      tenantId,
+      operatorFiUserId,
+      userRole,
+      canUseClinicFeatures,
+      activeLeadId,
+      bridgedOpenLead,
+      bridgedClose,
+    ]
   );
 
   if (workspaceShell) {

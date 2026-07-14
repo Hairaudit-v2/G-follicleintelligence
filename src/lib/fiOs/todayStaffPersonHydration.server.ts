@@ -191,24 +191,23 @@ export async function loadStaffMemberPersonProfilesForToday(
   const authMetaByUserId = await loadAuthMetadataByUserId(authUserIds, client);
 
   for (const member of members) {
-    const fiStaff = member.fi_staff_id ? fiStaffById.get(String(member.fi_staff_id)) ?? null : null;
-    const fiUser = fiStaff?.fi_user_id ? fiUserById.get(String(fiStaff.fi_user_id)) ?? null : null;
+    const fiStaff = member.fi_staff_id
+      ? (fiStaffById.get(String(member.fi_staff_id)) ?? null)
+      : null;
+    const fiUser = fiStaff?.fi_user_id
+      ? (fiUserById.get(String(fiStaff.fi_user_id)) ?? null)
+      : null;
     const authMeta = fiUser?.auth_user_id
       ? authMetaByUserId.get(String(fiUser.auth_user_id))
       : undefined;
 
-    out.set(
-      String(member.id),
-      buildStaffPersonLabelInput({ member, fiStaff, fiUser, authMeta })
-    );
+    out.set(String(member.id), buildStaffPersonLabelInput({ member, fiStaff, fiUser, authMeta }));
   }
 
   return out;
 }
 
-export function resolveStaffPersonDisplayNameForToday(
-  profile: TodayPersonLabelInput
-): string {
+export function resolveStaffPersonDisplayNameForToday(profile: TodayPersonLabelInput): string {
   return (
     resolvePersonDisplayNameForToday(profile, { defaultLabel: "Staff member" }) || "Staff member"
   );

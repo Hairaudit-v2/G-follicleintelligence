@@ -181,7 +181,11 @@ export async function updateStaffCredential(
   const revoked = String(raw.status) === "revoked";
   const suspended = String(raw.status) === "suspended";
   const expiresAt =
-    input.expiresAt !== undefined ? input.expiresAt : raw.expires_at != null ? String(raw.expires_at) : null;
+    input.expiresAt !== undefined
+      ? input.expiresAt
+      : raw.expires_at != null
+        ? String(raw.expires_at)
+        : null;
 
   const evaluation = evaluateCredentialExpiry({
     expiresAt,

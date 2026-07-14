@@ -77,7 +77,11 @@ describe("evaluateImagingQuality", () => {
           ...IMAGING_QUALITY_POLICY_DEFAULTS,
           block_upload_on_poor_quality: true,
         },
-        protocol_context: { capture_source: "hairaudit", slot_required: true, is_audit_context: true },
+        protocol_context: {
+          capture_source: "hairaudit",
+          slot_required: true,
+          is_audit_context: true,
+        },
       }),
       true
     );

@@ -3,10 +3,7 @@
 import Link from "next/link";
 
 import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
-import {
-  REPORT_CATEGORY_LABELS,
-  type ReportDefinition,
-} from "@/src/lib/reports/reportCatalog";
+import { REPORT_CATEGORY_LABELS, type ReportDefinition } from "@/src/lib/reports/reportCatalog";
 import { cn } from "@/lib/utils";
 
 export function ReportCard(props: {

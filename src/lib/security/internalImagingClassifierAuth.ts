@@ -44,9 +44,7 @@ export function getInternalImagingClassifierToken(
   return getHairauditClassifierToken(env);
 }
 
-export function resolveAllowedImagingSourceSystems(
-  env: NodeJS.ProcessEnv = process.env
-): string[] {
+export function resolveAllowedImagingSourceSystems(env: NodeJS.ProcessEnv = process.env): string[] {
   const raw = env[FI_INTERNAL_IMAGING_ALLOWED_SOURCES_ENV]?.trim();
   if (!raw) return [...DEFAULT_ALLOWED_SOURCES];
   return raw
@@ -65,7 +63,10 @@ export function getInternalImagingHmacSecret(env: NodeJS.ProcessEnv = process.en
   return secret || null;
 }
 
-export function buildImagingClassifierSignatureMaterial(timestamp: string, rawBody: string): string {
+export function buildImagingClassifierSignatureMaterial(
+  timestamp: string,
+  rawBody: string
+): string {
   return `${timestamp}.${rawBody}`;
 }
 

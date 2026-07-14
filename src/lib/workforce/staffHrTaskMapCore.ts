@@ -92,7 +92,10 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
       description: "Create a staff profile and start onboarding for a new hire.",
       category: "onboarding",
       entryPoint: "HR OS > Onboarding Centre",
-      route: { href: buildOnboardingCentreHrefForTenant(tid), actionLabel: "Open Onboarding Centre" },
+      route: {
+        href: buildOnboardingCentreHrefForTenant(tid),
+        actionLabel: "Open Onboarding Centre",
+      },
       requiredPermission: "hr_manager",
       doesNotChange: ["Does not provision login until invite is sent separately."],
       impact: {
@@ -202,10 +205,14 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
     {
       id: "assign_training",
       label: "Assign training",
-      description: "Mark training complete or route staff through Onboarding Centre training checklist.",
+      description:
+        "Mark training complete or route staff through Onboarding Centre training checklist.",
       category: "training_readiness",
       entryPoint: "Onboarding Centre or Staff Profile > Actions",
-      route: { href: buildOnboardingCentreHrefForTenant(tid), actionLabel: "Open Onboarding Centre" },
+      route: {
+        href: buildOnboardingCentreHrefForTenant(tid),
+        actionLabel: "Open Onboarding Centre",
+      },
       requiredPermission: "hr_manager",
       doesNotChange: ["Does not change employment or roster hours."],
       impact: {
@@ -291,7 +298,8 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
       ],
       impact: {
         lifecycle: "Employment retained; HR status becomes on_leave.",
-        roster: "Excluded from roster generation and missing standard-hours validation for the leave period.",
+        roster:
+          "Excluded from roster generation and missing standard-hours validation for the leave period.",
         access: "Login can remain active unless admin disables access.",
         readiness: "Readiness remains historical but staff is not considered roster-required.",
         audit: "Leave period recorded with reason maternity_leave.",
@@ -432,7 +440,9 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
       category: "audit",
       entryPoint: "Staff Profile > Audit tab",
       route: {
-        href: staffId ? `${buildStaffProfileHref(tid, staffId)}#audit` : buildStaffDirectoryHref(tid),
+        href: staffId
+          ? `${buildStaffProfileHref(tid, staffId)}#audit`
+          : buildStaffDirectoryHref(tid),
         actionLabel: "Open audit tab",
       },
       requiredPermission: "hr_manager",

@@ -35,10 +35,7 @@ export function inferWorkspaceFromHref(href: string): WorkspaceRef | null {
     matchUuid(path, new RegExp(`/fi-admin/[^/]+/surgery/cases/(${UUID})$`, "i"));
   if (surgeryCase) return { kind: "surgery_case", id: surgeryCase };
 
-  const consultation = matchUuid(
-    path,
-    new RegExp(`/fi-admin/[^/]+/consultations/(${UUID})$`, "i")
-  );
+  const consultation = matchUuid(path, new RegExp(`/fi-admin/[^/]+/consultations/(${UUID})$`, "i"));
   if (consultation) return { kind: "consultation", id: consultation };
 
   const payment =

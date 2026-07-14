@@ -29,9 +29,10 @@ const SCORE = {
   INACTIVE: -30,
 } as const;
 
-export function scoreStaffOperationalHistory(
-  history: StaffOperationalHistory
-): { score: number; reasoning: string[] } {
+export function scoreStaffOperationalHistory(history: StaffOperationalHistory): {
+  score: number;
+  reasoning: string[];
+} {
   const reasoning: string[] = [];
   let score = 0;
 

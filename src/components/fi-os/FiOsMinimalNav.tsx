@@ -91,10 +91,7 @@ function MinimalNavButton({
           />
         ) : (
           <Icon
-            className={cn(
-              "h-5 w-5 shrink-0",
-              active ? "fi-tenant-accent-text" : "text-slate-500"
-            )}
+            className={cn("h-5 w-5 shrink-0", active ? "fi-tenant-accent-text" : "text-slate-500")}
             aria-hidden
           />
         )}
@@ -201,10 +198,7 @@ export function FiOsMobileBottomNav({
   }
 
   return (
-    <nav
-      className={fiOsChromeClasses.mobileBottomNav}
-      aria-label="FI OS mobile navigation"
-    >
+    <nav className={fiOsChromeClasses.mobileBottomNav} aria-label="FI OS mobile navigation">
       {items.map((item) => (
         <MinimalNavButton
           key={item.id}

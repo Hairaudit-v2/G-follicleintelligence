@@ -59,7 +59,10 @@ async function countTenantRows(
   tenantId: string,
   spec: CountSpec
 ): Promise<number> {
-  let q = supabase.from(spec.table).select("id", { count: "exact", head: true }).eq("tenant_id", tenantId);
+  let q = supabase
+    .from(spec.table)
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId);
   if (spec.filter) {
     q = q.ilike(spec.filter.column, spec.filter.value);
   }

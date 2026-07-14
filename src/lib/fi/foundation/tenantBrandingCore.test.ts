@@ -153,7 +153,10 @@ describe("brandingCss shell variables", () => {
         },
       })
     ) as Record<string, string>;
-    assert.equal(vars["--fi-tenant-primary"], safeBrandingColourHex("#aabbcc", FI_ADMIN_NEUTRAL_PRIMARY));
+    assert.equal(
+      vars["--fi-tenant-primary"],
+      safeBrandingColourHex("#aabbcc", FI_ADMIN_NEUTRAL_PRIMARY)
+    );
     assert.equal(vars["--fi-tenant-accent"], "#112233");
     assert.ok(String(vars["--fi-tenant-primary-soft"]).startsWith("rgba("));
     assert.ok(String(vars["--fi-tenant-brand-bg"]).startsWith("rgba("));

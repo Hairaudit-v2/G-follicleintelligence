@@ -70,7 +70,9 @@ function kanban(id: string): CrmKanbanLeadCard {
   };
 }
 
-function stageRow(partial: Partial<FiCrmPipelineStageRow> & Pick<FiCrmPipelineStageRow, "id" | "slug">): FiCrmPipelineStageRow {
+function stageRow(
+  partial: Partial<FiCrmPipelineStageRow> & Pick<FiCrmPipelineStageRow, "id" | "slug">
+): FiCrmPipelineStageRow {
   return {
     id: partial.id,
     tenant_id: TENANT,

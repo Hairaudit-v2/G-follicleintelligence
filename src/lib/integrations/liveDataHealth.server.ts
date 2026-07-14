@@ -85,7 +85,10 @@ export function buildLiveDataHealthWarnings(input: {
         `Google Calendar last synced ${Math.round(staleHours)}h ago — calendar UI may be stale.`
       );
     }
-    if (input.googleCalendarStagedEventCount > 0 && input.googleCalendarPromotedAppointmentCount === 0) {
+    if (
+      input.googleCalendarStagedEventCount > 0 &&
+      input.googleCalendarPromotedAppointmentCount === 0
+    ) {
       warnings.push(
         `${input.googleCalendarStagedEventCount} OnboardingOS calendar event(s) staged with no promoted fi_calendar_events — use CalendarOS inbound sync or import review.`
       );
@@ -114,7 +117,11 @@ export function buildLiveDataHealthWarnings(input: {
       warnings.push(`HubSpot last synced ${Math.round(staleHours)}h ago — CRM may be stale.`);
     }
     const stagedTotal = input.hubSpotStagedContactCount + input.hubSpotStagedDealCount;
-    if (stagedTotal > 0 && input.hubSpotPromotedLeadCount === 0 && input.hubSpotPromotedOpportunityCount === 0) {
+    if (
+      stagedTotal > 0 &&
+      input.hubSpotPromotedLeadCount === 0 &&
+      input.hubSpotPromotedOpportunityCount === 0
+    ) {
       warnings.push(
         `${stagedTotal} HubSpot record(s) in connector staging — approve and import via OnboardingOS import review.`
       );
@@ -326,10 +333,13 @@ export async function loadLiveDataHealthSummary(
     if (res.error) throw new Error(res.error.message);
   }
 
-  const googleCalendarConnected = Boolean(calendarIntegrationRes.data || onboardingCalendarRes.data);
+  const googleCalendarConnected = Boolean(
+    calendarIntegrationRes.data || onboardingCalendarRes.data
+  );
   const googleCalendarLastSyncAt =
-    (calendarIntegrationRes.data as { last_synced_at?: string | null } | null)?.last_synced_at?.trim() ??
-    null;
+    (
+      calendarIntegrationRes.data as { last_synced_at?: string | null } | null
+    )?.last_synced_at?.trim() ?? null;
   const googleCalendarStagedEventCount = stagedCalendarRes.count ?? 0;
   const googleCalendarPromotedAppointmentCount =
     (calendarEventsRes.count ?? 0) + (timelyMappingsRes.count ?? 0);
@@ -340,7 +350,8 @@ export async function loadLiveDataHealthSummary(
 
   const hubSpotConnected = Boolean(hubspotIntegrationRes.data);
   const hubSpotLastSyncAt =
-    (hubspotSyncRunRes.data as { completed_at?: string | null } | null)?.completed_at?.trim() ?? null;
+    (hubspotSyncRunRes.data as { completed_at?: string | null } | null)?.completed_at?.trim() ??
+    null;
   const hubSpotStagedContactCount = stagedContactsRes.count ?? 0;
   const hubSpotStagedDealCount = stagedDealsRes.count ?? 0;
   const hubSpotPromotedLeadCount = (crmLeadsRes.count ?? 0) + (leadFlowLeadsRes.count ?? 0);
@@ -351,8 +362,7 @@ export async function loadLiveDataHealthSummary(
   const genericEmailConfigured =
     isGenericClinicEmailIngestionEnabledFromEnv() && (genericEmailRoutesRes.count ?? 0) > 0;
   const genericEmailLastIngestedAt =
-    (genericEmailLastRes.data as { created_at?: string | null } | null)?.created_at?.trim() ??
-    null;
+    (genericEmailLastRes.data as { created_at?: string | null } | null)?.created_at?.trim() ?? null;
   const genericEmailRecentActivityCount = genericEmailRecentRes.count ?? 0;
   const genericEmailUnmatchedCount = genericEmailUnmatchedRes.count ?? 0;
   const genericEmailAmbiguousMatchCount = genericEmailAmbiguousRes.count ?? 0;

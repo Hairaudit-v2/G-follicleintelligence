@@ -24,8 +24,7 @@ function mapCertificationRow(raw: Record<string, unknown>): StaffCertificationRe
     certificationName: name,
     certificationKey: String(raw.certification_key),
     certificationType: raw.certification_type != null ? String(raw.certification_type) : null,
-    issuingOrganization:
-      raw.issuing_organization != null ? String(raw.issuing_organization) : null,
+    issuingOrganization: raw.issuing_organization != null ? String(raw.issuing_organization) : null,
     issuedAt: raw.issued_at != null ? String(raw.issued_at) : null,
     expiresAt,
     competencyScore:
@@ -220,11 +219,7 @@ export async function syncStaffCertificationStatusesForMember(
       expiresAt: raw.expires_at != null ? String(raw.expires_at) : null,
       revoked: String(raw.status) === "revoked",
     });
-    const nextStatus = expiry.isExpired
-      ? "expired"
-      : expiry.isDueSoon
-        ? "due_soon"
-        : "current";
+    const nextStatus = expiry.isExpired ? "expired" : expiry.isDueSoon ? "due_soon" : "current";
 
     if (nextStatus !== String(raw.status)) {
       const { error: upErr } = await supabase

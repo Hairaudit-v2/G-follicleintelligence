@@ -40,7 +40,9 @@ const ROUTE_EMAIL = "pathology+evolved@example.com";
 const WEBHOOK_SECRET = "test-webhook-secret-32chars-min";
 
 function minimalPdfBytes(label = "lab"): Uint8Array {
-  return new TextEncoder().encode(`%PDF-1.4\nFI_PATHOLOGY_MARKERS_JSON=[{"test_label":"${label}","result_value":"1"}]\n`);
+  return new TextEncoder().encode(
+    `%PDF-1.4\nFI_PATHOLOGY_MARKERS_JSON=[{"test_label":"${label}","result_value":"1"}]\n`
+  );
 }
 
 function pdfAttachment(filename: string, bytes: Uint8Array) {
@@ -52,7 +54,9 @@ function pdfAttachment(filename: string, bytes: Uint8Array) {
   };
 }
 
-function basePayload(partial: Partial<PathologyEmailNormalizedPayload> = {}): PathologyEmailNormalizedPayload {
+function basePayload(
+  partial: Partial<PathologyEmailNormalizedPayload> = {}
+): PathologyEmailNormalizedPayload {
   const pdf = minimalPdfBytes();
   return {
     provider: "generic",
@@ -178,7 +182,9 @@ function createEmailMockSupabase(state: EmailMockState): SupabaseClient {
             const doc: PathologyInboundDocumentRow = {
               id: `doc-${state.nextDocId}`,
               tenant_id: String(row.tenant_id),
-              source_channel: String(row.source_channel ?? "email") as PathologyInboundDocumentRow["source_channel"],
+              source_channel: String(
+                row.source_channel ?? "email"
+              ) as PathologyInboundDocumentRow["source_channel"],
               storage_bucket: null,
               storage_path: null,
               original_filename: String(row.original_filename ?? "inbound.pdf"),
@@ -188,7 +194,8 @@ function createEmailMockSupabase(state: EmailMockState): SupabaseClient {
               confirmed_patient_id: null,
               match_confidence: null,
               match_evidence: {},
-              extracted_patient_name: row.extracted_patient_name != null ? String(row.extracted_patient_name) : null,
+              extracted_patient_name:
+                row.extracted_patient_name != null ? String(row.extracted_patient_name) : null,
               extracted_dob: null,
               extracted_mrn: null,
               promoted_result_id: null,
@@ -203,7 +210,9 @@ function createEmailMockSupabase(state: EmailMockState): SupabaseClient {
               email_source_label:
                 row.email_source_label != null ? String(row.email_source_label) : null,
               email_attachment_dedup_hash:
-                row.email_attachment_dedup_hash != null ? String(row.email_attachment_dedup_hash) : null,
+                row.email_attachment_dedup_hash != null
+                  ? String(row.email_attachment_dedup_hash)
+                  : null,
               created_at: "2026-07-02T12:00:00.000Z",
               updated_at: "2026-07-02T12:00:00.000Z",
             };
@@ -273,7 +282,8 @@ function createEmailMockSupabase(state: EmailMockState): SupabaseClient {
             };
             state.jobs.set(`key:${String(job.idempotency_key)}`, job);
             state.jobs.set(`id:${String(job.id)}`, job);
-            const inboundDocumentId = (job as { inbound_document_id?: unknown }).inbound_document_id;
+            const inboundDocumentId = (job as { inbound_document_id?: unknown })
+              .inbound_document_id;
             const doc = state.inbound.find((d) => d.id === String(inboundDocumentId ?? ""));
             if (doc) {
               doc.extraction_job_id = String(job.id);
@@ -323,7 +333,8 @@ function createEmailMockSupabase(state: EmailMockState): SupabaseClient {
             if (!bytes) return Promise.resolve({ data: null, error: { message: "missing" } });
             return Promise.resolve({
               data: {
-                arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+                arrayBuffer: async () =>
+                  bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
               },
               error: null,
             });
@@ -362,7 +373,10 @@ function testEnv(overrides: Record<string, string> = {}): Record<string, string>
 }
 
 test("pathology email env defaults ingestion off", () => {
-  assert.equal(isPathologyEmailIngestionEnabledFromEnv({ PATHOLOGY_EMAIL_INGESTION_ENABLED: "false" }), false);
+  assert.equal(
+    isPathologyEmailIngestionEnabledFromEnv({ PATHOLOGY_EMAIL_INGESTION_ENABLED: "false" }),
+    false
+  );
   assert.equal(readPathologyEmailMaxAttachmentBytesFromEnv({}), 15 * 1024 * 1024);
 });
 
@@ -373,7 +387,10 @@ test("webhook disabled rejects authorization", () => {
         new Request("http://localhost/api/integrations/pathology-email/inbound", {
           headers: { "x-pathology-email-webhook-secret": WEBHOOK_SECRET },
         }),
-        { PATHOLOGY_EMAIL_INGESTION_ENABLED: "false", PATHOLOGY_EMAIL_WEBHOOK_SECRET: WEBHOOK_SECRET }
+        {
+          PATHOLOGY_EMAIL_INGESTION_ENABLED: "false",
+          PATHOLOGY_EMAIL_WEBHOOK_SECRET: WEBHOOK_SECRET,
+        }
       ),
     PathologyEmailIngestionDisabledError
   );
@@ -402,9 +419,7 @@ test("missing or invalid webhook secret rejects", () => {
 });
 
 test("allowed sender list enforced when configured", () => {
-  assert.doesNotThrow(() =>
-    assertPathologyEmailSenderAllowed("lab@pathology.example", testEnv())
-  );
+  assert.doesNotThrow(() => assertPathologyEmailSenderAllowed("lab@pathology.example", testEnv()));
   assert.throws(
     () =>
       assertPathologyEmailSenderAllowed(
@@ -475,10 +490,7 @@ test("non-PDF attachment rejected safely", async () => {
 
 test("oversized PDF rejected", async () => {
   const bytes = minimalPdfBytes();
-  const parsed = parsePathologyEmailAttachment(
-    pdfAttachment("big.pdf", bytes),
-    bytes.length - 1
-  );
+  const parsed = parsePathologyEmailAttachment(pdfAttachment("big.pdf", bytes), bytes.length - 1);
   assert.equal(parsed.ok, false);
   if (parsed.ok) return;
   assert.equal(parsed.reason, "oversized");
@@ -519,9 +531,7 @@ test("email-created document enqueues extraction when flag enabled", async () =>
       client
     );
     assert.equal(job.created, true);
-    assert.ok(
-      state.inboundEvents.some((e) => e.event_type === "extraction_queued")
-    );
+    assert.ok(state.inboundEvents.some((e) => e.event_type === "extraction_queued"));
   } finally {
     process.env.PATHOLOGY_EXTRACTION_ENABLED = prev;
   }
@@ -567,7 +577,14 @@ test("generic provider payload normalizes to internal shape", () => {
     fromEmail: "a@b.com",
     toEmails: [ROUTE_EMAIL],
     subject: "Test",
-    attachments: [{ filename: "x.pdf", contentType: "application/pdf", sizeBytes: 4, contentBase64: "JVBERi0=" }],
+    attachments: [
+      {
+        filename: "x.pdf",
+        contentType: "application/pdf",
+        sizeBytes: 4,
+        contentBase64: "JVBERi0=",
+      },
+    ],
   });
   assert.equal(payload.provider, "generic");
   assert.equal(payload.toEmails[0], ROUTE_EMAIL);

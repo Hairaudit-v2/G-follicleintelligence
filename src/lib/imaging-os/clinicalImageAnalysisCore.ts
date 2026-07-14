@@ -147,7 +147,9 @@ export function shouldRunDonorAssessment(input: {
   const view = normalizeViewType(input.viewType ?? input.hliCategory ?? "other");
   if ((DONOR_ASSESSMENT_VIEW_TYPES as readonly string[]).includes(view)) {
     if (view === "microscopic") {
-      const region = String(input.anatomicalRegion ?? "").trim().toLowerCase();
+      const region = String(input.anatomicalRegion ?? "")
+        .trim()
+        .toLowerCase();
       return !region || DONOR_ANATOMICAL_REGIONS.has(region);
     }
     return true;
@@ -257,11 +259,7 @@ export function buildClinicalImageAnalysisFromHli(input: {
 
   const reviewRequired = reasons.length > 0;
   const status: ClinicalImageAnalysisStatus =
-    unknownCategory && confidence < 0.4
-      ? "failed"
-      : reviewRequired
-        ? "needs_review"
-        : "complete";
+    unknownCategory && confidence < 0.4 ? "failed" : reviewRequired ? "needs_review" : "complete";
 
   return {
     provider: "hli_vision",
@@ -297,9 +295,7 @@ export function buildDonorAssessmentSummary(input: {
     input.reviewRequired ??
     (confidence < CLINICAL_REVIEW_CONFIDENCE_THRESHOLD || input.observations.length === 0);
   return {
-    status:
-      input.status ??
-      (review ? "needs_review" : confidence > 0 ? "complete" : "unavailable"),
+    status: input.status ?? (review ? "needs_review" : confidence > 0 ? "complete" : "unavailable"),
     confidence,
     observations: input.observations.filter(Boolean).slice(0, 12),
     review_required: review,
@@ -467,11 +463,7 @@ function parseDonorRecipientAssessmentSummary(
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const m = raw as Record<string, unknown>;
   const status = m.status;
-  if (
-    status !== "complete" &&
-    status !== "needs_review" &&
-    status !== "unavailable"
-  ) {
+  if (status !== "complete" && status !== "needs_review" && status !== "unavailable") {
     return null;
   }
   return {

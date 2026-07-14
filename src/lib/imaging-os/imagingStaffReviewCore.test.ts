@@ -48,10 +48,7 @@ describe("imagingStaffReviewCore", () => {
     );
     assert.deepEqual(merged.imaging_clinical_ai, aiRecord);
     assert.deepEqual(merged.imaging_quality, { quality_score: 80 });
-    assert.equal(
-      (merged.imaging_staff_review as { status: string }).status,
-      "reviewed"
-    );
+    assert.equal((merged.imaging_staff_review as { status: string }).status, "reviewed");
   });
 
   it("rejects invalid view types", () => {

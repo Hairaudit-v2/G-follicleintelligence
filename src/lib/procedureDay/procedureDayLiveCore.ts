@@ -7,17 +7,17 @@ import {
   nextProcedureDayStage,
   PROCEDURE_DAY_STAGE_LABELS,
 } from "./procedureDayWorkflowCore";
-import type { ProcedureDayLiveCardState, ProcedureDaySessionRow } from "./procedureDayWorkflowTypes";
+import type {
+  ProcedureDayLiveCardState,
+  ProcedureDaySessionRow,
+} from "./procedureDayWorkflowTypes";
 
 function parseMetrics(metadata: Record<string, unknown>) {
   return {
-    graftsExtracted:
-      typeof metadata.graftsExtracted === "number" ? metadata.graftsExtracted : null,
-    graftsImplanted:
-      typeof metadata.graftsImplanted === "number" ? metadata.graftsImplanted : null,
+    graftsExtracted: typeof metadata.graftsExtracted === "number" ? metadata.graftsExtracted : null,
+    graftsImplanted: typeof metadata.graftsImplanted === "number" ? metadata.graftsImplanted : null,
     hairsCounted: typeof metadata.hairsCounted === "number" ? metadata.hairsCounted : null,
-    transectionRate:
-      typeof metadata.transectionRate === "number" ? metadata.transectionRate : null,
+    transectionRate: typeof metadata.transectionRate === "number" ? metadata.transectionRate : null,
     punchSize: typeof metadata.punchSize === "string" ? metadata.punchSize : null,
     extractionMethod:
       typeof metadata.extractionMethod === "string" ? metadata.extractionMethod : null,

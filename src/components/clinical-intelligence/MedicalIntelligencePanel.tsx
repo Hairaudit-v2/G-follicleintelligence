@@ -104,10 +104,7 @@ export function MedicalIntelligencePanel({
           </h3>
           <ul className="mt-2 flex flex-wrap gap-2 text-xs text-violet-100">
             {activeDrivers.map((driver) => (
-              <li
-                key={driver}
-                className="rounded-full bg-violet-500/10 px-2 py-1 font-medium"
-              >
+              <li key={driver} className="rounded-full bg-violet-500/10 px-2 py-1 font-medium">
                 {driver}
               </li>
             ))}
@@ -150,14 +147,15 @@ export function MedicalIntelligencePanel({
                   <th className="py-1 pr-2 font-medium">Value</th>
                   <th className="py-1 pr-2 font-medium">Status</th>
                   <th className="py-1 pr-2 font-medium">Flag</th>
-                  {!compact ? (
-                    <th className="py-1 pr-2 font-medium">Explanation</th>
-                  ) : null}
+                  {!compact ? <th className="py-1 pr-2 font-medium">Explanation</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {interpretedMarkers.map((m) => (
-                  <tr key={`${m.marker}-${m.value}`} className="border-b border-white/[0.06] align-top">
+                  <tr
+                    key={`${m.marker}-${m.value}`}
+                    className="border-b border-white/[0.06] align-top"
+                  >
                     <td className="py-1 pr-2 font-medium text-slate-100">{m.marker}</td>
                     <td className="py-1 pr-2 text-slate-200">
                       {m.value}
@@ -221,9 +219,7 @@ export function MedicalIntelligenceTwinSummary({
         </ul>
       ) : null}
       {summary.active_drivers.length > 0 ? (
-        <p className="mt-2 text-sm text-violet-100">
-          Drivers: {summary.active_drivers.join(", ")}
-        </p>
+        <p className="mt-2 text-sm text-violet-100">Drivers: {summary.active_drivers.join(", ")}</p>
       ) : null}
       {summary.insight_preview ? (
         <p className="mt-2 text-sm text-violet-100/90">{summary.insight_preview}</p>

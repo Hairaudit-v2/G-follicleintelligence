@@ -37,10 +37,7 @@ describe("staffUatScreenGuide", () => {
       resolveStaffUatScreenKeyFromPath(`/fi-admin/${tid}/procedure-day`),
       "procedure_day"
     );
-    assert.equal(
-      resolveStaffUatScreenKeyFromPath(`/fi-admin/${tid}/workforce-os`),
-      "workforce_os"
-    );
+    assert.equal(resolveStaffUatScreenKeyFromPath(`/fi-admin/${tid}/workforce-os`), "workforce_os");
     assert.equal(
       resolveStaffUatScreenKeyFromPath(`/fi-admin/${tid}/patients/p-1`),
       "patient_profile"

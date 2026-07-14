@@ -98,11 +98,7 @@ export function isFiOsSurgeryConsolidatedPath(pathname: string, tenantBase: stri
   return path === `${base}/surgery` || path.startsWith(`${base}/surgery/`);
 }
 
-export function isSurgeryTabActive(
-  pathname: string,
-  tenantBase: string,
-  segment: string
-): boolean {
+export function isSurgeryTabActive(pathname: string, tenantBase: string, segment: string): boolean {
   const base = tenantBase.replace(/\/+$/, "");
   const path = pathname.replace(/\/+$/, "") || "/";
   if (!segment) {

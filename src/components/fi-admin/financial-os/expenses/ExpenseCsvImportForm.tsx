@@ -11,10 +11,7 @@ import {
   type FinancialOsFeedback,
 } from "@/src/components/fi-admin/financial-os/financialOsUi";
 
-export function ExpenseCsvImportForm(props: {
-  tenantId: string;
-  canMutate: boolean;
-}) {
+export function ExpenseCsvImportForm(props: { tenantId: string; canMutate: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
@@ -118,9 +115,7 @@ export function ExpenseCsvImportForm(props: {
         >
           {pending ? "Parsing…" : "Parse & review"}
         </button>
-        {filename ? (
-          <span className={financialOsClasses.mutedMeta}>{filename}</span>
-        ) : null}
+        {filename ? <span className={financialOsClasses.mutedMeta}>{filename}</span> : null}
       </div>
       <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />
     </form>

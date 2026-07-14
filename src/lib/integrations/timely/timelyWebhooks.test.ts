@@ -1576,13 +1576,23 @@ describe("Timely appointment webhook — P0 duplicate/parallel/retry safety", ()
       }
     );
 
-    const first = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
+    const first = await processTimelyAppointmentWebhookForTest(
+      TENANT,
+      payloadBase,
+      supabase,
+      ports
+    );
     assert.equal(first.ok, false);
     if (first.ok) return;
     assert.equal(first.status, 500);
 
     // Retry succeeds: the released claim let this worker re-claim and create exactly one booking.
-    const second = await processTimelyAppointmentWebhookForTest(TENANT, payloadBase, supabase, ports);
+    const second = await processTimelyAppointmentWebhookForTest(
+      TENANT,
+      payloadBase,
+      supabase,
+      ports
+    );
     assert.equal(second.ok, true);
     assert.equal(attempts, 2);
   });

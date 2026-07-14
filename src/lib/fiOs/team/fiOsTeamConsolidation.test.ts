@@ -74,14 +74,10 @@ function flattenMoreIds(sections = moreSections()) {
 }
 
 test("primary rail still has exactly six slots and Team remains on rail", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
   const teamRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "team");
   assert.equal(teamRail?.kind, "link");
@@ -105,7 +101,10 @@ test("no extra Team or HR OS rows on primary minimal rail", () => {
 test("More contains one Team group with consolidated destination", () => {
   const team = moreSections().find((s) => s.groupId === "TEAM");
   assert.ok(team);
-  assert.deepEqual(team!.items.map((i) => i.id), [FI_OS_TEAM_NAV_ID]);
+  assert.deepEqual(
+    team!.items.map((i) => i.id),
+    [FI_OS_TEAM_NAV_ID]
+  );
   assert.equal(team!.items[0]!.href, `${base}/team`);
 });
 
@@ -125,10 +124,7 @@ test("legacy Team routes remain in nav catalog; staff More hides direct links", 
   );
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
     assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
-    assert.equal(
-      buildFiOsTeamLegacyHref(tenantId, legacy.suffix),
-      `${base}/${legacy.suffix}`
-    );
+    assert.equal(buildFiOsTeamLegacyHref(tenantId, legacy.suffix), `${base}/${legacy.suffix}`);
   }
   const staffMoreIds = flattenMoreIds();
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
@@ -136,10 +132,7 @@ test("legacy Team routes remain in nav catalog; staff More hides direct links", 
   }
   assert.equal(getFiOsShellActiveSidebarId(`${base}/workforce-os`, base), "workforce-os-hub");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");
-  assert.equal(
-    getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base),
-    "onboarding-centre"
-  );
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "onboarding-centre");
   assert.equal(
     getFiOsShellActiveSidebarId(`${base}/workforce-os/staff-identity-audit`, base),
     "staff-identity-audit"

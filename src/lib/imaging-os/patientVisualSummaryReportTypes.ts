@@ -11,11 +11,7 @@ export const PATIENT_VISUAL_SUMMARY_REPORT_TYPES = [
 
 export type PatientVisualSummaryReportType = (typeof PATIENT_VISUAL_SUMMARY_REPORT_TYPES)[number];
 
-export const PATIENT_VISUAL_SUMMARY_APPROVAL_STATUSES = [
-  "draft",
-  "approved",
-  "exported",
-] as const;
+export const PATIENT_VISUAL_SUMMARY_APPROVAL_STATUSES = ["draft", "approved", "exported"] as const;
 
 export type PatientVisualSummaryApprovalStatus =
   (typeof PATIENT_VISUAL_SUMMARY_APPROVAL_STATUSES)[number];

@@ -5,10 +5,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  isFiOsPlatformAdminFullSessionBypass,
-  resolveAuthUserId,
-} from "@/src/lib/crm/crmGate";
+import { isFiOsPlatformAdminFullSessionBypass, resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsCrossTenantDirectoryRole, isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";

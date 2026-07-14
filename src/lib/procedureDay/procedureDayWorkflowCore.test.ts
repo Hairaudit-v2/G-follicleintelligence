@@ -19,14 +19,8 @@ describe("procedureDayWorkflowCore", () => {
   });
 
   it("derives stage from booking without session row", () => {
-    assert.equal(
-      deriveProcedureDayStageFromBooking({ bookingStatus: "scheduled" }),
-      "scheduled"
-    );
-    assert.equal(
-      deriveProcedureDayStageFromBooking({ bookingStatus: "arrived" }),
-      "arrived"
-    );
+    assert.equal(deriveProcedureDayStageFromBooking({ bookingStatus: "scheduled" }), "scheduled");
+    assert.equal(deriveProcedureDayStageFromBooking({ bookingStatus: "arrived" }), "arrived");
     assert.equal(
       deriveProcedureDayStageFromBooking({
         bookingStatus: "arrived",
@@ -37,15 +31,9 @@ describe("procedureDayWorkflowCore", () => {
   });
 
   it("allows single-step forward transitions only", () => {
-    assert.doesNotThrow(() =>
-      assertProcedureDayStageTransitionAllowed("scheduled", "arrived")
-    );
-    assert.throws(() =>
-      assertProcedureDayStageTransitionAllowed("scheduled", "extraction")
-    );
-    assert.throws(() =>
-      assertProcedureDayStageTransitionAllowed("implantation", "extraction")
-    );
+    assert.doesNotThrow(() => assertProcedureDayStageTransitionAllowed("scheduled", "arrived"));
+    assert.throws(() => assertProcedureDayStageTransitionAllowed("scheduled", "extraction"));
+    assert.throws(() => assertProcedureDayStageTransitionAllowed("implantation", "extraction"));
   });
 
   it("nextProcedureDayStage walks the pipeline", () => {

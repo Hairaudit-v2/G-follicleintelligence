@@ -284,7 +284,8 @@ const PROVIDER_DESCRIPTIONS: Record<ExternalConnectorProvider, string> = {
   microsoft_outlook: "Mirror Outlook calendar events alongside FI scheduling.",
   stripe: "Reference Stripe billing data while FI FinancialOS is primary.",
   xero: "Reference Xero invoices and contacts during finance transition.",
-  quickbooks: "Export FI posted expenses to QuickBooks and map vendors/accounts during finance coexistence.",
+  quickbooks:
+    "Export FI posted expenses to QuickBooks and map vendors/accounts during finance coexistence.",
   meta_ads: "Track Meta ad campaigns for attribution alongside FI marketing.",
   google_ads: "Track Google Ads campaigns for attribution alongside FI marketing.",
 };

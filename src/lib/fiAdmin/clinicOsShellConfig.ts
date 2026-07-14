@@ -106,8 +106,7 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         label: "Front desk",
         path: "reception-os",
         permissionHint: {},
-        description:
-          "Front desk — patients, communications, pipeline, deposits, and alerts.",
+        description: "Front desk — patients, communications, pipeline, deposits, and alerts.",
       },
       {
         id: "reception-board",

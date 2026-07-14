@@ -96,8 +96,7 @@ export async function generateRevenueAttributionReport(input: {
               consults: row.consults,
               collected: formatMoneyFromCents(row.collected_revenue_cents, currency),
               profit: formatMoneyFromCents(row.gross_profit_cents, currency),
-              margin:
-                row.margin_percentage != null ? `${row.margin_percentage.toFixed(1)}%` : "—",
+              margin: row.margin_percentage != null ? `${row.margin_percentage.toFixed(1)}%` : "—",
               confidence: row.confidence,
             })),
           },

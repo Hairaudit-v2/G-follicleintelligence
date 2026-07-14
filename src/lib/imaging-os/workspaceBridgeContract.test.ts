@@ -45,9 +45,6 @@ describe("workspaceBridgeContract", () => {
 
   it("documents the sole intentional cross-tree bridge endpoints", () => {
     assert.equal(LEGACY_WORKSPACE_BRIDGE_FILE, "src/lib/imagingOs/imagingOsWorkspaceBridge.ts");
-    assert.equal(
-      CANONICAL_WORKSPACE_BRIDGE_SPECIFIER,
-      "@/src/lib/imaging-os/workspaceBridge"
-    );
+    assert.equal(CANONICAL_WORKSPACE_BRIDGE_SPECIFIER, "@/src/lib/imaging-os/workspaceBridge");
   });
 });

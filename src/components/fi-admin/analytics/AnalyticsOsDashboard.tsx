@@ -62,8 +62,8 @@ export function AnalyticsOsDashboard({
             Insights
           </h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
-            Clinic performance across revenue, consultations, surgery, patients, team, and day-to-day
-            operations.
+            Clinic performance across revenue, consultations, surgery, patients, team, and
+            day-to-day operations.
           </p>
           {tenantName ? (
             <p className="mt-2 text-sm text-[#64748B]">

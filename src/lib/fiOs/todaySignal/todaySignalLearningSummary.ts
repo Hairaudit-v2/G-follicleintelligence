@@ -131,10 +131,7 @@ function overallAverageResolutionSeconds(summary: TodaySignalLearningSummary): n
 function dedupeCriticalUnresolved(
   summary: TodaySignalLearningSummary
 ): TodaySignalLearningSummaryView["unresolvedCriticalSignals"] {
-  const byType = new Map<
-    string,
-    { ageSeconds: number; priorityBand: string }
-  >();
+  const byType = new Map<string, { ageSeconds: number; priorityBand: string }>();
 
   for (const row of summary.criticalSignalsUnresolvedOverThreshold) {
     const signalType = row.signalType;
@@ -214,13 +211,9 @@ export function buildSignalLearningCards(
 
   const roleRows = summary.averageResolutionTimeByRole;
   const fastestRole =
-    roleRows.length > 0
-      ? [...roleRows].sort((a, b) => a.avgSeconds - b.avgSeconds)[0]
-      : null;
+    roleRows.length > 0 ? [...roleRows].sort((a, b) => a.avgSeconds - b.avgSeconds)[0] : null;
   const busiestRole =
-    roleRows.length > 0
-      ? [...roleRows].sort((a, b) => b.sampleCount - a.sampleCount)[0]
-      : null;
+    roleRows.length > 0 ? [...roleRows].sort((a, b) => b.sampleCount - a.sampleCount)[0] : null;
 
   const cards: TodaySignalLearningSummaryView["cards"] = [
     {
@@ -241,10 +234,7 @@ export function buildSignalLearningCards(
         avgSeconds == null
           ? "No resolved signals in this window yet."
           : "Weighted average across resolved signal types.",
-      tone:
-        avgSeconds != null && avgSeconds >= 14_400
-          ? "watch"
-          : "neutral",
+      tone: avgSeconds != null && avgSeconds >= 14_400 ? "watch" : "neutral",
     },
     {
       id: "critical-open",
@@ -261,7 +251,10 @@ export function buildSignalLearningCards(
   if (fastestRole) {
     cards.push({
       id: "role-resolution",
-      label: busiestRole && busiestRole.role !== fastestRole.role ? "Fastest resolving role" : "Resolving role",
+      label:
+        busiestRole && busiestRole.role !== fastestRole.role
+          ? "Fastest resolving role"
+          : "Resolving role",
       value: safeRoleLabel(fastestRole.role),
       helper: `Average ${formatSignalLearningDuration(fastestRole.avgSeconds)} across ${fastestRole.sampleCount} resolved signal${fastestRole.sampleCount === 1 ? "" : "s"}.${busiestRole && busiestRole.role !== fastestRole.role ? ` Busiest: ${safeRoleLabel(busiestRole.role)} (${busiestRole.sampleCount}).` : ""}`,
       tone: "neutral",

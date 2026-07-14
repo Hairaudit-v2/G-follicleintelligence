@@ -60,16 +60,16 @@ function patientNameForBooking(
   return "Patient";
 }
 
-function teamMembersFromStaffing(
-  staffing: ClinicalStaffingSummaryDto | null | undefined
-): { doctor: string | null; nurse: string | null } {
+function teamMembersFromStaffing(staffing: ClinicalStaffingSummaryDto | null | undefined): {
+  doctor: string | null;
+  nurse: string | null;
+} {
   if (!staffing) return { doctor: null, nurse: null };
   const missing = staffing.missingRoles.map((m) => m.role).join(", ");
   const doctor =
     staffing.warnings.find((w) => /surgeon|doctor|consultant/i.test(w)) ??
     (staffing.ready ? null : missing || null);
-  const nurse =
-    staffing.missingRoles.find((m) => /nurse|assistant/i.test(m.role))?.role ?? null;
+  const nurse = staffing.missingRoles.find((m) => /nurse|assistant/i.test(m.role))?.role ?? null;
   return { doctor: doctor ?? null, nurse };
 }
 
@@ -80,9 +80,7 @@ export function buildCalendarOsBookingCardModel(
   const operational = display?.operational ?? null;
   const staffing = display?.clinicalStaffing ?? null;
   const durationMin =
-    display?.durationMin ??
-    bookingDurationMinutesUtc(booking.start_at, booking.end_at) ??
-    30;
+    display?.durationMin ?? bookingDurationMinutesUtc(booking.start_at, booking.end_at) ?? 30;
   const timeRangeLabel = formatTimeRangeInTimezone(
     booking.start_at,
     booking.end_at,

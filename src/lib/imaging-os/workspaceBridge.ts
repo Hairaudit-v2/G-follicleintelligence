@@ -18,7 +18,4 @@ export {
 export type { ProtocolSlotDef } from "./protocolSlotVocabulary";
 export { parseProtocolSlots, PROGRESS_META_KEY } from "./protocolSlotVocabulary";
 
-export type {
-  NormalizedProtocol,
-  ProtocolCatalogSource,
-} from "./protocolCatalogResolverCore";
+export type { NormalizedProtocol, ProtocolCatalogSource } from "./protocolCatalogResolverCore";

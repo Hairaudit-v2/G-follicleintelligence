@@ -171,10 +171,7 @@ test("32. Move stage keyboard path remains", () => {
 
 // --- Desktop drag kill-switch (FI_PIPELINE_ENABLE_DESKTOP_DRAG) ----------------
 
-const PAGE = readFileSync(
-  join("app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx"),
-  "utf8"
-);
+const PAGE = readFileSync(join("app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx"), "utf8");
 
 test("33. Desktop drag defaults disabled in workspace", () => {
   // Prop defaults to false and gates the drag effect.
@@ -197,14 +194,14 @@ test("36. stopCardDrag pointer guards are fully removed", () => {
 });
 
 test("37. More trigger carries no pointer/mouse stopPropagation guard", () => {
-  const trigger = UI.slice(UI.indexOf('data-pipeline-more-trigger'));
+  const trigger = UI.slice(UI.indexOf("data-pipeline-more-trigger"));
   const triggerButton = trigger.slice(0, trigger.indexOf("</button>"));
   assert.doesNotMatch(triggerButton, /stopPropagation/);
   assert.doesNotMatch(triggerButton, /onMouseDown=/);
 });
 
 test("38. Action row does not stopPropagation on pointer/mouse down", () => {
-  const row = UI.slice(UI.indexOf('data-pipeline-card-actions'));
+  const row = UI.slice(UI.indexOf("data-pipeline-card-actions"));
   const rowOpen = row.slice(0, row.indexOf(">"));
   assert.doesNotMatch(rowOpen, /onPointerDown=/);
   assert.doesNotMatch(rowOpen, /onMouseDown=/);

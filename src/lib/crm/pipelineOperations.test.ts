@@ -5,9 +5,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  applyPipelineOpsToPresentation,
-} from "@/src/lib/crm/pipelineOperationsApply";
+import { applyPipelineOpsToPresentation } from "@/src/lib/crm/pipelineOperationsApply";
 import {
   cardMatchesAgeBucket,
   cardMatchesActivityFilter,
@@ -38,7 +36,10 @@ import {
 } from "@/src/lib/crm/pipelineDrag";
 import { normalizePipelineSearchParams } from "@/src/lib/crm/pipelineLoader";
 import { resolvePipelineInitialView } from "@/src/lib/crm/pipelineQueryCompat";
-import type { PipelineLeadCard, PipelinePresentation } from "@/src/lib/crm/pipelinePresentation.types";
+import type {
+  PipelineLeadCard,
+  PipelinePresentation,
+} from "@/src/lib/crm/pipelinePresentation.types";
 import type { PipelineMoveStageDefinition } from "@/src/lib/crm/pipelineMoveTarget";
 
 const NOW = Date.parse("2026-07-12T12:00:00.000Z");
@@ -59,9 +60,7 @@ function sortable(
   };
 }
 
-function card(
-  partial: Partial<PipelineLeadCard> & { leadId: string }
-): PipelineLeadCard {
+function card(partial: Partial<PipelineLeadCard> & { leadId: string }): PipelineLeadCard {
   return {
     leadId: partial.leadId,
     person: partial.person ?? {
@@ -496,13 +495,16 @@ test("18. Shell/full query normalization matches", () => {
 });
 
 test("19. No duplicate card after sorting", () => {
-  const c1 = card({ leadId: "dup", timestamps: {
-    createdAtIso: "2026-07-01T00:00:00.000Z",
-    updatedAtIso: "2026-07-01T00:00:00.000Z",
-    meaningfulActivityAtIso: "2026-07-01T00:00:00.000Z",
-    stageEnteredAtIso: null,
-    lostAtIso: null,
-  }});
+  const c1 = card({
+    leadId: "dup",
+    timestamps: {
+      createdAtIso: "2026-07-01T00:00:00.000Z",
+      updatedAtIso: "2026-07-01T00:00:00.000Z",
+      meaningfulActivityAtIso: "2026-07-01T00:00:00.000Z",
+      stageEnteredAtIso: null,
+      lostAtIso: null,
+    },
+  });
   const presentation: PipelinePresentation = {
     generatedAt: "2026-07-12T12:00:00.000Z",
     loadTier: "full",
@@ -676,10 +678,7 @@ test("25. Read-only cannot drag", () => {
 });
 
 test("26. Tablet drag disabled", () => {
-  assert.equal(
-    isPipelineDesktopDragEnabled({ canMutate: true, finePointerDesktop: false }),
-    false
-  );
+  assert.equal(isPipelineDesktopDragEnabled({ canMutate: true, finePointerDesktop: false }), false);
   const intent = resolvePipelineDragDrop({
     leadId: "lead-1",
     fromColumnId: "new",

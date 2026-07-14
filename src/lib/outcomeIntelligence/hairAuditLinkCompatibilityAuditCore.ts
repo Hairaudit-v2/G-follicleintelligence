@@ -41,12 +41,7 @@ export const HAIRAUDIT_LINK_READ_PATHS = [
 
 /** Metadata keys used for HairAudit identity bridging (current production contract). */
 export const HAIRAUDIT_METADATA_KEY_INVENTORY = {
-  caseId: [
-    "source_case_id",
-    "hairaudit_source_case_id",
-    "hair_audit_case_id",
-    "hairaudit_case_id",
-  ],
+  caseId: ["source_case_id", "hairaudit_source_case_id", "hair_audit_case_id", "hairaudit_case_id"],
   reportId: ["report_id", "audit_report_id", "fi_report_id"],
   imageId: ["fi_upload_id", "global_case_id", "fi_event_id"],
   patientId: ["source_patient_id"],
@@ -81,12 +76,7 @@ export function parseLegacyHairAuditLinkMetadataSnapshot(
   metadata: Record<string, unknown>
 ): LegacyHairAuditLinkSnapshot {
   const hairauditCaseId =
-    readString(
-      metadata,
-      "hairaudit_case_id",
-      "hair_audit_case_id",
-      "hairaudit_source_case_id"
-    ) ??
+    readString(metadata, "hairaudit_case_id", "hair_audit_case_id", "hairaudit_source_case_id") ??
     (readString(metadata, "source_system") === "hairaudit"
       ? readString(metadata, "source_case_id")
       : null);

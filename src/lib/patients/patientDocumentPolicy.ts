@@ -13,7 +13,9 @@ export const PATIENT_CONSENT_MAX_BYTES = 15 * 1024 * 1024;
 
 export const PATIENT_DOCUMENTS_BUCKET_DEFAULT = PATIENT_IMAGES_BUCKET_DEFAULT;
 
-export function buildSafePatientDocumentFilename(originalFilename: string | null | undefined): string {
+export function buildSafePatientDocumentFilename(
+  originalFilename: string | null | undefined
+): string {
   const raw = (originalFilename ?? "document").split(/[/\\]/).pop() ?? "document";
   const cleaned = raw.replace(/[^\w.\-]+/g, "_").replace(/^_+|_+$/g, "");
   const base = cleaned.length > 0 ? cleaned : "document";

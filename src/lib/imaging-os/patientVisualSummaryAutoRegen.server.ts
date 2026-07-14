@@ -12,9 +12,7 @@ import {
   defaultPatientVisualSummaryApproval,
   readPatientVisualSummaryApproval,
 } from "./patientVisualSummaryApprovalCore";
-import {
-  regeneratePatientVisualSummaryDraft,
-} from "./patientVisualSummaryReportMutations.server";
+import { regeneratePatientVisualSummaryDraft } from "./patientVisualSummaryReportMutations.server";
 import type { PatientVisualSummaryReportType } from "./patientVisualSummaryReportTypes";
 
 export type TriggerPatientVisualSummaryAutoRegenResult = {

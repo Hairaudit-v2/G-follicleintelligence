@@ -59,7 +59,9 @@ function roleLabel(role: string): string {
   }
 }
 
-export function classifyPresenceState(snapshot: Pick<PresenceSnapshot, "state" | "signalKind">): PresenceState {
+export function classifyPresenceState(
+  snapshot: Pick<PresenceSnapshot, "state" | "signalKind">
+): PresenceState {
   if (snapshot.state === "unknown") return "unknown";
   if (snapshot.signalKind === "clinic_unattended") return "unattended";
   if (snapshot.signalKind === "role_uncovered" || snapshot.signalKind === "reception_missing") {
@@ -659,9 +661,7 @@ export function applyPresenceToTodayItems(
       next = {
         ...next,
         actionHint: "Confirm check-in when reception is available",
-        detailLine:
-          next.detailLine ??
-          "Patient says they're here — reception confirmation needed",
+        detailLine: next.detailLine ?? "Patient says they're here — reception confirmation needed",
         priorityScore: Math.min(100, next.priorityScore + 12),
         severity: next.severity === "normal" ? "warning" : next.severity,
       };
@@ -700,10 +700,7 @@ export function applyPresenceToTodayItems(
 }
 
 export function buildPresenceContextFromDashboard(
-  dashboard: Pick<
-    TenantOperationalDashboard,
-    "tenantId" | "quickStats" | "operationalDay"
-  >,
+  dashboard: Pick<TenantOperationalDashboard, "tenantId" | "quickStats" | "operationalDay">,
   opts: {
     profileKey?: FiWorkspaceProfileKey;
     now?: Date;

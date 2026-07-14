@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { createCertification, verifyCertification } from "@/src/lib/workforce/staffCertification.server";
+import {
+  createCertification,
+  verifyCertification,
+} from "@/src/lib/workforce/staffCertification.server";
 import {
   createStaffCredential,
   updateStaffCredential,
@@ -122,8 +125,7 @@ export async function verifyCertificationAction(
 export async function runComplianceAuditAction(
   tenantId: string
 ): Promise<
-  | { ok: true; staffChecked: number; alertsGenerated: number }
-  | { ok: false; error: string }
+  { ok: true; staffChecked: number; alertsGenerated: number } | { ok: false; error: string }
 > {
   try {
     await assertWorkforceHrManageAllowed(tenantId);

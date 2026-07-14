@@ -93,7 +93,9 @@ describe("surgicalRiskDetectionCore", () => {
       }),
     });
 
-    assert.ok(snapshot.detectedRisks.some((r) => /Transection rate above safe threshold/i.test(r.title)));
+    assert.ok(
+      snapshot.detectedRisks.some((r) => /Transection rate above safe threshold/i.test(r.title))
+    );
   });
 
   it("detects procedure delay from live timeline", () => {

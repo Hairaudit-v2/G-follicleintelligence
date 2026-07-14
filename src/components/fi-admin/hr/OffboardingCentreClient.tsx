@@ -71,9 +71,7 @@ export function OffboardingCentreClient({
       <HrOsSubNav tenantId={tenantId} />
 
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-50">
-          Offboarding
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-50">Offboarding</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Terminate staff access and roster eligibility without deleting audit, compliance, or
           training history.
@@ -100,9 +98,7 @@ export function OffboardingCentreClient({
             pending={pending}
             exitReason={exitReason}
             departureType={departureType}
-            onExitReasonChange={(id, value) =>
-              setExitReason((prev) => ({ ...prev, [id]: value }))
-            }
+            onExitReasonChange={(id, value) => setExitReason((prev) => ({ ...prev, [id]: value }))}
             onDepartureTypeChange={(id, value) =>
               setDepartureType((prev) => ({ ...prev, [id]: value }))
             }

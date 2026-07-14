@@ -20,9 +20,7 @@ import {
   STAFF_LIFECYCLE_AUDIT_EVENTS,
 } from "./staffLifecycleTypes";
 
-function lifecycleRow(
-  overrides: Partial<StaffMemberLifecycleRow> = {}
-): StaffMemberLifecycleRow {
+function lifecycleRow(overrides: Partial<StaffMemberLifecycleRow> = {}): StaffMemberLifecycleRow {
   return {
     id: "sm-1",
     tenant_id: "tenant-1",
@@ -107,7 +105,11 @@ test("readiness score is 0 for terminated employment", () => {
     working_hours: {},
     hr: { hasHrLink: true, isSyncStale: false } as never,
     identityRows: [],
-    compliance: { items: [], overallStatus: "current", counts: { current: 0, due_soon: 0, expired: 0, missing: 0, unknown: 0 } },
+    compliance: {
+      items: [],
+      overallStatus: "current",
+      counts: { current: 0, due_soon: 0, expired: 0, missing: 0, unknown: 0 },
+    },
   });
   assert.equal(result.score, 0);
   assert.equal(result.operationally_ineligible, true);
@@ -121,7 +123,11 @@ test("readiness blocked warnings for suspended", () => {
     working_hours: { mon: [{ start: "09:00", end: "17:00" }] },
     hr: { hasHrLink: true, isSyncStale: false } as never,
     identityRows: [{ source_system: "iiohr_hr", source_staff_id: "x", metadata: {} }],
-    compliance: { items: [], overallStatus: "current", counts: { current: 0, due_soon: 0, expired: 0, missing: 0, unknown: 0 } },
+    compliance: {
+      items: [],
+      overallStatus: "current",
+      counts: { current: 0, due_soon: 0, expired: 0, missing: 0, unknown: 0 },
+    },
   });
   assert.equal(result.operationally_ineligible, true);
   assert.ok(result.warnings.includes("employment_suspended"));
@@ -130,9 +136,7 @@ test("readiness blocked warnings for suspended", () => {
 test("email exact match reconciliation suggestion", () => {
   const suggestions = buildReconciliationSuggestions({
     staffMembers: [lifecycleRow({ email: "ana@example.com", full_name: "Ana Example" })],
-    evolvedStaffRecords: [
-      { id: "iiohr-1", email: "ana@example.com", full_name: "Ana Example" },
-    ],
+    evolvedStaffRecords: [{ id: "iiohr-1", email: "ana@example.com", full_name: "Ana Example" }],
   });
   assert.equal(suggestions.length, 1);
   assert.equal(suggestions[0]?.matchType, "exact_email");

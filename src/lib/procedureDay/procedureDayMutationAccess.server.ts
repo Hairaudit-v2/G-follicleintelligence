@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  assertCrmTenantWriteAllowed,
-  tryResolveFiUserIdForTenant,
-} from "@/src/lib/crm/crmGate";
+import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import { buildSurgeryOsMutationContext } from "@/src/lib/surgeryOs/surgeryOsMutationAccess.server";
 import { surgeryOsActionAllowed } from "@/src/lib/surgeryOs/surgeryOsPolicy";
 

@@ -136,10 +136,7 @@ export function resolveCanonicalStaffMemberRow(
   }
 
   const archivedDuplicateSelected = Boolean(
-    naiveFirst &&
-      isArchivedMember(naiveFirst) &&
-      canonical &&
-      naiveFirst.id !== canonical.id
+    naiveFirst && isArchivedMember(naiveFirst) && canonical && naiveFirst.id !== canonical.id
   );
 
   return { canonical, naiveFirst, archivedDuplicateSelected };
@@ -192,7 +189,10 @@ export function collectWorkspaceAccessDiagnostics(
   const diagnostics: WorkspaceAccessDiagnostic[] = [];
   const { identity } = input;
 
-  if (input.fiStaff && resolveCanonicalStaffMemberRow(input.memberRows, input.fiStaff.id).archivedDuplicateSelected) {
+  if (
+    input.fiStaff &&
+    resolveCanonicalStaffMemberRow(input.memberRows, input.fiStaff.id).archivedDuplicateSelected
+  ) {
     diagnostics.push({
       code: "archived_duplicate_selected",
       detail: {

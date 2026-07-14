@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import {
-  DOCUMENT_TEMPLATE_CATEGORIES,
-} from "@/src/lib/documentTemplates/documentTemplateConstants";
+import { DOCUMENT_TEMPLATE_CATEGORIES } from "@/src/lib/documentTemplates/documentTemplateConstants";
 import {
   deleteDocumentTemplate,
   ensureDefaultDocumentTemplatesForTenant,

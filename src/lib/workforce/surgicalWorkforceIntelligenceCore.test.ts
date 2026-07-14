@@ -161,7 +161,12 @@ describe("surgicalWorkforceIntelligenceCore", () => {
           missingRoles: [{ role: "technician", required: 1, assigned: 0 }],
           recommendedTeam: [
             {
-              ...candidate({ staffId: "n1", name: "Nurse", section: "warning", warnings: ["Low readiness"] }),
+              ...candidate({
+                staffId: "n1",
+                name: "Nurse",
+                section: "warning",
+                warnings: ["Low readiness"],
+              }),
               assignedRole: "nurse",
               grossCostCents: 0,
               optimizerScore: 50,
@@ -338,13 +343,17 @@ describe("surgicalWorkforceIntelligenceCore", () => {
       tomorrowOptimizer: snapshot("2026-07-02", [
         recommendation({ surgeryId: "s1", scheduledDate: "2026-07-02" }),
       ]),
-      weekOptimizers: [snapshot("2026-07-02", [recommendation({ surgeryId: "s1", scheduledDate: "2026-07-02" })])],
+      weekOptimizers: [
+        snapshot("2026-07-02", [recommendation({ surgeryId: "s1", scheduledDate: "2026-07-02" })]),
+      ],
     });
 
     assert.ok(Number.isFinite(panel.tomorrowReadiness.readinessScore));
     assert.ok(Number.isFinite(panel.staffingQuality.staffingQualityScore));
     assert.ok(Number.isFinite(panel.clinicalCapacity.weeklyCapacityPercent));
-    assert.ok(panel.tomorrowReadiness.readinessScore >= 0 && panel.tomorrowReadiness.readinessScore <= 100);
+    assert.ok(
+      panel.tomorrowReadiness.readinessScore >= 0 && panel.tomorrowReadiness.readinessScore <= 100
+    );
     assert.ok(panel.recommendations.length <= 6);
     assert.equal(panel.tomorrowDate, "2026-07-02");
   });

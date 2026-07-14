@@ -260,14 +260,11 @@ export async function runAccountingExpensePush(input: {
       }
     } catch (e) {
       failed += 1;
-      errors.push(
-        `${draft.fi_expense_id}: ${e instanceof Error ? e.message : "push failed"}`
-      );
+      errors.push(`${draft.fi_expense_id}: ${e instanceof Error ? e.message : "push failed"}`);
     }
   }
 
-  const status =
-    failed === 0 ? "completed" : success === 0 ? "failed" : ("partial" as const);
+  const status = failed === 0 ? "completed" : success === 0 ? "failed" : ("partial" as const);
   const run = await insertPushRun(db, {
     tenantId: tid,
     provider: "quickbooks",

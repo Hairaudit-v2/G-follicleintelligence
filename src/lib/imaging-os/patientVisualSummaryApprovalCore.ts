@@ -22,8 +22,7 @@ function isApprovalStatus(v: unknown): v is PatientVisualSummaryApprovalStatus {
 
 function isReportType(v: unknown): v is PatientVisualSummaryReportType {
   return (
-    typeof v === "string" &&
-    (PATIENT_VISUAL_SUMMARY_REPORT_TYPES as readonly string[]).includes(v)
+    typeof v === "string" && (PATIENT_VISUAL_SUMMARY_REPORT_TYPES as readonly string[]).includes(v)
   );
 }
 

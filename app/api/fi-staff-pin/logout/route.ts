@@ -17,11 +17,7 @@ export async function POST() {
         tenantId: session.tenantId,
         fiStaffId: session.staffId,
       });
-      await endStaffPinClinicSession(
-        session.sessionToken,
-        session.tenantId,
-        session.staffId
-      );
+      await endStaffPinClinicSession(session.sessionToken, session.tenantId, session.staffId);
     }
     return NextResponse.json({
       ok: true,

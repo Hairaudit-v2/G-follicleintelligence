@@ -5,7 +5,4 @@
 import "server-only";
 
 export { loadResolvedProtocol, loadResolvedProtocolSlots } from "./protocolCatalogResolver.server";
-export type {
-  NormalizedProtocol,
-  ProtocolCatalogSource,
-} from "./protocolCatalogResolverCore";
+export type { NormalizedProtocol, ProtocolCatalogSource } from "./protocolCatalogResolverCore";

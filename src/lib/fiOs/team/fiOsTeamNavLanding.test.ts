@@ -129,10 +129,26 @@ test("FI-TEAM-MANAGER-ACCESS-404-1: nav visibility and route gate aligned for ma
   const team = teamSidebarItem(tabAccess.visibleTabIds, false);
   assert.ok(team);
 
-  const rail = resolveFiOsMinimalNavItems(base, filterFiOsPrimarySidebarItemsByFeatureAccess(
-    resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, false, true, false, false, tabAccess.visibleTabIds),
-    buildDefaultFeatureAccessAllEnabled()
-  ));
+  const rail = resolveFiOsMinimalNavItems(
+    base,
+    filterFiOsPrimarySidebarItemsByFeatureAccess(
+      resolveFiOsPrimarySidebarItems(
+        base,
+        true,
+        true,
+        null,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        false,
+        tabAccess.visibleTabIds
+      ),
+      buildDefaultFeatureAccessAllEnabled()
+    )
+  );
   const teamRail = rail.find((item) => item.id === "team");
   assert.equal(teamRail?.kind, "link");
   if (teamRail?.kind === "link") {

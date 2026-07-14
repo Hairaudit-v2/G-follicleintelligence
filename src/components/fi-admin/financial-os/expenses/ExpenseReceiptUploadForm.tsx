@@ -27,8 +27,7 @@ export function ExpenseReceiptUploadForm(props: {
   const [attachMode, setAttachMode] = useState<"new" | "existing">("new");
   const [existingExpenseId, setExistingExpenseId] = useState("");
 
-  const attachable =
-    props.expenses?.filter((e) => e.status !== "void").slice(0, 100) ?? [];
+  const attachable = props.expenses?.filter((e) => e.status !== "void").slice(0, 100) ?? [];
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

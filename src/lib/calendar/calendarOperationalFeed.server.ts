@@ -5,7 +5,11 @@ import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadBookingsForCalendarOverlap } from "@/src/lib/bookings/bookings";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "@/src/lib/bookings/operatorBookingConstants";
-import { parseCalendarSearchParams, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import {
+  parseCalendarSearchParams,
+  type CalendarRoute,
+  type ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { applyCalendarSettingsToQuery } from "@/src/lib/calendar/calendarSettingsCore";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";

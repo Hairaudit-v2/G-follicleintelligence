@@ -122,12 +122,7 @@ export function parseLegacyHairAuditLinkMetadata(
   ] as const;
 
   const hairauditCaseId =
-    readString(
-      metadata,
-      "hairaudit_case_id",
-      "hair_audit_case_id",
-      "hairaudit_source_case_id"
-    ) ??
+    readString(metadata, "hairaudit_case_id", "hair_audit_case_id", "hairaudit_source_case_id") ??
     (readString(metadata, "source_system") === "hairaudit"
       ? readString(metadata, "source_case_id")
       : null);
@@ -152,11 +147,7 @@ export function parseStructuredHairAuditLink(
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const block = raw as Record<string, unknown>;
   const origin = readString(block, "link_origin");
-  if (
-    origin !== "legacy" &&
-    origin !== "structured" &&
-    origin !== "resolved_match"
-  ) {
+  if (origin !== "legacy" && origin !== "structured" && origin !== "resolved_match") {
     return null;
   }
   const linkedImageIds = collectLinkedImageIds(block);
@@ -232,8 +223,7 @@ export function detectHairAuditLinkageConflict(input: {
     return {
       conflict: true,
       detail:
-        input.structured.linkage_conflict_detail ??
-        "Structured linkage marked linkage_conflict.",
+        input.structured.linkage_conflict_detail ?? "Structured linkage marked linkage_conflict.",
     };
   }
 
@@ -312,9 +302,7 @@ export function resolveHairAuditLinkForSurgery(
   }
   const legacy = mergeLegacySnapshots(...legacySources);
 
-  const structured = input.caseMetadata
-    ? parseStructuredHairAuditLink(input.caseMetadata)
-    : null;
+  const structured = input.caseMetadata ? parseStructuredHairAuditLink(input.caseMetadata) : null;
 
   let resolvedCaseId: string | null = null;
   let resolvedOrigin: HairAuditLinkOrigin | null = null;
@@ -344,16 +332,16 @@ export function resolveHairAuditLinkForSurgery(
   const preferLegacyOnConflict = conflict.conflict;
 
   const hairauditCaseId = preferLegacyOnConflict
-    ? legacy.hairaudit_case_id ?? resolvedCaseId
-    : resolvedCaseId ?? legacy.hairaudit_case_id ?? structured?.hairaudit_case_id ?? null;
+    ? (legacy.hairaudit_case_id ?? resolvedCaseId)
+    : (resolvedCaseId ?? legacy.hairaudit_case_id ?? structured?.hairaudit_case_id ?? null);
 
   const auditReportId = preferLegacyOnConflict
-    ? legacy.audit_report_id ?? structured?.audit_report_id ?? null
-    : structured?.audit_report_id ?? legacy.audit_report_id ?? null;
+    ? (legacy.audit_report_id ?? structured?.audit_report_id ?? null)
+    : (structured?.audit_report_id ?? legacy.audit_report_id ?? null);
 
   let fiReportId = preferLegacyOnConflict
-    ? legacy.fi_report_id ?? structured?.fi_report_id ?? input.fiReportId ?? null
-    : structured?.fi_report_id ?? legacy.fi_report_id ?? input.fiReportId ?? null;
+    ? (legacy.fi_report_id ?? structured?.fi_report_id ?? input.fiReportId ?? null)
+    : (structured?.fi_report_id ?? legacy.fi_report_id ?? input.fiReportId ?? null);
 
   if (!fiReportId && input.fiReportId && !conflict.conflict) {
     fiReportId = input.fiReportId;
@@ -446,9 +434,7 @@ export function buildStructuredHairAuditLinkFromLegacy(input: {
     ...(input.legacy.hairaudit_case_id
       ? { hairaudit_case_id: input.legacy.hairaudit_case_id }
       : {}),
-    ...(input.legacy.audit_report_id
-      ? { audit_report_id: input.legacy.audit_report_id }
-      : {}),
+    ...(input.legacy.audit_report_id ? { audit_report_id: input.legacy.audit_report_id } : {}),
     ...(input.legacy.fi_report_id ? { fi_report_id: input.legacy.fi_report_id } : {}),
     ...(input.legacy.patient_review_pathway
       ? { patient_review_pathway: input.legacy.patient_review_pathway }
@@ -476,15 +462,11 @@ export function buildStructuredHairAuditLinkFromResolution(input: {
     ...(input.resolution.audit_report_id
       ? { audit_report_id: input.resolution.audit_report_id }
       : {}),
-    ...(input.resolution.fi_report_id
-      ? { fi_report_id: input.resolution.fi_report_id }
-      : {}),
+    ...(input.resolution.fi_report_id ? { fi_report_id: input.resolution.fi_report_id } : {}),
     ...(input.resolution.patient_review_pathway
       ? { patient_review_pathway: input.resolution.patient_review_pathway }
       : {}),
-    ...(input.resolution.source_system
-      ? { source_system: input.resolution.source_system }
-      : {}),
+    ...(input.resolution.source_system ? { source_system: input.resolution.source_system } : {}),
     ...(input.resolution.linked_image_ids.length > 0
       ? { linked_image_ids: [...input.resolution.linked_image_ids] }
       : {}),
@@ -502,9 +484,7 @@ export function buildStructuredHairAuditLinkFromResolution(input: {
   };
 }
 
-export function formatHairAuditLinkDashboardLabel(
-  resolution: HairAuditLinkResolution
-): string {
+export function formatHairAuditLinkDashboardLabel(resolution: HairAuditLinkResolution): string {
   if (resolution.linkage_conflict) return "Conflict — review";
   if (resolution.audit_readiness.ready_for_audit) return "Audit ready";
   if (resolution.hairaudit_case_id && !resolution.fi_report_id) return "Linked — no report";

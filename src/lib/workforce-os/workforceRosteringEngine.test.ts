@@ -240,7 +240,10 @@ test("detectStaffSchedulingConflicts excludes shift being edited from overlap ch
     eventAssignments: [],
     excludeShiftId: "shift-being-edited",
   });
-  assert.equal(conflicts.some((c) => c.kind === "shift_overlap"), false);
+  assert.equal(
+    conflicts.some((c) => c.kind === "shift_overlap"),
+    false
+  );
 });
 
 test("detectStaffSchedulingConflicts detects leave and shift overlap", () => {

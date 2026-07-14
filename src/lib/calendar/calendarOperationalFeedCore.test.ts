@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { parseCalendarSearchParams, calendarRangeIsoForQuery } from "@/src/lib/bookings/calendarQuery";
+import {
+  parseCalendarSearchParams,
+  calendarRangeIsoForQuery,
+} from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import {
   assertCalendarOperationalFeedPayloadIsLightweight,

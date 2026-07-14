@@ -1,4 +1,7 @@
-import type { ProcedureDayUpsertPatch, ProcedureStatusValue } from "@/src/lib/cases/procedureDayTypes";
+import type {
+  ProcedureDayUpsertPatch,
+  ProcedureStatusValue,
+} from "@/src/lib/cases/procedureDayTypes";
 import { isProcedureStatus } from "@/src/lib/cases/procedureDayTypes";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 

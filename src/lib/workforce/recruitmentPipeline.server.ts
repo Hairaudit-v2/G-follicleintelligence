@@ -29,9 +29,7 @@ function mapRoleRequirement(row: Record<string, unknown>): WorkforceRoleRequirem
     displayName: String(row.display_name),
     description: row.description != null ? String(row.description) : null,
     requirementsJson:
-      req && typeof req === "object" && !Array.isArray(req)
-        ? (req as Record<string, unknown>)
-        : {},
+      req && typeof req === "object" && !Array.isArray(req) ? (req as Record<string, unknown>) : {},
     onboardingTemplateCode:
       row.onboarding_template_code != null ? String(row.onboarding_template_code) : null,
     isActive: Boolean(row.is_active),
@@ -54,7 +52,9 @@ function mapCandidate(
     email: row.email != null ? String(row.email) : null,
     phone: row.phone != null ? String(row.phone) : null,
     source: (() => {
-      const src = String(row.source ?? "direct").trim().toLowerCase();
+      const src = String(row.source ?? "direct")
+        .trim()
+        .toLowerCase();
       return isRecruitmentCandidateSource(src) ? src : "direct";
     })(),
     pipelineStage: normalizeRecruitmentPipelineStage(String(row.pipeline_stage)),
@@ -62,8 +62,7 @@ function mapCandidate(
     onboardingTemplateCode:
       row.onboarding_template_code != null ? String(row.onboarding_template_code) : null,
     notes: row.notes != null ? String(row.notes) : null,
-    assignedToUserId:
-      row.assigned_to_user_id != null ? String(row.assigned_to_user_id) : null,
+    assignedToUserId: row.assigned_to_user_id != null ? String(row.assigned_to_user_id) : null,
     hiredStaffMemberId:
       row.hired_staff_member_id != null ? String(row.hired_staff_member_id) : null,
     archivedAt: row.archived_at != null ? String(row.archived_at) : null,
@@ -78,17 +77,12 @@ function mapStageEvent(row: Record<string, unknown>): RecruitmentStageEvent {
     tenantId: String(row.tenant_id),
     candidateId: String(row.candidate_id),
     fromStage:
-      row.from_stage != null
-        ? normalizeRecruitmentPipelineStage(String(row.from_stage))
-        : null,
+      row.from_stage != null ? normalizeRecruitmentPipelineStage(String(row.from_stage)) : null,
     toStage: normalizeRecruitmentPipelineStage(String(row.to_stage)),
     offerStatus:
-      row.offer_status != null
-        ? normalizeRecruitmentOfferStatus(String(row.offer_status))
-        : null,
+      row.offer_status != null ? normalizeRecruitmentOfferStatus(String(row.offer_status)) : null,
     notes: row.notes != null ? String(row.notes) : null,
-    recordedByUserId:
-      row.recorded_by_user_id != null ? String(row.recorded_by_user_id) : null,
+    recordedByUserId: row.recorded_by_user_id != null ? String(row.recorded_by_user_id) : null,
     recordedAt: String(row.recorded_at),
   };
 }

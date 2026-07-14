@@ -51,11 +51,7 @@ test("4. email local-part fallback only when no name", () => {
 
 test("5. evolved.crm.seed1/2/3 excluded", () => {
   for (const local of ["evolved.crm.seed1", "evolved.crm.seed2", "evolved.crm.seed3"]) {
-    assert.equal(
-      isSystemOrSeedIdentity({ email: `${local}@evolvedhair.com.au` }),
-      true,
-      local
-    );
+    assert.equal(isSystemOrSeedIdentity({ email: `${local}@evolvedhair.com.au` }), true, local);
   }
 });
 
@@ -161,7 +157,10 @@ test("10. on_leave staff retained", () => {
     ],
     users: [{ userId: "u-leave", email: "leave@clinic.com", role: "member" }],
   });
-  assert.equal(r.options.some((o) => o.userId === "u-leave"), true);
+  assert.equal(
+    r.options.some((o) => o.userId === "u-leave"),
+    true
+  );
 });
 
 test("11. mutation pure assert rejects seed and inactive", () => {

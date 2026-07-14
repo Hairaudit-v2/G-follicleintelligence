@@ -3,9 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import {
-  IMAGING_OS_BARREL_IMPORT_ALLOWLIST,
-} from "./imagingOsBarrelImportAllowlist";
+import { IMAGING_OS_BARREL_IMPORT_ALLOWLIST } from "./imagingOsBarrelImportAllowlist";
 import {
   findBarrelImportsInSource,
   isAllowlistedBarrelImportFile,
@@ -22,7 +20,10 @@ describe("imagingOsBarrelGuardrailCore", () => {
     assert.equal(isCatchAllImagingOsBarrelSpecifier("@/src/lib/imaging-os/index"), true);
     assert.equal(isCatchAllImagingOsBarrelSpecifier("../src/lib/imaging-os"), true);
     assert.equal(isCatchAllImagingOsBarrelSpecifier("@/src/lib/imaging-os/pipeline"), false);
-    assert.equal(isCatchAllImagingOsBarrelSpecifier("@/src/lib/imaging-os/adapters/hairauditImageAdapter"), false);
+    assert.equal(
+      isCatchAllImagingOsBarrelSpecifier("@/src/lib/imaging-os/adapters/hairauditImageAdapter"),
+      false
+    );
   });
 
   it("treats focused entry-point imports as safe", () => {
@@ -84,7 +85,10 @@ describe("imagingOs barrel import allowlist", () => {
     }
     const source = fs.readFileSync(path.join(REPO_ROOT, sample), "utf8");
     const violations = findBarrelImportsInSource(source, sample);
-    assert.ok(violations.length > 0, "fixture allowlisted file should still contain barrel imports");
+    assert.ok(
+      violations.length > 0,
+      "fixture allowlisted file should still contain barrel imports"
+    );
     assert.equal(isAllowlistedBarrelImportFile(sample), true);
   });
 });

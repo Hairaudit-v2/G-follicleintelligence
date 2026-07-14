@@ -158,7 +158,10 @@ const receptionCardSchema = z.object({
   metadata: z.record(z.string(), z.unknown()),
 });
 
-const queueRecordSchema = z.record(z.enum(RECEPTION_BOARD_QUEUE_COLUMN_IDS), z.array(queueItemSchema));
+const queueRecordSchema = z.record(
+  z.enum(RECEPTION_BOARD_QUEUE_COLUMN_IDS),
+  z.array(queueItemSchema)
+);
 
 export const receptionBoardCommandCenterPayloadSchema = z.object({
   tenantId: z.string().uuid(),

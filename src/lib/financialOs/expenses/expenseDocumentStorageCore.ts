@@ -62,12 +62,9 @@ export function buildExpenseDocumentStoragePath(input: {
   contentType: string;
 }): string {
   const tid = input.tenantId.trim();
-  const base =
-    input.originalFilename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80) || "document";
+  const base = input.originalFilename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80) || "document";
   const ext =
-    MIME_EXT[input.contentType] ??
-    (base.includes(".") ? base.split(".").pop() : null) ??
-    "bin";
+    MIME_EXT[input.contentType] ?? (base.includes(".") ? base.split(".").pop() : null) ?? "bin";
   const safe = base.replace(/\.[^.]+$/, "") || "document";
   const folder = input.expenseId?.trim()
     ? `expenses/${input.expenseId.trim()}`
@@ -99,15 +96,12 @@ export type ExpenseReceiptUploadFields =
     }
   | { ok: false; error: string };
 
-export function readExpenseReceiptUploadFormData(
-  formData: FormData
-): ExpenseReceiptUploadFields {
+export function readExpenseReceiptUploadFormData(formData: FormData): ExpenseReceiptUploadFields {
   const tenantId = String(formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.tenantId) ?? "").trim();
   if (!tenantId) return { ok: false, error: "tenantId is required." };
 
   const adminRaw = formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.adminKey);
-  const adminKey =
-    typeof adminRaw === "string" && adminRaw.trim() ? adminRaw.trim() : null;
+  const adminKey = typeof adminRaw === "string" && adminRaw.trim() ? adminRaw.trim() : null;
 
   const file = formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.file);
   if (!(file instanceof File)) return { ok: false, error: "No file provided." };
@@ -118,12 +112,9 @@ export function readExpenseReceiptUploadFormData(
   const docKindRaw = String(formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.docKind) ?? "receipt")
     .trim()
     .toLowerCase();
-  const docKind =
-    docKindRaw === "invoice" || docKindRaw === "other" ? docKindRaw : "receipt";
+  const docKind = docKindRaw === "invoice" || docKindRaw === "other" ? docKindRaw : "receipt";
 
-  const expenseIdRaw = String(
-    formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.expenseId) ?? ""
-  ).trim();
+  const expenseIdRaw = String(formData.get(EXPENSE_RECEIPT_UPLOAD_FIELDS.expenseId) ?? "").trim();
   const expenseId = expenseIdRaw || null;
 
   const createDraft =

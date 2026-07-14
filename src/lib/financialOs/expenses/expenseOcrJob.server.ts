@@ -65,9 +65,7 @@ export async function runExpenseOcrCron(options?: {
     } catch (e) {
       processed += 1;
       failed += 1;
-      errors.push(
-        `${row.id}: ${e instanceof Error ? e.message : "unknown error"}`.slice(0, 200)
-      );
+      errors.push(`${row.id}: ${e instanceof Error ? e.message : "unknown error"}`.slice(0, 200));
     }
   }
 

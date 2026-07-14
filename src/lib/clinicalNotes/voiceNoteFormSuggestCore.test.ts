@@ -67,9 +67,6 @@ test("applyVoiceNoteFormSuggestions writes clinical_note and voice_note shapes",
     }
   );
 
-  assert.equal(
-    (applied.structured_clinical_note as { note: string }).note,
-    "Assessment\nStable"
-  );
+  assert.equal((applied.structured_clinical_note as { note: string }).note, "Assessment\nStable");
   assert.equal((applied.dictation as { transcript: string }).transcript, "raw transcript");
 });

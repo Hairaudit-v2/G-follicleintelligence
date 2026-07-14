@@ -79,8 +79,7 @@ export async function generateMarketingCplReport(input: {
               campaign: row.campaign_key,
               spend: formatMoneyFromCents(row.spend_cents, currency),
               leads: row.lead_count,
-              cpl:
-                row.cpl_cents != null ? formatMoneyFromCents(row.cpl_cents, currency) : "—",
+              cpl: row.cpl_cents != null ? formatMoneyFromCents(row.cpl_cents, currency) : "—",
             })),
           },
     emptyMessage:

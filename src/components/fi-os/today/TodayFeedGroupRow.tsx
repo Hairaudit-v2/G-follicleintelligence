@@ -29,14 +29,19 @@ export function TodayFeedGroupRow({ item }: { item: TodayFeedItem }) {
         className="flex w-full items-start gap-3 text-left"
         aria-expanded={open}
       >
-        <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])} aria-hidden />
+        <span
+          className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])}
+          aria-hidden
+        />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium text-slate-100">{item.actionLabel}</span>
           {item.detailLine ? (
             <span className="mt-0.5 block text-sm text-slate-500">{item.detailLine}</span>
           ) : null}
         </span>
-        <span className="shrink-0 text-xs font-medium text-slate-500">{open ? "Hide" : "Expand"}</span>
+        <span className="shrink-0 text-xs font-medium text-slate-500">
+          {open ? "Hide" : "Expand"}
+        </span>
       </button>
       {open ? (
         <ul className="ml-5 mt-3 space-y-1 border-l border-white/[0.06] pl-4">

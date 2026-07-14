@@ -9,7 +9,10 @@ import {
 import { buildRosterActualVarianceForPeriod } from "@/src/lib/workforce/rosterActualVariance.server";
 import { listWorkforceTimePunches } from "@/src/lib/workforce/staffTimeClock.server";
 import { loadWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicy.server";
-import { calendarDateStringFromInstant, resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  resolveTenantCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   computeSurgeryDayStaffingCostForDate,
@@ -32,9 +35,7 @@ export async function loadWorkforceOsPayrollPage(
   const tid = tenantId.trim();
   await ensureDefaultAwardLoadingPlaceholders(tid);
 
-  const date =
-    workDate?.trim() ||
-    new Date().toISOString().slice(0, 10);
+  const date = workDate?.trim() || new Date().toISOString().slice(0, 10);
 
   const timeClockPolicy = await loadWorkforceTimeClockPolicy(tid);
   const supabase = supabaseAdmin();
@@ -47,8 +48,7 @@ export async function loadWorkforceOsPayrollPage(
     tzRow as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null
   );
   const anchorDate =
-    periodDate?.trim() ||
-    calendarDateStringFromInstant(new Date(), calendarTimezone);
+    periodDate?.trim() || calendarDateStringFromInstant(new Date(), calendarTimezone);
   const payPeriod = resolvePayPeriodContaining(
     anchorDate,
     timeClockPolicy.payPeriodFrequency,
@@ -80,12 +80,7 @@ export async function loadWorkforceOsPayrollPage(
     }),
     listActiveStaffForWageProfiles(tid),
     computeSurgeryDayStaffingCostForDate(tid, date),
-    buildRosterActualVarianceForPeriod(
-      tid,
-      payPeriod.start,
-      payPeriod.end,
-      calendarTimezone
-    ),
+    buildRosterActualVarianceForPeriod(tid, payPeriod.start, payPeriod.end, calendarTimezone),
     listWorkforceTimePunches(tid, { source: "auto_close", limit: 20 }),
     listWorkforceTimePunches(tid, { openOnly: true, limit: 20 }),
   ]);
@@ -102,8 +97,7 @@ export async function loadWorkforceOsPayrollPage(
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   return {
     wageProfiles,

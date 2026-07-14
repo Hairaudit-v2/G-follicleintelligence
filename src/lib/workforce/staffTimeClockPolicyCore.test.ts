@@ -39,9 +39,6 @@ describe("staffTimeClockPolicyCore", () => {
       { breaksEnabled: true }
     );
     assert.equal(merged.timezone_note, "Perth");
-    assert.equal(
-      (merged.workforce_time_clock as { breaks_enabled: boolean }).breaks_enabled,
-      true
-    );
+    assert.equal((merged.workforce_time_clock as { breaks_enabled: boolean }).breaks_enabled, true);
   });
 });

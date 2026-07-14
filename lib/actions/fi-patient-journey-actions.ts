@@ -18,7 +18,9 @@ import { loadPatientJourneySnapshot } from "@/src/lib/patientJourney/patientJour
 const manualOverrideBodySchema = z
   .object({
     adminKey: z.string().optional(),
-    toState: z.enum(PATIENT_JOURNEY_STATES as unknown as [PatientJourneyState, ...PatientJourneyState[]]),
+    toState: z.enum(
+      PATIENT_JOURNEY_STATES as unknown as [PatientJourneyState, ...PatientJourneyState[]]
+    ),
     reason: z.string().min(3).max(2000),
     overrideExpiresAt: z.string().datetime().optional().nullable(),
     leadId: z.string().uuid().optional().nullable(),
@@ -91,9 +93,8 @@ export async function syncPatientJourneyStateAction(
     const pid = patientId.trim();
     await assertCrmTenantWriteAllowed({ tenantId: tid, adminKey, request: undefined });
 
-    const { syncPatientJourneyStateFromRecords } = await import(
-      "@/src/lib/patientJourney/patientJourneyState.server"
-    );
+    const { syncPatientJourneyStateFromRecords } =
+      await import("@/src/lib/patientJourney/patientJourneyState.server");
     const { snapshot } = await syncPatientJourneyStateFromRecords(tid, pid);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     return { ok: true, state: snapshot.state };

@@ -26,7 +26,11 @@ function listTsxFiles(dir: string): string[] {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) out.push(...listTsxFiles(p));
-    else if (/\.(tsx|ts)$/.test(name) && !name.endsWith(".test.ts") && !name.endsWith(".test.tsx")) {
+    else if (
+      /\.(tsx|ts)$/.test(name) &&
+      !name.endsWith(".test.ts") &&
+      !name.endsWith(".test.tsx")
+    ) {
       out.push(p);
     }
   }
@@ -34,7 +38,10 @@ function listTsxFiles(dir: string): string[] {
 }
 
 function fixturePresentation(overrides?: Partial<PipelinePresentation>): PipelinePresentation {
-  const card = (id: string, columnId: (typeof PIPELINE_STAFF_COLUMN_ORDER)[number]): PipelineLeadCard => ({
+  const card = (
+    id: string,
+    columnId: (typeof PIPELINE_STAFF_COLUMN_ORDER)[number]
+  ): PipelineLeadCard => ({
     leadId: id,
     person: { personId: "p", displayName: `Person ${id.slice(0, 4)}`, patientId: null },
     contact: { hasEmail: true, hasPhone: false, preferredChannel: "email" },
@@ -142,10 +149,7 @@ function fixturePresentation(overrides?: Partial<PipelinePresentation>): Pipelin
       dueTodayFollowUps: 0,
       untouchedNew: 0,
       byColumn: Object.fromEntries(
-        PIPELINE_STAFF_COLUMN_ORDER.map((id) => [
-          id,
-          columns.find((c) => c.id === id)?.count ?? 0,
-        ])
+        PIPELINE_STAFF_COLUMN_ORDER.map((id) => [id, columns.find((c) => c.id === id)?.count ?? 0])
       ) as PipelinePresentation["summary"]["byColumn"],
     },
     filters: {

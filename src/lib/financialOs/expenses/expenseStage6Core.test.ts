@@ -155,7 +155,10 @@ describe("expenseExportCore + QuickBooks", () => {
 
 describe("expenseChartOfAccountsCore multi-clinic", () => {
   it("splits P&L by clinic", () => {
-    const names = new Map([["c1", "Perth"], ["c2", "Sydney"]]);
+    const names = new Map([
+      ["c1", "Perth"],
+      ["c2", "Sydney"],
+    ]);
     const summary = aggregateMultiClinicOperatingPl({
       period_start: "2026-07-01",
       period_end: "2026-07-31",

@@ -183,7 +183,10 @@ export function PatientConsentVaultCard({
       {documents.length > 0 ? (
         <ul className="mt-4 divide-y divide-white/[0.06] rounded-lg border border-white/[0.08]">
           {documents.map((doc) => (
-            <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
+            <li
+              key={doc.id}
+              className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5"
+            >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-slate-100">
                   {doc.original_filename ?? "Consent document"}

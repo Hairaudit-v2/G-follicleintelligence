@@ -198,7 +198,8 @@ export async function searchFoundationRecords(
           .limit(limit),
       ]);
       for (const o of orgMatch.data ?? []) orgIdsForCaseBoost.add(String((o as { id: string }).id));
-      for (const c of clMatch.data ?? []) clinicIdsForCaseBoost.add(String((c as { id: string }).id));
+      for (const c of clMatch.data ?? [])
+        clinicIdsForCaseBoost.add(String((c as { id: string }).id));
     }
 
     let q = supabase

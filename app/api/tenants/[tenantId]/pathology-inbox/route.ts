@@ -2,7 +2,11 @@
  * GET  /api/tenants/[tenantId]/pathology-inbox — list pending inbound documents
  * POST /api/tenants/[tenantId]/pathology-inbox — manual PDF upload to inbox
  */
-import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import {
+  assertCrmTenantReadAllowed,
+  assertCrmTenantWriteAllowed,
+  tryResolveFiUserIdForTenant,
+} from "@/src/lib/crm/crmGate";
 import {
   crmJsonError,
   crmJsonOk,
@@ -23,10 +27,7 @@ const VALID_STATUSES = new Set<PathologyInboundMatchStatus | "all">([
   "promoted",
 ]);
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) return crmJsonError(400, "Missing tenantId.");
@@ -51,10 +52,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) return crmJsonError(400, "Missing tenantId.");
@@ -93,13 +91,9 @@ export async function POST(
           ? null
           : String(extractedPatientName),
       extractedDob:
-        extractedDob == null || String(extractedDob).trim() === ""
-          ? null
-          : String(extractedDob),
+        extractedDob == null || String(extractedDob).trim() === "" ? null : String(extractedDob),
       extractedMrn:
-        extractedMrn == null || String(extractedMrn).trim() === ""
-          ? null
-          : String(extractedMrn),
+        extractedMrn == null || String(extractedMrn).trim() === "" ? null : String(extractedMrn),
       actingUserId,
     });
 

@@ -12,9 +12,7 @@ export const APPOINTMENT_PROCEDURE_PROTOCOL_REQUIRED_MESSAGE =
 export const APPOINTMENT_ADMIN_FALLBACK_ENV_KEY = "FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK" as const;
 
 /** Server and client: server-only env or NEXT_PUBLIC mirror for UI gating. */
-export function isAppointmentAdminFallbackEnabled(
-  env: NodeJS.ProcessEnv = process.env
-): boolean {
+export function isAppointmentAdminFallbackEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return (
     env[APPOINTMENT_ADMIN_FALLBACK_ENV_KEY] === "1" ||
     env.NEXT_PUBLIC_FI_ALLOW_APPOINTMENT_ADMIN_FALLBACK === "1"

@@ -122,7 +122,8 @@ export function isProtocolCaptureContext(input: {
 }): boolean {
   const source = normalizeCaptureSource(input.captureSource);
   if (source === "imaging_os_wizard") return Boolean(input.protocolSessionId?.trim());
-  if (source === "appointment_procedure_admin_fallback") return Boolean(input.protocolSessionId?.trim());
+  if (source === "appointment_procedure_admin_fallback")
+    return Boolean(input.protocolSessionId?.trim());
   return isVieProtocolRequiredSource(source) && Boolean(input.protocolSessionId?.trim());
 }
 

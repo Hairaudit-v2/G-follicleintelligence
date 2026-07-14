@@ -35,7 +35,10 @@ export type StaffStandardHoursManageDecision = {
 function logManageDecisionInDevelopment(decision: StaffStandardHoursManageDecision): void {
   if (process.env.NODE_ENV === "production") return;
   if (decision.canManage) return;
-  console.info("[staff-standard-hours] manage denied:", decision.debugReason ?? decision.manageDeniedReason);
+  console.info(
+    "[staff-standard-hours] manage denied:",
+    decision.debugReason ?? decision.manageDeniedReason
+  );
 }
 
 export async function resolveStaffStandardHoursManageCapability(

@@ -26,8 +26,7 @@ function fromDefaults(): PipelineMoveStageDefinition[] {
 }
 
 function stage(
-  partial: Partial<PipelineMoveStageDefinition> &
-    Pick<PipelineMoveStageDefinition, "id" | "slug">
+  partial: Partial<PipelineMoveStageDefinition> & Pick<PipelineMoveStageDefinition, "id" | "slug">
 ): PipelineMoveStageDefinition {
   return {
     id: partial.id,

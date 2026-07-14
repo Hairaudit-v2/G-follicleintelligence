@@ -92,16 +92,17 @@ export async function updateStaffProfile(input: {
   if (allowed.role_code !== undefined) dbPatch.role_code = allowed.role_code?.trim() || null;
   if (allowed.employment_type !== undefined)
     dbPatch.employment_type = allowed.employment_type?.trim() || null;
-  if (allowed.employment_status !== undefined) dbPatch.employment_status = allowed.employment_status;
+  if (allowed.employment_status !== undefined)
+    dbPatch.employment_status = allowed.employment_status;
   if (allowed.timezone !== undefined) dbPatch.timezone = allowed.timezone?.trim() || null;
   if (allowed.clinic_id !== undefined) dbPatch.clinic_id = allowed.clinic_id?.trim() || null;
   if (allowed.notes !== undefined) dbPatch.notes = allowed.notes?.trim() || null;
   if (allowed.internal_tags !== undefined) dbPatch.internal_tags = allowed.internal_tags ?? [];
 
   const firstName =
-    allowed.first_name !== undefined ? (allowed.first_name?.trim() || null) : existing.first_name;
+    allowed.first_name !== undefined ? allowed.first_name?.trim() || null : existing.first_name;
   const lastName =
-    allowed.last_name !== undefined ? (allowed.last_name?.trim() || null) : existing.last_name;
+    allowed.last_name !== undefined ? allowed.last_name?.trim() || null : existing.last_name;
   const composed = composeFullName(firstName, lastName);
   if (composed) dbPatch.full_name = composed;
 
@@ -121,7 +122,8 @@ export async function updateStaffProfile(input: {
   if (allowed.phone !== undefined) fiPatch.mobile = updated.phone;
   if (allowed.role_code !== undefined) fiPatch.staff_role = updated.role_code;
   if (allowed.timezone !== undefined) fiPatch.default_timezone = updated.timezone;
-  if (allowed.professional_title !== undefined) fiPatch.professional_title = updated.professional_title;
+  if (allowed.professional_title !== undefined)
+    fiPatch.professional_title = updated.professional_title;
   if (allowed.employment_status !== undefined) {
     fiPatch.employment_status = updated.employment_status;
     fiPatch.is_active = updated.employment_status === "active";
@@ -325,9 +327,7 @@ export async function loadStaffMemberAuditTimeline(
       event_type: String(r.event_type),
       source: String(r.source),
       metadata:
-        md && typeof md === "object" && !Array.isArray(md)
-          ? (md as Record<string, unknown>)
-          : {},
+        md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : {},
       created_at: String(r.created_at),
     };
   });

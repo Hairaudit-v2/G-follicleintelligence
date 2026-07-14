@@ -89,7 +89,13 @@ describe("deriveCalendarOsSurgeryIntelligence", () => {
         start_at: "2026-06-10T08:00:00.000Z",
         end_at: "2026-06-10T12:00:00.000Z",
       }),
-      display: { anchorLabel: "Pt", scalesSummary: null, durationMin: 240, reminderHint: null, roomLabel: "T1" },
+      display: {
+        anchorLabel: "Pt",
+        scalesSummary: null,
+        durationMin: 240,
+        reminderHint: null,
+        roomLabel: "T1",
+      },
       operational: {
         riskStatus: "attention",
         readinessPercent: 55,
@@ -164,7 +170,10 @@ describe("buildCalendarOsOperationalPanelSummary", () => {
           clinical_readiness: { clinically_available: true },
         },
       ],
-      rooms: [{ id: "r1", is_active: true }, { id: "r2", is_active: true }],
+      rooms: [
+        { id: "r1", is_active: true },
+        { id: "r2", is_active: true },
+      ],
       lanesDayKeys: ["2026-06-10"],
     });
     assert.equal(summary.unassignedBookings, 1);

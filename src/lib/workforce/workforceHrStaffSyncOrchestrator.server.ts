@@ -76,10 +76,7 @@ export async function runWorkforceReconciliationForInboundRows(input: {
     }
   }
 
-  const duplicatesDetected = await runPostSyncDuplicateDetection(
-    input.tenantId,
-    input.client
-  );
+  const duplicatesDetected = await runPostSyncDuplicateDetection(input.tenantId, input.client);
 
   const counts: HrSyncRunCounts = {
     recordsReceived: input.rows.length,

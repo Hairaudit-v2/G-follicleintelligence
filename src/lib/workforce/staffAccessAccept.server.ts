@@ -5,10 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
-import {
-  hashStaffAccessInviteToken,
-  STAFF_ACCESS_INVITE_ERRORS,
-} from "./staffAccessInviteCore";
+import { hashStaffAccessInviteToken, STAFF_ACCESS_INVITE_ERRORS } from "./staffAccessInviteCore";
 import {
   insertStaffAccessAuditEvent,
   STAFF_ACCESS_AUDIT_EVENTS,
@@ -247,7 +244,11 @@ export async function acceptStaffAccessInvitation(input: {
   inviteToken: string;
   pinSetupToken?: string | null;
   client?: SupabaseClient;
-}): Promise<{ staffMemberId: string; authInviteLink: string | null; pinSetupToken: string | null }> {
+}): Promise<{
+  staffMemberId: string;
+  authInviteLink: string | null;
+  pinSetupToken: string | null;
+}> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();

@@ -122,9 +122,7 @@ export function RosterPlanningSettingsPanel({
               className={inputClass}
               value={policy.rosterCycleAnchorDate}
               disabled={pending}
-              onChange={(e) =>
-                setPolicy((p) => ({ ...p, rosterCycleAnchorDate: e.target.value }))
-              }
+              onChange={(e) => setPolicy((p) => ({ ...p, rosterCycleAnchorDate: e.target.value }))}
               data-testid="roster-cycle-anchor-date"
             />
             <span className="mt-1 block text-[11px] text-slate-500">
@@ -213,9 +211,7 @@ export function RosterPlanningSettingsPanel({
             type="checkbox"
             checked={policy.rosterPublishRequired}
             disabled={pending}
-            onChange={(e) =>
-              setPolicy((p) => ({ ...p, rosterPublishRequired: e.target.checked }))
-            }
+            onChange={(e) => setPolicy((p) => ({ ...p, rosterPublishRequired: e.target.checked }))}
           />
           Require roster publish before staff can view final rosters
         </label>

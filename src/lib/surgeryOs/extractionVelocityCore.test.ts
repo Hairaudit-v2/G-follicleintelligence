@@ -5,9 +5,7 @@ import { buildExtractionVelocity } from "@/src/lib/surgeryOs/extractionVelocityC
 
 const surgeryId = "00000000-0000-4000-8000-000000000040";
 
-function baseInput(
-  overrides: Partial<Parameters<typeof buildExtractionVelocity>[0]> = {}
-) {
+function baseInput(overrides: Partial<Parameters<typeof buildExtractionVelocity>[0]> = {}) {
   return {
     surgeryId,
     patientLabel: "Jordan Patient",
@@ -98,8 +96,7 @@ describe("extractionVelocityCore", () => {
     assert.ok(snapshot.extractionRatePerHour != null);
     assert.ok(!Number.isNaN(snapshot.extractionRatePerHour));
     assert.ok(
-      snapshot.efficiencyDeclinePercent == null ||
-        !Number.isNaN(snapshot.efficiencyDeclinePercent)
+      snapshot.efficiencyDeclinePercent == null || !Number.isNaN(snapshot.efficiencyDeclinePercent)
     );
   });
 });

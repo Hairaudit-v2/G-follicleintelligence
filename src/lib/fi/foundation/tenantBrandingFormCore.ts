@@ -2,10 +2,7 @@
  * Client-safe helpers for Settings → Branding form hydration and save merging.
  */
 
-import {
-  parseTenantBrandingMetadata,
-  type NormalizedTenantBranding,
-} from "./tenantBrandingCore";
+import { parseTenantBrandingMetadata, type NormalizedTenantBranding } from "./tenantBrandingCore";
 import { safeBrandingColourHex } from "./brandingCss";
 import type { FiTenantSettingsRow, WriteFiTenantSettingsPayload } from "./tenantSettings";
 
@@ -25,11 +22,7 @@ export function buildTenantBrandingRevisionKey(
 ): string {
   if (!settings) return "no-row";
   const meta = parseTenantBrandingMetadata(settings.metadata);
-  return [
-    settings.updated_at,
-    meta.logo_storage_path ?? "",
-    meta.logo_uploaded_at ?? "",
-  ].join("|");
+  return [settings.updated_at, meta.logo_storage_path ?? "", meta.logo_uploaded_at ?? ""].join("|");
 }
 
 /** Initialize editable fields from persisted tenant settings (not cascade preview). */
@@ -55,10 +48,7 @@ export function mergeTenantSettingsSavePayload(
   existing: FiTenantSettingsRow | null | undefined,
   incoming: WriteFiTenantSettingsPayload
 ): WriteFiTenantSettingsPayload {
-  const keep = <T extends string | null>(
-    next: T,
-    prev: string | null | undefined
-  ): T => {
+  const keep = <T extends string | null>(next: T, prev: string | null | undefined): T => {
     if (next !== null && String(next).trim() !== "") return next;
     return (prev ?? null) as T;
   };

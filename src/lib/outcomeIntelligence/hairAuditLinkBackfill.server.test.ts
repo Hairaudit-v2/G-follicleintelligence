@@ -91,9 +91,6 @@ describe("hairAuditLinkBackfill.server", () => {
       { supabase }
     );
     assert.equal(result.summary.copied, 1);
-    assert.equal(
-      (result.outcomes[0] as { kind: string }).kind,
-      "copied_legacy"
-    );
+    assert.equal((result.outcomes[0] as { kind: string }).kind, "copied_legacy");
   });
 });

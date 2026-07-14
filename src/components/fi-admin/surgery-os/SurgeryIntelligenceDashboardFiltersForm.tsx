@@ -11,7 +11,11 @@ type Props = {
 const inputClass =
   "w-full rounded-lg border border-white/10 bg-[#0c1426]/80 px-3 py-2 text-sm text-[#E2E8F0] placeholder:text-[#64748B] focus:border-[#22C1FF]/50 focus:outline-none";
 
-export function SurgeryIntelligenceDashboardFiltersForm({ baseHref, filters, filterOptions }: Props) {
+export function SurgeryIntelligenceDashboardFiltersForm({
+  baseHref,
+  filters,
+  filterOptions,
+}: Props) {
   return (
     <form
       method="get"

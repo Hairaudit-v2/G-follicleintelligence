@@ -22,11 +22,7 @@ export type ExpensePlSummary = {
   expense_event_count: number;
 };
 
-const REVENUE_KINDS = new Set([
-  "payment_received",
-  "deposit_paid",
-  "balance_paid",
-]);
+const REVENUE_KINDS = new Set(["payment_received", "deposit_paid", "balance_paid"]);
 
 function inIsoRange(iso: string, start: string, end: string): boolean {
   const d = iso.slice(0, 10);

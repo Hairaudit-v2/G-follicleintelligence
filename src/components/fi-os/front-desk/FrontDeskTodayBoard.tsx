@@ -64,8 +64,7 @@ export function FrontDeskTodayBoard(props: FrontDeskTodayBoardProps) {
   const { data, lastRefreshedAt, isRefreshing, refreshError, refresh } = useReceptionBoardRefresh({
     tenantId: props.initialData.tenantId,
     initialData: props.initialData,
-    hydrateFullOnMount:
-      props.hydrateFullOnMount ?? props.initialData.loadTier === "shell",
+    hydrateFullOnMount: props.hydrateFullOnMount ?? props.initialData.loadTier === "shell",
   });
 
   // After mount: live clock; re-run presentation for arriving soon / running late.
@@ -91,9 +90,7 @@ export function FrontDeskTodayBoard(props: FrontDeskTodayBoardProps) {
   // Global actions: force take_payment href to /payments
   const globalActions = useMemo(
     () =>
-      presentation.actions.map((a) =>
-        a.id === "take_payment" ? { ...a, href: paymentsHref } : a
-      ),
+      presentation.actions.map((a) => (a.id === "take_payment" ? { ...a, href: paymentsHref } : a)),
     [presentation.actions, paymentsHref]
   );
 
@@ -157,16 +154,7 @@ export function FrontDeskTodayBoard(props: FrontDeskTodayBoardProps) {
         setBusyBookingId(null);
       }
     },
-    [
-      canMutate,
-      data.tenantId,
-      mutationMode,
-      paymentsHref,
-      refresh,
-      router,
-      toast,
-      announce,
-    ]
+    [canMutate, data.tenantId, mutationMode, paymentsHref, refresh, router, toast, announce]
   );
 
   return (

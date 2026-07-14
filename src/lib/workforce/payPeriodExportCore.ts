@@ -54,19 +54,19 @@ export type PayPeriodExportBundle = {
   rows: PayPeriodExportEntryRow[] | PayPeriodExportSummaryRow[];
 };
 
-export function parsePayPeriodExportScope(
-  raw: string | null | undefined
-): PayPeriodExportScope {
-  const v = String(raw ?? "approved").trim().toLowerCase();
+export function parsePayPeriodExportScope(raw: string | null | undefined): PayPeriodExportScope {
+  const v = String(raw ?? "approved")
+    .trim()
+    .toLowerCase();
   return (PAY_PERIOD_EXPORT_SCOPES as readonly string[]).includes(v)
     ? (v as PayPeriodExportScope)
     : "approved";
 }
 
-export function parsePayPeriodExportView(
-  raw: string | null | undefined
-): PayPeriodExportView {
-  const v = String(raw ?? "summary").trim().toLowerCase();
+export function parsePayPeriodExportView(raw: string | null | undefined): PayPeriodExportView {
+  const v = String(raw ?? "summary")
+    .trim()
+    .toLowerCase();
   return (PAY_PERIOD_EXPORT_VIEWS as readonly string[]).includes(v)
     ? (v as PayPeriodExportView)
     : "summary";
@@ -81,9 +81,7 @@ export function centsToExportAud(cents: number): number {
   return Math.round(cents) / 100;
 }
 
-function formatAwardLoadings(
-  loadings: Array<{ loadingCode: string; multiplier: number }>
-): string {
+function formatAwardLoadings(loadings: Array<{ loadingCode: string; multiplier: number }>): string {
   if (loadings.length === 0) return "";
   return loadings.map((l) => `${l.loadingCode}×${l.multiplier}`).join("; ");
 }
@@ -94,8 +92,7 @@ export function buildPayPeriodExportEntryRows(
   scope: PayPeriodExportScope
 ): { rows: PayPeriodExportEntryRow[]; unapprovedEntryCount: number } {
   const unapprovedEntryCount = entries.filter((e) => e.status !== "approved").length;
-  const filtered =
-    scope === "approved" ? entries.filter((e) => e.status === "approved") : entries;
+  const filtered = scope === "approved" ? entries.filter((e) => e.status === "approved") : entries;
 
   const rows = filtered
     .map((e) => {
@@ -184,8 +181,7 @@ export function buildPayPeriodExportBundle(input: {
     input.staffRefs,
     scope
   );
-  const rows =
-    view === "detail" ? entryRows : buildPayPeriodExportSummaryRows(entryRows);
+  const rows = view === "detail" ? entryRows : buildPayPeriodExportSummaryRows(entryRows);
 
   return {
     exportedAt: input.exportedAt ?? new Date().toISOString(),
@@ -207,7 +203,10 @@ export function serializePayPeriodExportCsv(bundle: PayPeriodExportBundle): stri
     csvRow(["pay_period_frequency", bundle.payPeriod.frequency]),
     csvRow(["export_scope", bundle.scope]),
     csvRow(["export_view", bundle.view]),
-    csvRow(["unapproved_entries_excluded", bundle.scope === "approved" ? bundle.unapprovedEntryCount : 0]),
+    csvRow([
+      "unapproved_entries_excluded",
+      bundle.scope === "approved" ? bundle.unapprovedEntryCount : 0,
+    ]),
     "",
   ];
 

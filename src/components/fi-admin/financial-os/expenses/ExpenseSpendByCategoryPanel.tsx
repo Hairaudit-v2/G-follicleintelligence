@@ -17,7 +17,8 @@ export function ExpenseSpendByCategoryPanel(props: { summary: ExpenseSpendSummar
       title="Spend by category"
       description={
         <>
-          Posted expenses {s.period_start} → {s.period_end}. Simple opex breakdown (not full P&amp;L).
+          Posted expenses {s.period_start} → {s.period_end}. Simple opex breakdown (not full
+          P&amp;L).
         </>
       }
     >
@@ -27,10 +28,7 @@ export function ExpenseSpendByCategoryPanel(props: { summary: ExpenseSpendSummar
           value={formatMoneyFromCents(s.total_posted_spend_cents)}
         />
         <FinancialOsMetricTile label="Expense rows" value={String(s.expense_count)} />
-        <FinancialOsMetricTile
-          label="Categories"
-          value={String(s.by_category.length)}
-        />
+        <FinancialOsMetricTile label="Categories" value={String(s.by_category.length)} />
       </dl>
 
       <div className="mt-4">

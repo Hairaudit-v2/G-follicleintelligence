@@ -11,19 +11,13 @@ import {
 
 describe("staffTimeClockCore", () => {
   it("computes minutes between clock-in and clock-out", () => {
-    const mins = computePunchMinutes(
-      "2026-07-01T00:00:00.000Z",
-      "2026-07-01T08:30:00.000Z"
-    );
+    const mins = computePunchMinutes("2026-07-01T00:00:00.000Z", "2026-07-01T08:30:00.000Z");
     assert.equal(mins, 510);
   });
 
   it("returns zero for invalid or reversed spans", () => {
     assert.equal(computePunchMinutes("invalid", "2026-07-01T08:00:00.000Z"), 0);
-    assert.equal(
-      computePunchMinutes("2026-07-01T10:00:00.000Z", "2026-07-01T08:00:00.000Z"),
-      0
-    );
+    assert.equal(computePunchMinutes("2026-07-01T10:00:00.000Z", "2026-07-01T08:00:00.000Z"), 0);
   });
 
   it("shouldOpenNewPunchOnLogin only when no open punch", () => {
@@ -32,16 +26,9 @@ describe("staffTimeClockCore", () => {
   });
 
   it("derivePunchMinutesWorked returns null for open punches", () => {
+    assert.equal(derivePunchMinutesWorked("open", "2026-07-01T00:00:00.000Z", null), null);
     assert.equal(
-      derivePunchMinutesWorked("open", "2026-07-01T00:00:00.000Z", null),
-      null
-    );
-    assert.equal(
-      derivePunchMinutesWorked(
-        "closed",
-        "2026-07-01T00:00:00.000Z",
-        "2026-07-01T08:00:00.000Z"
-      ),
+      derivePunchMinutesWorked("closed", "2026-07-01T00:00:00.000Z", "2026-07-01T08:00:00.000Z"),
       480
     );
   });

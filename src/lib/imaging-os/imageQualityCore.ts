@@ -144,7 +144,9 @@ export function shouldBlockUploadForImagingQuality(input: {
 /**
  * Pure scoring from metadata, client hints, server heuristics, and duplicate signals.
  */
-export function evaluateImagingQuality(input: ImagingQualityEvaluationInput): ImagingQualityEvaluationResult {
+export function evaluateImagingQuality(
+  input: ImagingQualityEvaluationInput
+): ImagingQualityEvaluationResult {
   const policy = resolveImagingQualityPolicy(input.policy);
   const reasons: string[] = [];
   let score = 100;
@@ -262,7 +264,9 @@ export function readClientCaptureHintsFromMetadata(
   const root = metadata?.capture_hints;
   if (!root || typeof root !== "object" || Array.isArray(root)) return {};
   const o = root as Record<string, unknown>;
-  const exposure = String(o.exposure_hint ?? "").trim().toLowerCase();
+  const exposure = String(o.exposure_hint ?? "")
+    .trim()
+    .toLowerCase();
   const exposure_hint =
     exposure === "underexposed" || exposure === "overexposed" || exposure === "normal"
       ? exposure

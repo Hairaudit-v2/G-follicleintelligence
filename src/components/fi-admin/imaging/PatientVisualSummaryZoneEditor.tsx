@@ -49,9 +49,7 @@ export function PatientVisualSummaryZoneEditor({
   }, [initialRecord]);
 
   const updateDraft = useCallback((zoneId: string, patch: Partial<RecipientZoneDraft>) => {
-    setDrafts((prev) =>
-      prev.map((d) => (d.zone_id === zoneId ? { ...d, ...patch } : d))
-    );
+    setDrafts((prev) => prev.map((d) => (d.zone_id === zoneId ? { ...d, ...patch } : d)));
   }, []);
 
   const save = () => {
@@ -83,8 +81,8 @@ export function PatientVisualSummaryZoneEditor({
           Recipient zone data
         </p>
         <p className="mt-1 text-xs text-slate-400">
-          Staff-only. Partial entries are allowed. Missing fields show as &quot;Not recorded&quot; in
-          the patient report.
+          Staff-only. Partial entries are allowed. Missing fields show as &quot;Not recorded&quot;
+          in the patient report.
           {surgeryGraftTotal != null && surgeryGraftTotal > 0
             ? ` Surgery graft total: ${surgeryGraftTotal}.`
             : null}

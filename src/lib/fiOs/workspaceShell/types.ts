@@ -21,18 +21,12 @@ export const D4_WORKSPACE_KINDS = [
 export type D4WorkspaceKind = (typeof D4_WORKSPACE_KINDS)[number];
 
 /** All kinds the workspace shell currently supports. */
-export const WORKSPACE_SHELL_KINDS = [
-  ...D1_WORKSPACE_KINDS,
-  ...D4_WORKSPACE_KINDS,
-] as const;
+export const WORKSPACE_SHELL_KINDS = [...D1_WORKSPACE_KINDS, ...D4_WORKSPACE_KINDS] as const;
 
 export type WorkspaceShellKind = (typeof WORKSPACE_SHELL_KINDS)[number];
 
 /** All workspace kinds the shell may eventually support. */
-export type WorkspaceKind =
-  | WorkspaceShellKind
-  | "booking"
-  | "prescription";
+export type WorkspaceKind = WorkspaceShellKind | "booking" | "prescription";
 
 export type WorkspaceRef = {
   kind: WorkspaceShellKind;

@@ -22,8 +22,7 @@ export async function loadWorkforceOsRecruitmentPage(tenantId: string) {
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   return {
     candidates,

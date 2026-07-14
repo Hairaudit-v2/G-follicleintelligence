@@ -42,9 +42,7 @@ export async function buildRosterActualVarianceForPeriod(
   if (shiftRes.error) throw new Error(shiftRes.error.message);
 
   const staffIds = Array.from(
-    new Set(
-      ((shiftRes.data ?? []) as { staff_id: string }[]).map((s) => String(s.staff_id))
-    )
+    new Set(((shiftRes.data ?? []) as { staff_id: string }[]).map((s) => String(s.staff_id)))
   );
   const nameByStaff = new Map<string, string>();
   if (staffIds.length > 0) {

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { summarizeSignalLearning, type TodaySignalObservation } from "@/src/lib/fiOs/todaySignal/todaySignalLearning";
+import {
+  summarizeSignalLearning,
+  type TodaySignalObservation,
+} from "@/src/lib/fiOs/todaySignal/todaySignalLearning";
 import {
   assertTodaySignalLearningViewPrivacy,
   buildTodaySignalLearningSummaryView,
@@ -15,7 +18,8 @@ const RANGE = {
 };
 
 function observation(
-  overrides: Partial<TodaySignalObservation> & Pick<TodaySignalObservation, "signalKey" | "signalType">
+  overrides: Partial<TodaySignalObservation> &
+    Pick<TodaySignalObservation, "signalKey" | "signalType">
 ): TodaySignalObservation {
   return {
     firstSeenAt: "2026-07-03T06:00:00.000Z",
@@ -127,9 +131,8 @@ test("disabled learning returns disabled state", async () => {
   const prev = process.env.FI_TODAY_SIGNAL_LEARNING_ENABLED;
   process.env.FI_TODAY_SIGNAL_LEARNING_ENABLED = "false";
   try {
-    const { loadTodaySignalLearningSummaryForTenant } = await import(
-      "@/src/lib/fiOs/todaySignal/todaySignalLearningSummary.server"
-    );
+    const { loadTodaySignalLearningSummaryForTenant } =
+      await import("@/src/lib/fiOs/todaySignal/todaySignalLearningSummary.server");
     const model = await loadTodaySignalLearningSummaryForTenant(
       "11111111-1111-4111-8111-111111111111"
     );

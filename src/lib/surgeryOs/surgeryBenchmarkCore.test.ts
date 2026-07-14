@@ -1,12 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildSurgeryBenchmark, buildSurgeryBenchmarks } from "@/src/lib/surgeryOs/surgeryBenchmarkCore";
+import {
+  buildSurgeryBenchmark,
+  buildSurgeryBenchmarks,
+} from "@/src/lib/surgeryOs/surgeryBenchmarkCore";
 import type { SurgeonPerformanceSnapshot } from "@/src/lib/surgeryOs/surgeonPerformanceAnalyticsCore";
 
 const surgeonId = "00000000-0000-4000-8000-000000000101";
 
-function performance(overrides: Partial<SurgeonPerformanceSnapshot> = {}): SurgeonPerformanceSnapshot {
+function performance(
+  overrides: Partial<SurgeonPerformanceSnapshot> = {}
+): SurgeonPerformanceSnapshot {
   return {
     surgeonId,
     surgeonName: "Dr Seetal",

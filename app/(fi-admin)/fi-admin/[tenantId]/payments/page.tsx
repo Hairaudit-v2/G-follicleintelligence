@@ -58,16 +58,19 @@ export default async function TenantPaymentsInboxPage({
       <div className="mx-auto max-w-2xl px-4 py-10 text-sm text-slate-300">
         <h1 className="text-lg font-semibold text-slate-100">Take payment</h1>
         <p className="mt-2 text-slate-400">
-          The online payments inbox is not enabled for this clinic deployment
-          (<code className="rounded bg-white/[0.06] px-1">FI_PAYMENTS_ENABLED</code> is off).
+          The online payments inbox is not enabled for this clinic deployment (
+          <code className="rounded bg-white/[0.06] px-1">FI_PAYMENTS_ENABLED</code> is off).
         </p>
         <p className="mt-3 text-slate-400">
           Record deposits and balances under{" "}
-          <Link href={moneyHref} className="font-medium text-sky-300 underline-offset-2 hover:underline">
+          <Link
+            href={moneyHref}
+            className="font-medium text-sky-300 underline-offset-2 hover:underline"
+          >
             Money
           </Link>
-          . Staff should treat Money as the single finance workspace until card checkout is
-          switched on by an administrator.
+          . Staff should treat Money as the single finance workspace until card checkout is switched
+          on by an administrator.
         </p>
         <p className="mt-6">
           <Link

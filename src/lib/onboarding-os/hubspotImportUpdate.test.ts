@@ -151,7 +151,9 @@ describe("createFiLeadFromHubspotContact existing mapping update", () => {
     assert.ok(updates.some((u) => u.table === "fi_crm_leads" && u.payload.summary));
     assert.ok(
       updates.some(
-        (u) => u.table === "fi_external_hubspot_contact_staging" && u.payload.import_status === "imported"
+        (u) =>
+          u.table === "fi_external_hubspot_contact_staging" &&
+          u.payload.import_status === "imported"
       )
     );
   });

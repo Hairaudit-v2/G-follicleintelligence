@@ -11,10 +11,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  completeCrmTaskAction,
-  crmMoveLeadStageAction,
-} from "@/lib/actions/fi-crm-actions";
+import { completeCrmTaskAction, crmMoveLeadStageAction } from "@/lib/actions/fi-crm-actions";
 import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
 import { useCrmLeadSlideOverOptional } from "@/src/components/fi/crm/LeadSlideOver";
 import {
@@ -105,7 +102,10 @@ export type PipelineWorkspaceProps = {
   desktopDragFeatureEnabled?: boolean;
 };
 
-function logPipelineIdentityMismatch(shell: PipelinePresentation, full: PipelinePresentation): void {
+function logPipelineIdentityMismatch(
+  shell: PipelinePresentation,
+  full: PipelinePresentation
+): void {
   const identity = comparePipelineTierIdentity(shell, full);
   if (identity.ok) return;
   // IDs/counts only — no PHI, no staff-facing lead lists.
@@ -173,9 +173,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   const refreshFnRef = useRef(props.onRefreshPresentation);
   refreshFnRef.current = props.onRefreshPresentation;
 
-  const coordinatorRef = useRef<ReturnType<typeof createPipelineRefreshCoordinator> | null>(
-    null
-  );
+  const coordinatorRef = useRef<ReturnType<typeof createPipelineRefreshCoordinator> | null>(null);
   if (!coordinatorRef.current) {
     coordinatorRef.current = createPipelineRefreshCoordinator(async () => {
       const fn = refreshFnRef.current;
@@ -298,8 +296,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   const nowMs = Date.parse(presentation.generatedAt) || Date.now();
 
   const opsApplied = useMemo(() => {
-    const lifecycleCol =
-      filters.staffColumnIds.length === 1 ? filters.staffColumnIds[0]! : null;
+    const lifecycleCol = filters.staffColumnIds.length === 1 ? filters.staffColumnIds[0]! : null;
     return applyPipelineOpsToPresentation(
       presentation,
       {
@@ -331,10 +328,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
   );
 
   const inactiveCards = useMemo(
-    () =>
-      view === "inactive_review"
-        ? collectInactiveReviewCards(presentation, nowMs, 30)
-        : [],
+    () => (view === "inactive_review" ? collectInactiveReviewCards(presentation, nowMs, 30) : []),
     [view, presentation, nowMs]
   );
 
@@ -355,9 +349,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
 
   const focusLead = (leadId: string) => {
     window.setTimeout(() => {
-      const el = document.querySelector<HTMLElement>(
-        `[data-lead-id="${CSS.escape(leadId)}"]`
-      );
+      const el = document.querySelector<HTMLElement>(`[data-lead-id="${CSS.escape(leadId)}"]`);
       el?.focus?.();
       el?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
     }, 50);
@@ -383,8 +375,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
     setBusyLeadId(card.leadId);
     try {
       const mover =
-        props.moveLeadStage ??
-        (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
+        props.moveLeadStage ?? (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
       const result = await mover(tenantId, card.leadId, {
         toStageId: resolved.stageId,
         source: "pipeline_workspace",
@@ -394,8 +385,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
         return;
       }
       await refresh();
-      const label =
-        PIPELINE_STAFF_COLUMNS.find((c) => c.id === columnId)?.label ?? columnId;
+      const label = PIPELINE_STAFF_COLUMNS.find((c) => c.id === columnId)?.label ?? columnId;
       announce(`Lead moved to ${label}.`);
       focusLead(card.leadId);
     } finally {
@@ -484,8 +474,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
           return;
         }
         const mover =
-          props.moveLeadStage ??
-          (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
+          props.moveLeadStage ?? (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
         const result = await mover(tenantId, card.leadId, {
           toStageId: lost.id,
           reason: reason.trim() || "Marked lost from Pipeline",
@@ -567,8 +556,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
       setBusyLeadId(card.leadId);
       try {
         const mover =
-          props.moveLeadStage ??
-          (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
+          props.moveLeadStage ?? (async (tid, lid, body) => crmMoveLeadStageAction(tid, lid, body));
         const result = await mover(tenantId, card.leadId, {
           toStageId: intent.toStageId,
           source: "pipeline_workspace",
@@ -578,8 +566,7 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
           return;
         }
         await refresh();
-        const label =
-          PIPELINE_STAFF_COLUMNS.find((c) => c.id === toColumnId)?.label ?? toColumnId;
+        const label = PIPELINE_STAFF_COLUMNS.find((c) => c.id === toColumnId)?.label ?? toColumnId;
         announce(`Lead moved to ${label}.`);
         focusLead(card.leadId);
       } finally {
@@ -666,13 +653,11 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
                   className="rounded-xl border border-white/[0.1] bg-[#0b1220]/90 p-3"
                   data-lead-id={card.leadId}
                 >
-                  <p className="text-sm font-semibold text-slate-100">
-                    {card.person.displayName}
-                  </p>
+                  <p className="text-sm font-semibold text-slate-100">{card.person.displayName}</p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {card.stage.staffColumnLabel}
                     {" · "}
-                    {card.owner.unassigned ? "Unassigned" : card.owner.displayName ?? "Owner"}
+                    {card.owner.unassigned ? "Unassigned" : (card.owner.displayName ?? "Owner")}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
@@ -755,27 +740,21 @@ export function PipelineWorkspace(props: PipelineWorkspaceProps) {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={
-            confirm.action === "mark_lost" ? "Confirm mark lost" : "Confirm convert"
-          }
+          aria-label={confirm.action === "mark_lost" ? "Confirm mark lost" : "Confirm convert"}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
         >
           <div className="w-full max-w-md rounded-2xl border border-white/[0.12] bg-[#0f1629] p-5 shadow-2xl">
             <h2 className="text-lg font-semibold text-slate-50">
               {confirm.action === "mark_lost" ? "Mark as lost?" : "Convert this lead?"}
             </h2>
-            <p className="mt-2 text-sm text-slate-400">
-              {confirm.card.person.displayName}
-            </p>
+            <p className="mt-2 text-sm text-slate-400">{confirm.card.person.displayName}</p>
             {confirm.action === "mark_lost" ? (
               <label className="mt-4 block text-sm text-slate-300">
                 Reason
                 <input
                   className="mt-1 w-full min-h-11 rounded-xl border border-white/[0.12] bg-black/30 px-3 text-slate-100"
                   value={confirm.reason}
-                  onChange={(e) =>
-                    setConfirm({ ...confirm, reason: e.target.value })
-                  }
+                  onChange={(e) => setConfirm({ ...confirm, reason: e.target.value })}
                 />
               </label>
             ) : (

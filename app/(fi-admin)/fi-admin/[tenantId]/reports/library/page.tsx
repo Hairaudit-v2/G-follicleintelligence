@@ -73,10 +73,7 @@ export default async function FiAdminReportsLibraryPage({
       loadRevenueAttributionFilterOptions(tid),
       listReportRunsForTenant(tid, { limit: 20 }),
     ]);
-    const procedureSet = new Set([
-      ...surgeryOpts.procedureTypes,
-      ...attrOpts.procedureTypes,
-    ]);
+    const procedureSet = new Set([...surgeryOpts.procedureTypes, ...attrOpts.procedureTypes]);
     filterOptions = {
       procedureTypes: [...procedureSet].filter(Boolean).sort(),
       attributionSources: attrOpts.sources.filter(Boolean),

@@ -57,10 +57,7 @@ function buildFallbackHliResult(input: {
   reason: string;
 }): FiAiImageClassificationResult {
   const hint = input.request.canonical_photo_category ?? "unknown";
-  const mapped = mapExternalLabelToPhotoCategoryV1(
-    hint,
-    input.request.legacy_upload_type ?? null
-  );
+  const mapped = mapExternalLabelToPhotoCategoryV1(hint, input.request.legacy_upload_type ?? null);
 
   return {
     category: mapped.category === "front" ? "front" : "unknown",

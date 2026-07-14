@@ -44,7 +44,9 @@ export type RosterGenerationRunResult = GenerateRosterFromStandardHoursResult & 
   validationErrors?: string[];
 };
 
-function mapShiftRow(row: Record<string, unknown>): FiStaffShiftRow & { shift_source?: StandardHoursShiftSource } {
+function mapShiftRow(
+  row: Record<string, unknown>
+): FiStaffShiftRow & { shift_source?: StandardHoursShiftSource } {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
@@ -109,7 +111,8 @@ export async function loadAvailabilityBlocksInRange(
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => ({
-    block_type: (r as Record<string, unknown>).block_type as import("@/src/lib/workforce-os/workforceRosteringEngine").AvailabilityBlockType,
+    block_type: (r as Record<string, unknown>)
+      .block_type as import("@/src/lib/workforce-os/workforceRosteringEngine").AvailabilityBlockType,
     starts_at: String((r as Record<string, unknown>).starts_at),
     ends_at: String((r as Record<string, unknown>).ends_at),
     status: String((r as Record<string, unknown>).status),
@@ -279,12 +282,15 @@ export async function applyRosterGenerationPlan(input: {
   }
 
   const supabase = input.client ?? supabaseAdmin();
-  const { data: rpcData, error: rpcErr } = await supabase.rpc("fi_replace_generated_roster_shifts", {
-    p_tenant_id: input.tenantId,
-    p_shift_ids_to_cancel: input.plan.shiftIdsToReplace,
-    p_new_shifts: mapRosterShiftCandidatesToRpcRows(input.plan.candidates, input.createdBy),
-    p_created_by: input.createdBy?.trim() || null,
-  });
+  const { data: rpcData, error: rpcErr } = await supabase.rpc(
+    "fi_replace_generated_roster_shifts",
+    {
+      p_tenant_id: input.tenantId,
+      p_shift_ids_to_cancel: input.plan.shiftIdsToReplace,
+      p_new_shifts: mapRosterShiftCandidatesToRpcRows(input.plan.candidates, input.createdBy),
+      p_created_by: input.createdBy?.trim() || null,
+    }
+  );
 
   if (rpcErr || !(rpcData as { ok?: boolean } | null)?.ok) {
     return {
@@ -321,7 +327,11 @@ export async function copyPreviousRosterPeriodForTenant(
   const cadence = input.cadence ?? rosterPolicy.rosterCadence;
   const periodStart = input.targetPeriodStartIso.slice(0, 10);
   const dayCount = rosterPeriodDayCount(periodStart, cadence);
-  const range = rosterDateRangeFromPeriodStart(periodStart, cadence, rosterPolicy.rosterWeekStartDay);
+  const range = rosterDateRangeFromPeriodStart(
+    periodStart,
+    cadence,
+    rosterPolicy.rosterWeekStartDay
+  );
   const prevStart = new Date(range.startsAt);
   prevStart.setUTCDate(prevStart.getUTCDate() - dayCount);
   const prevEnd = new Date(range.startsAt);

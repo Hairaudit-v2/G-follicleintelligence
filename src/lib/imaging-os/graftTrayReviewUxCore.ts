@@ -119,9 +119,7 @@ export function graftTrayAiHasLowConfidenceSignal(input: {
   return input.confidence_band === "low" || input.image_quality === "insufficient";
 }
 
-export function graftTrayAiHasMismatchSignal(
-  mismatch_band: GraftTrayMismatchBand
-): boolean {
+export function graftTrayAiHasMismatchSignal(mismatch_band: GraftTrayMismatchBand): boolean {
   return (
     mismatch_band === "minor_mismatch" ||
     mismatch_band === "material_mismatch" ||
@@ -254,7 +252,11 @@ export function parseGraftTrayReviewAuditTrail(value: unknown): GraftTrayAiRevie
     const decision = row.decision;
     const reviewStatus = row.review_status;
     const reviewedAt = row.reviewed_at;
-    if (typeof decision !== "string" || typeof reviewStatus !== "string" || typeof reviewedAt !== "string") {
+    if (
+      typeof decision !== "string" ||
+      typeof reviewStatus !== "string" ||
+      typeof reviewedAt !== "string"
+    ) {
       continue;
     }
     entries.push({

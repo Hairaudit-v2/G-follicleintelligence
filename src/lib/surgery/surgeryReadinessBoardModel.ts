@@ -54,8 +54,7 @@ export const SURGERY_READINESS_ISSUE_LABEL: Record<SurgeryReadinessIssueKind, st
   abnormal_pathology: "Pathology markers flagged abnormal",
   missing_consent_proxy: "Consultation / quote acceptance (consent proxy)",
   missing_surgery_plan: "Surgery plan incomplete or missing",
-  no_payment_tracking:
-    "No surgery payment record yet (manual tracking — not bank/card proof)",
+  no_payment_tracking: "No surgery payment record yet (manual tracking — not bank/card proof)",
   surgery_deposit_pending: "Recorded deposit not satisfied (manual tracking — verify funds)",
   booking_unconfirmed: "Booking not confirmed",
   case_on_hold: "Surgery plan on hold",

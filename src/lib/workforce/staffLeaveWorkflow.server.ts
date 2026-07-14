@@ -113,16 +113,14 @@ export async function setStaffMaternityLeave(
 
   const member = await loadStaffMemberLifecycle(tid, staffMemberId, supabase);
   if (!member) throw new Error("Staff member not found.");
-  if (!member.fi_staff_id) throw new Error("Staff member is not linked to fi_staff — cannot set leave.");
+  if (!member.fi_staff_id)
+    throw new Error("Staff member is not linked to fi_staff — cannot set leave.");
 
   if (Date.parse(input.expectedReturnDate) < Date.parse(input.startDate)) {
     throw new Error("Expected return date must be on or after the start date.");
   }
 
-  const { startsAt, endsAt } = localDateToLeaveRangeIso(
-    input.startDate,
-    input.expectedReturnDate
-  );
+  const { startsAt, endsAt } = localDateToLeaveRangeIso(input.startDate, input.expectedReturnDate);
 
   const reasonParts = ["maternity_leave"];
   if (input.notes?.trim()) reasonParts.push(input.notes.trim());

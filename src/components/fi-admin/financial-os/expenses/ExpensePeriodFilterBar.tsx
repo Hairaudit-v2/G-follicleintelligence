@@ -43,7 +43,9 @@ export function ExpensePeriodFilterBar(props: {
   }
 
   return (
-    <div className={`${financialOsClasses.formPanel} flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end`}>
+    <div
+      className={`${financialOsClasses.formPanel} flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end`}
+    >
       <label className={financialOsClasses.formLabel}>
         From
         <input

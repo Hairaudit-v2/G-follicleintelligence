@@ -11,7 +11,9 @@ import {
   getCrmShellSessionIfAllowed,
 } from "@/src/lib/crm/crmShellAccess";
 
-function pinToSession(pin: Awaited<ReturnType<typeof getStaffPinClinicSessionIfValid>>): ClinicFloorSession | null {
+function pinToSession(
+  pin: Awaited<ReturnType<typeof getStaffPinClinicSessionIfValid>>
+): ClinicFloorSession | null {
   if (!pin) return null;
   return {
     authUserId: "",

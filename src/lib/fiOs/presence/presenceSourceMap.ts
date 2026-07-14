@@ -3,11 +3,7 @@
  * Maps operational signals to presence derivability. No duplicate attendance system.
  */
 
-export type PresenceSourceStatus =
-  | "implemented"
-  | "derived"
-  | "future"
-  | "excluded";
+export type PresenceSourceStatus = "implemented" | "derived" | "future" | "excluded";
 
 export type PresenceSourceEntry = {
   key: string;
@@ -148,9 +144,7 @@ export function getPresenceSourcesByStatus(
 }
 
 export function getImplementedPresenceSources(): readonly PresenceSourceEntry[] {
-  return PRESENCE_SOURCE_MAP.filter(
-    (e) => e.status === "implemented" || e.status === "derived"
-  );
+  return PRESENCE_SOURCE_MAP.filter((e) => e.status === "implemented" || e.status === "derived");
 }
 
 export function isPresenceSourceExcluded(key: string): boolean {

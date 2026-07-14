@@ -159,19 +159,14 @@ export async function staffPinLogoutAction(
     const member = await getFiTenantMemberSessionIfAllowed(tenantId);
     const { getStaffPinClinicSessionIfValid, endStaffPinClinicSession } =
       await import("@/src/lib/staffPin/staffPinSession.server");
-    const { clockOutFromPinLogout } =
-      await import("@/src/lib/workforce/staffTimeClock.server");
+    const { clockOutFromPinLogout } = await import("@/src/lib/workforce/staffTimeClock.server");
     const session = await getStaffPinClinicSessionIfValid(tenantId.trim());
     if (session) {
       await clockOutFromPinLogout({
         tenantId: session.tenantId,
         fiStaffId: session.staffId,
       });
-      await endStaffPinClinicSession(
-        session.sessionToken,
-        session.tenantId,
-        session.staffId
-      );
+      await endStaffPinClinicSession(session.sessionToken, session.tenantId, session.staffId);
     }
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}`);

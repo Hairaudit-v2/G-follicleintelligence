@@ -96,7 +96,12 @@ export type CalendarOsDayPlacement = {
   heightPx: number;
 };
 
-export type CalendarOsWorkforceBlockKind = "rdo" | "leave" | "lunch" | "unavailable" | "working_hours";
+export type CalendarOsWorkforceBlockKind =
+  | "rdo"
+  | "leave"
+  | "lunch"
+  | "unavailable"
+  | "working_hours";
 
 export type CalendarOsWorkforceBlock = {
   id: string;
@@ -171,11 +176,7 @@ export function bookingMatchesCalendarOsViewMode(
   const type = booking.booking_type.trim().toLowerCase();
   switch (mode) {
     case "consultations":
-      return (
-        type.includes("consultation") ||
-        type === "trichology" ||
-        type === "review"
-      );
+      return type.includes("consultation") || type === "trichology" || type === "review";
     case "prp":
       return type === "prp" || type === "prf" || type === "mesotherapy" || type === "exosomes";
     case "surgery":
@@ -243,9 +244,7 @@ function columnToResourceRow(
   const staffId = col.staffId ?? (col.id.startsWith("s:") ? col.id.slice(2) : undefined);
   const staff = staffId ? staffById?.get(staffId) : undefined;
   const roleGroup =
-    col.kind === "fi_staff" && staff
-      ? mapStaffRoleToCalendarOsGroup(staff.staff_role)
-      : "doctors";
+    col.kind === "fi_staff" && staff ? mapStaffRoleToCalendarOsGroup(staff.staff_role) : "doctors";
   return {
     id: col.id,
     kind: col.kind,
@@ -339,8 +338,11 @@ export function groupCalendarOsResourceRowsByRole(
     grouped.set(row.roleGroup, list);
   }
 
-  const out: { group: CalendarOsResourceRoleGroup; label: string; rows: CalendarOsResourceRow[] }[] =
-    [];
+  const out: {
+    group: CalendarOsResourceRoleGroup;
+    label: string;
+    rows: CalendarOsResourceRow[];
+  }[] = [];
   for (const group of CALENDAR_OS_RESOURCE_ROLE_GROUPS) {
     const list = grouped.get(group);
     if (!list?.length) continue;
@@ -354,7 +356,9 @@ export function groupCalendarOsResourceRowsByRole(
   return out;
 }
 
-export function mapBookingsToWeekResourceCells(input: CalendarOsResourceModelInput): CalendarOsWeekCell[] {
+export function mapBookingsToWeekResourceCells(
+  input: CalendarOsResourceModelInput
+): CalendarOsWeekCell[] {
   const visibleIds = new Set(input.resourceColumns.map((c) => c.id));
   const filtered = filterBookingsForCalendarOsView(input.bookings, input.query);
   const cellMap = new Map<string, CalendarOsWeekCell>();

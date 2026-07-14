@@ -21,11 +21,7 @@ export type ImagingAiReviewOpsMutationResult = {
   newJobId: string | null;
 };
 
-async function loadJobOrThrow(
-  client: SupabaseClient,
-  tenantId: string,
-  jobId: string
-) {
+async function loadJobOrThrow(client: SupabaseClient, tenantId: string, jobId: string) {
   const { data, error } = await client
     .from("fi_imaging_ai_analysis_jobs")
     .select("*")

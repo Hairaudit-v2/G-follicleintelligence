@@ -25,7 +25,10 @@ import {
   runPathologyExtractionOnPdf,
   setPathologyExtractionProviderForTests,
 } from "@/src/lib/pathology/pathologyExtractionWorker.server";
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 
 const TENANT = "tenant-1";
 const OTHER_TENANT = "tenant-2";
@@ -46,7 +49,9 @@ type MockState = {
   env: Record<string, string | undefined>;
 };
 
-function inboundRow(partial: Partial<PathologyInboundDocumentRow> = {}): PathologyInboundDocumentRow {
+function inboundRow(
+  partial: Partial<PathologyInboundDocumentRow> = {}
+): PathologyInboundDocumentRow {
   return {
     id: DOC,
     tenant_id: TENANT,
@@ -119,8 +124,10 @@ function createMockSupabase(state: MockState): SupabaseClient {
                     return {
                       maybeSingle: async () => {
                         if (all.tenant_id === OTHER_TENANT) return { data: null, error: null };
-                        if (all.id && all.id !== state.inbound.id) return { data: null, error: null };
-                        if (all.tenant_id && all.tenant_id !== TENANT) return { data: null, error: null };
+                        if (all.id && all.id !== state.inbound.id)
+                          return { data: null, error: null };
+                        if (all.tenant_id && all.tenant_id !== TENANT)
+                          return { data: null, error: null };
                         return { data: state.inbound, error: null };
                       },
                       single: async () => ({ data: state.inbound, error: null }),
@@ -137,7 +144,9 @@ function createMockSupabase(state: MockState): SupabaseClient {
             state.inbound = inboundRow({
               id: DOC,
               tenant_id: String(payload.tenant_id),
-              match_status: String(payload.match_status || "pending") as PathologyInboundDocumentRow["match_status"],
+              match_status: String(
+                payload.match_status || "pending"
+              ) as PathologyInboundDocumentRow["match_status"],
             });
             return {
               select() {
@@ -150,7 +159,10 @@ function createMockSupabase(state: MockState): SupabaseClient {
               eq(_c: string, _v: string) {
                 return {
                   eq(_c2: string, _v2: string) {
-                    state.inbound = { ...state.inbound, ...(patch as Partial<PathologyInboundDocumentRow>) };
+                    state.inbound = {
+                      ...state.inbound,
+                      ...(patch as Partial<PathologyInboundDocumentRow>),
+                    };
                     return {
                       select() {
                         return { single: async () => ({ data: state.inbound, error: null }) };
@@ -164,7 +176,10 @@ function createMockSupabase(state: MockState): SupabaseClient {
                     return { single: async () => ({ data: state.inbound, error: null }) };
                   },
                   then(onFulfilled: (v: unknown) => unknown) {
-                    state.inbound = { ...state.inbound, ...(patch as Partial<PathologyInboundDocumentRow>) };
+                    state.inbound = {
+                      ...state.inbound,
+                      ...(patch as Partial<PathologyInboundDocumentRow>),
+                    };
                     return Promise.resolve({ error: null }).then(onFulfilled);
                   },
                 };
@@ -222,7 +237,8 @@ function createMockSupabase(state: MockState): SupabaseClient {
             const row = jobRow({
               id,
               tenant_id: String(payload.tenant_id),
-              inbound_document_id: payload.inbound_document_id != null ? String(payload.inbound_document_id) : null,
+              inbound_document_id:
+                payload.inbound_document_id != null ? String(payload.inbound_document_id) : null,
               idempotency_key: String(payload.idempotency_key),
               status: String(payload.status ?? "queued") as PathologyExtractionJobRow["status"],
             });
@@ -310,7 +326,9 @@ function createMockSupabase(state: MockState): SupabaseClient {
                   },
                   in(_c: string, vals: string[]) {
                     return Promise.resolve({
-                      data: vals.filter((id) => state.patients.has(id)).map((id) => ({ id, person_id: "person-1" })),
+                      data: vals
+                        .filter((id) => state.patients.has(id))
+                        .map((id) => ({ id, person_id: "person-1" })),
                       error: null,
                     });
                   },
@@ -329,7 +347,12 @@ function createMockSupabase(state: MockState): SupabaseClient {
                 return {
                   in() {
                     return Promise.resolve({
-                      data: [{ id: "person-1", metadata: { hubspot: { first_name: "Jane", last_name: "Doe" } } }],
+                      data: [
+                        {
+                          id: "person-1",
+                          metadata: { hubspot: { first_name: "Jane", last_name: "Doe" } },
+                        },
+                      ],
                       error: null,
                     });
                   },
@@ -377,7 +400,10 @@ function createMockSupabase(state: MockState): SupabaseClient {
                         return {
                           single: async () => {
                             if (!state.result) return { data: null, error: { message: "missing" } };
-                            state.result = { ...state.result, ...(patch as Partial<PathologyResultRow>) };
+                            state.result = {
+                              ...state.result,
+                              ...(patch as Partial<PathologyResultRow>),
+                            };
                             return { data: state.result, error: null };
                           },
                         };
@@ -428,7 +454,11 @@ function createMockSupabase(state: MockState): SupabaseClient {
       if (table === "fi_crm_activity_events") {
         return {
           insert() {
-            return { select() { return { single: async () => ({ data: { id: "evt-1" }, error: null }) }; } };
+            return {
+              select() {
+                return { single: async () => ({ data: { id: "evt-1" }, error: null }) };
+              },
+            };
           },
         };
       }
@@ -783,7 +813,12 @@ test("upload enqueues extraction when flag enabled", async () => {
     result: null,
     items: [],
     patients: new Set([PATIENT]),
-    storage: new Map([[pdfPath, new TextEncoder().encode(`FI_PATHOLOGY_MARKERS_JSON=${JSON.stringify(SAMPLE_MARKERS)}`)]]),
+    storage: new Map([
+      [
+        pdfPath,
+        new TextEncoder().encode(`FI_PATHOLOGY_MARKERS_JSON=${JSON.stringify(SAMPLE_MARKERS)}`),
+      ],
+    ]),
     env: {},
   };
   const client = createMockSupabase(state);

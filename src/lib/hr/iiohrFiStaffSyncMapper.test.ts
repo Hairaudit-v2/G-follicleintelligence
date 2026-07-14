@@ -53,7 +53,10 @@ test("metadata_snapshot is schema v1 and bounded to the allowlisted keys", () =>
   const ms = row.metadata_snapshot;
   assert.ok(ms && typeof ms === "object");
   for (const k of Object.keys(ms)) {
-    assert.ok(IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.has(k), `row.metadata_snapshot leaked key: ${k}`);
+    assert.ok(
+      IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.has(k),
+      `row.metadata_snapshot leaked key: ${k}`
+    );
   }
 });
 

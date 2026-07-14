@@ -55,7 +55,12 @@ test("validation summary classifies fail if any critical fail exists", () => {
 test("validation summary classifies watch if warnings only", () => {
   const results = [
     check("feed.missing_id", "refresh_behaviour", "pass"),
-    check("workspace.count_bounded", "workspace_sync", "watch", "Workspace signal count 60 exceeds 50."),
+    check(
+      "workspace.count_bounded",
+      "workspace_sync",
+      "watch",
+      "Workspace signal count 60 exceeds 50."
+    ),
     check("rollout.realtime_polling_fallback", "rollout_flag_consistency", "watch"),
   ];
   assert.equal(classifyTodaySignalValidationStatus(results), "watch");

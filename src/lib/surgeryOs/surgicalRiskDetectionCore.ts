@@ -81,7 +81,8 @@ export function buildSurgicalRiskDetection(
         extraction.efficiencyDeclinePercent >= thresholds.extractionSlowingDeclinePercent * 1.5
           ? "critical"
           : "warning",
-      recommendation: "Consider operator rotation, break, or technique review to restore extraction pace.",
+      recommendation:
+        "Consider operator rotation, break, or technique review to restore extraction pace.",
     });
   }
 
@@ -89,7 +90,8 @@ export function buildSurgicalRiskDetection(
     detectedRisks.push({
       title: "Possible operator fatigue",
       severity: "warning",
-      recommendation: "Schedule a supervised break or rotate extraction staff before quality declines further.",
+      recommendation:
+        "Schedule a supervised break or rotate extraction staff before quality declines further.",
     });
   }
 
@@ -114,23 +116,28 @@ export function buildSurgicalRiskDetection(
     detectedRisks.push({
       title: `Procedure running ${behindSchedule.elapsedMinutes} minutes behind`,
       severity: behindSchedule.severity === "critical" ? "critical" : "warning",
-      recommendation: "Reconcile theatre pacing with coordinator and adjust downstream schedule commitments.",
+      recommendation:
+        "Reconcile theatre pacing with coordinator and adjust downstream schedule commitments.",
     });
   }
 
   const graftIntel = input.graftIntelligence;
   if (graftIntel) {
     const inconsistencyWarnings = graftIntel.warnings.filter((w) =>
-      ["composition_mismatch", "remaining_unaccounted", "over_implantation", "reconciliation_incomplete"].includes(
-        w.kind
-      )
+      [
+        "composition_mismatch",
+        "remaining_unaccounted",
+        "over_implantation",
+        "reconciliation_incomplete",
+      ].includes(w.kind)
     );
     if (inconsistencyWarnings.length > 0) {
       const critical = inconsistencyWarnings.some((w) => w.severity === "critical");
       detectedRisks.push({
         title: "Graft count inconsistency",
         severity: critical ? "critical" : "warning",
-        recommendation: "Pause implantation until trays are reconciled and graft totals are verified.",
+        recommendation:
+          "Pause implantation until trays are reconciled and graft totals are verified.",
       });
     }
   }
@@ -156,8 +163,10 @@ export function buildSurgicalRiskDetection(
       if (delayMinutes >= thresholds.implantationDelayMinutes) {
         detectedRisks.push({
           title: "Prolonged implantation delay",
-          severity: delayMinutes >= thresholds.implantationDelayMinutes * 2 ? "critical" : "warning",
-          recommendation: "Confirm graft storage conditions and begin implantation or document clinical hold reason.",
+          severity:
+            delayMinutes >= thresholds.implantationDelayMinutes * 2 ? "critical" : "warning",
+          recommendation:
+            "Confirm graft storage conditions and begin implantation or document clinical hold reason.",
         });
       }
     } else if (Number.isFinite(extractionMs) && Number.isFinite(implantationMs)) {
@@ -166,7 +175,8 @@ export function buildSurgicalRiskDetection(
         detectedRisks.push({
           title: "Prolonged implantation delay",
           severity: gapMinutes >= thresholds.implantationDelayMinutes * 2 ? "critical" : "warning",
-          recommendation: "Review out-of-body time protocol and graft hydration between extraction and implantation.",
+          recommendation:
+            "Review out-of-body time protocol and graft hydration between extraction and implantation.",
         });
       }
     }
@@ -182,7 +192,8 @@ export function buildSurgicalRiskDetection(
     detectedRisks.push({
       title: "Implantation velocity below target",
       severity: "warning",
-      recommendation: "Assess recipient site workflow, team allocation, and graft placement cadence.",
+      recommendation:
+        "Assess recipient site workflow, team allocation, and graft placement cadence.",
     });
   }
 

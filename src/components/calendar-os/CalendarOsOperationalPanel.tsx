@@ -57,7 +57,12 @@ function PanelCard({ icon, label, value, tone = "default", detail, compact }: Pa
         {value}
       </p>
       {detail && !compact ? (
-        <p className={cn("truncate text-slate-500", compact ? "mt-0 text-[9px]" : "mt-0.5 text-[10px]")}>
+        <p
+          className={cn(
+            "truncate text-slate-500",
+            compact ? "mt-0 text-[9px]" : "mt-0.5 text-[10px]"
+          )}
+        >
           {detail}
         </p>
       ) : null}
@@ -95,12 +100,7 @@ export function CalendarOsOperationalPanel({
     summary.staffCoverageWarnings.length;
 
   const metricsGrid = (
-    <div
-      className={cn(
-        "grid grid-cols-4 gap-1 lg:grid-cols-8",
-        compact ? "p-1.5" : "p-2"
-      )}
-    >
+    <div className={cn("grid grid-cols-4 gap-1 lg:grid-cols-8", compact ? "p-1.5" : "p-2")}>
       <PanelCard
         compact={compact}
         icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
@@ -158,7 +158,9 @@ export function CalendarOsOperationalPanel({
         value={summary.staffCoverageWarnings.length}
         detail={summary.staffCoverageWarnings.length > 0 ? "Warnings active" : "Roster OK"}
         tone={
-          summary.staffCoverageWarnings.some((w) => w.severity === "critical") ? "warning" : "default"
+          summary.staffCoverageWarnings.some((w) => w.severity === "critical")
+            ? "warning"
+            : "default"
         }
       />
     </div>
@@ -201,9 +203,11 @@ export function CalendarOsOperationalPanel({
           onClick={() => setTabletMetricsOpen((v) => !v)}
         >
           <span className="truncate text-[11px] text-slate-300">
-            <span className="font-semibold text-slate-100">{summary.todaysCapacity.booked}</span> booked
+            <span className="font-semibold text-slate-100">{summary.todaysCapacity.booked}</span>{" "}
+            booked
             {" · "}
-            <span className="font-semibold text-slate-100">{summary.unassignedBookings}</span> unassigned
+            <span className="font-semibold text-slate-100">{summary.unassignedBookings}</span>{" "}
+            unassigned
             {warningCount > 0 ? (
               <>
                 {" · "}

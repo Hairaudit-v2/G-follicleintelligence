@@ -246,7 +246,9 @@ export function buildLeadFlowHealthCards(
       label: "Follow-ups due today",
       value: String(followUpsToday),
       detail:
-        followUpsToday > 0 ? "Follow-up tasks due for attention today" : "No follow-up tasks due today",
+        followUpsToday > 0
+          ? "Follow-up tasks due for attention today"
+          : "No follow-up tasks due today",
       href: `${base}/crm?view=list`,
     },
     {

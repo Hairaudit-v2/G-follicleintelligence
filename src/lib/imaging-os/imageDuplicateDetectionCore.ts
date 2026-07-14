@@ -55,7 +55,12 @@ export function detectDuplicateInSessionFingerprints(input: {
         return { duplicate_status: "possible_duplicate", matched_image_id: existing.image_id };
       }
     }
-    if (slot && existing.protocol_slot_slug?.trim() === slot && contentHash && existing.content_hash) {
+    if (
+      slot &&
+      existing.protocol_slot_slug?.trim() === slot &&
+      contentHash &&
+      existing.content_hash
+    ) {
       return { duplicate_status: "possible_duplicate", matched_image_id: existing.image_id };
     }
   }

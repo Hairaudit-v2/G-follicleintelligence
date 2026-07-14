@@ -25,8 +25,7 @@ export const SURGERY_IMAGING_INTELLIGENCE_GROUPS = [
   "follow_up",
 ] as const;
 
-export type SurgeryImagingIntelligenceGroup =
-  (typeof SURGERY_IMAGING_INTELLIGENCE_GROUPS)[number];
+export type SurgeryImagingIntelligenceGroup = (typeof SURGERY_IMAGING_INTELLIGENCE_GROUPS)[number];
 
 export const SURGERY_IMAGING_GROUP_LABELS: Record<SurgeryImagingIntelligenceGroup, string> = {
   baseline_pre_op: "Baseline / pre-op",
@@ -126,7 +125,10 @@ function readString(value: unknown): string | null {
 }
 
 function normalizeViewKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function resolveCanonicalCategory(input: SurgeryImagingIntelligenceImageInput): string {
@@ -148,7 +150,9 @@ function resolveCanonicalCategory(input: SurgeryImagingIntelligenceImageInput): 
   return "unknown";
 }
 
-function resolveSurgicalEvent(input: SurgeryImagingIntelligenceImageInput): ImagingOsSurgicalImageEventType {
+function resolveSurgicalEvent(
+  input: SurgeryImagingIntelligenceImageInput
+): ImagingOsSurgicalImageEventType {
   const explicit = readString(input.surgicalEvent);
   if (explicit) return normalizeSurgicalImageEventType(explicit);
 
@@ -231,7 +235,12 @@ function isImageUsable(input: SurgeryImagingIntelligenceImageInput): boolean {
   if (input.isClinicallyUsable === false) return false;
   const quality = normalizeViewKey(readString(input.qualityStatus) ?? "");
   if (!quality || quality === "not_evaluated" || quality === "unknown") return true;
-  return quality === "excellent" || quality === "acceptable" || quality === "suitable" || quality === "pass";
+  return (
+    quality === "excellent" ||
+    quality === "acceptable" ||
+    quality === "suitable" ||
+    quality === "pass"
+  );
 }
 
 function isPoorQuality(input: SurgeryImagingIntelligenceImageInput): boolean {
@@ -336,9 +345,7 @@ export function buildSurgeryImagingAuditReadiness(input: {
   const dueMonths = input.followUpDueAfterMonths ?? 10;
   const referenceDate = input.referenceDate ?? new Date().toISOString();
   const monthsSince =
-    input.procedureDate != null
-      ? monthsSinceProcedure(input.procedureDate, referenceDate)
-      : null;
+    input.procedureDate != null ? monthsSinceProcedure(input.procedureDate, referenceDate) : null;
   const followUpDue = monthsSince != null && monthsSince >= dueMonths;
   const followUpCapturedOrDue = followUpCaptured || followUpDue;
 
@@ -359,7 +366,10 @@ export function buildSurgeryImagingAuditReadiness(input: {
   }
 
   const beforeAfterReady =
-    baselinePresent && immediatePresent && followUpCapturedOrDue && !input.hairAuditLink.linkage_conflict;
+    baselinePresent &&
+    immediatePresent &&
+    followUpCapturedOrDue &&
+    !input.hairAuditLink.linkage_conflict;
 
   const graftAndLinkReady =
     input.hasReviewedGraftCount && hairAuditResolved && !input.hairAuditLink.linkage_conflict;
@@ -451,7 +461,10 @@ export function formatSurgeryImagingCompletenessLabel(score: number): string {
 }
 
 export function formatSurgeryImagingAuditReadinessLabel(
-  readiness: Pick<SurgeryImagingAuditReadiness, "overall_audit_ready" | "hairaudit_linkage_conflict" | "before_after_ready">
+  readiness: Pick<
+    SurgeryImagingAuditReadiness,
+    "overall_audit_ready" | "hairaudit_linkage_conflict" | "before_after_ready"
+  >
 ): string {
   if (readiness.hairaudit_linkage_conflict) return "Conflict — review";
   if (readiness.overall_audit_ready) return "Audit ready";
@@ -480,11 +493,9 @@ export function mapPatientImageRowToSurgeryImagingInput(row: {
       readString(metadata.canonical_view) ??
       readString(metadata.canonical_category) ??
       readString(row.anatomical_region),
-    surgicalEvent:
-      readString(metadata.surgical_event) ?? readString(metadata.procedure_stage),
+    surgicalEvent: readString(metadata.surgical_event) ?? readString(metadata.procedure_stage),
     procedureStage: readString(metadata.procedure_stage),
-    captureSource:
-      readString(metadata.capture_source) ?? readString(metadata.upload_source),
+    captureSource: readString(metadata.capture_source) ?? readString(metadata.upload_source),
     imageCategory: row.image_category ?? null,
     anatomicalRegion: row.anatomical_region ?? null,
     visitType: row.visit_type ?? readString(metadata.visit_type),
@@ -492,9 +503,7 @@ export function mapPatientImageRowToSurgeryImagingInput(row: {
     qualityStatus:
       readString(imagingQuality?.quality_status) ?? readString(metadata.classifier_status),
     isClinicallyUsable:
-      typeof metadata.is_clinically_usable === "boolean"
-        ? metadata.is_clinically_usable
-        : null,
+      typeof metadata.is_clinically_usable === "boolean" ? metadata.is_clinically_usable : null,
     capturedAt: readString(metadata.captured_at),
   };
 }

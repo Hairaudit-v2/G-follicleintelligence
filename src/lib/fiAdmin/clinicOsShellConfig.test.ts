@@ -53,7 +53,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.staff?.href, `${base}/staff`);
   assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
-  assert.equal(items.find((i) => i.id === "consultation-conversion-board"), undefined);
+  assert.equal(
+    items.find((i) => i.id === "consultation-conversion-board"),
+    undefined
+  );
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
   const readiness = items.find((i) => i.id === "surgery-readiness-board");
   assert.ok(readiness);
@@ -96,7 +99,10 @@ test("resolveClinicOsShellNavItems: Pipeline enabled when showCrmNav", () => {
   assert.equal(pipeline!.disabled, false);
   assert.equal(pipeline!.href, `${base}/crm`);
   assert.equal(pipeline!.label, "Pipeline");
-  assert.equal(items.find((i) => i.id === "leadflow"), undefined);
+  assert.equal(
+    items.find((i) => i.id === "leadflow"),
+    undefined
+  );
 });
 
 test("resolveClinicOsShellNavItems: Pipeline disabled without showCrmNav", () => {

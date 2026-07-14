@@ -27,10 +27,14 @@ function mapExtractionJob(row: Record<string, unknown>): PathologyExtractionJobR
     status: String(row.status) as PathologyExtractionJobRow["status"],
     provider: row.provider != null ? String(row.provider) : null,
     raw_extraction_json:
-      row.raw_extraction_json && typeof row.raw_extraction_json === "object" && !Array.isArray(row.raw_extraction_json)
+      row.raw_extraction_json &&
+      typeof row.raw_extraction_json === "object" &&
+      !Array.isArray(row.raw_extraction_json)
         ? (row.raw_extraction_json as Record<string, unknown>)
         : {},
-    normalized_items_json: Array.isArray(row.normalized_items_json) ? row.normalized_items_json : [],
+    normalized_items_json: Array.isArray(row.normalized_items_json)
+      ? row.normalized_items_json
+      : [],
     error_message: row.error_message != null ? String(row.error_message) : null,
     idempotency_key: String(row.idempotency_key),
     started_at: row.started_at != null ? String(row.started_at) : null,
@@ -38,7 +42,9 @@ function mapExtractionJob(row: Record<string, unknown>): PathologyExtractionJobR
     extracted_marker_count:
       row.extracted_marker_count != null ? Number(row.extracted_marker_count) : 0,
     skipped_marker_count: row.skipped_marker_count != null ? Number(row.skipped_marker_count) : 0,
-    review_status: String(row.review_status ?? "pending_review") as PathologyExtractionJobRow["review_status"],
+    review_status: String(
+      row.review_status ?? "pending_review"
+    ) as PathologyExtractionJobRow["review_status"],
     raw_text_preview: row.raw_text_preview != null ? String(row.raw_text_preview) : null,
     medical_intelligence_preview_json:
       row.medical_intelligence_preview_json &&
@@ -364,10 +370,7 @@ export async function runPathologyExtractionForDocument(
     client
   );
 
-  return runPathologyExtractionJob(
-    { tenantId, documentId, jobId: job.id, actingUserId },
-    client
-  );
+  return runPathologyExtractionJob({ tenantId, documentId, jobId: job.id, actingUserId }, client);
 }
 
 export async function retryPathologyExtractionJob(
@@ -422,7 +425,12 @@ export async function dismissPathologyExtractionJob(
   if (error) throw new Error(error.message);
 
   if (existing.inbound_document_id) {
-    await updateInboundExtractionStatus(supabase, tid, existing.inbound_document_id, "needs_review");
+    await updateInboundExtractionStatus(
+      supabase,
+      tid,
+      existing.inbound_document_id,
+      "needs_review"
+    );
   }
 
   return mapExtractionJob(data as Record<string, unknown>);
@@ -436,6 +444,11 @@ export async function maybeEnqueueAndRunPathologyExtractionAfterUpload(
   client?: SupabaseClient
 ): Promise<PathologyExtractionJobRow | null> {
   if (!readPathologyExtractionEnabled()) return null;
-  const { job } = await runPathologyExtractionForDocument(tenantId, documentId, actingUserId, client);
+  const { job } = await runPathologyExtractionForDocument(
+    tenantId,
+    documentId,
+    actingUserId,
+    client
+  );
   return job;
 }

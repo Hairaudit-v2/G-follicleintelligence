@@ -168,7 +168,9 @@ function safePercent(numerator: number, denominator: number): number | null {
   return Math.round((numerator / denominator) * 1000) / 10;
 }
 
-export function buildCommandCentreKpis(input: WorkforceCommandCentreComposeInput): WorkforceCommandCentreKpis {
+export function buildCommandCentreKpis(
+  input: WorkforceCommandCentreComposeInput
+): WorkforceCommandCentreKpis {
   const ops = input.operationalMetrics;
   const planning = input.planning;
 
@@ -184,7 +186,9 @@ export function buildCommandCentreKpis(input: WorkforceCommandCentreComposeInput
       planning?.staffingShortages.reduce((sum, s) => sum + s.shortageCount, 0) ??
       0,
     weeklyWageExposureCents:
-      planning?.weeklyWageExposureCents ?? input.shiftCost?.weeklyForecast.totalForecastGrossCostCents ?? 0,
+      planning?.weeklyWageExposureCents ??
+      input.shiftCost?.weeklyForecast.totalForecastGrossCostCents ??
+      0,
   };
 }
 
@@ -236,10 +240,9 @@ export function buildWorkforceHealthRadar(
       label: "Training Readiness",
       scorePercent: trainingScore,
       status: scoreToHealthStatus(trainingScore),
-      explanation:
-        planning?.recruitmentForecast.recommendedHires
-          ? `${planning.recruitmentForecast.recommendedHires} hire(s) may be needed beyond late-stage pipeline.`
-          : "Recruitment pipeline covers forecast staffing gaps.",
+      explanation: planning?.recruitmentForecast.recommendedHires
+        ? `${planning.recruitmentForecast.recommendedHires} hire(s) may be needed beyond late-stage pipeline.`
+        : "Recruitment pipeline covers forecast staffing gaps.",
       href: `${base}/recruitment`,
     },
     {
@@ -416,7 +419,9 @@ export function sortAttentionQueue(
     .slice(0, limit);
 }
 
-export function buildAttentionQueue(input: WorkforceCommandCentreComposeInput): WorkforceAttentionQueueItem[] {
+export function buildAttentionQueue(
+  input: WorkforceCommandCentreComposeInput
+): WorkforceAttentionQueueItem[] {
   const planningItems = (input.planning?.nextBestActions ?? []).map((a) =>
     mapPlanningActionToAttentionItem(a, input.tenantId)
   );
@@ -470,7 +475,9 @@ export function buildFinancialIntelligencePanel(
 
   return {
     weeklyWageExposureCents:
-      planning?.weeklyWageExposureCents ?? shiftCost?.weeklyForecast.totalForecastGrossCostCents ?? 0,
+      planning?.weeklyWageExposureCents ??
+      shiftCost?.weeklyForecast.totalForecastGrossCostCents ??
+      0,
     dailyRosterCostCents: shiftCost?.dailyRoster.totalGrossCostCents ?? 0,
     procedureLabourCostCents: totalProcedureCost,
     averageCostPerProcedureCents: avgProcedureCost,
@@ -502,8 +509,7 @@ export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): Wor
       statusBadge: {
         label:
           (planning?.recruitmentForecast.recommendedHires ?? 0) > 0 ? "Hiring needed" : "On track",
-        variant:
-          (planning?.recruitmentForecast.recommendedHires ?? 0) > 0 ? "warning" : "success",
+        variant: (planning?.recruitmentForecast.recommendedHires ?? 0) > 0 ? "warning" : "success",
       },
       href: `${base}/recruitment`,
       ctaLabel: "Open recruitment",

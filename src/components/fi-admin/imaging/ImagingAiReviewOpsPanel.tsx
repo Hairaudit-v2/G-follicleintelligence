@@ -110,7 +110,9 @@ export function ImagingAiReviewOpsPanel({ tenantId, health }: Props) {
             }`}
           >
             <p className="font-semibold">{BUCKET_LABELS[bucket]}</p>
-            <p className="mt-1 text-lg font-bold tabular-nums">{health.bucketCounts[bucket] ?? 0}</p>
+            <p className="mt-1 text-lg font-bold tabular-nums">
+              {health.bucketCounts[bucket] ?? 0}
+            </p>
           </button>
         ))}
       </div>
@@ -170,7 +172,9 @@ export function ImagingAiReviewOpsPanel({ tenantId, health }: Props) {
                   <td className="px-3 py-2">{job.provider ?? "—"}</td>
                   <td className="px-3 py-2">
                     {job.graftTrayReviewStatus ? (
-                      <span className="capitalize">{job.graftTrayReviewStatus.replace(/_/g, " ")}</span>
+                      <span className="capitalize">
+                        {job.graftTrayReviewStatus.replace(/_/g, " ")}
+                      </span>
                     ) : (
                       "—"
                     )}
@@ -184,12 +188,16 @@ export function ImagingAiReviewOpsPanel({ tenantId, health }: Props) {
                       <p className="mt-1 text-[10px] text-rose-300">{job.lastError}</p>
                     ) : null}
                     {job.supersedeReason ? (
-                      <p className="mt-1 text-[10px] text-slate-500">Superseded: {job.supersedeReason}</p>
+                      <p className="mt-1 text-[10px] text-slate-500">
+                        Superseded: {job.supersedeReason}
+                      </p>
                     ) : null}
                   </td>
                   <td className="px-3 py-2 text-[10px] text-slate-500">
                     <p>Queued {new Date(job.queuedAt).toLocaleString()}</p>
-                    {job.startedAt ? <p>Started {new Date(job.startedAt).toLocaleString()}</p> : null}
+                    {job.startedAt ? (
+                      <p>Started {new Date(job.startedAt).toLocaleString()}</p>
+                    ) : null}
                     {job.completedAt ? (
                       <p>Completed {new Date(job.completedAt).toLocaleString()}</p>
                     ) : null}

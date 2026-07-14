@@ -239,7 +239,10 @@ export function groupStandardHoursByCycleWeek(
     byWeekday.set(day.weekday, { ...day, cycle_week: cycle });
     out.set(
       cycle,
-      Array.from({ length: 7 }, (_, weekday) => byWeekday.get(weekday) ?? emptyStandardHoursWeek(cycle)[weekday]!)
+      Array.from(
+        { length: 7 },
+        (_, weekday) => byWeekday.get(weekday) ?? emptyStandardHoursWeek(cycle)[weekday]!
+      )
     );
   }
   return out;
@@ -430,9 +433,7 @@ export function staffHasConfiguredStandardHours(
 }
 
 /** Human-readable one-line summary for roster staff rows. */
-export function formatStandardHoursSummary(
-  days: StaffStandardHoursDayInput[] | undefined
-): string {
+export function formatStandardHoursSummary(days: StaffStandardHoursDayInput[] | undefined): string {
   if (!staffHasConfiguredStandardHours(days)) return "No standard hours set";
 
   const working = days!.filter((d) => d.is_working_day);

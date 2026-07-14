@@ -44,7 +44,8 @@ export const REGENERATIVE_TREATMENT_BOOKING_TYPES = [
   "exosomes",
 ] as const;
 
-export type RegenerativeTreatmentBookingType = (typeof REGENERATIVE_TREATMENT_BOOKING_TYPES)[number];
+export type RegenerativeTreatmentBookingType =
+  (typeof REGENERATIVE_TREATMENT_BOOKING_TYPES)[number];
 
 const REGENERATIVE_TYPE_SET = new Set<string>(REGENERATIVE_TREATMENT_BOOKING_TYPES);
 
@@ -57,7 +58,11 @@ export type TreatmentImagingBookingHints = {
 
 function normalizedBookingText(...parts: Array<string | null | undefined>): string {
   return parts
-    .map((p) => String(p ?? "").trim().toLowerCase())
+    .map((p) =>
+      String(p ?? "")
+        .trim()
+        .toLowerCase()
+    )
     .filter(Boolean)
     .join(" ");
 }

@@ -11,14 +11,7 @@ import {
 } from "./imagingOsBarrelImportAllowlist";
 
 const SCAN_ROOTS = ["src", "tests", "lib", "app"] as const;
-const SKIP_DIRS = new Set([
-  "node_modules",
-  ".git",
-  ".next",
-  "dist",
-  "build",
-  "coverage",
-]);
+const SKIP_DIRS = new Set(["node_modules", ".git", ".next", "dist", "build", "coverage"]);
 
 const FOCUSED_ENTRY_PREFIXES = [
   "@/src/lib/imaging-os/ai",
@@ -70,8 +63,7 @@ export function findBarrelImportsInSource(
 
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? "";
-    const match =
-      line.match(SINGLE_LINE_IMPORT_FROM) ?? line.match(MULTILINE_IMPORT_FROM);
+    const match = line.match(SINGLE_LINE_IMPORT_FROM) ?? line.match(MULTILINE_IMPORT_FROM);
     if (!match) continue;
     const specifier = match[1];
     if (!isCatchAllImagingOsBarrelSpecifier(specifier)) continue;

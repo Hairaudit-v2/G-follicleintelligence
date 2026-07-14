@@ -107,9 +107,7 @@ export function calculateClinicalEligibility(
       blockingReasons.push(`${cred.displayName} revoked`);
       penalties += 40;
     } else if (cred.status === "expiring_soon" && cred.expiresAt) {
-      const days = Math.ceil(
-        (new Date(cred.expiresAt).getTime() - Date.now()) / 86_400_000
-      );
+      const days = Math.ceil((new Date(cred.expiresAt).getTime() - Date.now()) / 86_400_000);
       warnings.push(`${cred.displayName} expires in ${days} day(s)`);
     }
   }
@@ -301,7 +299,7 @@ export function evaluateClinicalEligibility(input: {
     operationalEligible: mapped.status !== "inactive",
     clinicalEligible: mapped.eligible,
     blockingIssues: mapped.blockingReasons as never[],
-    reason: mapped.eligible ? null : mapped.blockingReasons[0] ?? "Not clinically eligible",
+    reason: mapped.eligible ? null : (mapped.blockingReasons[0] ?? "Not clinically eligible"),
     snapshot: {},
   };
 }

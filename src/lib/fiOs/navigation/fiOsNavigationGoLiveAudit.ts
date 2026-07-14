@@ -340,8 +340,7 @@ function resolveMoreSections(
     showNavigationAdminSurfaces: scenario.showNavigationAdminSurfaces,
     showProcedureDayNav: scenario.showProcedureDayNav ?? false,
     showSurgeryAdminSurfaces: scenario.showNavigationAdminSurfaces,
-    showTeamAdminSurfaces:
-      scenario.showTeamAdminSurfaces ?? scenario.showNavigationAdminSurfaces,
+    showTeamAdminSurfaces: scenario.showTeamAdminSurfaces ?? scenario.showNavigationAdminSurfaces,
     showReportsAdminSurfaces:
       scenario.showReportsAdminSurfaces ?? scenario.showNavigationAdminSurfaces,
     showSettingsAdminSurfaces:
@@ -350,15 +349,11 @@ function resolveMoreSections(
 }
 
 function flattenMoreSubIds(sections: FiOsSidebarWorkflowSection[]): string[] {
-  return sections.flatMap((s) =>
-    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
-  );
+  return sections.flatMap((s) => s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? []));
 }
 
 function flattenMoreSubLabels(sections: FiOsSidebarWorkflowSection[]): string[] {
-  return sections.flatMap((s) =>
-    s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? [])
-  );
+  return sections.flatMap((s) => s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? []));
 }
 
 function check(
@@ -453,13 +448,9 @@ function auditPrimaryRail(
   return checks;
 }
 
-function isPermittedProcedureDayDirectLabel(
-  label: string,
-  showProcedureDayNav?: boolean
-): boolean {
+function isPermittedProcedureDayDirectLabel(label: string, showProcedureDayNav?: boolean): boolean {
   return (
-    showProcedureDayNav === true &&
-    /^(procedure day|surgery day)\s*\(direct\)$/i.test(label.trim())
+    showProcedureDayNav === true && /^(procedure day|surgery day)\s*\(direct\)$/i.test(label.trim())
   );
 }
 
@@ -640,7 +631,11 @@ function auditLegacyRouteCatalog(tenantId: string, base: string): FiOsNavigation
   const checks: FiOsNavigationGoLiveCheck[] = [];
 
   const catalogs = [
-    { name: "front_desk", subs: buildFrontDeskSidebarSubItems(tenantId), legacy: FI_OS_FRONT_DESK_LEGACY_ROUTES },
+    {
+      name: "front_desk",
+      subs: buildFrontDeskSidebarSubItems(tenantId),
+      legacy: FI_OS_FRONT_DESK_LEGACY_ROUTES,
+    },
     {
       name: "surgery",
       subs: buildSurgerySidebarSubItems(tenantId, { showProcedureDayNav: true }),
@@ -653,7 +648,10 @@ function auditLegacyRouteCatalog(tenantId: string, base: string): FiOsNavigation
     },
     {
       name: "reports",
-      subs: buildReportsSidebarSubItems(tenantId, { showAuditOsNav: true, showReportsAdminSurfaces: true }),
+      subs: buildReportsSidebarSubItems(tenantId, {
+        showAuditOsNav: true,
+        showReportsAdminSurfaces: true,
+      }),
       legacy: FI_OS_REPORTS_LEGACY_ROUTES,
     },
   ] as const;

@@ -17,7 +17,10 @@ import type {
   PatientVisualSummaryStaffRecord,
 } from "./patientVisualSummaryReportTypes";
 
-async function loadCaseMetadata(caseId: string, tenantId: string): Promise<Record<string, unknown>> {
+async function loadCaseMetadata(
+  caseId: string,
+  tenantId: string
+): Promise<Record<string, unknown>> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_cases")

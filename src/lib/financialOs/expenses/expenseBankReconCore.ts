@@ -66,7 +66,9 @@ export function matchBankLinesToExpenses(input: {
   const usedLines = new Set<string>();
   const usedExpenses = new Set<string>();
 
-  const postedExpenses = input.expenses.filter((e) => e.status === "posted" || e.status === "reviewed");
+  const postedExpenses = input.expenses.filter(
+    (e) => e.status === "posted" || e.status === "reviewed"
+  );
   const openLines = input.lines.filter(
     (l) => l.status === "draft" || l.status === "accepted" || l.status === "committed"
   );

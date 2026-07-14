@@ -70,12 +70,9 @@ export async function runGoogleCalendarBackfillAction(
     let endDate = parsed.endDate?.trim() || presetDates.endDate;
 
     if (parsed.preset === "next_14_days" && !startDate && !endDate) {
-      const { resolveGoogleCalendarBackfillNextDaysRange } = await import(
-        "@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore"
-      );
-      const { resolveTenantCalendarTimezone } = await import(
-        "@/src/lib/calendar/calendarTimezone"
-      );
+      const { resolveGoogleCalendarBackfillNextDaysRange } =
+        await import("@/src/lib/integrations/googleCalendar/googleCalendarBackfillCore");
+      const { resolveTenantCalendarTimezone } = await import("@/src/lib/calendar/calendarTimezone");
       const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
       const supabase = supabaseAdmin();
       const { data } = await supabase
@@ -84,8 +81,10 @@ export async function runGoogleCalendarBackfillAction(
         .eq("id", tenantId.trim())
         .maybeSingle();
       const tz = resolveTenantCalendarTimezone(
-        (data as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null) ??
-          null
+        (data as {
+          default_timezone?: string | null;
+          metadata?: Record<string, unknown> | null;
+        } | null) ?? null
       );
       const range = resolveGoogleCalendarBackfillNextDaysRange(14, tz);
       if ("error" in range) return { ok: false, error: range.error };

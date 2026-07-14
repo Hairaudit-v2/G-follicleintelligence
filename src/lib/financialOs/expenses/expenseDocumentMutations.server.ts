@@ -155,7 +155,10 @@ export async function uploadExpenseDocument(input: {
     .select("*")
     .single();
   if (docErr) {
-    await db.storage.from(FI_FINANCIAL_DOCUMENTS_BUCKET).remove([storagePath]).catch(() => undefined);
+    await db.storage
+      .from(FI_FINANCIAL_DOCUMENTS_BUCKET)
+      .remove([storagePath])
+      .catch(() => undefined);
     throw new Error(docErr.message);
   }
 

@@ -36,10 +36,7 @@ export function ExpenseOperatingPlPanel(props: { summary: ExpensePlSummary }) {
           label="Opex void reversals"
           value={formatMoneyFromCents(s.opex_void_reversal_cents)}
         />
-        <FinancialOsMetricTile
-          label="Net opex"
-          value={formatMoneyFromCents(s.opex_net_cents)}
-        />
+        <FinancialOsMetricTile label="Net opex" value={formatMoneyFromCents(s.opex_net_cents)} />
         <FinancialOsMetricTile
           label="Net operating"
           value={formatMoneyFromCents(s.net_operating_cents)}

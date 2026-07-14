@@ -201,9 +201,7 @@ export async function loadShiftCostIntelligence(
     loadShiftsForDate(tid, date, supabase),
     supabase
       .from("fi_surgeries")
-      .select(
-        "id, scheduled_date, scheduled_start_at, scheduled_end_at, status, metadata"
-      )
+      .select("id, scheduled_date, scheduled_start_at, scheduled_end_at, status, metadata")
       .eq("tenant_id", tid)
       .eq("scheduled_date", date)
       .neq("status", "cancelled"),
@@ -232,11 +230,13 @@ export async function loadShiftCostIntelligence(
   }[];
 
   const surgeryIds = new Set(surgeries.map((s) => String(s.id)));
-  const assignments = ((assignmentsRes.data ?? []) as {
-    event_id: string | null;
-    staff_id: string;
-    assigned_role: string;
-  }[]).filter((a) => a.event_id && surgeryIds.has(String(a.event_id)));
+  const assignments = (
+    (assignmentsRes.data ?? []) as {
+      event_id: string | null;
+      staff_id: string;
+      assigned_role: string;
+    }[]
+  ).filter((a) => a.event_id && surgeryIds.has(String(a.event_id)));
 
   const rosterLines = shifts.map((shift) =>
     buildShiftLine(ctx, {
@@ -253,15 +253,11 @@ export async function loadShiftCostIntelligence(
   const surgeryTeamLines: Omit<ShiftCostLine, "grossCostCents" | "hasWageProfile">[] = [];
   for (const surgery of surgeries) {
     const mins = procedureMinutes(surgery.scheduled_start_at, surgery.scheduled_end_at);
-    const start =
-      surgery.scheduled_start_at ?? `${String(surgery.scheduled_date)}T08:00:00.000Z`;
+    const start = surgery.scheduled_start_at ?? `${String(surgery.scheduled_date)}T08:00:00.000Z`;
     const end =
-      surgery.scheduled_end_at ??
-      new Date(new Date(start).getTime() + mins * 60_000).toISOString();
+      surgery.scheduled_end_at ?? new Date(new Date(start).getTime() + mins * 60_000).toISOString();
 
-    const surgeryAssignments = assignments.filter(
-      (a) => String(a.event_id) === String(surgery.id)
-    );
+    const surgeryAssignments = assignments.filter((a) => String(a.event_id) === String(surgery.id));
 
     for (const assignment of surgeryAssignments) {
       surgeryTeamLines.push(
@@ -285,8 +281,7 @@ export async function loadShiftCostIntelligence(
   const procedures = computeProcedureLabourCosts({
     procedures: surgeries.map((surgery) => {
       const mins = procedureMinutes(surgery.scheduled_start_at, surgery.scheduled_end_at);
-      const start =
-        surgery.scheduled_start_at ?? `${String(surgery.scheduled_date)}T08:00:00.000Z`;
+      const start = surgery.scheduled_start_at ?? `${String(surgery.scheduled_date)}T08:00:00.000Z`;
       const end =
         surgery.scheduled_end_at ??
         new Date(new Date(start).getTime() + mins * 60_000).toISOString();
@@ -316,8 +311,10 @@ export async function loadShiftCostIntelligence(
 
   const efficiency = computeLabourEfficiencyMetrics(dailyRoster);
 
-  const weekDays: { workDate: string; lines: Omit<ShiftCostLine, "grossCostCents" | "hasWageProfile">[] }[] =
-    [];
+  const weekDays: {
+    workDate: string;
+    lines: Omit<ShiftCostLine, "grossCostCents" | "hasWageProfile">[];
+  }[] = [];
   for (let i = 0; i < 7; i++) {
     const d = addDaysIso(date, i);
     const dayShifts = await loadShiftsForDate(tid, d, supabase);

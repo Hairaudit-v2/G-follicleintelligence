@@ -45,9 +45,7 @@ test("receptionist without override cannot manage roster", () => {
 test("receptionist with roster tab grant receives roster.manage only", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
   });
 
   assert.equal(staffCapabilitySatisfies(access, "roster.view"), true);
@@ -67,9 +65,7 @@ test("receptionist with roster tab grant receives roster.manage only", () => {
 test("receptionist with roster.view only cannot manage roster or standard hours", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" })],
   });
   assert.equal(staffCapabilitySatisfies(access, "roster.view"), true);
   assert.equal(staffCapabilitySatisfies(access, "roster.manage"), false);
@@ -120,9 +116,18 @@ test("manager template retains full workforce module edit", () => {
 
 test("manager module edit does not grant team nav tabs without hrOsFullNav", () => {
   const access = computeEffectiveAccess({ roleKey: "manager", grants: [] });
-  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }), false);
-  assert.equal(canAccessWorkforceTabForTeamNav(access, "onboarding", "read", { hrOsFullNav: false }), false);
-  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: true }), true);
+  assert.equal(
+    canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }),
+    false
+  );
+  assert.equal(
+    canAccessWorkforceTabForTeamNav(access, "onboarding", "read", { hrOsFullNav: false }),
+    false
+  );
+  assert.equal(
+    canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: true }),
+    true
+  );
 });
 
 test("receptionist roster tab grant satisfies team nav roster without module edit blanket", () => {
@@ -130,8 +135,14 @@ test("receptionist roster tab grant satisfies team nav roster without module edi
     roleKey: "reception",
     grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
   });
-  assert.equal(canAccessWorkforceTabForTeamNav(access, "roster", "read", { hrOsFullNav: false }), true);
-  assert.equal(canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }), false);
+  assert.equal(
+    canAccessWorkforceTabForTeamNav(access, "roster", "read", { hrOsFullNav: false }),
+    true
+  );
+  assert.equal(
+    canAccessWorkforceTabForTeamNav(access, "identity", "read", { hrOsFullNav: false }),
+    false
+  );
 });
 
 test("explicit identity tab grant required for sensitive tabs without module edit", () => {
@@ -150,11 +161,7 @@ test("explicit identity tab grant required for sensitive tabs without module edi
 
 test("platform admin role template satisfies all capabilities", () => {
   const access = computeEffectiveAccess({ roleKey: "platform_admin", grants: [] });
-  for (const cap of [
-    "roster.manage",
-    "team.identity.manage",
-    "team.onboarding.manage",
-  ] as const) {
+  for (const cap of ["roster.manage", "team.identity.manage", "team.onboarding.manage"] as const) {
     assert.equal(staffCapabilitySatisfies(access, cap), true, cap);
   }
 });

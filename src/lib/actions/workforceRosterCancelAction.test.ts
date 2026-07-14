@@ -86,7 +86,9 @@ describe("RosterShiftDrawer permission and cancel UI", () => {
       "cancellationReason",
       "disabled={pending || !cancellationReason.trim()}"
     );
-    assert.ok(readFileSync(SHIFT_DRAWER, "utf8").includes('data-testid="roster-shift-cancel-section"'));
+    assert.ok(
+      readFileSync(SHIFT_DRAWER, "utf8").includes('data-testid="roster-shift-cancel-section"')
+    );
   });
 
   it("hides cancel section when canManage is false or shift is not cancellable", () => {

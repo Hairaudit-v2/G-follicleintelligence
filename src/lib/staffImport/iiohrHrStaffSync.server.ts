@@ -39,9 +39,8 @@ export async function syncIiohrHrStaffForTenant(
 
   let hrSyncRunId: string | null = null;
   if (commit) {
-    const { beginWorkforceHrSyncRun } = await import(
-      "@/src/lib/workforce/workforceHrStaffSyncOrchestrator.server"
-    );
+    const { beginWorkforceHrSyncRun } =
+      await import("@/src/lib/workforce/workforceHrStaffSyncOrchestrator.server");
     const started = await beginWorkforceHrSyncRun({ tenantId: input.tenantId });
     hrSyncRunId = started.hrSyncRunId;
   }
@@ -59,9 +58,8 @@ export async function syncIiohrHrStaffForTenant(
   });
 
   if (commit && result.ok && importRows.length > 0) {
-    const { runWorkforceReconciliationForInboundRows } = await import(
-      "@/src/lib/workforce/workforceHrStaffSyncOrchestrator.server"
-    );
+    const { runWorkforceReconciliationForInboundRows } =
+      await import("@/src/lib/workforce/workforceHrStaffSyncOrchestrator.server");
     const workforce = await runWorkforceReconciliationForInboundRows({
       tenantId: input.tenantId,
       rows: importRows,

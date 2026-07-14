@@ -51,9 +51,7 @@ async function loadCaseContext(
 
   const { data: planRow } = await supabase
     .from("fi_case_surgery_plans")
-    .select(
-      "recipient_strategy_notes, surgical_plan_summary, updated_at, created_at"
-    )
+    .select("recipient_strategy_notes, surgical_plan_summary, updated_at, created_at")
     .eq("tenant_id", tenantId)
     .eq("case_id", caseId)
     .maybeSingle();
@@ -121,10 +119,7 @@ async function loadPatientName(
   return displayFromPersonMetadata(personMeta, patientMeta).name;
 }
 
-async function loadClinicName(
-  supabase: SupabaseClient,
-  tenantId: string
-): Promise<string | null> {
+async function loadClinicName(supabase: SupabaseClient, tenantId: string): Promise<string | null> {
   const { data } = await supabase
     .from("fi_tenants")
     .select("name")
@@ -136,16 +131,18 @@ async function loadClinicName(
 
 function filterImagesForContext(
   images: PatientImageRow[],
-  input: { caseId?: string | null; surgeryId?: string | null; reportType: PatientVisualSummaryReportType }
+  input: {
+    caseId?: string | null;
+    surgeryId?: string | null;
+    reportType: PatientVisualSummaryReportType;
+  }
 ): PatientImageRow[] {
   let filtered = images;
   if (input.caseId?.trim()) {
     filtered = filtered.filter((img) => img.case_id === input.caseId!.trim());
   }
   if (input.reportType === "hairaudit_visual_summary") {
-    const audit = filtered.filter(
-      (img) => img.metadata?.upload_source === "hairaudit"
-    );
+    const audit = filtered.filter((img) => img.metadata?.upload_source === "hairaudit");
     if (audit.length > 0) filtered = audit;
   }
   return filtered;

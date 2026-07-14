@@ -39,9 +39,6 @@ describe("resolvePipelineInitialView", () => {
   });
 
   it("supports URLSearchParams", () => {
-    assert.equal(
-      resolvePipelineInitialView(new URLSearchParams("view=follow_ups")),
-      "follow_ups"
-    );
+    assert.equal(resolvePipelineInitialView(new URLSearchParams("view=follow_ups")), "follow_ups");
   });
 });

@@ -65,10 +65,7 @@ type BookingPromotionCounters = {
   skippedDuplicates: number;
 };
 
-async function loadTenantTimeZone(
-  supabase: SupabaseClient,
-  tenantId: string
-): Promise<string> {
+async function loadTenantTimeZone(supabase: SupabaseClient, tenantId: string): Promise<string> {
   const { data, error } = await supabase
     .from("fi_tenants")
     .select("default_timezone, metadata")
@@ -76,8 +73,10 @@ async function loadTenantTimeZone(
     .maybeSingle();
   if (error) throw new Error(error.message);
   return resolveTenantCalendarTimezone(
-    (data as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null) ??
-      null
+    (data as {
+      default_timezone?: string | null;
+      metadata?: Record<string, unknown> | null;
+    } | null) ?? null
   );
 }
 
@@ -149,9 +148,7 @@ async function persistBackfillDiagnostics(
 async function loadPatientNameCandidates(
   supabase: SupabaseClient,
   tenantId: string
-): Promise<
-  { patientId: string; personId: string; displayName: string; leadId: string | null }[]
-> {
+): Promise<{ patientId: string; personId: string; displayName: string; leadId: string | null }[]> {
   const { data: patients, error: pErr } = await supabase
     .from("fi_patients")
     .select("id, person_id")

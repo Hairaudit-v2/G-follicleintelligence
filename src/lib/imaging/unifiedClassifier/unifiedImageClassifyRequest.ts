@@ -45,7 +45,9 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function parseMetadata(value: unknown): Record<string, string | number | boolean | null> | undefined {
+function parseMetadata(
+  value: unknown
+): Record<string, string | number | boolean | null> | undefined {
   if (!isPlainObject(value)) return undefined;
   const out: Record<string, string | number | boolean | null> = {};
   for (const [key, raw] of Object.entries(value)) {
@@ -61,7 +63,9 @@ function parseMetadata(value: unknown): Record<string, string | number | boolean
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
-export function isAllowedUnifiedSourceSystem(value: string): value is UnifiedImageClassifyRequest["source_system"] {
+export function isAllowedUnifiedSourceSystem(
+  value: string
+): value is UnifiedImageClassifyRequest["source_system"] {
   return ALLOWED_SOURCE_SYSTEMS.has(value);
 }
 
@@ -176,7 +180,9 @@ export function parseUnifiedImageClassifyRequest(body: unknown): ParseUnifiedIma
       ? { upload_source: readNonEmptyString(body.upload_source) }
       : {}),
     ...(requestedCategories?.length ? { requested_categories: requestedCategories } : {}),
-    ...(readNonEmptyString(body.patient_id) ? { patient_id: readNonEmptyString(body.patient_id) } : {}),
+    ...(readNonEmptyString(body.patient_id)
+      ? { patient_id: readNonEmptyString(body.patient_id) }
+      : {}),
     ...(readNonEmptyString(body.case_id) ? { case_id: readNonEmptyString(body.case_id) } : {}),
     ...(readNonEmptyString(body.professional_id)
       ? { professional_id: readNonEmptyString(body.professional_id) }

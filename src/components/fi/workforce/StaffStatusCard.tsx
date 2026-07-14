@@ -6,13 +6,7 @@ import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui/DashboardC
 import type { StaffUnifiedStatusSnapshot } from "@/src/lib/workforce/staffLifecycleUxCore";
 import { cn } from "@/lib/utils";
 
-function StatusPill({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+function StatusPill({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
       className={cn(
@@ -30,7 +24,8 @@ function pillToneForOperationalState(
 ): string {
   if (state === "active") return "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25";
   if (state === "pending_onboarding") return "bg-sky-500/15 text-sky-300 ring-sky-500/25";
-  if (state === "temporarily_unavailable") return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
+  if (state === "temporarily_unavailable")
+    return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
   if (state === "departed" || state === "archived") {
     return "bg-slate-500/15 text-slate-400 ring-slate-500/20";
   }
@@ -173,17 +168,21 @@ export function StaffStatusCard({
     <DashboardCard className={cn("p-4 sm:p-5", className)}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Staff status</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+            Staff status
+          </p>
           <h3 className="mt-1 truncate text-base font-semibold text-[#F8FAFC]">{name}</h3>
           {roleLabel ? (
             <p className="text-xs capitalize text-[#64748B]">{roleLabel.replace(/_/g, " ")}</p>
           ) : null}
         </div>
-        <div className="flex flex-wrap gap-2">{pills.map((pill) => (
+        <div className="flex flex-wrap gap-2">
+          {pills.map((pill) => (
             <StatusPill key={pill.label} className={pill.className}>
               {pill.label}
             </StatusPill>
-          ))}</div>
+          ))}
+        </div>
       </div>
       {status.isAccessSuspended ? (
         <p className="mt-3 text-xs text-rose-200/90">

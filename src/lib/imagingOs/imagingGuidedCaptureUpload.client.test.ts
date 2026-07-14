@@ -15,7 +15,9 @@ describe("resolveGuidedCaptureUploadException", () => {
       GUIDED_CAPTURE_UPLOAD_MESSAGES.timeout
     );
     assert.equal(
-      resolveGuidedCaptureUploadException(Object.assign(new Error("Aborted"), { name: "AbortError" })),
+      resolveGuidedCaptureUploadException(
+        Object.assign(new Error("Aborted"), { name: "AbortError" })
+      ),
       GUIDED_CAPTURE_UPLOAD_MESSAGES.timeout
     );
   });

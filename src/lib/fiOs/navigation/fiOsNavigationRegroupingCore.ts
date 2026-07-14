@@ -250,16 +250,56 @@ export function orderedD6gWorkflowGroups(
   const p = workspaceProfile?.trim() || "default";
   switch (p) {
     case "reception":
-      return ["FRONT_DESK", "PIPELINE", "PATIENTS", "CLINICAL", "SURGERY", "TEAM", "FINANCE", "REPORTS", "SETTINGS"];
+      return [
+        "FRONT_DESK",
+        "PIPELINE",
+        "PATIENTS",
+        "CLINICAL",
+        "SURGERY",
+        "TEAM",
+        "FINANCE",
+        "REPORTS",
+        "SETTINGS",
+      ];
     case "surgeon":
     case "doctor":
-      return ["SURGERY", "CLINICAL", "FRONT_DESK", "PIPELINE", "PATIENTS", "TEAM", "FINANCE", "REPORTS", "SETTINGS"];
+      return [
+        "SURGERY",
+        "CLINICAL",
+        "FRONT_DESK",
+        "PIPELINE",
+        "PATIENTS",
+        "TEAM",
+        "FINANCE",
+        "REPORTS",
+        "SETTINGS",
+      ];
     case "consultant":
-      return ["PIPELINE", "PATIENTS", "CLINICAL", "FRONT_DESK", "SURGERY", "TEAM", "FINANCE", "REPORTS", "SETTINGS"];
+      return [
+        "PIPELINE",
+        "PATIENTS",
+        "CLINICAL",
+        "FRONT_DESK",
+        "SURGERY",
+        "TEAM",
+        "FINANCE",
+        "REPORTS",
+        "SETTINGS",
+      ];
     case "director":
     case "platform_admin":
     case "clinic_manager":
-      return ["REPORTS", "FRONT_DESK", "PIPELINE", "SURGERY", "CLINICAL", "PATIENTS", "TEAM", "FINANCE", "SETTINGS"];
+      return [
+        "REPORTS",
+        "FRONT_DESK",
+        "PIPELINE",
+        "SURGERY",
+        "CLINICAL",
+        "PATIENTS",
+        "TEAM",
+        "FINANCE",
+        "SETTINGS",
+      ];
     default:
       return [...FI_OS_D6G_WORKFLOW_GROUP_IDS];
   }

@@ -142,9 +142,7 @@ export async function resolveDevelopmentClinicAccessForTenant(
 
   const principal = await resolvePrincipalAuthUserId(authUserId);
   const fiUser = await loadFiUserForTenant(tid, principal);
-  const staffRole = fiUser
-    ? await loadActiveStaffRoleForFiUser(tid, fiUser.id)
-    : null;
+  const staffRole = fiUser ? await loadActiveStaffRoleForFiUser(tid, fiUser.id) : null;
   const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authUserId);
   const tenantAdminRole = tenantAdmin?.adminRole ?? null;
 

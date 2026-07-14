@@ -48,9 +48,7 @@ export function buildImportLineDraftsFromCsv(
   });
 }
 
-export type CommitLineEligibility =
-  | { ok: true }
-  | { ok: false; reason: string };
+export type CommitLineEligibility = { ok: true } | { ok: false; reason: string };
 
 export function assertImportLineCommitEligible(input: {
   status: string;

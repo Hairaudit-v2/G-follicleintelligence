@@ -56,9 +56,7 @@ function varianceFromRecords(
   records: SurgeonProcedurePerformanceRecord[],
   selector: (r: SurgeonProcedurePerformanceRecord) => number | null
 ): number | null {
-  const values = records
-    .map(selector)
-    .filter((v): v is number => v != null && Number.isFinite(v));
+  const values = records.map(selector).filter((v): v is number => v != null && Number.isFinite(v));
   return coefficientOfVariation(values);
 }
 
@@ -122,7 +120,9 @@ export function buildSurgeonConsistency(input: {
   const graftScore = varianceToScore(graftVariance, 15);
 
   const consistencyScore = hasEnoughData
-    ? clampScore(extractionScore * 0.3 + transectionScore * 0.35 + durationScore * 0.2 + graftScore * 0.15)
+    ? clampScore(
+        extractionScore * 0.3 + transectionScore * 0.35 + durationScore * 0.2 + graftScore * 0.15
+      )
     : 0;
 
   const status = hasEnoughData ? mapStatus(consistencyScore) : "concerning";

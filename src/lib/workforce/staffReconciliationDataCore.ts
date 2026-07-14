@@ -41,21 +41,14 @@ export type ReconciliationPipelineDiagnostics = {
   duplicateFiStaffRows: number;
 };
 
-const ACTIVE_EMPLOYMENT_STATUSES = new Set([
-  "active",
-  "pending_onboarding",
-  "on_leave",
-]);
+const ACTIVE_EMPLOYMENT_STATUSES = new Set(["active", "pending_onboarding", "on_leave"]);
 
 export function extractEmailFromSourceMetadata(
   metadata: Record<string, unknown> | null | undefined
 ): string | null {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
   const raw =
-    metadata.email ??
-    metadata.work_email ??
-    metadata.contact_email ??
-    metadata.primary_email;
+    metadata.email ?? metadata.work_email ?? metadata.contact_email ?? metadata.primary_email;
   return raw != null ? normalizeEmail(String(raw)) : null;
 }
 
@@ -159,9 +152,7 @@ export function findBestExternalMatch(
   return best;
 }
 
-export function pickCanonicalMemberForEmailGroup(
-  members: ReconciliationMemberContext[]
-): string {
+export function pickCanonicalMemberForEmailGroup(members: ReconciliationMemberContext[]): string {
   const sorted = [...members].sort((a, b) => {
     if (a.fiStaffId && !b.fiStaffId) return -1;
     if (!a.fiStaffId && b.fiStaffId) return 1;

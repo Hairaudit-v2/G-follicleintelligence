@@ -71,9 +71,7 @@ export function scorePathologyPatientMatch(
   const candidateEmail = candidate.primaryEmail?.trim()
     ? normalizeEmail(candidate.primaryEmail)
     : null;
-  const emailMatch = Boolean(
-    extractedEmail && candidateEmail && extractedEmail === candidateEmail
-  );
+  const emailMatch = Boolean(extractedEmail && candidateEmail && extractedEmail === candidateEmail);
 
   const extractedMrn = extracted.mrn?.trim() ? normalizeMrn(extracted.mrn) : null;
   const candidateMrn = candidate.mrn?.trim() ? normalizeMrn(candidate.mrn) : null;

@@ -50,7 +50,8 @@ export async function classifyClinicalHairImageFromModelUrl(
     const mod = await import("./classifyClinicalHairImageFromModelUrl.server");
     return mod.classifyClinicalHairImageFromModelUrlLive(input, env);
   } catch (e: unknown) {
-    const { buildDegradedHairAuditClassification } = await import("./hairAuditClassifierResponseMap");
+    const { buildDegradedHairAuditClassification } =
+      await import("./hairAuditClassifierResponseMap");
     return buildDegradedHairAuditClassification({
       canonical_photo_category: input.canonical_photo_category,
       legacy_upload_type: input.legacy_upload_type,

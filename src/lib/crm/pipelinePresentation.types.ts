@@ -3,10 +3,7 @@
  * Client-safe boundary: no DB rows, no HubSpot payloads, no React.
  */
 
-import type {
-  PipelineStaffColumnId,
-  PipelineUrgencyFlag,
-} from "@/src/lib/crm/pipelineStaffModel";
+import type { PipelineStaffColumnId, PipelineUrgencyFlag } from "@/src/lib/crm/pipelineStaffModel";
 
 export type { PipelineStaffColumnId, PipelineUrgencyFlag };
 

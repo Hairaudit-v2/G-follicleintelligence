@@ -106,7 +106,9 @@ async function loadSurgicalIntelligenceSignals(
   );
 
   const snapshotByDate = new Map(
-    snapshots.filter((entry) => entry.snapshot != null).map((entry) => [entry.date, entry.snapshot!])
+    snapshots
+      .filter((entry) => entry.snapshot != null)
+      .map((entry) => [entry.date, entry.snapshot!])
   );
   const weekOptimizers = weekDates
     .map((date) => snapshotByDate.get(date))
@@ -137,19 +139,25 @@ export async function loadWorkforceCommandCentrePage(
   const tid = tenantId.trim();
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
-  const [directory, planning, shiftCost, operationalMetrics, candidates, roleRequirements, wageStaff] =
-    await Promise.all([
-      loadWorkforceOsDirectoryPage(tid).catch(() => null),
-      safeLoadPlanning(tid),
-      safeLoadShiftCost(tid),
-      canManage ? safeLoadOperationalMetrics(tid) : Promise.resolve(null),
-      listRecruitmentCandidates(tid).catch(() => []),
-      listWorkforceRoleRequirements(tid).catch(() => []),
-      listActiveStaffForWageProfiles(tid).catch(() => []),
-    ]);
+  const [
+    directory,
+    planning,
+    shiftCost,
+    operationalMetrics,
+    candidates,
+    roleRequirements,
+    wageStaff,
+  ] = await Promise.all([
+    loadWorkforceOsDirectoryPage(tid).catch(() => null),
+    safeLoadPlanning(tid),
+    safeLoadShiftCost(tid),
+    canManage ? safeLoadOperationalMetrics(tid) : Promise.resolve(null),
+    listRecruitmentCandidates(tid).catch(() => []),
+    listWorkforceRoleRequirements(tid).catch(() => []),
+    listActiveStaffForWageProfiles(tid).catch(() => []),
+  ]);
 
   // Canonical lifecycle: terminated/archived staff never count towards headcount,
   // even when flags have drifted (matches Staff Directory + roster eligibility).
@@ -173,9 +181,8 @@ export async function loadWorkforceCommandCentrePage(
   const missingWageProfileCount = wageStaff.filter((s) => !s.hasWageProfile).length;
   const wageProfileCoveragePercent =
     wageStaff.length > 0
-      ? Math.round(
-          (wageStaff.filter((s) => s.hasWageProfile).length / wageStaff.length) * 1000
-        ) / 10
+      ? Math.round((wageStaff.filter((s) => s.hasWageProfile).length / wageStaff.length) * 1000) /
+        10
       : null;
 
   const composeInput = {
@@ -191,7 +198,11 @@ export async function loadWorkforceCommandCentrePage(
   };
 
   const clinicallyEligible = operationalMetrics?.clinicallyEligibleStaff ?? totalStaff;
-  const surgicalIntelligence = await loadSurgicalIntelligenceSignals(tid, planning, clinicallyEligible);
+  const surgicalIntelligence = await loadSurgicalIntelligenceSignals(
+    tid,
+    planning,
+    clinicallyEligible
+  );
 
   return {
     canManage,

@@ -77,7 +77,10 @@ export function scanImagingOsFoundationProviderImports(input: {
     if (isImagingOsProviderAdapterModule(file)) continue;
 
     const source = input.readFile(`${input.imagingOsDir}/${file}`);
-    for (const violation of findForbiddenProviderImportsInSource(source, `src/lib/imaging-os/${file}`)) {
+    for (const violation of findForbiddenProviderImportsInSource(
+      source,
+      `src/lib/imaging-os/${file}`
+    )) {
       violations.push(violation);
     }
   }

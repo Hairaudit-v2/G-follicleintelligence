@@ -46,13 +46,15 @@ function AuditRow({ row, tenantId }: { row: StaffIdentityReadinessAuditRow; tena
     <tr className="border-t border-white/5 align-top">
       <td className="px-3 py-3 text-sm text-[#F8FAFC]">
         <div className="font-medium">
-          <Link href={profileHref} className="text-[#22C1FF] hover:underline" data-testid="identity-audit-profile-link">
+          <Link
+            href={profileHref}
+            className="text-[#22C1FF] hover:underline"
+            data-testid="identity-audit-profile-link"
+          >
             {row.displayLabel}
           </Link>
         </div>
-        {row.roleCode ? (
-          <div className="mt-1 text-xs text-[#94A3B8]">{row.roleCode}</div>
-        ) : null}
+        {row.roleCode ? <div className="mt-1 text-xs text-[#94A3B8]">{row.roleCode}</div> : null}
       </td>
       <td className="px-3 py-3 text-sm text-[#CBD5E1]">{row.employmentStatus}</td>
       <td className={`px-3 py-3 text-sm capitalize ${statusClass("login", row.loginStatus)}`}>
@@ -97,9 +99,7 @@ export function StaffIdentityReadinessAuditClient({
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">
-          Team
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#22C1FF]/90">Team</p>
         <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Identity Audit</h1>
         <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">
           Check whether staff identity, login, PIN, and readiness records are linked correctly.
@@ -122,7 +122,10 @@ export function StaffIdentityReadinessAuditClient({
         <SummaryCard label="Ready staff" value={summary.readyCount} />
         <SummaryCard label="Missing login link" value={summary.missingLoginLinkCount} />
         <SummaryCard label="Pending invite" value={summary.pendingInviteCount} />
-        <SummaryCard label="Missing workspace profile" value={summary.missingWorkspaceProfileCount} />
+        <SummaryCard
+          label="Missing workspace profile"
+          value={summary.missingWorkspaceProfileCount}
+        />
         <SummaryCard label="PIN missing" value={summary.pinMissingCount} />
         <SummaryCard label="Suspended / revoked" value={summary.suspendedRevokedCount} />
       </div>
@@ -155,7 +158,9 @@ export function StaffIdentityReadinessAuditClient({
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => <AuditRow key={row.staffMemberId} row={row} tenantId={tenantId} />)
+                rows.map((row) => (
+                  <AuditRow key={row.staffMemberId} row={row} tenantId={tenantId} />
+                ))
               )}
             </tbody>
           </table>

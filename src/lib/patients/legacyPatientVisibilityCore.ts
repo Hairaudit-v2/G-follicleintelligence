@@ -206,7 +206,10 @@ export function deriveMergeReadinessStatus(input: {
   ) {
     return "needs_manual_merge_review";
   }
-  if (readMetadataBool(meta, "possible_duplicate_suspected") || mergeStatus === "possible_duplicate") {
+  if (
+    readMetadataBool(meta, "possible_duplicate_suspected") ||
+    mergeStatus === "possible_duplicate"
+  ) {
     return "possible_duplicate";
   }
   if (isHistoricalRecordIncomplete(meta)) {
@@ -238,8 +241,7 @@ export function deriveLegacyPatientVisibilitySummary(
   const latestEncounter = encounters[0] ?? null;
   const latestSession = sessions[0] ?? null;
   const followUpImageCount = input.followUpImageCount ?? 0;
-  const hasPhotosCaptured =
-    followUpImageCount > 0 || sessions.some(sessionHasPhotos);
+  const hasPhotosCaptured = followUpImageCount > 0 || sessions.some(sessionHasPhotos);
   const hasAiReviewPending = sessions.some(sessionAiReviewPending);
   const hasClinicianApproved = sessions.some(
     (s) => s.ai_review_status?.trim().toLowerCase() === "clinician_approved"
@@ -273,9 +275,7 @@ export function deriveLegacyPatientVisibilitySummary(
   });
 
   const latestBookingId =
-    input.latestBookingId?.trim() ||
-    latestEncounter?.booking_id?.trim() ||
-    null;
+    input.latestBookingId?.trim() || latestEncounter?.booking_id?.trim() || null;
 
   return {
     patientId: input.patientId,
@@ -390,7 +390,8 @@ export function deriveLegacyPatientProfileBanners(
     banners.push({
       kind: "returning_timely",
       title: "Returning patient from Timely",
-      description: "Continue care from today's FI OS record. The historical Timely chart stays outside FI OS.",
+      description:
+        "Continue care from today's FI OS record. The historical Timely chart stays outside FI OS.",
       href: followUpHref,
       hrefLabel: "Add today's follow-up",
       secondaryHref: captureHref,
@@ -400,7 +401,8 @@ export function deriveLegacyPatientProfileBanners(
     banners.push({
       kind: "continue_care",
       title: "Continue care in FI OS",
-      description: "This patient has a linked legacy source. Add today's follow-up without a full consultation.",
+      description:
+        "This patient has a linked legacy source. Add today's follow-up without a full consultation.",
       href: followUpHref,
       hrefLabel: "Add today's follow-up",
       secondaryHref: captureHref,
@@ -412,7 +414,8 @@ export function deriveLegacyPatientProfileBanners(
     banners.push({
       kind: "historical_incomplete",
       title: "Historical record not fully imported yet",
-      description: "Use FI OS for today's visit. Prior Timely history remains reference-only until import.",
+      description:
+        "Use FI OS for today's visit. Prior Timely history remains reference-only until import.",
     });
   }
 
@@ -483,15 +486,15 @@ export function matchesLegacyPatientDirectoryFilters(
 export function legacyDirectoryFiltersAreActive(filters: LegacyPatientDirectoryFilters): boolean {
   return Boolean(
     filters.returningFromTimely ||
-      filters.hasLegacySource ||
-      filters.historicalIncomplete ||
-      filters.hasFollowUpEncounter ||
-      filters.hasPhotosCaptured ||
-      filters.aiReviewPending ||
-      filters.clinicianApprovedAi ||
-      filters.needsMergeReview ||
-      filters.photosNoAiApproval ||
-      filters.followUpSince
+    filters.hasLegacySource ||
+    filters.historicalIncomplete ||
+    filters.hasFollowUpEncounter ||
+    filters.hasPhotosCaptured ||
+    filters.aiReviewPending ||
+    filters.clinicianApprovedAi ||
+    filters.needsMergeReview ||
+    filters.photosNoAiApproval ||
+    filters.followUpSince
   );
 }
 

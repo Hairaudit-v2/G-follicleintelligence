@@ -2,7 +2,10 @@
  * Pure HLI pathology handoff payload builder (testable without server deps).
  */
 
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 import type { NormalizedPathologyMarker } from "@/src/lib/pathology/pathologyMarkerNormalize";
 
 export type HliPathologyMarkerPayload = {
@@ -41,8 +44,7 @@ function markerFromResultItem(item: PathologyResultItemRow): HliPathologyMarkerP
       ? meta.extraction_confidence
       : null;
   const sourceRaw = meta.marker_source;
-  const source =
-    sourceRaw === "extraction" || sourceRaw === "manual" ? sourceRaw : "result_item";
+  const source = sourceRaw === "extraction" || sourceRaw === "manual" ? sourceRaw : "result_item";
   return {
     testCode: item.test_code,
     label: item.test_label,

@@ -126,10 +126,7 @@ test("10. filterCrmAssignableOwnerOptions drops ineligible", () => {
     ],
     staff
   );
-  assert.deepEqual(
-    out.map((o) => o.id).sort(),
-    ["active-u", "op-u"]
-  );
+  assert.deepEqual(out.map((o) => o.id).sort(), ["active-u", "op-u"]);
 });
 
 test("11. empty id is not eligible", () => {

@@ -409,9 +409,8 @@ export async function completeConsultationDraft(
     await import("./advanceCrmLeadOnConsultationComplete.server");
   await advanceCrmLeadOnConsultationComplete(tid, loaded, supabase);
   if (loaded.patient_id?.trim()) {
-    const { advancePatientJourneyOnEvent } = await import(
-      "@/src/lib/patientJourney/patientJourneyState.server"
-    );
+    const { advancePatientJourneyOnEvent } =
+      await import("@/src/lib/patientJourney/patientJourneyState.server");
     const hasRecommendation = Boolean(loaded.recommendation_notes?.trim());
     await advancePatientJourneyOnEvent({
       tenantId: tid,

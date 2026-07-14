@@ -120,7 +120,8 @@ export async function POST(
     const caseIdStr = caseId == null ? "" : String(caseId).trim();
     const procedureDayIdStr =
       form.get("procedure_day_id") == null ? "" : String(form.get("procedure_day_id")).trim();
-    const surgeryIdStr = form.get("surgery_id") == null ? "" : String(form.get("surgery_id")).trim();
+    const surgeryIdStr =
+      form.get("surgery_id") == null ? "" : String(form.get("surgery_id")).trim();
 
     try {
       assertCanonicalStaffCaptureSource(captureSourceStr ?? "");
@@ -351,7 +352,9 @@ export async function POST(
       !Array.isArray(result.attribution.metadata_patch) &&
       (result.attribution.metadata_patch as Record<string, unknown>).imaging_quality;
     const imaging_quality =
-      imagingQualityRaw && typeof imagingQualityRaw === "object" && !Array.isArray(imagingQualityRaw)
+      imagingQualityRaw &&
+      typeof imagingQualityRaw === "object" &&
+      !Array.isArray(imagingQualityRaw)
         ? toClientImagingQualitySummary(
             imagingQualityRaw as Parameters<typeof toClientImagingQualitySummary>[0]
           )

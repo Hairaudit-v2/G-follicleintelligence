@@ -1,7 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { DashboardCard, InfoNotice, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
+import {
+  DashboardCard,
+  InfoNotice,
+  SectionHeader,
+  StatCard,
+} from "@/src/components/fi-admin/dashboard-ui";
 import {
   getTodaySignalValidationCheck,
   type TodaySignalValidationDomainSummary,
@@ -90,7 +95,12 @@ function DomainCard({ domain }: { domain: TodaySignalValidationDomainSummary }) 
     <DashboardCard className={cn("p-5", domainToneClass(domain.status))} elevated>
       <div className="flex items-start justify-between gap-3">
         <SectionHeader title={domain.label} />
-        <span className={cn("text-xs font-medium uppercase tracking-wide", checkStatusClass(domain.status))}>
+        <span
+          className={cn(
+            "text-xs font-medium uppercase tracking-wide",
+            checkStatusClass(domain.status)
+          )}
+        >
           {checkStatusLabel(domain.status)}
         </span>
       </div>
@@ -120,7 +130,9 @@ export function TodaySignalBakeSurface({ model }: { model: TodaySignalBakePageMo
       <header className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-100">D6 Intelligence Bake</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+              D6 Intelligence Bake
+            </h1>
             <p className="text-sm text-slate-400">
               Validation status for the living Today and workspace signal layer.
             </p>
@@ -177,15 +189,17 @@ export function TodaySignalBakeSurface({ model }: { model: TodaySignalBakePageMo
           ).map(([label, enabled]) => (
             <span
               key={label}
-              className={cn("rounded-full border px-3 py-1 text-xs font-medium", flagClass(enabled))}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium",
+                flagClass(enabled)
+              )}
             >
               {label}: {flagLabel(enabled)}
             </span>
           ))}
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Revision endpoint:{" "}
-          {report.counts.revisionEndpointAvailable ? "available" : "unavailable"}
+          Revision endpoint: {report.counts.revisionEndpointAvailable ? "available" : "unavailable"}
           {" · "}
           Learning: {report.counts.learningEnabled ? "enabled" : "disabled"}
         </p>

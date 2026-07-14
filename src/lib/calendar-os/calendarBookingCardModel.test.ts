@@ -55,7 +55,9 @@ describe("buildCalendarOsBookingCardModel", () => {
         journeyStateLabel: null,
         paymentFlag: "due",
         consentFlag: "missing",
-        blockers: [{ kind: "missing_consent", label: "Consent missing", severity: "warning", href: null }],
+        blockers: [
+          { kind: "missing_consent", label: "Consent missing", severity: "warning", href: null },
+        ],
         blockerCount: 1,
         nextAction: { label: "Collect consent", href: null },
         isSurgery: true,

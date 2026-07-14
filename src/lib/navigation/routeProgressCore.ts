@@ -26,7 +26,11 @@ export function resolveNavigationUrl(href: string, origin = "http://fi.local"): 
 export function isInternalAppNavigationHref(href: string, origin = "http://fi.local"): boolean {
   const trimmed = href.trim();
   if (!trimmed || trimmed.startsWith("#")) return false;
-  if (trimmed.startsWith("mailto:") || trimmed.startsWith("tel:") || trimmed.startsWith("javascript:")) {
+  if (
+    trimmed.startsWith("mailto:") ||
+    trimmed.startsWith("tel:") ||
+    trimmed.startsWith("javascript:")
+  ) {
     return false;
   }
 

@@ -173,10 +173,7 @@ export async function loadStaffAccessCentrePage(
     .map((m) => (m.fi_staff_id != null ? String(m.fi_staff_id) : null))
     .filter(Boolean) as string[];
 
-  const fiStaffById = new Map<
-    string,
-    { fi_user_id: string | null; email: string | null }
-  >();
+  const fiStaffById = new Map<string, { fi_user_id: string | null; email: string | null }>();
   if (fiStaffIds.length) {
     const { data: fiStaffRows, error: fsErr } = await supabase
       .from("fi_staff")
@@ -194,16 +191,9 @@ export async function loadStaffAccessCentrePage(
   }
 
   const fiUserIds = [
-    ...new Set(
-      [...fiStaffById.values()]
-        .map((s) => s.fi_user_id)
-        .filter(Boolean) as string[]
-    ),
+    ...new Set([...fiStaffById.values()].map((s) => s.fi_user_id).filter(Boolean) as string[]),
   ];
-  const fiUserById = new Map<
-    string,
-    { auth_user_id: string | null; email: string | null }
-  >();
+  const fiUserById = new Map<string, { auth_user_id: string | null; email: string | null }>();
   if (fiUserIds.length) {
     const { data: userRows, error: uErr } = await supabase
       .from("fi_users")
@@ -221,11 +211,7 @@ export async function loadStaffAccessCentrePage(
   }
 
   const authUserIds = [
-    ...new Set(
-      [...fiUserById.values()]
-        .map((u) => u.auth_user_id)
-        .filter(Boolean) as string[]
-    ),
+    ...new Set([...fiUserById.values()].map((u) => u.auth_user_id).filter(Boolean) as string[]),
   ];
   const authSnapshots = await loadAuthSnapshots(authUserIds, supabase);
 
@@ -274,8 +260,7 @@ export async function loadStaffAccessCentrePage(
 
   const rows: StaffAccessCentreRow[] = [];
   for (const member of memberRows) {
-    const fiStaffId =
-      member.fi_staff_id != null ? String(member.fi_staff_id) : null;
+    const fiStaffId = member.fi_staff_id != null ? String(member.fi_staff_id) : null;
     const fiStaff = fiStaffId ? fiStaffById.get(fiStaffId) : null;
     const fiUserId = fiStaff?.fi_user_id ?? null;
     const fiUser = fiUserId ? fiUserById.get(fiUserId) : null;
@@ -396,7 +381,9 @@ async function ensureFiStaffForMember(
 ): Promise<{ fiStaffId: string; email: string }> {
   const { data, error } = await client
     .from("fi_staff_members")
-    .select("full_name, email, fi_staff_id, role_code, employment_status, archived_at, system_access_revoked")
+    .select(
+      "full_name, email, fi_staff_id, role_code, employment_status, archived_at, system_access_revoked"
+    )
     .eq("tenant_id", tenantId)
     .eq("id", staffMemberId)
     .maybeSingle();
@@ -565,12 +552,10 @@ async function trySendStaffAccessInviteEmail(input: {
 }): Promise<boolean> {
   try {
     const { sendResendEmailHttp } = await import("@/src/lib/email/resendHttpSend.server");
-    const { buildResendFromAddress, isEmailDeliveryConfigured } = await import(
-      "@/src/lib/reminders/reminderDeliveryConfig"
-    );
-    const { loadReminderDeliveryConfig } = await import(
-      "@/src/lib/reminders/reminderDeliveryConfig.server"
-    );
+    const { buildResendFromAddress, isEmailDeliveryConfigured } =
+      await import("@/src/lib/reminders/reminderDeliveryConfig");
+    const { loadReminderDeliveryConfig } =
+      await import("@/src/lib/reminders/reminderDeliveryConfig.server");
     const cfg = await loadReminderDeliveryConfig();
     if (!isEmailDeliveryConfigured(cfg)) return false;
     const fromHeader = buildResendFromAddress(cfg.resend);
@@ -684,13 +669,16 @@ export async function sendStaffLoginInvite(input: {
   const tenantName = await loadTenantDisplayName(tid, supabase);
 
   const origin = getRequestOrigin();
-  const { authUserId, inviteLink: authInviteLink, crossTenantWarning } =
-    await provisionStaffAuthInviteLink({
-      tenantId: tid,
-      email,
-      origin,
-      client: supabase,
-    });
+  const {
+    authUserId,
+    inviteLink: authInviteLink,
+    crossTenantWarning,
+  } = await provisionStaffAuthInviteLink({
+    tenantId: tid,
+    email,
+    origin,
+    client: supabase,
+  });
 
   const { fiUserId } = await repairStaffTenantLinkFromInvitation({
     tenantId: tid,
@@ -791,13 +779,16 @@ export async function resendStaffLoginInvite(input: {
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
   const tenantName = await loadTenantDisplayName(tid, supabase);
   const origin = getRequestOrigin();
-  const { authUserId, inviteLink: authInviteLink, crossTenantWarning } =
-    await provisionStaffAuthInviteLink({
-      tenantId: tid,
-      email,
-      origin,
-      client: supabase,
-    });
+  const {
+    authUserId,
+    inviteLink: authInviteLink,
+    crossTenantWarning,
+  } = await provisionStaffAuthInviteLink({
+    tenantId: tid,
+    email,
+    origin,
+    client: supabase,
+  });
 
   const { fiUserId } = await repairStaffTenantLinkFromInvitation({
     tenantId: tid,
@@ -811,10 +802,7 @@ export async function resendStaffLoginInvite(input: {
   const inviteToken = generateStaffAccessInviteToken();
   const inviteUrl = buildStaffAccessInviteUrl(tid, inviteToken);
   const canReuseRow =
-    latest &&
-    latest.status !== "accepted" &&
-    latest.status !== "revoked" &&
-    !latest.accepted_at;
+    latest && latest.status !== "accepted" && latest.status !== "revoked" && !latest.accepted_at;
 
   const invitationId = await upsertStaffLoginInvitation({
     tenantId: tid,
@@ -895,7 +883,11 @@ export async function copyStaffLoginInviteLink(input: {
   if (error) throw new Error(error.message);
   if (!data) throw new Error("No pending login invite found.");
 
-  const row = data as { invite_link: string | null; expires_at: string; accepted_at: string | null };
+  const row = data as {
+    invite_link: string | null;
+    expires_at: string;
+    accepted_at: string | null;
+  };
   if (row.accepted_at) throw new Error(STAFF_ACCESS_INVITE_ERRORS.ALREADY_ACCEPTED);
   const status = resolveInviteStatus({
     invitationStatus: "pending",

@@ -10,7 +10,9 @@ export function mapOnboardingInviteDisplayStatus(input: {
   acceptedAt: string | null | undefined;
   now?: Date;
 }): OnboardingInviteDisplayStatus {
-  const raw = String(input.rawStatus ?? "").trim().toLowerCase();
+  const raw = String(input.rawStatus ?? "")
+    .trim()
+    .toLowerCase();
   if (input.acceptedAt?.trim() || raw === "accepted") return "accepted";
   if (raw === "revoked") return "revoked";
   if (raw === "expired") return "expired";
@@ -39,7 +41,12 @@ export function canSendOnboardingInvite(input: {
 }): boolean {
   if (!String(input.email ?? "").trim()) return false;
   if (input.systemAccessRevoked) return false;
-  if (String(input.employmentStatus ?? "").trim().toLowerCase() === "suspended") return false;
+  if (
+    String(input.employmentStatus ?? "")
+      .trim()
+      .toLowerCase() === "suspended"
+  )
+    return false;
   if (input.inviteStatus === "accepted") return false;
   if (input.inviteStatus === "pending" || input.inviteStatus === "expired") return false;
   return input.inviteStatus === "none" || input.inviteStatus === "revoked";
@@ -53,7 +60,12 @@ export function canResendOnboardingInvite(input: {
 }): boolean {
   if (!String(input.email ?? "").trim()) return false;
   if (input.systemAccessRevoked) return false;
-  if (String(input.employmentStatus ?? "").trim().toLowerCase() === "suspended") return false;
+  if (
+    String(input.employmentStatus ?? "")
+      .trim()
+      .toLowerCase() === "suspended"
+  )
+    return false;
   if (input.inviteStatus === "accepted") return false;
   return input.inviteStatus === "pending" || input.inviteStatus === "expired";
 }
@@ -63,7 +75,6 @@ export function canCopyOnboardingInviteLink(input: {
   hasInviteUrl: boolean;
 }): boolean {
   return (
-    (input.inviteStatus === "pending" || input.inviteStatus === "expired") &&
-    input.hasInviteUrl
+    (input.inviteStatus === "pending" || input.inviteStatus === "expired") && input.hasInviteUrl
   );
 }

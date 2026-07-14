@@ -24,14 +24,8 @@ import { resolvePathologyExtractionJobStatus } from "@/src/lib/pathology/patholo
 
 test("provider env defaults to stub", () => {
   assert.equal(resolvePathologyExtractionProviderIdFromEnv({}), FI_PATHOLOGY_STUB_PROVIDER_ID);
-  assert.equal(
-    normalizePathologyExtractionProviderId("textract"),
-    "aws-textract-v1"
-  );
-  assert.equal(
-    normalizePathologyExtractionProviderId("openai"),
-    "openai-vision-v1"
-  );
+  assert.equal(normalizePathologyExtractionProviderId("textract"), "aws-textract-v1");
+  assert.equal(normalizePathologyExtractionProviderId("openai"), "openai-vision-v1");
 });
 
 test("confidence summary flags low marker confidence for manual review", () => {

@@ -87,10 +87,7 @@ export function sumBreakMinutes(
   return total;
 }
 
-export function computeNetWorkMinutes(
-  grossMinutes: number,
-  breakMinutes: number
-): number {
+export function computeNetWorkMinutes(grossMinutes: number, breakMinutes: number): number {
   return Math.max(0, Math.floor(grossMinutes) - Math.max(0, Math.floor(breakMinutes)));
 }
 

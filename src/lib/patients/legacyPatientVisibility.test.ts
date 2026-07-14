@@ -16,7 +16,10 @@ import {
   toPermissionSafeLegacyRowView,
   type LegacyPatientVisibilityInput,
 } from "./legacyPatientVisibilityCore";
-import { parsePatientDirectoryQuery, patientDirectoryQueryToHrefQuery } from "./patientDirectoryQuery";
+import {
+  parsePatientDirectoryQuery,
+  patientDirectoryQueryToHrefQuery,
+} from "./patientDirectoryQuery";
 import { isAiImagingSummaryPatientVisible } from "@/src/lib/followUpEncounters/followUpEncounterTypes";
 
 function baseInput(over: Partial<LegacyPatientVisibilityInput> = {}): LegacyPatientVisibilityInput {
@@ -45,7 +48,10 @@ describe("FI-LEGACY-PATIENTOS-FILTER-1 — legacy patient visibility", () => {
       true
     );
     assert.equal(
-      matchesLegacyPatientDirectoryFilters(summary, { returningFromTimely: true, hasLegacySource: true }),
+      matchesLegacyPatientDirectoryFilters(summary, {
+        returningFromTimely: true,
+        hasLegacySource: true,
+      }),
       true
     );
   });
@@ -77,12 +83,19 @@ describe("FI-LEGACY-PATIENTOS-FILTER-1 — legacy patient visibility", () => {
     );
     assert.equal(summary.has_follow_up_encounter, true);
     assert.equal(summary.follow_up_encounter_count, 1);
-    assert.equal(matchesLegacyPatientDirectoryFilters(summary, { hasFollowUpEncounter: true }), true);
     assert.equal(
-      matchesLegacyPatientDirectoryFilters(summary, {
-        hasFollowUpEncounter: true,
-        followUpSince: "2026-07-01T00:00:00.000Z",
-      }, { followUpEncounterDates: ["2026-07-02T10:00:00.000Z"] }),
+      matchesLegacyPatientDirectoryFilters(summary, { hasFollowUpEncounter: true }),
+      true
+    );
+    assert.equal(
+      matchesLegacyPatientDirectoryFilters(
+        summary,
+        {
+          hasFollowUpEncounter: true,
+          followUpSince: "2026-07-01T00:00:00.000Z",
+        },
+        { followUpEncounterDates: ["2026-07-02T10:00:00.000Z"] }
+      ),
       true
     );
   });
@@ -104,8 +117,14 @@ describe("FI-LEGACY-PATIENTOS-FILTER-1 — legacy patient visibility", () => {
     );
     assert.equal(withPhotos.has_photos_captured, true);
     assert.equal(withPhotos.has_photos_without_ai_approval, true);
-    assert.equal(matchesLegacyPatientDirectoryFilters(withPhotos, { hasPhotosCaptured: true }), true);
-    assert.equal(matchesLegacyPatientDirectoryFilters(withPhotos, { photosNoAiApproval: true }), true);
+    assert.equal(
+      matchesLegacyPatientDirectoryFilters(withPhotos, { hasPhotosCaptured: true }),
+      true
+    );
+    assert.equal(
+      matchesLegacyPatientDirectoryFilters(withPhotos, { photosNoAiApproval: true }),
+      true
+    );
 
     const approved = deriveLegacyPatientVisibilitySummary(
       baseInput({
@@ -123,7 +142,10 @@ describe("FI-LEGACY-PATIENTOS-FILTER-1 — legacy patient visibility", () => {
     );
     assert.equal(approved.has_clinician_approved_ai_review, true);
     assert.equal(approved.has_photos_without_ai_approval, false);
-    assert.equal(matchesLegacyPatientDirectoryFilters(approved, { clinicianApprovedAi: true }), true);
+    assert.equal(
+      matchesLegacyPatientDirectoryFilters(approved, { clinicianApprovedAi: true }),
+      true
+    );
   });
 
   it("filters AI review pending", () => {

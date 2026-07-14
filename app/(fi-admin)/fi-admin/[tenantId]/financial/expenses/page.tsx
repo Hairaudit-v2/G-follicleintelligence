@@ -144,11 +144,7 @@ export default async function FinancialOsExpensesPage({
         </p>
       ) : null}
 
-      <ExpensePeriodFilterBar
-        tenantId={tid}
-        periodStart={period_start}
-        periodEnd={period_end}
-      />
+      <ExpensePeriodFilterBar tenantId={tid} periodStart={period_start} periodEnd={period_end} />
 
       <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-3">
         <ExpenseManualEntryForm
@@ -158,11 +154,7 @@ export default async function FinancialOsExpensesPage({
           campaignSuggestions={campaignSuggestions}
         />
         <ExpenseCsvImportForm tenantId={tid} canMutate={canMutate} />
-        <ExpenseReceiptUploadForm
-          tenantId={tid}
-          canMutate={canMutate}
-          expenses={expenses}
-        />
+        <ExpenseReceiptUploadForm tenantId={tid} canMutate={canMutate} expenses={expenses} />
       </div>
 
       <ExpenseExportPanel
@@ -237,9 +229,7 @@ export default async function FinancialOsExpensesPage({
                 {row.created_at ? new Date(row.created_at).toLocaleString() : "—"}
               </td>
               <td className={financialOsClasses.tableCell}>{row.source_type}</td>
-              <td className={financialOsClasses.tableCell}>
-                {row.original_filename || "—"}
-              </td>
+              <td className={financialOsClasses.tableCell}>{row.original_filename || "—"}</td>
               <td className={financialOsClasses.tableCell}>{row.row_count}</td>
               <td className={financialOsClasses.tableCell}>
                 <FinancialOsRecordStatusBadge status={row.status} />

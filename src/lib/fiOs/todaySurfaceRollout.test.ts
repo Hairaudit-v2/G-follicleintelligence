@@ -85,10 +85,7 @@ describe("isTodaySurfaceEnabledForTenant", () => {
 
   it("matches a tenant slug when the caller supplies one and it's in the allowlist", () => {
     process.env.FI_TODAY_SURFACE_TENANT_IDS = "acme-clinic";
-    assert.equal(
-      isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "acme-clinic" }),
-      true
-    );
+    assert.equal(isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "acme-clinic" }), true);
   });
 
   it("does not match on slug when no slug is supplied and the id isn't the UUID form", () => {
@@ -98,17 +95,11 @@ describe("isTodaySurfaceEnabledForTenant", () => {
 
   it("matches slugs case-insensitively and trims whitespace", () => {
     process.env.FI_TODAY_SURFACE_TENANT_IDS = " Acme-Clinic ";
-    assert.equal(
-      isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "  acme-clinic  " }),
-      true
-    );
+    assert.equal(isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "  acme-clinic  " }), true);
   });
 
   it("does not require a matching slug when the UUID itself is allowlisted", () => {
     process.env.FI_TODAY_SURFACE_TENANT_IDS = TENANT_A;
-    assert.equal(
-      isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "unrelated-slug" }),
-      true
-    );
+    assert.equal(isTodaySurfaceEnabledForTenant(TENANT_A, { tenantSlug: "unrelated-slug" }), true);
   });
 });

@@ -54,10 +54,7 @@ const btnSecondary = cn(
   "border border-white/[0.12] bg-white/[0.04] text-slate-200 hover:border-cyan-500/30"
 );
 
-const btnGhost = cn(
-  btnBase,
-  "border border-transparent text-slate-300 hover:bg-white/[0.06]"
-);
+const btnGhost = cn(btnBase, "border border-transparent text-slate-300 hover:bg-white/[0.06]");
 
 // --- Header -------------------------------------------------------------------
 
@@ -173,10 +170,7 @@ export function PipelineSummary(props: { summary: PipelinePresentationSummary })
       aria-label="Pipeline summary"
     >
       {tiles.map((t) => (
-        <div
-          key={t.id}
-          className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2"
-        >
+        <div key={t.id} className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
             {t.label}
           </p>
@@ -363,9 +357,7 @@ export function PipelineFilterBar(props: {
             type="checkbox"
             className="h-4 w-4"
             checked={props.active.overdue}
-            onChange={(e) =>
-              props.onChange({ ...props.active, overdue: e.target.checked })
-            }
+            onChange={(e) => props.onChange({ ...props.active, overdue: e.target.checked })}
           />
           Overdue
         </label>
@@ -374,9 +366,7 @@ export function PipelineFilterBar(props: {
             type="checkbox"
             className="h-4 w-4"
             checked={props.active.dueToday}
-            onChange={(e) =>
-              props.onChange({ ...props.active, dueToday: e.target.checked })
-            }
+            onChange={(e) => props.onChange({ ...props.active, dueToday: e.target.checked })}
           />
           Due today
         </label>
@@ -385,9 +375,7 @@ export function PipelineFilterBar(props: {
             type="checkbox"
             className="h-4 w-4"
             checked={props.active.unassignedOnly}
-            onChange={(e) =>
-              props.onChange({ ...props.active, unassignedOnly: e.target.checked })
-            }
+            onChange={(e) => props.onChange({ ...props.active, unassignedOnly: e.target.checked })}
           />
           Unassigned
         </label>
@@ -396,9 +384,7 @@ export function PipelineFilterBar(props: {
             type="checkbox"
             className="h-4 w-4"
             checked={props.active.highValue}
-            onChange={(e) =>
-              props.onChange({ ...props.active, highValue: e.target.checked })
-            }
+            onChange={(e) => props.onChange({ ...props.active, highValue: e.target.checked })}
           />
           High value
         </label>
@@ -473,8 +459,7 @@ export function PipelineFilterBar(props: {
               </p>
               {props.filters.sources.slice(0, 16).map((opt) => {
                 const key = opt.id.replace(/^source:/, "");
-                const on =
-                  props.active.sourceKey === key || props.active.sources.includes(opt.id);
+                const on = props.active.sourceKey === key || props.active.sources.includes(opt.id);
                 return (
                   <button
                     key={opt.id}
@@ -531,7 +516,10 @@ export function PipelineTruncationNotice(props: {
   );
   if (!msg) return null;
   return (
-    <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100" role="status">
+    <p
+      className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+      role="status"
+    >
       {msg}
     </p>
   );
@@ -564,7 +552,11 @@ export function PipelineBoard(props: {
    * Keyboard users continue to use Move stage.
    */
   desktopDragEnabled?: boolean;
-  onDesktopDrop?: (leadId: string, fromColumnId: PipelineStaffColumnId, toColumnId: PipelineStaffColumnId) => void;
+  onDesktopDrop?: (
+    leadId: string,
+    fromColumnId: PipelineStaffColumnId,
+    toColumnId: PipelineStaffColumnId
+  ) => void;
 }) {
   const [openMenuLeadId, setOpenMenuLeadId] = useState<string | null>(null);
   const [dragLeadId, setDragLeadId] = useState<string | null>(null);
@@ -623,22 +615,12 @@ export function PipelineBoard(props: {
           data-testid="pipeline-board-h-scroll"
         >
           {active.map((col) => (
-            <PipelineColumn
-              key={col.id}
-              column={col}
-              {...columnProps}
-              layout="desktop"
-            />
+            <PipelineColumn key={col.id} column={col} {...columnProps} layout="desktop" />
           ))}
         </div>
         <div className="mt-4 space-y-2">
           {rest.map((col) => (
-            <PipelineColumn
-              key={col.id}
-              column={col}
-              {...columnProps}
-              layout="desktop-section"
-            />
+            <PipelineColumn key={col.id} column={col} {...columnProps} layout="desktop-section" />
           ))}
         </div>
       </div>
@@ -646,12 +628,7 @@ export function PipelineBoard(props: {
       {/* Tablet / phone: vertical stack */}
       <div className="space-y-3 lg:hidden" aria-label="Pipeline stages">
         {[...active, ...rest].map((col) => (
-          <PipelineColumn
-            key={col.id}
-            column={col}
-            {...columnProps}
-            layout="stack"
-          />
+          <PipelineColumn key={col.id} column={col} {...columnProps} layout="stack" />
         ))}
       </div>
     </div>
@@ -698,9 +675,7 @@ export function PipelineColumn(props: {
   const hidden = Math.max(0, column.cards.length - cards.length);
   // Drag only on desktop board layout — never on tablet/phone stack
   const allowDrop =
-    Boolean(props.desktopDragEnabled) &&
-    props.layout === "desktop" &&
-    Boolean(props.onDesktopDrop);
+    Boolean(props.desktopDragEnabled) && props.layout === "desktop" && Boolean(props.onDesktopDrop);
 
   if (
     (column.kind === "terminal_won" ||
@@ -758,9 +733,7 @@ export function PipelineColumn(props: {
       <div className="sticky top-0 z-[1] flex items-center justify-between gap-2 border-b border-white/[0.06] bg-[#0b1220]/95 px-3 py-3 backdrop-blur">
         <h2 id={headingId} className="text-sm font-semibold text-slate-100">
           {column.label}
-          <span className="ml-2 text-xs font-medium text-slate-500">
-            ({column.count})
-          </span>
+          <span className="ml-2 text-xs font-medium text-slate-500">({column.count})</span>
         </h2>
         <button
           type="button"
@@ -841,9 +814,7 @@ export function PipelineLeadCardView(props: {
   onPipelineDragEnd?: () => void;
 }) {
   const { card } = props;
-  const instanceRef = useRef(
-    `more-instance-${Math.random().toString(36).slice(2, 8)}`
-  );
+  const instanceRef = useRef(`more-instance-${Math.random().toString(36).slice(2, 8)}`);
   const [uncontrolledMenuOpen, setUncontrolledMenuOpen] = useState(false);
   const menuOpen = props.menuOpen ?? uncontrolledMenuOpen;
   const setMenuOpen = (open: boolean) => {
@@ -868,11 +839,7 @@ export function PipelineLeadCardView(props: {
   const [moveOpen, setMoveOpen] = useState(false);
   const dueLabel =
     props.loadTier === "full"
-      ? formatPipelineDueLabel(
-          card.nextAction.dueAtIso,
-          card.nextAction.overdue,
-          props.nowMs
-        )
+      ? formatPipelineDueLabel(card.nextAction.dueAtIso, card.nextAction.overdue, props.nowMs)
       : null;
   const consultLabel = pipelineConsultationLabel(card.consultation.state);
   const primary = card.primaryAction;
@@ -944,7 +911,7 @@ export function PipelineLeadCardView(props: {
             <p className="mt-0.5 truncate text-xs text-slate-500">
               {card.source.label}
               {" · "}
-              {card.owner.unassigned ? "Unassigned" : card.owner.displayName ?? "Owner"}
+              {card.owner.unassigned ? "Unassigned" : (card.owner.displayName ?? "Owner")}
             </p>
           </div>
         </div>
@@ -1260,9 +1227,7 @@ function FollowUpBucket(props: {
       >
         <h2 className="text-sm font-semibold text-slate-100">
           {props.label}
-          <span className="ml-2 text-xs font-medium text-slate-500">
-            ({props.items.length})
-          </span>
+          <span className="ml-2 text-xs font-medium text-slate-500">({props.items.length})</span>
         </h2>
         <span className="text-xs text-slate-500">{open ? "Hide" : "Show"}</span>
       </button>
@@ -1312,12 +1277,9 @@ export function PipelineFollowUpItemView(props: {
           </button>
           <p className="mt-0.5 text-xs text-slate-300">{item.title}</p>
           <p className="mt-1 text-[11px] text-slate-500">
-            {item.dueAtIso
-              ? `Due ${item.dueAtIso.slice(0, 10)}`
-              : "No due date"}
+            {item.dueAtIso ? `Due ${item.dueAtIso.slice(0, 10)}` : "No due date"}
             {" · "}
-            {item.assignee.displayName ??
-              (item.assignee.userId ? "Assigned" : "Unassigned task")}
+            {item.assignee.displayName ?? (item.assignee.userId ? "Assigned" : "Unassigned task")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1392,9 +1354,7 @@ export function PipelineLiveRegion(props: { message: string }) {
   );
 }
 
-export function PipelineGlobalActionsBar(props: {
-  actions: readonly PipelineGlobalAction[];
-}) {
+export function PipelineGlobalActionsBar(props: { actions: readonly PipelineGlobalAction[] }) {
   if (!props.actions.length) return null;
   return (
     <div className="flex flex-wrap gap-2" aria-label="Pipeline actions">

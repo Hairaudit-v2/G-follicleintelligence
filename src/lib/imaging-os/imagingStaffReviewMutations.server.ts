@@ -45,7 +45,10 @@ async function loadTenantPatientImage(
   return data as Record<string, unknown>;
 }
 
-function resolvePreviousViewType(row: Record<string, unknown>, metadata: Record<string, unknown>): string {
+function resolvePreviousViewType(
+  row: Record<string, unknown>,
+  metadata: Record<string, unknown>
+): string {
   const clinical = readImagingClinicalAiMetadata(metadata);
   if (clinical?.view_type) return clinical.view_type;
   if (row.ai_image_category != null) return String(row.ai_image_category);

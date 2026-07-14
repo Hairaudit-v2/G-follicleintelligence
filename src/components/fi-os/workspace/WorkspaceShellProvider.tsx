@@ -62,7 +62,11 @@ function WorkspaceShellProviderInner({
   const writeStackToUrl = useCallback(
     (stack: readonly WorkspaceRef[], mode: "push" | "replace") => {
       skipUrlSyncRef.current = true;
-      const next = buildWorkspaceQueryUrl(pathname, new URLSearchParams(searchParams.toString()), stack);
+      const next = buildWorkspaceQueryUrl(
+        pathname,
+        new URLSearchParams(searchParams.toString()),
+        stack
+      );
       if (mode === "push") router.push(next, { scroll: false });
       else router.replace(next, { scroll: false });
     },

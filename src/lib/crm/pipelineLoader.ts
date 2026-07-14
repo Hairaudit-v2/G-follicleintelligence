@@ -56,10 +56,8 @@ export function resolvePipelinePermissions(
   const canMutate =
     input.canMutateFromOperatorContext || Boolean(input.validPlatformAdminTenantProxy);
   const canConvert =
-    canMutate &&
-    (input.canUseConversion || Boolean(input.validPlatformAdminTenantProxy));
-  const canBookConsultation =
-    input.canUseBookings || Boolean(input.validPlatformAdminTenantProxy);
+    canMutate && (input.canUseConversion || Boolean(input.validPlatformAdminTenantProxy));
+  const canBookConsultation = input.canUseBookings || Boolean(input.validPlatformAdminTenantProxy);
   const canCreateEnquiry = canMutate;
 
   return {
@@ -98,9 +96,7 @@ export function resolvePipelinePermissionsFromSession(opts: {
   const canMutate = operatorCanMutate || (opts.hasCrmShellAccess && validProxy);
   const canUseConversion =
     canMutate &&
-    (opts.canUseClinicFeatures ||
-      CRM_MUTATION_ROLES_LOWER.has(roleLower) ||
-      validProxy);
+    (opts.canUseClinicFeatures || CRM_MUTATION_ROLES_LOWER.has(roleLower) || validProxy);
   const canUseBookings = opts.bookingsOperator ?? canMutate;
 
   const perms = resolvePipelinePermissions({
@@ -192,9 +188,7 @@ export function toPipelineMoveStageDefinitionsForClient(
 // ---------------------------------------------------------------------------
 
 /** Visible board lead IDs (archived lifecycle excluded from columns). */
-export function extractVisiblePipelineLeadIds(
-  presentation: PipelinePresentation
-): string[] {
+export function extractVisiblePipelineLeadIds(presentation: PipelinePresentation): string[] {
   const ids: string[] = [];
   for (const col of presentation.columns) {
     for (const card of col.cards) {
@@ -294,7 +288,7 @@ export function normalizePipelineSearchParams(
   // Lazy terminal: when not explicitly requesting lost/converted lifecycle, keep default window.
   // Explicit lifecycle=closed_lost|converted may raise pages for review (still capped).
   const life = String(
-    Array.isArray(mapped.lifecycle) ? mapped.lifecycle[0] : mapped.lifecycle ?? ""
+    Array.isArray(mapped.lifecycle) ? mapped.lifecycle[0] : (mapped.lifecycle ?? "")
   )
     .trim()
     .toLowerCase();

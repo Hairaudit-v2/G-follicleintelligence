@@ -91,7 +91,8 @@ export function FrontDeskTodayHeader(props: {
             <span className="text-xs font-medium text-slate-500">Loading details…</span>
           ) : props.lastRefreshedAt ? (
             <span className="text-xs text-slate-500">
-              Updated {props.lastRefreshedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              Updated{" "}
+              {props.lastRefreshedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           ) : null}
           {props.refreshError ? (
@@ -294,8 +295,7 @@ function AttentionRow(props: {
 }
 
 function SeverityMark({ severity }: { severity: FrontDeskSeverity }) {
-  const symbol =
-    severity === "blocker" ? "!" : severity === "action_needed" ? "•" : "i";
+  const symbol = severity === "blocker" ? "!" : severity === "action_needed" ? "•" : "i";
   return (
     <span
       aria-hidden
@@ -375,8 +375,7 @@ export function FrontDeskLane(props: {
     >
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-4 py-3">
         <h2 id={`${panelId}-heading`} className="text-sm font-semibold text-slate-100">
-          {lane.label}{" "}
-          <span className="tabular-nums text-slate-400">({lane.count})</span>
+          {lane.label} <span className="tabular-nums text-slate-400">({lane.count})</span>
         </h2>
         {lane.collapsedByDefault ? (
           <button
@@ -437,8 +436,7 @@ export function FrontDeskTerminalSection(props: {
     >
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <h2 id={`${id}-heading`} className="text-sm font-semibold text-slate-300">
-          Cancelled & no-show{" "}
-          <span className="tabular-nums text-slate-500">({total})</span>
+          Cancelled & no-show <span className="tabular-nums text-slate-500">({total})</span>
         </h2>
         <button
           type="button"
@@ -511,7 +509,11 @@ export function FrontDeskPatientCard(props: {
                 {card.patient.displayName}
               </p>
             )}
-            <StateChip state={card.operationalState} label={stateLabel} runningLate={card.runningLate} />
+            <StateChip
+              state={card.operationalState}
+              label={stateLabel}
+              runningLate={card.runningLate}
+            />
           </div>
           <p className="text-sm text-slate-300">
             <span className="font-medium tabular-nums text-slate-100">
@@ -582,8 +584,9 @@ export function FrontDeskPatientCard(props: {
             />
           ) : null}
 
-          {secondary.filter((a) => a !== "take_payment" || !paymentNeedsAttention(card.payment.state))
-            .length > 0 ? (
+          {secondary.filter(
+            (a) => a !== "take_payment" || !paymentNeedsAttention(card.payment.state)
+          ).length > 0 ? (
             <div className="relative">
               <button
                 type="button"
@@ -604,8 +607,7 @@ export function FrontDeskPatientCard(props: {
                 >
                   {secondary
                     .filter(
-                      (a) =>
-                        !(a === "take_payment" && paymentNeedsAttention(card.payment.state))
+                      (a) => !(a === "take_payment" && paymentNeedsAttention(card.payment.state))
                     )
                     .map((action) => (
                       <li key={action} role="none">
@@ -735,7 +737,12 @@ export function FrontDeskTodayActionsBar(props: {
       {props.actions.map((action) => {
         if (action.id === "find_patient") {
           return (
-            <button key={action.id} type="button" className={btnPrimary} onClick={props.onFindPatient}>
+            <button
+              key={action.id}
+              type="button"
+              className={btnPrimary}
+              onClick={props.onFindPatient}
+            >
               {action.label}
             </button>
           );
@@ -801,4 +808,3 @@ function formatDayLabel(ymd: string, tz: string): string {
     return ymd;
   }
 }
-

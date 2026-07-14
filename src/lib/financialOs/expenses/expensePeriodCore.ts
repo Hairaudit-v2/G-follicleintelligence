@@ -2,9 +2,7 @@
 
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
 
-export function parseExpensePeriodYmd(
-  raw: string | null | undefined
-): string | null {
+export function parseExpensePeriodYmd(raw: string | null | undefined): string | null {
   const s = raw?.trim().slice(0, 10) ?? "";
   return YMD.test(s) ? s : null;
 }

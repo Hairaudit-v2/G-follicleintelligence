@@ -22,7 +22,9 @@ export function FiOsEmptyState({
     <div className={cn("px-4 py-12 text-center", className)}>
       {icon ? <div className="mx-auto mb-4 flex justify-center text-slate-500">{icon}</div> : null}
       <p className="text-base font-semibold text-slate-200">{title}</p>
-      {description ? <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">{description}</p> : null}
+      {description ? (
+        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">{description}</p>
+      ) : null}
       {action || secondaryAction ? (
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           {action ? (

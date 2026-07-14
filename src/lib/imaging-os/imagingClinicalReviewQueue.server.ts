@@ -8,12 +8,13 @@ import {
   readImagingClinicalAiMetadata,
   CLINICAL_REVIEW_CONFIDENCE_THRESHOLD,
 } from "./clinicalImageAnalysisCore";
-import {
-  readImagingStaffReviewRecord,
-  staffReviewClearsQueue,
-} from "./imagingStaffReviewCore";
+import { readImagingStaffReviewRecord, staffReviewClearsQueue } from "./imagingStaffReviewCore";
 import type { ImagingQualityMetadataRecord } from "./imageQualityMetadata";
-import { buildImagingDeepLinks, listAvailableImagingDeepLinks, type ImagingDeepLink } from "./imagingDeepLinksCore";
+import {
+  buildImagingDeepLinks,
+  listAvailableImagingDeepLinks,
+  type ImagingDeepLink,
+} from "./imagingDeepLinksCore";
 import {
   matchesImagingReviewQueueFilters,
   type ImagingClinicalReviewQueueFilters,
@@ -103,7 +104,7 @@ export function imageNeedsClinicalReview(input: {
     input.aiImageCategoryConfidence ??
     (typeof metadata.ai_image_category_confidence === "number"
       ? metadata.ai_image_category_confidence
-      : clinicalAi?.confidence ?? null);
+      : (clinicalAi?.confidence ?? null));
 
   const graftTrayReasons = Array.isArray(metadata.graft_tray_review_reasons)
     ? metadata.graft_tray_review_reasons.map(String)
@@ -119,7 +120,10 @@ export function imageNeedsClinicalReview(input: {
     graftTrayReviewReasons: graftTrayReasons,
   });
 
-  if (input.aiImageReviewStatus === "pending" && (classificationConfidence ?? 0) < CLINICAL_REVIEW_CONFIDENCE_THRESHOLD) {
+  if (
+    input.aiImageReviewStatus === "pending" &&
+    (classificationConfidence ?? 0) < CLINICAL_REVIEW_CONFIDENCE_THRESHOLD
+  ) {
     if (!reasons.includes("low_classification_confidence")) {
       reasons.push("low_classification_confidence");
     }
@@ -200,8 +204,7 @@ export async function loadImagingClinicalReviewQueue(
       patientId: String(mapped.patient_id),
       caseId: mapped.case_id != null ? String(mapped.case_id) : null,
       metadata,
-      aiImageCategory:
-        mapped.ai_image_category != null ? String(mapped.ai_image_category) : null,
+      aiImageCategory: mapped.ai_image_category != null ? String(mapped.ai_image_category) : null,
       aiImageCategoryConfidence:
         mapped.ai_image_category_confidence != null
           ? Number(mapped.ai_image_category_confidence)
@@ -315,8 +318,7 @@ export async function loadImagingClinicalReviewQueue(
       deepLinks,
       assignedToUserId: readImagingReviewAssignmentRecord(metadata)?.assigned_to ?? null,
       assignedReviewerLabel: null,
-      assignmentStatus:
-        readImagingReviewAssignmentRecord(metadata)?.assignment_status ?? null,
+      assignmentStatus: readImagingReviewAssignmentRecord(metadata)?.assignment_status ?? null,
       retakeRequired: readImagingStaffReviewRecord(metadata)?.status === "retake_required",
       graftTrayAiEstimate: readGraftTrayAiEstimateFromMetadata(metadata),
       graftTrayAiReviewAudit: parseGraftTrayReviewAuditTrail(metadata.graft_tray_ai_review_audit),

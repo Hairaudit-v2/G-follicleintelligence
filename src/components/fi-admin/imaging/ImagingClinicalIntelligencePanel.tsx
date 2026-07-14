@@ -23,7 +23,9 @@ function AssessmentCard({
       <p className="text-xs font-semibold text-slate-300">{title}</p>
       <p className="mt-1 text-[11px] capitalize text-slate-400">
         Status: {assessment.status.replace(/_/g, " ")}
-        {assessment.confidence > 0 ? ` · ${Math.round(assessment.confidence * 100)}% confidence` : ""}
+        {assessment.confidence > 0
+          ? ` · ${Math.round(assessment.confidence * 100)}% confidence`
+          : ""}
       </p>
       {assessment.observations.length > 0 ? (
         <ul className="mt-2 space-y-0.5 text-xs text-slate-400">
@@ -101,7 +103,9 @@ export function ImagingClinicalIntelligencePanel({ view }: Props) {
             </span>
           ) : null}
           {view.retakeRequired ? (
-            <span className="rounded bg-rose-500/10 px-2 py-0.5 text-rose-200">Retake required</span>
+            <span className="rounded bg-rose-500/10 px-2 py-0.5 text-rose-200">
+              Retake required
+            </span>
           ) : null}
         </div>
       )}
@@ -126,7 +130,9 @@ export function ImagingClinicalIntelligencePanel({ view }: Props) {
               <p className="font-medium text-slate-300">Density summary (staff)</p>
               <p className="capitalize">{view.jobSummaries.density_estimate.summary_status}</p>
               {view.jobSummaries.density_estimate.limitations[0] ? (
-                <p className="mt-1 text-[11px]">{view.jobSummaries.density_estimate.limitations[0]}</p>
+                <p className="mt-1 text-[11px]">
+                  {view.jobSummaries.density_estimate.limitations[0]}
+                </p>
               ) : null}
             </div>
           ) : null}

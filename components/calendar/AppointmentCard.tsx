@@ -715,7 +715,8 @@ function AppointmentCardInner({
                   variant="outline"
                   className="border-rose-500/35 bg-rose-950/40 font-medium text-rose-100"
                 >
-                  {appointment.blockerCount} blocker{(appointment.blockerCount ?? 0) === 1 ? "" : "s"}
+                  {appointment.blockerCount} blocker
+                  {(appointment.blockerCount ?? 0) === 1 ? "" : "s"}
                 </Badge>
               ) : null}
               {appointment.paymentDue ? (

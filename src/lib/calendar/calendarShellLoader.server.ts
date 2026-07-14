@@ -74,7 +74,9 @@ function buildShellResourceColumns(
   if (resourceView === "clinic") {
     return [{ id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No clinic" }];
   }
-  return [{ id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No staff column" }];
+  return [
+    { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No staff column" },
+  ];
 }
 
 /**

@@ -38,9 +38,7 @@ export function runUnifiedPatientImageIngest(
   const pipeline = runImagingOsIngestionPipeline(request);
   const captureSource =
     ctx.capture_source ||
-    (typeof request.metadata?.capture_source === "string"
-      ? request.metadata.capture_source
-      : null);
+    (typeof request.metadata?.capture_source === "string" ? request.metadata.capture_source : null);
 
   const imaging_os_ingest = buildImagingOsIngestMetadata(pipeline);
 

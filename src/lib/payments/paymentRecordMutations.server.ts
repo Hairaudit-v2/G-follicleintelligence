@@ -235,9 +235,8 @@ export async function recordManualPayment(
   if (error) throw new Error(error.message);
   const mapped = mapRow(data as Record<string, unknown>);
   if (mapped.status === "paid" && mapped.patient_id?.trim()) {
-    const { advancePatientJourneyOnEvent } = await import(
-      "@/src/lib/patientJourney/patientJourneyState.server"
-    );
+    const { advancePatientJourneyOnEvent } =
+      await import("@/src/lib/patientJourney/patientJourneyState.server");
     await advancePatientJourneyOnEvent({
       tenantId: tid,
       patientId: mapped.patient_id.trim(),

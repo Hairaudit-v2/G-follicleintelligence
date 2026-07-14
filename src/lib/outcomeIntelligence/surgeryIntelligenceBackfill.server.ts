@@ -66,7 +66,9 @@ async function loadExistingFactsEventRows(
   return (data ?? []).map((raw) => {
     const row = raw as { id: string; event_metadata?: Record<string, unknown> };
     const metadata =
-      row.event_metadata && typeof row.event_metadata === "object" && !Array.isArray(row.event_metadata)
+      row.event_metadata &&
+      typeof row.event_metadata === "object" &&
+      !Array.isArray(row.event_metadata)
         ? row.event_metadata
         : {};
     return {

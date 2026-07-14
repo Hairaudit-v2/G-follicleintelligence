@@ -31,7 +31,8 @@ export function OnboardingInviteClient({
   const [accepted, setAccepted] = useState(model.invitationStatus === "accepted");
 
   const expired = model.invitationStatus === "expired";
-  const canSetupPin = !expired && model.pinSetupToken && (accepted || model.invitationStatus === "pending");
+  const canSetupPin =
+    !expired && model.pinSetupToken && (accepted || model.invitationStatus === "pending");
 
   const onAccept = () => {
     setError(null);
@@ -68,7 +69,9 @@ export function OnboardingInviteClient({
         setError(result.error);
         return;
       }
-      setMessage("PIN set successfully. Your clinic administrator will finalize permissions and training.");
+      setMessage(
+        "PIN set successfully. Your clinic administrator will finalize permissions and training."
+      );
       setPin("");
       setPinConfirm("");
       router.refresh();
@@ -154,7 +157,11 @@ export function OnboardingInviteClient({
                     className="mt-1 w-full rounded-lg border border-white/10 bg-[#0c1426] px-3 py-2 text-slate-100"
                   />
                 </label>
-                <Button className="w-full" disabled={pending || pin.length !== 4} onClick={onSetPin}>
+                <Button
+                  className="w-full"
+                  disabled={pending || pin.length !== 4}
+                  onClick={onSetPin}
+                >
                   {pending ? "Saving…" : "Set PIN"}
                 </Button>
               </div>

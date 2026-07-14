@@ -29,19 +29,21 @@ export type StaffOperationalHistory = {
   totalActivityCount: number;
 };
 
-export function computeTotalActivityCount(h: Pick<
-  StaffOperationalHistory,
-  | "trainingCount"
-  | "sopAcknowledgementCount"
-  | "surgeryAssignmentCount"
-  | "calendarAssignmentCount"
-  | "patientAssignmentCount"
-  | "complianceHistoryCount"
-  | "academyCompetencyCount"
-  | "credentialCount"
-  | "certificationCount"
-  | "identityLinkCount"
->): number {
+export function computeTotalActivityCount(
+  h: Pick<
+    StaffOperationalHistory,
+    | "trainingCount"
+    | "sopAcknowledgementCount"
+    | "surgeryAssignmentCount"
+    | "calendarAssignmentCount"
+    | "patientAssignmentCount"
+    | "complianceHistoryCount"
+    | "academyCompetencyCount"
+    | "credentialCount"
+    | "certificationCount"
+    | "identityLinkCount"
+  >
+): number {
   return (
     h.trainingCount +
     h.sopAcknowledgementCount +

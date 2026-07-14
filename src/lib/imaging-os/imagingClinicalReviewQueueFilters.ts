@@ -77,8 +77,7 @@ function confidenceBandMatch(
   if (band === "any") return true;
   const c = confidence ?? 0;
   if (band === "low") return c < CLINICAL_REVIEW_CONFIDENCE_THRESHOLD;
-  if (band === "medium")
-    return c >= CLINICAL_REVIEW_CONFIDENCE_THRESHOLD && c < 0.85;
+  if (band === "medium") return c >= CLINICAL_REVIEW_CONFIDENCE_THRESHOLD && c < 0.85;
   return c >= 0.85;
 }
 

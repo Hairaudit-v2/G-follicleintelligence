@@ -63,7 +63,10 @@ export default async function ImagingAiReviewOpsPage({
           work and never overwrite staff-reviewed graft-tray decisions.
         </p>
         <p className="text-xs text-slate-500">
-          <Link href={`/fi-admin/${tid}/imaging/review`} className="text-violet-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tid}/imaging/review`}
+            className="text-violet-300 hover:underline"
+          >
             Clinical review queue
           </Link>
         </p>

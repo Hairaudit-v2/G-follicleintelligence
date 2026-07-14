@@ -50,38 +50,23 @@ test("mapOnboardingInviteDisplayStatus: expired when past expires_at", () => {
 });
 
 test("canSendOnboardingInvite: true when no invite yet", () => {
-  assert.equal(
-    canSendOnboardingInvite({ ...base, inviteStatus: "none" }),
-    true
-  );
+  assert.equal(canSendOnboardingInvite({ ...base, inviteStatus: "none" }), true);
 });
 
 test("canSendOnboardingInvite: false when invite pending", () => {
-  assert.equal(
-    canSendOnboardingInvite({ ...base, inviteStatus: "pending" }),
-    false
-  );
+  assert.equal(canSendOnboardingInvite({ ...base, inviteStatus: "pending" }), false);
 });
 
 test("canResendOnboardingInvite: true for pending unaccepted invite", () => {
-  assert.equal(
-    canResendOnboardingInvite({ ...base, inviteStatus: "pending" }),
-    true
-  );
+  assert.equal(canResendOnboardingInvite({ ...base, inviteStatus: "pending" }), true);
 });
 
 test("canResendOnboardingInvite: true for expired unaccepted invite", () => {
-  assert.equal(
-    canResendOnboardingInvite({ ...base, inviteStatus: "expired" }),
-    true
-  );
+  assert.equal(canResendOnboardingInvite({ ...base, inviteStatus: "expired" }), true);
 });
 
 test("canResendOnboardingInvite: false for accepted invite", () => {
-  assert.equal(
-    canResendOnboardingInvite({ ...base, inviteStatus: "accepted" }),
-    false
-  );
+  assert.equal(canResendOnboardingInvite({ ...base, inviteStatus: "accepted" }), false);
 });
 
 test("canResendOnboardingInvite: false when access suspended", () => {
@@ -104,10 +89,7 @@ test("canResendOnboardingInvite: false when access suspended", () => {
 });
 
 test("canCopyOnboardingInviteLink: true when pending and URL exists", () => {
-  assert.equal(
-    canCopyOnboardingInviteLink({ inviteStatus: "pending", hasInviteUrl: true }),
-    true
-  );
+  assert.equal(canCopyOnboardingInviteLink({ inviteStatus: "pending", hasInviteUrl: true }), true);
 });
 
 test("canCopyOnboardingInviteLink: false when accepted", () => {

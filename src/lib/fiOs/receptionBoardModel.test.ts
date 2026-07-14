@@ -114,20 +114,29 @@ test("1. scheduled booking outside arriving-soon window → expected", () => {
   // Window default 60 min; start is 2h ahead.
   const start = "2026-07-11T14:00:00.000Z";
   assert.equal(derive({ bookingStatus: "scheduled", startAtIso: start }), "expected");
-  assert.equal(isBookingArrivingSoon({ bookingStatus: "scheduled", startAtIso: start, nowMs: NOW_MS }), false);
+  assert.equal(
+    isBookingArrivingSoon({ bookingStatus: "scheduled", startAtIso: start, nowMs: NOW_MS }),
+    false
+  );
 });
 
 test("2. scheduled booking inside arriving-soon window → arriving_soon", () => {
   const start = "2026-07-11T12:30:00.000Z"; // 30 min ahead
   assert.equal(derive({ bookingStatus: "scheduled", startAtIso: start }), "arriving_soon");
-  assert.equal(isBookingArrivingSoon({ bookingStatus: "scheduled", startAtIso: start, nowMs: NOW_MS }), true);
+  assert.equal(
+    isBookingArrivingSoon({ bookingStatus: "scheduled", startAtIso: start, nowMs: NOW_MS }),
+    true
+  );
 });
 
 test("3. confirmed booking past start + grace → running_late", () => {
   // Default grace is 10 minutes; 1h past start is late.
   const start = "2026-07-11T11:00:00.000Z";
   assert.equal(derive({ bookingStatus: "confirmed", startAtIso: start }), "running_late");
-  assert.equal(isBookingRunningLate({ bookingStatus: "confirmed", startAtIso: start, nowMs: NOW_MS }), true);
+  assert.equal(
+    isBookingRunningLate({ bookingStatus: "confirmed", startAtIso: start, nowMs: NOW_MS }),
+    true
+  );
   // Within default 10m grace: not yet running late
   const withinGrace = "2026-07-11T11:55:00.000Z"; // 5 min before now
   assert.equal(derive({ bookingStatus: "confirmed", startAtIso: withinGrace }), "expected");
@@ -135,10 +144,7 @@ test("3. confirmed booking past start + grace → running_late", () => {
 
 test("4. arrived booking past start → waiting, not running_late", () => {
   const start = "2026-07-11T10:00:00.000Z";
-  assert.equal(
-    derive({ bookingStatus: "arrived", startAtIso: start, metadata: {} }),
-    "waiting"
-  );
+  assert.equal(derive({ bookingStatus: "arrived", startAtIso: start, metadata: {} }), "waiting");
   assert.equal(isBookingWaiting({ bookingStatus: "arrived", metadata: {} }), true);
   assert.equal(
     isBookingRunningLate({ bookingStatus: "arrived", startAtIso: start, nowMs: NOW_MS }),

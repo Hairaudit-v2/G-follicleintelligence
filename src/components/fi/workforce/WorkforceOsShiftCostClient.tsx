@@ -293,7 +293,10 @@ export function WorkforceOsShiftCostClient({
               </tr>
             ) : (
               dailyRoster.lines.map((line) => (
-                <tr key={line.shiftId ?? `${line.staffMemberId}-${line.shiftType}`} className="border-b border-white/[0.06]">
+                <tr
+                  key={line.shiftId ?? `${line.staffMemberId}-${line.shiftType}`}
+                  className="border-b border-white/[0.06]"
+                >
                   <td className="px-4 py-3 text-[#F8FAFC]">
                     {line.fullName}
                     {!line.hasWageProfile ? (

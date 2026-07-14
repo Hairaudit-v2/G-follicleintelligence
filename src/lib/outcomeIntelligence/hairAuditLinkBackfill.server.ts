@@ -45,7 +45,9 @@ async function loadSurgeryRows(
       .eq("id", scope.surgeryId.trim())
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return data ? [{ id: String(data.id), case_id: data.case_id ? String(data.case_id) : null }] : [];
+    return data
+      ? [{ id: String(data.id), case_id: data.case_id ? String(data.case_id) : null }]
+      : [];
   }
 
   if (scope.caseId?.trim()) {
@@ -106,11 +108,7 @@ export async function runHairAuditLinkBackfill(
     });
     outcomes.push(planned.outcome);
 
-    if (
-      !input.dryRun &&
-      planned.outcome.kind === "copied_legacy" &&
-      planned.nextMetadata
-    ) {
+    if (!input.dryRun && planned.outcome.kind === "copied_legacy" && planned.nextMetadata) {
       const { error } = await supabase
         .from("fi_cases")
         .update({ metadata: planned.nextMetadata })

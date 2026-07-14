@@ -109,10 +109,7 @@ export const STAFF_CAPABILITY_SPECS: Record<StaffCapabilityKey, StaffCapabilityS
 };
 
 /** Map consolidated Team workspace tab ids to SA-1 tab keys. */
-export const TEAM_TAB_ID_TO_WORKFORCE_TAB_KEY: Record<
-  string,
-  WorkforceOsTabKey | null
-> = {
+export const TEAM_TAB_ID_TO_WORKFORCE_TAB_KEY: Record<string, WorkforceOsTabKey | null> = {
   overview: null,
   staff: null,
   roster: "roster",

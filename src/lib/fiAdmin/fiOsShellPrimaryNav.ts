@@ -335,7 +335,10 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Team",
       href:
         visibleTeamTabIds && visibleTeamTabIds.length > 0
-          ? buildTeamWorkspaceLandingHref(b.split("/").filter(Boolean).pop() ?? "", visibleTeamTabIds)
+          ? buildTeamWorkspaceLandingHref(
+              b.split("/").filter(Boolean).pop() ?? "",
+              visibleTeamTabIds
+            )
           : hrefFor(b, "team"),
       disabled: false,
       hint: "Staff operations, roster, onboarding, compliance, training, and access.",
@@ -441,7 +444,11 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (npRaw.startsWith(nb)) {
     const restEarly = npRaw.slice(nb.length).replace(/^\//, "");
     const firstEarly = restEarly.split("/")[0] ?? "";
-    if (firstEarly === "crm" || firstEarly === "leadflow" || firstEarly === "consultation-conversion") {
+    if (
+      firstEarly === "crm" ||
+      firstEarly === "leadflow" ||
+      firstEarly === "consultation-conversion"
+    ) {
       return "crm";
     }
     if (firstEarly === "doctor") return "doctor-workspace";

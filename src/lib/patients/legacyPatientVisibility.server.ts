@@ -22,7 +22,9 @@ type PatientMetaRow = {
 };
 
 function metaRecord(raw: unknown): Record<string, unknown> {
-  return raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  return raw && typeof raw === "object" && !Array.isArray(raw)
+    ? (raw as Record<string, unknown>)
+    : {};
 }
 
 async function loadSourceMappingsByPatient(

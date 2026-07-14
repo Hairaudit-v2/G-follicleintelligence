@@ -1,16 +1,16 @@
 import "server-only";
 
-import type { ImageClassificationResultV1, NormalizedImageSignalV1 } from "@follicle/intelligence-core/contracts";
+import type {
+  ImageClassificationResultV1,
+  NormalizedImageSignalV1,
+} from "@follicle/intelligence-core/contracts";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
 import {
   buildHairAuditClassificationFromHli,
   buildDegradedHairAuditClassification,
 } from "@/src/lib/hairaudit/hairAuditClassifierResponseMap";
 import type { HairAuditImageClassifyResponse } from "@/src/lib/hairaudit/fiOsHairAuditImageClassifyService";
-import {
-  buildImageClassificationResultV1,
-  buildNormalizedImageSignalV1,
-} from "./contractMapping";
+import { buildImageClassificationResultV1, buildNormalizedImageSignalV1 } from "./contractMapping";
 import {
   classifyWithImagingOsStub,
   classifyWithLiveHieStack,
@@ -32,8 +32,7 @@ export const SOURCE_CAPTURE_DEFAULTS: Partial<
   Record<UnifiedImageClassifyRequest["source_system"], SourceSystemCaptureDefaults>
 > = {
   fi_os: {
-    resolveCaptureSource: (request) =>
-      resolveFiOsClassifierCaptureSource(request.capture_source),
+    resolveCaptureSource: (request) => resolveFiOsClassifierCaptureSource(request.capture_source),
     defaultUploadSource: "fi_os",
   },
   hairaudit: {
@@ -217,7 +216,10 @@ export function mapUnifiedResultToHairAuditResponse(
   }
 
   const category = unified.classification.category ?? "front";
-  const hliCategoryMap: Record<string, Parameters<typeof buildHairAuditClassificationFromHli>[0]["hliCategory"]> = {
+  const hliCategoryMap: Record<
+    string,
+    Parameters<typeof buildHairAuditClassificationFromHli>[0]["hliCategory"]
+  > = {
     front: "front",
     left_temple: "left_profile",
     right_temple: "right_profile",

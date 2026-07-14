@@ -37,7 +37,10 @@ export async function POST(req: Request) {
         httpStatus: result.httpStatus,
         reason: result.publicMessage,
       });
-      return NextResponse.json({ ok: false, error: result.publicMessage }, { status: result.httpStatus });
+      return NextResponse.json(
+        { ok: false, error: result.publicMessage },
+        { status: result.httpStatus }
+      );
     }
 
     return NextResponse.json(

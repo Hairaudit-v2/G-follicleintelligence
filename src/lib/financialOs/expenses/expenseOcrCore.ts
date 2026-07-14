@@ -120,7 +120,9 @@ export function extractExpenseFieldsFromText(rawText: string): {
   if (inv?.[1]) invoice_number = inv[1].slice(0, 80);
 
   const description = lines.slice(0, 3).join(" · ").slice(0, 500) || null;
-  const suggested = suggestCategoryCodeFromText([vendor_name, description].filter(Boolean).join(" "));
+  const suggested = suggestCategoryCodeFromText(
+    [vendor_name, description].filter(Boolean).join(" ")
+  );
 
   let confidence = 0.2;
   if (amountCents != null) confidence += 0.35;

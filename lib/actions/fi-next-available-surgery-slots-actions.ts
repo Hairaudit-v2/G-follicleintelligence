@@ -17,7 +17,12 @@ const bodySchema = z
     roomId: z.union([UUID, z.null()]).optional(),
     bookingId: z.union([UUID, z.null()]).optional(),
     preferredStartAt: z.string().min(1),
-    durationMinutes: z.number().int().positive().max(24 * 60).optional(),
+    durationMinutes: z
+      .number()
+      .int()
+      .positive()
+      .max(24 * 60)
+      .optional(),
     limit: z.number().int().positive().max(20).optional(),
   })
   .strict();

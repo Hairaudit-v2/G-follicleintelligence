@@ -281,11 +281,7 @@ export function StaffDirectoryClient({
       ) : null}
 
       {mode === "edit" && canManage ? (
-        <DashboardCard
-          className="p-4 sm:p-5"
-          elevated
-          aria-label="Edit staff member"
-        >
+        <DashboardCard className="p-4 sm:p-5" elevated aria-label="Edit staff member">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <h2 className="text-sm font-semibold text-[#F8FAFC]">Edit staff</h2>

@@ -32,7 +32,8 @@ export async function enrichProcedureDayBoardWithLiveWorkflow(
     liveByBooking: Object.fromEntries(liveByBooking),
     liveSummary: {
       activeSessions,
-      completedToday: [...liveByBooking.values()].filter((s) => s.currentStage === "completed").length,
+      completedToday: [...liveByBooking.values()].filter((s) => s.currentStage === "completed")
+        .length,
       dischargedToday: [...liveByBooking.values()].filter((s) => s.currentStage === "discharged")
         .length,
     },

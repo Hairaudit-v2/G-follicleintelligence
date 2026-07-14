@@ -104,12 +104,7 @@ export function ReportLibraryClient(props: {
   }
 
   function liveHrefFor(def: ReportDefinition): string | null {
-    return buildReportLiveHrefWithPeriod(
-      tenantId,
-      def.livePathSuffix,
-      { from, to },
-      def.id
-    );
+    return buildReportLiveHrefWithPeriod(tenantId, def.livePathSuffix, { from, to }, def.id);
   }
 
   function pushPeriod(nextFrom: string, nextTo: string) {

@@ -31,7 +31,11 @@ describe("imaging quality tenant policy", () => {
       shouldBlockUploadForImagingQuality({
         evaluation: { status: "fail", qualityScore: 20 },
         policy: { ...IMAGING_QUALITY_POLICY_DEFAULTS, block_upload_on_poor_quality: false },
-        protocol_context: { capture_source: "hairaudit", slot_required: true, is_audit_context: true },
+        protocol_context: {
+          capture_source: "hairaudit",
+          slot_required: true,
+          is_audit_context: true,
+        },
       }),
       false
     );

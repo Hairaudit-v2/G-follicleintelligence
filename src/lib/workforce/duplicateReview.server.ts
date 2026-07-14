@@ -59,7 +59,9 @@ export type { DuplicateDecisionCard } from "@/src/lib/workforce/duplicateMergeRe
 export async function loadDuplicateDecisionCards(
   tenantId: string,
   client?: SupabaseClient
-): Promise<import("@/src/lib/workforce/duplicateMergeRecommendation.server").DuplicateDecisionCard[]> {
+): Promise<
+  import("@/src/lib/workforce/duplicateMergeRecommendation.server").DuplicateDecisionCard[]
+> {
   const candidates = await loadDuplicateCandidates(tenantId, client);
   const { buildDuplicateDecisionCard } =
     await import("@/src/lib/workforce/duplicateMergeRecommendation.server");

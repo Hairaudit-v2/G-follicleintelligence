@@ -104,9 +104,7 @@ export function TenantLogoPreviewStrip({
           key={surface}
           className={cn(
             "flex min-h-[72px] items-center justify-center rounded-xl border p-4",
-            surface === "light"
-              ? "border-slate-200 bg-white"
-              : "border-white/10 bg-[#0F1629]"
+            surface === "light" ? "border-slate-200 bg-white" : "border-white/10 bg-[#0F1629]"
           )}
         >
           {src && preview ? (

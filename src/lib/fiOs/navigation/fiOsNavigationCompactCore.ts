@@ -58,9 +58,7 @@ export function parsePersistedExpandedNavGroups(
   }
 }
 
-export function serializeExpandedNavGroups(
-  groups: ReadonlySet<FiOsD6gWorkflowGroupId>
-): string {
+export function serializeExpandedNavGroups(groups: ReadonlySet<FiOsD6gWorkflowGroupId>): string {
   return JSON.stringify([...groups]);
 }
 
@@ -92,7 +90,9 @@ export function toggleNavGroupExpansion(
   return out;
 }
 
-export function countCompactNavGroupHeaders(sections: readonly FiOsSidebarWorkflowSection[]): number {
+export function countCompactNavGroupHeaders(
+  sections: readonly FiOsSidebarWorkflowSection[]
+): number {
   return sections.length;
 }
 

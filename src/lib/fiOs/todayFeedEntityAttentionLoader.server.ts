@@ -6,9 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
-import {
-  resolveFinancialClearanceForBookings,
-} from "@/src/lib/financialOs/financialClearance.server";
+import { resolveFinancialClearanceForBookings } from "@/src/lib/financialOs/financialClearance.server";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import { mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import {
@@ -213,7 +211,9 @@ async function loadFinancialEntitySignals(
       }),
     ]);
 
-    const caseIds = surgeryBookings.map((b) => b.case_id).filter((x): x is string => Boolean(x?.trim()));
+    const caseIds = surgeryBookings
+      .map((b) => b.case_id)
+      .filter((x): x is string => Boolean(x?.trim()));
     const patientIds = surgeryBookings
       .map((b) => b.patient_id)
       .filter((x): x is string => Boolean(x?.trim()));
@@ -221,7 +221,10 @@ async function loadFinancialEntitySignals(
     const invoiceByPatient = new Map<string, string[]>();
 
     if (caseIds.length || patientIds.length) {
-      let invoiceQuery = supabase.from("fi_invoices").select("id, case_id, patient_id").eq("tenant_id", tid);
+      let invoiceQuery = supabase
+        .from("fi_invoices")
+        .select("id, case_id, patient_id")
+        .eq("tenant_id", tid);
       if (caseIds.length && patientIds.length) {
         invoiceQuery = invoiceQuery.or(
           `case_id.in.(${caseIds.join(",")}),and(patient_id.in.(${patientIds.join(",")}),case_id.is.null)`
@@ -360,11 +363,13 @@ async function loadFinancialEntitySignals(
   );
 
   for (const row of overdueRows) {
-    if (out.filter((s) => s.id.startsWith("entity-payment-overdue-")).length >= ENTITY_LIMIT_PER_CATEGORY) {
+    if (
+      out.filter((s) => s.id.startsWith("entity-payment-overdue-")).length >=
+      ENTITY_LIMIT_PER_CATEGORY
+    ) {
       break;
     }
-    const label =
-      (row.patient_id ? overduePatientLabels.get(row.patient_id) : null) ?? "Patient";
+    const label = (row.patient_id ? overduePatientLabels.get(row.patient_id) : null) ?? "Patient";
     out.push({
       id: `entity-payment-overdue-${row.id}`,
       category: "financial",
@@ -429,9 +434,7 @@ async function loadSurgeryEntitySignals(
 
     const daysUntil = Math.max(
       0,
-      Math.round(
-        (Date.parse(b.start_at) - now.getTime()) / 86_400_000
-      )
+      Math.round((Date.parse(b.start_at) - now.getTime()) / 86_400_000)
     );
     const dayLabel =
       daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
@@ -560,8 +563,7 @@ async function loadConsultationEntitySignals(
     const label = consultationPersonLabel(row, labels);
     const consultDate = row.consultation_date?.trim()?.slice(0, 10);
     const scheduledSoon =
-      consultDate &&
-      Date.parse(`${consultDate}T23:59:59.000Z`) - now.getTime() <= 2 * 86_400_000;
+      consultDate && Date.parse(`${consultDate}T23:59:59.000Z`) - now.getTime() <= 2 * 86_400_000;
 
     out.push({
       id: `entity-consultation-${row.id}`,
@@ -586,7 +588,10 @@ async function loadConsultationEntitySignals(
   return out;
 }
 
-async function loadStaffEntitySignals(tenantId: string, base: string): Promise<TodayEntityAttentionSignal[]> {
+async function loadStaffEntitySignals(
+  tenantId: string,
+  base: string
+): Promise<TodayEntityAttentionSignal[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
 

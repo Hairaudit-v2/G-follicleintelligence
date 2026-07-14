@@ -8,17 +8,13 @@ import {
   resolveActiveLeavePeriod,
   resolveStaffLeavePresentation,
 } from "@/src/lib/workforce/staffLeaveWorkflowCore";
-import {
-  applyStandardHoursTemplate,
-} from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { applyStandardHoursTemplate } from "@/src/lib/workforce-os/staffStandardHoursCore";
 import {
   evaluateRosterStaffEligibility,
   listStaffMissingStandardHoursForRoster,
   resolveRosterEligibleStaffIds,
 } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
-import {
-  generateRosterFromStandardHours,
-} from "@/src/lib/workforce-os/rosterGenerationCore";
+import { generateRosterFromStandardHours } from "@/src/lib/workforce-os/rosterGenerationCore";
 
 const TENANT = "11111111-1111-1111-1111-111111111111";
 const STAFF_ID = "dddddddd-dddd-dddd-dddd-dddddddddddd";

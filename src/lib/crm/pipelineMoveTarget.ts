@@ -38,10 +38,7 @@ export type PipelineMoveTargetResolution =
       columnId: PipelineStaffColumnId;
     };
 
-const TERMINAL_SPECIAL: ReadonlySet<PipelineStaffColumnId> = new Set([
-  "converted",
-  "closed_lost",
-]);
+const TERMINAL_SPECIAL: ReadonlySet<PipelineStaffColumnId> = new Set(["converted", "closed_lost"]);
 
 /**
  * Resolve the default backend entry stage for an active/holding staff column.

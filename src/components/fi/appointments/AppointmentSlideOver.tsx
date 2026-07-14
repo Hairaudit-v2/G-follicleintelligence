@@ -231,36 +231,35 @@ export function AppointmentSlideOverProvider({
     ]
   );
 
-  const shellOpen =
-    createPrefill != null || (!workspaceShell && appointmentId != null);
+  const shellOpen = createPrefill != null || (!workspaceShell && appointmentId != null);
 
   return (
     <AppointmentSlideOverContext.Provider value={value}>
       {children}
       {shellOpen ? (
-      <AppointmentSlideOverShell
-        tenantId={tenantId}
-        appointmentId={appointmentId}
-        createPrefill={createPrefill}
-        open={shellOpen}
-        onClose={close}
-        operatorFiUserId={operatorFiUserId}
-        userRole={userRole}
-        canUseClinicFeatures={canUseClinicFeatures}
-        assignees={assignees}
-        clinics={clinics}
-        existingBookings={existingBookings}
-        calendarTimezone={calendarTimezone}
-        services={services}
-        onCreated={(id) => {
-          setCreatePrefill(null);
-          if (workspaceShell) {
-            workspaceShell.openWorkspace({ kind: "appointment", id });
-            return;
-          }
-          setAppointmentId(id);
-        }}
-      />
+        <AppointmentSlideOverShell
+          tenantId={tenantId}
+          appointmentId={appointmentId}
+          createPrefill={createPrefill}
+          open={shellOpen}
+          onClose={close}
+          operatorFiUserId={operatorFiUserId}
+          userRole={userRole}
+          canUseClinicFeatures={canUseClinicFeatures}
+          assignees={assignees}
+          clinics={clinics}
+          existingBookings={existingBookings}
+          calendarTimezone={calendarTimezone}
+          services={services}
+          onCreated={(id) => {
+            setCreatePrefill(null);
+            if (workspaceShell) {
+              workspaceShell.openWorkspace({ kind: "appointment", id });
+              return;
+            }
+            setAppointmentId(id);
+          }}
+        />
       ) : null}
     </AppointmentSlideOverContext.Provider>
   );
@@ -960,8 +959,8 @@ export function AppointmentSlideOverPanel({
             clinicalStaffing={payload.clinicalStaffing}
             blockerLabel={
               payload.clinicalStaffing?.displayStatus === "blocked"
-                ? payload.clinicalStaffing.warnings[0] ??
-                  "Clinical team assignment must be resolved before this appointment can proceed."
+                ? (payload.clinicalStaffing.warnings[0] ??
+                  "Clinical team assignment must be resolved before this appointment can proceed.")
                 : payload.clinicalStaffing?.missingRoles.length
                   ? `Please assign ${payload.clinicalStaffing.missingRoles.map((r) => r.role).join(", ")} before continuing.`
                   : null

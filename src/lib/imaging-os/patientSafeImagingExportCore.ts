@@ -99,12 +99,7 @@ export function buildPatientSafeImagingExportCard(input: {
 
 /** Ensures export card contains no restricted clinical fields. */
 export function patientSafeExportCardIsRedacted(card: PatientSafeImagingExportCard): boolean {
-  const text = [
-    card.view_label,
-    card.session_type,
-    card.progress_label,
-    card.status_message,
-  ]
+  const text = [card.view_label, card.session_type, card.progress_label, card.status_message]
     .filter(Boolean)
     .join(" ");
   return !FORBIDDEN_EXPORT_PATTERNS.some((re) => re.test(text));

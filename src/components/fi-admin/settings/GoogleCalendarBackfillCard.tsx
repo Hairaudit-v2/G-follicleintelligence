@@ -255,7 +255,9 @@ export function GoogleCalendarBackfillCard({
               </button>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-[#64748B]">Tenant admin access required to run import.</p>
+            <p className="mt-4 text-sm text-[#64748B]">
+              Tenant admin access required to run import.
+            </p>
           )}
 
           {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}

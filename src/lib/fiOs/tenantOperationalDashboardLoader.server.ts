@@ -3,10 +3,11 @@ import "server-only";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadTenantCalendarSettingsCached } from "@/src/lib/performance/referenceDataCache.server";
 import {
-  loadTenantCalendarSettingsCached,
-} from "@/src/lib/performance/referenceDataCache.server";
-import { loadBookingsForOperatorView, loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
+  loadBookingsForOperatorView,
+  loadBookingsForTenantRange,
+} from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
 import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
@@ -931,9 +932,8 @@ export async function loadReceptionBoardCards(
   const roomNameById = new Map<string, string>();
 
   if (enrichment === "full") {
-    const { loadClinicalStaffPickerCached, loadCrmShellUsersCached } = await import(
-      "@/src/lib/performance/referenceDataCache.server"
-    );
+    const { loadClinicalStaffPickerCached, loadCrmShellUsersCached } =
+      await import("@/src/lib/performance/referenceDataCache.server");
     const [staff, users] = await Promise.all([
       loadClinicalStaffPickerCached(tid),
       loadCrmShellUsersCached(tid),
@@ -989,7 +989,11 @@ export async function loadReceptionBoardCards(
     const assign =
       enrichment === "full"
         ? bookingAssignmentDisplay(staffOpts, userOpts, b)
-        : { providerLabel: providerLabelFromBookingMetadata(meta), ownerLabel: null, summaryLine: "" };
+        : {
+            providerLabel: providerLabelFromBookingMetadata(meta),
+            ownerLabel: null,
+            summaryLine: "",
+          };
     const clinicLabel =
       enrichment === "full" && b.clinic_id?.trim()
         ? (clinicNameById.get(b.clinic_id.trim()) ?? null)

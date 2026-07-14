@@ -130,8 +130,7 @@ async function alignInactiveFromIiohr(
     .eq("id", fiStaffId);
   if (fiStaffError) throw new Error(fiStaffError.message);
 
-  const staffMemberId =
-    staffMember != null ? String(staffMember.id) : null;
+  const staffMemberId = staffMember != null ? String(staffMember.id) : null;
 
   if (staffMemberId && staffMember) {
     const previousStatus = String(staffMember.employment_status ?? "active");
@@ -205,9 +204,8 @@ export async function alignIiohrStaffDeparture(input: {
   if (memberError) throw new Error(memberError.message);
 
   const staffMemberId = staffMember != null ? String(staffMember.id) : null;
-  const currentStatus = staffMember != null
-    ? parseStaffEmploymentStatus(staffMember.employment_status)
-    : null;
+  const currentStatus =
+    staffMember != null ? parseStaffEmploymentStatus(staffMember.employment_status) : null;
 
   if (currentStatus != null && isAlreadyOffboardedEmploymentStatus(currentStatus)) {
     return {

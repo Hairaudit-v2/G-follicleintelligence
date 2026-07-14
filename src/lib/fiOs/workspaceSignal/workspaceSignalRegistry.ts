@@ -41,23 +41,24 @@ export type WorkspaceSignalPayload = {
   reasonLabel: string;
 };
 
-const WORKSPACE_SIGNAL_TO_KINDS: Readonly<Record<WorkspaceSignalKind, readonly WorkspaceShellKind[]>> =
-  {
-    arrival_intent: ["appointment", "patient", "consultation"],
-    reception_check_in: ["appointment", "patient", "consultation"],
-    appointment_phase_change: ["appointment", "patient"],
-    payment_blocker: ["payment", "patient", "surgery_case"],
-    payment_received: ["payment", "patient", "surgery_case"],
-    pathology_review_pending: ["pathology_result", "patient", "consultation"],
-    pathology_reviewed: ["pathology_result", "patient", "consultation"],
-    surgery_readiness_blocker: ["surgery_case", "patient", "appointment"],
-    surgery_readiness_cleared: ["surgery_case", "patient", "appointment"],
-    lead_stale: ["lead"],
-    lead_follow_up_due: ["lead"],
-    consultation_completed: ["consultation", "patient", "lead", "payment"],
-    staff_compliance_alert: ["staff", "surgery_case"],
-    staff_presence_change: ["staff"],
-  };
+const WORKSPACE_SIGNAL_TO_KINDS: Readonly<
+  Record<WorkspaceSignalKind, readonly WorkspaceShellKind[]>
+> = {
+  arrival_intent: ["appointment", "patient", "consultation"],
+  reception_check_in: ["appointment", "patient", "consultation"],
+  appointment_phase_change: ["appointment", "patient"],
+  payment_blocker: ["payment", "patient", "surgery_case"],
+  payment_received: ["payment", "patient", "surgery_case"],
+  pathology_review_pending: ["pathology_result", "patient", "consultation"],
+  pathology_reviewed: ["pathology_result", "patient", "consultation"],
+  surgery_readiness_blocker: ["surgery_case", "patient", "appointment"],
+  surgery_readiness_cleared: ["surgery_case", "patient", "appointment"],
+  lead_stale: ["lead"],
+  lead_follow_up_due: ["lead"],
+  consultation_completed: ["consultation", "patient", "lead", "payment"],
+  staff_compliance_alert: ["staff", "surgery_case"],
+  staff_presence_change: ["staff"],
+};
 
 const WORKSPACE_SIGNAL_REASONS: Readonly<
   Record<WorkspaceSignalKind, Partial<Record<WorkspaceShellKind, string>>>
@@ -141,9 +142,10 @@ const ENTITY_KIND_TO_WORKSPACE: Readonly<Record<string, WorkspaceShellKind>> = {
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
-export function extractEntityFromFeedItemId(
-  id: string
-): { entityKind?: string; entityId?: string } {
+export function extractEntityFromFeedItemId(id: string): {
+  entityKind?: string;
+  entityId?: string;
+} {
   const prefixes: Array<[string, string]> = [
     ["reception-", "booking"],
     ["stale-lead-", "lead"],
@@ -179,9 +181,7 @@ function dedupeWorkspaceRefs(refs: readonly WorkspaceRef[]): WorkspaceRef[] {
 
 function patientIdFromPathologyHref(href: string): string | null {
   const path = href.split("?")[0]?.split("#")[0]?.trim() ?? "";
-  const match = path.match(
-    new RegExp(`/fi-admin/[^/]+/patients/(${UUID})/blood-results/`, "i")
-  );
+  const match = path.match(new RegExp(`/fi-admin/[^/]+/patients/(${UUID})/blood-results/`, "i"));
   return match?.[1] ?? null;
 }
 

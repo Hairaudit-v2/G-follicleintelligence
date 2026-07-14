@@ -13,11 +13,14 @@ export type FollowUpEncounterPermissionRole =
   | "reception"
   | "unknown";
 
-export function normalizeFollowUpRole(raw: string | null | undefined): FollowUpEncounterPermissionRole {
+export function normalizeFollowUpRole(
+  raw: string | null | undefined
+): FollowUpEncounterPermissionRole {
   const r = String(raw ?? "")
     .trim()
     .toLowerCase();
-  if (r === "fi_admin" || r === "admin" || r === "owner") return r === "owner" ? "owner" : r === "fi_admin" ? "fi_admin" : "admin";
+  if (r === "fi_admin" || r === "admin" || r === "owner")
+    return r === "owner" ? "owner" : r === "fi_admin" ? "fi_admin" : "admin";
   if (r === "doctor" || r === "clinician") return r === "doctor" ? "doctor" : "clinician";
   if (r === "nurse" || r === "rn") return "nurse";
   if (r === "surgical_assistant" || r === "surgical_assist") return "surgical_assistant";

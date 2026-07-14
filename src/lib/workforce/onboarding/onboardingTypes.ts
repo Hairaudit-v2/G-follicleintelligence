@@ -1,5 +1,11 @@
 /** WorkforceOS staff onboarding invitation statuses. */
-export const ONBOARDING_INVITATION_STATUSES = ["pending", "sent", "accepted", "expired", "revoked"] as const;
+export const ONBOARDING_INVITATION_STATUSES = [
+  "pending",
+  "sent",
+  "accepted",
+  "expired",
+  "revoked",
+] as const;
 export type OnboardingInvitationStatus = (typeof ONBOARDING_INVITATION_STATUSES)[number];
 
 /** Isolated onboarding PIN setup token statuses. */

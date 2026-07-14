@@ -20,6 +20,9 @@ describe("mapWorkforceFkMutationError", () => {
   });
 
   it("returns null for unrelated database errors", () => {
-    assert.equal(mapWorkforceFkMutationError("duplicate key value violates unique constraint"), null);
+    assert.equal(
+      mapWorkforceFkMutationError("duplicate key value violates unique constraint"),
+      null
+    );
   });
 });

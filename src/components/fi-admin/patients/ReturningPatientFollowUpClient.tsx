@@ -60,7 +60,10 @@ export function ReturningPatientFollowUpClient({ tenantId }: { tenantId: string 
   const [patientLabel, setPatientLabel] = useState<string | null>(null);
   const [isLegacyTimely, setIsLegacyTimely] = useState(true);
   const [encounterType, setEncounterType] = useState<FollowUpEncounterType>(() => {
-    if (urlEncounterType && ENCOUNTER_TYPE_OPTIONS.includes(urlEncounterType as FollowUpEncounterType)) {
+    if (
+      urlEncounterType &&
+      ENCOUNTER_TYPE_OPTIONS.includes(urlEncounterType as FollowUpEncounterType)
+    ) {
       return urlEncounterType as FollowUpEncounterType;
     }
     const fromIntent = intentToEncounterType(urlIntent);
@@ -159,7 +162,9 @@ export function ReturningPatientFollowUpClient({ tenantId }: { tenantId: string 
   useEffect(() => {
     if (!initialPatientId || initialBookingId) return;
     void (async () => {
-      const r = await searchReturningPatientsAction(tenantId, { query: initialPatientId.slice(0, 8) });
+      const r = await searchReturningPatientsAction(tenantId, {
+        query: initialPatientId.slice(0, 8),
+      });
       if (r.ok) {
         const hit = r.patients.find((p) => p.patientId === initialPatientId);
         if (hit) setPatientLabel(hit.displayName);
@@ -350,7 +355,9 @@ export function ReturningPatientFollowUpClient({ tenantId }: { tenantId: string 
               disabled={busy}
             />
             <label className="block text-sm">
-              <span className="mb-1 block font-medium text-slate-300">Date of birth (optional)</span>
+              <span className="mb-1 block font-medium text-slate-300">
+                Date of birth (optional)
+              </span>
               <input
                 type="date"
                 value={dateOfBirth}
@@ -400,7 +407,9 @@ export function ReturningPatientFollowUpClient({ tenantId }: { tenantId: string 
           <FiCard className="space-y-4 p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Patient</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Patient
+                </p>
                 <p className="text-sm font-medium text-slate-100">{patientLabel ?? patientId}</p>
               </div>
               <button

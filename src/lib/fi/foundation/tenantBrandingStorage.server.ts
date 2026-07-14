@@ -5,10 +5,7 @@ import { createHash, randomUUID } from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { parseTenantBrandingMetadata } from "./tenantBrandingCore";
 import { loadTenantBranding } from "./tenantSettings";
-import {
-  assertAllowedTenantLogoFile,
-  TENANT_BRANDING_BUCKET,
-} from "./tenantBrandingStorageCore";
+import { assertAllowedTenantLogoFile, TENANT_BRANDING_BUCKET } from "./tenantBrandingStorageCore";
 
 export {
   assertAllowedTenantLogoFile,
@@ -118,7 +115,10 @@ export async function uploadTenantLogoFile(
     { onConflict: "tenant_id" }
   );
   if (upsertErr) {
-    await supabase.storage.from(TENANT_BRANDING_BUCKET).remove([storagePath]).catch(() => undefined);
+    await supabase.storage
+      .from(TENANT_BRANDING_BUCKET)
+      .remove([storagePath])
+      .catch(() => undefined);
     return { ok: false, error: upsertErr.message || "Could not save logo metadata." };
   }
 

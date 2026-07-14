@@ -69,9 +69,7 @@ describe("expenseImportCore + categories", () => {
   });
 
   it("builds drafts with suggested category ids", () => {
-    const parsed = parseExpenseBankCsv(
-      "Date,Description,Amount\n01/07/2026,META ADS,-10.00"
-    );
+    const parsed = parseExpenseBankCsv("Date,Description,Amount\n01/07/2026,META ADS,-10.00");
     const map = new Map([["marketing_ads", "cat-1"]]);
     const drafts = buildImportLineDraftsFromCsv(parsed.lines, map);
     assert.equal(drafts[0]?.suggested_category_code, "marketing_ads");

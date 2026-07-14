@@ -92,7 +92,12 @@ test("incomplete or unknown markers are skipped safely", () => {
   const { interpreted, mapping } = interpretFiPathologyMarkers([
     fiItem({ id: "a", test_label: "", test_code: null, result_value: "25" }),
     fiItem({ id: "b", test_label: "Notes", result_value: "see comment" }),
-    fiItem({ id: "c", test_label: "Unknown marker XYZ", result_value: "10", reference_range: "5-15" }),
+    fiItem({
+      id: "c",
+      test_label: "Unknown marker XYZ",
+      result_value: "10",
+      reference_range: "5-15",
+    }),
   ]);
   assert.equal(mapping.skipped.length, 2);
   assert.equal(interpreted.length, 1);

@@ -17,10 +17,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  req: Request,
-  ctx: { params: Promise<{ tenantId: string }> }
-) {
+export async function POST(req: Request, ctx: { params: Promise<{ tenantId: string }> }) {
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ ok: false, error: "Service unavailable." }, { status: 503 });
@@ -43,7 +40,10 @@ export async function POST(
     const result = await ingestGenericEmailActivity({ tenantId: tid, ...normalized });
 
     if (!result.ok) {
-      return NextResponse.json({ ok: false, error: result.publicMessage }, { status: result.httpStatus });
+      return NextResponse.json(
+        { ok: false, error: result.publicMessage },
+        { status: result.httpStatus }
+      );
     }
 
     if (result.duplicate) {

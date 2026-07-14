@@ -224,9 +224,7 @@ export function WorkforceCommandCentreView({
           <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
             Team · Settings
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">
-            Team overview
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">Team overview</h1>
           <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
             Manage clinical readiness, compliance, permissions and workforce allocation.
           </p>

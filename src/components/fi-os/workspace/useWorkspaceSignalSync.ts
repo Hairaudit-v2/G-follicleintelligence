@@ -18,9 +18,7 @@ export type WorkspaceRevalidationQueueState = {
 };
 
 export type WorkspaceSignalSyncHandlers = {
-  applyWorkspaceSignalUpdates: (
-    updates: Record<string, { reason: string; at: string }>
-  ) => void;
+  applyWorkspaceSignalUpdates: (updates: Record<string, { reason: string; at: string }>) => void;
 };
 
 export function useWorkspaceRevalidationQueue(): {

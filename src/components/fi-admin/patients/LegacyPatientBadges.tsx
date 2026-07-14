@@ -1,4 +1,7 @@
-import type { LegacyPatientBadge, LegacyPatientBadgeKind } from "@/src/lib/patients/legacyPatientVisibilityCore";
+import type {
+  LegacyPatientBadge,
+  LegacyPatientBadgeKind,
+} from "@/src/lib/patients/legacyPatientVisibilityCore";
 import { cn } from "@/lib/utils";
 
 const BADGE_STYLES: Record<LegacyPatientBadgeKind, string> = {

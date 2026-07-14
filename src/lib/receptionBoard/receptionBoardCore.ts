@@ -377,7 +377,11 @@ export function buildExtendedAlertsFromSurgeryCards(
       };
       const kind = kindMap[issue.kind] ?? "surgery_readiness_incomplete";
       const severity: ReceptionBoardActionAlert["severity"] =
-        issue.severity === "high_risk" ? "critical" : issue.severity === "warning" ? "warning" : "info";
+        issue.severity === "high_risk"
+          ? "critical"
+          : issue.severity === "warning"
+            ? "warning"
+            : "info";
 
       alerts.push({
         id: `surgery-issue-${card.bookingId}-${issue.kind}`,
@@ -413,13 +417,11 @@ export function buildExtendedAlertsFromSurgeryCards(
 export function sortActionAlerts(
   alerts: readonly ReceptionBoardActionAlert[]
 ): ReceptionBoardActionAlert[] {
-  return alerts
-    .slice()
-    .sort((a, b) => {
-      const sd = compareReceptionOsSeverity(a.severity, b.severity);
-      if (sd !== 0) return sd;
-      return b.priorityScore - a.priorityScore;
-    });
+  return alerts.slice().sort((a, b) => {
+    const sd = compareReceptionOsSeverity(a.severity, b.severity);
+    if (sd !== 0) return sd;
+    return b.priorityScore - a.priorityScore;
+  });
 }
 
 export function buildQuickActions(base: string): ReceptionBoardQuickAction[] {
@@ -509,7 +511,8 @@ function hasIssueKind(
 function preOpChecklistFromMetadata(card: SurgeryReadinessBoardCard): boolean {
   const meta = card as SurgeryReadinessBoardCard & { metadata?: Record<string, unknown> };
   const checklist = meta.metadata?.pre_op_checklist;
-  if (!Array.isArray(checklist)) return card.readinessPercent != null && card.readinessPercent >= 80;
+  if (!Array.isArray(checklist))
+    return card.readinessPercent != null && card.readinessPercent >= 80;
   return checklist.every((item) => {
     if (!item || typeof item !== "object") return false;
     return (item as { complete?: boolean }).complete === true;
@@ -522,7 +525,8 @@ export function mapTomorrowSurgeryCard(
 ): ReceptionBoardTomorrowSurgery | null {
   if (card.surgeryLocalYmd !== tomorrowYmd) return null;
 
-  const depositPaid = !hasIssueKind(card, "surgery_deposit_pending") && !hasIssueKind(card, "no_payment_tracking");
+  const depositPaid =
+    !hasIssueKind(card, "surgery_deposit_pending") && !hasIssueKind(card, "no_payment_tracking");
   const consentSigned = !hasIssueKind(card, "missing_consent_proxy");
   const medicalClearance =
     !hasIssueKind(card, "missing_pathology") && !hasIssueKind(card, "abnormal_pathology");
@@ -541,7 +545,9 @@ export function mapTomorrowSurgeryCard(
     if (!missingItems.includes(label)) missingItems.push(label);
   }
 
-  const readinessPercent = card.readinessPercent ?? (missingItems.length === 0 ? 100 : Math.max(0, 100 - missingItems.length * 12));
+  const readinessPercent =
+    card.readinessPercent ??
+    (missingItems.length === 0 ? 100 : Math.max(0, 100 - missingItems.length * 12));
 
   return {
     bookingId: card.bookingId,
@@ -580,7 +586,9 @@ export function buildIntelligenceMetrics(input: {
   };
   const surgeryTypes = (t: string) => {
     const x = t.toLowerCase();
-    return x.includes("surgery") || x.includes("procedure") || x.includes("prp") || x.includes("exosome");
+    return (
+      x.includes("surgery") || x.includes("procedure") || x.includes("prp") || x.includes("exosome")
+    );
   };
 
   const todayConsultations = input.cards.filter((c) => consultTypes(c.bookingType)).length;
@@ -588,10 +596,14 @@ export function buildIntelligenceMetrics(input: {
   const inClinical = input.cards.filter(
     (c) => c.receptionColumn === "in_consultation" || c.receptionColumn === "in_treatment"
   ).length;
-  const activeStaffSlots = input.cards.filter((c) => c.providerLabel && c.providerLabel !== "—").length;
+  const activeStaffSlots = input.cards.filter(
+    (c) => c.providerLabel && c.providerLabel !== "—"
+  ).length;
 
   const doctorUtilizationPercent =
-    todayConsultations > 0 ? Math.min(100, Math.round((inClinical / todayConsultations) * 100)) : null;
+    todayConsultations > 0
+      ? Math.min(100, Math.round((inClinical / todayConsultations) * 100))
+      : null;
   const staffUtilizationPercent =
     input.cards.length > 0
       ? Math.min(100, Math.round((activeStaffSlots / input.cards.length) * 100))
@@ -601,7 +613,9 @@ export function buildIntelligenceMetrics(input: {
     (c) => consultTypes(c.bookingType) && c.receptionColumn === "complete"
   ).length;
   const averageConsultationCloseRate =
-    todayConsultations > 0 ? Math.round((completedConsults / todayConsultations) * 100) / 100 : null;
+    todayConsultations > 0
+      ? Math.round((completedConsults / todayConsultations) * 100) / 100
+      : null;
 
   return {
     todayConsultations,
@@ -650,7 +664,9 @@ export function buildLiveActivityFeed(input: {
       events.push({
         id: `complete-${card.id}`,
         kind: isSurgery ? "surgery_completed" : "consultation_submitted",
-        title: isSurgery ? `Surgery completed — ${card.displayName}` : `Consultation completed — ${card.displayName}`,
+        title: isSurgery
+          ? `Surgery completed — ${card.displayName}`
+          : `Consultation completed — ${card.displayName}`,
         detail: card.typeLabel,
         occurredAt: card.endAt,
         href: card.patientId ? `${input.base}/patients/${card.patientId}` : null,

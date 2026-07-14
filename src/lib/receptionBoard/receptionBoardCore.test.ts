@@ -16,7 +16,9 @@ import {
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const OTHER = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
-function card(partial: Partial<ReceptionBoardCard> & Pick<ReceptionBoardCard, "id" | "receptionColumn">): ReceptionBoardCard {
+function card(
+  partial: Partial<ReceptionBoardCard> & Pick<ReceptionBoardCard, "id" | "receptionColumn">
+): ReceptionBoardCard {
   return {
     id: partial.id,
     startAt: partial.startAt ?? "2026-07-02T09:00:00.000Z",
@@ -155,9 +157,6 @@ describe("receptionBoardCore", () => {
   });
 
   it("rejects cross-tenant payload refresh", () => {
-    assert.throws(
-      () => assertReceptionBoardTenantScope(TENANT, OTHER),
-      /tenant mismatch/
-    );
+    assert.throws(() => assertReceptionBoardTenantScope(TENANT, OTHER), /tenant mismatch/);
   });
 });

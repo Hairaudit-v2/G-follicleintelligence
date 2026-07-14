@@ -4,12 +4,7 @@
 
 import type { TimesheetStatus } from "./wageProfileCore";
 
-export const TIMESHEET_APPROVAL_ACTIONS = [
-  "submit",
-  "approve",
-  "void",
-  "revert_to_draft",
-] as const;
+export const TIMESHEET_APPROVAL_ACTIONS = ["submit", "approve", "void", "revert_to_draft"] as const;
 export type TimesheetApprovalAction = (typeof TIMESHEET_APPROVAL_ACTIONS)[number];
 
 export const TIMESHEET_STATUS_LABELS: Record<TimesheetStatus, string> = {
@@ -19,7 +14,10 @@ export const TIMESHEET_STATUS_LABELS: Record<TimesheetStatus, string> = {
   void: "Void",
 };
 
-const TRANSITIONS: Record<TimesheetApprovalAction, Partial<Record<TimesheetStatus, TimesheetStatus>>> = {
+const TRANSITIONS: Record<
+  TimesheetApprovalAction,
+  Partial<Record<TimesheetStatus, TimesheetStatus>>
+> = {
   submit: { draft: "submitted" },
   approve: { draft: "approved", submitted: "approved" },
   void: { draft: "void", submitted: "void" },

@@ -3,7 +3,12 @@
 import { Activity, Clock3, Layers, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { DashboardCard, InfoNotice, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
+import {
+  DashboardCard,
+  InfoNotice,
+  SectionHeader,
+  StatCard,
+} from "@/src/components/fi-admin/dashboard-ui";
 import type { TodaySignalLearningPageModel } from "@/src/lib/fiOs/todaySignal/todaySignalLearningSummary";
 
 function healthLabel(health: "quiet" | "normal" | "watch" | "attention"): string {
@@ -106,8 +111,12 @@ export function TodaySignalLearningSurface({ model }: { model: TodaySignalLearni
       <header className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-100">Signal Learning</h1>
-            <p className="text-sm text-slate-400">What Today is learning from operational signals.</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+              Signal Learning
+            </h1>
+            <p className="text-sm text-slate-400">
+              What Today is learning from operational signals.
+            </p>
             <p className="text-xs text-slate-500">
               Operational patterns only. No patient-identifying data is shown.
             </p>
@@ -207,7 +216,9 @@ export function TodaySignalLearningSurface({ model }: { model: TodaySignalLearni
                 >
                   <div>
                     <p className="text-sm font-medium text-slate-100">{row.signalType}</p>
-                    <p className="text-xs uppercase tracking-wide text-slate-500">{row.priorityBand}</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      {row.priorityBand}
+                    </p>
                   </div>
                   <p className="shrink-0 text-sm text-slate-300">Open {row.openForLabel}</p>
                 </div>

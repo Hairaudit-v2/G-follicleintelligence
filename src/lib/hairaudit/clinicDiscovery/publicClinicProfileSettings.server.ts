@@ -29,9 +29,7 @@ function mapProfileRow(row: Record<string, unknown>): PublicClinicProfile {
     audit_verified: Boolean(row.audit_verified),
     public_profile_enabled: Boolean(row.public_profile_enabled),
     search_visible: Boolean(row.search_visible),
-    accepts_independent_hairaudit_enquiries: Boolean(
-      row.accepts_independent_hairaudit_enquiries
-    ),
+    accepts_independent_hairaudit_enquiries: Boolean(row.accepts_independent_hairaudit_enquiries),
     city_suburb: (row.city_suburb as string | null) ?? null,
     state_region: (row.state_region as string | null) ?? null,
     country: (row.country as string | null) ?? null,
@@ -162,7 +160,8 @@ export async function loadClinicDiscoveryAdminContext(
     .limit(1);
 
   const hairauditClinicId =
-    sourceRows?.[0] && typeof (sourceRows[0] as { source_clinic_id: string }).source_clinic_id === "string"
+    sourceRows?.[0] &&
+    typeof (sourceRows[0] as { source_clinic_id: string }).source_clinic_id === "string"
       ? (sourceRows[0] as { source_clinic_id: string }).source_clinic_id
       : null;
 
@@ -187,8 +186,7 @@ export async function loadClinicDiscoveryAdminContext(
       ? {
           public_profile_enabled: existing.public_profile_enabled,
           search_visible: existing.search_visible,
-          accepts_independent_hairaudit_enquiries:
-            existing.accepts_independent_hairaudit_enquiries,
+          accepts_independent_hairaudit_enquiries: existing.accepts_independent_hairaudit_enquiries,
           clinic_name: existing.clinic_name,
           city_suburb: existing.city_suburb,
           state_region: existing.state_region,
@@ -286,7 +284,10 @@ export async function savePublicClinicDiscoverySettings(
       profileId: mapped.public_clinic_profile_id,
       eventKind,
       actorFiUserId: input.actorFiUserId,
-      detail: { search_visible: mapped.search_visible, public_profile_enabled: mapped.public_profile_enabled },
+      detail: {
+        search_visible: mapped.search_visible,
+        public_profile_enabled: mapped.public_profile_enabled,
+      },
     });
     return mapped;
   }

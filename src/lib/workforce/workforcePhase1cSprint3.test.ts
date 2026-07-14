@@ -11,7 +11,10 @@ import {
   formatClinicalEligibilityBlockMessage,
   StaffClinicalEligibilityError,
 } from "@/src/lib/workforce/clinicalEligibilityGate.server";
-import type { StaffCredentialRecord, StaffCertificationRecord } from "@/src/lib/workforce/workforceClinicalTypes";
+import type {
+  StaffCredentialRecord,
+  StaffCertificationRecord,
+} from "@/src/lib/workforce/workforceClinicalTypes";
 
 const NOW = new Date("2026-07-01T12:00:00.000Z");
 
@@ -142,9 +145,7 @@ test("expired certification restricts eligibility", () => {
   );
   assert.equal(result.eligible, false);
   assert.equal(result.status, "restricted");
-  assert.ok(
-    result.blockingReasons.some((r) => r.includes("PRP Protocol Certification"))
-  );
+  assert.ok(result.blockingReasons.some((r) => r.includes("PRP Protocol Certification")));
 });
 
 test("compliance alert upsert key pattern for expired certification", () => {
@@ -171,7 +172,9 @@ test("SurgeryOS block message format", () => {
 });
 
 test("StaffClinicalEligibilityError preserves message", () => {
-  const err = new StaffClinicalEligibilityError("Cannot assign Nurse Anna. Reason: PRP Certification expired.");
+  const err = new StaffClinicalEligibilityError(
+    "Cannot assign Nurse Anna. Reason: PRP Certification expired."
+  );
   assert.equal(err.name, "StaffClinicalEligibilityError");
   assert.match(err.message, /PRP Certification expired/);
 });

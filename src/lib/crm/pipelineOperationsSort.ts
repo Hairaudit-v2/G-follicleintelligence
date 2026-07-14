@@ -63,20 +63,14 @@ export function compareNewColumnDefault(
 }
 
 /** Newest first: created_at DESC, lead_id ASC */
-export function compareNewestFirst(
-  a: PipelineOpsSortableCard,
-  b: PipelineOpsSortableCard
-): number {
+export function compareNewestFirst(a: PipelineOpsSortableCard, b: PipelineOpsSortableCard): number {
   const c = cmpDesc(parseMs(a.createdAtIso), parseMs(b.createdAtIso));
   if (c !== 0) return c;
   return tieLeadId(a.leadId, b.leadId);
 }
 
 /** Oldest first: created_at ASC, lead_id ASC */
-export function compareOldestFirst(
-  a: PipelineOpsSortableCard,
-  b: PipelineOpsSortableCard
-): number {
+export function compareOldestFirst(a: PipelineOpsSortableCard, b: PipelineOpsSortableCard): number {
   const c = cmpAsc(parseMs(a.createdAtIso), parseMs(b.createdAtIso));
   if (c !== 0) return c;
   return tieLeadId(a.leadId, b.leadId);
@@ -100,10 +94,7 @@ export function compareOldestUntouched(
   a: PipelineOpsSortableCard,
   b: PipelineOpsSortableCard
 ): number {
-  const c = cmpAsc(
-    parseMs(a.meaningfulActivityAtIso),
-    parseMs(b.meaningfulActivityAtIso)
-  );
+  const c = cmpAsc(parseMs(a.meaningfulActivityAtIso), parseMs(b.meaningfulActivityAtIso));
   if (c !== 0) return c;
   return tieLeadId(a.leadId, b.leadId);
 }
@@ -122,10 +113,7 @@ export function compareMostRecentlyLost(
   return tieLeadId(a.leadId, b.leadId);
 }
 
-export function compareOldestLost(
-  a: PipelineOpsSortableCard,
-  b: PipelineOpsSortableCard
-): number {
+export function compareOldestLost(a: PipelineOpsSortableCard, b: PipelineOpsSortableCard): number {
   const la = parseMs(a.lostAtIso) ?? parseMs(a.stageEnteredAtIso) ?? parseMs(a.updatedAtIso);
   const lb = parseMs(b.lostAtIso) ?? parseMs(b.stageEnteredAtIso) ?? parseMs(b.updatedAtIso);
   const c = cmpAsc(la, lb);

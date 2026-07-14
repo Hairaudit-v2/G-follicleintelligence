@@ -293,7 +293,10 @@ export function FiOsCalendarTodayCommandStrip({
             Today · {counts.all} appointments
           </span>
           <ChevronDown
-            className={cn("h-4 w-4 shrink-0 text-slate-500 transition", desktopOpen && "rotate-180")}
+            className={cn(
+              "h-4 w-4 shrink-0 text-slate-500 transition",
+              desktopOpen && "rotate-180"
+            )}
             aria-hidden
           />
         </button>

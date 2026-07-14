@@ -72,8 +72,7 @@ export function buildPathologyExtractionConfidenceSummary(
     .map((m) => m.confidence)
     .filter((c): c is number => typeof c === "number" && Number.isFinite(c));
 
-  const minMarker =
-    confidences.length > 0 ? Math.min(...confidences.map(clampConfidence)) : null;
+  const minMarker = confidences.length > 0 ? Math.min(...confidences.map(clampConfidence)) : null;
   const avgMarker =
     confidences.length > 0
       ? clampConfidence(confidences.reduce((a, b) => a + b, 0) / confidences.length)

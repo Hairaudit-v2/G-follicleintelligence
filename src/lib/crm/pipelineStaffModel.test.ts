@@ -137,9 +137,7 @@ test("unknown entry stage maps to New", () => {
 });
 
 test("unknown active stage uses detectable qualified fallback", () => {
-  const r = resolvePipelineStaffStage(
-    stage({ slug: "tenant_custom_mid", label: "Custom mid" })
-  );
+  const r = resolvePipelineStaffStage(stage({ slug: "tenant_custom_mid", label: "Custom mid" }));
   assert.equal(r.columnId, PIPELINE_UNKNOWN_ACTIVE_FALLBACK_COLUMN);
   assert.equal(r.columnId, "qualified");
   assert.equal(r.source, "fallback");
@@ -174,10 +172,7 @@ test("conflicting won/lost flags reported and resolve deterministically", () => 
 });
 
 test("duplicate stage slug is reported", () => {
-  const stages = [
-    ...defaultStages(),
-    stage({ slug: "qualified", label: "Dup", sortOrder: 999 }),
-  ];
+  const stages = [...defaultStages(), stage({ slug: "qualified", label: "Dup", sortOrder: 999 })];
   const audit = auditPipelineStageCrosswalk(stages);
   assert.ok(audit.duplicateSlugs.includes("qualified"));
   assert.equal(audit.pass, false);
@@ -209,10 +204,7 @@ test("production default stage set passes audit", () => {
 });
 
 test("custom fallback stage is reported as a warning", () => {
-  const stages = [
-    ...defaultStages(),
-    stage({ slug: "vip_lane", label: "VIP", sortOrder: 55 }),
-  ];
+  const stages = [...defaultStages(), stage({ slug: "vip_lane", label: "VIP", sortOrder: 55 })];
   const audit = auditPipelineStageCrosswalk(stages);
   assert.equal(audit.pass, true, "fallback is warning-only when terminals exist");
   assert.ok(audit.fallbackStageSlugs.includes("vip_lane"));
@@ -398,9 +390,7 @@ test("repeated input produces identical output", () => {
   ];
   const a = sortPipelineSortableLeads(leads).map((l) => l.leadId);
   const b = sortPipelineSortableLeads(leads).map((l) => l.leadId);
-  const c = [...leads]
-    .sort(comparePipelineSortableLeads)
-    .map((l) => l.leadId);
+  const c = [...leads].sort(comparePipelineSortableLeads).map((l) => l.leadId);
   assert.deepEqual(a, b);
   assert.deepEqual(a, c);
   assert.deepEqual(a, ["k", "m", "n"]);
@@ -423,8 +413,7 @@ test("urgency flags never alter stage resolution", () => {
 // --- Terminology (38) -------------------------------------------------------
 
 test("staff labels contain no LeadFlow, CRM or technical OS language", () => {
-  const banned =
-    /leadflow|crm|command centre|command center|os\b|hubspot|kanban|fi_crm|slug/i;
+  const banned = /leadflow|crm|command centre|command center|os\b|hubspot|kanban|fi_crm|slug/i;
   for (const col of PIPELINE_STAFF_COLUMNS) {
     assert.doesNotMatch(col.label, banned, col.label);
   }

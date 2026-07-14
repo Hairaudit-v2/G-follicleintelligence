@@ -49,7 +49,10 @@ describe("workspaceQuery", () => {
     assert.deepEqual(parseWorkspaceSearchParam("patient:not-a-uuid"), []);
     assert.deepEqual(parseWorkspaceSearchParam("case:123"), []);
     assert.deepEqual(parseWorkspaceSearchParam("booking:12345678-1234-1234-1234-123456789012"), []);
-    assert.deepEqual(parseWorkspaceSearchParam("prescription:12345678-1234-1234-1234-123456789012"), []);
+    assert.deepEqual(
+      parseWorkspaceSearchParam("prescription:12345678-1234-1234-1234-123456789012"),
+      []
+    );
   });
 
   it("round-trips stack formatting", () => {

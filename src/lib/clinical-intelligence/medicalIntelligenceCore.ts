@@ -38,7 +38,13 @@ export type FiPathologyMarkerMappingResult = {
   skipped: Array<{
     item: Pick<
       PathologyResultItemRow,
-      "id" | "test_code" | "test_label" | "result_value" | "result_unit" | "reference_range" | "flag"
+      | "id"
+      | "test_code"
+      | "test_label"
+      | "result_value"
+      | "result_unit"
+      | "reference_range"
+      | "flag"
     >;
     reason: FiPathologyMarkerMappingSkipReason;
   }>;
@@ -165,9 +171,7 @@ export function mapFiPathologyItemsToMarkerInputs(
 }
 
 /** Interpret FI pathology markers via shared HLI medical intelligence (no FI-local rules). */
-export function interpretFiPathologyMarkers(
-  items: PathologyResultItemRow[]
-): {
+export function interpretFiPathologyMarkers(items: PathologyResultItemRow[]): {
   interpreted: InterpretedMarker[];
   mapping: FiPathologyMarkerMappingResult;
 } {
@@ -192,7 +196,9 @@ export function buildFiClinicalInsights(input: FiClinicalInsightsInput): Clinica
 }
 
 /** Build normalized longevity signals from FI marker context via shared package logic. */
-export function buildFiLongevitySignals(input: FiLongevitySignalsInput): NormalizedLongevitySignal[] {
+export function buildFiLongevitySignals(
+  input: FiLongevitySignalsInput
+): NormalizedLongevitySignal[] {
   const { interpreted } = interpretFiPathologyMarkers(input.pathologyItems);
   const clinicalInsights =
     input.clinicalInsights ??
@@ -215,7 +221,9 @@ export function buildFiLongevitySignals(input: FiLongevitySignalsInput): Normali
   });
 }
 
-function questionnaireForFiEligibility(input: FiBloodworkEligibilityInput): LongevityQuestionnaireResponses {
+function questionnaireForFiEligibility(
+  input: FiBloodworkEligibilityInput
+): LongevityQuestionnaireResponses {
   const base = input.questionnaireResponses ?? {};
   if (!input.hasRecentPathologyOnFile) return base;
   return {
@@ -231,10 +239,7 @@ function questionnaireForFiEligibility(input: FiBloodworkEligibilityInput): Long
 export function getFiBloodworkEligibility(
   input: FiBloodworkEligibilityInput
 ): BloodRequestEligibilityResult | null {
-  return getEligibility(
-    questionnaireForFiEligibility(input),
-    input.reviewOutcome ?? null
-  );
+  return getEligibility(questionnaireForFiEligibility(input), input.reviewOutcome ?? null);
 }
 
 /** Lightweight bridge helper for FI UI — surfaces which shared risk domains are active. */

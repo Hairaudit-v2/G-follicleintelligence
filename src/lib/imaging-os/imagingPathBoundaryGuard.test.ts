@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST,
-} from "./imagingPathBoundaryCrossImportAllowlist";
+import { IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST } from "./imagingPathBoundaryCrossImportAllowlist";
 import {
   boundaryForFilePath,
   boundaryForImportSpecifier,
@@ -27,14 +25,8 @@ const REPO_ROOT = process.cwd();
 
 describe("imagingPathBoundaryGuardCore", () => {
   it("classifies canonical and legacy tree paths", () => {
-    assert.equal(
-      boundaryForFilePath("src/lib/imaging-os/pipeline.ts"),
-      "canonical"
-    );
-    assert.equal(
-      boundaryForFilePath("src/lib/imagingOs/imagingOsLoad.server.ts"),
-      "legacy"
-    );
+    assert.equal(boundaryForFilePath("src/lib/imaging-os/pipeline.ts"), "canonical");
+    assert.equal(boundaryForFilePath("src/lib/imagingOs/imagingOsLoad.server.ts"), "legacy");
     assert.equal(boundaryForFilePath("src/lib/patientImages/patientImageTypes.ts"), null);
   });
 
@@ -80,19 +72,14 @@ describe("imagingPathBoundaryGuardCore", () => {
       violations,
       [],
       violations
-        .map(
-          (v) =>
-            `${v.file}:${v.line} ${v.fromBoundary}→${v.toBoundary} imports ${v.specifier}`
-        )
+        .map((v) => `${v.file}:${v.line} ${v.fromBoundary}→${v.toBoundary} imports ${v.specifier}`)
         .join("\n")
     );
   });
 
   it("reports existing allowlisted cross-imports for migration tracking", () => {
     const observations = scanImagingPathCrossImports(REPO_ROOT).filter((o) => o.allowlisted);
-    const keys = new Set(
-      observations.map((o) => `${o.file}|${o.specifier}`)
-    );
+    const keys = new Set(observations.map((o) => `${o.file}|${o.specifier}`));
     for (const entry of IMAGING_PATH_BOUNDARY_CROSS_IMPORT_ALLOWLIST) {
       assert.ok(keys.has(entry), `allowlisted cross-import missing on disk: ${entry}`);
     }
@@ -151,10 +138,7 @@ describe("imagingPathBoundaryGuardCore", () => {
       unauthorized,
       [],
       unauthorized
-        .map(
-          (v) =>
-            `${v.file}:${v.line} legacy→canonical imports ${v.specifier}`
-        )
+        .map((v) => `${v.file}:${v.line} legacy→canonical imports ${v.specifier}`)
         .join("\n")
     );
   });

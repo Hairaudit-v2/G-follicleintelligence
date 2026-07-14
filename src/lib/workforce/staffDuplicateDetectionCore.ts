@@ -86,11 +86,7 @@ export function scoreDuplicatePair(
     signals.roleSimilarity = true;
   }
 
-  if (
-    a.sourceExternalId &&
-    b.sourceExternalId &&
-    a.sourceExternalId === b.sourceExternalId
-  ) {
+  if (a.sourceExternalId && b.sourceExternalId && a.sourceExternalId === b.sourceExternalId) {
     score += 100;
     signals.externalIdConflict = true;
   }

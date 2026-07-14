@@ -77,14 +77,8 @@ describe("mergeCalendarBookingDisplayOnHydrate", () => {
   });
 
   it("merges server bookings by id without dropping unchanged rows", () => {
-    const server = [
-      row("a", "2026-06-10T02:00:00.000Z"),
-      row("c", "2026-06-10T04:00:00.000Z"),
-    ];
-    const client = [
-      row("a", "2026-06-10T01:00:00.000Z"),
-      row("b", "2026-06-10T03:00:00.000Z"),
-    ];
+    const server = [row("a", "2026-06-10T02:00:00.000Z"), row("c", "2026-06-10T04:00:00.000Z")];
+    const client = [row("a", "2026-06-10T01:00:00.000Z"), row("b", "2026-06-10T03:00:00.000Z")];
     const merged = mergeCalendarBookingsOnHydrate(server, client);
     assert.equal(merged.length, 3);
     assert.equal(merged.find((b) => b.id === "a")?.start_at, server[0]?.start_at);

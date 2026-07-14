@@ -144,8 +144,8 @@ export default async function StaffAccessSettingsPage({
           </Link>
           . Every staff member keeps a standard{" "}
           <span className="text-[#CBD5E1]">role template</span>, then receives optional module/tab
-          grants on top — so a doctor who becomes an investor can see Insights, Finances, and
-          the Investor Dashboard without changing their clinical role. Grants are tenant- or
+          grants on top — so a doctor who becomes an investor can see Insights, Finances, and the
+          Investor Dashboard without changing their clinical role. Grants are tenant- or
           clinic-scoped with read / edit / approve levels and are fully audited.
         </p>
       </div>

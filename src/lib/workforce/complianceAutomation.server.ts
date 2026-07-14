@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { evaluateCertificationExpiry, evaluateCredentialExpiry } from "@/src/lib/workforce/credentialExpiryCore";
+import {
+  evaluateCertificationExpiry,
+  evaluateCredentialExpiry,
+} from "@/src/lib/workforce/credentialExpiryCore";
 import { syncStaffCertificationStatusesForMember } from "@/src/lib/workforce/staffCertification.server";
 import {
   checkExpiringCredentials,
@@ -269,18 +272,8 @@ async function auditMemberCompliance(
       }
     }
   } else {
-    await resolveComplianceAlert(
-      supabase,
-      tenantId,
-      staffMemberId,
-      "offboarded_with_permissions"
-    );
-    await resolveComplianceAlert(
-      supabase,
-      tenantId,
-      staffMemberId,
-      "calendar_assignment_inactive"
-    );
+    await resolveComplianceAlert(supabase, tenantId, staffMemberId, "offboarded_with_permissions");
+    await resolveComplianceAlert(supabase, tenantId, staffMemberId, "calendar_assignment_inactive");
   }
 
   if (status === "suspended") {

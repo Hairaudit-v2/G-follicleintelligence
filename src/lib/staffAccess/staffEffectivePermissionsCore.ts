@@ -59,16 +59,9 @@ export function resolveEffectiveStaffPermissions(
   const showReportsAdmin = opts?.showReportsAdminSurfaces === true || showAdmin;
 
   const canManageRoster = staffCapabilitySatisfies(access, "roster.manage");
-  const canViewRoster =
-    staffCapabilitySatisfies(access, "roster.view") || canManageRoster;
-  const canManageStandardHours = staffCapabilitySatisfies(
-    access,
-    "roster.standard_hours.manage"
-  );
-  const canManageIdentityAccess = staffCapabilitySatisfies(
-    access,
-    "team.identity.manage"
-  );
+  const canViewRoster = staffCapabilitySatisfies(access, "roster.view") || canManageRoster;
+  const canManageStandardHours = staffCapabilitySatisfies(access, "roster.standard_hours.manage");
+  const canManageIdentityAccess = staffCapabilitySatisfies(access, "team.identity.manage");
   const canViewIdentityAccess =
     canManageIdentityAccess ||
     canAccessWorkforceTab(access, "identity", "read") ||

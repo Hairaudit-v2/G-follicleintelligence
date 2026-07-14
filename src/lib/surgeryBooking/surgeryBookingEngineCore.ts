@@ -28,16 +28,16 @@ export const PRE_OP_CHECKLIST_LABELS: Record<keyof PreOpChecklistFlags, string> 
 export function preOpChecklistDisplayItems(
   flags: PreOpChecklistFlags
 ): Array<{ key: string; label: string; complete: boolean }> {
-  return (Object.keys(PRE_OP_CHECKLIST_LABELS) as Array<keyof PreOpChecklistFlags>).map(
-    (key) => ({
-      key,
-      label: PRE_OP_CHECKLIST_LABELS[key],
-      complete: flags[key],
-    })
-  );
+  return (Object.keys(PRE_OP_CHECKLIST_LABELS) as Array<keyof PreOpChecklistFlags>).map((key) => ({
+    key,
+    label: PRE_OP_CHECKLIST_LABELS[key],
+    complete: flags[key],
+  }));
 }
 
-export function buildPreOpChecklistFlagsForBookingDraft(body: SurgeryBookingConfirmBody): PreOpChecklistFlags {
+export function buildPreOpChecklistFlagsForBookingDraft(
+  body: SurgeryBookingConfirmBody
+): PreOpChecklistFlags {
   return buildPreOpChecklistFlags({
     caseId: body.caseId ?? null,
     consultRows: [],
@@ -68,7 +68,8 @@ export function listSurgeryBookingMissingRequirements(
   }
   if (step >= 3) {
     if (!body.startAt?.trim() || !body.endAt?.trim()) missing.push("Select date and time.");
-    if (!body.roomId?.trim() && body.roomRequired !== false) missing.push("Select a procedure room.");
+    if (!body.roomId?.trim() && body.roomRequired !== false)
+      missing.push("Select a procedure room.");
   }
   return missing;
 }

@@ -74,7 +74,11 @@ export function isStaffPinRestrictedRoute(pathname: string, tenantBase: string):
   if (!path.startsWith(tenantBase)) return true;
   const suffix = path.slice(tenantBase.length) || "/";
   if (suffix === "/" || suffix === "") return false;
-  if (PIN_ALLOWED_ROUTE_SUFFIXES.some((allowed) => suffix === allowed || suffix.startsWith(`${allowed}/`))) {
+  if (
+    PIN_ALLOWED_ROUTE_SUFFIXES.some(
+      (allowed) => suffix === allowed || suffix.startsWith(`${allowed}/`)
+    )
+  ) {
     return false;
   }
   return PIN_RESTRICTED_ROUTE_PREFIXES.some(

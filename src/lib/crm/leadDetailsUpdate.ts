@@ -122,10 +122,7 @@ async function assertFiUserAssignableAsLeadOwner(
     .eq("tenant_id", tenantId)
     .eq("id", fiUserId.trim())
     .maybeSingle();
-  const email =
-    (userRow as { email: string | null } | null)?.email ??
-    staffList[0]?.email ??
-    null;
+  const email = (userRow as { email: string | null } | null)?.email ?? staffList[0]?.email ?? null;
 
   const pure = assertCrmOwnerAssignablePure({
     userId: fiUserId,

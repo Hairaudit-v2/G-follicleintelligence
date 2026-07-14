@@ -59,8 +59,7 @@ function mapRow(data: Record<string, unknown>): PatientDocumentRow {
       meta && typeof meta === "object" && !Array.isArray(meta)
         ? (meta as Record<string, unknown>)
         : {},
-    uploaded_by_user_id:
-      data.uploaded_by_user_id != null ? String(data.uploaded_by_user_id) : null,
+    uploaded_by_user_id: data.uploaded_by_user_id != null ? String(data.uploaded_by_user_id) : null,
     created_at: String(data.created_at),
     updated_at: String(data.updated_at),
   };
@@ -144,7 +143,9 @@ export async function uploadPatientConsentDocument(input: {
     throw new Error("Consent document must be PDF, JPEG, or PNG.");
   }
   if (input.file.size > PATIENT_CONSENT_MAX_BYTES) {
-    throw new Error(`Consent document exceeds ${PATIENT_CONSENT_MAX_BYTES / (1024 * 1024)} MB limit.`);
+    throw new Error(
+      `Consent document exceeds ${PATIENT_CONSENT_MAX_BYTES / (1024 * 1024)} MB limit.`
+    );
   }
 
   const { person_id } = await assertPatientInTenant(supabase, tid, pid);

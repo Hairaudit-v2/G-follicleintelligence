@@ -124,12 +124,19 @@ function StaffRowCard({
             Profile
           </Link>
           {canViewTwin && showTwinLinks ? (
-            <Link href={`${base}/staff/${row.id}/twin`} className="font-medium text-[#22C1FF] hover:underline">
+            <Link
+              href={`${base}/staff/${row.id}/twin`}
+              className="font-medium text-[#22C1FF] hover:underline"
+            >
               View
             </Link>
           ) : null}
           {canManage ? (
-            <button type="button" onClick={onEdit} className="font-medium text-[#22C1FF] hover:underline">
+            <button
+              type="button"
+              onClick={onEdit}
+              className="font-medium text-[#22C1FF] hover:underline"
+            >
               Edit
             </button>
           ) : null}
@@ -185,7 +192,9 @@ export function StaffDirectorySecondaryView({
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Workforce · Directory</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+            Workforce · Directory
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC]">Staff Directory</h1>
           <p className="max-w-2xl text-sm text-[#94A3B8]">
             All staff records for this clinic — roles, calendars, and scheduling defaults. Use
@@ -245,7 +254,10 @@ export function StaffDirectorySecondaryView({
         </div>
       </DashboardCard>
 
-      <section aria-label="Compact workforce summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section
+        aria-label="Compact workforce summary"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
+      >
         <StatCard label="Total staff" value={metrics.totalStaff} />
         <StatCard label="Active" value={metrics.activeStaff} />
         <StatCard label="Needs attention" value={attentionCount} />
@@ -295,7 +307,10 @@ export function StaffDirectorySecondaryView({
                 <>
                   {lifecycleCopy.emptyState}{" "}
                   {canManage ? (
-                    <Link href={onboardingHref} className="font-medium text-[#22C1FF] hover:underline">
+                    <Link
+                      href={onboardingHref}
+                      className="font-medium text-[#22C1FF] hover:underline"
+                    >
                       Start onboarding →
                     </Link>
                   ) : null}

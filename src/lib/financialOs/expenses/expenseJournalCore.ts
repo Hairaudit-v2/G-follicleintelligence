@@ -124,9 +124,10 @@ export function buildExpenseVoidJournal(input: {
   };
 }
 
-export function fundingGlForPaymentMethod(
-  paymentMethod: string | null | undefined
-): { code: string; name: string } {
+export function fundingGlForPaymentMethod(paymentMethod: string | null | undefined): {
+  code: string;
+  name: string;
+} {
   const m = (paymentMethod ?? "").toLowerCase();
   if (m === "card" || m === "bank" || m === "direct_debit" || m === "cash") {
     return { code: "1000", name: "Cash & bank" };

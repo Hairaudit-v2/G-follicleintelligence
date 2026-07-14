@@ -4,10 +4,7 @@ import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  resolveAuthUserId,
-  resolveEffectiveTenantAuthUserId,
-} from "@/src/lib/crm/crmGate";
+import { resolveAuthUserId, resolveEffectiveTenantAuthUserId } from "@/src/lib/crm/crmGate";
 import { resolvePersonDisplayNameForToday } from "@/src/lib/fiOs/todayPersonLabels";
 import { loadStaffPersonProfileForAuthUserInTenant } from "@/src/lib/fiOs/todayStaffPersonHydration.server";
 

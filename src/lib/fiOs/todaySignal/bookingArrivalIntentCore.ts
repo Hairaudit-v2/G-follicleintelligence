@@ -14,12 +14,10 @@ export type BookingArrivalTokenPayload = {
 
 export const BOOKING_ARRIVAL_TOKEN_TTL_MS = 6 * 60 * 60_000;
 
-export function resolveBookingArrivalTokenSecret(env: NodeJS.ProcessEnv = process.env): string | null {
-  const secret = (
-    env.FI_ARRIVAL_TOKEN_SECRET ??
-    env.FI_EXTERNAL_CONNECTOR_MASTER_KEY ??
-    ""
-  ).trim();
+export function resolveBookingArrivalTokenSecret(
+  env: NodeJS.ProcessEnv = process.env
+): string | null {
+  const secret = (env.FI_ARRIVAL_TOKEN_SECRET ?? env.FI_EXTERNAL_CONNECTOR_MASTER_KEY ?? "").trim();
   return secret || null;
 }
 
@@ -103,7 +101,9 @@ export function withArrivalIntentMetadata(
   };
 }
 
-export function withoutArrivalIntentMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+export function withoutArrivalIntentMetadata(
+  metadata: Record<string, unknown>
+): Record<string, unknown> {
   const next = { ...metadata };
   delete next[FI_ARRIVAL_INTENT_AT_KEY];
   delete next[FI_ARRIVAL_INTENT_SOURCE_KEY];

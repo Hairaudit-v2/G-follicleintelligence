@@ -34,7 +34,8 @@ export function buildPatientPortalImageIngestionRequest(
     storage_path: input.storage_path,
     ...(input.content_type ? { content_type: input.content_type } : {}),
     ...(input.size_bytes != null ? { size_bytes: input.size_bytes } : {}),
-    external_category: input.external_category?.trim() || input.protocol_slot_slug?.trim() || "follow_up",
+    external_category:
+      input.external_category?.trim() || input.protocol_slot_slug?.trim() || "follow_up",
     uploaded_by_actor_type: "patient",
     metadata: {
       capture_source: "patient_portal",

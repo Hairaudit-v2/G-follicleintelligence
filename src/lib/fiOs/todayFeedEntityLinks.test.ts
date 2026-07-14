@@ -20,7 +20,10 @@ const STAFF = "66666666-7777-8888-9999-aaaaaaaaaaaa";
 
 describe("todayFeedEntityLinks", () => {
   it("builds payment entity hrefs", () => {
-    assert.equal(paymentEntityHref(BASE, PAYMENT, "payment_record"), `${BASE}/financial/payments/${PAYMENT}`);
+    assert.equal(
+      paymentEntityHref(BASE, PAYMENT, "payment_record"),
+      `${BASE}/financial/payments/${PAYMENT}`
+    );
     assert.equal(
       paymentEntityHref(BASE, PAYMENT, "payment_request"),
       `${BASE}/financial/payment-requests/${PAYMENT}`

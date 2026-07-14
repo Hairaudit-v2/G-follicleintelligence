@@ -129,15 +129,7 @@ function HeroAudiencePills() {
   );
 }
 
-function PhilosophyPillar({
-  title,
-  body,
-  index,
-}: {
-  title: string;
-  body: string;
-  index: number;
-}) {
+function PhilosophyPillar({ title, body, index }: { title: string; body: string; index: number }) {
   const icons = [Network, BrainCircuit, Globe2] as const;
   const Icon = icons[index] ?? Sparkles;
 
@@ -401,10 +393,7 @@ export function EcosystemArchitectureView() {
             />
           </div>
 
-          <GlassCard
-            variant="os"
-            className="mt-8 border-amber-400/15 !p-6 sm:!p-8 md:mt-10"
-          >
+          <GlassCard variant="os" className="mt-8 border-amber-400/15 !p-6 sm:!p-8 md:mt-10">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
               Switching economics
             </p>
@@ -469,8 +458,9 @@ export function EcosystemArchitectureView() {
                 {c.globalNetwork.closingStatement}
               </p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                The AI continuously learns. Every clinic that joins strengthens predictive capability
-                for the entire network — governed, structured, and built for clinical rigor.
+                The AI continuously learns. Every clinic that joins strengthens predictive
+                capability for the entire network — governed, structured, and built for clinical
+                rigor.
               </p>
             </GlassCard>
           </div>

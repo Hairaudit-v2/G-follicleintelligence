@@ -44,9 +44,7 @@ const LIFECYCLE_SOURCE = "workforce_os_staff_lifecycle";
 function mapLifecycleRow(raw: Record<string, unknown>): StaffMemberLifecycleRow {
   const names = splitFullName(String(raw.full_name ?? ""));
   const tags = raw.internal_tags;
-  const internal_tags = Array.isArray(tags)
-    ? tags.map((t) => String(t)).filter(Boolean)
-    : [];
+  const internal_tags = Array.isArray(tags) ? tags.map((t) => String(t)).filter(Boolean) : [];
   const snapshot = raw.source_snapshot;
   return {
     id: String(raw.id),
@@ -154,7 +152,9 @@ export async function ensureStaffMemberProjection(
       role_code: String(s.staff_role ?? "consultant"),
       timezone: s.default_timezone != null ? String(s.default_timezone) : null,
       professional_title: s.professional_title != null ? String(s.professional_title) : null,
-      employment_status: parseStaffEmploymentStatus(s.employment_status ?? (s.is_active ? "active" : "inactive")),
+      employment_status: parseStaffEmploymentStatus(
+        s.employment_status ?? (s.is_active ? "active" : "inactive")
+      ),
       identity_source: parseStaffIdentitySource(s.identity_source),
       archived_at: s.archived_at ?? null,
       created_at: now,
@@ -526,7 +526,8 @@ export async function runEmailReconciliationForTenant(input: {
       tenantId: tid,
       staffMemberId: link.staffMemberId,
       iiohrStaffRecordId: String(link.evolvedRecord.id),
-      iiohrUserId: link.evolvedRecord.iiohr_user_id != null ? String(link.evolvedRecord.iiohr_user_id) : null,
+      iiohrUserId:
+        link.evolvedRecord.iiohr_user_id != null ? String(link.evolvedRecord.iiohr_user_id) : null,
       sourceSnapshot: { ...link.evolvedRecord },
       client: supabase,
     });

@@ -57,7 +57,10 @@ export const RECRUITMENT_OFFER_STATUS_LABELS: Record<RecruitmentOfferStatus, str
   expired: "Offer expired",
 };
 
-export const TERMINAL_RECRUITMENT_STAGES = new Set<RecruitmentPipelineStage>(["hired", "withdrawn"]);
+export const TERMINAL_RECRUITMENT_STAGES = new Set<RecruitmentPipelineStage>([
+  "hired",
+  "withdrawn",
+]);
 
 export type WorkforceRoleRequirement = {
   id: string;
@@ -166,9 +169,10 @@ export function assertRecruitmentStageTransition(
 export function countCandidatesByStage(
   candidates: Pick<RecruitmentCandidate, "pipelineStage" | "archivedAt">[]
 ): Record<RecruitmentPipelineStage, number> {
-  const out = Object.fromEntries(
-    RECRUITMENT_PIPELINE_STAGES.map((s) => [s, 0])
-  ) as Record<RecruitmentPipelineStage, number>;
+  const out = Object.fromEntries(RECRUITMENT_PIPELINE_STAGES.map((s) => [s, 0])) as Record<
+    RecruitmentPipelineStage,
+    number
+  >;
   for (const c of candidates) {
     if (c.archivedAt) continue;
     out[c.pipelineStage] += 1;

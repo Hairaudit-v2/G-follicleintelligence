@@ -2,10 +2,7 @@
  * WorkforceOS PIN time clock — per-tenant policy (pure parse/merge).
  */
 
-import {
-  isPayPeriodFrequency,
-  type PayPeriodFrequency,
-} from "./payPeriodCore";
+import { isPayPeriodFrequency, type PayPeriodFrequency } from "./payPeriodCore";
 
 export type WorkforceTimeClockPolicy = {
   breaksEnabled: boolean;

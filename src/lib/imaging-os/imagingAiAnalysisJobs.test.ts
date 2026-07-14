@@ -75,7 +75,11 @@ function createJobStore(initial: JobRow[] = []) {
         for (const row of matched) Object.assign(row, updatePatch);
         if (returning) {
           const data =
-            terminal === "many" ? matched : terminal === "maybeSingle" ? (matched[0] ?? null) : matched[0];
+            terminal === "many"
+              ? matched
+              : terminal === "maybeSingle"
+                ? (matched[0] ?? null)
+                : matched[0];
           return { data, error: null };
         }
       }

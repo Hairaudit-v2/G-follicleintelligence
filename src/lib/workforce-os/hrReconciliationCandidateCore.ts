@@ -27,9 +27,7 @@ export function resolveEvolvedStaffRecordId(record: {
   return null;
 }
 
-export function mapIiohrPortalStaffToEvolvedStaffRecords(
-  rows: IiohrHrPortalStaffRecord[]
-): {
+export function mapIiohrPortalStaffToEvolvedStaffRecords(rows: IiohrHrPortalStaffRecord[]): {
   records: EvolvedStaffRecord[];
   skippedNonUuidCount: number;
 } {

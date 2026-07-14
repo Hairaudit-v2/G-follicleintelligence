@@ -9,7 +9,10 @@ import {
   reassignImagingImageViewType,
 } from "./imagingStaffReviewMutations.server";
 import { readImagingClinicalAiMetadata } from "./clinicalImageAnalysisCore";
-import { buildStubClinicalImageAnalysis, clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisCore";
+import {
+  buildStubClinicalImageAnalysis,
+  clinicalAnalysisResultToMetadataRecord,
+} from "./clinicalImageAnalysisCore";
 
 type Row = Record<string, unknown>;
 
@@ -127,7 +130,10 @@ describe("imagingStaffReviewMutations", () => {
     };
     assert.equal(staff.status, "view_reassigned");
     assert.equal(staff.assigned_view_type, "recipient");
-    assert.deepEqual(readImagingClinicalAiMetadata(row.metadata as Record<string, unknown>)?.view_type, "donor");
+    assert.deepEqual(
+      readImagingClinicalAiMetadata(row.metadata as Record<string, unknown>)?.view_type,
+      "donor"
+    );
   });
 
   it("rejects invalid view type", async () => {

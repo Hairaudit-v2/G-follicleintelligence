@@ -174,7 +174,12 @@ export const PATIENT_JOURNEY_ALLOWED_TRANSITIONS: Partial<
     "completed",
     "inactive",
   ],
-  three_month_review_due: ["six_month_review_due", "twelve_month_audit_due", "completed", "inactive"],
+  three_month_review_due: [
+    "six_month_review_due",
+    "twelve_month_audit_due",
+    "completed",
+    "inactive",
+  ],
   six_month_review_due: ["twelve_month_audit_due", "completed", "inactive"],
   twelve_month_audit_due: ["completed", "inactive"],
   completed: ["inactive"],
@@ -283,10 +288,7 @@ export function detectPatientJourneyBlockers(input: {
     });
   }
 
-  if (
-    (state === "pre_op_incomplete" || state === "pre_op_ready") &&
-    !signals.imagingComplete
-  ) {
+  if ((state === "pre_op_incomplete" || state === "pre_op_ready") && !signals.imagingComplete) {
     blockers.push({
       kind: "missing_images",
       label: "Clinical photos incomplete",

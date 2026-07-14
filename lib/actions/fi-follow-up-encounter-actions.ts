@@ -27,7 +27,10 @@ import {
   searchReturningPatients,
   updateImagingSessionAiReview,
 } from "@/src/lib/followUpEncounters/followUpEncounterServer";
-import { buildFollowUpImagingCaptureHref, buildFollowUpReturnHref } from "@/src/lib/followUpEncounters/followUpImagingRoutes";
+import {
+  buildFollowUpImagingCaptureHref,
+  buildFollowUpReturnHref,
+} from "@/src/lib/followUpEncounters/followUpImagingRoutes";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -262,7 +265,9 @@ export async function loadBookingFollowUpContextAction(
           title: string | null;
         };
         prefill: import("@/src/lib/followUpEncounters/bookingFollowUpContextCore").BookingFollowUpPrefill;
-        continuityStatus: import("@/src/lib/followUpEncounters/bookingFollowUpContextCore").BookingContinuityStatus | null;
+        continuityStatus:
+          | import("@/src/lib/followUpEncounters/bookingFollowUpContextCore").BookingContinuityStatus
+          | null;
         continuityLabel: string | null;
         matchedPatientId: string | null;
         duplicatePrevented: boolean;
@@ -276,9 +281,8 @@ export async function loadBookingFollowUpContextAction(
     const session = await getCrmShellSessionIfAllowed(tenantId);
     if (!session) return { ok: false, error: "Not authorised." };
 
-    const { loadBookingFollowUpContext } = await import(
-      "@/src/lib/followUpEncounters/bookingFollowUpContext.server"
-    );
+    const { loadBookingFollowUpContext } =
+      await import("@/src/lib/followUpEncounters/bookingFollowUpContext.server");
     const ctx = await loadBookingFollowUpContext(tenantId, bookingId);
     if (!ctx) return { ok: false, error: "Booking not found." };
 

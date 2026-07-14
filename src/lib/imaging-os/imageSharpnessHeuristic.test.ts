@@ -30,12 +30,16 @@ describe("evaluateImageSharpnessHeuristic", () => {
 
   it("classifies a noisy image as clearer than a flat image", async () => {
     const clear = await evaluateImageSharpnessHeuristic(await buildNoisyPngBuffer());
-    const flat = await evaluateImageSharpnessHeuristic(await buildSolidPngBuffer({ r: 120, g: 120, b: 120 }));
+    const flat = await evaluateImageSharpnessHeuristic(
+      await buildSolidPngBuffer({ r: 120, g: 120, b: 120 })
+    );
     assert.ok((clear.sharpness_score ?? 0) > (flat.sharpness_score ?? 0));
   });
 
   it("detects underexposed flat images", async () => {
-    const dark = await evaluateImageSharpnessHeuristic(await buildSolidPngBuffer({ r: 10, g: 10, b: 10 }));
+    const dark = await evaluateImageSharpnessHeuristic(
+      await buildSolidPngBuffer({ r: 10, g: 10, b: 10 })
+    );
     assert.equal(dark.exposure_status, "underexposed");
   });
 

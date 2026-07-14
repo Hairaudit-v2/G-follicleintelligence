@@ -41,9 +41,7 @@ test("domain mapping examples from D6G scope", () => {
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("cases-worklist")!), "Surgery");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("surgery-cases")!), "Surgery");
   assert.equal(
-    mapCurrentNavItemTo1BDomain(
-      items.find((i) => i.id === "surgery-readiness-board")!
-    ),
+    mapCurrentNavItemTo1BDomain(items.find((i) => i.id === "surgery-readiness-board")!),
     "Surgery"
   );
 });
@@ -65,7 +63,10 @@ test("pipeline has no duplicate peer surfaces after S4.5D consolidation", () => 
   assert.ok(crm);
   assert.equal(crm.label, "Pipeline");
   assert.ok(crm.href.endsWith("/crm"));
-  assert.equal(items.find((i) => i.id === "follow-up-queue"), undefined);
+  assert.equal(
+    items.find((i) => i.id === "follow-up-queue"),
+    undefined
+  );
   const pipelineLabeled = items.filter(
     (i) => i.source === "primary_sidebar" && /^(Pipeline|Enquiries)$/i.test(i.label)
   );

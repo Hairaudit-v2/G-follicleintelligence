@@ -148,7 +148,9 @@ function ActionRow({
       >
         {action.label}
         {action.description ? (
-          <span className="mt-0.5 block text-[10px] font-normal text-[#64748B]">{action.description}</span>
+          <span className="mt-0.5 block text-[10px] font-normal text-[#64748B]">
+            {action.description}
+          </span>
         ) : null}
       </button>
     );
@@ -158,7 +160,8 @@ function ActionRow({
     const key = actionKey(staffMemberId, mutation);
     const copied = copiedActionId === action.id;
     const label =
-      copied && (mutation === "copy_onboarding" || mutation === "copy_login" || mutation === "reset_pin")
+      copied &&
+      (mutation === "copy_onboarding" || mutation === "copy_login" || mutation === "reset_pin")
         ? "Copied"
         : action.label;
 
@@ -276,7 +279,10 @@ export function StaffProfileActionMenu({
       const mutation = mutationForActionId(action.id);
       if (!mutation) return;
 
-      if (action.confirmTitle && !window.confirm(`${action.confirmTitle}\n\n${action.confirmDescription ?? ""}`)) {
+      if (
+        action.confirmTitle &&
+        !window.confirm(`${action.confirmTitle}\n\n${action.confirmDescription ?? ""}`)
+      ) {
         return;
       }
 
@@ -318,10 +324,7 @@ export function StaffProfileActionMenu({
             return;
           }
 
-          if (
-            (mutation === "copy_onboarding" || mutation === "copy_login") &&
-            result.inviteUrl
-          ) {
+          if ((mutation === "copy_onboarding" || mutation === "copy_login") && result.inviteUrl) {
             try {
               await navigator.clipboard.writeText(result.inviteUrl);
               setCopiedActionId(action.id);
@@ -376,7 +379,9 @@ export function StaffProfileActionMenu({
       ) : null}
 
       {message ? (
-        <InfoNotice variant={message.includes("failed") ? "danger" : "success"}>{message}</InfoNotice>
+        <InfoNotice variant={message.includes("failed") ? "danger" : "success"}>
+          {message}
+        </InfoNotice>
       ) : null}
 
       {manualCopyUrl ? (
@@ -442,10 +447,7 @@ export function StaffProfileActionMenu({
   }
 
   return (
-    <DashboardCard
-      className="p-4 sm:p-5"
-      data-testid="staff-profile-action-menu"
-    >
+    <DashboardCard className="p-4 sm:p-5" data-testid="staff-profile-action-menu">
       <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Action menu</p>
       <div className="mt-3">{menuBody}</div>
     </DashboardCard>

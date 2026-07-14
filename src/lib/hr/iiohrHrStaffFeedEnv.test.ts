@@ -8,7 +8,8 @@ import {
 
 test("readIiohrHrStaffFeedUrl prefers Perth env var", () => {
   const result = readIiohrHrStaffFeedUrl((key) => {
-    if (key === "IIOHR_HR_PERTH_STAFF_FEED_URL") return "https://www.iiohr.com/api/hr/evolved-perth/staff-feed\r\n";
+    if (key === "IIOHR_HR_PERTH_STAFF_FEED_URL")
+      return "https://www.iiohr.com/api/hr/evolved-perth/staff-feed\r\n";
     if (key === "IIOHR_HR_STAFF_FEED_URL") return "https://legacy.example/feed";
     return undefined;
   });

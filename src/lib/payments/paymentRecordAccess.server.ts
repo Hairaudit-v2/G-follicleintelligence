@@ -70,16 +70,16 @@ async function fiUserAllowsPaymentMutationViaTenantAdmin(
   return tenantAdminRoleAllowsPaymentMutation(role);
 }
 
-async function assertFiUserMayMutatePayments(row: {
-  id: string;
-  role: string;
-}, tenantId: string): Promise<void> {
+async function assertFiUserMayMutatePayments(
+  row: {
+    id: string;
+    role: string;
+  },
+  tenantId: string
+): Promise<void> {
   if (isPaymentMutationRole(row.role)) return;
   if (await fiUserAllowsPaymentMutationViaTenantAdmin(tenantId, row.id)) return;
-  throw new PaymentRecordAccessError(
-    403,
-    "Finance or manager access required to record payments."
-  );
+  throw new PaymentRecordAccessError(403, "Finance or manager access required to record payments.");
 }
 
 /**

@@ -137,9 +137,7 @@ export function VoiceNoteEntryButton({
       return;
     }
     if (typeof MediaRecorder === "undefined") {
-      setErr(
-        "MediaRecorder is not available in this browser. Use Upload audio instead."
-      );
+      setErr("MediaRecorder is not available in this browser. Use Upload audio instead.");
       return;
     }
     try {
@@ -149,7 +147,9 @@ export function VoiceNoteEntryButton({
           name: "microphone" as PermissionName,
         });
         if (perm?.state === "denied") {
-          setErr(formatMicrophoneAccessError({ name: "NotAllowedError", message: "permission denied" }));
+          setErr(
+            formatMicrophoneAccessError({ name: "NotAllowedError", message: "permission denied" })
+          );
           return;
         }
       } catch {
@@ -312,8 +312,8 @@ export function VoiceNoteEntryButton({
                     Recommended if the mic is blocked: Upload audio
                   </p>
                   <p className="mt-1 text-[11px] text-slate-400">
-                    Record on your phone (Voice Memos) or Windows Voice Recorder, then upload
-                    .m4a / .mp3 / .wav / .webm here. No browser mic permission needed.
+                    Record on your phone (Voice Memos) or Windows Voice Recorder, then upload .m4a /
+                    .mp3 / .wav / .webm here. No browser mic permission needed.
                   </p>
                   <input
                     type="file"
@@ -336,9 +336,9 @@ export function VoiceNoteEntryButton({
                 <div className="rounded border border-white/[0.06] bg-white/[0.03] p-3">
                   <p className="text-xs font-medium text-slate-300">Or record in this browser</p>
                   <p className="mt-1 text-[11px] text-slate-500">
-                    Edge must allow Microphone for this site, and Windows Privacy must allow Edge
-                    to use the mic. InPrivate does not reset a previously blocked site permission
-                    in all cases — reset it under the lock icon or edge://settings/content/microphone
+                    Edge must allow Microphone for this site, and Windows Privacy must allow Edge to
+                    use the mic. InPrivate does not reset a previously blocked site permission in
+                    all cases — reset it under the lock icon or edge://settings/content/microphone
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {!recording ? (

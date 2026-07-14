@@ -45,14 +45,14 @@ export default function BookingArrivalClient() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Clinic arrival</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          Clinic arrival
+        </p>
         <h1 className="mt-2 text-xl font-semibold text-slate-900">I&apos;m here</h1>
         {state === "submitting" ? (
           <p className="mt-4 text-sm text-slate-600">Letting the clinic know…</p>
         ) : null}
-        {state === "success" ? (
-          <p className="mt-4 text-sm text-emerald-800">{message}</p>
-        ) : null}
+        {state === "success" ? <p className="mt-4 text-sm text-emerald-800">{message}</p> : null}
         {state === "error" ? (
           <>
             <p className="mt-4 text-sm text-red-700">{message}</p>

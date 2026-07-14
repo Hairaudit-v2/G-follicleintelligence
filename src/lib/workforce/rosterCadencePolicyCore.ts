@@ -7,10 +7,7 @@ import type { ClinicDeploymentTemplateCode } from "@/src/lib/onboarding-os/tenan
 
 export type RosterCadence = "weekly" | "fortnightly" | "monthly";
 export type RosterWeekStartDay = "monday" | "sunday";
-export type RosterGenerationMode =
-  | "standard_hours_only"
-  | "copy_previous_period"
-  | "hybrid";
+export type RosterGenerationMode = "standard_hours_only" | "copy_previous_period" | "hybrid";
 export type DefaultFullTimePattern = "five_eight" | "four_ten" | "custom";
 
 export type WorkforceRosterPlanningPolicy = {
@@ -27,11 +24,7 @@ export type WorkforceRosterPlanningPolicy = {
   explicitlyConfigured: boolean;
 };
 
-export const ROSTER_CADENCE_VALUES: readonly RosterCadence[] = [
-  "weekly",
-  "fortnightly",
-  "monthly",
-];
+export const ROSTER_CADENCE_VALUES: readonly RosterCadence[] = ["weekly", "fortnightly", "monthly"];
 
 export const DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY: Omit<
   WorkforceRosterPlanningPolicy,
@@ -67,31 +60,35 @@ function parseIsoDate(value: unknown, fallback: string): string {
 }
 
 function parseCadence(value: unknown): RosterCadence {
-  const raw = String(value ?? "").trim().toLowerCase();
+  const raw = String(value ?? "")
+    .trim()
+    .toLowerCase();
   return ROSTER_CADENCE_VALUES.includes(raw as RosterCadence)
     ? (raw as RosterCadence)
     : DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterCadence;
 }
 
 function parseWeekStartDay(value: unknown): RosterWeekStartDay {
-  const raw = String(value ?? "").trim().toLowerCase();
+  const raw = String(value ?? "")
+    .trim()
+    .toLowerCase();
   return raw === "sunday" ? "sunday" : "monday";
 }
 
 function parseGenerationMode(value: unknown): RosterGenerationMode {
-  const raw = String(value ?? "").trim().toLowerCase();
-  const allowed: RosterGenerationMode[] = [
-    "standard_hours_only",
-    "copy_previous_period",
-    "hybrid",
-  ];
+  const raw = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  const allowed: RosterGenerationMode[] = ["standard_hours_only", "copy_previous_period", "hybrid"];
   return allowed.includes(raw as RosterGenerationMode)
     ? (raw as RosterGenerationMode)
     : DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterGenerationMode;
 }
 
 function parseFullTimePattern(value: unknown): DefaultFullTimePattern {
-  const raw = String(value ?? "").trim().toLowerCase();
+  const raw = String(value ?? "")
+    .trim()
+    .toLowerCase();
   const allowed: DefaultFullTimePattern[] = ["five_eight", "four_ten", "custom"];
   return allowed.includes(raw as DefaultFullTimePattern)
     ? (raw as DefaultFullTimePattern)
@@ -100,7 +97,8 @@ function parseFullTimePattern(value: unknown): DefaultFullTimePattern {
 
 function parseHorizonWeeks(value: unknown): number {
   const n = Number(value);
-  if (!Number.isFinite(n)) return DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterPlanningHorizonWeeks;
+  if (!Number.isFinite(n))
+    return DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterPlanningHorizonWeeks;
   return Math.min(52, Math.max(1, Math.floor(n)));
 }
 
@@ -127,9 +125,7 @@ export function parseWorkforceRosterPlanningPolicy(
 
   return {
     rosterCadence: parseCadence(root.roster_cadence ?? root.rosterCadence),
-    rosterWeekStartDay: parseWeekStartDay(
-      root.roster_week_start_day ?? root.rosterWeekStartDay
-    ),
+    rosterWeekStartDay: parseWeekStartDay(root.roster_week_start_day ?? root.rosterWeekStartDay),
     rosterPlanningHorizonWeeks: parseHorizonWeeks(
       root.roster_planning_horizon_weeks ?? root.rosterPlanningHorizonWeeks
     ),
@@ -154,18 +150,14 @@ export function parseWorkforceRosterPlanningPolicy(
   };
 }
 
-export function isRosterCadenceConfigured(
-  policy: WorkforceRosterPlanningPolicy
-): boolean {
+export function isRosterCadenceConfigured(policy: WorkforceRosterPlanningPolicy): boolean {
   return policy.explicitlyConfigured;
 }
 
 /** Merges policy into tenant settings metadata without dropping unrelated keys. */
 export function mergeWorkforceRosterPlanningPolicyIntoMetadata(
   metadata: Record<string, unknown> | null | undefined,
-  policy: Partial<
-    Omit<WorkforceRosterPlanningPolicy, "explicitlyConfigured">
-  >
+  policy: Partial<Omit<WorkforceRosterPlanningPolicy, "explicitlyConfigured">>
 ): Record<string, unknown> {
   const base = asObject(metadata) ?? {};
   const existing = asObject(base[METADATA_KEY]) ?? {};
@@ -245,16 +237,14 @@ export function resolveRosterPeriodStart(input: ResolveRosterPeriodStartInput): 
     return `${ref.slice(0, 7)}-01`;
   }
 
-  const weekStart =
-    weekStartDay === "sunday" ? sundayOfWeekIso(ref) : mondayOfWeekIso(ref);
+  const weekStart = weekStartDay === "sunday" ? sundayOfWeekIso(ref) : mondayOfWeekIso(ref);
 
   if (input.cadence === "weekly") return weekStart;
 
   const anchorMonday = mondayOfWeekIso(
-    (input.rosterCycleAnchorDate ?? DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterCycleAnchorDate).slice(
-      0,
-      10
-    )
+    (
+      input.rosterCycleAnchorDate ?? DEFAULT_WORKFORCE_ROSTER_PLANNING_POLICY.rosterCycleAnchorDate
+    ).slice(0, 10)
   );
   const weeksFromAnchor = Math.floor(daysBetweenIso(anchorMonday, weekStart) / 7);
   const fortnightOffset = weeksFromAnchor % 2 === 0 ? 0 : -7;
@@ -269,10 +259,7 @@ function sundayOfWeekIso(refDateIso: string): string {
 }
 
 /** Inclusive period day count for cadence (weekly=7, fortnightly=14, monthly=calendar days). */
-export function rosterPeriodDayCount(
-  periodStartIso: string,
-  cadence: RosterCadence
-): number {
+export function rosterPeriodDayCount(periodStartIso: string, cadence: RosterCadence): number {
   if (cadence === "weekly") return 7;
   if (cadence === "fortnightly") return 14;
   const [y, m] = periodStartIso.slice(0, 7).split("-").map(Number);
@@ -287,9 +274,7 @@ export function rosterDateRangeFromPeriodStart(
 ): { startsAt: string; endsAt: string; periodStart: string; periodDayDates: string[] } {
   const periodStart = periodStartIso.slice(0, 10);
   const dayCount = rosterPeriodDayCount(periodStart, cadence);
-  const periodDayDates = Array.from({ length: dayCount }, (_, i) =>
-    shiftIsoDate(periodStart, i)
-  );
+  const periodDayDates = Array.from({ length: dayCount }, (_, i) => shiftIsoDate(periodStart, i));
 
   const start = new Date(`${periodStart}T00:00:00.000Z`);
   const end = new Date(start);
@@ -304,10 +289,7 @@ export function rosterDateRangeFromPeriodStart(
 }
 
 /** Fortnightly cycle week index (1=Week A, 2=Week B) for a local calendar date. */
-export function resolveFortnightCycleWeek(
-  localDate: string,
-  anchorDate: string
-): 1 | 2 {
+export function resolveFortnightCycleWeek(localDate: string, anchorDate: string): 1 | 2 {
   const anchorWeekStart = mondayOfWeekIso(anchorDate.slice(0, 10));
   const dateWeekStart = mondayOfWeekIso(localDate.slice(0, 10));
   const weeksSinceAnchor = Math.floor(daysBetweenIso(anchorWeekStart, dateWeekStart) / 7);
@@ -343,8 +325,7 @@ export function groupDatesIntoWeekRows(
   for (const date of dayDates) {
     const d = new Date(`${date}T12:00:00.000Z`);
     const dow = d.getUTCDay();
-    const isWeekStart =
-      weekStartDay === "sunday" ? dow === 0 : dow === 1;
+    const isWeekStart = weekStartDay === "sunday" ? dow === 0 : dow === 1;
 
     if (isWeekStart && current.length) {
       rows.push(current);
@@ -427,10 +408,7 @@ export function rosterClearGeneratedConfirmMessage(cadence: RosterCadence): stri
   );
 }
 
-export function fortnightWeekLabel(
-  localDate: string,
-  anchorDate: string
-): "Week A" | "Week B" {
+export function fortnightWeekLabel(localDate: string, anchorDate: string): "Week A" | "Week B" {
   return resolveFortnightCycleWeek(localDate, anchorDate) === 1 ? "Week A" : "Week B";
 }
 

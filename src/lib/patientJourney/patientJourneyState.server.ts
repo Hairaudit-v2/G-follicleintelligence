@@ -68,49 +68,51 @@ export async function loadPatientJourneySignals(
   const tz = calendarSettings.calendarTimezone;
   const todayYmd = calendarDateStringFromInstant(new Date(), tz);
 
-  const [leadsRes, consultsRes, bookingsRes, paymentsRes, imagesRes, _casesRes] = await Promise.all([
-    supabase
-      .from("fi_crm_leads")
-      .select("id, status")
-      .eq("tenant_id", tid)
-      .eq("patient_id", pid)
-      .limit(20),
-    supabase
-      .from("fi_consultations")
-      .select("id, status, quote_data, recommendation_notes, consultation_date, archived_at")
-      .eq("tenant_id", tid)
-      .eq("patient_id", pid)
-      .is("archived_at", null)
-      .order("updated_at", { ascending: false })
-      .limit(20),
-    supabase
-      .from("fi_bookings")
-      .select("id, booking_type, booking_status, start_at, end_at")
-      .eq("tenant_id", tid)
-      .eq("patient_id", pid)
-      .order("start_at", { ascending: false })
-      .limit(40),
-    supabase
-      .from("fi_payment_records")
-      .select("id, status, amount_expected, amount_paid, due_date, payment_context")
-      .eq("tenant_id", tid)
-      .eq("patient_id", pid)
-      .order("updated_at", { ascending: false })
-      .limit(20),
-    supabase
-      .from("fi_patient_images")
-      .select("id")
-      .eq("tenant_id", tid)
-      .eq("patient_id", pid)
-      .limit(5),
-    supabase
-      .from("fi_cases")
-      .select("id, case_status")
-      .eq("tenant_id", tid)
-      .eq("foundation_patient_id", pid)
-      .is("deleted_at", null)
-      .limit(10),
-  ]);
+  const [leadsRes, consultsRes, bookingsRes, paymentsRes, imagesRes, _casesRes] = await Promise.all(
+    [
+      supabase
+        .from("fi_crm_leads")
+        .select("id, status")
+        .eq("tenant_id", tid)
+        .eq("patient_id", pid)
+        .limit(20),
+      supabase
+        .from("fi_consultations")
+        .select("id, status, quote_data, recommendation_notes, consultation_date, archived_at")
+        .eq("tenant_id", tid)
+        .eq("patient_id", pid)
+        .is("archived_at", null)
+        .order("updated_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("fi_bookings")
+        .select("id, booking_type, booking_status, start_at, end_at")
+        .eq("tenant_id", tid)
+        .eq("patient_id", pid)
+        .order("start_at", { ascending: false })
+        .limit(40),
+      supabase
+        .from("fi_payment_records")
+        .select("id, status, amount_expected, amount_paid, due_date, payment_context")
+        .eq("tenant_id", tid)
+        .eq("patient_id", pid)
+        .order("updated_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("fi_patient_images")
+        .select("id")
+        .eq("tenant_id", tid)
+        .eq("patient_id", pid)
+        .limit(5),
+      supabase
+        .from("fi_cases")
+        .select("id, case_status")
+        .eq("tenant_id", tid)
+        .eq("foundation_patient_id", pid)
+        .is("deleted_at", null)
+        .limit(10),
+    ]
+  );
 
   const leads = leadsRes.data ?? [];
   const consults = (consultsRes.data ?? []) as Array<{
@@ -122,7 +124,9 @@ export async function loadPatientJourneySignals(
   const payments = paymentsRes.data ?? [];
 
   const hasLead = leads.length > 0;
-  const leadLost = leads.some((l) => String((l as { status?: string }).status ?? "").toLowerCase() === "lost");
+  const leadLost = leads.some(
+    (l) => String((l as { status?: string }).status ?? "").toLowerCase() === "lost"
+  );
 
   const consultBooked = bookings.some((b) => {
     const type = String((b as { booking_type?: string }).booking_type ?? "").toLowerCase();
@@ -159,10 +163,17 @@ export async function loadPatientJourneySignals(
       due_date: string | null;
       payment_context: string;
     };
-    if (!String(row.payment_context ?? "").toLowerCase().includes("surgery")) return false;
+    if (
+      !String(row.payment_context ?? "")
+        .toLowerCase()
+        .includes("surgery")
+    )
+      return false;
     return (
-      !paymentRecordNeedsCollection(row as Pick<PaymentRecordRow, "status" | "amount_expected" | "amount_paid" | "due_date">, todayYmd) &&
-      Number(row.amount_paid) > 0
+      !paymentRecordNeedsCollection(
+        row as Pick<PaymentRecordRow, "status" | "amount_expected" | "amount_paid" | "due_date">,
+        todayYmd
+      ) && Number(row.amount_paid) > 0
     );
   });
 
@@ -182,15 +193,18 @@ export async function loadPatientJourneySignals(
   });
 
   const surgeryDateYmd = activeSurgery
-    ? calendarDateStringFromInstant(new Date(String((activeSurgery as { start_at: string }).start_at)), tz)
+    ? calendarDateStringFromInstant(
+        new Date(String((activeSurgery as { start_at: string }).start_at)),
+        tz
+      )
     : null;
 
   const procedureDayToday = Boolean(
     activeSurgery &&
-      surgeryDateYmd === todayYmd &&
-      ["scheduled", "confirmed", "arrived"].includes(
-        String((activeSurgery as { booking_status?: string }).booking_status ?? "").toLowerCase()
-      )
+    surgeryDateYmd === todayYmd &&
+    ["scheduled", "confirmed", "arrived"].includes(
+      String((activeSurgery as { booking_status?: string }).booking_status ?? "").toLowerCase()
+    )
   );
 
   const procedureCompleted = Boolean(completedSurgery);
@@ -198,7 +212,10 @@ export async function loadPatientJourneySignals(
   const followUpBooked = bookings.some((b) => {
     const type = String((b as { booking_type?: string }).booking_type ?? "").toLowerCase();
     const st = String((b as { booking_status?: string }).booking_status ?? "").toLowerCase();
-    return (type.includes("follow") || type.includes("review")) && ["scheduled", "confirmed"].includes(st);
+    return (
+      (type.includes("follow") || type.includes("review")) &&
+      ["scheduled", "confirmed"].includes(st)
+    );
   });
 
   let reviewFlags = {

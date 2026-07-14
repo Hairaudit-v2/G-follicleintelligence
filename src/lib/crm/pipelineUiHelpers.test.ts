@@ -23,7 +23,9 @@ import type {
 
 const NOW = Date.parse("2026-07-12T12:00:00.000Z");
 
-function card(partial: Partial<PipelineLeadCard> & Pick<PipelineLeadCard, "leadId">): PipelineLeadCard {
+function card(
+  partial: Partial<PipelineLeadCard> & Pick<PipelineLeadCard, "leadId">
+): PipelineLeadCard {
   return {
     leadId: partial.leadId,
     person: partial.person ?? {
@@ -104,14 +106,8 @@ test("action labels are staff-safe", () => {
 });
 
 test("due labels use text not colour alone", () => {
-  assert.match(
-    formatPipelineDueLabel("2026-07-10T10:00:00.000Z", true, NOW) ?? "",
-    /Overdue/
-  );
-  assert.match(
-    formatPipelineDueLabel("2026-07-12T15:00:00.000Z", false, NOW) ?? "",
-    /Due today/
-  );
+  assert.match(formatPipelineDueLabel("2026-07-10T10:00:00.000Z", true, NOW) ?? "", /Overdue/);
+  assert.match(formatPipelineDueLabel("2026-07-12T15:00:00.000Z", false, NOW) ?? "", /Due today/);
 });
 
 test("hidden lead notice is staff-safe", () => {

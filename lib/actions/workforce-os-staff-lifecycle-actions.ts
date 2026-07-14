@@ -246,15 +246,15 @@ export async function loadHrReconciliationPageAction(
   }
 }
 
-export async function runHrProjectionSyncAction(
-  tenantId: string
-): Promise<
+export async function runHrProjectionSyncAction(tenantId: string): Promise<
   | {
       ok: true;
       syncedCount: number;
       syncedAt: string;
       health: Awaited<
-        ReturnType<typeof import("@/src/lib/workforce-os/projectionHealth.server").loadTenantHrProjectionHealth>
+        ReturnType<
+          typeof import("@/src/lib/workforce-os/projectionHealth.server").loadTenantHrProjectionHealth
+        >
       >;
     }
   | { ok: false; error: string }

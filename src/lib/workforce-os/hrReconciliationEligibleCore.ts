@@ -6,9 +6,7 @@ import type {
 } from "./staffLifecycleTypes";
 import { isOperationallyIneligible, parseStaffEmploymentStatus } from "./staffLifecycleCore";
 
-export function isStaffArchived(
-  member: Pick<StaffMemberLifecycleRow, "archived_at">
-): boolean {
+export function isStaffArchived(member: Pick<StaffMemberLifecycleRow, "archived_at">): boolean {
   return member.archived_at != null && String(member.archived_at).trim() !== "";
 }
 

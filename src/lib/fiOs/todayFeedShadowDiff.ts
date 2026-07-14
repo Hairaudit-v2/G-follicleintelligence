@@ -72,7 +72,9 @@ export function computeTodayFeedShadowDiff(input: {
     }
   }
 
-  const inClinicCards = dashboard.receptionBoard.cards.filter((c) => IN_CLINIC_COLUMNS.has(c.receptionColumn));
+  const inClinicCards = dashboard.receptionBoard.cards.filter((c) =>
+    IN_CLINIC_COLUMNS.has(c.receptionColumn)
+  );
   for (const c of inClinicCards) {
     if (!idSet.has(`reception-${c.id}`)) {
       discrepancies.push({

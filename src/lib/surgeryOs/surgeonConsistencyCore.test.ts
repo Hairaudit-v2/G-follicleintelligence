@@ -6,7 +6,10 @@ import type { SurgeonProcedurePerformanceRecord } from "@/src/lib/surgeryOs/surg
 
 const surgeonId = "00000000-0000-4000-8000-000000000101";
 
-function record(index: number, overrides: Partial<SurgeonProcedurePerformanceRecord> = {}): SurgeonProcedurePerformanceRecord {
+function record(
+  index: number,
+  overrides: Partial<SurgeonProcedurePerformanceRecord> = {}
+): SurgeonProcedurePerformanceRecord {
   return {
     surgeryId: `00000000-0000-4000-8000-0000000002${String(index).padStart(2, "0")}`,
     surgeonId,

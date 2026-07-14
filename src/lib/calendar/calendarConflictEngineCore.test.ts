@@ -7,7 +7,9 @@ import { evaluateCalendarConflicts } from "./calendarConflictEngineCore";
 const TID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const STAFF = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-function row(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "end_at">): FiBookingRow {
+function row(
+  p: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "end_at">
+): FiBookingRow {
   return {
     tenant_id: TID,
     lead_id: null,

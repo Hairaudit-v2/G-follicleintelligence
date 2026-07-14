@@ -55,8 +55,7 @@ export async function loadApprovedPatientVisualSummariesForPortal(input: {
       const approval = readPatientVisualSummaryApproval(metadata, reportType);
       if (!approval || !patientVisualSummaryPatientAccessAllowed(approval)) continue;
 
-      const surgeryId =
-        typeof approval.surgery_id === "string" ? approval.surgery_id : null;
+      const surgeryId = typeof approval.surgery_id === "string" ? approval.surgery_id : null;
 
       const report = await loadPatientVisualSummaryReport({
         tenantId: tid,

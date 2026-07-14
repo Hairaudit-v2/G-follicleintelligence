@@ -61,7 +61,9 @@ export function openRosterMissingStandardHoursSetupDrawer(): RosterCommandCentre
   return { kind: "setup_missing_standard_hours" };
 }
 
-export function openRosterStandardHoursDrawer(staffMemberId: string): RosterCommandCentreDrawerState {
+export function openRosterStandardHoursDrawer(
+  staffMemberId: string
+): RosterCommandCentreDrawerState {
   return { kind: "standard_hours", staffMemberId };
 }
 
@@ -74,9 +76,7 @@ export function openRosterShiftDrawer(input: {
   return { kind: "shift", ...input };
 }
 
-export function rosterDrawerRequiresStaff(
-  drawer: RosterCommandCentreDrawerState
-): drawer is
+export function rosterDrawerRequiresStaff(drawer: RosterCommandCentreDrawerState): drawer is
   | { kind: "standard_hours"; staffMemberId: string }
   | {
       kind: "shift";
@@ -114,9 +114,7 @@ export const ROSTER_DRAWER_STAFF_UNAVAILABLE_MESSAGE =
   "Could not open the roster drawer for this staff member. Refresh the page and try again.";
 
 /** Single source for roster manage-deny copy (never allow blank deny messages). */
-export function resolveRosterManageDeniedMessage(
-  manageDeniedReason?: string | null
-): string {
+export function resolveRosterManageDeniedMessage(manageDeniedReason?: string | null): string {
   const trimmed = manageDeniedReason?.trim();
   return trimmed || ROSTER_MANAGE_DENIED_REASON;
 }
@@ -192,7 +190,10 @@ export function buildRosterPeriodAbsenceLocalWindow(localDates: readonly string[
   startsAtLocal: string;
   endsAtLocal: string;
 } | null {
-  const sorted = [...localDates].map((d) => d.slice(0, 10)).filter(Boolean).sort();
+  const sorted = [...localDates]
+    .map((d) => d.slice(0, 10))
+    .filter(Boolean)
+    .sort();
   if (sorted.length === 0) return null;
   const first = sorted[0]!;
   const last = sorted[sorted.length - 1]!;
@@ -229,9 +230,7 @@ export function resolveRosterDrawerStaffContext(input: {
   const fromStaffOptions = findStaff(input.staffOptions);
   if (fromStaffOptions) return fromStaffOptions;
 
-  const fromGrid = input.rosterGridStaffOptions
-    ? findStaff(input.rosterGridStaffOptions)
-    : null;
+  const fromGrid = input.rosterGridStaffOptions ? findStaff(input.rosterGridStaffOptions) : null;
   if (fromGrid) return fromGrid;
 
   if (input.selectedShift?.staff_id === staffMemberId) {
@@ -286,8 +285,7 @@ export function resolveRosterCellClickOutcome(input: {
     return {
       outcome: "deny",
       message:
-        input.ineligibleMessage ??
-        "This staff member is not roster-eligible for this period.",
+        input.ineligibleMessage ?? "This staff member is not roster-eligible for this period.",
     };
   }
   if (!input.canManage) {
@@ -319,10 +317,7 @@ export function resolveStandardHoursDayForLocalDate(input: {
   const weekday = weekdayIndexFromLocalDate(input.localDate);
   const cycleWeek =
     input.rosterCadence === "fortnightly"
-      ? resolveFortnightCycleWeek(
-          input.localDate,
-          input.rosterCycleAnchorDate ?? "2026-01-05"
-        )
+      ? resolveFortnightCycleWeek(input.localDate, input.rosterCycleAnchorDate ?? "2026-01-05")
       : 1;
   return (
     input.standardHours.find(
@@ -399,9 +394,7 @@ export function listStaffMissingStandardHours(
   staffOptions: Array<{ id: string; name: string }>,
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>
 ): Array<{ id: string; name: string }> {
-  return staffOptions.filter(
-    (s) => !staffHasConfiguredStandardHours(standardHoursByStaffId[s.id])
-  );
+  return staffOptions.filter((s) => !staffHasConfiguredStandardHours(standardHoursByStaffId[s.id]));
 }
 
 function shiftTypeFromStaffRole(role: string | null | undefined): string {
@@ -471,17 +464,9 @@ export function buildRosterShiftDrawerDefaults(input: {
     input.rosterCycleAnchorDate
   );
   const clinicId = input.filterClinicId || day?.clinic_id?.trim() || "";
-  const shiftType = day
-    ? shiftTypeFromStandardDay(day)
-    : shiftTypeFromStaffRole(input.staffRole);
-  const startHm = normaliseDatetimeLocalHm(
-    day?.is_working_day ? day.start_time : null,
-    "09:00"
-  );
-  const endHm = normaliseDatetimeLocalHm(
-    day?.is_working_day ? day.end_time : null,
-    "17:00"
-  );
+  const shiftType = day ? shiftTypeFromStandardDay(day) : shiftTypeFromStaffRole(input.staffRole);
+  const startHm = normaliseDatetimeLocalHm(day?.is_working_day ? day.start_time : null, "09:00");
+  const endHm = normaliseDatetimeLocalHm(day?.is_working_day ? day.end_time : null, "17:00");
   const date = input.localDate.slice(0, 10);
 
   return {
@@ -546,11 +531,9 @@ export function toRosterShiftDatetimeLocal(
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export const ROSTER_SHIFT_START_END_REQUIRED_MESSAGE =
-  "Start and end times are required.";
+export const ROSTER_SHIFT_START_END_REQUIRED_MESSAGE = "Start and end times are required.";
 
-export const ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE =
-  "Shift end must be after start.";
+export const ROSTER_SHIFT_INVALID_TIME_RANGE_MESSAGE = "Shift end must be after start.";
 
 /** Convert drawer datetime-local values to UTC ISO using staff/tenant timezone. */
 export function rosterShiftDatetimeLocalToUtcIso(input: {
@@ -637,8 +620,7 @@ export function resolveRosterShiftDrawerEditEligibility(shift: RosterShiftSnapsh
   }
   const editEligibility = canEditRosterShift(shift);
   const activeStatus = shift.status === "scheduled" || shift.status === "confirmed";
-  const generated =
-    shift.shift_source === "standard_hours" || shift.shift_source === "copy_week";
+  const generated = shift.shift_source === "standard_hours" || shift.shift_source === "copy_week";
   return {
     canShowEditButton: editEligibility.editable,
     canCancelShift: activeStatus,

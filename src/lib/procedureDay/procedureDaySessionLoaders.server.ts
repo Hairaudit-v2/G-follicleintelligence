@@ -151,7 +151,8 @@ export async function assertProcedureDayBookingScope(
   };
   if (String(row.tenant_id) !== tid) throw new Error("Booking does not belong to this tenant.");
   const patientId = row.patient_id?.trim();
-  if (!patientId) throw new Error("Booking must be linked to a patient for procedure day workflow.");
+  if (!patientId)
+    throw new Error("Booking must be linked to a patient for procedure day workflow.");
   if (row.booking_type?.trim().toLowerCase() !== "surgery") {
     throw new Error("Procedure day workflow applies to surgery bookings only.");
   }

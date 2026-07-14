@@ -24,8 +24,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const result = await recordBookingArrivalIntentFromToken(parsed.data.token);
   if (!result.ok) {
-    const status =
-      result.code === "invalid_token" ? 400 : result.code === "not_found" ? 404 : 409;
+    const status = result.code === "invalid_token" ? 400 : result.code === "not_found" ? 404 : 409;
     return NextResponse.json({ ok: false, error: result.error }, { status });
   }
 

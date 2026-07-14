@@ -67,8 +67,8 @@ export function TreatmentPhotosChecklist({
         <div>
           <h2 className="text-sm font-semibold text-slate-100">Treatment Photos</h2>
           <p className="mt-1 text-xs text-slate-400">
-            Standard scalp imaging for this {treatmentType.replace(/_/g, " ")} session — five required
-            views plus one optional clinical image.
+            Standard scalp imaging for this {treatmentType.replace(/_/g, " ")} session — five
+            required views plus one optional clinical image.
           </p>
         </div>
         <div className="text-right text-xs text-slate-400">
@@ -99,7 +99,9 @@ export function TreatmentPhotosChecklist({
             ) : (
               <Circle className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
             )}
-            <span className={slot.complete ? "text-slate-200" : "text-slate-300"}>{slot.label}</span>
+            <span className={slot.complete ? "text-slate-200" : "text-slate-300"}>
+              {slot.label}
+            </span>
             <span className="ml-auto text-[0.65rem] uppercase tracking-wide text-slate-500">
               {slot.required ? "Required" : "Optional"}
             </span>
@@ -108,7 +110,9 @@ export function TreatmentPhotosChecklist({
       </ul>
 
       {!patientId ? (
-        <p className="mt-3 text-sm text-amber-200">Link a patient to enable treatment photo capture.</p>
+        <p className="mt-3 text-sm text-amber-200">
+          Link a patient to enable treatment photo capture.
+        </p>
       ) : (
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
@@ -119,7 +123,11 @@ export function TreatmentPhotosChecklist({
             data-testid="treatment-photos-capture-btn"
           >
             <Camera className="h-3.5 w-3.5" aria-hidden />
-            {pending ? "Preparing…" : completion.complete ? "Review / add photos" : "Capture treatment photos"}
+            {pending
+              ? "Preparing…"
+              : completion.complete
+                ? "Review / add photos"
+                : "Capture treatment photos"}
           </button>
         </div>
       )}

@@ -8,10 +8,7 @@ import {
 } from "./reportFilters";
 
 test("reportFilterFields maps phase-2 optional filters", () => {
-  assert.deepEqual(reportFilterFields("surgery_gross_margin"), [
-    "procedureType",
-    "snapshotStatus",
-  ]);
+  assert.deepEqual(reportFilterFields("surgery_gross_margin"), ["procedureType", "snapshotStatus"]);
   assert.deepEqual(reportFilterFields("revenue_attribution_summary"), [
     "attributionSource",
     "campaign",

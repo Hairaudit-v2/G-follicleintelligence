@@ -87,9 +87,7 @@ export function buildSurgeryOsGraftTrayIntelligenceSummary(input: {
   hasNewerActiveJob?: boolean;
   allowCorrection?: boolean;
 }): SurgeryOsGraftTrayIntelligenceSummary {
-  return mapGraftTrayIntelligenceToSurgeryOsSummary(
-    buildGraftTrayIntelligenceSummary(input)
-  );
+  return mapGraftTrayIntelligenceToSurgeryOsSummary(buildGraftTrayIntelligenceSummary(input));
 }
 
 export function buildSurgeryOsGraftTrayCaseIntelligence(input: {

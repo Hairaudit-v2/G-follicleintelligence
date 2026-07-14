@@ -71,7 +71,9 @@ function rowToObservation(row: TodaySignalObservationRow): TodaySignalObservatio
   };
 }
 
-async function loadOpenTodaySignalObservations(tenantId: string): Promise<TodaySignalObservation[]> {
+async function loadOpenTodaySignalObservations(
+  tenantId: string
+): Promise<TodaySignalObservation[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_today_signal_observations")

@@ -67,8 +67,14 @@ describe("liveTheatreCaseSyncCore", () => {
       mapLiveTheatreStatusToProcedureStatus("in_progress", "procedure_completed"),
       "completed"
     );
-    assert.equal(mapLiveTheatreStatusToProcedureStatus("scheduled", "procedure_completed"), "completed");
-    assert.equal(mapLiveTheatreStatusToProcedureStatus("in_progress", "graft_reconciliation_completed"), "in_progress");
+    assert.equal(
+      mapLiveTheatreStatusToProcedureStatus("scheduled", "procedure_completed"),
+      "completed"
+    );
+    assert.equal(
+      mapLiveTheatreStatusToProcedureStatus("in_progress", "graft_reconciliation_completed"),
+      "in_progress"
+    );
   });
 
   it("does not downgrade procedure status", () => {

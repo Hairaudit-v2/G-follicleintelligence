@@ -140,7 +140,8 @@ export function StaffAccessAcceptClient({
               </div>
             </dl>
 
-            {!accepted && (model.invitationStatus === "pending" || model.invitationStatus === "sent") ? (
+            {!accepted &&
+            (model.invitationStatus === "pending" || model.invitationStatus === "sent") ? (
               <Button className="mt-6 w-full" disabled={pending} onClick={onAccept}>
                 {pending ? "Confirming…" : "Confirm staff access"}
               </Button>
@@ -177,7 +178,11 @@ export function StaffAccessAcceptClient({
                     className="mt-1 w-full rounded-lg border border-white/10 bg-[#0c1426] px-3 py-2 text-slate-100"
                   />
                 </label>
-                <Button className="w-full" disabled={pending || pin.length !== 4} onClick={onSetPin}>
+                <Button
+                  className="w-full"
+                  disabled={pending || pin.length !== 4}
+                  onClick={onSetPin}
+                >
                   {pending ? "Saving…" : "Set PIN"}
                 </Button>
               </div>

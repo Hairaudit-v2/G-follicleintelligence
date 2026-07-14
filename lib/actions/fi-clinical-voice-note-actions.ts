@@ -51,9 +51,7 @@ export async function approveClinicalVoiceNoteAction(
   }
 }
 
-export async function loadLatestVoiceClinicalNoteAction(
-  raw: unknown
-): Promise<
+export async function loadLatestVoiceClinicalNoteAction(raw: unknown): Promise<
   | {
       ok: true;
       note: {

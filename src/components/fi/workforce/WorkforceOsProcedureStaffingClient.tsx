@@ -132,7 +132,9 @@ export function WorkforceOsProcedureStaffingClient({
                   ) : (
                     <span className="text-amber-100">
                       Missing roles:{" "}
-                      {rec.missingRoles.map((m) => `${m.role} (${m.assigned}/${m.required})`).join(", ")}
+                      {rec.missingRoles
+                        .map((m) => `${m.role} (${m.assigned}/${m.required})`)
+                        .join(", ")}
                     </span>
                   )}
                 </p>
@@ -175,7 +177,10 @@ export function WorkforceOsProcedureStaffingClient({
                     </tr>
                   ) : (
                     rec.recommendedTeam.map((member) => (
-                      <tr key={`${member.staffId}-${member.assignedRole}`} className="border-t border-white/[0.06]">
+                      <tr
+                        key={`${member.staffId}-${member.assignedRole}`}
+                        className="border-t border-white/[0.06]"
+                      >
                         <td className="py-2 pr-4 capitalize text-[#CBD5E1]">
                           {member.assignedRole.replace(/_/g, " ")}
                         </td>

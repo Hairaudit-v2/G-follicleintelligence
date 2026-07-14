@@ -38,7 +38,12 @@ describe("graftTrayCountProviderCore", () => {
 
   it("compares within tolerance band", () => {
     const estimate = buildStubGraftTrayCountEstimate({ imageId: IMAGE_ID, manualCount: 100 });
-    const manual = { manual_count: estimate.estimated_graft_count, manual_count_source: "confirmed_tray_latest" as const, graft_count_event_id: "evt-1", graft_session_id: "sess-1" };
+    const manual = {
+      manual_count: estimate.estimated_graft_count,
+      manual_count_source: "confirmed_tray_latest" as const,
+      graft_count_event_id: "evt-1",
+      graft_session_id: "sess-1",
+    };
     const comparison = compareGraftTrayAiEstimate({ estimate, manual, tolerancePercent: 5 });
     assert.equal(comparison.mismatch_band, "within_tolerance");
   });

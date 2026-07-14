@@ -132,13 +132,14 @@ const EVENT_KIND_TO_STAGE: Partial<
   graft_reconciliation_completed: "graft_count_reconciled",
 };
 
-const STAGE_RANK: Record<LiveProcedureTimelineStage, number> = LIVE_PROCEDURE_TIMELINE_STAGES.reduce(
-  (acc, stage, index) => {
-    acc[stage] = index;
-    return acc;
-  },
-  {} as Record<LiveProcedureTimelineStage, number>
-);
+const STAGE_RANK: Record<LiveProcedureTimelineStage, number> =
+  LIVE_PROCEDURE_TIMELINE_STAGES.reduce(
+    (acc, stage, index) => {
+      acc[stage] = index;
+      return acc;
+    },
+    {} as Record<LiveProcedureTimelineStage, number>
+  );
 
 function safeParseMs(iso: string | null | undefined): number | null {
   if (!iso?.trim()) return null;
@@ -158,16 +159,14 @@ function minutesBetween(startMs: number | null, endMs: number | null): number | 
   return clampMinutes(diff);
 }
 
-function resolveTimelineStatus(input: LiveProcedureTimelineSurgeryContext): LiveProcedureTimelineStatus {
+function resolveTimelineStatus(
+  input: LiveProcedureTimelineSurgeryContext
+): LiveProcedureTimelineStatus {
   const status = input.status.trim().toLowerCase();
   if (status === "cancelled") return "cancelled";
   if (status === "completed" || input.procedurePhase === "completed") return "completed";
   if (status === "paused" || input.procedurePhase === "extraction_paused") return "paused";
-  if (
-    input.procedurePhase === "pre_op" &&
-    status === "scheduled" &&
-    !input.actualStartAt
-  ) {
+  if (input.procedurePhase === "pre_op" && status === "scheduled" && !input.actualStartAt) {
     return "not_started";
   }
   return "in_progress";
@@ -214,14 +213,10 @@ function buildTimelineItems(
     });
   }
 
-  return items.sort(
-    (a, b) => (safeParseMs(a.occurredAt) ?? 0) - (safeParseMs(b.occurredAt) ?? 0)
-  );
+  return items.sort((a, b) => (safeParseMs(a.occurredAt) ?? 0) - (safeParseMs(b.occurredAt) ?? 0));
 }
 
-function deriveCurrentStage(
-  items: LiveProcedureTimelineItem[]
-): LiveProcedureTimelineStage | null {
+function deriveCurrentStage(items: LiveProcedureTimelineItem[]): LiveProcedureTimelineStage | null {
   if (!items.length) return null;
 
   let latest: LiveProcedureTimelineItem | null = null;
@@ -287,9 +282,7 @@ function computeExpectedCompletionTime(input: {
     const completedAt =
       safeParseMs(input.surgery.actualEndAt) != null ? input.surgery.actualEndAt : null;
     if (completedAt) return completedAt;
-    return safeParseMs(input.surgery.scheduledEndAt) != null
-      ? input.surgery.scheduledEndAt
-      : null;
+    return safeParseMs(input.surgery.scheduledEndAt) != null ? input.surgery.scheduledEndAt : null;
   }
   if (safeParseMs(input.surgery.scheduledEndAt) != null) {
     return input.surgery.scheduledEndAt!.trim();
@@ -321,12 +314,7 @@ function deriveDelaySignals(input: {
     const stageStartMs = safeParseMs(latestForStage?.occurredAt);
     const stageElapsed = minutesBetween(stageStartMs, input.nowMs);
     const threshold = input.thresholds.stageWarningMinutes[input.currentStage];
-    if (
-      stageElapsed != null &&
-      threshold != null &&
-      threshold > 0 &&
-      stageElapsed >= threshold
-    ) {
+    if (stageElapsed != null && threshold != null && threshold > 0 && stageElapsed >= threshold) {
       signals.push({
         kind: "stage_overrun",
         stage: input.currentStage,

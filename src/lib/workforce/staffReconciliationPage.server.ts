@@ -107,9 +107,7 @@ function mapSourceIdRowsToExternalIdentities(
     if (linkedExternalKeys.has(key)) continue;
     const md = raw.metadata;
     const meta =
-      md && typeof md === "object" && !Array.isArray(md)
-        ? (md as Record<string, unknown>)
-        : {};
+      md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : {};
     identities.push({
       sourceSystem: sys,
       externalId: extId,
@@ -143,20 +141,16 @@ export async function loadStaffReconciliationQueue(
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = client ?? supabaseAdmin();
 
-  const [members, identityLinks, memberStatusRes, sourceIdRes, feedIdentities] =
-    await Promise.all([
-      loadStaffMembersForReconciliation(tid, supabase),
-      loadIdentityLinksForTenant(tid, supabase),
-      supabase
-        .from("fi_staff_members")
-        .select("id, employment_status")
-        .eq("tenant_id", tid),
-      supabase
-        .from("fi_staff_source_ids")
-        .select("source_system, source_staff_id, metadata")
-        .eq("tenant_id", tid),
-      loadIiohrHrFeedExternalIdentities(),
-    ]);
+  const [members, identityLinks, memberStatusRes, sourceIdRes, feedIdentities] = await Promise.all([
+    loadStaffMembersForReconciliation(tid, supabase),
+    loadIdentityLinksForTenant(tid, supabase),
+    supabase.from("fi_staff_members").select("id, employment_status").eq("tenant_id", tid),
+    supabase
+      .from("fi_staff_source_ids")
+      .select("source_system, source_staff_id, metadata")
+      .eq("tenant_id", tid),
+    loadIiohrHrFeedExternalIdentities(),
+  ]);
 
   if (memberStatusRes.error) throw new Error(memberStatusRes.error.message);
   if (sourceIdRes.error) throw new Error(sourceIdRes.error.message);
@@ -252,7 +246,8 @@ export async function loadStaffReconciliationDecisionQueue(
   const duplicateContexts = buildDuplicateStaffContexts(
     members.map((m) => ({
       ...m,
-      employmentStatus: queue.unlinkedStaff.find((row) => row.id === m.id)?.employmentStatus ?? "active",
+      employmentStatus:
+        queue.unlinkedStaff.find((row) => row.id === m.id)?.employmentStatus ?? "active",
       iiohrStaffRecordId: m.iiohrStaffRecordId ?? null,
     }))
   );
@@ -291,9 +286,7 @@ export async function loadStaffReconciliationDecisionQueue(
       continue;
     }
 
-    const best = member
-      ? findBestExternalMatch(member, queue.availableExternalIdentities)
-      : null;
+    const best = member ? findBestExternalMatch(member, queue.availableExternalIdentities) : null;
     const fallback = row.matchSuggestions[0];
     const matchCandidate =
       best && (best.score >= (fallback?.score ?? 0) || best.emailExactMatch)

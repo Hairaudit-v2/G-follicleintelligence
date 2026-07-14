@@ -131,7 +131,9 @@ export default async function FiOsPaymentsSettingsPage({
             </a>
             .
           </li>
-          <li>Outbound auto-send still requires cron + consent + ESP/SMS wiring (not enabled here).</li>
+          <li>
+            Outbound auto-send still requires cron + consent + ESP/SMS wiring (not enabled here).
+          </li>
         </ul>
         <p className="mt-3 text-xs text-slate-500">
           A cron entry point exists at{" "}

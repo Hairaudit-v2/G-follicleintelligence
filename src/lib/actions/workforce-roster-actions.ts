@@ -99,8 +99,7 @@ const cancelShiftSchema = z.object({
     .trim()
     .min(1, ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE)
     .refine(
-      (value) =>
-        (ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS as readonly string[]).includes(value),
+      (value) => (ROSTER_SHIFT_DRAWER_CANCELLATION_REASONS as readonly string[]).includes(value),
       ROSTER_SHIFT_CANCELLATION_REASON_REQUIRED_MESSAGE
     ),
   notes: z.string().max(500).optional().nullable(),
@@ -274,9 +273,8 @@ export async function createRosterShiftAction(
       return { ok: false, error: "Shift end must be after start." };
     }
 
-    const { evaluateStaffShiftAssignmentWarnings } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { evaluateStaffShiftAssignmentWarnings } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
     const { warnings } = await evaluateStaffShiftAssignmentWarnings({
       tenantId: parsed.tenantId,
       staffId: parsed.staffId,
@@ -302,12 +300,10 @@ export async function createRosterShiftAction(
       adjustmentReason: parsed.adjustmentReason ?? "manual_adjustment",
     });
 
-    const { insertRosterShiftAuditEvent } = await import(
-      "@/src/lib/workforce-os/rosterShiftAudit.server"
-    );
-    const { ROSTER_SHIFT_AUDIT_ACTION_TYPES, shiftSnapshotForAudit } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustmentsCore"
-    );
+    const { insertRosterShiftAuditEvent } =
+      await import("@/src/lib/workforce-os/rosterShiftAudit.server");
+    const { ROSTER_SHIFT_AUDIT_ACTION_TYPES, shiftSnapshotForAudit } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustmentsCore");
     await insertRosterShiftAuditEvent({
       tenantId: parsed.tenantId,
       shiftId: shift.id,
@@ -388,9 +384,8 @@ export async function cancelRosterShiftAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const { cancelStaffShiftWithReason } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { cancelStaffShiftWithReason } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
 
     const shift = await cancelStaffShiftWithReason({
       tenantId: parsed.tenantId,
@@ -431,9 +426,8 @@ export async function updateRosterShiftAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const { updateStaffShift } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { updateStaffShift } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
 
     const result = await updateStaffShift({
       tenantId: parsed.tenantId,
@@ -449,7 +443,11 @@ export async function updateRosterShiftAction(
     });
 
     if (result.outcome === ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED) {
-      return { ok: true, data: result.shift, outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED };
+      return {
+        ok: true,
+        data: result.shift,
+        outcome: ROSTER_SHIFT_UPDATE_OUTCOMES.SHIFT_UNCHANGED,
+      };
     }
 
     revalidateRosterSurfaces(parsed.tenantId);
@@ -473,9 +471,8 @@ export async function clearGeneratedRosterShiftsAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const { clearGeneratedRosterShiftsForPeriod } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { clearGeneratedRosterShiftsForPeriod } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
 
     const result = await clearGeneratedRosterShiftsForPeriod({
       tenantId: parsed.tenantId,
@@ -492,9 +489,7 @@ export async function clearGeneratedRosterShiftsAction(
   }
 }
 
-export async function markStaffSickForShiftAction(
-  body: unknown
-): Promise<
+export async function markStaffSickForShiftAction(body: unknown): Promise<
   WorkforceRosterActionResult<{
     cancelledShift: FiStaffShiftRow;
     sickBlock: FiStaffAvailabilityBlockRow;
@@ -506,9 +501,8 @@ export async function markStaffSickForShiftAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const { markStaffSickForShift } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { markStaffSickForShift } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
 
     const result = await markStaffSickForShift({
       tenantId: parsed.tenantId,
@@ -532,9 +526,8 @@ export async function createReplacementShiftAction(
     await assertHrOsRosterManageAllowed(parsed.tenantId);
     const actorFiUserId = await resolveRosterActorFiUserId(parsed.tenantId);
 
-    const { createReplacementShiftForSickCover } = await import(
-      "@/src/lib/workforce-os/rosterManualAdjustments.server"
-    );
+    const { createReplacementShiftForSickCover } =
+      await import("@/src/lib/workforce-os/rosterManualAdjustments.server");
 
     const result = await createReplacementShiftForSickCover({
       tenantId: parsed.tenantId,
@@ -618,9 +611,7 @@ const applyDefaultClinicStandardHoursSchema = z.object({
   tenantId: z.string().uuid(),
 });
 
-export async function applyDefaultClinicStandardHoursAction(
-  body: unknown
-): Promise<
+export async function applyDefaultClinicStandardHoursAction(body: unknown): Promise<
   WorkforceRosterActionResult<{
     appliedCount: number;
     skippedCount: number;
@@ -630,9 +621,8 @@ export async function applyDefaultClinicStandardHoursAction(
   try {
     const parsed = applyDefaultClinicStandardHoursSchema.parse(body);
     await assertHrOsRosterManageAllowed(parsed.tenantId);
-    const { applyDefaultClinicStandardHoursToMissingStaff } = await import(
-      "@/src/lib/workforce-os/staffStandardHours.server"
-    );
+    const { applyDefaultClinicStandardHoursToMissingStaff } =
+      await import("@/src/lib/workforce-os/staffStandardHours.server");
     const result = await applyDefaultClinicStandardHoursToMissingStaff(parsed.tenantId);
     revalidateRosterSurfaces(parsed.tenantId);
     return {
@@ -747,9 +737,9 @@ export async function generateRosterFromStandardHoursAction(body: unknown): Prom
   }
 }
 
-export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
-  WorkforceRosterActionResult<{ createdCount: number; cadence: string }>
-> {
+export async function copyPreviousRosterPeriodAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<{ createdCount: number; cadence: string }>> {
   try {
     const parsed = copyPeriodSchema.parse(body);
     await assertHrOsRosterManageAllowed(parsed.tenantId);
@@ -776,9 +766,9 @@ export async function copyPreviousRosterPeriodAction(body: unknown): Promise<
   }
 }
 
-export async function copyPreviousWeekRosterAction(body: unknown): Promise<
-  WorkforceRosterActionResult<{ createdCount: number }>
-> {
+export async function copyPreviousWeekRosterAction(
+  body: unknown
+): Promise<WorkforceRosterActionResult<{ createdCount: number }>> {
   try {
     const parsed = copyWeekSchema.parse(body);
     await assertHrOsRosterManageAllowed(parsed.tenantId);

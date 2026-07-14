@@ -125,7 +125,12 @@ export function redactAuthUrlForLog(url: string): string {
   try {
     const parsed = new URL(url, "http://localhost");
     for (const key of [...parsed.searchParams.keys()]) {
-      if (key === "code" || key === "token_hash" || key === "access_token" || key === "refresh_token") {
+      if (
+        key === "code" ||
+        key === "token_hash" ||
+        key === "access_token" ||
+        key === "refresh_token"
+      ) {
         parsed.searchParams.set(key, "[REDACTED]");
       }
     }

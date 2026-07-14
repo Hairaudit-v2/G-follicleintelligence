@@ -147,8 +147,18 @@ function createAnalyticsEventsMock(store: StoredRow[]) {
 describe("loadSurgeryIntelligenceDashboard", () => {
   it("loads and aggregates tenant-scoped published facts", async () => {
     const store = [
-      makeEventRow({ tenantId: TENANT_A, occurredAt: "2026-07-04T10:00:00.000Z", hasFinal: true, graftCount: 120 }),
-      makeEventRow({ tenantId: TENANT_B, occurredAt: "2026-07-04T11:00:00.000Z", hasFinal: true, graftCount: 999 }),
+      makeEventRow({
+        tenantId: TENANT_A,
+        occurredAt: "2026-07-04T10:00:00.000Z",
+        hasFinal: true,
+        graftCount: 120,
+      }),
+      makeEventRow({
+        tenantId: TENANT_B,
+        occurredAt: "2026-07-04T11:00:00.000Z",
+        hasFinal: true,
+        graftCount: 999,
+      }),
     ];
     const client = createAnalyticsEventsMock(store);
 

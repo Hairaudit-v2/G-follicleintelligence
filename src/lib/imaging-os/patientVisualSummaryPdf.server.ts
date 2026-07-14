@@ -52,7 +52,12 @@ function drawLines(
   }
 }
 
-function ensureSpace(pdf: PDFDocument, y: { y: number }, pageRef: { page: PDFPage }, min = 60): void {
+function ensureSpace(
+  pdf: PDFDocument,
+  y: { y: number },
+  pageRef: { page: PDFPage },
+  min = 60
+): void {
   if (y.y < MARGIN + min) {
     pageRef.page = pdf.addPage([PAGE_W, PAGE_H]);
     y.y = PAGE_H - MARGIN;
@@ -248,7 +253,13 @@ export async function renderPatientVisualSummaryPdfBytes(
 
   if (report.hairlinePrinciples.length > 0) {
     sectionTitle(pdf, pageRef, y, bold, "Hairline / design principles");
-    drawLines(pageRef.page, y, report.hairlinePrinciples.map((p) => `• ${p}`), 10, regular);
+    drawLines(
+      pageRef.page,
+      y,
+      report.hairlinePrinciples.map((p) => `• ${p}`),
+      10,
+      regular
+    );
   }
 
   sectionTitle(pdf, pageRef, y, bold, "Graft type summary");
@@ -285,7 +296,13 @@ export async function renderPatientVisualSummaryPdfBytes(
   drawLines(pageRef.page, y, [report.timelineVariationNote], 9, regular, rgb(0.35, 0.35, 0.4));
 
   sectionTitle(pdf, pageRef, y, bold, "What we will monitor");
-  drawLines(pageRef.page, y, report.monitoringItems.map((m) => `• ${m}`), 10, regular);
+  drawLines(
+    pageRef.page,
+    y,
+    report.monitoringItems.map((m) => `• ${m}`),
+    10,
+    regular
+  );
 
   if (report.followUpPlan) {
     sectionTitle(pdf, pageRef, y, bold, "Follow-up plan");

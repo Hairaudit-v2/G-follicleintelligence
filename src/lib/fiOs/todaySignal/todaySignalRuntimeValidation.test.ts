@@ -58,9 +58,7 @@ test("invalid priority band is flagged", () => {
 });
 
 test("forbidden PHI-like keys are flagged", () => {
-  const results = validateTodayFeedPrivacy([
-    { revision: "abc", patientName: "Jane Doe" },
-  ]);
+  const results = validateTodayFeedPrivacy([{ revision: "abc", patientName: "Jane Doe" }]);
   assert.equal(results[0]?.status, "fail");
   assert.match(results[0]?.message ?? "", /patientName/);
 });
@@ -123,7 +121,10 @@ test("learning disabled state is handled as pass, not fail", () => {
     metadataSamples: [],
   });
   assert.equal(results.find((r) => r.checkId === "learning.disabled_clean")?.status, "pass");
-  assert.equal(results.find((r) => r.checkId === "learning.metadata_sanitized")?.status, "not_applicable");
+  assert.equal(
+    results.find((r) => r.checkId === "learning.metadata_sanitized")?.status,
+    "not_applicable"
+  );
 });
 
 test("forbidden keys list covers required D6F privacy tokens", () => {

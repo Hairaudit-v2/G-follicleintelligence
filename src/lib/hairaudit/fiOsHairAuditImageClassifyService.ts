@@ -9,7 +9,10 @@
 
 import { isValidHairauditImageContentType } from "./hairauditImageClassifyContract";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
-import { classifyImageCategoryStub, stubConfidenceFromSeed } from "@/src/lib/imaging-os/classification";
+import {
+  classifyImageCategoryStub,
+  stubConfidenceFromSeed,
+} from "@/src/lib/imaging-os/classification";
 import type { ImagingOsImageIngestionRequest } from "@/src/lib/imaging-os/intake";
 import type { UnifiedImageClassifyRequest } from "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyRequest";
 
@@ -257,9 +260,8 @@ export async function classifyHairAuditImageRequest(
     ...(input.idempotency_key ? { metadata: { idempotency_key: input.idempotency_key } } : {}),
   };
 
-  const { classifyUnifiedImageRequest, mapUnifiedResultToHairAuditResponse } = await import(
-    "@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyService.server"
-  );
+  const { classifyUnifiedImageRequest, mapUnifiedResultToHairAuditResponse } =
+    await import("@/src/lib/imaging/unifiedClassifier/unifiedImageClassifyService.server");
 
   const outcome = await classifyUnifiedImageRequest(unifiedRequest, env);
   if (!outcome.ok) {

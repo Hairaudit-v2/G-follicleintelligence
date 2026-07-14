@@ -45,11 +45,9 @@ export function parseTenantBrandingMetadata(
   const path = metadata.logo_storage_path;
   const uploadedAt = metadata.logo_uploaded_at;
   const theme = metadata.theme_mode;
-  const themeMode =
-    theme === "light" || theme === "dark" || theme === "system" ? theme : null;
+  const themeMode = theme === "light" || theme === "dark" || theme === "system" ? theme : null;
   return {
-    logo_storage_bucket:
-      typeof bucket === "string" && bucket.trim() ? bucket.trim() : null,
+    logo_storage_bucket: typeof bucket === "string" && bucket.trim() ? bucket.trim() : null,
     logo_storage_path: typeof path === "string" && path.trim() ? path.trim() : null,
     logo_uploaded_at:
       typeof uploadedAt === "string" && uploadedAt.trim() ? uploadedAt.trim() : null,
@@ -103,9 +101,7 @@ export function normalizeTenantBranding(
   const { effective } = input;
   const meta = parseTenantBrandingMetadata(input.metadata ?? null);
   const displayName =
-    effective.clinic_display_name?.trim() ||
-    effective.brand_name?.trim() ||
-    FI_DEFAULT_BRAND_NAME;
+    effective.clinic_display_name?.trim() || effective.brand_name?.trim() || FI_DEFAULT_BRAND_NAME;
 
   const legacyLogo = effective.logo_url?.trim() || null;
   const uploaded = input.uploadedLogoUrl?.trim() || null;
@@ -118,10 +114,7 @@ export function normalizeTenantBranding(
     logoStoragePath: meta.logo_storage_path ?? null,
     logoStorageBucket: meta.logo_storage_bucket ?? null,
     primaryColor: safeBrandingColourHex(effective.primary_colour, FI_ADMIN_NEUTRAL_PRIMARY),
-    secondaryColor: safeBrandingColourHex(
-      effective.secondary_colour,
-      FI_ADMIN_NEUTRAL_SECONDARY
-    ),
+    secondaryColor: safeBrandingColourHex(effective.secondary_colour, FI_ADMIN_NEUTRAL_SECONDARY),
     accentColor: safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT),
     themeMode: meta.theme_mode ?? null,
     clinicInitials: deriveClinicInitials(displayName),

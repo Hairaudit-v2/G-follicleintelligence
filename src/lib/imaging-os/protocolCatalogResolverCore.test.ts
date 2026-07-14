@@ -55,7 +55,10 @@ describe("protocolCatalogResolverCore", () => {
     );
     assert.ok(fromHli);
     assert.equal(fromHli.metadata.source, "hli_mapping");
-    assert.equal(fromHli.metadata.mapped_from, HLI_TO_CANONICAL_PROTOCOL_SLUG.consultation_standard);
+    assert.equal(
+      fromHli.metadata.mapped_from,
+      HLI_TO_CANONICAL_PROTOCOL_SLUG.consultation_standard
+    );
   });
 
   it("VIE legacy returns empty slots for unknown slug", () => {
@@ -72,10 +75,7 @@ describe("protocolCatalogResolverCore", () => {
   });
 
   it("tenant DB returns null when slots empty", () => {
-    const fromDb = resolveFromTenantDb(
-      { slug: "x", name: "X", slots: [] },
-      at
-    );
+    const fromDb = resolveFromTenantDb({ slug: "x", name: "X", slots: [] }, at);
     assert.equal(fromDb, null);
   });
 });

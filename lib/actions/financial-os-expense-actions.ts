@@ -60,9 +60,7 @@ const periodExportSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional()
     .nullable(),
-  format: z
-    .enum(["fi_csv", "quickbooks_csv", "quickbooks_json", "xero_csv"])
-    .default("fi_csv"),
+  format: z.enum(["fi_csv", "quickbooks_csv", "quickbooks_json", "xero_csv"]).default("fi_csv"),
 });
 
 const reconSuggestSchema = z.object({
@@ -258,9 +256,7 @@ export async function updateExpenseImportLineAction(
 export async function commitExpenseImportLinesAction(
   tenantId: string,
   body: unknown
-): Promise<
-  { ok: true; committed: number; expense_ids: string[] } | { ok: false; error: string }
-> {
+): Promise<{ ok: true; committed: number; expense_ids: string[] } | { ok: false; error: string }> {
   try {
     const parsed = commitImportLinesSchema.parse(body);
     const access = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);

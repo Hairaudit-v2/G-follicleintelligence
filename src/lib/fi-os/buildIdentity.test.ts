@@ -9,10 +9,17 @@ import { pickBuildEnvironment, pickBuildSha, shortBuildSha } from "@/src/lib/fi-
 
 test("pickBuildSha prefers VERCEL_GIT_COMMIT_SHA, then NEXT_PUBLIC, then GITHUB_SHA", () => {
   assert.equal(
-    pickBuildSha({ VERCEL_GIT_COMMIT_SHA: "abc", NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: "def", GITHUB_SHA: "ghi" }),
+    pickBuildSha({
+      VERCEL_GIT_COMMIT_SHA: "abc",
+      NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: "def",
+      GITHUB_SHA: "ghi",
+    }),
     "abc"
   );
-  assert.equal(pickBuildSha({ NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: "def", GITHUB_SHA: "ghi" }), "def");
+  assert.equal(
+    pickBuildSha({ NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: "def", GITHUB_SHA: "ghi" }),
+    "def"
+  );
   assert.equal(pickBuildSha({ GITHUB_SHA: "ghi" }), "ghi");
 });
 

@@ -141,7 +141,13 @@ test("lane omits empty content when collapsed completed", () => {
     label: "Completed",
     count: 1,
     collapsedByDefault: true,
-    cards: [sampleCard({ operationalState: "complete", laneId: "completed", allowedActions: ["open_patient"] })],
+    cards: [
+      sampleCard({
+        operationalState: "complete",
+        laneId: "completed",
+        allowedActions: ["open_patient"],
+      }),
+    ],
   };
   const html = renderToStaticMarkup(
     createElement(FrontDeskLane, {
@@ -213,9 +219,7 @@ test("summary tiles render counts", () => {
     paymentAttention: 1,
     blockers: 1,
   };
-  const html = renderToStaticMarkup(
-    createElement(FrontDeskTodaySummaryTiles, { summary })
-  );
+  const html = renderToStaticMarkup(createElement(FrontDeskTodaySummaryTiles, { summary }));
   assert.match(html, /Running late/);
   assert.match(html, /Waiting/);
 });

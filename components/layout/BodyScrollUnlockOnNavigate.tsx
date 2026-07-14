@@ -3,10 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-import {
-  forceUnlockBodyScroll,
-  getBodyScrollLockCount,
-} from "@/src/lib/dom/bodyScrollLock";
+import { forceUnlockBodyScroll, getBodyScrollLockCount } from "@/src/lib/dom/bodyScrollLock";
 
 /**
  * Safety valve for the marketing site and shared portal chrome.

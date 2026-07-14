@@ -9,10 +9,7 @@ export function ReceptionOsModuleHealthPanel({ health }: { health: ReceptionOsMo
   if (!health.coreBoardLoaded || health.unavailableModules.length === 0) return null;
 
   return (
-    <InfoNotice
-      variant="warning"
-      title="Feature not available"
-    >
+    <InfoNotice variant="warning" title="Feature not available">
       <div className="space-y-2 text-sm">
         <p>
           The front-desk command centre is available. Some add-on modules could not load, usually

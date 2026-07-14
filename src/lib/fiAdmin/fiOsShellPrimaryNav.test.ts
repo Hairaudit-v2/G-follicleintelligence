@@ -192,7 +192,18 @@ test("resolveFiOsPrimarySidebarItems: approved D3 presentation labels", () => {
 });
 
 test("resolveFiOsPrimarySidebarItems: consolidated reports entry with preserved legacy sub-links", () => {
-  const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, false, false, true);
+  const items = resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true
+  );
   const reports = items.find((i) => i.id === "reports");
   assert.ok(reports?.subItems?.length);
   const subIds = new Set(reports!.subItems!.map((s) => s.id));

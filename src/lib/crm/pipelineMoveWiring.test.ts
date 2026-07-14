@@ -58,11 +58,7 @@ test("terminal columns are not ordinary move destinations", () => {
 
 test("injected move runner receives only real stage IDs", async () => {
   const calls: Array<{ leadId: string; toStageId: string }> = [];
-  const moveLeadStage = async (
-    _tenantId: string,
-    leadId: string,
-    body: { toStageId: string }
-  ) => {
+  const moveLeadStage = async (_tenantId: string, leadId: string, body: { toStageId: string }) => {
     calls.push({ leadId, toStageId: body.toStageId });
     return { ok: true as const };
   };

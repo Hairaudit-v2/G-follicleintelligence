@@ -14,10 +14,7 @@ import { buildPayPeriodPayrollExport } from "@/src/lib/workforce/payPeriodExport
 
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) {
     return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
@@ -28,10 +25,7 @@ export async function GET(
   // internal check is ever refactored, and blocks unauthenticated/cross-tenant callers early.
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) {
-    return NextResponse.json(
-      { ok: false, error: "WorkforceOS access denied." },
-      { status: 403 }
-    );
+    return NextResponse.json({ ok: false, error: "WorkforceOS access denied." }, { status: 403 });
   }
 
   const url = new URL(req.url);

@@ -209,13 +209,18 @@ export function validateScenarioAHeavySurgeryDay(): ScenarioValidationResult {
     bookingDisplay,
   });
 
-  const surgeries = bookings.filter((b) => b.booking_type === "surgery" && !b.metadata?.team_support);
+  const surgeries = bookings.filter(
+    (b) => b.booking_type === "surgery" && !b.metadata?.team_support
+  );
   const surgeryRoomCells = roomView.cells.filter(
     (c) =>
       c.dayKey === dayKey &&
-      (c.resourceId === `r:${EVOLVED_ROOMS.surgery1}` || c.resourceId === `r:${EVOLVED_ROOMS.surgery2}`)
+      (c.resourceId === `r:${EVOLVED_ROOMS.surgery1}` ||
+        c.resourceId === `r:${EVOLVED_ROOMS.surgery2}`)
   );
-  const drSeetalUtil = staffView.rowsWithUtil.find((r) => r.staffId === EVOLVED_STAFF.drSeetal)?.utilisation;
+  const drSeetalUtil = staffView.rowsWithUtil.find(
+    (r) => r.staffId === EVOLVED_STAFF.drSeetal
+  )?.utilisation;
   const unassignedLane = staffView.rowsWithUtil.find((r) => r.id === "unassigned");
   const surgeryGroup = staffView.groups.find((g) => g.group === "surgeons");
 
@@ -354,7 +359,8 @@ export function validateScenarioBSparseClinicDay(): ScenarioValidationResult {
 }
 
 export function validateScenarioCFrontDeskWorkflow(): ScenarioValidationResult {
-  const { dayKey, bookings, freeDoctorIds, freeNurseIds, freeRoomIds } = scenarioCFrontDeskWorkflow();
+  const { dayKey, bookings, freeDoctorIds, freeNurseIds, freeRoomIds } =
+    scenarioCFrontDeskWorkflow();
   const staffDirectory = evolvedQaStaffDirectory();
   const rooms = evolvedQaRooms();
   const query = evolvedQaQuery({ view: "day", dateAnchor: dayKey });
@@ -372,13 +378,21 @@ export function validateScenarioCFrontDeskWorkflow(): ScenarioValidationResult {
   const availableDoctors = staffDirectory
     .filter(
       (s) =>
-        String(s.staff_role ?? "").toLowerCase().includes("surgeon") ||
-        String(s.staff_role ?? "").toLowerCase().includes("consultant")
+        String(s.staff_role ?? "")
+          .toLowerCase()
+          .includes("surgeon") ||
+        String(s.staff_role ?? "")
+          .toLowerCase()
+          .includes("consultant")
     )
     .filter((s) => !busyStaff.has(s.id) && s.clinical_readiness?.clinically_available !== false)
     .map((s) => s.id);
   const availableNurses = staffDirectory
-    .filter((s) => String(s.staff_role ?? "").toLowerCase().includes("nurse"))
+    .filter((s) =>
+      String(s.staff_role ?? "")
+        .toLowerCase()
+        .includes("nurse")
+    )
     .filter((s) => !busyStaff.has(s.id) && s.clinical_readiness?.clinically_available !== false)
     .map((s) => s.id);
   const availableRooms = rooms
@@ -449,7 +463,9 @@ export function validateScenarioCFrontDeskWorkflow(): ScenarioValidationResult {
   };
 }
 
-function stressResourceColumns(staffDirectory: ClinicalStaffPickerOption[]): OperationalCalendarResourceColumn[] {
+function stressResourceColumns(
+  staffDirectory: ClinicalStaffPickerOption[]
+): OperationalCalendarResourceColumn[] {
   const cols: OperationalCalendarResourceColumn[] = staffDirectory.map((s) => ({
     id: `s:${s.id}`,
     kind: "fi_staff",
@@ -579,7 +595,9 @@ function panelAnswersSurgeryCoordinator(
   };
 }
 
-function panelAnswersClinicManager(panel: ReturnType<typeof buildCalendarOsOperationalPanelSummary>) {
+function panelAnswersClinicManager(
+  panel: ReturnType<typeof buildCalendarOsOperationalPanelSummary>
+) {
   return {
     staffUtil: panel.todaysCapacity.booked > 0,
     staffOnLeave: panel.staffCoverageWarnings.some((w) => /RDO|leave|unavailable/i.test(w.label)),
@@ -691,7 +709,10 @@ export function auditCalendarOsWorkflows(): WorkflowAuditResult[] {
         },
         {
           question: "Staff on leave visible?",
-          answerableIn3s: cm.staffOnLeave || sparse.staffDirectory.filter((s) => !s.clinical_readiness?.clinically_available).length >= 4,
+          answerableIn3s:
+            cm.staffOnLeave ||
+            sparse.staffDirectory.filter((s) => !s.clinical_readiness?.clinically_available)
+              .length >= 4,
           detail: "RDO blocks + readiness warnings",
         },
         {
@@ -721,17 +742,57 @@ export function auditCalendarOsWorkflows(): WorkflowAuditResult[] {
 }
 
 export function scoreCalendarOsVsTimely(): TimelyBenchmarkScore[] {
-  const categories: { category: TimelyBenchmarkCategory; label: string; timely: number; calendarOsV2: number }[] = [
+  const categories: {
+    category: TimelyBenchmarkCategory;
+    label: string;
+    timely: number;
+    calendarOsV2: number;
+  }[] = [
     { category: "scanability", label: "Scanability", timely: 9.4, calendarOsV2: 8.6 },
-    { category: "speed_free_staff", label: "Speed to identify free staff", timely: 9.5, calendarOsV2: 8.8 },
-    { category: "speed_free_rooms", label: "Speed to identify free rooms", timely: 9.3, calendarOsV2: 8.4 },
+    {
+      category: "speed_free_staff",
+      label: "Speed to identify free staff",
+      timely: 9.5,
+      calendarOsV2: 8.8,
+    },
+    {
+      category: "speed_free_rooms",
+      label: "Speed to identify free rooms",
+      timely: 9.3,
+      calendarOsV2: 8.4,
+    },
     { category: "booking_speed", label: "Booking speed", timely: 9.2, calendarOsV2: 8.5 },
     { category: "staff_visibility", label: "Staff visibility", timely: 9.5, calendarOsV2: 9.1 },
-    { category: "daily_workflow_clarity", label: "Daily workflow clarity", timely: 9.1, calendarOsV2: 8.7 },
-    { category: "sparse_schedule_handling", label: "Sparse schedule handling", timely: 8.2, calendarOsV2: 8.9 },
-    { category: "multi_surgery_day", label: "Multi-surgery day handling", timely: 8.8, calendarOsV2: 8.6 },
-    { category: "staff_schedule_readability", label: "Staff schedule readability", timely: 9.0, calendarOsV2: 8.5 },
-    { category: "operational_awareness", label: "Operational awareness", timely: 7.8, calendarOsV2: 9.3 },
+    {
+      category: "daily_workflow_clarity",
+      label: "Daily workflow clarity",
+      timely: 9.1,
+      calendarOsV2: 8.7,
+    },
+    {
+      category: "sparse_schedule_handling",
+      label: "Sparse schedule handling",
+      timely: 8.2,
+      calendarOsV2: 8.9,
+    },
+    {
+      category: "multi_surgery_day",
+      label: "Multi-surgery day handling",
+      timely: 8.8,
+      calendarOsV2: 8.6,
+    },
+    {
+      category: "staff_schedule_readability",
+      label: "Staff schedule readability",
+      timely: 9.0,
+      calendarOsV2: 8.5,
+    },
+    {
+      category: "operational_awareness",
+      label: "Operational awareness",
+      timely: 7.8,
+      calendarOsV2: 9.3,
+    },
   ];
   return categories.map((c) => ({
     ...c,
@@ -820,20 +881,30 @@ export function deriveOperationalStrengths(
 ): string[] {
   const strengths: string[] = [];
   if (scenarios.find((s) => s.scenario === "A")?.pass) {
-    strengths.push("Heavy surgery days remain readable with role-grouped lanes and theatre room view");
+    strengths.push(
+      "Heavy surgery days remain readable with role-grouped lanes and theatre room view"
+    );
   }
   if (scenarios.find((s) => s.scenario === "B")?.pass) {
-    strengths.push("Sparse days feel purposeful via sparse context banner and open-capacity suggestions");
+    strengths.push(
+      "Sparse days feel purposeful via sparse context banner and open-capacity suggestions"
+    );
   }
   const opAware = benchmark.find((b) => b.category === "operational_awareness");
   if (opAware && opAware.calendarOsV2 > opAware.timely) {
-    strengths.push("Operational panel exceeds Timely on surgery readiness, payments, and coverage awareness");
+    strengths.push(
+      "Operational panel exceeds Timely on surgery readiness, payments, and coverage awareness"
+    );
   }
   const staffVis = benchmark.find((b) => b.category === "staff_visibility");
   if (staffVis && staffVis.calendarOsV2 >= 9.0) {
-    strengths.push("Staff visibility strong — utilisation bars, RDO blocks, and readiness dots per lane");
+    strengths.push(
+      "Staff visibility strong — utilisation bars, RDO blocks, and readiness dots per lane"
+    );
   }
-  strengths.push("Resource-first week/day views with density modes support multi-role clinic operations");
+  strengths.push(
+    "Resource-first week/day views with density modes support multi-role clinic operations"
+  );
   strengths.push("Legacy calendar preserved behind feature flag for safe rollout");
   return strengths;
 }
@@ -847,7 +918,9 @@ export function scoreCalendarOsProductionReadiness(input: {
     input.scenarios.reduce((s, sc) => s + sc.passed / sc.total, 0) / input.scenarios.length;
   const workflowPct =
     input.workflowAudits.filter((w) => w.pass).length / input.workflowAudits.length;
-  const openFriction = input.frictionPoints.filter((f) => !f.fixApplied && f.severity !== "low").length;
+  const openFriction = input.frictionPoints.filter(
+    (f) => !f.fixApplied && f.severity !== "low"
+  ).length;
   const frictionPenalty = Math.min(15, openFriction * 5);
   const raw = scenarioPct * 50 + workflowPct * 35 + 15 - frictionPenalty;
   const score = Math.max(0, Math.min(100, Math.round(raw)));

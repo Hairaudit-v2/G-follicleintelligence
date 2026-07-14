@@ -17,7 +17,11 @@ export function resolveCorrectedCountForReviewAction(input: {
   correctedCount?: number | null;
 }): number | null {
   if (input.action !== "correct_count") return null;
-  if (input.correctedCount == null || !Number.isFinite(input.correctedCount) || input.correctedCount < 0) {
+  if (
+    input.correctedCount == null ||
+    !Number.isFinite(input.correctedCount) ||
+    input.correctedCount < 0
+  ) {
     throw new Error("A non-negative corrected count is required.");
   }
   return Math.round(input.correctedCount);
@@ -30,10 +34,7 @@ export function resolveGraftTrayLinkStatusAfterReview(input: {
   if (input.action === "reject_ai_estimate" || input.action === "request_retake") {
     return { status: "review_required", reviewRequired: true };
   }
-  if (
-    input.action === "accept_ai_estimate" &&
-    input.mismatchBand === "material_mismatch"
-  ) {
+  if (input.action === "accept_ai_estimate" && input.mismatchBand === "material_mismatch") {
     return { status: "mismatch_flagged", reviewRequired: false };
   }
   if (input.action === "accept_manual_count" || input.action === "accept_ai_estimate") {

@@ -24,11 +24,7 @@ export type PipelineStaffColumnId =
   | "nurture"
   | "closed_lost";
 
-export type PipelineStageLifecycle =
-  | "active"
-  | "holding"
-  | "terminal_won"
-  | "terminal_lost";
+export type PipelineStageLifecycle = "active" | "holding" | "terminal_won" | "terminal_lost";
 
 export type PipelineStaffColumnDefinition = {
   id: PipelineStaffColumnId;
@@ -76,9 +72,7 @@ const COLUMN_BY_ID: ReadonlyMap<PipelineStaffColumnId, PipelineStaffColumnDefini
  * Backend slugs are never renamed; this is presentation grouping only.
  * A staff column may group multiple backend stages — mutations must still use a real stage id.
  */
-export const PIPELINE_DEFAULT_STAGE_CROSSWALK: Readonly<
-  Record<string, PipelineStaffColumnId>
-> = {
+export const PIPELINE_DEFAULT_STAGE_CROSSWALK: Readonly<Record<string, PipelineStaffColumnId>> = {
   new: "new",
   contacted: "contacting",
   qualified: "qualified",
@@ -259,12 +253,7 @@ function asColumnId(
 // Lead lifecycle reconciliation (presentation only — no mutation)
 // ---------------------------------------------------------------------------
 
-export type PipelineLeadLifecycleState =
-  | "active"
-  | "holding"
-  | "converted"
-  | "lost"
-  | "archived";
+export type PipelineLeadLifecycleState = "active" | "holding" | "converted" | "lost" | "archived";
 
 export type PipelineLeadLifecycleWarning =
   | "status_converted_active_stage"

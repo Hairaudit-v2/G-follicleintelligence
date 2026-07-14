@@ -1,12 +1,7 @@
 export const TENANT_BRANDING_BUCKET = "tenant-branding";
 export const TENANT_LOGO_MAX_BYTES = 2 * 1024 * 1024;
 
-const ALLOWED_LOGO_MIME = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/svg+xml",
-]);
+const ALLOWED_LOGO_MIME = new Set(["image/png", "image/jpeg", "image/webp", "image/svg+xml"]);
 
 const MIME_EXT: Record<string, string> = {
   "image/png": "png",
@@ -32,13 +27,15 @@ export function buildTenantLogoStoragePath(
   return `tenant-branding/${tid}/logo/${Date.now()}-${hash.toString(16).slice(0, 12)}-${safeName}.${ext}`;
 }
 
-export function assertAllowedTenantLogoFile(file: File): {
-  ok: true;
-  contentType: string;
-} | {
-  ok: false;
-  error: string;
-} {
+export function assertAllowedTenantLogoFile(file: File):
+  | {
+      ok: true;
+      contentType: string;
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
   if (!file || !(file instanceof File)) {
     return { ok: false, error: "No file provided." };
   }

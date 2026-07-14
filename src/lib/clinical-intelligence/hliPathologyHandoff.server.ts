@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { computeAgeYearsFromDobString } from "@/src/lib/patients/patientIdentityContact";
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 import {
   buildHliPathologyHandoffPayload,
   type HliPathologyHandoffPayload,
@@ -54,8 +57,7 @@ export async function buildHliPathologyHandoffForResult(
   });
 
   const meta = result.metadata ?? {};
-  const consultationId =
-    typeof meta.consultation_id === "string" ? meta.consultation_id : null;
+  const consultationId = typeof meta.consultation_id === "string" ? meta.consultation_id : null;
   const surgeryCaseId = typeof meta.surgery_case_id === "string" ? meta.surgery_case_id : null;
 
   return buildHliPathologyHandoffPayload({
@@ -69,8 +71,7 @@ export async function buildHliPathologyHandoffForResult(
             ? String(patientMeta.sex)
             : null,
       age: identity.ageYears ?? computeAgeYearsFromDobString(identity.dateOfBirth),
-      diagnosisContext:
-        typeof meta.diagnosis_context === "string" ? meta.diagnosis_context : null,
+      diagnosisContext: typeof meta.diagnosis_context === "string" ? meta.diagnosis_context : null,
       consultationId,
       surgeryCaseId,
       medicationContext:

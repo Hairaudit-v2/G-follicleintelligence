@@ -20,7 +20,8 @@ export const IMAGING_AI_REVIEW_OPS_BUCKETS = [
 
 export type ImagingAiReviewOpsBucket = (typeof IMAGING_AI_REVIEW_OPS_BUCKETS)[number];
 
-export const IMAGING_AI_REVIEW_OPS_DEFAULT_KIND: ImagingAiAnalysisKind = "graft_tray_count_estimate";
+export const IMAGING_AI_REVIEW_OPS_DEFAULT_KIND: ImagingAiAnalysisKind =
+  "graft_tray_count_estimate";
 
 /** Running jobs older than this are considered stale for operator requeue. */
 export const IMAGING_AI_STALE_RUNNING_MS = 15 * 60 * 1000;
@@ -119,7 +120,13 @@ export function classifyImagingAiReviewOpsBuckets(input: {
   if (input.jobStatus === "queued") buckets.push("queued");
   if (input.jobStatus === "running") {
     buckets.push("running");
-    if (isStaleRunningImagingAiJob({ jobStatus: input.jobStatus, updatedAt: input.updatedAt, nowMs: input.nowMs })) {
+    if (
+      isStaleRunningImagingAiJob({
+        jobStatus: input.jobStatus,
+        updatedAt: input.updatedAt,
+        nowMs: input.nowMs,
+      })
+    ) {
       buckets.push("stale_running");
     }
   }
@@ -130,10 +137,7 @@ export function classifyImagingAiReviewOpsBuckets(input: {
     if (input.jobStatus === "completed" && input.graftTrayReviewStatus === "pending_review") {
       buckets.push("completed_awaiting_review", "requires_staff_review");
     }
-    if (
-      input.graftTrayReviewStatus === "pending_review" &&
-      input.jobStatus !== "superseded"
-    ) {
+    if (input.graftTrayReviewStatus === "pending_review" && input.jobStatus !== "superseded") {
       if (!buckets.includes("requires_staff_review")) buckets.push("requires_staff_review");
     }
     if (input.provider === "unavailable" || input.provider === "stub") {
@@ -186,11 +190,13 @@ export function canRequeueStaleImagingAiJob(input: {
   graftTrayReviewStatus: GraftTrayAiReviewStatus | null;
   nowMs?: number;
 }): { allowed: boolean; reason: string | null } {
-  if (!isStaleRunningImagingAiJob({
-    jobStatus: input.jobStatus,
-    updatedAt: input.updatedAt,
-    nowMs: input.nowMs,
-  })) {
+  if (
+    !isStaleRunningImagingAiJob({
+      jobStatus: input.jobStatus,
+      updatedAt: input.updatedAt,
+      nowMs: input.nowMs,
+    })
+  ) {
     return { allowed: false, reason: "Job is not a stale running job." };
   }
   const blocked = resolveGraftTrayReplayBlockedReason(input.graftTrayReviewStatus);
@@ -240,7 +246,9 @@ export function buildImagingAiReviewOpsJobView(input: {
     input.estimate
   );
 
-  const replayBlockedReason = resolveGraftTrayReplayBlockedReason(input.snapshot.graftTrayReviewStatus);
+  const replayBlockedReason = resolveGraftTrayReplayBlockedReason(
+    input.snapshot.graftTrayReviewStatus
+  );
   const reviewHref =
     input.snapshot.graftTrayReviewStatus === "pending_review" && input.patientId
       ? `/fi-admin/${input.tenantId}/imaging/review`

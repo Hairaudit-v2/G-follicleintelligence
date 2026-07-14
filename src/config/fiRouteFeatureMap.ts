@@ -43,7 +43,10 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   },
   { test: (f) => f === "front-desk" || f.startsWith("front-desk/"), feature: "dashboard" },
   { test: (f) => f === "operations" || f.startsWith("operations/"), feature: "dashboard" },
-  { test: (f) => f === "reception-board" || f.startsWith("reception-board/"), feature: "dashboard" },
+  {
+    test: (f) => f === "reception-board" || f.startsWith("reception-board/"),
+    feature: "dashboard",
+  },
   { test: (f) => f === "reception-os" || f.startsWith("reception-os/"), feature: "dashboard" },
   { test: (f) => f === "reception" || f.startsWith("reception/"), feature: "dashboard" },
   {
@@ -51,7 +54,10 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
     feature: "procedure_day",
   },
   { test: (f) => f === "surgery/cases" || f.startsWith("surgery/cases/"), feature: "cases" },
-  { test: (f) => f === "surgery/review" || f.startsWith("surgery/review/"), feature: "surgery_pipeline" },
+  {
+    test: (f) => f === "surgery/review" || f.startsWith("surgery/review/"),
+    feature: "surgery_pipeline",
+  },
   { test: (f) => f === "surgery" || f.startsWith("surgery/"), feature: "surgery_pipeline" },
   { test: (f) => f === "surgery-os" || f.startsWith("surgery-os/"), feature: "surgery_pipeline" },
   { test: (f) => f === "system-status" || f.startsWith("system-status/"), feature: "settings" },

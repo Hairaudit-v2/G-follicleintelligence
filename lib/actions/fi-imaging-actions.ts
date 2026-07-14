@@ -22,7 +22,10 @@ import {
   ensureTreatmentImagingSession,
   loadTreatmentImagingChecklistForBooking,
 } from "@/src/lib/imaging-os/treatmentImagingSession.server";
-import { TREATMENT_IMAGING_CAPTURE_SOURCE, TREATMENT_IMAGING_PROTOCOL_SLUG } from "@/src/lib/imaging-os/treatmentImagingProtocol";
+import {
+  TREATMENT_IMAGING_CAPTURE_SOURCE,
+  TREATMENT_IMAGING_PROTOCOL_SLUG,
+} from "@/src/lib/imaging-os/treatmentImagingProtocol";
 import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
   bulkAssignImagingReviewItemsStaffNote,
@@ -991,7 +994,10 @@ export async function loadPatientVisualSummaryReportAction(
   patientId: string,
   body: unknown
 ): Promise<
-  | { ok: true; report: import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryReport }
+  | {
+      ok: true;
+      report: import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryReport;
+    }
   | { ok: false; error: string }
 > {
   try {
@@ -1113,7 +1119,9 @@ export async function savePatientVisualSummaryZoneRecordAction(
     if (surgeryGraftTotal == null && parsed.surgeryId?.trim()) {
       const { loadGraftSessionsForSurgeries } =
         await import("@/src/lib/surgeryOs/surgeryGraftMutations.server");
-      const sessions = await loadGraftSessionsForSurgeries(tenantId.trim(), [parsed.surgeryId.trim()]);
+      const sessions = await loadGraftSessionsForSurgeries(tenantId.trim(), [
+        parsed.surgeryId.trim(),
+      ]);
       const session = sessions.get(parsed.surgeryId.trim());
       if (session) {
         surgeryGraftTotal =
@@ -1227,7 +1235,12 @@ export async function loadPatientVisualSummaryStaffRecordAction(
   tenantId: string,
   body: unknown
 ): Promise<
-  | { ok: true; record: import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryStaffRecord | null }
+  | {
+      ok: true;
+      record:
+        | import("@/src/lib/imaging-os/patientVisualSummaryReportTypes").PatientVisualSummaryStaffRecord
+        | null;
+    }
   | { ok: false; error: string }
 > {
   try {

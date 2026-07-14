@@ -91,9 +91,7 @@ export async function unassignFutureBookingsForStaff(
     if (deleteError) throw new Error(deleteError.message);
   }
 
-  const affectedBookingIds = [
-    ...new Set([...primaryIds, ...futureResourceBookingIds]),
-  ];
+  const affectedBookingIds = [...new Set([...primaryIds, ...futureResourceBookingIds])];
 
   return {
     primaryUnassignedCount: primaryIds.length,

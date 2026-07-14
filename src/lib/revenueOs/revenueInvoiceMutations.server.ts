@@ -1179,7 +1179,13 @@ export async function recordGatewayPaymentSuccess(args: {
   }
 
   const nextPaid = inv.amount_paid_cents + payAmt;
-  const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null, supabase);
+  const updated = await patchInvoiceAfterPayment(
+    tid,
+    iid,
+    nextPaid,
+    args.todayYmd ?? null,
+    supabase
+  );
   const paymentId = String((payRow as { id: string }).id);
 
   if (prId) {

@@ -225,11 +225,7 @@ export async function buildIiohrShadowOperationalHistory(input: {
   client?: SupabaseClient;
 }): Promise<StaffOperationalHistory | null> {
   if (input.linkedStaffMemberId) {
-    return loadStaffOperationalHistory(
-      input.tenantId,
-      input.linkedStaffMemberId,
-      input.client
-    );
+    return loadStaffOperationalHistory(input.tenantId, input.linkedStaffMemberId, input.client);
   }
 
   return {

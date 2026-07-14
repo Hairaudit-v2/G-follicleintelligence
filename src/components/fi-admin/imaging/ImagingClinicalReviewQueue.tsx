@@ -76,8 +76,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
     const q = reviewerSearch.trim().toLowerCase();
     if (!q) return true;
     return (
-      r.display_name.toLowerCase().includes(q) ||
-      (r.email?.toLowerCase().includes(q) ?? false)
+      r.display_name.toLowerCase().includes(q) || (r.email?.toLowerCase().includes(q) ?? false)
     );
   });
 
@@ -158,7 +157,9 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                 setMsg(res.error);
                 return;
               }
-              setMsg(`Marked ${res.succeeded} reviewed${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              setMsg(
+                `Marked ${res.succeeded} reviewed${res.failed.length ? `; ${res.failed.length} failed` : ""}`
+              );
               router.refresh();
             });
           }}
@@ -184,7 +185,9 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                 setMsg(res.error);
                 return;
               }
-              setMsg(`Flagged ${res.succeeded} retake${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              setMsg(
+                `Flagged ${res.succeeded} retake${res.failed.length ? `; ${res.failed.length} failed` : ""}`
+              );
               router.refresh();
             });
           }}
@@ -222,7 +225,9 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                 setMsg(res.error);
                 return;
               }
-              setMsg(`Assigned ${res.succeeded} reviewer${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              setMsg(
+                `Assigned ${res.succeeded} reviewer${res.failed.length ? `; ${res.failed.length} failed` : ""}`
+              );
               router.refresh();
             });
           }}
@@ -248,7 +253,9 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                 setMsg(res.error);
                 return;
               }
-              setMsg(`Unassigned ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              setMsg(
+                `Unassigned ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`
+              );
               router.refresh();
             });
           }}
@@ -274,7 +281,9 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                 setMsg(res.error);
                 return;
               }
-              setMsg(`Assigned note to ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`);
+              setMsg(
+                `Assigned note to ${res.succeeded}${res.failed.length ? `; ${res.failed.length} failed` : ""}`
+              );
               router.refresh();
             });
           }}
@@ -433,8 +442,7 @@ export function ImagingClinicalReviewQueue({ tenantId, items, reviewers = [] }: 
                         <button
                           type="button"
                           disabled={
-                            pending ||
-                            !(assignee[item.imageId] ?? item.assignedToUserId)?.trim()
+                            pending || !(assignee[item.imageId] ?? item.assignedToUserId)?.trim()
                           }
                           className="rounded bg-violet-900/40 px-2 py-0.5 text-[10px] text-violet-200 disabled:opacity-40"
                           onClick={() => {

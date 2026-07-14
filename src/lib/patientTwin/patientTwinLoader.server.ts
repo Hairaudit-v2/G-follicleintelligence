@@ -43,7 +43,10 @@ import {
   PATIENT_TWIN_MEDICATION_OS_EVENTS_READ_CAP,
 } from "./patientTwinMedicationOs";
 import { buildFiMedicalIntelligenceTwinSummary } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceCore";
-import type { PathologyResultItemRow, PathologyResultStatus } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultStatus,
+} from "@/src/lib/pathology/pathologyResultTypes";
 import {
   PATIENT_TWIN_LOADER_VERSION,
   PATIENT_TWIN_VERSION,
@@ -965,9 +968,7 @@ export async function loadPatientTwinV1(
       last_result_reviewed_at,
     };
 
-    const intelligenceTarget = results.find(
-      (r) => r.status === "draft" || r.status === "reviewed"
-    );
+    const intelligenceTarget = results.find((r) => r.status === "draft" || r.status === "reviewed");
     if (intelligenceTarget) {
       const { data: resMeta, error: resMetaErr } = await supabase
         .from("fi_pathology_results")

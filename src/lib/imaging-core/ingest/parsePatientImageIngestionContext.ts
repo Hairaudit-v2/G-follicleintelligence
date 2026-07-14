@@ -77,13 +77,19 @@ function attributionFields(input: FlatPatientImageIngestionContext) {
   };
 }
 
-function resolveIngestKind(input: FlatPatientImageIngestionContext): ParsedPatientImageIngestContext["kind"] {
+function resolveIngestKind(
+  input: FlatPatientImageIngestionContext
+): ParsedPatientImageIngestContext["kind"] {
   const base = buildSharedBase(input);
   const captureSource = base.capture_source;
   const rawCaptureSource = normalizeUploadSource(input.capture_source);
   const uploadSource = base.upload_source ?? "";
 
-  if (uploadSource === "hairaudit" || captureSource === "hairaudit" || rawCaptureSource === "hairaudit") {
+  if (
+    uploadSource === "hairaudit" ||
+    captureSource === "hairaudit" ||
+    rawCaptureSource === "hairaudit"
+  ) {
     return "hairaudit";
   }
   if (uploadSource === "hair_longevity" || rawCaptureSource === "hli") {

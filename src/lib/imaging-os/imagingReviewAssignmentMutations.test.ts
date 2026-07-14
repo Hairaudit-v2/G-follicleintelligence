@@ -126,7 +126,10 @@ describe("imagingReviewAssignmentMutations", () => {
       client,
     });
     assert.deepEqual(result.succeeded, ["img-1"]);
-    assert.equal(readImagingReviewAssignmentRecord(row.metadata as Record<string, unknown>)?.assigned_to, "reviewer-bulk");
+    assert.equal(
+      readImagingReviewAssignmentRecord(row.metadata as Record<string, unknown>)?.assigned_to,
+      "reviewer-bulk"
+    );
   });
 
   it("bulk unassign clears assignments", async () => {

@@ -71,7 +71,10 @@ function trayGraftTotal(event: TransectionMonitoringTrayEvent): number {
   );
 }
 
-function classifyDamagedUnits(note: string | null, damaged: number): {
+function classifyDamagedUnits(
+  note: string | null,
+  damaged: number
+): {
   partial: number;
   full: number;
   unclassified: number;
@@ -83,9 +86,7 @@ function classifyDamagedUnits(note: string | null, damaged: number): {
     /\bfull\b/.test(normalized) ||
     /\bcomplete transection\b/.test(normalized) ||
     /\bfully transected\b/.test(normalized);
-  const isPartial =
-    /\bpartial\b/.test(normalized) ||
-    /\bpartial transection\b/.test(normalized);
+  const isPartial = /\bpartial\b/.test(normalized) || /\bpartial transection\b/.test(normalized);
 
   if (isFull && !isPartial) return { partial: 0, full: damaged, unclassified: 0 };
   if (isPartial && !isFull) return { partial: damaged, full: 0, unclassified: 0 };
@@ -124,7 +125,9 @@ function buildSummary(input: {
   }
 
   const ratePart =
-    input.ratePercent != null ? `${input.ratePercent}% transection rate` : "Transection rate pending";
+    input.ratePercent != null
+      ? `${input.ratePercent}% transection rate`
+      : "Transection rate pending";
 
   return `${input.patientLabel} — ${ratePart}; ${input.status}.`;
 }

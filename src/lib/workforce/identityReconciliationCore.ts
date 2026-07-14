@@ -156,9 +156,7 @@ export function findExistingStaffMatch(input: {
     (m) => m.tenantId === input.tenantId && isActiveMember(m)
   );
 
-  const link = input.identityLinks.find(
-    (l) => l.sourceSystem === sys && l.externalId === ext
-  );
+  const link = input.identityLinks.find((l) => l.sourceSystem === sys && l.externalId === ext);
   if (link) {
     return {
       staffMemberId: link.staffMemberId,
@@ -170,9 +168,7 @@ export function findExistingStaffMatch(input: {
   }
 
   if (inboundEmail) {
-    const emailMatches = activeMembers.filter(
-      (m) => normalizeEmail(m.email) === inboundEmail
-    );
+    const emailMatches = activeMembers.filter((m) => normalizeEmail(m.email) === inboundEmail);
     if (emailMatches.length === 1) {
       return {
         staffMemberId: emailMatches[0]!.id,
@@ -194,9 +190,7 @@ export function findExistingStaffMatch(input: {
   }
 
   if (inboundName) {
-    const nameMatches = activeMembers.filter(
-      (m) => normalizeName(m.fullName) === inboundName
-    );
+    const nameMatches = activeMembers.filter((m) => normalizeName(m.fullName) === inboundName);
     if (nameMatches.length === 1) {
       const match = nameMatches[0]!;
       const existingEmail = normalizeEmail(match.email);

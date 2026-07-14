@@ -83,7 +83,9 @@ function createTransactionalMock(seed?: {
                   maybeSingle: async () => ({
                     data:
                       staff.find((s) =>
-                        filters.every((f) => String((s as Record<string, unknown>)[f.col]) === f.val)
+                        filters.every(
+                          (f) => String((s as Record<string, unknown>)[f.col]) === f.val
+                        )
                       ) ?? null,
                     error: null,
                   }),
@@ -130,7 +132,9 @@ function createTransactionalMock(seed?: {
                   maybeSingle: async () => ({
                     data:
                       clinics.find((c) =>
-                        filters.every((f) => String((c as Record<string, unknown>)[f.col]) === f.val)
+                        filters.every(
+                          (f) => String((c as Record<string, unknown>)[f.col]) === f.val
+                        )
                       ) ?? null,
                     error: null,
                   }),

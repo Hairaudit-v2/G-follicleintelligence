@@ -59,11 +59,7 @@ export type ExpenseCpgSummary = {
   unlinked_clinical_spend_cents: number;
 };
 
-const CLINICAL_CATEGORY_CODES = new Set([
-  "clinical_consumables",
-  "medications",
-  "equipment",
-]);
+const CLINICAL_CATEGORY_CODES = new Set(["clinical_consumables", "medications", "equipment"]);
 
 export function isClinicalConsumableExpense(categoryCode: string | null | undefined): boolean {
   const c = (categoryCode ?? "").trim().toLowerCase();
@@ -76,10 +72,7 @@ function inDateRangeYmd(dateYmd: string | null, start: string, end: string): boo
   return d >= start.slice(0, 10) && d <= end.slice(0, 10);
 }
 
-export function computeCostPerGraftCents(
-  spendCents: number,
-  grafts: number
-): number | null {
+export function computeCostPerGraftCents(spendCents: number, grafts: number): number | null {
   if (!Number.isFinite(spendCents) || spendCents < 0) return null;
   if (!Number.isFinite(grafts) || grafts <= 0) return null;
   return Math.round(spendCents / grafts);
@@ -176,8 +169,7 @@ export function aggregateExpenseCostPerGraft(input: {
       const actual = computeCostPerGraftCents(spend_cents, grafts_implanted);
       const std = standardByProc.get(procedure_type) ?? null;
       const standardCpg = std?.standard_cost_per_graft_cents ?? null;
-      const variance =
-        actual != null && standardCpg != null ? actual - standardCpg : null;
+      const variance = actual != null && standardCpg != null ? actual - standardCpg : null;
       return {
         procedure_type,
         spend_cents,

@@ -75,11 +75,7 @@ export function resolveFiPublicAppUrl(options?: {
     const requestOrigin = options?.allowRequestOrigin?.trim();
     if (requestOrigin) {
       const normalized = normalizeFiDeploymentBaseUrl(stripTrailingSlashes(requestOrigin));
-      if (
-        normalized &&
-        !isVercelPreviewDeploymentHost(normalized) &&
-        isLocalhostHost(normalized)
-      ) {
+      if (normalized && !isVercelPreviewDeploymentHost(normalized) && isLocalhostHost(normalized)) {
         return normalized;
       }
     }

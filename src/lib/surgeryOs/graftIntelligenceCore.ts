@@ -118,7 +118,9 @@ function computeGraftCountConfidence(input: {
   return clampPercent(score) ?? 0;
 }
 
-function deriveWarnings(input: GraftIntelligenceInput & { compositionTotal: number }): GraftIntelligenceWarning[] {
+function deriveWarnings(
+  input: GraftIntelligenceInput & { compositionTotal: number }
+): GraftIntelligenceWarning[] {
   const warnings: GraftIntelligenceWarning[] = [];
 
   if (!hasGraftData(input)) {
@@ -219,8 +221,7 @@ export function buildGraftIntelligence(input: GraftIntelligenceInput): GraftInte
   const totalGrafts = Math.max(0, input.extractedGrafts);
   const totalHairs = Math.max(0, input.totalHairs);
   const graftBasis = compositionTotal > 0 ? compositionTotal : totalGrafts;
-  const averageHairsPerGraft =
-    input.averageHairsPerGraft ?? safeAverage(totalHairs, graftBasis);
+  const averageHairsPerGraft = input.averageHairsPerGraft ?? safeAverage(totalHairs, graftBasis);
   const extractionProgressPercent = clampPercent(
     computeGraftProgressPercent(input.extractedGrafts, input.targetGrafts)
   );

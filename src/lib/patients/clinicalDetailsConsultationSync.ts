@@ -72,7 +72,9 @@ export async function syncConsultationFormValuesToPatientClinicalDetails(params:
   if (mapped.sinclairScale) {
     const existing = await loadPatientClinicalDetails(params.tenantId.trim(), pid);
     const priorMeta =
-      existing?.metadata && typeof existing.metadata === "object" && !Array.isArray(existing.metadata)
+      existing?.metadata &&
+      typeof existing.metadata === "object" &&
+      !Array.isArray(existing.metadata)
         ? (existing.metadata as Record<string, unknown>)
         : {};
     patchRecord.metadata = {

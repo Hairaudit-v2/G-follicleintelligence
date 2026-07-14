@@ -66,9 +66,7 @@ export function resolveGraftTraySlotVariant(input: {
   return GRAFT_TRAY_SLOT_SLUG;
 }
 
-export function extractGraftTraySurgeryLinkage(
-  metadata?: Record<string, unknown> | null
-): {
+export function extractGraftTraySurgeryLinkage(metadata?: Record<string, unknown> | null): {
   surgery_id: string | null;
   case_id: string | null;
   booking_id: string | null;

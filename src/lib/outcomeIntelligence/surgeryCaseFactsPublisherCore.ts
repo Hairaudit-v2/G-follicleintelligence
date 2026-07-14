@@ -69,7 +69,8 @@ export function validateSurgeryCaseIntelligenceFactsForPublish(
   const parsed = surgeryCaseIntelligenceFactsSchema.safeParse(facts);
   if (!parsed.success) {
     throw new SurgeryCaseFactsPublishValidationError(
-      parsed.error.issues.map((i) => i.message).join("; ") || "Invalid surgery case intelligence facts."
+      parsed.error.issues.map((i) => i.message).join("; ") ||
+        "Invalid surgery case intelligence facts."
     );
   }
 

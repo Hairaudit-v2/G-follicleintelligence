@@ -1,10 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  isFiOsPlatformAdminFullSessionBypass,
-  resolveAuthUserId,
-} from "@/src/lib/crm/crmGate";
+import { isFiOsPlatformAdminFullSessionBypass, resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import {
   isFiOsElevatedOsOperatorRole,
@@ -45,10 +42,7 @@ export async function canViewTodaySignalLearning(tenantId: string): Promise<bool
   }
 
   const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authId);
-  if (
-    tenantAdmin?.adminRole &&
-    CLINIC_MANAGER_TENANT_ADMIN_ROLES.has(tenantAdmin.adminRole)
-  ) {
+  if (tenantAdmin?.adminRole && CLINIC_MANAGER_TENANT_ADMIN_ROLES.has(tenantAdmin.adminRole)) {
     return true;
   }
 

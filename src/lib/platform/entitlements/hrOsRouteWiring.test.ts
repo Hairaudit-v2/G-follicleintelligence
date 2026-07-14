@@ -160,13 +160,10 @@ test("verified + active + enabled + wrong role denied", () => {
   const result = evaluateHrOsModuleEntitlement(entitledContext({ userRole: "crm_operator" }));
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.reason, "role_not_allowed");
-  assert.deepEqual([...HR_OS_ROUTE_REQUIRED_ROLES], [
-    "owner",
-    "fi_admin",
-    "admin",
-    "hr_manager",
-    "manager",
-  ]);
+  assert.deepEqual(
+    [...HR_OS_ROUTE_REQUIRED_ROLES],
+    ["owner", "fi_admin", "admin", "hr_manager", "manager"]
+  );
 });
 
 test("Team nav visibility aligns with HR OS route gate — crm_operator and tenant_backend denied", () => {
@@ -178,10 +175,7 @@ test("Team nav visibility aligns with HR OS route gate — crm_operator and tena
     evaluateHrOsModuleEntitlement(entitledContext({ userRole: "tenant_backend" })).ok,
     false
   );
-  assert.equal(
-    evaluateHrOsModuleEntitlement(entitledContext({ userRole: "hr_manager" })).ok,
-    true
-  );
+  assert.equal(evaluateHrOsModuleEntitlement(entitledContext({ userRole: "hr_manager" })).ok, true);
 });
 
 test("verified + active + disabled module denied", () => {

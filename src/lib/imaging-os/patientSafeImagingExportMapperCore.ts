@@ -33,7 +33,9 @@ function formatViewLabel(image: PatientImageRow): string | null {
   return null;
 }
 
-export function mapPatientImageToSafeExportCard(image: PatientImageRow): PatientSafeImagingExportCard {
+export function mapPatientImageToSafeExportCard(
+  image: PatientImageRow
+): PatientSafeImagingExportCard {
   const metadata = redactMetadataForPatientExport(image.metadata ?? {});
   const procedureStage = inferFiImageProcedureStage({
     visit_type: image.visit_type,

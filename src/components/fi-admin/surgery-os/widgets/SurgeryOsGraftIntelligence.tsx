@@ -3,9 +3,7 @@ import { Layers, AlertTriangle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import {
-  SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS,
-} from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import { SURGERY_OS_GRAFT_RECONCILIATION_STATUS_LABELS } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import type {
   GraftIntelligenceSnapshot,
   SurgeryOsGraftSummary,

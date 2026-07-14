@@ -99,7 +99,10 @@ function localOffsetMinutesAt(instant: Date, tz: string): number {
     timeZoneName: "shortOffset",
   });
   const parts = Object.fromEntries(
-    dtf.formatToParts(instant).filter((p) => p.type !== "literal").map((p) => [p.type, p.value])
+    dtf
+      .formatToParts(instant)
+      .filter((p) => p.type !== "literal")
+      .map((p) => [p.type, p.value])
   );
   const offsetRaw = parts.timeZoneName ?? "GMT";
   const match = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(offsetRaw);

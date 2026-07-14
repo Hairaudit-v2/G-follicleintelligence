@@ -78,9 +78,7 @@ import { buildExtractionVelocity } from "@/src/lib/surgeryOs/extractionVelocityC
 import { buildImplantationSpeed } from "@/src/lib/surgeryOs/implantationSpeedCore";
 import { buildSurgicalRiskDetection } from "@/src/lib/surgeryOs/surgicalRiskDetectionCore";
 import { buildTransectionMonitoring } from "@/src/lib/surgeryOs/transectionMonitoringCore";
-import {
-  buildSurgeonProcedurePerformanceRecord,
-} from "@/src/lib/surgeryOs/surgeonPerformanceAnalyticsCore";
+import { buildSurgeonProcedurePerformanceRecord } from "@/src/lib/surgeryOs/surgeonPerformanceAnalyticsCore";
 import { buildSurgeonPerformanceIntelligence } from "@/src/lib/surgeryOs/surgeonPerformanceIntelligenceCore";
 import {
   buildLiveProcedureTimeline,
@@ -554,15 +552,16 @@ export async function loadSurgeryOsCommandCentrePayload(
   let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
   let trayIntelligenceByImage = new Map<
     string,
-    Awaited<ReturnType<typeof loadGraftTrayIntelligenceContextForImages>> extends Map<string, infer V>
+    Awaited<ReturnType<typeof loadGraftTrayIntelligenceContextForImages>> extends Map<
+      string,
+      infer V
+    >
       ? V
       : never
   >();
   try {
     trayLinksBySurgery = await loadGraftTrayLinksForSurgeries(tid, surgeryIds, supabase);
-    const trayImageIds = [...trayLinksBySurgery.values()]
-      .flat()
-      .map((l) => l.image_id);
+    const trayImageIds = [...trayLinksBySurgery.values()].flat().map((l) => l.image_id);
     if (trayImageIds.length) {
       trayIntelligenceByImage = await loadGraftTrayIntelligenceContextForImages(
         tid,
@@ -966,8 +965,7 @@ export async function loadSurgeryOsCommandCentrePayload(
     }));
     const surgeryTrayEvents = rawGraftEvents.map((e) => ({
       eventType: e.event_type,
-      reviewStatus:
-        e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+      reviewStatus: e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
       singles: e.singles,
       doubles: e.doubles,
       triples: e.triples,

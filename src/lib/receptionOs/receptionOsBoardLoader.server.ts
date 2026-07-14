@@ -734,8 +734,7 @@ export async function loadReceptionOsBoardPayload(
     ]);
 
   const bookingIds = operational.receptionBoard.cards.map((c) => c.id);
-  const caseByBooking =
-    preloaded.caseByBooking ?? (await loadBookingCaseIds(tid, bookingIds));
+  const caseByBooking = preloaded.caseByBooking ?? (await loadBookingCaseIds(tid, bookingIds));
   const todaysPatients = operational.receptionBoard.cards
     .slice()
     .sort((a, b) => a.startAt.localeCompare(b.startAt))

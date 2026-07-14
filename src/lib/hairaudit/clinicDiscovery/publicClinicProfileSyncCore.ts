@@ -53,9 +53,7 @@ function profilesEquivalent(a: PublicClinicProfile, b: PublicClinicProfile): boo
   );
 }
 
-export function planPublicClinicProfileSyncItem(
-  input: PublicClinicProfileSyncItemInput
-): {
+export function planPublicClinicProfileSyncItem(input: PublicClinicProfileSyncItemInput): {
   outcome: PublicClinicProfileSyncItemOutcome;
   nextProfile?: PublicClinicProfile;
 } {
@@ -89,8 +87,7 @@ export function planPublicClinicProfileSyncItem(
       public_clinic_profile_id: existing.public_clinic_profile_id,
       public_profile_enabled: existing.public_profile_enabled,
       search_visible: existing.search_visible,
-      accepts_independent_hairaudit_enquiries:
-        existing.accepts_independent_hairaudit_enquiries,
+      accepts_independent_hairaudit_enquiries: existing.accepts_independent_hairaudit_enquiries,
       created_at: existing.created_at,
     },
     preserveHairAuditOwned: true,

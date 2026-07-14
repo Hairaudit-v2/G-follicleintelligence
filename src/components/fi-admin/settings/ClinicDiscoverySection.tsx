@@ -57,10 +57,7 @@ export function ClinicDiscoverySection(props: {
     setMessage(null);
     setError(null);
     startTransition(async () => {
-      const result = await previewHairAuditClinicDiscoveryAction(
-        props.tenantId,
-        props.clinicId
-      );
+      const result = await previewHairAuditClinicDiscoveryAction(props.tenantId, props.clinicId);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -133,9 +130,7 @@ export function ClinicDiscoverySection(props: {
           <input
             type="checkbox"
             checked={settings.search_visible}
-            onChange={(e) =>
-              setSettings((s) => ({ ...s, search_visible: e.target.checked }))
-            }
+            onChange={(e) => setSettings((s) => ({ ...s, search_visible: e.target.checked }))}
           />
           Search visible
         </label>
@@ -173,9 +168,7 @@ export function ClinicDiscoverySection(props: {
             <input
               className={inputClass}
               value={settings[key] ?? ""}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, [key]: e.target.value || null }))
-              }
+              onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value || null }))}
             />
           </label>
         ))}
@@ -186,9 +179,7 @@ export function ClinicDiscoverySection(props: {
         <textarea
           className={`${inputClass} min-h-[80px]`}
           value={settings.profile_summary ?? ""}
-          onChange={(e) =>
-            setSettings((s) => ({ ...s, profile_summary: e.target.value || null }))
-          }
+          onChange={(e) => setSettings((s) => ({ ...s, profile_summary: e.target.value || null }))}
         />
       </label>
 
@@ -197,9 +188,7 @@ export function ClinicDiscoverySection(props: {
         <textarea
           className={`${inputClass} min-h-[120px]`}
           value={settings.profile_bio ?? ""}
-          onChange={(e) =>
-            setSettings((s) => ({ ...s, profile_bio: e.target.value || null }))
-          }
+          onChange={(e) => setSettings((s) => ({ ...s, profile_bio: e.target.value || null }))}
         />
       </label>
 

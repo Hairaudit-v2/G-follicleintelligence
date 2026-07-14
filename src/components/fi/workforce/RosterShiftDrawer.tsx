@@ -146,9 +146,7 @@ function RosterShiftDrawerBody({
     rosterCycleAnchorDate,
   });
 
-  const [isInlineEditing, setIsInlineEditing] = useState(
-    () => openInEditMode && canManage
-  );
+  const [isInlineEditing, setIsInlineEditing] = useState(() => openInEditMode && canManage);
   const [clinicId, setClinicId] = useState(initialFormValues.clinicId);
   const [shiftType, setShiftType] = useState(initialFormValues.shiftType);
   const [startsAt, setStartsAt] = useState(initialFormValues.startsAt);
@@ -294,7 +292,10 @@ function RosterShiftDrawerBody({
       return;
     }
 
-    const changedFields = resolveRosterShiftDrawerChangedFields(viewingExistingShift, editFormInput);
+    const changedFields = resolveRosterShiftDrawerChangedFields(
+      viewingExistingShift,
+      editFormInput
+    );
     if (changedFields.length === 0) {
       setIsInlineEditing(false);
       return;

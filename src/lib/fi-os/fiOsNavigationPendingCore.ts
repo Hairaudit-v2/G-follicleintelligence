@@ -50,7 +50,9 @@ export function isModifiedNavigationClick(event: {
 }
 
 export function isSameFiOsRoute(a: FiOsRouteLocation, b: FiOsRouteLocation): boolean {
-  return normalizeFiOsNavPath(a.pathname) === normalizeFiOsNavPath(b.pathname) && a.search === b.search;
+  return (
+    normalizeFiOsNavPath(a.pathname) === normalizeFiOsNavPath(b.pathname) && a.search === b.search
+  );
 }
 
 export function shouldStartFiOsNavigationPending(input: {
@@ -82,7 +84,9 @@ export function shouldStartFiOsNavigationPending(input: {
   return true;
 }
 
-export function readFiOsNavIdFromAnchor(anchor: { getAttribute(name: string): string | null }): string | null {
+export function readFiOsNavIdFromAnchor(anchor: {
+  getAttribute(name: string): string | null;
+}): string | null {
   const id = anchor.getAttribute(FI_OS_NAV_PENDING_ATTR)?.trim();
   return id || null;
 }

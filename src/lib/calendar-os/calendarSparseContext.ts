@@ -46,7 +46,9 @@ export function buildCalendarOsSparseContext(input: {
 
   const suggestedActions: string[] = [];
   if (unassignedCount > 0) {
-    suggestedActions.push(`${unassignedCount} booking${unassignedCount === 1 ? "" : "s"} need assignment`);
+    suggestedActions.push(
+      `${unassignedCount} booking${unassignedCount === 1 ? "" : "s"} need assignment`
+    );
   }
   if (followUpCount > 0) {
     suggestedActions.push(`${followUpCount} follow-up${followUpCount === 1 ? "" : "s"} scheduled`);

@@ -28,10 +28,7 @@ export function ExpenseCostPerGraftPanel(props: { summary: ExpenseCpgSummary }) 
           label="Clinical spend"
           value={formatMoneyFromCents(s.total_clinical_spend_cents)}
         />
-        <FinancialOsMetricTile
-          label="Grafts implanted"
-          value={String(s.total_grafts_implanted)}
-        />
+        <FinancialOsMetricTile label="Grafts implanted" value={String(s.total_grafts_implanted)} />
         <FinancialOsMetricTile
           label="Overall actual CPG"
           value={

@@ -5,7 +5,10 @@
 
 import { createRequire } from "node:module";
 
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 import {
   buildFiClinicalInsights,
   interpretFiPathologyMarkers,
@@ -77,7 +80,9 @@ function isLegacyDisplaySnapshot(value: unknown): value is FiMedicalIntelligence
   );
 }
 
-function isPersistedMetadataSnapshot(value: unknown): value is FiMedicalIntelligenceSnapshotMetadata {
+function isPersistedMetadataSnapshot(
+  value: unknown
+): value is FiMedicalIntelligenceSnapshotMetadata {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const v = value as Record<string, unknown>;
   return (
@@ -182,9 +187,7 @@ export function buildFiMedicalIntelligenceTwinSummary(
   const display = buildFiPathologyMedicalIntelligenceDisplay(input);
   if (!display) return null;
   const insightPreview =
-    display.clinicianInsights[0]?.trim() ||
-    display.activeDrivers[0]?.trim() ||
-    null;
+    display.clinicianInsights[0]?.trim() || display.activeDrivers[0]?.trim() || null;
   return {
     pathology_result_id: input.result.id,
     result_date: input.result.result_date,

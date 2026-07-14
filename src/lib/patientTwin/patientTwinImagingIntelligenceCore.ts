@@ -98,8 +98,7 @@ export function mapPatientTwinImagingIntelligence(input: {
   const staffReview = readImagingStaffReviewRecord(input.metadata);
   const jobSummaries = readImagingJobSummaries(input.metadata);
 
-  const classificationConfidence =
-    input.aiImageCategoryConfidence ?? clinical?.confidence ?? null;
+  const classificationConfidence = input.aiImageCategoryConfidence ?? clinical?.confidence ?? null;
 
   const cleared = staffReviewClearsQueue(staffReview);
   const retakeRequired = staffReview?.status === "retake_required";

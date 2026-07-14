@@ -33,9 +33,7 @@ export async function loadCompliancePageModel(tenantId: string): Promise<{
 
   const memberIds = [
     ...new Set(
-      ((alertRows ?? []) as { staff_member_id: string }[]).map((r) =>
-        String(r.staff_member_id)
-      )
+      ((alertRows ?? []) as { staff_member_id: string }[]).map((r) => String(r.staff_member_id))
     ),
   ];
   const nameById = new Map<string, string>();

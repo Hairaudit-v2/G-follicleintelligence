@@ -164,9 +164,7 @@ export async function loadRosterCommandCentrePageData(
 
   const eventDetails: RosterCommandCentrePageSuccess["eventDetails"] = {};
   /** Only hydrate explicitly selected events — missing-role scans load every staff member per role. */
-  const hydrationKeys = input.preselectedEventKey?.trim()
-    ? [input.preselectedEventKey.trim()]
-    : [];
+  const hydrationKeys = input.preselectedEventKey?.trim() ? [input.preselectedEventKey.trim()] : [];
 
   try {
     const hydrationResults = await Promise.allSettled(

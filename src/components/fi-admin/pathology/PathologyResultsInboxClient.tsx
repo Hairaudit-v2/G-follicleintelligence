@@ -84,8 +84,13 @@ export function PathologyResultsInboxClient(props: {
   extractionEnabled: boolean;
   emailIngestionEnabled?: boolean;
 }) {
-  const { tenantId, initialDocuments, canMutate, extractionEnabled, emailIngestionEnabled = false } =
-    props;
+  const {
+    tenantId,
+    initialDocuments,
+    canMutate,
+    extractionEnabled,
+    emailIngestionEnabled = false,
+  } = props;
   const router = useRouter();
   const [documents, setDocuments] = useState(initialDocuments);
   const [statusFilter, setStatusFilter] = useState<PathologyInboundMatchStatus | "all">("pending");
@@ -122,7 +127,10 @@ export function PathologyResultsInboxClient(props: {
     });
   }
 
-  async function postJson<T>(url: string, body?: unknown): Promise<T & { ok?: boolean; error?: string }> {
+  async function postJson<T>(
+    url: string,
+    body?: unknown
+  ): Promise<T & { ok?: boolean; error?: string }> {
     const res = await fetch(url, {
       method: "POST",
       headers: body ? { "Content-Type": "application/json" } : undefined,
@@ -213,7 +221,8 @@ export function PathologyResultsInboxClient(props: {
         if (!res.ok || json.ok !== true || !json.document) {
           setFeedback({
             tone: "err",
-            message: typeof json.error === "string" ? json.error : `Match update failed (${res.status}).`,
+            message:
+              typeof json.error === "string" ? json.error : `Match update failed (${res.status}).`,
           });
           return;
         }
@@ -256,7 +265,8 @@ export function PathologyResultsInboxClient(props: {
         if (!res.ok || json.ok !== true || !json.document) {
           setFeedback({
             tone: "err",
-            message: typeof json.error === "string" ? json.error : `Promote failed (${res.status}).`,
+            message:
+              typeof json.error === "string" ? json.error : `Promote failed (${res.status}).`,
           });
           return;
         }
@@ -305,7 +315,10 @@ export function PathologyResultsInboxClient(props: {
           return;
         }
         patchDocument(json.document);
-        setFeedback({ tone: "ok", message: useRetry ? "Extraction retried." : "Extraction completed." });
+        setFeedback({
+          tone: "ok",
+          message: useRetry ? "Extraction retried." : "Extraction completed.",
+        });
         router.refresh();
       } catch {
         setFeedback({ tone: "err", message: "Network error during extraction." });
@@ -424,7 +437,9 @@ export function PathologyResultsInboxClient(props: {
               type="button"
               disabled={pending || !file}
               onClick={onUpload}
-              className={fiOsChromeClasses.toolbarControlSurface + " px-4 py-2 text-sm font-semibold"}
+              className={
+                fiOsChromeClasses.toolbarControlSurface + " px-4 py-2 text-sm font-semibold"
+              }
             >
               Upload to inbox
             </button>
@@ -518,7 +533,9 @@ export function PathologyResultsInboxClient(props: {
                         {doc.original_filename ?? "inbound.pdf"}
                       </td>
                       <td className="px-3 py-2">{STATUS_LABELS[doc.match_status]}</td>
-                      <td className="px-3 py-2">{EXTRACTION_STATUS_LABELS[doc.extraction_status]}</td>
+                      <td className="px-3 py-2">
+                        {EXTRACTION_STATUS_LABELS[doc.extraction_status]}
+                      </td>
                       <td className="px-3 py-2 tabular-nums">
                         {doc.extraction_job?.extracted_marker_count ?? "—"}
                       </td>
@@ -584,7 +601,9 @@ export function PathologyResultsInboxClient(props: {
                     <dl className="grid grid-cols-2 gap-2">
                       <div>
                         <dt className="text-slate-500">Provider</dt>
-                        <dd className="text-slate-200">{selected.extraction_job.provider ?? "—"}</dd>
+                        <dd className="text-slate-200">
+                          {selected.extraction_job.provider ?? "—"}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-slate-500">OCR confidence</dt>
@@ -653,9 +672,14 @@ export function PathologyResultsInboxClient(props: {
                       type="button"
                       disabled={pending}
                       onClick={onExtract}
-                      className={fiOsChromeClasses.toolbarControlSurface + " px-3 py-1.5 text-xs font-semibold"}
+                      className={
+                        fiOsChromeClasses.toolbarControlSurface +
+                        " px-3 py-1.5 text-xs font-semibold"
+                      }
                     >
-                      {selected.extraction_status === "not_started" ? "Run extraction" : "Retry extraction"}
+                      {selected.extraction_status === "not_started"
+                        ? "Run extraction"
+                        : "Retry extraction"}
                     </button>
                     {selected.extraction_job?.id &&
                     selected.extraction_job.review_status !== "dismissed" ? (
@@ -674,14 +698,19 @@ export function PathologyResultsInboxClient(props: {
                   </div>
                 ) : null}
 
-                {canMutate && selected.match_status !== "promoted" && selected.match_status !== "rejected" ? (
+                {canMutate &&
+                selected.match_status !== "promoted" &&
+                selected.match_status !== "rejected" ? (
                   <div className="flex flex-wrap gap-2">
                     {selected.suggested_patient_id ? (
                       <button
                         type="button"
                         disabled={pending}
                         onClick={() => onMatchAction("confirm")}
-                        className={fiOsChromeClasses.toolbarControlSurface + " px-3 py-1.5 text-xs font-semibold"}
+                        className={
+                          fiOsChromeClasses.toolbarControlSurface +
+                          " px-3 py-1.5 text-xs font-semibold"
+                        }
                       >
                         Confirm match
                       </button>
@@ -690,7 +719,10 @@ export function PathologyResultsInboxClient(props: {
                       type="button"
                       disabled={pending}
                       onClick={() => onMatchAction("suggest")}
-                      className={fiOsChromeClasses.toolbarControlSurface + " px-3 py-1.5 text-xs font-semibold"}
+                      className={
+                        fiOsChromeClasses.toolbarControlSurface +
+                        " px-3 py-1.5 text-xs font-semibold"
+                      }
                     >
                       Refresh suggestion
                     </button>
@@ -745,7 +777,10 @@ export function PathologyResultsInboxClient(props: {
                         type="button"
                         disabled={pending}
                         onClick={() => onPromote("draft")}
-                        className={fiOsChromeClasses.toolbarControlSurface + " px-3 py-1.5 text-xs font-semibold"}
+                        className={
+                          fiOsChromeClasses.toolbarControlSurface +
+                          " px-3 py-1.5 text-xs font-semibold"
+                        }
                       >
                         Promote as draft
                       </button>

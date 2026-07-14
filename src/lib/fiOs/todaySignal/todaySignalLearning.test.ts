@@ -74,10 +74,9 @@ test("repeated signal updates last_seen_at and increments occurrence_count", () 
     },
   ];
 
-  const current = deriveSignalObservationSnapshot(
-    [feedItem({ id: "reception-booking-1" })],
-    { nowIso: T1 }
-  );
+  const current = deriveSignalObservationSnapshot([feedItem({ id: "reception-booking-1" })], {
+    nowIso: T1,
+  });
   const result = reconcileSignalObservations(previous, current, { nowIso: T1 });
 
   assert.equal(result.created.length, 0);

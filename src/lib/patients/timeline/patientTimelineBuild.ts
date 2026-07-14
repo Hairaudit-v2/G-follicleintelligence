@@ -4,7 +4,10 @@ import {
   followUpEncounterTimelineTitle,
   imagingAiReviewStatusLabel,
 } from "@/src/lib/followUpEncounters/followUpEncounterTypes";
-import type { FollowUpEncounterType, LegacyPatientSource } from "@/src/lib/followUpEncounters/followUpEncounterTypes";
+import type {
+  FollowUpEncounterType,
+  LegacyPatientSource,
+} from "@/src/lib/followUpEncounters/followUpEncounterTypes";
 import { crmActivityTimelineTitle } from "./patientTimelineLabels";
 import { sortPatientTimelineItems } from "./patientTimelineFilters";
 import type {
@@ -188,10 +191,7 @@ export function buildPatientTimeline(
 
   for (const ev of bundle.activity) {
     if (EXCLUDED_DUPLICATE_ACTIVITY_KINDS.has(ev.activity_kind.trim())) continue;
-    if (
-      isGenericEmailActivityKind(ev.activity_kind) &&
-      options.viewerCanReadClinicalPhi !== true
-    ) {
+    if (isGenericEmailActivityKind(ev.activity_kind) && options.viewerCanReadClinicalPhi !== true) {
       continue;
     }
     const sens = isSensitiveActivityKind(ev.activity_kind);
@@ -378,7 +378,8 @@ export function buildPatientTimeline(
                 date: String(im.created_at).slice(0, 10),
               })
             : null,
-        metadata_summary: treatmentSummary ?? (isFollowUpPhoto ? "Follow-up imaging session" : `Category: ${cat}`),
+        metadata_summary:
+          treatmentSummary ?? (isFollowUpPhoto ? "Follow-up imaging session" : `Category: ${cat}`),
         is_sensitive: false,
       });
     }

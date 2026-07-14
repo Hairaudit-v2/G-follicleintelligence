@@ -23,7 +23,9 @@ function MetricTile({
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className={cn("mt-1 text-xl font-semibold tabular-nums text-slate-100", accent)}>{value}</p>
+      <p className={cn("mt-1 text-xl font-semibold tabular-nums text-slate-100", accent)}>
+        {value}
+      </p>
       {detail ? <p className="mt-1 text-xs text-slate-500">{detail}</p> : null}
     </div>
   );
@@ -126,10 +128,20 @@ function SurgeonPerformanceCard({
           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
             Surgeon Score
           </p>
-          <p className={cn("text-2xl font-semibold tabular-nums", gradeClass(performance.performanceGrade))}>
+          <p
+            className={cn(
+              "text-2xl font-semibold tabular-nums",
+              gradeClass(performance.performanceGrade)
+            )}
+          >
             {performance.performanceScore}%
           </p>
-          <p className={cn("text-xs font-semibold uppercase tracking-wider", gradeClass(performance.performanceGrade))}>
+          <p
+            className={cn(
+              "text-xs font-semibold uppercase tracking-wider",
+              gradeClass(performance.performanceGrade)
+            )}
+          >
             {gradeLabel(performance.performanceGrade)}
           </p>
         </div>
@@ -176,7 +188,12 @@ function SurgeonPerformanceCard({
           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
             Performance Trend
           </p>
-          <p className={cn("mt-1 flex items-center gap-1.5 text-sm font-medium", trendClass(performance.trendDirection))}>
+          <p
+            className={cn(
+              "mt-1 flex items-center gap-1.5 text-sm font-medium",
+              trendClass(performance.trendDirection)
+            )}
+          >
             <TrendingUp className="h-4 w-4" aria-hidden />
             {trendLabel(performance.trendDirection)}
           </p>

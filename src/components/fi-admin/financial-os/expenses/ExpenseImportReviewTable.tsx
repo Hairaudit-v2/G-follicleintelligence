@@ -42,7 +42,10 @@ export function ExpenseImportReviewTable(props: {
   });
 
   const selectedIds = useMemo(
-    () => Object.entries(selected).filter(([, v]) => v).map(([id]) => id),
+    () =>
+      Object.entries(selected)
+        .filter(([, v]) => v)
+        .map(([id]) => id),
     [selected]
   );
 
@@ -173,16 +176,12 @@ export function ExpenseImportReviewTable(props: {
                   aria-label={`Select line ${line.line_index + 1}`}
                 />
               </td>
-              <td className={financialOsClasses.tableCellMono}>
-                {line.transaction_date ?? "—"}
-              </td>
+              <td className={financialOsClasses.tableCellMono}>{line.transaction_date ?? "—"}</td>
               <td className={financialOsClasses.tableCell}>
                 <div className={financialOsClasses.tableCellStrong}>
                   {line.vendor_name || line.merchant_hint || "—"}
                 </div>
-                <div className={financialOsClasses.mutedMeta}>
-                  {line.description_raw ?? ""}
-                </div>
+                <div className={financialOsClasses.mutedMeta}>{line.description_raw ?? ""}</div>
               </td>
               <td className={financialOsClasses.tableCell}>
                 {formatMoneyFromCents(line.amount_cents, line.currency)}

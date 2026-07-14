@@ -212,8 +212,7 @@ function TenantRow({
           ) : dependencyCounts ? (
             <>
               <p className="mt-2 text-xs text-slate-300">
-                Total linked records:{" "}
-                <span className="font-mono">{totalLinked ?? 0}</span>
+                Total linked records: <span className="font-mono">{totalLinked ?? 0}</span>
               </p>
               <DependencySummary counts={dependencyCounts} />
             </>

@@ -68,7 +68,10 @@ export function mapExternalLabelToPhotoCategoryV1(
   externalCategory: string,
   legacyUploadType?: string | null
 ): CategoryMappingOutcome {
-  const direct = externalCategory.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const direct = externalCategory
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
   if (isPhotoCategoryV1(direct)) {
     return { category: direct, aliasUsed: false, mappingSource: "direct_v1" };
   }

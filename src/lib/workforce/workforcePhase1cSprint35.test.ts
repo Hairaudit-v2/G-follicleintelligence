@@ -44,8 +44,19 @@ function history(
 
 test("record with more surgery history wins canonical selection", () => {
   const result = determineCanonicalStaffRecord([
-    history("a", { fullName: "Paul Green", surgeryAssignmentCount: 14, trainingCount: 7, daysSinceCreated: 200, isManuallyCreated: false }),
-    history("b", { fullName: "Paul Green B", surgeryAssignmentCount: 0, trainingCount: 0, daysSinceCreated: 5 }),
+    history("a", {
+      fullName: "Paul Green",
+      surgeryAssignmentCount: 14,
+      trainingCount: 7,
+      daysSinceCreated: 200,
+      isManuallyCreated: false,
+    }),
+    history("b", {
+      fullName: "Paul Green B",
+      surgeryAssignmentCount: 0,
+      trainingCount: 0,
+      daysSinceCreated: 5,
+    }),
   ]);
   assert.ok(result);
   assert.equal(result?.canonicalStaffId, "a");
@@ -53,7 +64,11 @@ test("record with more surgery history wins canonical selection", () => {
 });
 
 test("IIOHR linked record scores higher", () => {
-  const linked = history("linked", { isIiohrLinked: true, identityLinkCount: 1, isManuallyCreated: false });
+  const linked = history("linked", {
+    isIiohrLinked: true,
+    identityLinkCount: 1,
+    isManuallyCreated: false,
+  });
   const manual = history("manual", { isManuallyCreated: true });
   const linkedScore = determineCanonicalStaffRecord([
     { ...linked, label: "Linked" },

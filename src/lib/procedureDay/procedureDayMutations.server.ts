@@ -79,19 +79,17 @@ function metricKeyToMetadata(
   }
 }
 
-async function insertProcedureDayEvent(
-  input: {
-    tenantId: string;
-    sessionId: string;
-    bookingId: string;
-    patientId: string;
-    eventType: string;
-    fromStage?: ProcedureDayWorkflowStage | null;
-    toStage?: ProcedureDayWorkflowStage | null;
-    payload?: Record<string, unknown>;
-    actorFiUserId?: string | null;
-  }
-): Promise<void> {
+async function insertProcedureDayEvent(input: {
+  tenantId: string;
+  sessionId: string;
+  bookingId: string;
+  patientId: string;
+  eventType: string;
+  fromStage?: ProcedureDayWorkflowStage | null;
+  toStage?: ProcedureDayWorkflowStage | null;
+  payload?: Record<string, unknown>;
+  actorFiUserId?: string | null;
+}): Promise<void> {
   const supabase = supabaseAdmin();
   const { error } = await supabase.from("fi_procedure_day_events").insert({
     tenant_id: input.tenantId,
@@ -143,7 +141,9 @@ export async function startProcedureDaySession(
     bookingId: scope.bookingId,
     patientId: scope.patientId,
     caseId: scope.caseId,
-    currentStage: (initialStage === "scheduled" ? "arrived" : initialStage) as ProcedureDayWorkflowStage,
+    currentStage: (initialStage === "scheduled"
+      ? "arrived"
+      : initialStage) as ProcedureDayWorkflowStage,
     startedAt: now,
     completedAt: null,
     metadata: {},
@@ -263,12 +263,7 @@ export async function recordProcedureDayMetric(
     session = await startProcedureDaySession(tid, bookingId, actor);
   }
 
-  const patch = metricKeyToMetadata(
-    input.metric,
-    input.value,
-    session.metadata,
-    input.increment
-  );
+  const patch = metricKeyToMetadata(input.metric, input.value, session.metadata, input.increment);
   const metadata = mergeProcedureDayMetrics(session.metadata, patch);
   const now = new Date().toISOString();
   const supabase = supabaseAdmin();

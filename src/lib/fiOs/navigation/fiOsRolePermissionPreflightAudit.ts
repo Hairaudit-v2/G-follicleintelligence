@@ -12,10 +12,7 @@ import {
   filterFiOsPrimarySidebarItemsByFeatureAccess,
   resolveFiOsPrimarySidebarItems,
 } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
-import {
-  primaryRailSlotIds,
-  resolveFiOsMinimalNavItems,
-} from "@/src/lib/fiAdmin/fiOsMinimalNav";
+import { primaryRailSlotIds, resolveFiOsMinimalNavItems } from "@/src/lib/fiAdmin/fiOsMinimalNav";
 import { mergeFeatureAccessWithOrganisationalLayers } from "@/src/lib/fi-os/organisationalProfile.merge";
 import { parseFeatureAccessJsonObject } from "@/src/lib/fi-os/organisationalProfile.merge";
 import { resolveFiFeatureRouteDecision } from "@/src/lib/fi-os/featureRouteGuardPolicy";
@@ -529,13 +526,9 @@ function auditPrimaryRail(
   return checks;
 }
 
-function isPermittedProcedureDayDirectLabel(
-  label: string,
-  showProcedureDayNav?: boolean
-): boolean {
+function isPermittedProcedureDayDirectLabel(label: string, showProcedureDayNav?: boolean): boolean {
   return (
-    showProcedureDayNav === true &&
-    /^(procedure day|surgery day)\s*\(direct\)$/i.test(label.trim())
+    showProcedureDayNav === true && /^(procedure day|surgery day)\s*\(direct\)$/i.test(label.trim())
   );
 }
 
@@ -708,7 +701,9 @@ function auditCapabilityOverrides(
   return checks;
 }
 
-function auditMutationGuards(scenario: FiOsRolePermissionPreflightScenario): FiOsPermissionPreflightCheck[] {
+function auditMutationGuards(
+  scenario: FiOsRolePermissionPreflightScenario
+): FiOsPermissionPreflightCheck[] {
   const access = computeEffectiveAccess({
     roleKey: scenario.staffRoleKey,
     grants: [...(scenario.staffAccessGrants ?? [])],
@@ -879,7 +874,9 @@ function buildMatrixRow(
 
   const hasNav = (id: string) => sidebar.some((s) => s.id === id);
   const moreHas = (id: string) =>
-    sections.some((s) => s.items.some((i) => i.id === id || i.subItems?.some((sub) => sub.id === id)));
+    sections.some((s) =>
+      s.items.some((i) => i.id === id || i.subItems?.some((sub) => sub.id === id))
+    );
 
   const riskNotes: string[] = [];
   if (scenario.persona === "receptionist" && hasNav("team")) {
@@ -912,13 +909,14 @@ function buildMatrixRow(
         ? "quality"
         : "no",
     adminIntelligenceAccess: scenario.showNavigationAdminSurfaces ? "admin surfaces" : "none",
-    mutationAccess: [
-      canEditModule(access, "workforce_os") ? "roster/staff" : null,
-      canApproveModule(access, "surgery_os") ? "surgery" : null,
-      canViewModule(access, "analytics_os") ? "reports" : null,
-    ]
-      .filter(Boolean)
-      .join(", ") || "read-only",
+    mutationAccess:
+      [
+        canEditModule(access, "workforce_os") ? "roster/staff" : null,
+        canApproveModule(access, "surgery_os") ? "surgery" : null,
+        canViewModule(access, "analytics_os") ? "reports" : null,
+      ]
+        .filter(Boolean)
+        .join(", ") || "read-only",
     riskNotes,
     pass: checks.every((c) => c.passed),
   };

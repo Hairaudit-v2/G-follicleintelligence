@@ -15,9 +15,7 @@ export function TodayFeedQueue(props: {
   const [expanded, setExpanded] = useState(false);
 
   if (items.length === 0) {
-    return (
-      <p className="py-6 text-sm text-slate-500">{emptyText}</p>
-    );
+    return <p className="py-6 text-sm text-slate-500">{emptyText}</p>;
   }
 
   const visible = expanded ? items : items.slice(0, visibleCap);

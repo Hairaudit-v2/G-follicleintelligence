@@ -42,7 +42,9 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
       row.confirmed_patient_id != null ? String(row.confirmed_patient_id) : null,
     match_confidence: row.match_confidence != null ? Number(row.match_confidence) : null,
     match_evidence:
-      row.match_evidence && typeof row.match_evidence === "object" && !Array.isArray(row.match_evidence)
+      row.match_evidence &&
+      typeof row.match_evidence === "object" &&
+      !Array.isArray(row.match_evidence)
         ? (row.match_evidence as Record<string, unknown>)
         : {},
     extracted_patient_name:
@@ -50,7 +52,9 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extracted_dob: row.extracted_dob != null ? String(row.extracted_dob).slice(0, 10) : null,
     extracted_mrn: row.extracted_mrn != null ? String(row.extracted_mrn) : null,
     promoted_result_id: row.promoted_result_id != null ? String(row.promoted_result_id) : null,
-    extraction_status: String(row.extraction_status ?? "not_started") as PathologyInboundDocumentRow["extraction_status"],
+    extraction_status: String(
+      row.extraction_status ?? "not_started"
+    ) as PathologyInboundDocumentRow["extraction_status"],
     extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
     draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
     ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
@@ -127,9 +131,7 @@ function extractedHintsFromDocument(
 ) {
   return {
     patientName:
-      overrides?.extractedPatientName?.trim() ||
-      doc.extracted_patient_name?.trim() ||
-      null,
+      overrides?.extractedPatientName?.trim() || doc.extracted_patient_name?.trim() || null,
     dob: overrides?.extractedDob?.trim() || doc.extracted_dob?.trim() || null,
     mrn: overrides?.extractedMrn?.trim() || doc.extracted_mrn?.trim() || null,
   };

@@ -204,7 +204,11 @@ test("controlled dual-run: full fixture passes go/no-go gate", () => {
 
   // Intentional state diffs present and classified
   const kinds = new Set(report.stateDifferences.map((d) => d.kind));
-  assert.ok(kinds.has("expected_to_running_late") || kinds.has("expected_to_arriving_soon") || kinds.has("arrived_to_waiting"));
+  assert.ok(
+    kinds.has("expected_to_running_late") ||
+      kinds.has("expected_to_arriving_soon") ||
+      kinds.has("arrived_to_waiting")
+  );
 
   const serialized = JSON.stringify(report);
   assert.ok(!serialized.includes("Redacted"));

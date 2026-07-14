@@ -41,9 +41,7 @@ function createFiUsersMockSupabase(rows: FiUserRow[]) {
                   },
                   maybeSingle: async () => {
                     const row = rows.find((r) =>
-                      filters.every(
-                        (f) => String((r as Record<string, unknown>)[f.col]) === f.val
-                      )
+                      filters.every((f) => String((r as Record<string, unknown>)[f.col]) === f.val)
                     );
                     return { data: row ? { id: row.id } : null, error: null };
                   },

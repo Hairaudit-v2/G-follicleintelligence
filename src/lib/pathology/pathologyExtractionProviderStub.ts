@@ -29,9 +29,7 @@ function enrichStubOutput(
     threshold
   );
   const requiresManualReview =
-    base.markers.length === 0 ||
-    !confidenceSummary.meets_threshold ||
-    base.source === "empty";
+    base.markers.length === 0 || !confidenceSummary.meets_threshold || base.source === "empty";
 
   return {
     ...base,

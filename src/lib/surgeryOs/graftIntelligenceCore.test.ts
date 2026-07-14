@@ -5,9 +5,7 @@ import { buildGraftIntelligence } from "@/src/lib/surgeryOs/graftIntelligenceCor
 
 const surgeryId = "00000000-0000-4000-8000-000000000030";
 
-function baseInput(
-  overrides: Partial<Parameters<typeof buildGraftIntelligence>[0]> = {}
-) {
+function baseInput(overrides: Partial<Parameters<typeof buildGraftIntelligence>[0]> = {}) {
   return {
     surgeryId,
     patientLabel: "Jordan Patient",
@@ -34,7 +32,10 @@ describe("graftIntelligenceCore", () => {
 
     assert.equal(snapshot.totalGrafts, 0);
     assert.equal(snapshot.summary, "No graft intelligence available yet.");
-    assert.equal(snapshot.warnings.some((w) => w.kind === "no_data"), true);
+    assert.equal(
+      snapshot.warnings.some((w) => w.kind === "no_data"),
+      true
+    );
     assert.equal(snapshot.graftCountConfidence, 0);
   });
 
@@ -152,7 +153,9 @@ describe("graftIntelligenceCore", () => {
       })
     );
 
-    assert.ok(snapshot.averageHairsPerGraft == null || Number.isFinite(snapshot.averageHairsPerGraft));
+    assert.ok(
+      snapshot.averageHairsPerGraft == null || Number.isFinite(snapshot.averageHairsPerGraft)
+    );
     assert.ok(
       snapshot.extractionProgressPercent == null ||
         Number.isFinite(snapshot.extractionProgressPercent)

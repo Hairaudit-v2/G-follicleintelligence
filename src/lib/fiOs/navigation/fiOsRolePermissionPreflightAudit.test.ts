@@ -49,7 +49,19 @@ test("receptionist: team rail slot disabled when feature-filtered", () => {
   assert.equal(featureMap!.get("staff"), false);
   assert.equal(featureMap!.get("analytics"), false);
 
-  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false);
+  const raw = resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  );
   const sidebar = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureMap);
   assert.ok(!sidebar.some((i) => i.id === "team"));
   assert.ok(!sidebar.some((i) => i.id === "reports"));
@@ -149,7 +161,19 @@ test("platform admin: full access and admin More drawer surfaces", () => {
 });
 
 test("primary rail slots disabled when sidebar item filtered by feature access", () => {
-  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false);
+  const raw = resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  );
   const allOff = buildDefaultFeatureAccessAllEnabled();
   allOff.set("staff", false);
   allOff.set("analytics", false);
@@ -158,7 +182,10 @@ test("primary rail slots disabled when sidebar item filtered by feature access",
 
   const team = rail.find((i) => i.id === "team");
   if (team?.kind === "link") assert.equal(team.disabled, true);
-  assert.equal(rail.find((i) => (i.id as string) === "reports"), undefined);
+  assert.equal(
+    rail.find((i) => (i.id as string) === "reports"),
+    undefined
+  );
 });
 
 test("mutation guards: reception cannot edit roster or staff access", () => {

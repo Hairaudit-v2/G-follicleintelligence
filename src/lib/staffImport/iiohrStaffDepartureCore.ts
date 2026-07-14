@@ -23,9 +23,7 @@ export function mapHrEmploymentToFiDepartureStatus(
 
 export function isIiohrFullOffboardHrStatus(hrStatus: string | null | undefined): boolean {
   const mapped = mapHrEmploymentToFiDepartureStatus(hrStatus);
-  return (
-    mapped === "terminated" || mapped === "resigned" || mapped === "contract_ended"
-  );
+  return mapped === "terminated" || mapped === "resigned" || mapped === "contract_ended";
 }
 
 export function isAlreadyOffboardedEmploymentStatus(status: string | null | undefined): boolean {

@@ -481,7 +481,9 @@ export type PatientTwinPathologySection = {
   last_result_reviewed_at: string | null;
   latest_ai_interpretation: PatientTwinPathologyAiInterpretationSummary | null;
   /** Shared HLI medical intelligence summary for the latest draft/reviewed result (optional). */
-  latest_medical_intelligence: import("@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes").FiMedicalIntelligenceTwinSummary | null;
+  latest_medical_intelligence:
+    | import("@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes").FiMedicalIntelligenceTwinSummary
+    | null;
 };
 
 export type PatientTwinV1 = {

@@ -253,7 +253,10 @@ export async function loadSurgeryOsVieCaptureSummaries(
         });
         return {
           ...summary,
-          longitudinalSurfacing: buildSurgeryOsLongitudinalSurfacing({ tenantId: tid, capture: summary }),
+          longitudinalSurfacing: buildSurgeryOsLongitudinalSurfacing({
+            tenantId: tid,
+            capture: summary,
+          }),
         };
       })
   );

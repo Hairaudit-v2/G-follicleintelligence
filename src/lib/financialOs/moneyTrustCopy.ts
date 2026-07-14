@@ -20,9 +20,10 @@ export function moneyHubSubtitle(): string {
 }
 
 /** Banner under Money headline — payment source of truth. */
-export function moneyPaymentTruthBanner(input: {
-  paymentsInboxEnabled: boolean;
-}): { title: string; body: string } {
+export function moneyPaymentTruthBanner(input: { paymentsInboxEnabled: boolean }): {
+  title: string;
+  body: string;
+} {
   if (input.paymentsInboxEnabled) {
     return {
       title: "Two payment paths",
@@ -51,7 +52,9 @@ export type MoneyPaymentRowSource = {
 };
 
 /** Row-level source label for payment lists — manual tracking vs provider confirmed. */
-export function moneyPaymentRowSourceLabel(provider: string | null | undefined): MoneyPaymentRowSource {
+export function moneyPaymentRowSourceLabel(
+  provider: string | null | undefined
+): MoneyPaymentRowSource {
   const raw = provider?.trim() ?? "";
   const p = raw.toLowerCase();
   if (!p || p === "manual") {

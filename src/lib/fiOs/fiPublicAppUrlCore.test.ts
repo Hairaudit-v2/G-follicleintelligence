@@ -9,10 +9,7 @@ import {
   resolveFiPublicAppUrl,
 } from "@/src/lib/fiOs/fiPublicAppUrlCore";
 
-function withEnv(
-  patch: Record<string, string | undefined>,
-  fn: () => void
-): void {
+function withEnv(patch: Record<string, string | undefined>, fn: () => void): void {
   const prev = new Map<string, string | undefined>();
   for (const key of Object.keys(patch)) {
     prev.set(key, process.env[key]);
@@ -32,7 +29,9 @@ function withEnv(
 
 test("isVercelPreviewDeploymentHost detects vercel.app preview hosts", () => {
   assert.equal(
-    isVercelPreviewDeploymentHost("https://g-follicleintelligence-k84zti7pp-fi-ai-ef8ee84f.vercel.app"),
+    isVercelPreviewDeploymentHost(
+      "https://g-follicleintelligence-k84zti7pp-fi-ai-ef8ee84f.vercel.app"
+    ),
     true
   );
   assert.equal(isVercelPreviewDeploymentHost("https://app.follicleintelligence.com"), false);
@@ -107,9 +106,12 @@ test("requireFiPublicAppUrlForExternalLinks throws in production without config"
       NODE_ENV: "production",
     },
     () => {
-      assert.throws(() => requireFiPublicAppUrlForExternalLinks(), (err: unknown) => {
-        return err instanceof Error && err.message === FI_PUBLIC_APP_URL_MISSING_MESSAGE;
-      });
+      assert.throws(
+        () => requireFiPublicAppUrlForExternalLinks(),
+        (err: unknown) => {
+          return err instanceof Error && err.message === FI_PUBLIC_APP_URL_MISSING_MESSAGE;
+        }
+      );
     }
   );
 });
@@ -121,9 +123,7 @@ test("buildFiPublicAppUrl builds tenant onboarding invite paths", () => {
       NODE_ENV: "production",
     },
     () => {
-      const url = buildFiPublicAppUrl(
-        "/fi-admin/t-1/onboarding/invite/abc-123"
-      );
+      const url = buildFiPublicAppUrl("/fi-admin/t-1/onboarding/invite/abc-123");
       assert.equal(url, "https://app.example.com/fi-admin/t-1/onboarding/invite/abc-123");
     }
   );

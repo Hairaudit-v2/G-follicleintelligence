@@ -32,8 +32,16 @@ function candidate(
 
 describe("procedureStaffingOptimizerCore", () => {
   it("computeOptimizerScore penalizes blocked and high-cost candidates", () => {
-    const low = computeOptimizerScore({ rankScore: 90, section: "eligible", grossCostCents: 20_000 });
-    const high = computeOptimizerScore({ rankScore: 90, section: "eligible", grossCostCents: 120_000 });
+    const low = computeOptimizerScore({
+      rankScore: 90,
+      section: "eligible",
+      grossCostCents: 20_000,
+    });
+    const high = computeOptimizerScore({
+      rankScore: 90,
+      section: "eligible",
+      grossCostCents: 120_000,
+    });
     const blocked = computeOptimizerScore({ rankScore: 90, section: "blocked", grossCostCents: 0 });
     assert.ok(low > high);
     assert.ok(low > blocked);

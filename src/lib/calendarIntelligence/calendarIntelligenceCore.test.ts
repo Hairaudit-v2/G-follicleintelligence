@@ -13,7 +13,9 @@ import {
 
 const TID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
-function booking(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "end_at">): FiBookingRow {
+function booking(
+  p: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "end_at">
+): FiBookingRow {
   return {
     tenant_id: TID,
     lead_id: null,

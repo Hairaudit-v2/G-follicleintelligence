@@ -561,19 +561,19 @@ type WriteAuth = {
   actorLabel: string;
 };
 
-async function updateFiCrmLeadFromHubspotContactStaging(
-  input: {
-    supabase: SupabaseClient;
-    tid: string;
-    iid: string;
-    sid: string;
-    staging: HubspotStagingContact;
-    preview: FiLeadImportPreview;
-    leadId: string;
-    personId: string | null;
-    auth: WriteAuth;
-  }
-): Promise<HubspotImportActionResult<{ personId: string; leadId: string; patientId: string | null }>> {
+async function updateFiCrmLeadFromHubspotContactStaging(input: {
+  supabase: SupabaseClient;
+  tid: string;
+  iid: string;
+  sid: string;
+  staging: HubspotStagingContact;
+  preview: FiLeadImportPreview;
+  leadId: string;
+  personId: string | null;
+  auth: WriteAuth;
+}): Promise<
+  HubspotImportActionResult<{ personId: string; leadId: string; patientId: string | null }>
+> {
   const { supabase, tid, iid, sid, staging, preview, leadId, personId, auth } = input;
   const stageId = await resolvePipelineStageId(tid, preview.mappedPipelineSlug, supabase);
   const now = new Date().toISOString();
@@ -658,19 +658,17 @@ async function updateFiCrmLeadFromHubspotContactStaging(
   return { ok: true, data: { personId: personId ?? "", leadId, patientId } };
 }
 
-async function updateFiCrmLeadFromHubspotDealStaging(
-  input: {
-    supabase: SupabaseClient;
-    tid: string;
-    iid: string;
-    sid: string;
-    staging: HubspotStagingDeal;
-    preview: FiOpportunityImportPreview;
-    leadId: string;
-    personId: string | null;
-    auth: WriteAuth;
-  }
-): Promise<HubspotImportActionResult<{ leadId: string; personId: string | null }>> {
+async function updateFiCrmLeadFromHubspotDealStaging(input: {
+  supabase: SupabaseClient;
+  tid: string;
+  iid: string;
+  sid: string;
+  staging: HubspotStagingDeal;
+  preview: FiOpportunityImportPreview;
+  leadId: string;
+  personId: string | null;
+  auth: WriteAuth;
+}): Promise<HubspotImportActionResult<{ leadId: string; personId: string | null }>> {
   const { supabase, tid, iid, sid, staging, preview, leadId, personId, auth } = input;
   const stageId = await resolvePipelineStageId(tid, preview.mappedPipelineSlug, supabase);
   const now = new Date().toISOString();

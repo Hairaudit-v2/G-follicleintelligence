@@ -63,8 +63,16 @@ function minimalDashboard(
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [],
     ...overrides,
@@ -99,8 +107,5 @@ test("computeTodaySignalRevision changes when arrival intent is recorded", () =>
     },
   });
 
-  assert.notEqual(
-    computeTodaySignalRevision(base),
-    computeTodaySignalRevision(withIntent)
-  );
+  assert.notEqual(computeTodaySignalRevision(base), computeTodaySignalRevision(withIntent));
 });

@@ -27,7 +27,9 @@ const workspaceLoadSchema = z.object({
 
 type LoadResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
-async function assertWorkspaceAccess(tenantId: string): Promise<{ ok: false; error: string } | null> {
+async function assertWorkspaceAccess(
+  tenantId: string
+): Promise<{ ok: false; error: string } | null> {
   const session = await getCrmShellSessionIfAllowed(tenantId);
   if (!session) {
     return { ok: false, error: "You do not have access to this item." };

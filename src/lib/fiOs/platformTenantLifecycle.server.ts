@@ -17,7 +17,9 @@ import {
 const TENANT_SELECT =
   "id, name, slug, created_at, archived_at, archived_by, archive_reason, is_demo, is_production_visible";
 
-async function loadTenantLifecycleRow(tenantId: string): Promise<FiPlatformTenantLifecycleRow | null> {
+async function loadTenantLifecycleRow(
+  tenantId: string
+): Promise<FiPlatformTenantLifecycleRow | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenants")
@@ -32,10 +34,7 @@ async function loadActiveTenantIdsForActor(authUserId: string): Promise<string[]
   const supabase = supabaseAdmin();
   const os = await loadFiOsIdentity(authUserId);
   if (os && isFiOsCrossTenantDirectoryRole(os.osRole)) {
-    const { data, error } = await supabase
-      .from("fi_tenants")
-      .select("id")
-      .is("archived_at", null);
+    const { data, error } = await supabase.from("fi_tenants").select("id").is("archived_at", null);
     if (error) throw new Error(error.message);
     return (data ?? []).map((r) => String((r as { id: string }).id));
   }

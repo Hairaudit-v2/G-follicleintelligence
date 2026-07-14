@@ -39,9 +39,10 @@ export function ConsultationVoiceCapturePanel({
           <h2 className="mt-1 text-base font-semibold text-slate-50">Voice to clinical note</h2>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
             Record the consult (or upload audio). AI transcribes and structures a draft clinical
-            note (presenting concern, history, exam, plan, etc.). Approve the draft when ready.
-            Open a guided pathway form and use <strong className="font-medium text-slate-300">Apply
-            voice note to form</strong> to fill matching text fields.
+            note (presenting concern, history, exam, plan, etc.). Approve the draft when ready. Open
+            a guided pathway form and use{" "}
+            <strong className="font-medium text-slate-300">Apply voice note to form</strong> to fill
+            matching text fields.
           </p>
         </div>
         {canEdit && pid ? (

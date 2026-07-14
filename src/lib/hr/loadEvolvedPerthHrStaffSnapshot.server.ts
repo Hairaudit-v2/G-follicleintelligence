@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  readIiohrHrStaffFeedKey,
-  readIiohrHrStaffFeedUrl,
-} from "@/src/lib/hr/iiohrHrStaffFeedEnv";
+import { readIiohrHrStaffFeedKey, readIiohrHrStaffFeedUrl } from "@/src/lib/hr/iiohrHrStaffFeedEnv";
 import type { IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 
 function optionalCount(value: unknown): number | null {

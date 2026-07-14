@@ -101,9 +101,7 @@ function createMockSupabase(initialShifts: ShiftRow[]) {
                   },
                   maybeSingle: async () => {
                     const row = shifts.find((s) =>
-                      filters.every(
-                        (f) => String((s as Record<string, unknown>)[f.col]) === f.val
-                      )
+                      filters.every((f) => String((s as Record<string, unknown>)[f.col]) === f.val)
                     );
                     return { data: row ?? null, error: null };
                   },
@@ -158,7 +156,9 @@ function createMockSupabase(initialShifts: ShiftRow[]) {
                     const row = shifts.find((s) =>
                       filters.every((f) => {
                         if (f.col.endsWith("_id") && f.val.includes(",")) {
-                          return f.val.split(",").includes(String((s as Record<string, unknown>)[f.col]));
+                          return f.val
+                            .split(",")
+                            .includes(String((s as Record<string, unknown>)[f.col]));
                         }
                         return String((s as Record<string, unknown>)[f.col]) === f.val;
                       })
@@ -202,7 +202,9 @@ function createMockSupabase(initialShifts: ShiftRow[]) {
                   const s = shifts[i];
                   const match = filters.every((f) => {
                     if (f.val.includes(",")) {
-                      return f.val.split(",").includes(String((s as Record<string, unknown>)[f.col]));
+                      return f.val
+                        .split(",")
+                        .includes(String((s as Record<string, unknown>)[f.col]));
                     }
                     return String((s as Record<string, unknown>)[f.col]) === f.val;
                   });
@@ -475,7 +477,12 @@ describe("roster manual adjustments core", () => {
       notes: null,
     };
     assert.deepEqual(
-      canEditRosterShift({ id: SHIFT_MANUAL, ...base, status: "scheduled", shift_source: "manual" }),
+      canEditRosterShift({
+        id: SHIFT_MANUAL,
+        ...base,
+        status: "scheduled",
+        shift_source: "manual",
+      }),
       { editable: true }
     );
     assert.deepEqual(
@@ -609,13 +616,13 @@ describe("clear generated roster", () => {
     });
 
     assert.equal(result.cancelledCount, 1);
-    assert.equal(
-      supabase.shifts.find((s) => s.id === SHIFT_GENERATED)?.status,
-      "cancelled"
-    );
+    assert.equal(supabase.shifts.find((s) => s.id === SHIFT_GENERATED)?.status, "cancelled");
     assert.equal(supabase.shifts.find((s) => s.id === SHIFT_MANUAL)?.status, "scheduled");
     assert.equal(supabase.auditEvents.length, 1);
-    assert.equal(supabase.auditEvents[0]?.action_type, ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_REMOVED_GENERATED);
+    assert.equal(
+      supabase.auditEvents[0]?.action_type,
+      ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_REMOVED_GENERATED
+    );
   });
 });
 
@@ -652,7 +659,10 @@ describe("cancel confirmed shift retains historical record", () => {
     assert.equal(supabase.shifts.length, 1);
     assert.equal(supabase.shifts[0]?.updated_by, FI_USER);
     assert.equal(supabase.shifts[0]?.cancellation_reason, "staff_sick");
-    assert.equal(supabase.auditEvents[0]?.action_type, ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CANCELLED);
+    assert.equal(
+      supabase.auditEvents[0]?.action_type,
+      ROSTER_SHIFT_AUDIT_ACTION_TYPES.SHIFT_CANCELLED
+    );
     assert.equal(supabase.auditEvents[0]?.actor_fi_user_id, FI_USER);
     assert.deepEqual(supabase.auditEvents[0]?.metadata, {});
   });

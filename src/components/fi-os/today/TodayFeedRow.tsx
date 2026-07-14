@@ -30,7 +30,10 @@ export function TodayFeedRow({ item }: { item: TodayFeedItem }) {
   return (
     <li className="py-3.5">
       <div className="flex items-start gap-3">
-        <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])} aria-hidden />
+        <span
+          className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", severityDot[item.severity])}
+          aria-hidden
+        />
         <div className="min-w-0 flex-1">
           <RowLink href={item.href} className="group block">
             <span className="block text-sm font-medium text-slate-100 transition group-hover:text-white">

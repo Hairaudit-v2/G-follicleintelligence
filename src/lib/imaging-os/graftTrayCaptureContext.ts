@@ -147,7 +147,9 @@ function buildSlotContext(input: FlatGraftTrayLinkInput): GraftTrayCaptureSlotCo
 /**
  * Parse legacy flat link input into grouped graft tray capture context.
  */
-export function parseGraftTrayCaptureContext(input: FlatGraftTrayLinkInput): GraftTrayCaptureContext {
+export function parseGraftTrayCaptureContext(
+  input: FlatGraftTrayLinkInput
+): GraftTrayCaptureContext {
   const rawCaptureSource = input.captureSource?.trim() || "surgery_os";
   return {
     tenantId: input.tenantId.trim(),
@@ -208,12 +210,7 @@ export function validateGraftTrayCaptureContext(
   }
 
   const { surgeryId, caseId, bookingId } = ctx.surgeryContext;
-  if (
-    isGraftTrayLinkEligible(ctx) &&
-    !surgeryId?.trim() &&
-    !caseId?.trim() &&
-    !bookingId?.trim()
-  ) {
+  if (isGraftTrayLinkEligible(ctx) && !surgeryId?.trim() && !caseId?.trim() && !bookingId?.trim()) {
     issues.push({
       field: "surgeryContext.surgeryId",
       message: "graft tray link expects surgeryId, caseId, or bookingId for SurgeryOS linkage",
@@ -269,7 +266,8 @@ export function buildGraftTrayLinkInsertRow(
     surgeryContext: surgeryContextMeta,
   });
 
-  const slotVariant = ctx.slot.slotVariant ?? resolveGraftTraySlotVariant(captureSignalsFromContext(ctx));
+  const slotVariant =
+    ctx.slot.slotVariant ?? resolveGraftTraySlotVariant(captureSignalsFromContext(ctx));
 
   return {
     tenant_id: ctx.tenantId,
@@ -304,7 +302,8 @@ export function buildGraftTrayImageMetadataPatch(
     qualityNeedsReview: ctx.capture.qualityNeedsReview === true,
     missingProtocolSlot: !ctx.slot.protocolSlotSlug?.trim(),
   });
-  const slotVariant = ctx.slot.slotVariant ?? resolveGraftTraySlotVariant(captureSignalsFromContext(ctx));
+  const slotVariant =
+    ctx.slot.slotVariant ?? resolveGraftTraySlotVariant(captureSignalsFromContext(ctx));
 
   return {
     graft_tray_link_id: linkId,

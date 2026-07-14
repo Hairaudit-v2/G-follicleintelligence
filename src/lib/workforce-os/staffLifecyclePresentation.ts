@@ -56,8 +56,7 @@ export const STAFF_LIFECYCLE_OPERATIONAL_STATES: ReadonlyArray<{
   {
     id: "active",
     label: "Active",
-    description:
-      "Available for scheduling, roster assignment, and day-to-day operational systems.",
+    description: "Available for scheduling, roster assignment, and day-to-day operational systems.",
   },
   {
     id: "temporarily_unavailable",

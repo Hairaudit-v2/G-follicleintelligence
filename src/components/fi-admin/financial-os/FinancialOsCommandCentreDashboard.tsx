@@ -30,10 +30,7 @@ import {
   moneyTakePaymentHref,
 } from "@/src/lib/financialOs/moneyTrustCopy";
 
-function FinancialOsPrimaryActions(props: {
-  base: string;
-  paymentsInboxEnabled: boolean;
-}) {
+function FinancialOsPrimaryActions(props: { base: string; paymentsInboxEnabled: boolean }) {
   const { base, paymentsInboxEnabled } = props;
   const financialModule = `${base}/financial`;
   return (

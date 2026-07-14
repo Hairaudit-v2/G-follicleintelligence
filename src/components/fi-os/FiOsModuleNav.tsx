@@ -179,9 +179,7 @@ function useCompactNavExpandedGroups({
       return activeGroupId ? new Set([activeGroupId]) : new Set();
     }
     try {
-      const persisted = parsePersistedExpandedNavGroups(
-        window.localStorage.getItem(storageKey)
-      );
+      const persisted = parsePersistedExpandedNavGroups(window.localStorage.getItem(storageKey));
       return mergeExpandedNavGroups(persisted, activeGroupId);
     } catch {
       return activeGroupId ? new Set([activeGroupId]) : new Set();
@@ -196,9 +194,7 @@ function useCompactNavExpandedGroups({
   useEffect(() => {
     if (!compactExpandable || !storageKey || typeof window === "undefined") return;
     try {
-      const persisted = parsePersistedExpandedNavGroups(
-        window.localStorage.getItem(storageKey)
-      );
+      const persisted = parsePersistedExpandedNavGroups(window.localStorage.getItem(storageKey));
       setExpandedGroups(mergeExpandedNavGroups(persisted, activeGroupId));
     } catch {
       /* ignore */
@@ -301,7 +297,9 @@ export function FiOsModuleNav({
               type="button"
               className={cn(
                 "flex w-full items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 text-left text-[0.6rem] font-semibold uppercase tracking-[0.2em] transition",
-                groupActive ? "fi-tenant-accent-text" : "text-slate-500/95 hover:bg-white/[0.04] hover:text-slate-300"
+                groupActive
+                  ? "fi-tenant-accent-text"
+                  : "text-slate-500/95 hover:bg-white/[0.04] hover:text-slate-300"
               )}
               aria-expanded={isExpanded}
               aria-controls={sectionPanelId}

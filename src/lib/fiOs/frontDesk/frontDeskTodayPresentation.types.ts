@@ -15,12 +15,7 @@ export type FrontDeskTodayLaneId =
 
 export type FrontDeskSeverity = "blocker" | "action_needed" | "information";
 
-export type FrontDeskPaymentState =
-  | "paid"
-  | "due"
-  | "overdue"
-  | "not_required"
-  | "unknown";
+export type FrontDeskPaymentState = "paid" | "due" | "overdue" | "not_required" | "unknown";
 
 export type FrontDeskCardActionId =
   | "check_in"

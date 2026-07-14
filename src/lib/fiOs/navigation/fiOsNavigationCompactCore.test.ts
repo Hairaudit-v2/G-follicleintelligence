@@ -28,11 +28,39 @@ const tenantId = "t-compact-nav-1";
 const base = `/fi-admin/${tenantId}`;
 
 function staffSidebar() {
-  return resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false, undefined, false);
+  return resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    undefined,
+    false
+  );
 }
 
 function adminSidebar() {
-  return resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, true, true, undefined, true);
+  return resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    undefined,
+    true
+  );
 }
 
 function legacySections(sidebar = staffSidebar(), profile: FiWorkspaceProfileKey = "default") {
@@ -55,7 +83,10 @@ function adminLegacySections() {
   });
 }
 
-function collapsedDrawerSections(sidebar = staffSidebar(), profile: FiWorkspaceProfileKey = "default") {
+function collapsedDrawerSections(
+  sidebar = staffSidebar(),
+  profile: FiWorkspaceProfileKey = "default"
+) {
   return buildFiOsSidebarWorkflowSections(sidebar, profile, {
     tenantBase: base,
     forCollapsedShell: true,
@@ -104,10 +135,7 @@ test("compact nav: route-to-group mapping for primary and deep links", () => {
     ),
     "SETTINGS"
   );
-  assert.equal(
-    workflowGroupForD6gNavItemId("team-roster"),
-    "TEAM"
-  );
+  assert.equal(workflowGroupForD6gNavItemId("team-roster"), "TEAM");
   assert.equal(workflowGroupForD6gNavItemId("d6-navigation-audit"), "SETTINGS");
 });
 
@@ -160,7 +188,19 @@ test("compact nav 1B: All areas drawer applies staff-safe direct-link filtering"
 });
 
 test("compact nav 1B: collapsed All areas drawer fits within max group headers", () => {
-  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false);
+  const raw = resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  );
   const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     staff: false,
     analytics: false,
@@ -172,17 +212,24 @@ test("compact nav 1B: collapsed All areas drawer fits within max group headers",
     patients: true,
   });
   const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, access);
-  const sections = buildFiOsSidebarWorkflowSections(filtered, "reception" as FiWorkspaceProfileKey, {
-    tenantBase: base,
-    forCollapsedShell: true,
-  });
+  const sections = buildFiOsSidebarWorkflowSections(
+    filtered,
+    "reception" as FiWorkspaceProfileKey,
+    {
+      tenantBase: base,
+      forCollapsedShell: true,
+    }
+  );
   assert.ok(countCompactNavGroupHeaders(sections) <= FI_OS_COMPACT_NAV_MAX_GROUP_HEADERS);
 });
 
 test("compact nav: workforce and HR deep routes map to Team group", () => {
   const team = legacySections().find((s) => s.groupId === "TEAM");
   assert.ok(team);
-  assert.deepEqual(team!.items.map((i) => i.id), ["team"]);
+  assert.deepEqual(
+    team!.items.map((i) => i.id),
+    ["team"]
+  );
   const subIds = team!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.ok(subIds.includes("team-overview"));
   assert.ok(subIds.includes("team-staff"));
@@ -200,13 +247,24 @@ test("compact nav: low-frequency admin routes grouped under Settings for admins"
   }
 
   const reports = adminLegacySections().find((s) => s.groupId === "REPORTS");
-  const reportSubIds =
-    reports?.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []) ?? [];
+  const reportSubIds = reports?.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []) ?? [];
   assert.ok(!reportSubIds.includes("d6-navigation-audit"));
 });
 
 test("compact nav: receptionist persona fits within max collapsed group headers", () => {
-  const raw = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true, false, false);
+  const raw = resolveFiOsPrimarySidebarItems(
+    base,
+    true,
+    true,
+    null,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  );
   const access = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
     staff: false,
     analytics: false,
@@ -218,10 +276,14 @@ test("compact nav: receptionist persona fits within max collapsed group headers"
     patients: true,
   });
   const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, access);
-  const sections = buildFiOsSidebarWorkflowSections(filtered, "reception" as FiWorkspaceProfileKey, {
-    tenantBase: base,
-    forCollapsedShell: false,
-  });
+  const sections = buildFiOsSidebarWorkflowSections(
+    filtered,
+    "reception" as FiWorkspaceProfileKey,
+    {
+      tenantBase: base,
+      forCollapsedShell: false,
+    }
+  );
   assert.ok(countCompactNavGroupHeaders(sections) <= FI_OS_COMPACT_NAV_MAX_GROUP_HEADERS);
 });
 

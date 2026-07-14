@@ -399,9 +399,7 @@ export function CalendarTopControls({
               <div className="hidden flex-wrap items-center gap-2 xl:flex">{secondaryControls}</div>
             </>
           ) : (
-            <>
-              {secondaryControls}
-            </>
+            <>{secondaryControls}</>
           )}
         </div>
 

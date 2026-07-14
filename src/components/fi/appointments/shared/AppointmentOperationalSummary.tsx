@@ -116,7 +116,11 @@ export function AppointmentOperationalSummary({
             <p
               className={cn(
                 "mt-0.5 text-base font-medium",
-                staffingReady ? "text-emerald-300" : staffingBlocked ? "text-rose-300" : "text-amber-300"
+                staffingReady
+                  ? "text-emerald-300"
+                  : staffingBlocked
+                    ? "text-rose-300"
+                    : "text-amber-300"
               )}
             >
               {staffingHeadline}

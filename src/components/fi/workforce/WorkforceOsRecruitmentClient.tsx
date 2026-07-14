@@ -87,7 +87,9 @@ export function WorkforceOsRecruitmentClient({
   }, [candidates, stageFilter]);
 
   const activeCount = useMemo(
-    () => candidates.filter((c) => c.pipelineStage !== "hired" && c.pipelineStage !== "withdrawn").length,
+    () =>
+      candidates.filter((c) => c.pipelineStage !== "hired" && c.pipelineStage !== "withdrawn")
+        .length,
     [candidates]
   );
 
@@ -143,7 +145,9 @@ export function WorkforceOsRecruitmentClient({
         setError(res.error);
         return;
       }
-      setMessage(roleForm.roleRequirementId ? "Role requirement updated." : "Role requirement created.");
+      setMessage(
+        roleForm.roleRequirementId ? "Role requirement updated." : "Role requirement created."
+      );
       setShowRoleForm(false);
       setRoleForm({
         roleRequirementId: "",
@@ -196,9 +200,7 @@ export function WorkforceOsRecruitmentClient({
         setError(res.error);
         return;
       }
-      setCandidates((prev) =>
-        prev.map((c) => (c.id === candidate.id ? { ...c, offerStatus } : c))
-      );
+      setCandidates((prev) => prev.map((c) => (c.id === candidate.id ? { ...c, offerStatus } : c)));
       setMessage(`Offer status updated for ${candidate.fullName}.`);
     });
   }
@@ -218,8 +220,8 @@ export function WorkforceOsRecruitmentClient({
     const code = resolveCandidateOnboardingTemplate({
       candidateTemplateCode: candidate.onboardingTemplateCode,
       roleTemplateCode:
-        roleRequirements.find((r) => r.id === candidate.roleRequirementId)?.onboardingTemplateCode ??
-        null,
+        roleRequirements.find((r) => r.id === candidate.roleRequirementId)
+          ?.onboardingTemplateCode ?? null,
     });
     if (!code) return "—";
     return templateLabelByCode.get(code) ?? code;
@@ -388,7 +390,8 @@ export function WorkforceOsRecruitmentClient({
                   setCreateForm((f) => ({
                     ...f,
                     roleRequirementId,
-                    onboardingTemplateCode: role?.onboardingTemplateCode ?? f.onboardingTemplateCode,
+                    onboardingTemplateCode:
+                      role?.onboardingTemplateCode ?? f.onboardingTemplateCode,
                   }));
                 }}
                 className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[#F8FAFC]"
@@ -536,10 +539,7 @@ export function WorkforceOsRecruitmentClient({
           <tbody>
             {visibleCandidates.length === 0 ? (
               <tr>
-                <td
-                  colSpan={canManage ? 6 : 5}
-                  className="px-4 py-8 text-center text-[#94A3B8]"
-                >
+                <td colSpan={canManage ? 6 : 5} className="px-4 py-8 text-center text-[#94A3B8]">
                   No candidates match the current filter.
                 </td>
               </tr>
@@ -561,9 +561,7 @@ export function WorkforceOsRecruitmentClient({
                         {candidate.source.replace(/_/g, " ")}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-[#CBD5E1]">
-                      {candidate.roleDisplayName ?? "—"}
-                    </td>
+                    <td className="px-4 py-3 text-[#CBD5E1]">{candidate.roleDisplayName ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-[#E2E8F0]">
                         {RECRUITMENT_PIPELINE_STAGE_LABELS[candidate.pipelineStage]}
@@ -603,10 +601,7 @@ export function WorkforceOsRecruitmentClient({
                               disabled={pending}
                               value={candidate.offerStatus}
                               onChange={(e) =>
-                                onUpdateOffer(
-                                  candidate,
-                                  e.target.value as RecruitmentOfferStatus
-                                )
+                                onUpdateOffer(candidate, e.target.value as RecruitmentOfferStatus)
                               }
                               className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-[#F8FAFC]"
                             >

@@ -5,9 +5,7 @@
 
 export const FRONT_DESK_REDIRECT_QUERY_WHITELIST = ["bookingId", "date"] as const;
 
-export type FrontDeskRedirectTarget =
-  | { kind: "today" }
-  | { kind: "tomorrow" };
+export type FrontDeskRedirectTarget = { kind: "today" } | { kind: "tomorrow" };
 
 /**
  * Build redirect path under /fi-admin/{tenantId}/front-desk[...].

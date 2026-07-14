@@ -88,9 +88,7 @@ export function ExpenseLinkPickers(props: {
           type="text"
           list={campaignListId}
           value={props.value.campaignKey}
-          onChange={(e) =>
-            props.onChange({ ...props.value, campaignKey: e.target.value })
-          }
+          onChange={(e) => props.onChange({ ...props.value, campaignKey: e.target.value })}
           className={financialOsClasses.input}
           disabled={props.disabled}
           placeholder="e.g. meta_q3_perth"
@@ -202,7 +200,9 @@ function ExpenseEntitySearchField(props: {
           onClick={() => setOpen(true)}
           className={financialOsClasses.secondaryButton}
         >
-          {props.selectedId ? `Change ${props.label.toLowerCase()}` : `Link ${props.label.toLowerCase()}`}
+          {props.selectedId
+            ? `Change ${props.label.toLowerCase()}`
+            : `Link ${props.label.toLowerCase()}`}
         </button>
         {props.selectedId && !props.disabled ? (
           <button type="button" onClick={props.onClear} className={financialOsClasses.textButton}>
@@ -252,9 +252,7 @@ function ExpenseEntitySearchField(props: {
                     : "Case id, treatment type, external id…"
                 }
               />
-              {loading ? (
-                <p className={financialOsClasses.mutedMeta}>Searching…</p>
-              ) : null}
+              {loading ? <p className={financialOsClasses.mutedMeta}>Searching…</p> : null}
               {error ? <p className={financialOsClasses.errorText}>{error}</p> : null}
               {!loading && debounced && hits.length === 0 && !error ? (
                 <p className={financialOsClasses.mutedMeta}>No matches.</p>

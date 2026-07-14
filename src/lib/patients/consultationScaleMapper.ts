@@ -1,9 +1,5 @@
 import type { HairlinePatternValue, LudwigScaleValue, NorwoodScaleValue } from "./hairLossScales";
-import {
-  isHairlinePatternValue,
-  isLudwigScaleValue,
-  isNorwoodScaleValue,
-} from "./hairLossScales";
+import { isHairlinePatternValue, isLudwigScaleValue, isNorwoodScaleValue } from "./hairLossScales";
 
 const CONSULTATION_NORWOOD_TO_PATIENT: Record<string, NorwoodScaleValue> = {
   nw1: "I",
@@ -32,9 +28,7 @@ const CONSULTATION_LUDWIG_TO_PATIENT: Record<string, LudwigScaleValue> = {
 const CONSULTATION_SINCLAIR_CODES = new Set(["s1", "s2", "s3", "s4", "s5", "unsure", "unknown"]);
 
 /** Normalizes consultation Sinclair codes (`s3`, …) for patient metadata storage. */
-export function mapConsultationSinclairToPatient(
-  raw: string | null | undefined
-): string | null {
+export function mapConsultationSinclairToPatient(raw: string | null | undefined): string | null {
   const key = raw?.trim().toLowerCase();
   if (!key || key === "unsure" || key === "unknown") return null;
   return CONSULTATION_SINCLAIR_CODES.has(key) ? key : null;

@@ -76,10 +76,7 @@ function adverseChangePercent(
   return raw < 0 ? Math.round(Math.abs(raw)) : null;
 }
 
-function buildSummary(input: {
-  surgeonName: string;
-  totalRisks: number;
-}): string {
+function buildSummary(input: { surgeonName: string; totalRisks: number }): string {
   if (input.totalRisks === 0) {
     return "No surgeon performance risks detected.";
   }
@@ -103,23 +100,33 @@ export function buildSurgeonRiskPatterns(input: {
 
     const transectionFirst = safeAverage(firstHalf.map((r) => r.transectionRate));
     const transectionSecond = safeAverage(secondHalf.map((r) => r.transectionRate));
-    const transectionChange = adverseChangePercent(transectionFirst, transectionSecond, "increase_worse");
+    const transectionChange = adverseChangePercent(
+      transectionFirst,
+      transectionSecond,
+      "increase_worse"
+    );
     if (
       transectionChange != null &&
       transectionChange >= SURGEON_RISK_PATTERN_THRESHOLDS.transectionIncreasePercent
     ) {
       detectedPatterns.push({
         title: `Transection rate increased ${Math.round(transectionChange)}% across last ${window.length} procedures`,
-        severity: transectionChange >= SURGEON_RISK_PATTERN_THRESHOLDS.transectionIncreasePercent * 1.5
-          ? "critical"
-          : "warning",
-        recommendation: "Review punch technique, magnification setup, and follicle handling with theatre lead.",
+        severity:
+          transectionChange >= SURGEON_RISK_PATTERN_THRESHOLDS.transectionIncreasePercent * 1.5
+            ? "critical"
+            : "warning",
+        recommendation:
+          "Review punch technique, magnification setup, and follicle handling with theatre lead.",
       });
     }
 
     const extractionFirst = safeAverage(firstHalf.map((r) => r.extractionVelocityPerHour));
     const extractionSecond = safeAverage(secondHalf.map((r) => r.extractionVelocityPerHour));
-    const extractionChange = adverseChangePercent(extractionFirst, extractionSecond, "decrease_worse");
+    const extractionChange = adverseChangePercent(
+      extractionFirst,
+      extractionSecond,
+      "decrease_worse"
+    );
     if (
       extractionChange != null &&
       extractionChange >= SURGEON_RISK_PATTERN_THRESHOLDS.extractionSlowingPercent
@@ -127,7 +134,8 @@ export function buildSurgeonRiskPatterns(input: {
       detectedPatterns.push({
         title: `Extraction velocity slowed ${Math.round(extractionChange)}% across last ${window.length} procedures`,
         severity: "warning",
-        recommendation: "Assess operator fatigue, team rotation, and extraction workflow bottlenecks.",
+        recommendation:
+          "Assess operator fatigue, team rotation, and extraction workflow bottlenecks.",
       });
     }
 
@@ -140,10 +148,12 @@ export function buildSurgeonRiskPatterns(input: {
     ) {
       detectedPatterns.push({
         title: `Procedure duration increased ${Math.round(durationChange)}% across last ${window.length} procedures`,
-        severity: durationChange >= SURGEON_RISK_PATTERN_THRESHOLDS.durationIncreasePercent * 1.5
-          ? "critical"
-          : "warning",
-        recommendation: "Review theatre pacing, case complexity mix, and pre-op planning alignment.",
+        severity:
+          durationChange >= SURGEON_RISK_PATTERN_THRESHOLDS.durationIncreasePercent * 1.5
+            ? "critical"
+            : "warning",
+        recommendation:
+          "Review theatre pacing, case complexity mix, and pre-op planning alignment.",
       });
     }
 
@@ -161,7 +171,8 @@ export function buildSurgeonRiskPatterns(input: {
       detectedPatterns.push({
         title: `Implantation efficiency declined ${Math.round(implantationChange)}% across last ${window.length} procedures`,
         severity: "warning",
-        recommendation: "Evaluate recipient site workflow, graft handling time, and implantation team allocation.",
+        recommendation:
+          "Evaluate recipient site workflow, graft handling time, and implantation team allocation.",
       });
     }
   }
@@ -179,7 +190,8 @@ export function buildSurgeonRiskPatterns(input: {
     detectedPatterns.push({
       title: "Abnormal performance inconsistency detected",
       severity: consistency.consistencyScore < 40 ? "critical" : "warning",
-      recommendation: "Schedule competency review and standardise technique checkpoints across recent cases.",
+      recommendation:
+        "Schedule competency review and standardise technique checkpoints across recent cases.",
     });
   }
 

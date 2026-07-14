@@ -2,7 +2,10 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { classifyClinicalHairImageFromModelUrl as classifyWithHli } from "@/src/lib/hair-intelligence/imageClassification/classifyClinicalHairImage.server";
-import { classificationResultToHliInsert, insertHliImageClassificationRow } from "@/src/lib/hair-intelligence/imageClassification/persistHliClassification.server";
+import {
+  classificationResultToHliInsert,
+  insertHliImageClassificationRow,
+} from "@/src/lib/hair-intelligence/imageClassification/persistHliClassification.server";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
 import {
   buildDegradedHairAuditClassification,
@@ -27,10 +30,7 @@ export function isClinicalHairImageClassifierAvailable(
   return isLiveClassifierMode(env) && isOpenAiApiKeyConfigured();
 }
 
-async function createModelSignedUrl(
-  bucket: string,
-  path: string
-): Promise<string | null> {
+async function createModelSignedUrl(bucket: string, path: string): Promise<string | null> {
   const { data, error } = await supabaseAdmin()
     .storage.from(bucket)
     .createSignedUrl(path, SIGNED_URL_TTL_SEC);

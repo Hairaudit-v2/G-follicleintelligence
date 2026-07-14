@@ -7,14 +7,8 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 import { periodFromPreset } from "@/src/lib/financialOs/expenses/expensePeriodCore";
-import {
-  getReportDefinition,
-  isReportId,
-  type ReportId,
-} from "@/src/lib/reports/reportCatalog";
-import {
-  buildExpenseExportPackFiles,
-} from "@/src/lib/reports/generators/expenseExportPack.server";
+import { getReportDefinition, isReportId, type ReportId } from "@/src/lib/reports/reportCatalog";
+import { buildExpenseExportPackFiles } from "@/src/lib/reports/generators/expenseExportPack.server";
 import { runReportGenerator } from "@/src/lib/reports/reportGenerate.server";
 import type { ReportGenerateFilters } from "@/src/lib/reports/reportFilters";
 import { reportCsvFilename, reportResultToCsv } from "@/src/lib/reports/reportCsv";
@@ -37,17 +31,22 @@ function errMsg(e: unknown): string {
 const generateSchema = z.object({
   tenantId: z.string().uuid(),
   reportId: z.string().min(1),
-  periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  periodStart: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  periodEnd: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
   currency: z.string().max(8).optional().nullable(),
   procedureType: z.string().max(120).optional().nullable(),
   attributionSource: z.string().max(80).optional().nullable(),
   campaign: z.string().max(200).optional().nullable(),
   arRisk: z.string().max(40).optional().nullable(),
-  snapshotStatus: z
-    .enum(["all", "paid_in_full", "outstanding"])
-    .optional()
-    .nullable(),
+  snapshotStatus: z.enum(["all", "paid_in_full", "outstanding"]).optional().nullable(),
 });
 
 type GenerateInput = z.infer<typeof generateSchema>;
@@ -234,11 +233,11 @@ export async function listReportRunsAction(
 
 export async function loadReportRunAction(
   body: unknown
-): Promise<{ ok: true; result: ReportGenerateResult; runId: string } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; result: ReportGenerateResult; runId: string } | { ok: false; error: string }
+> {
   try {
-    const parsed = z
-      .object({ tenantId: z.string().uuid(), runId: z.string().uuid() })
-      .parse(body);
+    const parsed = z.object({ tenantId: z.string().uuid(), runId: z.string().uuid() }).parse(body);
     await assertFiTenantPortalAccess(parsed.tenantId);
     const run = await loadReportRunById(parsed.tenantId, parsed.runId);
     if (!run) return { ok: false, error: "Report run not found." };

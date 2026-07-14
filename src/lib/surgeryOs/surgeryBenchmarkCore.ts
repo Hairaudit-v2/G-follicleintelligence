@@ -36,8 +36,17 @@ function clampPercent(value: number): number {
   return Math.round(value);
 }
 
-function deviationPercent(value: number | null, clinicAverage: number | null, invert = false): number | null {
-  if (value == null || clinicAverage == null || !Number.isFinite(value) || !Number.isFinite(clinicAverage)) {
+function deviationPercent(
+  value: number | null,
+  clinicAverage: number | null,
+  invert = false
+): number | null {
+  if (
+    value == null ||
+    clinicAverage == null ||
+    !Number.isFinite(value) ||
+    !Number.isFinite(clinicAverage)
+  ) {
     return null;
   }
   if (clinicAverage === 0) return null;
@@ -162,9 +171,7 @@ export function buildSurgeryBenchmarks(input: {
   clinicAverageDurationMinutes: number | null;
   clinicAverageHairsPerGraft: number | null;
 }): SurgeryBenchmarkSnapshot[] {
-  const ranked = [...input.performances].sort(
-    (a, b) => b.performanceScore - a.performanceScore
-  );
+  const ranked = [...input.performances].sort((a, b) => b.performanceScore - a.performanceScore);
 
   return ranked.map((performance, index) =>
     buildSurgeryBenchmark({

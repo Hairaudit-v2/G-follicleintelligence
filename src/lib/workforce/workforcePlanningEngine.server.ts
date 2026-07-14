@@ -30,9 +30,7 @@ async function loadCredentialExpiryRisks(
   client: SupabaseClient
 ): Promise<CredentialExpiryRisk[]> {
   const now = new Date();
-  const soonCutoff = new Date(
-    now.getTime() + CREDENTIAL_DUE_SOON_DAYS * 86_400_000
-  ).toISOString();
+  const soonCutoff = new Date(now.getTime() + CREDENTIAL_DUE_SOON_DAYS * 86_400_000).toISOString();
 
   const [credRes, certRes, membersRes] = await Promise.all([
     client
@@ -82,9 +80,7 @@ async function loadCredentialExpiryRisks(
       status: string;
     };
     const expiresAt = String(row.expires_at);
-    const days = Math.ceil(
-      (new Date(expiresAt).getTime() - now.getTime()) / 86_400_000
-    );
+    const days = Math.ceil((new Date(expiresAt).getTime() - now.getTime()) / 86_400_000);
     const blocks = Boolean(row.blocks_clinical_work);
     risks.push({
       staffMemberId: String(row.staff_member_id),
@@ -106,9 +102,7 @@ async function loadCredentialExpiryRisks(
       status: string;
     };
     const expiresAt = String(row.expires_at);
-    const days = Math.ceil(
-      (new Date(expiresAt).getTime() - now.getTime()) / 86_400_000
-    );
+    const days = Math.ceil((new Date(expiresAt).getTime() - now.getTime()) / 86_400_000);
     const blocks = row.status === "expired";
     risks.push({
       staffMemberId: String(row.staff_member_id),
@@ -133,7 +127,10 @@ async function loadProcedureSignalsForHorizon(
 ): Promise<{
   scheduledProcedures: number;
   fullyStaffedProcedures: number;
-  understaffedByDate: Array<{ workDate: string; missingRoles: Array<{ role: string; gap: number }> }>;
+  understaffedByDate: Array<{
+    workDate: string;
+    missingRoles: Array<{ role: string; gap: number }>;
+  }>;
 }> {
   const { data: surgeries, error } = await client
     .from("fi_surgeries")

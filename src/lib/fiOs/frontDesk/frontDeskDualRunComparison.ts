@@ -58,9 +58,10 @@ function uniqueSorted(ids: Iterable<string>): string[] {
   return [...new Set(ids)].sort((a, b) => a.localeCompare(b));
 }
 
-function collectPresentationBookingIds(
-  presentation: FrontDeskTodayPresentation
-): { all: string[]; duplicates: string[] } {
+function collectPresentationBookingIds(presentation: FrontDeskTodayPresentation): {
+  all: string[];
+  duplicates: string[];
+} {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
   const add = (id: string) => {
@@ -221,16 +222,12 @@ export function compareFrontDeskDualRun(
       .map((a) => a.bookingId?.trim() || null)
       .filter((x): x is string => !!x && oldSet.has(x))
   );
-  const newKeyedBlockerBookingIds = uniqueSorted(
-    [
-      ...presentation.lanes.flatMap((l) =>
-        l.cards.filter((c) => c.blocker.items.length > 0).map((c) => c.bookingId)
-      ),
-      ...presentation.attentionItems
-        .map((a) => a.bookingId)
-        .filter((x): x is string => !!x),
-    ]
-  );
+  const newKeyedBlockerBookingIds = uniqueSorted([
+    ...presentation.lanes.flatMap((l) =>
+      l.cards.filter((c) => c.blocker.items.length > 0).map((c) => c.bookingId)
+    ),
+    ...presentation.attentionItems.map((a) => a.bookingId).filter((x): x is string => !!x),
+  ]);
 
   const keyedBlockerMismatches: string[] = [];
   // Soft: only flag when old has keyed alert but new has neither card blocker nor attention
@@ -243,9 +240,7 @@ export function compareFrontDeskDualRun(
     if (cardHas && !hasBlocker) {
       // May be filtered kind (pipeline) — check alert kind
       const alerts = (payload.actionAlerts ?? []).filter((a) => a.bookingId === id);
-      const allExcluded = alerts.every(
-        (a) => a.kind === "no_follow_up_after_consultation"
-      );
+      const allExcluded = alerts.every((a) => a.kind === "no_follow_up_after_consultation");
       if (!allExcluded) keyedBlockerMismatches.push(id);
     }
   }
@@ -271,9 +266,7 @@ export function compareFrontDeskDualRun(
     hardFailures.push(`duplicateBookingIds:${duplicateBookingIds.length}`);
   }
   if (oldCompleted !== presentation.summary.completed) {
-    hardFailures.push(
-      `completedDrift:old=${oldCompleted},new=${presentation.summary.completed}`
-    );
+    hardFailures.push(`completedDrift:old=${oldCompleted},new=${presentation.summary.completed}`);
   }
   if (oldCancelledOrNoShow !== presentation.summary.cancelledOrNoShow) {
     hardFailures.push(
@@ -326,4 +319,3 @@ export function compareFrontDeskDualRun(
     pass: hardFailures.length === 0,
   };
 }
-

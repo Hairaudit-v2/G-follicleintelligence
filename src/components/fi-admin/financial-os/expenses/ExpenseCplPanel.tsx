@@ -32,9 +32,7 @@ export function ExpenseCplPanel(props: { summary: ExpenseCplSummary }) {
         <FinancialOsMetricTile label="Leads" value={String(s.total_leads)} />
         <FinancialOsMetricTile
           label="Overall CPL"
-          value={
-            s.overall_cpl_cents != null ? formatMoneyFromCents(s.overall_cpl_cents) : "—"
-          }
+          value={s.overall_cpl_cents != null ? formatMoneyFromCents(s.overall_cpl_cents) : "—"}
           foot={
             s.overall_cpl_cents == null
               ? "Needs posted marketing spend and at least one lead."

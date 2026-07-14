@@ -89,10 +89,7 @@ export function planHairAuditLinkBackfillItem(
     };
   }
 
-  const nextMetadata = mergeAdditiveCaseHairAuditMetadata(
-    input.caseMetadata,
-    structuredLink
-  );
+  const nextMetadata = mergeAdditiveCaseHairAuditMetadata(input.caseMetadata, structuredLink);
 
   if (input.dryRun) {
     return {

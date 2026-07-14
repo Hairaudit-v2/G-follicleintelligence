@@ -111,7 +111,10 @@ export function WorkforceOsStaffProfileClient({
         staffId={lifecycle.id}
       />
 
-      <nav className="flex flex-wrap gap-2 border-b border-white/10 pb-3" aria-label="Staff profile tabs">
+      <nav
+        className="flex flex-wrap gap-2 border-b border-white/10 pb-3"
+        aria-label="Staff profile tabs"
+      >
         {TABS.map((item) => (
           <button
             key={item.id}
@@ -143,7 +146,11 @@ export function WorkforceOsStaffProfileClient({
           onModalAction={(actionId) => {
             if (actionId === "set_maternity_leave" || actionId === "manage_leave") {
               setMaternityLeaveOpen(true);
-            } else if (actionId === "manage_employment" || actionId === "set_leave" || actionId === "mark_inactive") {
+            } else if (
+              actionId === "manage_employment" ||
+              actionId === "set_leave" ||
+              actionId === "mark_inactive"
+            ) {
               setEmploymentOpen(true);
             } else if (actionId === "archive_staff") {
               setArchiveOpen(true);
@@ -198,7 +205,9 @@ export function WorkforceOsStaffProfileClient({
             </div>
             <div>
               <dt className="text-[#64748B]">Identity source</dt>
-              <dd className="mt-1 text-[#E2E8F0]">{lifecycle.identity_source.replace(/_/g, " ")}</dd>
+              <dd className="mt-1 text-[#E2E8F0]">
+                {lifecycle.identity_source.replace(/_/g, " ")}
+              </dd>
             </div>
             <div>
               <dt className="text-[#64748B]">Timezone</dt>
@@ -226,7 +235,9 @@ export function WorkforceOsStaffProfileClient({
                   key={event.id}
                   className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm"
                 >
-                  <p className="font-medium text-[#E2E8F0]">{event.event_type.replace(/_/g, " ")}</p>
+                  <p className="font-medium text-[#E2E8F0]">
+                    {event.event_type.replace(/_/g, " ")}
+                  </p>
                   <p className="mt-1 text-xs text-[#64748B]">
                     {new Date(event.created_at).toLocaleString()} · {event.source}
                   </p>

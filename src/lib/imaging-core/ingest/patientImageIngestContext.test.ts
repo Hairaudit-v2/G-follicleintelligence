@@ -197,7 +197,10 @@ describe("discriminated ingest preserves unified output", () => {
     const fromFlat = runUnifiedPatientImageIngest(surgeryFlat);
     const fromParsed = runUnifiedPatientImageIngest(parsed);
     assert.deepEqual(fromParsed, fromFlat);
-    assert.equal(fromFlat.imaging_os_ingest.pipeline_version, IMAGING_OS_INGESTION_PIPELINE_VERSION);
+    assert.equal(
+      fromFlat.imaging_os_ingest.pipeline_version,
+      IMAGING_OS_INGESTION_PIPELINE_VERSION
+    );
     assert.equal(fromFlat.imaging_os_ingest.source_system, "surgery_os");
     assert.equal(fromFlat.imaging_session.session_type, "surgery_day");
     assert.equal(fromFlat.imaging_session.view, "graft_tray_overview");

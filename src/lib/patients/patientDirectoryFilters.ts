@@ -136,6 +136,8 @@ export function patientDirectoryLegacyFiltersFromQuery(
   };
 }
 
-export function patientDirectoryHasLegacyFilters(query: PatientDirectoryLegacyQueryFields): boolean {
+export function patientDirectoryHasLegacyFilters(
+  query: PatientDirectoryLegacyQueryFields
+): boolean {
   return legacyDirectoryFiltersAreActive(patientDirectoryLegacyFiltersFromQuery(query));
 }

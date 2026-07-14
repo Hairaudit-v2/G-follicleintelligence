@@ -18,9 +18,7 @@ import {
 import type { HrReconciliationDiagnostics, StaffMemberLifecycleRow } from "./staffLifecycleTypes";
 import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "./iiohrStaffHrLinkReconciliationTypes";
 
-function lifecycleRow(
-  overrides: Partial<StaffMemberLifecycleRow> = {}
-): StaffMemberLifecycleRow {
+function lifecycleRow(overrides: Partial<StaffMemberLifecycleRow> = {}): StaffMemberLifecycleRow {
   return {
     id: "sm-1",
     tenant_id: "tenant-1",

@@ -286,8 +286,7 @@ export async function voidExpense(input: {
   if (!existing) throw new Error("Expense not found.");
   if (existing.status === "void") return existing;
 
-  const wasPosted =
-    existing.status === "posted" || Boolean(existing.ledger_post_transaction_id);
+  const wasPosted = existing.status === "posted" || Boolean(existing.ledger_post_transaction_id);
 
   const now = new Date().toISOString();
   const metadata = {
@@ -375,8 +374,7 @@ export async function createExpenseImportFromCsv(input: {
   const csvText = input.body.csv_text?.trim();
   if (!csvText) throw new Error("csv_text is required for bank/card CSV import.");
 
-  const sourceType =
-    input.body.source_type === "card_csv" ? "card_csv" : ("bank_csv" as const);
+  const sourceType = input.body.source_type === "card_csv" ? "card_csv" : ("bank_csv" as const);
 
   const { data: importData, error: importErr } = await db
     .from("fi_expense_imports")

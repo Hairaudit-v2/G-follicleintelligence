@@ -63,30 +63,31 @@ describe("receptionBoard.server safety", () => {
   it("tenant isolation guard blocks mismatched refresh tenant", () => {
     const parsed = parseReceptionBoardCommandCenterPayload(minimalPayload(TENANT));
     assert.throws(
-      () => assertReceptionBoardTenantScope("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", parsed.tenantId),
+      () =>
+        assertReceptionBoardTenantScope("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", parsed.tenantId),
       /tenant mismatch/
     );
   });
 
   it("status transition actions align with reception board flow policy", async () => {
-    const { RECEPTION_BOARD_FLOW_ACTIONS } = await import(
-      "@/src/lib/fiOs/receptionBoardFlowPolicy"
-    );
+    const { RECEPTION_BOARD_FLOW_ACTIONS } =
+      await import("@/src/lib/fiOs/receptionBoardFlowPolicy");
     assert.ok(RECEPTION_BOARD_FLOW_ACTIONS.includes("mark_arrived"));
     assert.ok(RECEPTION_BOARD_FLOW_ACTIONS.includes("start_consultation"));
     assert.ok(RECEPTION_BOARD_FLOW_ACTIONS.includes("complete"));
   });
 
   it("booking mutation policy blocks terminal status changes", async () => {
-    const { assertBookingMutableForReceptionFlow } = await import(
-      "@/src/lib/fiOs/receptionBoardFlowPolicy"
-    );
+    const { assertBookingMutableForReceptionFlow } =
+      await import("@/src/lib/fiOs/receptionBoardFlowPolicy");
     assert.equal(assertBookingMutableForReceptionFlow("completed").ok, false);
     assert.equal(assertBookingMutableForReceptionFlow("scheduled").ok, true);
   });
 
   it("payment action quick links target financial dashboard", () => {
-    const collect = buildQuickActions(`/fi-admin/${TENANT}`).find((a) => a.id === "collect_payment");
+    const collect = buildQuickActions(`/fi-admin/${TENANT}`).find(
+      (a) => a.id === "collect_payment"
+    );
     assert.ok(collect);
     assert.match(collect!.href, /financial\/dashboard/);
   });

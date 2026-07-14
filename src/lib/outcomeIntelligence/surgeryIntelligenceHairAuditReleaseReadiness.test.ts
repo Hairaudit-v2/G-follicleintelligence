@@ -33,11 +33,7 @@ describe("surgeryIntelligenceHairAuditReleaseReadiness", () => {
     for (const path of READ_ONLY_SURFACES) {
       const source = readRepoFile(path);
       for (const marker of HAIRAUDIT_LINK_MUTATION_MARKERS) {
-        assert.equal(
-          source.includes(marker),
-          false,
-          `${path} must not reference ${marker}`
-        );
+        assert.equal(source.includes(marker), false, `${path} must not reference ${marker}`);
       }
     }
   });

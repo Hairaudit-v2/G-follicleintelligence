@@ -80,7 +80,8 @@ export function encounterTypeForBookingType(bookingType: string): FollowUpEncoun
   if (t === "photos_only" || t === "photo_session") return "photos_only";
   if (t.includes("post_op") || t === "post_op_review") return "post_op_review";
   if (t.includes("donor")) return "donor_review";
-  if (t.includes("prp") || t.includes("exosome") || t.includes("treatment")) return "treatment_review";
+  if (t.includes("prp") || t.includes("exosome") || t.includes("treatment"))
+    return "treatment_review";
   if (t.includes("concern") || t.includes("review")) return "concern_review";
   if (t === "follow_up" || t.includes("follow")) return "follow_up";
   return "legacy_follow_up";
@@ -106,7 +107,11 @@ export function buildVisitReasonFromBooking(input: {
   return `${typeLabel} · ${when}`;
 }
 
-export function formatBookingAppointmentWhen(startAt: string, endAt: string, tz?: string | null): string {
+export function formatBookingAppointmentWhen(
+  startAt: string,
+  endAt: string,
+  tz?: string | null
+): string {
   try {
     const start = new Date(startAt);
     const end = new Date(endAt);

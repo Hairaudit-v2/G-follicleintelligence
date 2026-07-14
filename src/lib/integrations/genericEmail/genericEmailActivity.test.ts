@@ -11,10 +11,7 @@ import {
   truncateSubjectPreview,
 } from "./genericEmailActivityCore";
 import { ingestGenericEmailActivity } from "./genericEmailActivityIngestion.server";
-import {
-  buildLiveDataHealthWarnings,
-  loadLiveDataHealthSummary,
-} from "../liveDataHealth.server";
+import { buildLiveDataHealthWarnings, loadLiveDataHealthSummary } from "../liveDataHealth.server";
 
 const TENANT_A = "11111111-1111-4111-8111-111111111111";
 const TENANT_B = "22222222-2222-4222-8222-222222222222";
@@ -369,9 +366,8 @@ describe("loadLiveDataHealthSummary tenant isolation", () => {
 
 describe("patient timeline generic email visibility", () => {
   it("omits generic email CRM events when viewer lacks clinical PHI access", async () => {
-    const { buildPatientTimeline } = await import(
-      "@/src/lib/patients/timeline/patientTimelineBuild"
-    );
+    const { buildPatientTimeline } =
+      await import("@/src/lib/patients/timeline/patientTimelineBuild");
     const href = { tenantId: TENANT_A };
     const bundle = {
       tenantId: TENANT_A,
@@ -407,12 +403,18 @@ describe("patient timeline generic email visibility", () => {
       hrefContext: href,
       viewerCanReadClinicalPhi: false,
     });
-    assert.equal(withoutPhi.items.some((i) => i.id === "crm_activity:crm-email-1"), false);
+    assert.equal(
+      withoutPhi.items.some((i) => i.id === "crm_activity:crm-email-1"),
+      false
+    );
 
     const withPhi = buildPatientTimeline(bundle, {
       hrefContext: href,
       viewerCanReadClinicalPhi: true,
     });
-    assert.equal(withPhi.items.some((i) => i.id === "crm_activity:crm-email-1"), true);
+    assert.equal(
+      withPhi.items.some((i) => i.id === "crm_activity:crm-email-1"),
+      true
+    );
   });
 });

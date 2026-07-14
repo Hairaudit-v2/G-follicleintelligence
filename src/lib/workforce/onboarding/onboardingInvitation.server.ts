@@ -27,7 +27,11 @@ export type SendOnboardingInviteResult = {
 
 async function loadTenantName(tenantId: string, client: SupabaseClient): Promise<string> {
   // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
-  const { data, error } = await client.from("fi_tenants").select("name").eq("id", tenantId).maybeSingle();
+  const { data, error } = await client
+    .from("fi_tenants")
+    .select("name")
+    .eq("id", tenantId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return String((data as { name: string } | null)?.name ?? "Your clinic").trim() || "Your clinic";
 }
@@ -94,11 +98,10 @@ async function revokeSupersededOnboardingInvites(
     .eq("staff_member_id", staffMemberId)
     .in("status", ["pending", "sent", "expired"]);
 }
-function resolveInvitationStatus(
-  raw: unknown,
-  expiresAt: string
-): OnboardingInvitationStatus {
-  const status = String(raw ?? "pending").trim().toLowerCase();
+function resolveInvitationStatus(raw: unknown, expiresAt: string): OnboardingInvitationStatus {
+  const status = String(raw ?? "pending")
+    .trim()
+    .toLowerCase();
   if (status === "accepted") return "accepted";
   if (status === "revoked") return "expired";
   if (status === "expired" || new Date(expiresAt).getTime() < Date.now()) return "expired";
@@ -109,7 +112,12 @@ async function loadStaffMemberForInvite(
   tenantId: string,
   staffMemberId: string,
   client: SupabaseClient
-): Promise<{ fullName: string; email: string | null; fiStaffId: string | null; roleCode: string | null }> {
+): Promise<{
+  fullName: string;
+  email: string | null;
+  fiStaffId: string | null;
+  roleCode: string | null;
+}> {
   const { data, error } = await client
     .from("fi_staff_members")
     .select("full_name, email, fi_staff_id, role_code, employment_status")
@@ -156,7 +164,8 @@ export async function sendOnboardingInvite(input: {
   const email = member.email?.trim().toLowerCase();
   if (!email) throw new Error("Staff member must have an email before sending an invite.");
 
-  const fiStaffId = (await ensureFiStaffIdForOnboardingMember(tid, mid, supabase)) ?? member.fiStaffId;
+  const fiStaffId =
+    (await ensureFiStaffIdForOnboardingMember(tid, mid, supabase)) ?? member.fiStaffId;
   const tenantName = await loadTenantName(tid, supabase);
   const token = newOnboardingToken();
   const tokenHash = hashStaffAccessInviteToken(token);
@@ -257,7 +266,8 @@ export async function resendOnboardingInvite(input: {
   const email = member.email?.trim().toLowerCase();
   if (!email) throw new Error("Staff member must have an email before sending an invite.");
 
-  const fiStaffId = (await ensureFiStaffIdForOnboardingMember(tid, mid, supabase)) ?? member.fiStaffId;
+  const fiStaffId =
+    (await ensureFiStaffIdForOnboardingMember(tid, mid, supabase)) ?? member.fiStaffId;
   const tenantName = await loadTenantName(tid, supabase);
   const token = newOnboardingToken();
   const tokenHash = hashStaffAccessInviteToken(token);
@@ -350,12 +360,10 @@ async function trySendOnboardingInviteEmail(input: {
 }): Promise<boolean> {
   try {
     const { sendResendEmailHttp } = await import("@/src/lib/email/resendHttpSend.server");
-    const { buildResendFromAddress, isEmailDeliveryConfigured } = await import(
-      "@/src/lib/reminders/reminderDeliveryConfig"
-    );
-    const { loadReminderDeliveryConfig } = await import(
-      "@/src/lib/reminders/reminderDeliveryConfig.server"
-    );
+    const { buildResendFromAddress, isEmailDeliveryConfigured } =
+      await import("@/src/lib/reminders/reminderDeliveryConfig");
+    const { loadReminderDeliveryConfig } =
+      await import("@/src/lib/reminders/reminderDeliveryConfig.server");
     const cfg = await loadReminderDeliveryConfig();
     if (!isEmailDeliveryConfigured(cfg)) return false;
     const fromHeader = buildResendFromAddress(cfg.resend);
@@ -464,7 +472,10 @@ export async function acceptOnboardingInvitation(input: {
     .or(`invite_token.eq.${token},invite_token_hash.eq.${tokenHash}`)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!invitation) throw new Error("This invite is no longer active. Ask your clinic administrator for a new invite.");
+  if (!invitation)
+    throw new Error(
+      "This invite is no longer active. Ask your clinic administrator for a new invite."
+    );
 
   const inv = invitation as {
     id: string;
@@ -474,7 +485,8 @@ export async function acceptOnboardingInvitation(input: {
   };
 
   const status = resolveInvitationStatus(inv.status, inv.expires_at);
-  if (status === "expired") throw new Error("This invite has expired. Ask your clinic administrator to resend it.");
+  if (status === "expired")
+    throw new Error("This invite has expired. Ask your clinic administrator to resend it.");
   if (status === "accepted") return { staffMemberId: String(inv.staff_member_id) };
 
   const { error: updateError } = await supabase

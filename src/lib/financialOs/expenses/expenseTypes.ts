@@ -201,9 +201,7 @@ export function mapExpenseRow(raw: Record<string, unknown>): FiExpenseRow {
     description: raw.description != null ? String(raw.description) : null,
     category_id: raw.category_id != null ? String(raw.category_id) : null,
     payment_method:
-      raw.payment_method != null
-        ? (String(raw.payment_method) as FiExpensePaymentMethod)
-        : null,
+      raw.payment_method != null ? (String(raw.payment_method) as FiExpensePaymentMethod) : null,
     source_import_line_id:
       raw.source_import_line_id != null ? String(raw.source_import_line_id) : null,
     lead_id: raw.lead_id != null ? String(raw.lead_id) : null,

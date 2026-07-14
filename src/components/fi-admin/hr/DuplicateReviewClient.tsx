@@ -120,9 +120,15 @@ export function DuplicateReviewClient({
                   KEEP {card.keepStaffName.toUpperCase()}
                 </p>
                 <p className="text-sm text-slate-300">
-                  MERGE {card.archiveStaffName.toUpperCase()} INTO {card.keepStaffName.toUpperCase()}
+                  MERGE {card.archiveStaffName.toUpperCase()} INTO{" "}
+                  {card.keepStaffName.toUpperCase()}
                 </p>
-                <p className={cn("mt-3 text-2xl font-semibold tabular-nums", confidenceClass(card.recommendation.confidence))}>
+                <p
+                  className={cn(
+                    "mt-3 text-2xl font-semibold tabular-nums",
+                    confidenceClass(card.recommendation.confidence)
+                  )}
+                >
                   Confidence: {card.recommendation.confidence}%
                 </p>
                 <ul className="mt-3 space-y-1 text-xs text-slate-300">

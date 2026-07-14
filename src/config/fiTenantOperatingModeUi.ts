@@ -33,8 +33,7 @@ export const FI_TENANT_OPERATING_MODE_UI_OPTIONS: readonly FiTenantOperatingMode
     label: "Hair transplant clinic",
     description:
       "Surgery-forward defaults: Surgery, surgery day, imaging, quality review, and health record workflows.",
-    defaultModulesLine:
-      "Surgery, cases, surgery day, imaging, quality review, health record.",
+    defaultModulesLine: "Surgery, cases, surgery day, imaging, quality review, health record.",
   },
   {
     modeKey: "medical_hair_clinic",

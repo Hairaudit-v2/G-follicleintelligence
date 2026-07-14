@@ -147,7 +147,11 @@ export async function ingestPathologyEmailWebhook(
     attachmentHashes: attachmentDedupHashes,
   });
 
-  const existingMessage = await findExistingMessageByDedupHash(supabase, tenantId, messageDedupHash);
+  const existingMessage = await findExistingMessageByDedupHash(
+    supabase,
+    tenantId,
+    messageDedupHash
+  );
   if (existingMessage) {
     return {
       ok: true,

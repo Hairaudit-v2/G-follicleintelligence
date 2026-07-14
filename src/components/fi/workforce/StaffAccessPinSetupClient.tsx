@@ -46,7 +46,9 @@ export function StaffAccessPinSetupClient({
     <div className="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col justify-center px-4 py-12">
       <header className="text-center">
         <h1 className="text-2xl font-semibold text-slate-50">Set your staff PIN</h1>
-        <p className="mt-2 text-sm text-slate-400">Hi {staffName}, choose a new 4-digit clinic PIN.</p>
+        <p className="mt-2 text-sm text-slate-400">
+          Hi {staffName}, choose a new 4-digit clinic PIN.
+        </p>
       </header>
 
       {error ? (

@@ -85,10 +85,7 @@ export function CalendarOsBookingCard({
           </div>
           {expanded ? (
             <p
-              className={cn(
-                "truncate text-slate-500",
-                ultraCompact ? "text-[8px]" : "text-[9px]"
-              )}
+              className={cn("truncate text-slate-500", ultraCompact ? "text-[8px]" : "text-[9px]")}
             >
               {model.bookingTypeLabel}
             </p>

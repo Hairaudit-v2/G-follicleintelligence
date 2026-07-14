@@ -71,17 +71,7 @@ export function SurgeryIntelligenceBackfillCard({ tenantId }: { tenantId: string
       setLastSummary(result.data.summary);
       if (!result.data.summary.dryRun) router.refresh();
     });
-  }, [
-    tenantId,
-    dryRun,
-    force,
-    adminKey,
-    surgeryId,
-    caseId,
-    procedureFrom,
-    procedureTo,
-    router,
-  ]);
+  }, [tenantId, dryRun, force, adminKey, surgeryId, caseId, procedureFrom, procedureTo, router]);
 
   return (
     <DashboardCard className="p-5">

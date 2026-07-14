@@ -50,9 +50,7 @@ export function LeadActivityFeed({
             <li key={ev.id} className="border-l-2 border-white/[0.06] pl-2">
               <span className="text-gray-500">{ev.occurred_at}</span>{" "}
               <span className="font-medium text-slate-100">{activityLabel(ev)}</span>
-              {activityDetail(ev) ? (
-                <p className="text-slate-400">{activityDetail(ev)}</p>
-              ) : null}
+              {activityDetail(ev) ? <p className="text-slate-400">{activityDetail(ev)}</p> : null}
             </li>
           ))}
         </ul>

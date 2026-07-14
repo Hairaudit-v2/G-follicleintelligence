@@ -201,9 +201,7 @@ async function resolveTenantMembershipAuthUserId(sessionAuthUserId: string): Pro
  * Impersonation-aware auth user id for tenant viewer chrome (greeting, workspace profile, profile menu).
  * When a platform admin impersonates a tenant member, returns the impersonation target.
  */
-export async function resolveEffectiveTenantAuthUserId(
-  sessionAuthUserId: string
-): Promise<string> {
+export async function resolveEffectiveTenantAuthUserId(sessionAuthUserId: string): Promise<string> {
   return resolveTenantMembershipAuthUserId(sessionAuthUserId);
 }
 

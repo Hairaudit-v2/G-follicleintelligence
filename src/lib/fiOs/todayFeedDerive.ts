@@ -101,7 +101,9 @@ const ENTITY_CATEGORY: Record<TodayEntityAttentionCategory, FeedCategory> = {
 };
 
 /** Best-effort role weighting — reuses `FiWorkspaceProfileKey`, does not modify `fiWorkspaceProfiles.ts`. */
-const ROLE_CATEGORY_WEIGHT: Partial<Record<FiWorkspaceProfileKey, Partial<Record<FeedCategory, number>>>> = {
+const ROLE_CATEGORY_WEIGHT: Partial<
+  Record<FiWorkspaceProfileKey, Partial<Record<FeedCategory, number>>>
+> = {
   reception: { reception: 1.5, leads: 1.2 },
   nurse: { reception: 1.3, consultations: 1.1 },
   doctor: { consultations: 1.4, surgery: 1.2 },
@@ -111,7 +113,10 @@ const ROLE_CATEGORY_WEIGHT: Partial<Record<FiWorkspaceProfileKey, Partial<Record
   director: { financial: 1.3, surgery: 1.1 },
 };
 
-function categoryWeight(profileKey: FiWorkspaceProfileKey | undefined, category: FeedCategory): number {
+function categoryWeight(
+  profileKey: FiWorkspaceProfileKey | undefined,
+  category: FeedCategory
+): number {
   if (!profileKey) return 1;
   return ROLE_CATEGORY_WEIGHT[profileKey]?.[category] ?? 1;
 }
@@ -185,7 +190,11 @@ function receptionCopy(
   const mins = minutesUntil(nowMs, card.startAt);
   if (bucket === "right_now" && mins != null) {
     const arrival =
-      mins <= 1 ? "arriving now" : mins === 1 ? "arriving in 1 minute" : `arriving in ${mins} minutes`;
+      mins <= 1
+        ? "arriving now"
+        : mins === 1
+          ? "arriving in 1 minute"
+          : `arriving in ${mins} minutes`;
     return {
       actionLabel: `${todayFirstNameFromLabel(card.displayName)} ${arrival}`,
       detailLine: card.typeLabel.trim() || "Appointment starting soon",
@@ -324,7 +333,10 @@ function taskDueItems(
   });
 }
 
-function humanizeReminderAction(r: DashboardReminderItem): { actionLabel: string; detailLine?: string } {
+function humanizeReminderAction(r: DashboardReminderItem): {
+  actionLabel: string;
+  detailLine?: string;
+} {
   const summary = r.clinicalSummaryLine?.trim();
   if (summary) {
     return { actionLabel: summary, detailLine: "Clinical reminder scheduled" };
@@ -373,17 +385,26 @@ const AGGREGATE_CATEGORY: Record<string, FeedCategory> = {
 };
 
 /** Humanize aggregate labels from the legacy attention engine — presentation only. */
-function humanizeAggregateLabel(id: string, label: string): { actionLabel: string; detailLine?: string; actionHint?: string } {
+function humanizeAggregateLabel(
+  id: string,
+  label: string
+): { actionLabel: string; detailLine?: string; actionHint?: string } {
   switch (id) {
     case "financial_clearance":
       return {
-        actionLabel: label.replace(/need payment clearance before procedure day/i, "need financial clearance"),
+        actionLabel: label.replace(
+          /need payment clearance before procedure day/i,
+          "need financial clearance"
+        ),
         detailLine: "Procedures cannot proceed until cleared",
         actionHint: "Review clearance",
       };
     case "surgery_readiness":
       return {
-        actionLabel: label.replace(/blocked by missing preparation requirements/i, "need preparation completed"),
+        actionLabel: label.replace(
+          /blocked by missing preparation requirements/i,
+          "need preparation completed"
+        ),
         detailLine: "Missing requirements before procedure day",
         actionHint: "Review cases",
       };
@@ -429,24 +450,28 @@ function aggregateFallbackItems(opts: {
   return priorities
     .filter((p) => !suppressAggregateKeys?.has(p.id))
     .map((p) => {
-    const category = AGGREGATE_CATEGORY[p.id] ?? "financial";
-    const weight = categoryWeight(profileKey, category);
-    const bucket: TodayFeedBucket =
-      p.severity === "critical" ? "right_now" : p.severity === "warning" ? "up_next" : "coming_up";
-    const human = humanizeAggregateLabel(p.id, p.label);
-    return {
-      id: `aggregate-${p.id}`,
-      personLabel: "",
-      actionLabel: human.actionLabel,
-      detailLine: human.detailLine,
-      actionHint: human.actionHint,
-      href: p.href,
-      severity: p.severity,
-      bucket,
-      priorityScore: p.priorityScore * weight,
-      autoResolves: true,
-    } satisfies TodayFeedItem;
-  });
+      const category = AGGREGATE_CATEGORY[p.id] ?? "financial";
+      const weight = categoryWeight(profileKey, category);
+      const bucket: TodayFeedBucket =
+        p.severity === "critical"
+          ? "right_now"
+          : p.severity === "warning"
+            ? "up_next"
+            : "coming_up";
+      const human = humanizeAggregateLabel(p.id, p.label);
+      return {
+        id: `aggregate-${p.id}`,
+        personLabel: "",
+        actionLabel: human.actionLabel,
+        detailLine: human.detailLine,
+        actionHint: human.actionHint,
+        href: p.href,
+        severity: p.severity,
+        bucket,
+        priorityScore: p.priorityScore * weight,
+        autoResolves: true,
+      } satisfies TodayFeedItem;
+    });
 }
 
 function entityCategoryWeight(
@@ -518,9 +543,7 @@ export function buildTodayFeedFromRawItems(input: {
   } = input;
 
   const nowMs = now.getTime();
-  const presenceContext = presenceSummary
-    ? presenceContextFromSummary(presenceSummary)
-    : undefined;
+  const presenceContext = presenceSummary ? presenceContextFromSummary(presenceSummary) : undefined;
 
   const prioritised = applyTodaySignalPriority(rawItems, {
     profileKey,
@@ -555,13 +578,7 @@ export function buildTodayFeed(input: {
   /** D6E — when true (default), apply presence-aware ranking and copy hints. */
   applyPresence?: boolean;
 }): TodayFeed {
-  const {
-    dashboard,
-    profileKey,
-    now = new Date(),
-    applyPresence = true,
-    ...rawInput
-  } = input;
+  const { dashboard, profileKey, now = new Date(), applyPresence = true, ...rawInput } = input;
 
   const rawItems = loadTodayFeedRawItems({ ...rawInput, dashboard, profileKey, now });
 
@@ -583,9 +600,7 @@ export function buildTodayFeed(input: {
   });
 }
 
-function presenceContextFromSummary(
-  summary: PresenceSummary
-): TodayPresencePriorityContext {
+function presenceContextFromSummary(summary: PresenceSummary): TodayPresencePriorityContext {
   const hints = new Set(summary.escalationHints);
   return {
     receptionUnknown: hints.has("reception_unknown_escalates_arrival"),
@@ -637,8 +652,12 @@ export function countOverdueTasks(
 }
 
 /** Patients booked today — consultations + surgeries + follow-ups + PRP. */
-export function countPatientsBookedToday(clinicToday: TenantOperationalDashboard["clinicToday"]): number {
-  return clinicToday.consultations + clinicToday.surgeries + clinicToday.followUps + clinicToday.prp;
+export function countPatientsBookedToday(
+  clinicToday: TenantOperationalDashboard["clinicToday"]
+): number {
+  return (
+    clinicToday.consultations + clinicToday.surgeries + clinicToday.followUps + clinicToday.prp
+  );
 }
 
 export function greetingForHour(hour: number): string {
@@ -653,10 +672,7 @@ export function isGenericConsultationSubject(label: string): boolean {
   return !trimmed || /^consultation$/i.test(trimmed);
 }
 
-export function consultationEntityActionLabel(
-  status: string,
-  personLabel: string
-): string {
+export function consultationEntityActionLabel(status: string, personLabel: string): string {
   const generic = isGenericConsultationSubject(personLabel);
   const name = todayFirstNameFromLabel(personLabel);
 
@@ -666,13 +682,9 @@ export function consultationEntityActionLabel(
         ? "Draft consultation waiting to begin"
         : `${name} — draft consultation waiting to begin`;
     case "in_progress":
-      return generic
-        ? "Consultation in progress"
-        : `${name} — consultation in progress`;
+      return generic ? "Consultation in progress" : `${name} — consultation in progress`;
     default:
-      return generic
-        ? "Consultation awaiting closure"
-        : `${name} — consultation awaiting closure`;
+      return generic ? "Consultation awaiting closure" : `${name} — consultation awaiting closure`;
   }
 }
 

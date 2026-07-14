@@ -1,12 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { computeTodayFeedShadowDiff, runTodayFeedShadowValidation } from "@/src/lib/fiOs/todayFeedShadowDiff";
+import {
+  computeTodayFeedShadowDiff,
+  runTodayFeedShadowValidation,
+} from "@/src/lib/fiOs/todayFeedShadowDiff";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 const NOW = new Date("2026-06-10T12:00:00.000Z");
 
-function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): TenantOperationalDashboard {
+function baseDashboard(
+  overrides: Partial<TenantOperationalDashboard> = {}
+): TenantOperationalDashboard {
   return {
     tenantId: "00000000-0000-0000-0000-000000000001",
     tenantName: "Test Clinic",
@@ -62,8 +67,16 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [],
     ...overrides,
@@ -71,7 +84,11 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
 }
 
 test("computeTodayFeedShadowDiff: empty dashboard yields zero discrepancies", () => {
-  const result = computeTodayFeedShadowDiff({ dashboard: baseDashboard(), showCrmNav: true, now: NOW });
+  const result = computeTodayFeedShadowDiff({
+    dashboard: baseDashboard(),
+    showCrmNav: true,
+    now: NOW,
+  });
   assert.deepEqual(result.discrepancies, []);
   assert.equal(result.legacySignalCount, 0);
   assert.equal(result.todayFeedSignalCount, 0);
@@ -190,7 +207,10 @@ test("runTodayFeedShadowValidation: respects FI_TODAY_SURFACE_SHADOW_LOG=false k
   const prev = process.env.FI_TODAY_SURFACE_SHADOW_LOG;
   process.env.FI_TODAY_SURFACE_SHADOW_LOG = "false";
   try {
-    const malformed = { ...baseDashboard(), receptionBoard: undefined } as unknown as TenantOperationalDashboard;
+    const malformed = {
+      ...baseDashboard(),
+      receptionBoard: undefined,
+    } as unknown as TenantOperationalDashboard;
     assert.doesNotThrow(() => {
       runTodayFeedShadowValidation({ dashboard: malformed, showCrmNav: true, now: NOW });
     });

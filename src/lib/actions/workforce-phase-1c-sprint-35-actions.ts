@@ -99,7 +99,11 @@ export async function approveReconciliationRecommendationAction(
       const sourceId = input.sourceStaffMemberId?.trim();
       const targetId = input.targetStaffMemberId?.trim() ?? input.staffMemberId;
       if (!sourceId || sourceId === targetId) {
-        if (input.recommendation === "ARCHIVE_EMPTY_RECORD" && input.externalId && input.sourceSystem) {
+        if (
+          input.recommendation === "ARCHIVE_EMPTY_RECORD" &&
+          input.externalId &&
+          input.sourceSystem
+        ) {
           await manuallyLinkStaffIdentity({
             tenantId,
             staffMemberId: targetId,

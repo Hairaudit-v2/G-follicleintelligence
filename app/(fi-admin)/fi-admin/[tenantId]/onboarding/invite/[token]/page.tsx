@@ -22,7 +22,9 @@ export default async function OnboardingInvitePage({
   const tid = tenantId?.trim();
   const inviteToken = token?.trim();
   if (!tid || !inviteToken) {
-    return <OnboardingInviteUnavailable message="This invite link is not valid. Ask your clinic administrator for a new invite." />;
+    return (
+      <OnboardingInviteUnavailable message="This invite link is not valid. Ask your clinic administrator for a new invite." />
+    );
   }
 
   const model = await loadOnboardingInviteByToken(tid, inviteToken);

@@ -224,10 +224,7 @@ test("collectCancellableStaffShiftsInPeriod filters by staff, status, and local 
       },
     ],
   });
-  assert.deepEqual(
-    rows.map((r) => r.id).sort(),
-    ["1", "4"]
-  );
+  assert.deepEqual(rows.map((r) => r.id).sort(), ["1", "4"]);
 });
 
 test("buildRosterShiftDrawerDefaults normalises second-precision standard hours times", () => {
@@ -297,10 +294,9 @@ test("resolveRosterPayloadWeekDayDates prefers periodDayDates with weekDayDates 
     }),
     ["2026-07-06"]
   );
-  assert.deepEqual(
-    resolveRosterPayloadWeekDayDates({ weekDayDates: ["2026-07-13"] }),
-    ["2026-07-13"]
-  );
+  assert.deepEqual(resolveRosterPayloadWeekDayDates({ weekDayDates: ["2026-07-13"] }), [
+    "2026-07-13",
+  ]);
   assert.deepEqual(resolveRosterPayloadWeekDayDates({}), []);
 });
 
@@ -311,9 +307,7 @@ test("roster drawer state helpers open standard-hours and setup panels", () => {
     staffMemberId: STAFF_JANE,
   });
   assert.equal(
-    resolveRosterDrawerStaffName(standardHoursDrawer, [
-      { id: STAFF_JANE, name: "Jane Doe" },
-    ]),
+    resolveRosterDrawerStaffName(standardHoursDrawer, [{ id: STAFF_JANE, name: "Jane Doe" }]),
     "Jane Doe"
   );
   assert.equal(formatStandardHoursDrawerTitle("Jane Doe"), "Jane Doe — Standard hours");
@@ -525,11 +519,7 @@ test("rosterShiftDatetimeLocalToUtcIso validates missing and invalid ranges", ()
 
 test("toRosterShiftDatetimeLocal uses staff timezone for edit form display", () => {
   assert.equal(
-    toRosterShiftDatetimeLocal(
-      "2026-07-05T23:00:00.000Z",
-      "Australia/Sydney",
-      "Australia/Sydney"
-    ),
+    toRosterShiftDatetimeLocal("2026-07-05T23:00:00.000Z", "Australia/Sydney", "Australia/Sydney"),
     "2026-07-06T09:00"
   );
 });

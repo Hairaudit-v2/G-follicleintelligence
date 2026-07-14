@@ -72,8 +72,8 @@ export function StaffPinLoginClient({ data }: { data: StaffPinLoginPageData }) {
         <h1 className="mt-2 text-2xl font-semibold text-white">Staff PIN sign-in</h1>
         <p className="mt-2 text-sm text-slate-300">
           {data.clinicName ? `${data.clinicName} — ` : ""}
-          Select your name and enter your 4-digit PIN. Signing in clocks you in for the day;
-          sign out when you leave to record hours for timesheets and pay.
+          Select your name and enter your 4-digit PIN. Signing in clocks you in for the day; sign
+          out when you leave to record hours for timesheets and pay.
         </p>
 
         {data.staff.length === 0 ? (

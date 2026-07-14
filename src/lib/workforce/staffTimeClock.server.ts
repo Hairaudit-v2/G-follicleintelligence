@@ -73,8 +73,7 @@ function mapTimePunch(
     clockOutAt,
     pinSessionId: row.pin_session_id != null ? String(row.pin_session_id) : null,
     shiftId: row.shift_id != null ? String(row.shift_id) : null,
-    timesheetEntryId:
-      row.timesheet_entry_id != null ? String(row.timesheet_entry_id) : null,
+    timesheetEntryId: row.timesheet_entry_id != null ? String(row.timesheet_entry_id) : null,
     status,
     source: String(row.source) as WorkforceTimePunch["source"],
     grossMinutesWorked: deriveGrossMinutesWorked(status, clockInAt, clockOutAt),
@@ -88,10 +87,7 @@ function mapTimePunch(
   };
 }
 
-async function loadTenantTimezone(
-  tenantId: string,
-  client: SupabaseClient
-): Promise<string> {
+async function loadTenantTimezone(tenantId: string, client: SupabaseClient): Promise<string> {
   const { data, error } = await client
     .from("fi_tenant_settings")
     .select("default_timezone, metadata")
@@ -234,13 +230,12 @@ async function closeTimePunch(opts: ClosePunchOpts): Promise<ClockOutResult> {
     String(opts.punchRow.clock_in_at),
     clockOutAt
   );
-  const netMinutes =
-    grossMinutes != null ? Math.max(0, grossMinutes - breakMinutes) : null;
+  const netMinutes = grossMinutes != null ? Math.max(0, grossMinutes - breakMinutes) : null;
 
   const staffMemberId =
     opts.punchRow.staff_member_id != null
       ? String(opts.punchRow.staff_member_id)
-      : (await resolveStaffMemberContext(tid, fiStaffId, supabase))?.staffMemberId ?? null;
+      : ((await resolveStaffMemberContext(tid, fiStaffId, supabase))?.staffMemberId ?? null);
 
   let timesheetEntryId: string | null =
     opts.punchRow.timesheet_entry_id != null ? String(opts.punchRow.timesheet_entry_id) : null;
@@ -267,7 +262,8 @@ async function closeTimePunch(opts: ClosePunchOpts): Promise<ClockOutResult> {
       source: opts.source,
       timesheet_entry_id: timesheetEntryId,
       staff_member_id: staffMemberId,
-      notes: opts.notes?.trim() || (opts.punchRow.notes != null ? String(opts.punchRow.notes) : null),
+      notes:
+        opts.notes?.trim() || (opts.punchRow.notes != null ? String(opts.punchRow.notes) : null),
       metadata,
       updated_at: clockOutAt,
     })
@@ -349,9 +345,7 @@ export async function listWorkforceTimePunches(
   const names = await Promise.all(
     rows.map((r) => loadStaffNameByFiStaffId(tid, String(r.fi_staff_id), supabase))
   );
-  return rows.map((r, i) =>
-    mapTimePunch(r, breaksMap.get(String(r.id)) ?? [], names[i])
-  );
+  return rows.map((r, i) => mapTimePunch(r, breaksMap.get(String(r.id)) ?? [], names[i]));
 }
 
 export async function loadPinBreakSessionState(
@@ -690,9 +684,7 @@ export async function managerAddBreakToPunch(opts: {
     clock_out_at: string | null;
   };
   const punchStart = new Date(row.clock_in_at).getTime();
-  const punchEnd = row.clock_out_at
-    ? new Date(row.clock_out_at).getTime()
-    : Date.now();
+  const punchEnd = row.clock_out_at ? new Date(row.clock_out_at).getTime() : Date.now();
   const brkStart = new Date(breakStartAt).getTime();
   const brkEnd = new Date(breakEndAt).getTime();
   if (brkStart < punchStart || brkEnd > punchEnd) {
@@ -762,4 +754,3 @@ export async function autoCloseOpenPunchesForTenant(opts: {
   }
   return { closed };
 }
-

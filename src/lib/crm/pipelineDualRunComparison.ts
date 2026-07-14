@@ -130,7 +130,9 @@ function stageDefFromLegacyCard(card: CrmKanbanLeadCard): PipelineStageDefinitio
 }
 
 function legacyConversionState(card: CrmKanbanLeadCard): string {
-  const status = String(card.lead.status ?? "open").trim().toLowerCase();
+  const status = String(card.lead.status ?? "open")
+    .trim()
+    .toLowerCase();
   const slug = card.stage?.slug?.trim().toLowerCase() ?? "";
   // Legacy kanban placement uses terminal stage columns — align comparator with board evidence.
   const stageWon = slug === "won_closed";
@@ -221,7 +223,9 @@ function classifyStageMatch(
 // Main comparator
 // ---------------------------------------------------------------------------
 
-export function comparePipelineDualRun(input: ComparePipelineDualRunInput): PipelineDualRunComparison {
+export function comparePipelineDualRun(
+  input: ComparePipelineDualRunInput
+): PipelineDualRunComparison {
   const legacyLeadIds = sortedUnique(input.legacyCards.map((c) => c.lead.id));
 
   const pipelineIdsRaw: string[] = [];
@@ -341,9 +345,7 @@ export function comparePipelineDualRun(input: ComparePipelineDualRunInput): Pipe
     overdueMismatches,
     consultationMismatches,
     conversionMismatches,
-    orphanTaskIds: [...input.pipeline.diagnostics.orphanTaskIds].sort((a, b) =>
-      a.localeCompare(b)
-    ),
+    orphanTaskIds: [...input.pipeline.diagnostics.orphanTaskIds].sort((a, b) => a.localeCompare(b)),
     hiddenLeadCount: input.pipeline.diagnostics.hiddenLeadCount,
     pass,
   };
@@ -354,7 +356,15 @@ export function pipelineDualRunContainsPhi(comparison: PipelineDualRunComparison
   const json = JSON.stringify(comparison);
   if (/\S+@\S+\.\S+/.test(json)) return true;
   if (/\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/.test(json)) return true;
-  const forbiddenKeys = ["displayName", "email", "phone", "subject", "preview", "body", "note_body"];
+  const forbiddenKeys = [
+    "displayName",
+    "email",
+    "phone",
+    "subject",
+    "preview",
+    "body",
+    "note_body",
+  ];
   for (const k of forbiddenKeys) {
     if (json.includes(`"${k}"`)) return true;
   }

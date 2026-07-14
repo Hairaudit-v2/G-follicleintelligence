@@ -39,62 +39,70 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
   const tid = tenantId.trim();
 
   try {
-  const rawSearch = await searchParams;
-  const parsed = parseRosterCommandCentreSearchParams(rawSearch);
-  const rosterPlanning = await loadWorkforceRosterPlanningPolicy(tid);
-  const defaultRange = defaultRosterCommandCentreDateRange(new Date(), rosterPlanning);
-  const periodStart = resolveRosterPeriodStartFromParams(parsed, rosterPlanning);
-  const dateRange = rosterDateRangeFromPeriodStartParam(periodStart, rosterPlanning);
-  const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
+    const rawSearch = await searchParams;
+    const parsed = parseRosterCommandCentreSearchParams(rawSearch);
+    const rosterPlanning = await loadWorkforceRosterPlanningPolicy(tid);
+    const defaultRange = defaultRosterCommandCentreDateRange(new Date(), rosterPlanning);
+    const periodStart = resolveRosterPeriodStartFromParams(parsed, rosterPlanning);
+    const dateRange = rosterDateRangeFromPeriodStartParam(periodStart, rosterPlanning);
+    const preselectedEventKey = resolveRosterPreselectedEventKey(parsed);
 
-  const [result, showTechnicalDetail, manageCapability] = await Promise.all([
-    loadRosterCommandCentrePageData({
-      tenantId: tid,
-      dateRange: { startsAt: dateRange.startsAt, endsAt: dateRange.endsAt },
-      periodStart,
-      weekStart: defaultRange.weekStart,
-      rosterPlanning,
-      clinicId: parsed.clinicId,
-      staffId: parsed.staffId,
-      eventType: parsed.eventType,
-      statusFilter: parsed.status,
-      preselectedEventKey,
-    }),
-    canViewDashboardSystemDiagnostics(tid),
-    resolveStaffStandardHoursManageCapability(tid),
-  ]);
+    const [result, showTechnicalDetail, manageCapability] = await Promise.all([
+      loadRosterCommandCentrePageData({
+        tenantId: tid,
+        dateRange: { startsAt: dateRange.startsAt, endsAt: dateRange.endsAt },
+        periodStart,
+        weekStart: defaultRange.weekStart,
+        rosterPlanning,
+        clinicId: parsed.clinicId,
+        staffId: parsed.staffId,
+        eventType: parsed.eventType,
+        statusFilter: parsed.status,
+        preselectedEventKey,
+      }),
+      canViewDashboardSystemDiagnostics(tid),
+      resolveStaffStandardHoursManageCapability(tid),
+    ]);
 
-  if (!result.ok) {
-    const showDetail =
-      showTechnicalDetail || process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
+    if (!result.ok) {
+      const showDetail =
+        showTechnicalDetail ||
+        process.env.NODE_ENV !== "production" ||
+        process.env.VERCEL_ENV === "preview";
+      return (
+        <div
+          className={cn(
+            fiOsChromeClasses.pageScrollRoot,
+            fiOsChromeClasses.pageScrollContent,
+            "p-4 sm:p-6"
+          )}
+        >
+          <RosterCommandCentreDiagnosticCard failure={result} showTechnicalDetail={showDetail} />
+        </div>
+      );
+    }
+
     return (
-      <div className={cn(fiOsChromeClasses.pageScrollRoot, fiOsChromeClasses.pageScrollContent, "p-4 sm:p-6")}>
-        <RosterCommandCentreDiagnosticCard failure={result} showTechnicalDetail={showDetail} />
+      <div className={cn(fiOsChromeClasses.pageScrollRoot)}>
+        <RosterCommandCentreView
+          tenantId={tid}
+          payload={result.payload}
+          eventDetails={result.eventDetails}
+          filters={{
+            periodStart,
+            weekStart: periodStart,
+            clinicId: parsed.clinicId ?? "",
+            staffId: parsed.staffId ?? "",
+            eventType: parsed.eventType ?? "",
+            status: parsed.status ?? "",
+          }}
+          useWorkforceOsRoute
+          canManage={manageCapability.canManage}
+          canManageStandardHours={manageCapability.canManage}
+          manageDeniedReason={ROSTER_MANAGE_DENIED_REASON}
+        />
       </div>
     );
-  }
-
-  return (
-    <div className={cn(fiOsChromeClasses.pageScrollRoot)}>
-      <RosterCommandCentreView
-        tenantId={tid}
-        payload={result.payload}
-        eventDetails={result.eventDetails}
-        filters={{
-          periodStart,
-          weekStart: periodStart,
-          clinicId: parsed.clinicId ?? "",
-          staffId: parsed.staffId ?? "",
-          eventType: parsed.eventType ?? "",
-          status: parsed.status ?? "",
-        }}
-        useWorkforceOsRoute
-        canManage={manageCapability.canManage}
-        canManageStandardHours={manageCapability.canManage}
-        manageDeniedReason={ROSTER_MANAGE_DENIED_REASON}
-      />
-    </div>
-  );
   } catch (e) {
     const message = e instanceof Error ? e.message : "Roster page failed to load.";
     const digest =
@@ -104,7 +112,13 @@ export default async function WorkforceOsRosterPage({ params, searchParams }: Pa
     const showDetail =
       process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
     return (
-      <div className={cn(fiOsChromeClasses.pageScrollRoot, fiOsChromeClasses.pageScrollContent, "p-4 sm:p-6")}>
+      <div
+        className={cn(
+          fiOsChromeClasses.pageScrollRoot,
+          fiOsChromeClasses.pageScrollContent,
+          "p-4 sm:p-6"
+        )}
+      >
         <RosterCommandCentreDiagnosticCard
           failure={{
             ok: false,

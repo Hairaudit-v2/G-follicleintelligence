@@ -46,7 +46,9 @@ function bytesToBase64(bytes: Uint8Array): string {
 export class OpenAiVisionExpenseOcrProvider implements ExpenseOcrProviderAdapter {
   readonly providerId = "openai_vision" as const;
 
-  isConfigured(env: ExpenseOcrProviderEnvSlice = process.env as ExpenseOcrProviderEnvSlice): boolean {
+  isConfigured(
+    env: ExpenseOcrProviderEnvSlice = process.env as ExpenseOcrProviderEnvSlice
+  ): boolean {
     return isOpenAiExpenseOcrConfigured(env);
   }
 
@@ -159,9 +161,7 @@ Amounts are major units (dollars), not cents. Prefer AUD when ambiguous.`;
         d.tax_major != null && Number.isFinite(d.tax_major)
           ? Math.round(Math.abs(d.tax_major) * 100)
           : null;
-      const expense_date = d.expense_date
-        ? parseFlexibleDateToYmd(d.expense_date)
-        : null;
+      const expense_date = d.expense_date ? parseFlexibleDateToYmd(d.expense_date) : null;
       const vendor_name = d.vendor_name?.trim() || null;
       const description = d.description?.trim() || null;
       const suggested = suggestCategoryCodeFromText(

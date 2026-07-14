@@ -180,9 +180,7 @@ export function createGc8MonitoringMockTables() {
       },
       update(patch: Row) {
         const apply = (matched: Row[]) => {
-          matched.forEach((r) =>
-            Object.assign(r, patch, { updated_at: new Date().toISOString() })
-          );
+          matched.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
           return {
             select() {
               return {

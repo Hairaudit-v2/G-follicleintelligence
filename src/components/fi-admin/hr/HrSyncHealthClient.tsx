@@ -79,8 +79,12 @@ export function HrSyncHealthClient({
     identityOverview,
     workforceAudit,
   } = pageModel;
-  const { healthSummary, recentRuns: workforceRuns, openDuplicates, unlinkedActiveStaff } =
-    workforceAudit;
+  const {
+    healthSummary,
+    recentRuns: workforceRuns,
+    openDuplicates,
+    unlinkedActiveStaff,
+  } = workforceAudit;
 
   const exportCsv = useCallback(() => {
     const csv = buildHrSyncIssuesCsvExport(staffIssues);
@@ -214,8 +218,7 @@ export function HrSyncHealthClient({
         <DashboardCard className="p-5 border-amber-500/25">
           <h2 className="text-lg font-semibold text-[#F8FAFC]">Open duplicate candidates</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Pairs scoring ≥80 — Sprint 1 does not auto-merge. Review in Team HR
-            reconciliation.
+            Pairs scoring ≥80 — Sprint 1 does not auto-merge. Review in Team HR reconciliation.
           </p>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -235,10 +238,7 @@ export function HrSyncHealthClient({
                     <td className="py-2 pr-4">{d.staffBName}</td>
                     <td className="py-2 pr-4">{d.similarityScore}</td>
                     <td className="py-2 pr-4 text-xs text-[#94A3B8]">
-                      {[
-                        d.matchEmail ? "email" : null,
-                        d.matchName ? "name" : null,
-                      ]
+                      {[d.matchEmail ? "email" : null, d.matchName ? "name" : null]
                         .filter(Boolean)
                         .join(", ") || "—"}
                     </td>
@@ -259,7 +259,10 @@ export function HrSyncHealthClient({
           </p>
           <ul className="mt-4 space-y-2 text-sm text-[#E2E8F0]">
             {unlinkedActiveStaff.slice(0, 15).map((s) => (
-              <li key={s.id} className="flex flex-wrap justify-between gap-2 border-t border-white/5 pt-2">
+              <li
+                key={s.id}
+                className="flex flex-wrap justify-between gap-2 border-t border-white/5 pt-2"
+              >
                 <span>{s.fullName}</span>
                 <span className="text-[#94A3B8]">{s.email ?? "no email"}</span>
               </li>

@@ -131,7 +131,10 @@ export function WorkforceOsDirectoryClient({
                 return (
                   <tr key={row.id} className="border-b border-white/[0.06]">
                     <td className="px-4 py-3">
-                      <WorkspaceFeedLink href={staffHref} className="font-medium text-[#F8FAFC] hover:underline">
+                      <WorkspaceFeedLink
+                        href={staffHref}
+                        className="font-medium text-[#F8FAFC] hover:underline"
+                      >
                         {row.full_name}
                       </WorkspaceFeedLink>
                       <p className="text-xs text-[#64748B]">{row.email ?? "—"}</p>

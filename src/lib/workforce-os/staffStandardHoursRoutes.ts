@@ -3,8 +3,7 @@
 export const STAFF_STANDARD_HOURS_MANAGE_DENIED_REASON =
   "You do not have permission to edit standard hours.";
 
-export const ROSTER_MANAGE_DENIED_REASON =
-  "You do not have permission to edit roster shifts.";
+export const ROSTER_MANAGE_DENIED_REASON = "You do not have permission to edit roster shifts.";
 
 export function buildStaffStandardHoursSetupIndexHref(tenantId: string): string {
   return `/fi-admin/${tenantId.trim()}/workforce-os/roster/standard-hours`;

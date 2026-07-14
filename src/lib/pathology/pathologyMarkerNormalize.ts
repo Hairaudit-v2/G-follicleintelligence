@@ -59,9 +59,7 @@ export function normalizePathologyExtractedMarkers(
   return out;
 }
 
-export function normalizedMarkersToResultItemInputs(
-  markers: NormalizedPathologyMarker[]
-): {
+export function normalizedMarkersToResultItemInputs(markers: NormalizedPathologyMarker[]): {
   test_code: string | null;
   test_label: string;
   result_value: string;

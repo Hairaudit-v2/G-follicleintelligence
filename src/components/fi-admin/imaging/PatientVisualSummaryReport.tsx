@@ -107,9 +107,7 @@ export function PatientVisualSummaryReportView({ report }: { report: PatientVisu
               <p className="text-xs text-slate-500">{zone.description}</p>
               <div className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
                 <p>Grafts: {formatZoneDisplayValue(zone.graftCount)}</p>
-                <p>
-                  Density: {zone.densityRange?.trim() || PATIENT_VISUAL_SUMMARY_NOT_RECORDED}
-                </p>
+                <p>Density: {zone.densityRange?.trim() || PATIENT_VISUAL_SUMMARY_NOT_RECORDED}</p>
                 {zone.graftTypeMix && Object.keys(zone.graftTypeMix).length > 0 ? (
                   <p className="sm:col-span-2 text-slate-400">
                     Mix:{" "}
@@ -117,7 +115,9 @@ export function PatientVisualSummaryReportView({ report }: { report: PatientVisu
                       zone.graftTypeMix.singles != null ? `S ${zone.graftTypeMix.singles}` : null,
                       zone.graftTypeMix.doubles != null ? `D ${zone.graftTypeMix.doubles}` : null,
                       zone.graftTypeMix.triples != null ? `T ${zone.graftTypeMix.triples}` : null,
-                      zone.graftTypeMix.multiHair != null ? `4+ ${zone.graftTypeMix.multiHair}` : null,
+                      zone.graftTypeMix.multiHair != null
+                        ? `4+ ${zone.graftTypeMix.multiHair}`
+                        : null,
                       zone.graftTypeMix.fiveHair != null ? `5 ${zone.graftTypeMix.fiveHair}` : null,
                     ]
                       .filter(Boolean)
@@ -221,9 +221,7 @@ export function PatientVisualSummaryReportView({ report }: { report: PatientVisu
             ) : null}
             <p>
               Longitudinal comparison:{" "}
-              {report.auditSummary.longitudinalComparisonAvailable
-                ? "Available"
-                : "Not available"}
+              {report.auditSummary.longitudinalComparisonAvailable ? "Available" : "Not available"}
             </p>
             <p className="text-slate-400">{report.auditSummary.patientSafeSummary}</p>
           </div>

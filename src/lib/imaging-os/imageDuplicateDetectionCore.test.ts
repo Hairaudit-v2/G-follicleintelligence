@@ -22,7 +22,9 @@ describe("detectDuplicateInSessionFingerprints", () => {
   it("does not flag unique uploads in different sessions implicitly", () => {
     const result = detectDuplicateInSessionFingerprints({
       candidate: { content_hash: "new-hash", protocol_slot_slug: "left_temple" },
-      session_images: [{ image_id: "img-2", content_hash: "other-hash", protocol_slot_slug: "right_temple" }],
+      session_images: [
+        { image_id: "img-2", content_hash: "other-hash", protocol_slot_slug: "right_temple" },
+      ],
     });
     assert.equal(result.duplicate_status, "unique");
   });

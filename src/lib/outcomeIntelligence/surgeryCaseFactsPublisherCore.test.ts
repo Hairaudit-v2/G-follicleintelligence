@@ -176,7 +176,11 @@ describe("surgeryCaseFactsPublisherCore", () => {
       SurgeryCaseFactsPublishValidationError
     );
 
-    const inconsistent = { ...facts, has_final_graft_count: false, final_reviewed_graft_count: 120 };
+    const inconsistent = {
+      ...facts,
+      has_final_graft_count: false,
+      final_reviewed_graft_count: 120,
+    };
     assert.throws(
       () => validateSurgeryCaseIntelligenceFactsForPublish(inconsistent),
       /final_reviewed_graft_count must be null/
@@ -219,7 +223,10 @@ describe("surgeryCaseFactsPublisherCore", () => {
     );
 
     assert.equal(
-      compareFactsVersions("surgery_case_intelligence_facts_v1", "surgery_case_intelligence_facts_v2"),
+      compareFactsVersions(
+        "surgery_case_intelligence_facts_v1",
+        "surgery_case_intelligence_facts_v2"
+      ),
       -1
     );
     assert.deepEqual(

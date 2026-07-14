@@ -37,8 +37,7 @@ export function resolveOnboardingStaffCreationDecision(
     return {
       action: "reject",
       message:
-        reconcile.conflictReason ??
-        "This staff identity requires manual review before onboarding.",
+        reconcile.conflictReason ?? "This staff identity requires manual review before onboarding.",
     };
   }
 

@@ -78,7 +78,9 @@ async function loadClinics(
     .eq("tenant_id", tenantId)
     .order("display_name", { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => mapOnboardingClinicOption(r as { id: string; display_name?: string | null }));
+  return (data ?? []).map((r) =>
+    mapOnboardingClinicOption(r as { id: string; display_name?: string | null })
+  );
 }
 
 function buildRoleOptions(): { value: string; label: string }[] {

@@ -5,7 +5,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadHrSyncHealthSummary } from "@/src/lib/workforce/hrSyncAudit.server";
-import { loadIdentityLinksForTenant, loadStaffMembersForReconciliation } from "@/src/lib/workforce/identityReconciliation.server";
+import {
+  loadIdentityLinksForTenant,
+  loadStaffMembersForReconciliation,
+} from "@/src/lib/workforce/identityReconciliation.server";
 import { loadInactiveStaffCount } from "@/src/lib/workforce/staffOffboarding.server";
 import { CREDENTIAL_DUE_SOON_DAYS } from "@/src/lib/workforce/credentialExpiryCore";
 
@@ -126,9 +129,7 @@ export async function loadWorkforceOperationalMetrics(
     .eq("status", "expired")
     .eq("blocks_clinical_work", true);
   const blockedMemberIds = new Set(
-    ((blockingCreds ?? []) as { staff_member_id: string }[]).map((r) =>
-      String(r.staff_member_id)
-    )
+    ((blockingCreds ?? []) as { staff_member_id: string }[]).map((r) => String(r.staff_member_id))
   );
 
   const { data: openCriticalAlerts } = await supabase

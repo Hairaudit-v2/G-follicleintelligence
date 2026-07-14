@@ -175,9 +175,7 @@ export function resolveGenericEmailMatch(input: {
       matchedPatientId: null,
       matchConfidence: GENERIC_EMAIL_MATCH_CONFIDENCE_NONE,
       matchReason:
-        input.leadIds.length > 1
-          ? "multiple_leads_match_email"
-          : "multiple_patients_match_email",
+        input.leadIds.length > 1 ? "multiple_leads_match_email" : "multiple_patients_match_email",
       matchAudit: { ...baseAudit, decision: "ambiguous" },
     };
   }

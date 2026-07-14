@@ -81,7 +81,9 @@ test("pathology review ranks higher for doctor than reception", () => {
   });
 
   const doctorScore = scoreTodaySignalPriority(pathology, { profileKey: "doctor" }).priorityScore;
-  const receptionScore = scoreTodaySignalPriority(pathology, { profileKey: "reception" }).priorityScore;
+  const receptionScore = scoreTodaySignalPriority(pathology, {
+    profileKey: "reception",
+  }).priorityScore;
 
   assert.ok(doctorScore > receptionScore);
 });
@@ -96,7 +98,9 @@ test("stale lead ranks higher for consultant than surgeon", () => {
     bucket: "up_next",
   });
 
-  const consultantScore = scoreTodaySignalPriority(staleLead, { profileKey: "consultant" }).priorityScore;
+  const consultantScore = scoreTodaySignalPriority(staleLead, {
+    profileKey: "consultant",
+  }).priorityScore;
   const surgeonScore = scoreTodaySignalPriority(staleLead, { profileKey: "surgeon" }).priorityScore;
 
   assert.ok(consultantScore > surgeonScore);
@@ -113,7 +117,9 @@ test("staff compliance blocker ranks high for clinic_manager", () => {
     bucket: "right_now",
   });
 
-  const managerScore = scoreTodaySignalPriority(staff, { profileKey: "clinic_manager" }).priorityScore;
+  const managerScore = scoreTodaySignalPriority(staff, {
+    profileKey: "clinic_manager",
+  }).priorityScore;
   const auditorScore = scoreTodaySignalPriority(staff, { profileKey: "auditor" }).priorityScore;
 
   assert.ok(managerScore > auditorScore);

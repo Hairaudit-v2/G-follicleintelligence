@@ -221,10 +221,7 @@ describe("publicClinicProfileCore", () => {
     });
     assert.equal(resolution.hairaudit_case_id, LEGACY_HAIRAUDIT);
     assert.equal(resolution.fi_report_id, REPORT);
-    assert.equal(
-      resolution.hrefs.audit_report_href,
-      `/fi-admin/${TENANT}/audit/${REPORT}`
-    );
+    assert.equal(resolution.hrefs.audit_report_href, `/fi-admin/${TENANT}/audit/${REPORT}`);
   });
 
   it("dry-run does not write", () => {

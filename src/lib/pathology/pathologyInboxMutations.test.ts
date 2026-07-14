@@ -10,7 +10,10 @@ import {
   rejectInboundDocumentMatch,
   uploadInboundPathologyDocument,
 } from "@/src/lib/pathology/pathologyInboxMutations.server";
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 
 const TENANT = "tenant-1";
 const OTHER_TENANT = "tenant-2";
@@ -28,15 +31,16 @@ type InboxMockState = {
   storage: Map<string, Uint8Array>;
 };
 
-function inboundRow(partial: Partial<PathologyInboundDocumentRow> = {}): PathologyInboundDocumentRow {
+function inboundRow(
+  partial: Partial<PathologyInboundDocumentRow> = {}
+): PathologyInboundDocumentRow {
   return {
     ...partial,
     id: partial.id ?? DOC,
     tenant_id: partial.tenant_id ?? TENANT,
     source_channel: partial.source_channel ?? "manual_upload",
     storage_bucket: partial.storage_bucket ?? "patient-images",
-    storage_path:
-      partial.storage_path ?? `tenant/${TENANT}/pathology-inbox/${DOC}.pdf`,
+    storage_path: partial.storage_path ?? `tenant/${TENANT}/pathology-inbox/${DOC}.pdf`,
     original_filename: partial.original_filename ?? "lab.pdf",
     content_type: partial.content_type ?? "application/pdf",
     match_status: partial.match_status ?? "pending",
@@ -85,7 +89,9 @@ function draftResult(metadata: Record<string, unknown> = {}): PathologyResultRow
 
 function createInboxMockSupabase(state: InboxMockState): SupabaseClient {
   function inboundMatches(filters: Record<string, string>): boolean {
-    return Object.entries(filters).every(([k, v]) => String(state.inbound[k as keyof PathologyInboundDocumentRow]) === v);
+    return Object.entries(filters).every(
+      ([k, v]) => String(state.inbound[k as keyof PathologyInboundDocumentRow]) === v
+    );
   }
 
   function resolveQuery(table: string, filters: Record<string, string>) {
@@ -196,10 +202,15 @@ function createInboxMockSupabase(state: InboxMockState): SupabaseClient {
             state.inbound = inboundRow({
               id: DOC,
               tenant_id: String(payload.tenant_id),
-              match_status: String(payload.match_status) as PathologyInboundDocumentRow["match_status"],
+              match_status: String(
+                payload.match_status
+              ) as PathologyInboundDocumentRow["match_status"],
               extracted_patient_name:
-                payload.extracted_patient_name != null ? String(payload.extracted_patient_name) : null,
-              extracted_dob: payload.extracted_dob != null ? String(payload.extracted_dob).slice(0, 10) : null,
+                payload.extracted_patient_name != null
+                  ? String(payload.extracted_patient_name)
+                  : null,
+              extracted_dob:
+                payload.extracted_dob != null ? String(payload.extracted_dob).slice(0, 10) : null,
               extracted_mrn: payload.extracted_mrn != null ? String(payload.extracted_mrn) : null,
               original_filename:
                 payload.original_filename != null ? String(payload.original_filename) : null,
@@ -246,8 +257,14 @@ function createInboxMockSupabase(state: InboxMockState): SupabaseClient {
                           },
                         };
                       },
-                      then(onFulfilled: (v: unknown) => unknown, onRejected?: (e: unknown) => unknown) {
-                        return Promise.resolve(applyInboundUpdate(allFilters)).then(onFulfilled, onRejected);
+                      then(
+                        onFulfilled: (v: unknown) => unknown,
+                        onRejected?: (e: unknown) => unknown
+                      ) {
+                        return Promise.resolve(applyInboundUpdate(allFilters)).then(
+                          onFulfilled,
+                          onRejected
+                        );
                       },
                     };
                     return terminal;
@@ -331,7 +348,8 @@ function createInboxMockSupabase(state: InboxMockState): SupabaseClient {
                       select(_cols?: string) {
                         return {
                           single: async () => {
-                            if (!state.result) return { data: null, error: { message: "not found" } };
+                            if (!state.result)
+                              return { data: null, error: { message: "not found" } };
                             state.result = {
                               ...state.result,
                               ...(patch as Partial<PathologyResultRow>),
@@ -457,7 +475,10 @@ test("uploadInboundPathologyDocument creates pending inbound document", async ()
 
   assert.equal(out.match_status, "pending");
   assert.equal(out.storage_path?.includes("pathology-inbox"), true);
-  assert.equal(state.inboundEvents.some((e) => e.event_type === "created"), true);
+  assert.equal(
+    state.inboundEvents.some((e) => e.event_type === "created"),
+    true
+  );
 });
 
 test("upload with name/DOB hints suggests exact patient match", async () => {
@@ -486,7 +507,10 @@ test("upload with name/DOB hints suggests exact patient match", async () => {
 
   assert.equal(out.suggested_patient_id, PATIENT);
   assert.equal(out.match_confidence, 0.98);
-  assert.equal(state.inboundEvents.some((e) => e.event_type === "match_suggested"), true);
+  assert.equal(
+    state.inboundEvents.some((e) => e.event_type === "match_suggested"),
+    true
+  );
 });
 
 test("confirmInboundDocumentMatch stores confirmed_patient_id", async () => {

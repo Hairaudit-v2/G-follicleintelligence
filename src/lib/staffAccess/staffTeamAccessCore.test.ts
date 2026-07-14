@@ -29,9 +29,7 @@ function grant(
 test("receptionist with roster.manage sees Team/Roster nav only", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
   });
 
   const tabAccess = resolveTeamWorkspaceTabAccess(access, { hrOsFullNav: false });
@@ -51,9 +49,7 @@ test("receptionist with roster.manage sees Team/Roster nav only", () => {
 test("receptionist with roster.view only sees roster tab but cannot manage", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "read" })],
   });
   const tabAccess = resolveTeamWorkspaceTabAccess(access, { hrOsFullNav: false });
   assert.ok(tabAccess.visibleTabIds.includes("roster"));
@@ -65,9 +61,7 @@ test("receptionist with roster.view only sees roster tab but cannot manage", () 
 test("receptionist with roster.manage enables staff nav feature override", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
   });
   const overrides = computeStaffAccessNavFeatureOverrides(access);
   assert.equal(overrides.staff, undefined);
@@ -82,9 +76,7 @@ test("receptionist without override keeps staff nav blocked", () => {
 test("receptionist with roster.manage cannot access identity tab segment", () => {
   const access = computeEffectiveAccess({
     roleKey: "reception",
-    grants: [
-      grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" }),
-    ],
+    grants: [grant({ moduleKey: "workforce_os", tabKey: "roster", accessLevel: "edit" })],
   });
   assert.equal(isTeamTabSegmentAllowed(access, "roster", { hrOsFullNav: false }), true);
   assert.equal(isTeamTabSegmentAllowed(access, "identity", { hrOsFullNav: false }), false);

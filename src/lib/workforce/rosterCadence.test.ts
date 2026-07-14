@@ -87,8 +87,14 @@ describe("roster cadence policy", () => {
 });
 
 describe("fortnightly standard hours and generation", () => {
-  const weekA = applyStandardHoursTemplate("four_ten").map((d) => ({ ...d, cycle_week: 1 as const }));
-  const weekB = applyStandardHoursTemplate("five_eight").map((d) => ({ ...d, cycle_week: 2 as const }));
+  const weekA = applyStandardHoursTemplate("four_ten").map((d) => ({
+    ...d,
+    cycle_week: 1 as const,
+  }));
+  const weekB = applyStandardHoursTemplate("five_eight").map((d) => ({
+    ...d,
+    cycle_week: 2 as const,
+  }));
   const fortnightDays = flattenFortnightlyStandardHours(weekA, weekB);
 
   it("fortnightly Week A / Week B pattern saves shape", () => {
@@ -130,8 +136,10 @@ describe("fortnightly standard hours and generation", () => {
         {
           id: "s1",
           staff_id: STAFF_ANNA,
-          starts_at: localWallTimeToUtcRange("2026-01-05", "07:30", "17:30", "Australia/Perth").startsAt,
-          ends_at: localWallTimeToUtcRange("2026-01-05", "07:30", "17:30", "Australia/Perth").endsAt,
+          starts_at: localWallTimeToUtcRange("2026-01-05", "07:30", "17:30", "Australia/Perth")
+            .startsAt,
+          ends_at: localWallTimeToUtcRange("2026-01-05", "07:30", "17:30", "Australia/Perth")
+            .endsAt,
           shift_source: "manual",
         },
       ],

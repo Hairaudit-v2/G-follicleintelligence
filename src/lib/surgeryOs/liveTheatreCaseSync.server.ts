@@ -92,11 +92,7 @@ async function loadSurgeryForSync(
   };
 }
 
-async function loadExistingCaseProcedure(
-  tenantId: string,
-  caseId: string,
-  client: SupabaseClient
-) {
+async function loadExistingCaseProcedure(tenantId: string, caseId: string, client: SupabaseClient) {
   const { data, error } = await client
     .from("fi_case_procedures")
     .select(FI_CASE_PROCEDURE_SELECT_COLUMNS)
@@ -154,7 +150,8 @@ export async function syncLiveTheatreToCaseProcedure(
 
   try {
     const surgery = await loadSurgeryForSync(tid, sid, supabase);
-    if (!surgery) return { synced: false, skipped: true, caseId: null, reason: "surgery_not_found" };
+    if (!surgery)
+      return { synced: false, skipped: true, caseId: null, reason: "surgery_not_found" };
 
     const caseId = surgery.case_id?.trim() || null;
     if (!caseId) {

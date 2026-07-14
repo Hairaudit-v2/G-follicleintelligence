@@ -301,7 +301,8 @@ function resolveNextRequiredAction(
     if (input.balance_due_cents > 0) return "Issue or collect surgery invoice payment";
     return "Confirm financial setup before surgery";
   }
-  if (state === "unavailable") return "Check deposits and invoices in Money, or reload financial data";
+  if (state === "unavailable")
+    return "Check deposits and invoices in Money, or reload financial data";
   return null;
 }
 
@@ -614,34 +615,32 @@ export function buildFinancialClearanceFromPipelineStatus(args: {
     internationalTransferApplicationAttention: InternationalTransferAttentionSummary;
   };
 }): FinancialClearanceResult {
-  return buildFinancialClearance(
-    {
-      todayYmd: args.todayYmd,
-      calendarTimezone: args.calendarTimezone,
-      booking_status: args.booking_status,
-      financial_os_status: args.pipeline.financial_os_status,
-      surgeryDateYmd: args.surgeryDateYmd,
-      dataLoadFailed: args.dataLoadFailed,
-      financialDataAvailable: args.pipeline.financialDataAvailable,
-      depositInvoiceState: args.pipeline.depositInvoiceState,
-      balanceInvoiceState: args.pipeline.balanceInvoiceState,
-      amount_paid_cents: args.pipeline.amount_paid_cents,
-      balance_due_cents: args.pipeline.balance_due_cents,
-      balance_overdue: args.pipeline.balance_overdue,
-      balance_due_within_14_days: args.pipeline.balance_due_within_14_days,
-      deposit_pending_for_confirmed_surgery: args.pipeline.deposit_pending_for_confirmed_surgery,
-      failed_payment_in_last_60_days: args.pipeline.failed_payment_in_last_60_days,
-      installment_overdue: args.pipeline.installment_overdue,
-      paymentPathway: args.pipeline.paymentPathway,
-      pathwayTaskAttention: args.pipeline.pathwayTaskAttention,
-      financeApplicationAttention: args.pipeline.financeApplicationAttention,
-      superReleaseApplicationAttention: args.pipeline.superReleaseApplicationAttention,
-      internationalTransferApplicationAttention:
-        args.pipeline.internationalTransferApplicationAttention,
-      financeSlaBreach: args.financeSlaBreach,
-      financeRejected: args.financeRejected,
-    } satisfies BuildFinancialClearanceInput
-  );
+  return buildFinancialClearance({
+    todayYmd: args.todayYmd,
+    calendarTimezone: args.calendarTimezone,
+    booking_status: args.booking_status,
+    financial_os_status: args.pipeline.financial_os_status,
+    surgeryDateYmd: args.surgeryDateYmd,
+    dataLoadFailed: args.dataLoadFailed,
+    financialDataAvailable: args.pipeline.financialDataAvailable,
+    depositInvoiceState: args.pipeline.depositInvoiceState,
+    balanceInvoiceState: args.pipeline.balanceInvoiceState,
+    amount_paid_cents: args.pipeline.amount_paid_cents,
+    balance_due_cents: args.pipeline.balance_due_cents,
+    balance_overdue: args.pipeline.balance_overdue,
+    balance_due_within_14_days: args.pipeline.balance_due_within_14_days,
+    deposit_pending_for_confirmed_surgery: args.pipeline.deposit_pending_for_confirmed_surgery,
+    failed_payment_in_last_60_days: args.pipeline.failed_payment_in_last_60_days,
+    installment_overdue: args.pipeline.installment_overdue,
+    paymentPathway: args.pipeline.paymentPathway,
+    pathwayTaskAttention: args.pipeline.pathwayTaskAttention,
+    financeApplicationAttention: args.pipeline.financeApplicationAttention,
+    superReleaseApplicationAttention: args.pipeline.superReleaseApplicationAttention,
+    internationalTransferApplicationAttention:
+      args.pipeline.internationalTransferApplicationAttention,
+    financeSlaBreach: args.financeSlaBreach,
+    financeRejected: args.financeRejected,
+  } satisfies BuildFinancialClearanceInput);
 }
 
 export function computeClearanceHorizonEndYmd(

@@ -1,6 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
@@ -37,7 +45,10 @@ import { FiOsMinimalNavRail, FiOsMobileBottomNav } from "@/src/components/fi-os/
 import { FiOsMoreNavDrawer } from "@/src/components/fi-os/FiOsMoreNavDrawer";
 import { FiOsSkipLink } from "@/src/components/fi-os/FiOsSkipLink";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
-import { fiOsChromeClasses, buildFiOsChromeViewportStyle } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  fiOsChromeClasses,
+  buildFiOsChromeViewportStyle,
+} from "@/src/components/fi-os/fiOsChromeTokens";
 import {
   FiOsNavigationPendingProvider,
   FiOsNavigationProgressStrip,
@@ -236,9 +247,7 @@ function FiOsAppShellBody({
     () => resolveFiOsMinimalNavItems(base, sidebarItems),
     [base, sidebarItems]
   );
-  const activeMinimalNavId = navCollapseActive
-    ? getFiOsMinimalNavActiveId(pathname, base)
-    : null;
+  const activeMinimalNavId = navCollapseActive ? getFiOsMinimalNavActiveId(pathname, base) : null;
   const showLegacySidebar = !navCollapseActive;
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";

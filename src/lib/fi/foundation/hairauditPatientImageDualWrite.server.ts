@@ -135,8 +135,7 @@ async function insertPatientImageRow(
 export async function dualWriteHairAuditImagesToPatientLibrary(
   params: DualWriteHairAuditPatientImagesParams
 ): Promise<DualWriteHairAuditPatientImagesResult> {
-  const { tenantId, fiEventId, fiCaseId, envelope, globalCaseId, uploadIdsByStoragePath } =
-    params;
+  const { tenantId, fiEventId, fiCaseId, envelope, globalCaseId, uploadIdsByStoragePath } = params;
   const supabase: SupabaseClient = params.supabase ?? supabaseAdmin();
   const errors: string[] = [];
   let inserted = 0;

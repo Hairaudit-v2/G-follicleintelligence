@@ -7,7 +7,5 @@ export type FiPerfEnvSlice = Partial<
 export function isFiPerfDiagnosticsEnabled(
   env: FiPerfEnvSlice = process.env as FiPerfEnvSlice
 ): boolean {
-  return (
-    isAffirmative(env.FI_PERF_DIAGNOSTICS_ENABLED) || isAffirmative(env.FI_LOADER_PERF_SPANS)
-  );
+  return isAffirmative(env.FI_PERF_DIAGNOSTICS_ENABLED) || isAffirmative(env.FI_LOADER_PERF_SPANS);
 }

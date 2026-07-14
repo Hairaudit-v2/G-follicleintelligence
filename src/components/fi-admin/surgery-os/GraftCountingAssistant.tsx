@@ -658,8 +658,9 @@ function toGraftTrayPanelEstimate(
     delta: estimate.delta,
     confidence: estimate.confidence,
     confidence_band: estimate.confidenceBand,
-    image_quality:
-      estimate.reviewWarnings.some((w) => w.includes("marginal")) ? "marginal" : "suitable",
+    image_quality: estimate.reviewWarnings.some((w) => w.includes("marginal"))
+      ? "marginal"
+      : "suitable",
     assessable: estimate.estimatedGraftCount != null,
     review_status: estimate.reviewStatus,
     reviewer_decision: estimate.reviewerDecision,
@@ -1355,8 +1356,8 @@ function CorrectionPanel({
         </div>
       ) : (
         <p className="rounded-xl border border-dashed border-slate-600/40 bg-slate-950/30 px-4 py-3 text-sm text-slate-500">
-          No graft tray photos linked yet. Capture the graft tray in Surgery Day imaging before final
-          reconciliation.
+          No graft tray photos linked yet. Capture the graft tray in Surgery Day imaging before
+          final reconciliation.
         </p>
       )}
 

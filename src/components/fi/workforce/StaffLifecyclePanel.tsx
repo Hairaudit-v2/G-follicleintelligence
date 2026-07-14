@@ -36,10 +36,7 @@ export function StaffLifecyclePanel({
             >
               <div className="flex items-start gap-3">
                 {isCurrent ? (
-                  <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-[#22C1FF]"
-                    aria-hidden
-                  />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#22C1FF]" aria-hidden />
                 ) : (
                   <Circle className="mt-0.5 h-4 w-4 shrink-0 text-[#475569]" aria-hidden />
                 )}

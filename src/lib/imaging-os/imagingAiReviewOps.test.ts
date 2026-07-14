@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  mapImagingAiJobRow,
-  supersedeImagingAiAnalysisJob,
-} from "./imagingAiAnalysisJobs.server";
+import { mapImagingAiJobRow, supersedeImagingAiAnalysisJob } from "./imagingAiAnalysisJobs.server";
 import {
   markImagingAiReviewJobIgnored,
   requeueStaleImagingAiReviewJob,
@@ -82,7 +79,12 @@ function createOpsStore(initial: { jobs?: JobRow[]; reviewStatus?: string | null
       if (terminal === "single" || terminal === "maybeSingle") {
         return { data: matched[0] ?? null, error: null };
       }
-      if (op === "select" && matched.length > 0 && Object.keys(matched[0]).length === 1 && matched[0].id) {
+      if (
+        op === "select" &&
+        matched.length > 0 &&
+        Object.keys(matched[0]).length === 1 &&
+        matched[0].id
+      ) {
         return { data: matched.map((r) => ({ id: r.id })), error: null };
       }
       return { data: matched, error: null };
@@ -200,7 +202,12 @@ function createOpsStore(initial: { jobs?: JobRow[]; reviewStatus?: string | null
     },
   } as unknown as import("@supabase/supabase-js").SupabaseClient;
 
-  return { client, jobs, setReviewStatus: (status: string | null) => reviewStatusByImage.set("22222222-2222-4222-8222-222222222222", status) };
+  return {
+    client,
+    jobs,
+    setReviewStatus: (status: string | null) =>
+      reviewStatusByImage.set("22222222-2222-4222-8222-222222222222", status),
+  };
 }
 
 describe("imagingAiReviewOpsMutations", () => {

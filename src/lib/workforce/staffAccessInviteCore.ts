@@ -14,8 +14,7 @@ export const STAFF_ACCESS_INVITE_ERRORS = {
   NOT_ACTIVE: "This invite is no longer active. Ask your clinic administrator for a new invite.",
   NO_CLINIC_ACCESS: "You do not have access to this clinic.",
   SUSPENDED: "Your staff access has been suspended. Please contact your clinic administrator.",
-  PIN_SELF_SERVICE:
-    "You can set your PIN from a valid invite link or from your own staff account.",
+  PIN_SELF_SERVICE: "You can set your PIN from a valid invite link or from your own staff account.",
   NOT_ELIGIBLE: "This staff member is not eligible for a login invite.",
   REVOKED_REACTIVATE:
     "Staff access was revoked or suspended. Reactivate access before sending a new invite.",
@@ -115,6 +114,8 @@ export function formatInviteExpiryDate(iso: string): string {
 }
 
 export function extractStaffFirstName(fullName: string): string {
-  const parts = String(fullName ?? "").trim().split(/\s+/);
+  const parts = String(fullName ?? "")
+    .trim()
+    .split(/\s+/);
   return parts[0] ?? "there";
 }

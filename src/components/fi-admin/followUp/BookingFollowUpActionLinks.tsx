@@ -37,10 +37,7 @@ export function BookingFollowUpActionLinks({
     encounterType: "photos_only",
   });
 
-  const wrap =
-    layout === "grid"
-      ? "grid grid-cols-2 gap-2"
-      : "flex flex-wrap gap-2";
+  const wrap = layout === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-wrap gap-2";
 
   return (
     <div className={cn(wrap, className)}>
@@ -48,12 +45,22 @@ export function BookingFollowUpActionLinks({
         <RotateCcw className="h-3.5 w-3.5" aria-hidden />
         Start follow-up
       </Link>
-      <Link href={legacyHref} className={cn(btn, "border border-sky-500/40 bg-sky-950/50 text-sky-200 hover:bg-sky-900/60")}>
+      <Link
+        href={legacyHref}
+        className={cn(
+          btn,
+          "border border-sky-500/40 bg-sky-950/50 text-sky-200 hover:bg-sky-900/60"
+        )}
+      >
         Returning Timely patient
       </Link>
       <Link
         href={photosHref}
-        className={cn(btn, "border border-teal-500/30 bg-teal-950/40 text-teal-200 hover:bg-teal-900/50", layout === "grid" ? "col-span-2" : "")}
+        className={cn(
+          btn,
+          "border border-teal-500/30 bg-teal-950/40 text-teal-200 hover:bg-teal-900/50",
+          layout === "grid" ? "col-span-2" : ""
+        )}
       >
         <Camera className="h-3.5 w-3.5" aria-hidden />
         Capture photos

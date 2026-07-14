@@ -18,15 +18,13 @@ const PATIENT = "33333333-3333-4333-8333-333333333333";
 const EVENT = "44444444-4444-4444-8444-444444444444";
 const STORAGE_PATH = `tenant/${TENANT}/cases/${CASE}/patient/scalp/front.jpg`;
 
-function buildEnvelope(
-  document: {
-    kind: string;
-    filename: string;
-    storage_path: string;
-    mime_type?: string;
-    size_bytes?: number;
-  }
-): FiEventEnvelope {
+function buildEnvelope(document: {
+  kind: string;
+  filename: string;
+  storage_path: string;
+  mime_type?: string;
+  size_bytes?: number;
+}): FiEventEnvelope {
   return {
     tenant_id: TENANT,
     event_type: "hli.document.uploaded",

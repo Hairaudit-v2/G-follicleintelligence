@@ -103,13 +103,22 @@ export function FiOsCalendarQuickFilters({
 
   const filterChips = (
     <>
-      <CalendarTransitionLink href={resourceViewHref("staff")} className={chipClass(query.resourceView === "staff")}>
+      <CalendarTransitionLink
+        href={resourceViewHref("staff")}
+        className={chipClass(query.resourceView === "staff")}
+      >
         By staff
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={resourceViewHref("room")} className={chipClass(query.resourceView === "room")}>
+      <CalendarTransitionLink
+        href={resourceViewHref("room")}
+        className={chipClass(query.resourceView === "room")}
+      >
         By room
       </CalendarTransitionLink>
-      <CalendarTransitionLink href={resourceViewHref("clinic")} className={chipClass(query.resourceView === "clinic")}>
+      <CalendarTransitionLink
+        href={resourceViewHref("clinic")}
+        className={chipClass(query.resourceView === "clinic")}
+      >
         By clinic
       </CalendarTransitionLink>
       {TYPE_CHIPS.map((c) => {
@@ -210,7 +219,10 @@ export function FiOsCalendarQuickFilters({
             Quick filters
           </span>
           <ChevronDown
-            className={cn("h-4 w-4 shrink-0 text-slate-500 transition", desktopOpen && "rotate-180")}
+            className={cn(
+              "h-4 w-4 shrink-0 text-slate-500 transition",
+              desktopOpen && "rotate-180"
+            )}
             aria-hidden
           />
         </button>

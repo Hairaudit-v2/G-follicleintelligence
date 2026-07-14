@@ -31,9 +31,7 @@ export async function appendExpensePostedLedgerEntry(input: {
     consultationId: exp.consultation_id,
     sourceModule: "financial_os",
     description:
-      exp.description?.trim() ||
-      exp.vendor_name?.trim() ||
-      `Expense ${exp.id.slice(0, 8)}`,
+      exp.description?.trim() || exp.vendor_name?.trim() || `Expense ${exp.id.slice(0, 8)}`,
     idempotencyKey,
     metadata: {
       expense_id: exp.id,

@@ -25,7 +25,9 @@ export function parseGraftTrayAiFeatureFlags(
   const providerRaw = String(env.FI_IMAGING_GRAFT_TRAY_AI_PROVIDER ?? "stub")
     .trim()
     .toLowerCase();
-  const toleranceRaw = Number(env.FI_IMAGING_GRAFT_TRAY_COUNT_TOLERANCE_PERCENT ?? DEFAULT_TOLERANCE_PERCENT);
+  const toleranceRaw = Number(
+    env.FI_IMAGING_GRAFT_TRAY_COUNT_TOLERANCE_PERCENT ?? DEFAULT_TOLERANCE_PERCENT
+  );
   return {
     enabled: env.FI_IMAGING_ENABLE_GRAFT_TRAY_AI_COUNT === "true",
     provider: providerRaw === "openai_vision" ? "openai_vision" : "stub",
@@ -123,8 +125,7 @@ export function resolveManualGraftCountFromEvents(input: {
   }
 
   const totalConfirmed = confirmedTrays.reduce(
-    (sum, e) =>
-      sum + (e.singles ?? 0) + (e.doubles ?? 0) + (e.triples ?? 0) + (e.multiples ?? 0),
+    (sum, e) => sum + (e.singles ?? 0) + (e.doubles ?? 0) + (e.triples ?? 0) + (e.multiples ?? 0),
     0
   );
   if (totalConfirmed > 0) {

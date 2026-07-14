@@ -104,12 +104,7 @@ export const procedureDayMetricSchema = optionalAdminKey.extend({
     "adverse_events",
     "notes",
   ]),
-  value: z.union([
-    z.number(),
-    z.string(),
-    z.array(z.string()),
-    z.null(),
-  ]),
+  value: z.union([z.number(), z.string(), z.array(z.string()), z.null()]),
   increment: z.number().int().optional(),
 });
 

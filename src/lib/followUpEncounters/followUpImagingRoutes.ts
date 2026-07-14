@@ -59,7 +59,9 @@ export function buildReturningPatientFlowHref(
 }
 
 export function parseLegacyFollowUpCaptureSource(value: string | null | undefined): boolean {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase() === LEGACY_FOLLOW_UP_CAPTURE_SOURCE;
+  return (
+    String(value ?? "")
+      .trim()
+      .toLowerCase() === LEGACY_FOLLOW_UP_CAPTURE_SOURCE
+  );
 }

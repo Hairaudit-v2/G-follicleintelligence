@@ -61,13 +61,7 @@ describe("moneyTrustCopy", () => {
   });
 
   it("take payment href follows inbox flag", () => {
-    assert.equal(
-      moneyTakePaymentHref("/fi-admin/t1", true),
-      "/fi-admin/t1/payments"
-    );
-    assert.equal(
-      moneyTakePaymentHref("/fi-admin/t1", false),
-      "/fi-admin/t1/financial/payments"
-    );
+    assert.equal(moneyTakePaymentHref("/fi-admin/t1", true), "/fi-admin/t1/payments");
+    assert.equal(moneyTakePaymentHref("/fi-admin/t1", false), "/fi-admin/t1/financial/payments");
   });
 });

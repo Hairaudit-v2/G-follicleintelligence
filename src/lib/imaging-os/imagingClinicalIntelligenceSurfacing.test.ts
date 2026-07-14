@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildClinicalImageAnalysisFromHli, clinicalAnalysisResultToMetadataRecord } from "./clinicalImageAnalysisCore";
+import {
+  buildClinicalImageAnalysisFromHli,
+  clinicalAnalysisResultToMetadataRecord,
+} from "./clinicalImageAnalysisCore";
 import { buildImagingClinicalIntelligenceView } from "./imagingClinicalIntelligenceSurfacing";
 import { buildStaffReviewRecord, mergeImagingStaffReviewMetadata } from "./imagingStaffReviewCore";
 

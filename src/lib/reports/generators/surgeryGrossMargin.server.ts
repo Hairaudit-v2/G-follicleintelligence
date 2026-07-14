@@ -26,9 +26,7 @@ export async function generateSurgeryGrossMarginReport(input: {
 
   const status = input.snapshotStatus?.trim();
   const snapshotStatus =
-    status === "paid_in_full" || status === "outstanding" || status === "all"
-      ? status
-      : "all";
+    status === "paid_in_full" || status === "outstanding" || status === "all" ? status : "all";
 
   const payload = await loadSurgeryEconomicsDashboardPayload(tid, 50, {
     dateFrom: period_start,

@@ -1,6 +1,9 @@
 import "server-only";
 
-import { calendarDateStringFromInstant, resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  resolveTenantCalendarTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { workforceTenantClient } from "@/src/lib/workforce-os/security/tenantScopedQuery.server";
@@ -64,8 +67,7 @@ export async function buildPayPeriodPayrollExport(input: {
 
   const role = access.userRole.trim().toLowerCase();
   const canManage =
-    access.platformAdminPreview ||
-    (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
+    access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
   if (!canManage) {
     return { ok: false, status: 403, error: "Payroll export requires HR manager access." };
   }
@@ -78,8 +80,7 @@ export async function buildPayPeriodPayrollExport(input: {
     tzRow as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null
   );
   const anchorDate =
-    input.periodDate?.trim() ||
-    calendarDateStringFromInstant(new Date(), calendarTimezone);
+    input.periodDate?.trim() || calendarDateStringFromInstant(new Date(), calendarTimezone);
   const payPeriod = resolvePayPeriodContaining(
     anchorDate,
     timeClockPolicy.payPeriodFrequency,

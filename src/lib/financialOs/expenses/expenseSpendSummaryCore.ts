@@ -39,10 +39,7 @@ export function aggregateExpenseSpendByCategory(input: {
   const period_start = input.period_start.slice(0, 10);
   const period_end = input.period_end.slice(0, 10);
 
-  const byCode = new Map<
-    string,
-    { label: string; spend_cents: number; expense_count: number }
-  >();
+  const byCode = new Map<string, { label: string; spend_cents: number; expense_count: number }>();
   let total_posted_spend_cents = 0;
   let expense_count = 0;
 
@@ -72,7 +69,9 @@ export function aggregateExpenseSpendByCategory(input: {
           ? Math.round((v.spend_cents / total_posted_spend_cents) * 1000) / 10
           : 0,
     }))
-    .sort((a, b) => b.spend_cents - a.spend_cents || a.category_code.localeCompare(b.category_code));
+    .sort(
+      (a, b) => b.spend_cents - a.spend_cents || a.category_code.localeCompare(b.category_code)
+    );
 
   return {
     period_start,

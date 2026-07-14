@@ -792,11 +792,16 @@ export async function loadOperationalCalendarGridData(
 
   const tFeedStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const operationalFeed = monthSummaryMode
-    ? await buildOperationalFeedForGridBookings(tid, structuredBookings, {
-        staffNameById,
-        roomDisplayById: resources.roomDisplayById,
-        staffIdByUserId: resources.staffIdByUserId,
-      }, calendarSettings)
+    ? await buildOperationalFeedForGridBookings(
+        tid,
+        structuredBookings,
+        {
+          staffNameById,
+          roomDisplayById: resources.roomDisplayById,
+          staffIdByUserId: resources.staffIdByUserId,
+        },
+        calendarSettings
+      )
     : null;
   const tFeedEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 

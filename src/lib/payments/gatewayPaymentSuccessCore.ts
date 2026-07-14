@@ -43,9 +43,7 @@ export type GatewayPaymentSuccessOutcome =
 
 /** Webhook may be marked processed only when payment settlement is confirmed or idempotent. */
 export function isGatewayPaymentWebhookSettled(outcome: GatewayPaymentSuccessOutcome): boolean {
-  return (
-    outcome.status === "payment_recorded" || outcome.status === "duplicate_already_recorded"
-  );
+  return outcome.status === "payment_recorded" || outcome.status === "duplicate_already_recorded";
 }
 
 export type StripeWebhookUnresolvedContext = {

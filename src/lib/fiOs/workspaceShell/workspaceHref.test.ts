@@ -37,9 +37,7 @@ describe("inferWorkspaceFromHref", () => {
 
   it("maps pathology result hrefs", () => {
     assert.deepEqual(
-      inferWorkspaceFromHref(
-        `/fi-admin/${TENANT}/patients/${PATIENT}/blood-results/${PATHOLOGY}`
-      ),
+      inferWorkspaceFromHref(`/fi-admin/${TENANT}/patients/${PATIENT}/blood-results/${PATHOLOGY}`),
       { kind: "pathology_result", id: PATHOLOGY }
     );
   });
@@ -74,10 +72,10 @@ describe("inferWorkspaceFromHref", () => {
   });
 
   it("maps payment hrefs", () => {
-    assert.deepEqual(
-      inferWorkspaceFromHref(`/fi-admin/${TENANT}/financial/payments/${PAYMENT}`),
-      { kind: "payment", id: PAYMENT }
-    );
+    assert.deepEqual(inferWorkspaceFromHref(`/fi-admin/${TENANT}/financial/payments/${PAYMENT}`), {
+      kind: "payment",
+      id: PAYMENT,
+    });
     assert.deepEqual(
       inferWorkspaceFromHref(`/fi-admin/${TENANT}/financial/payment-requests/${PAYMENT}`),
       { kind: "payment", id: PAYMENT }

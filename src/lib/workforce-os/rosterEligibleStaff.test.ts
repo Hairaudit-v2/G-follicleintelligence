@@ -349,10 +349,7 @@ test("inactive staff with no standard hours do not produce generation skips when
     [STAFF_ACTIVE, { eligible: true, reason: null }],
     [STAFF_INACTIVE, { eligible: false, reason: "inactive" as const }],
   ]);
-  const staffIds = resolveRosterEligibleStaffIds(
-    [STAFF_ACTIVE, STAFF_INACTIVE],
-    eligibility
-  );
+  const staffIds = resolveRosterEligibleStaffIds([STAFF_ACTIVE, STAFF_INACTIVE], eligibility);
   assert.deepEqual(staffIds, [STAFF_ACTIVE]);
 
   const plan = generateRosterFromStandardHours({

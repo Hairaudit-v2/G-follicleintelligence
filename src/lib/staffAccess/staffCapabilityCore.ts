@@ -15,10 +15,7 @@ import {
   moduleSatisfies,
   type EffectiveAccessMap,
 } from "./staffAccessCore";
-import {
-  accessLevelSatisfies,
-  type StaffAccessLevel,
-} from "./staffAccessRegistry";
+import { accessLevelSatisfies, type StaffAccessLevel } from "./staffAccessRegistry";
 
 /**
  * Whether the viewer holds a capability via module level or explicit tab grant.
@@ -110,9 +107,7 @@ export function canEnterTeamWorkspace(access: EffectiveAccessMap): boolean {
 }
 
 /** List capabilities currently satisfied (for audit snapshots). */
-export function listSatisfiedStaffCapabilities(
-  access: EffectiveAccessMap
-): StaffCapabilityKey[] {
+export function listSatisfiedStaffCapabilities(access: EffectiveAccessMap): StaffCapabilityKey[] {
   return (Object.keys(STAFF_CAPABILITY_SPECS) as StaffCapabilityKey[]).filter((key) =>
     staffCapabilitySatisfies(access, key)
   );

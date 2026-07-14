@@ -8,10 +8,7 @@ import { loadSharedPatientVisualSummaryPdf } from "@/src/lib/imaging-os/patientV
 
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) {

@@ -38,7 +38,10 @@ describe("treatment imaging protocol — booking detection", () => {
       }),
       true
     );
-    assert.equal(resolveTreatmentTypeLabel("mesotherapy", { title: "Dutasteride mesotherapy" }), "dutasteride_mesotherapy");
+    assert.equal(
+      resolveTreatmentTypeLabel("mesotherapy", { title: "Dutasteride mesotherapy" }),
+      "dutasteride_mesotherapy"
+    );
   });
 
   it("excludes consultation and surgery bookings", () => {

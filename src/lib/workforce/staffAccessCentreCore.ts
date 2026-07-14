@@ -29,12 +29,16 @@ export function isArchivedStaff(archivedAt: string | null | undefined): boolean 
 }
 
 export function isDepartedStaff(employmentStatus: string | null | undefined): boolean {
-  const status = String(employmentStatus ?? "").trim().toLowerCase();
+  const status = String(employmentStatus ?? "")
+    .trim()
+    .toLowerCase();
   return DEPARTED_EMPLOYMENT_STATUSES.has(status);
 }
 
 export function resolvePermissionTemplateLabel(roleCode: string | null | undefined): string {
-  const key = String(roleCode ?? "").trim().toLowerCase();
+  const key = String(roleCode ?? "")
+    .trim()
+    .toLowerCase();
   if (!key) return "—";
   const label = STAFF_ROLE_LABELS[key as StaffRoleKey];
   return label ?? key.replace(/_/g, " ");
@@ -49,7 +53,11 @@ export function resolveAuthLoginStatus(input: {
   authHasSignedIn: boolean;
 }): StaffAuthLoginStatus {
   if (input.systemAccessRevoked) return "revoked";
-  if (String(input.employmentStatus ?? "").trim().toLowerCase() === "suspended") {
+  if (
+    String(input.employmentStatus ?? "")
+      .trim()
+      .toLowerCase() === "suspended"
+  ) {
     return "suspended";
   }
   if (input.authEmailConfirmed || input.authHasSignedIn) return "login_active";
@@ -62,7 +70,9 @@ export function resolveInviteStatus(input: {
   expiresAt: string | null | undefined;
   now?: Date;
 }): StaffInviteStatus {
-  const raw = String(input.invitationStatus ?? "").trim().toLowerCase();
+  const raw = String(input.invitationStatus ?? "")
+    .trim()
+    .toLowerCase();
   if (!raw) return "none";
   if (raw === "accepted") return "accepted";
   if (raw === "revoked") return "revoked";
@@ -110,7 +120,9 @@ export function inviteStatusLabel(status: StaffInviteStatus): string {
 }
 
 export function pinStatusLabel(status: string | null | undefined): string {
-  const s = String(status ?? "not_set").trim().toLowerCase();
+  const s = String(status ?? "not_set")
+    .trim()
+    .toLowerCase();
   if (s === "active") return "PIN Active";
   if (s === "locked") return "PIN Locked";
   if (s === "disabled") return "PIN Disabled";
@@ -123,8 +135,6 @@ export function nextResendInvitationTimestamps(
   expiryDays: number = STAFF_LOGIN_INVITE_EXPIRY_DAYS
 ): { invitedAt: string; expiresAt: string; updatedAt: string } {
   const invitedAt = now.toISOString();
-  const expiresAt = new Date(
-    now.getTime() + expiryDays * 24 * 60 * 60 * 1000
-  ).toISOString();
+  const expiresAt = new Date(now.getTime() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
   return { invitedAt, expiresAt, updatedAt: invitedAt };
 }

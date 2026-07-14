@@ -16,8 +16,7 @@ export const PATIENT_PORTAL_IMAGE_SLOT_OPTIONS = [
   { slug: "fu_donor", label: "Donor area" },
 ] as const;
 
-export type PatientPortalImageSlotSlug =
-  (typeof PATIENT_PORTAL_IMAGE_SLOT_OPTIONS)[number]["slug"];
+export type PatientPortalImageSlotSlug = (typeof PATIENT_PORTAL_IMAGE_SLOT_OPTIONS)[number]["slug"];
 
 export function normalizePatientPortalImageSlotSlug(
   raw: string | null | undefined

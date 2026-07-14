@@ -115,9 +115,7 @@ export function isGraftTrayEstimateSupersededStale(input: {
   return input.hasNewerActiveJob;
 }
 
-export function graftTrayReviewStatusHasFinalCount(
-  reviewStatus: GraftTrayAiReviewStatus
-): boolean {
+export function graftTrayReviewStatusHasFinalCount(reviewStatus: GraftTrayAiReviewStatus): boolean {
   return !NON_FINAL_REVIEW_STATUSES.has(reviewStatus);
 }
 
@@ -206,7 +204,10 @@ export function buildSurgeryOsGraftTrayCaseIntelligenceSummary(input: {
   const supersededStale = input.linkSummaries.filter((s) => s.supersededStaleJob);
   const allReviewed =
     input.linkSummaries.length > 0 &&
-    input.linkSummaries.every((s) => s.hasFinalCount || s.reviewStatus === "rejected_ai" || s.reviewStatus === "retake_requested");
+    input.linkSummaries.every(
+      (s) =>
+        s.hasFinalCount || s.reviewStatus === "rejected_ai" || s.reviewStatus === "retake_requested"
+    );
   const totalFinalAcceptedGrafts = allReviewed
     ? reviewed.reduce((sum, s) => sum + (s.finalAcceptedCount ?? 0), 0)
     : null;

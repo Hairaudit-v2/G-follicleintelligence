@@ -60,11 +60,7 @@ export async function validateStandardHoursWriteScope(
   if (!staffRow) throw new Error(STAFF_STANDARD_HOURS_STAFF_NOT_FOUND_MESSAGE);
 
   const clinicIds = [
-    ...new Set(
-      days
-        .map((day) => day.clinic_id?.trim())
-        .filter((id): id is string => Boolean(id))
-    ),
+    ...new Set(days.map((day) => day.clinic_id?.trim()).filter((id): id is string => Boolean(id))),
   ];
   for (const clinicId of clinicIds) {
     const ok = await clinicBelongsToTenant(tid, clinicId, supabase);
@@ -142,7 +138,10 @@ export async function loadActiveStandardHoursForTenant(
     .order("weekday", { ascending: true });
 
   if (staffIds?.length) {
-    query = query.in("staff_id", staffIds.map((id) => assertNonEmptyUuid(id, "staffId")));
+    query = query.in(
+      "staff_id",
+      staffIds.map((id) => assertNonEmptyUuid(id, "staffId"))
+    );
   }
 
   const { data, error } = await query;
@@ -288,10 +287,7 @@ export async function applyDefaultClinicStandardHoursToMissingStaff(
       skippedStaffIds.push(staff.id);
       continue;
     }
-    await saveStaffStandardHours(
-      { tenantId: tid, staffId: staff.id, days: defaultDays },
-      opts
-    );
+    await saveStaffStandardHours({ tenantId: tid, staffId: staff.id, days: defaultDays }, opts);
     appliedStaffIds.push(staff.id);
   }
 

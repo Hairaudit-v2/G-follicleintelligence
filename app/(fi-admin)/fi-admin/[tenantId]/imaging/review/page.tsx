@@ -79,12 +79,15 @@ export default async function ImagingClinicalReviewPage({
           Clinical image review queue
         </h1>
         <p className="max-w-3xl text-sm text-slate-400">
-          Staff-facing queue for low-confidence classifications, quality flags, missing scalp regions,
-          failed analysis, and assessment items requiring review. No patient-facing diagnostic
-          claims.
+          Staff-facing queue for low-confidence classifications, quality flags, missing scalp
+          regions, failed analysis, and assessment items requiring review. No patient-facing
+          diagnostic claims.
         </p>
         <p className="text-xs text-slate-500">
-          <Link href={`/fi-admin/${tid}/imaging/ai-jobs`} className="text-violet-300 hover:underline">
+          <Link
+            href={`/fi-admin/${tid}/imaging/ai-jobs`}
+            className="text-violet-300 hover:underline"
+          >
             AI review operations panel
           </Link>
         </p>

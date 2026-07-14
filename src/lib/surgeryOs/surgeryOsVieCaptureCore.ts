@@ -277,10 +277,9 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   const surgical = computeSurgicalDocumentationCompleteness(sessions);
   const donor = computeDonorDocumentationCompleteness(sessions);
   const protocol = getVieProtocol("surgery_day");
-  const protocolSlots =
-    input.protocolSlots?.length
-      ? input.protocolSlots
-      : (protocol?.slots.map(toProtocolSlotDef) ?? []);
+  const protocolSlots = input.protocolSlots?.length
+    ? input.protocolSlots
+    : (protocol?.slots.map(toProtocolSlotDef) ?? []);
   const globalNextSlug = protocolSlots.length
     ? nextRecommendedSlotSlug(protocolSlots, input.progress)
     : null;

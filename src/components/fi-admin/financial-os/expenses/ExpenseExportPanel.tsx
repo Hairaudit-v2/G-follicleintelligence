@@ -32,9 +32,7 @@ export function ExpenseExportPanel(props: {
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
 
-  function run(
-    format: "fi_csv" | "quickbooks_csv" | "quickbooks_json" | "xero_csv"
-  ) {
+  function run(format: "fi_csv" | "quickbooks_csv" | "quickbooks_json" | "xero_csv") {
     if (!props.canExport) return;
     setFeedback(null);
     start(async () => {
@@ -48,9 +46,7 @@ export function ExpenseExportPanel(props: {
         return;
       }
       const mime =
-        format === "quickbooks_json"
-          ? "application/json;charset=utf-8"
-          : "text/csv;charset=utf-8";
+        format === "quickbooks_json" ? "application/json;charset=utf-8" : "text/csv;charset=utf-8";
       downloadText(res.filename, res.content, mime);
       setFeedback({
         message: `Exported ${res.posted_count} posted / ${res.row_count} total (${format}).`,

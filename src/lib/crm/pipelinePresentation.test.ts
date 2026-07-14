@@ -28,9 +28,7 @@ const T3 = "t3333333-3333-4333-8333-333333333333";
 const P1 = "pppppppp-pppp-4ppp-8ppp-pppppppppppp";
 const U1 = "uuuuuuuu-uuuu-4uuu-8uuu-uuuuuuuuuuuu";
 
-function leadRow(
-  partial: Partial<FiCrmLeadRow> & Pick<FiCrmLeadRow, "id">
-): FiCrmLeadRow {
+function leadRow(partial: Partial<FiCrmLeadRow> & Pick<FiCrmLeadRow, "id">): FiCrmLeadRow {
   return {
     id: partial.id,
     tenant_id: "22222222-2222-4222-8222-222222222222",
@@ -54,29 +52,27 @@ function leadRow(
   };
 }
 
-function kanban(
-  partial: {
-    id: string;
-    slug?: string;
-    stageLabel?: string;
-    status?: string;
-    ownerId?: string | null;
-    ownerEmail?: string | null;
-    personId?: string;
-    personMeta?: Record<string, unknown>;
-    patientId?: string | null;
-    convertedAt?: string | null;
-    priority?: string | null;
-    metadata?: Record<string, unknown>;
-    daysInStage?: number | null;
-    overdueTaskCount?: number;
-    isHighValue?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    lastActivityAtIso?: string;
-    summary?: string;
-  }
-): CrmKanbanLeadCard {
+function kanban(partial: {
+  id: string;
+  slug?: string;
+  stageLabel?: string;
+  status?: string;
+  ownerId?: string | null;
+  ownerEmail?: string | null;
+  personId?: string;
+  personMeta?: Record<string, unknown>;
+  patientId?: string | null;
+  convertedAt?: string | null;
+  priority?: string | null;
+  metadata?: Record<string, unknown>;
+  daysInStage?: number | null;
+  overdueTaskCount?: number;
+  isHighValue?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  lastActivityAtIso?: string;
+  summary?: string;
+}): CrmKanbanLeadCard {
   const slug = partial.slug ?? "qualified";
   return {
     lead: leadRow({
@@ -102,13 +98,12 @@ function kanban(
       id: partial.personId ?? "person-1",
       metadata: partial.personMeta ?? { full_name: "Alex Example", email: "a@example.com" },
     },
-    owner:
-      (partial.ownerId === undefined ? U1 : partial.ownerId)
-        ? {
-            id: (partial.ownerId === undefined ? U1 : partial.ownerId) as string,
-            email: partial.ownerEmail ?? "owner@example.com",
-          }
-        : null,
+    owner: (partial.ownerId === undefined ? U1 : partial.ownerId)
+      ? {
+          id: (partial.ownerId === undefined ? U1 : partial.ownerId) as string,
+          email: partial.ownerEmail ?? "owner@example.com",
+        }
+      : null,
     patient: partial.patientId ? { id: partial.patientId } : null,
     clinicalSummaryLine: null,
     norwoodScale: null,
@@ -181,9 +176,7 @@ test("2. duplicate lead input produces one card plus diagnostic", () => {
 });
 
 test("3. duplicate enrichment cannot create a card", () => {
-  const tasks = new Map<string, PipelineTaskInput[]>([
-    [L2, [task({ taskId: T1, leadId: L2 })]],
-  ]);
+  const tasks = new Map<string, PipelineTaskInput[]>([[L2, [task({ taskId: T1, leadId: L2 })]]]);
   const p = build([kanban({ id: L1 })], { tasksByLeadId: tasks });
   assert.equal(allCards(p).length, 1);
   assert.ok(p.diagnostics.orphanTaskIds.includes(T1));
@@ -328,10 +321,7 @@ test("10. completed task not selected", () => {
 
 test("11. overdue state derives from canonical task rules", () => {
   const tasks = new Map([
-    [
-      L1,
-      [task({ taskId: T1, leadId: L1, dueAtIso: "2026-07-10T10:00:00.000Z" })],
-    ],
+    [L1, [task({ taskId: T1, leadId: L1, dueAtIso: "2026-07-10T10:00:00.000Z" })]],
   ]);
   const p = build([kanban({ id: L1 })], { tasksByLeadId: tasks });
   const c = findCard(p, L1)!;
@@ -367,9 +357,7 @@ test("12. one task appears in one bucket", () => {
 });
 
 test("13. orphan task is reported and creates no card", () => {
-  const tasks = new Map([
-    [L2, [task({ taskId: T1, leadId: L2 })]],
-  ]);
+  const tasks = new Map([[L2, [task({ taskId: T1, leadId: L2 })]]]);
   const p = build([kanban({ id: L1 })], { tasksByLeadId: tasks });
   assert.deepEqual(p.diagnostics.orphanTaskIds, [T1]);
   assert.equal(allCards(p).length, 1);
@@ -668,9 +656,10 @@ test("33. complete follow-up requires an open task", () => {
     ]),
   });
   assert.ok(
-    [withTask.columns[0] && findCard(withTask, L1)!.primaryAction, ...findCard(withTask, L1)!.secondaryActions].includes(
-      "complete_follow_up"
-    )
+    [
+      withTask.columns[0] && findCard(withTask, L1)!.primaryAction,
+      ...findCard(withTask, L1)!.secondaryActions,
+    ].includes("complete_follow_up")
   );
 
   const noTask = build([kanban({ id: L1 })], {

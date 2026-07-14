@@ -64,30 +64,31 @@ function moreSections(opts?: {
     opts?.showNavigationAdminSurfaces === true ||
     opts?.showReportsAdminSurfaces === true ||
     opts?.showTeamAdminSurfaces === true;
-  return buildFiOsSidebarWorkflowSections(fullSidebar(showAdmin), opts?.workspaceProfile ?? "default", {
-    tenantBase: base,
-    forCollapsedShell: true,
-    showNavigationAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
-    showProcedureDayNav: opts?.showProcedureDayNav ?? false,
-    showSurgeryAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
-    showTeamAdminSurfaces: opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
-    showReportsAdminSurfaces:
-      opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
-    showSettingsAdminSurfaces:
-      opts?.showNavigationAdminSurfaces ?? opts?.showReportsAdminSurfaces ?? false,
-  });
+  return buildFiOsSidebarWorkflowSections(
+    fullSidebar(showAdmin),
+    opts?.workspaceProfile ?? "default",
+    {
+      tenantBase: base,
+      forCollapsedShell: true,
+      showNavigationAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
+      showProcedureDayNav: opts?.showProcedureDayNav ?? false,
+      showSurgeryAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
+      showTeamAdminSurfaces:
+        opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+      showReportsAdminSurfaces:
+        opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+      showSettingsAdminSurfaces:
+        opts?.showNavigationAdminSurfaces ?? opts?.showReportsAdminSurfaces ?? false,
+    }
+  );
 }
 
 function flattenMoreSubLabels(sections = moreSections()) {
-  return sections.flatMap((s) =>
-    s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? [])
-  );
+  return sections.flatMap((s) => s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? []));
 }
 
 function flattenMoreSubIds(sections = moreSections()) {
-  return sections.flatMap((s) =>
-    s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
-  );
+  return sections.flatMap((s) => s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? []));
 }
 
 test("go-live audit notes document scope and six-slot rail", () => {
@@ -100,20 +101,22 @@ test("go-live audit notes document scope and six-slot rail", () => {
 });
 
 test("primary rail exactly equals Today · Calendar · Patients · Front desk · Team · More", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
 
   const items = resolveFiOsMinimalNavItems(base, fullSidebar());
   assert.equal(items.length, 6);
-  assert.deepEqual(items.map((i) => i.id), [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS]);
-  assert.deepEqual(items.map((i) => i.label), [...GO_LIVE_PRIMARY_RAIL_LABELS]);
+  assert.deepEqual(
+    items.map((i) => i.id),
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS]
+  );
+  assert.deepEqual(
+    items.map((i) => i.label),
+    [...GO_LIVE_PRIMARY_RAIL_LABELS]
+  );
 });
 
 test("Search and New are not present in primary rail", () => {
@@ -220,7 +223,9 @@ test("deep-link route catalog includes preserved legacy routes", () => {
   ];
   for (const suffix of expected) {
     assert.ok(
-      GO_LIVE_LEGACY_ROUTE_SUFFIXES.includes(suffix as (typeof GO_LIVE_LEGACY_ROUTE_SUFFIXES)[number]),
+      GO_LIVE_LEGACY_ROUTE_SUFFIXES.includes(
+        suffix as (typeof GO_LIVE_LEGACY_ROUTE_SUFFIXES)[number]
+      ),
       `legacy catalog should include ${suffix}`
     );
   }

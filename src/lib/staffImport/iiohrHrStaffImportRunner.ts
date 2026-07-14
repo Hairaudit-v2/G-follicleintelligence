@@ -601,9 +601,8 @@ export async function applyIiohrHrStaffImportPlanForTests(
         break;
       }
       case "align_iiohr_departure": {
-        const { alignIiohrStaffDeparture } = await import(
-          "@/src/lib/staffImport/iiohrStaffDepartureAlignment.server"
-        );
+        const { alignIiohrStaffDeparture } =
+          await import("@/src/lib/staffImport/iiohrStaffDepartureAlignment.server");
         const result = await alignIiohrStaffDeparture({
           tenantId: tid,
           fiStaffId: action.payload.staffId,
@@ -759,14 +758,12 @@ export async function runIiohrHrStaffImport(
 
   let workforceInjectedSourceIds = 0;
   if (rows.length > 0) {
-    const { syncAllStaffProjectionsForTenant } = await import(
-      "@/src/lib/workforce-os/hrReconciliation.server"
-    );
+    const { syncAllStaffProjectionsForTenant } =
+      await import("@/src/lib/workforce-os/hrReconciliation.server");
     await syncAllStaffProjectionsForTenant(tenantId);
 
-    const { enrichImportSnapshotsWithIdentityLinks } = await import(
-      "@/src/lib/workforce/identityReconciliation.server"
-    );
+    const { enrichImportSnapshotsWithIdentityLinks } =
+      await import("@/src/lib/workforce/identityReconciliation.server");
     const enrichment = await enrichImportSnapshotsWithIdentityLinks(
       tenantId,
       rows,

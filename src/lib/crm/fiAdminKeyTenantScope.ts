@@ -4,8 +4,7 @@
  * In production, env validation requires the allowlist when the admin key is configured.
  */
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isUuid(value: string): boolean {
   return UUID_RE.test(value.trim());
@@ -34,5 +33,4 @@ export function isFiAdminKeyTenantScopeAllowed(
   return allowlist.has(tid);
 }
 
-export const FI_ADMIN_KEY_TENANT_DENIED_MESSAGE =
-  "Admin key is not authorized for this tenant.";
+export const FI_ADMIN_KEY_TENANT_DENIED_MESSAGE = "Admin key is not authorized for this tenant.";

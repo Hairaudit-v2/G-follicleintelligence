@@ -69,7 +69,10 @@ export function LiveDataHealthDiagnosticsCard({
         <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/50 p-4">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[#F8FAFC]">Google Calendar / Timely</h3>
-            <StatusPill ok={health.googleCalendarConnected} label={health.googleCalendarConnected ? "Connected" : "Not connected"} />
+            <StatusPill
+              ok={health.googleCalendarConnected}
+              label={health.googleCalendarConnected ? "Connected" : "Not connected"}
+            />
           </div>
           <dl className="mt-3 space-y-2 text-sm text-[#94A3B8]">
             <div className="flex justify-between gap-4">
@@ -86,7 +89,9 @@ export function LiveDataHealthDiagnosticsCard({
             </div>
             <div className="flex justify-between gap-4">
               <dt>Last backfill</dt>
-              <dd className="text-[#CBD5E1]">{formatWhen(health.googleCalendarBackfillLastRunAt)}</dd>
+              <dd className="text-[#CBD5E1]">
+                {formatWhen(health.googleCalendarBackfillLastRunAt)}
+              </dd>
             </div>
             {health.googleCalendarBackfillLastRangeStart &&
             health.googleCalendarBackfillLastRangeEnd ? (
@@ -101,14 +106,18 @@ export function LiveDataHealthDiagnosticsCard({
           </dl>
           <p className="mt-3 text-xs text-[#64748B]">
             Calendar UI reads <code className="text-[#94A3B8]">fi_calendar_events</code> and{" "}
-            <code className="text-[#94A3B8]">fi_bookings</code>. OnboardingOS staging is preview-only.
+            <code className="text-[#94A3B8]">fi_bookings</code>. OnboardingOS staging is
+            preview-only.
           </p>
         </div>
 
         <div className="rounded-lg border border-white/[0.06] bg-[#0c1220]/50 p-4">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[#F8FAFC]">HubSpot</h3>
-            <StatusPill ok={health.hubSpotConnected} label={health.hubSpotConnected ? "Connected" : "Not connected"} />
+            <StatusPill
+              ok={health.hubSpotConnected}
+              label={health.hubSpotConnected ? "Connected" : "Not connected"}
+            />
           </div>
           <dl className="mt-3 space-y-2 text-sm text-[#94A3B8]">
             <div className="flex justify-between gap-4">
@@ -129,8 +138,8 @@ export function LiveDataHealthDiagnosticsCard({
             </div>
           </dl>
           <p className="mt-3 text-xs text-[#64748B]">
-            Enquiries webhook path writes <code className="text-[#94A3B8]">fi_leads</code>; OnboardingOS F5
-            writes <code className="text-[#94A3B8]">fi_crm_leads</code>.
+            Enquiries webhook path writes <code className="text-[#94A3B8]">fi_leads</code>;
+            OnboardingOS F5 writes <code className="text-[#94A3B8]">fi_crm_leads</code>.
           </p>
         </div>
 

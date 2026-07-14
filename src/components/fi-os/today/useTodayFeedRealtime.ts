@@ -13,10 +13,7 @@ import {
  * FI-UX-REBUILD D6 — tenant-scoped Supabase Realtime → debounced router.refresh().
  * Falls back silently when the browser session cannot subscribe (polling remains active).
  */
-export function useTodayFeedRealtime(opts: {
-  tenantId: string;
-  enabled?: boolean;
-}): void {
+export function useTodayFeedRealtime(opts: { tenantId: string; enabled?: boolean }): void {
   const { tenantId, enabled = true } = opts;
   const router = useRouter();
   const debounceRef = useRef<number | null>(null);

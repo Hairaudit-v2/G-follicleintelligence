@@ -71,7 +71,9 @@ function isNextServerRuntime(): boolean {
   return typeof process.env.NEXT_RUNTIME === "string";
 }
 
-async function loadReceptionShellBootstrapCrossRequest(tenantId: string): Promise<ReceptionShellBootstrap> {
+async function loadReceptionShellBootstrapCrossRequest(
+  tenantId: string
+): Promise<ReceptionShellBootstrap> {
   const tid = tenantId.trim();
   if (isNextServerRuntime()) {
     return unstable_cache(
@@ -137,7 +139,10 @@ async function fetchCalendarShellBootstrap(tenantId: string): Promise<CalendarSh
   };
 }
 
-const calendarShellBootstrapMemory = new Map<string, { at: number; value: CalendarShellBootstrap }>();
+const calendarShellBootstrapMemory = new Map<
+  string,
+  { at: number; value: CalendarShellBootstrap }
+>();
 
 async function loadCalendarShellBootstrapCrossRequest(
   tenantId: string
@@ -160,8 +165,9 @@ async function loadCalendarShellBootstrapCrossRequest(
 /** Calendar shell bootstrap — tenant metadata + timezone in one query (no `fi_calendar_settings`). */
 export const loadCalendarShellBootstrapCached = cache(loadCalendarShellBootstrapCrossRequest);
 
-export const loadTenantCalendarSettingsCached = cache((tenantId: string, clinicId?: string | null) =>
-  loadTenantOperationalCalendarSettings(tenantId.trim(), clinicId?.trim() || null)
+export const loadTenantCalendarSettingsCached = cache(
+  (tenantId: string, clinicId?: string | null) =>
+    loadTenantOperationalCalendarSettings(tenantId.trim(), clinicId?.trim() || null)
 );
 
 export const loadClinicalStaffPickerCached = cache((tenantId: string) =>
@@ -210,6 +216,4 @@ export const loadTenantConfigCached = cache(async (tenantId: string) => {
 export { loadRoleTemplateFromDb as loadRolePermissionMatrixCached } from "@/src/lib/staffAccess/staffAccess.server";
 
 /** SA-2 field permission matrix — re-export of per-request cached role field templates. */
-export {
-  loadRoleFieldTemplateFromDb as loadRoleFieldPermissionMatrixCached,
-} from "@/src/lib/staffAccess/staffFieldAccess.server";
+export { loadRoleFieldTemplateFromDb as loadRoleFieldPermissionMatrixCached } from "@/src/lib/staffAccess/staffFieldAccess.server";

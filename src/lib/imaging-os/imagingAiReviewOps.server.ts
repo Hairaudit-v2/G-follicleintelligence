@@ -103,14 +103,8 @@ export async function loadImagingAiReviewOpsHealth(input: {
   const views: ImagingAiReviewOpsJobView[] = mappedJobs.map((job) => {
     const estimate = estimates.get(job.patient_image_id) ?? null;
     const provider =
-      estimate?.provider ??
-      readProviderFromJobResult(kind, job.result_payload) ??
-      null;
-    const snapshot = toJobSnapshot(
-      job,
-      estimate?.review_status ?? null,
-      provider
-    );
+      estimate?.provider ?? readProviderFromJobResult(kind, job.result_payload) ?? null;
+    const snapshot = toJobSnapshot(job, estimate?.review_status ?? null, provider);
     return buildImagingAiReviewOpsJobView({
       tenantId: tid,
       patientImageId: job.patient_image_id,

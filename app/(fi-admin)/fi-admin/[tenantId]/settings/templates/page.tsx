@@ -86,10 +86,10 @@ export default async function TenantTemplatesSettingsPage({
           Clinic templates
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          One place for booking messages, invoice payment reminders, front-desk commercial SMS/email,
-          and long-form sales terms &amp; invoice documents. Booking triggers still enqueue through
-          the reminder job queue when patient consent is on; invoice copy is ready for AR / payment
-          reminder flows.
+          One place for booking messages, invoice payment reminders, front-desk commercial
+          SMS/email, and long-form sales terms &amp; invoice documents. Booking triggers still
+          enqueue through the reminder job queue when patient consent is on; invoice copy is ready
+          for AR / payment reminder flows.
         </p>
       </div>
 

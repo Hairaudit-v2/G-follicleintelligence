@@ -61,7 +61,8 @@ export function assertProcedureDayStageTransitionAllowed(
   const toIdx = procedureDayStageIndex(to);
   if (fromIdx < 0 || toIdx < 0) throw new Error("Invalid procedure day stage.");
   if (toIdx < fromIdx) throw new Error(`Cannot move backward from ${from} to ${to}.`);
-  if (toIdx > fromIdx + 1) throw new Error(`Stages must advance one step at a time (${from} → ${to}).`);
+  if (toIdx > fromIdx + 1)
+    throw new Error(`Stages must advance one step at a time (${from} → ${to}).`);
 }
 
 export function deriveProcedureDayStageFromBooking(input: {
@@ -72,7 +73,12 @@ export function deriveProcedureDayStageFromBooking(input: {
   const proc = input.procedureStatus?.trim().toLowerCase() ?? "";
 
   if (proc === "completed" || booking === "completed") return "completed";
-  if (booking === "cancelled" || booking === "no_show" || proc === "cancelled" || proc === "aborted") {
+  if (
+    booking === "cancelled" ||
+    booking === "no_show" ||
+    proc === "cancelled" ||
+    proc === "aborted"
+  ) {
     return "scheduled";
   }
   if (proc === "in_progress" || booking === "in_progress") return "extraction";

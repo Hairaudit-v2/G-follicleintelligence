@@ -51,7 +51,10 @@ function parseAddressParts(address: string | null | undefined): {
 } {
   const raw = readString(address);
   if (!raw) return { citySuburb: null, stateRegion: null, country: null };
-  const parts = raw.split(",").map((part) => part.trim()).filter(Boolean);
+  const parts = raw
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
   if (parts.length >= 3) {
     return {
       citySuburb: parts[parts.length - 3] ?? null,
@@ -93,8 +96,8 @@ export function derivePublicClinicSlug(input: {
   hairauditClinicId?: string | null;
 }): string {
   const base = normalizeSlug(input.clinicName) || "clinic";
-  const suffix = readString(input.hairauditClinicId)?.slice(0, 8) ??
-    readString(input.fiClinicId)?.slice(0, 8);
+  const suffix =
+    readString(input.hairauditClinicId)?.slice(0, 8) ?? readString(input.fiClinicId)?.slice(0, 8);
   return suffix ? `${base}-${suffix}` : base;
 }
 
@@ -139,8 +142,7 @@ function buildProfileShell(input: {
     audit_verified: input.auditVerified ?? false,
     public_profile_enabled: input.settings.public_profile_enabled,
     search_visible: input.settings.search_visible,
-    accepts_independent_hairaudit_enquiries:
-      input.settings.accepts_independent_hairaudit_enquiries,
+    accepts_independent_hairaudit_enquiries: input.settings.accepts_independent_hairaudit_enquiries,
     city_suburb: input.settings.city_suburb,
     state_region: input.settings.state_region,
     country: input.settings.country,
@@ -184,8 +186,7 @@ export function buildPublicClinicProfileFromFiOsClinic(
   );
 
   const hairauditClinicId =
-    readString(input.explicitHybridLink?.hairauditClinicId) ??
-    readString(input.hairauditClinicId);
+    readString(input.explicitHybridLink?.hairauditClinicId) ?? readString(input.hairauditClinicId);
 
   const auditSource: PublicClinicAuditSource = hairauditClinicId ? "hybrid" : "fi_os";
   const linkOrigin: PublicClinicLinkOrigin = hairauditClinicId ? "hybrid" : "fi_os";
@@ -271,8 +272,7 @@ export function mergePublicClinicProfileAdditive(input: {
     profile_bio: input.incoming.profile_bio ?? input.existing.profile_bio,
     public_profile_enabled: input.incoming.public_profile_enabled,
     search_visible: input.incoming.search_visible,
-    accepts_independent_hairaudit_enquiries:
-      input.incoming.accepts_independent_hairaudit_enquiries,
+    accepts_independent_hairaudit_enquiries: input.incoming.accepts_independent_hairaudit_enquiries,
     updated_at: new Date().toISOString(),
   };
 
@@ -391,9 +391,7 @@ export function assertPublicClinicSearchDocumentHasNoSensitiveFields(
   return violations;
 }
 
-export function buildPublicClinicDiscoveryPreview(
-  profile: PublicClinicProfile
-): {
+export function buildPublicClinicDiscoveryPreview(profile: PublicClinicProfile): {
   profile: PublicClinicProfile;
   searchDocument: PublicClinicSearchDocument | null;
   publishReady: boolean;

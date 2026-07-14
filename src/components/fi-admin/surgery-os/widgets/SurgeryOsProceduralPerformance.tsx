@@ -23,7 +23,9 @@ function MetricTile({
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className={cn("mt-1 text-xl font-semibold tabular-nums text-slate-100", accent)}>{value}</p>
+      <p className={cn("mt-1 text-xl font-semibold tabular-nums text-slate-100", accent)}>
+        {value}
+      </p>
       {detail ? <p className="mt-1 text-xs text-slate-500">{detail}</p> : null}
     </div>
   );
@@ -252,9 +254,7 @@ export function SurgeryOsProceduralPerformanceWidget({
         {rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
             <Activity className="mb-2 h-8 w-8 text-slate-400" aria-hidden />
-            <p className="text-sm text-slate-400">
-              No procedural performance data available yet.
-            </p>
+            <p className="text-sm text-slate-400">No procedural performance data available yet.</p>
           </div>
         ) : (
           <ul className="space-y-3">

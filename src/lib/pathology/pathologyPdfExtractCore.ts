@@ -91,7 +91,9 @@ export function parseTabularMarkerLines(text: string): RawPathologyExtractedMark
  * Deterministic pathology PDF extraction (Sprint F stub provider).
  * Supports embedded JSON test fixtures and pipe-delimited text rows.
  */
-export function extractPathologyMarkersFromPdf(pdfBytes: Uint8Array): PathologyPdfExtractCoreOutput {
+export function extractPathologyMarkersFromPdf(
+  pdfBytes: Uint8Array
+): PathologyPdfExtractCoreOutput {
   const rawText = extractPdfAsciiText(pdfBytes);
   const embedded = parseEmbeddedMarkersJson(rawText);
   if (embedded && embedded.length > 0) {

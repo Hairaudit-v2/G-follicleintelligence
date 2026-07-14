@@ -22,10 +22,7 @@ export function FiOsRecoveryHashRedirect() {
     if (!shouldRedirectAuthHashToUpdatePassword(credentials, window.location.pathname)) return;
 
     setActive(true);
-    const target = buildFiOsUpdatePasswordRecoveryUrl(
-      window.location.hash,
-      window.location.search
-    );
+    const target = buildFiOsUpdatePasswordRecoveryUrl(window.location.hash, window.location.search);
     router.replace(target);
   }, [router]);
 

@@ -33,20 +33,17 @@ describe("surgeryIntelligenceReleaseReadiness", () => {
     for (const path of READ_ONLY_LOADERS) {
       const source = readRepoFile(path);
       for (const marker of PUBLISH_MARKERS) {
-        assert.equal(
-          source.includes(marker),
-          false,
-          `${path} must not reference ${marker}`
-        );
+        assert.equal(source.includes(marker), false, `${path} must not reference ${marker}`);
       }
     }
   });
 
   it("publish paths exist only on approved mutation/backfill modules", () => {
-    const publisherHits = MUTATION_PUBLISH_PATHS.filter((path) =>
-      readRepoFile(path).includes("tryPublishSurgeryCaseIntelligenceFactsForSurgery") ||
-      readRepoFile(path).includes("publishSurgeryCaseIntelligenceFacts") ||
-      readRepoFile(path).includes("processSurgeryCaseIntelligenceBackfillItem")
+    const publisherHits = MUTATION_PUBLISH_PATHS.filter(
+      (path) =>
+        readRepoFile(path).includes("tryPublishSurgeryCaseIntelligenceFactsForSurgery") ||
+        readRepoFile(path).includes("publishSurgeryCaseIntelligenceFacts") ||
+        readRepoFile(path).includes("processSurgeryCaseIntelligenceBackfillItem")
     );
     assert.deepEqual(
       publisherHits.sort(),

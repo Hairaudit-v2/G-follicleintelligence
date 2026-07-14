@@ -316,9 +316,7 @@ export function buildProcedureStaffingQualityIntel(
     (recommendations.filter((r) => r.staffingComplete).length / recommendations.length) * 100
   );
   const eligibleRatio =
-    totalAssignments > 0
-      ? clampSurgicalScore((eligibleAssignments / totalAssignments) * 100)
-      : 100;
+    totalAssignments > 0 ? clampSurgicalScore((eligibleAssignments / totalAssignments) * 100) : 100;
   const staffingQualityScore = clampSurgicalScore(
     completeRatio * 0.55 + assignmentAccuracy * 0.3 + eligibleRatio * 0.15
   );
@@ -344,7 +342,9 @@ export function buildClinicalCapacityIntel(
     input.planning?.procedureCapacity.estimatedMaxProcedures ??
     Math.max(
       0,
-      Math.floor((input.activeClinicalStaffCount * STANDARD_WEEKLY_CLINICAL_HOURS) / HOURS_PER_PROCEDURE)
+      Math.floor(
+        (input.activeClinicalStaffCount * STANDARD_WEEKLY_CLINICAL_HOURS) / HOURS_PER_PROCEDURE
+      )
     );
 
   const maxAvailableHours = maxProceduresAvailable * HOURS_PER_PROCEDURE;
@@ -422,7 +422,11 @@ function formatProcedureDateLabel(date: string): string {
   return parsed.toLocaleDateString("en-AU", { month: "long", day: "numeric", timeZone: "UTC" });
 }
 
-function procedureStaffingRoute(tenantId: string, procedureDate: string, surgeryId?: string): string {
+function procedureStaffingRoute(
+  tenantId: string,
+  procedureDate: string,
+  surgeryId?: string
+): string {
   const base = `/fi-admin/${tenantId}/workforce-os/procedure-staffing?date=${encodeURIComponent(procedureDate)}`;
   return surgeryId ? `${base}&surgeryId=${encodeURIComponent(surgeryId)}` : base;
 }
@@ -668,15 +672,16 @@ export function buildSurgicalWorkforceRecommendations(
   const recommendations: SurgicalWorkforceRecommendation[] = [];
 
   for (const risk of risks.detectedRisks) {
-    const severity: WorkforceAttentionSeverity =
-      risk.severity === "critical" ? "critical" : "high";
+    const severity: WorkforceAttentionSeverity = risk.severity === "critical" ? "critical" : "high";
     const primaryAction = risk.actions[0];
     recommendations.push({
       id: `rec-${risk.id}`,
       title: risk.title,
       severity,
       impact: risk.severity === "critical" ? "high" : "medium",
-      route: primaryAction?.route ?? `${base}/procedure-staffing?date=${encodeURIComponent(risk.procedureDate)}`,
+      route:
+        primaryAction?.route ??
+        `${base}/procedure-staffing?date=${encodeURIComponent(risk.procedureDate)}`,
       ctaLabel: primaryAction?.label ?? "Open procedure staffing",
       score: risk.score,
       surgeryId: risk.surgeryId,
@@ -711,7 +716,9 @@ export function buildSurgicalWorkforceRecommendations(
       title: `Assign staff to ${tomorrow.procedureCount - tomorrow.completeCount} tomorrow procedure(s)`,
       severity: "high",
       impact: "high",
-      route: primary?.route ?? `${base}/procedure-staffing?date=${encodeURIComponent(input.tomorrowDate)}`,
+      route:
+        primary?.route ??
+        `${base}/procedure-staffing?date=${encodeURIComponent(input.tomorrowDate)}`,
       ctaLabel: primary?.label ?? "Staff tomorrow",
       score: 880,
       surgeryId: firstAtRisk?.surgeryId ?? null,

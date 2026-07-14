@@ -103,7 +103,9 @@ export function resolveActiveLeavePeriod(input: {
   availabilityBlocks: readonly StaffLeaveBlockSnapshot[];
   referenceDate?: string;
 }): StaffActiveLeavePeriod | null {
-  const employment = String(input.employmentStatus ?? "").trim().toLowerCase();
+  const employment = String(input.employmentStatus ?? "")
+    .trim()
+    .toLowerCase();
   const ref = input.referenceDate ?? new Date().toISOString();
   const refMs = parseIsoMs(ref);
   if (!Number.isFinite(refMs)) return null;
@@ -113,7 +115,9 @@ export function resolveActiveLeavePeriod(input: {
     .filter((block) => {
       const startMs = parseIsoMs(block.starts_at);
       const endMs = parseIsoMs(block.ends_at);
-      return Number.isFinite(startMs) && Number.isFinite(endMs) && refMs >= startMs && refMs <= endMs;
+      return (
+        Number.isFinite(startMs) && Number.isFinite(endMs) && refMs >= startMs && refMs <= endMs
+      );
     })
     .sort((a, b) => parseIsoMs(b.starts_at) - parseIsoMs(a.starts_at));
 
@@ -198,8 +202,7 @@ export function resolveStaffLeavePresentation(input: {
     : `On leave until ${untilLabel}`;
 
   const nextShiftInsideLeave =
-    Boolean(input.nextShiftLabel) &&
-    isDateWithinLeavePeriod(new Date().toISOString(), leave);
+    Boolean(input.nextShiftLabel) && isDateWithinLeavePeriod(new Date().toISOString(), leave);
 
   return {
     isOnLeave: true,
@@ -233,9 +236,7 @@ export function findFutureShiftsDuringLeave(
   });
 }
 
-export function buildMaternityLeaveConfirmationSummary(
-  input: MaternityLeaveConfirmationInput
-): {
+export function buildMaternityLeaveConfirmationSummary(input: MaternityLeaveConfirmationInput): {
   headline: string;
   preserves: string[];
   changes: string[];
@@ -276,7 +277,10 @@ export function buildMaternityLeaveConfirmationSummary(
   };
 }
 
-export function localDateToLeaveRangeIso(startDate: string, endDate: string): {
+export function localDateToLeaveRangeIso(
+  startDate: string,
+  endDate: string
+): {
   startsAt: string;
   endsAt: string;
 } {

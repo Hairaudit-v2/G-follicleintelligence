@@ -49,7 +49,8 @@ function isoAtUtcDayHour(ymd: string, hour: number, minute = 0): string {
 }
 
 function baseBooking(
-  partial: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "booking_type" | "start_at" | "end_at" | "title">
+  partial: Partial<FiBookingRow> &
+    Pick<FiBookingRow, "id" | "booking_type" | "start_at" | "end_at" | "title">
 ): FiBookingRow {
   const now = "2026-07-01T00:00:00.000Z";
   const { booking_type, title, booking_status, ...rest } = partial;
@@ -179,7 +180,11 @@ export function evolvedQaRooms(): FiClinicRoomRow[] {
   ];
 }
 
-function staffColumn(staffId: string, label: string, subtitle: string): OperationalCalendarResourceColumn {
+function staffColumn(
+  staffId: string,
+  label: string,
+  subtitle: string
+): OperationalCalendarResourceColumn {
   return {
     id: staffColumnId(staffId),
     kind: "fi_staff",

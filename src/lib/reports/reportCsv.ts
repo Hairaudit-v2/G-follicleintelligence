@@ -32,7 +32,11 @@ export function reportResultToCsv(result: ReportGenerateResult): string {
   return lines.join("\n");
 }
 
-export function reportCsvFilename(reportId: string, periodStart: string, periodEnd: string): string {
+export function reportCsvFilename(
+  reportId: string,
+  periodStart: string,
+  periodEnd: string
+): string {
   const safe = reportId.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
   return `${safe}_${periodStart}_${periodEnd}.csv`;
 }

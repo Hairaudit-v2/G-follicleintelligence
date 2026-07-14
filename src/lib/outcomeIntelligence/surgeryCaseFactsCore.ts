@@ -170,7 +170,7 @@ function mapLinkFacts(link: SurgeryCaseFactsTrayLinkInput): SurgeryCaseGraftTray
     image_id: link.imageId,
     estimate_id: summary?.estimateId ?? null,
     final_accepted_count: summary?.hasFinalCount ? summary.finalAcceptedCount : null,
-    ai_estimate: summary?.supersededStaleJob ? null : summary?.originalAiEstimate ?? null,
+    ai_estimate: summary?.supersededStaleJob ? null : (summary?.originalAiEstimate ?? null),
     manual_count: summary?.manualCount ?? null,
     graft_count_source: summary?.hasFinalCount ? summary.finalCountSource : null,
     mismatch_band: summary?.mismatchBand ?? null,
@@ -289,20 +289,21 @@ export function mapSurgeryCaseIntelligenceFacts(
   if (!eligible) return null;
 
   const metricValues = {
-    final_reviewed_graft_count: hasFinalGraftCount ? rollup?.totalFinalAcceptedGrafts ?? primary?.finalAcceptedCount ?? null : null,
+    final_reviewed_graft_count: hasFinalGraftCount
+      ? (rollup?.totalFinalAcceptedGrafts ?? primary?.finalAcceptedCount ?? null)
+      : null,
     extracted_grafts: input.extractedGrafts,
     implanted_grafts: input.implantedGrafts,
     target_grafts: input.targetGrafts,
     graft_tray_reviewed_count: rollup?.reviewedTrayCount ?? 0,
   };
 
-  const hairAuditLinkInput =
-    input.hairAuditLink ?? {
-      tenantId: input.tenantId,
-      surgeryId: input.surgeryId,
-      caseId: input.caseId,
-      patientId: input.patientId,
-    };
+  const hairAuditLinkInput = input.hairAuditLink ?? {
+    tenantId: input.tenantId,
+    surgeryId: input.surgeryId,
+    caseId: input.caseId,
+    patientId: input.patientId,
+  };
 
   const imagingSummary = toSurgeryImagingIntelligenceSummaryFacts(
     buildSurgeryImagingIntelligenceSummary({
@@ -338,7 +339,7 @@ export function mapSurgeryCaseIntelligenceFacts(
     booking_id: input.bookingId,
     procedure_date: input.procedureDate,
     final_reviewed_graft_count: hasFinalGraftCount
-      ? rollup?.totalFinalAcceptedGrafts ?? primary?.finalAcceptedCount ?? null
+      ? (rollup?.totalFinalAcceptedGrafts ?? primary?.finalAcceptedCount ?? null)
       : null,
     graft_tray_ai_estimate: primary?.originalAiEstimate ?? null,
     graft_tray_manual_count: primary?.manualCount ?? null,

@@ -96,19 +96,14 @@ test("fresh processing lease is not stale", () => {
 });
 
 test("processing older than FI_EVENT_PROCESSING_LEASE_MINUTES is stale", () => {
-  const updatedAt = new Date(
-    NOW - (FI_EVENT_PROCESSING_LEASE_MINUTES + 1) * 60_000
-  ).toISOString();
+  const updatedAt = new Date(NOW - (FI_EVENT_PROCESSING_LEASE_MINUTES + 1) * 60_000).toISOString();
   assert.equal(isFiEventProcessingLeaseStale(updatedAt, NOW), true);
 });
 
 test("fresh processing event returns already_processing", async () => {
   const freshUpdatedAt = new Date(NOW - 60_000).toISOString();
   const row = baseEvent({ updated_at: freshUpdatedAt });
-  const gate = await resolveFiEventIngestionGate(
-    { created: false, row },
-    { nowMs: NOW }
-  );
+  const gate = await resolveFiEventIngestionGate({ created: false, row }, { nowMs: NOW });
   assert.equal(gate.kind, "already_processing");
 });
 

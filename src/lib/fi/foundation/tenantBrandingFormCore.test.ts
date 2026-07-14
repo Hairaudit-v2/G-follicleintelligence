@@ -168,12 +168,10 @@ describe("tenantBrandingFormCore", () => {
   });
 
   it("exposes the documented fallback order", () => {
-    assert.deepEqual([...TENANT_BRANDING_LOGO_FALLBACK_ORDER], [
-      "Uploaded logo",
-      "Legacy logo URL",
-      "Clinic initials",
-      "FI mark",
-    ]);
+    assert.deepEqual(
+      [...TENANT_BRANDING_LOGO_FALLBACK_ORDER],
+      ["Uploaded logo", "Legacy logo URL", "Clinic initials", "FI mark"]
+    );
   });
 
   it("preview draft prefers in-progress colour edits", () => {

@@ -23,7 +23,10 @@ import {
   shouldStartRouteProgress,
   type RouteLocation,
 } from "@/src/lib/navigation/routeProgressCore";
-import { FI_OS_NAV_PENDING_ATTR, readFiOsNavIdFromAnchor } from "@/src/lib/fi-os/fiOsNavigationPendingCore";
+import {
+  FI_OS_NAV_PENDING_ATTR,
+  readFiOsNavIdFromAnchor,
+} from "@/src/lib/fi-os/fiOsNavigationPendingCore";
 
 type RouteProgressContextValue = {
   isPending: boolean;
@@ -120,37 +123,34 @@ function RouteProgressInner({ children }: { children: ReactNode }) {
     }, delay);
   }, [clearTimers]);
 
-  const armSoftNavFallback = useCallback(
-    (href: string) => {
-      if (softFallbackTimerRef.current != null) {
-        clearTimeout(softFallbackTimerRef.current);
-        softFallbackTimerRef.current = null;
+  const armSoftNavFallback = useCallback((href: string) => {
+    if (softFallbackTimerRef.current != null) {
+      clearTimeout(softFallbackTimerRef.current);
+      softFallbackTimerRef.current = null;
+    }
+    intendedHrefRef.current = href;
+    softFallbackTimerRef.current = setTimeout(() => {
+      softFallbackTimerRef.current = null;
+      const intended = intendedHrefRef.current;
+      if (!intended || typeof window === "undefined") return;
+      let intendedPathname = "";
+      try {
+        intendedPathname = new URL(intended, window.location.origin).pathname;
+      } catch {
+        return;
       }
-      intendedHrefRef.current = href;
-      softFallbackTimerRef.current = setTimeout(() => {
-        softFallbackTimerRef.current = null;
-        const intended = intendedHrefRef.current;
-        if (!intended || typeof window === "undefined") return;
-        let intendedPathname = "";
-        try {
-          intendedPathname = new URL(intended, window.location.origin).pathname;
-        } catch {
-          return;
-        }
-        const shouldHard = shouldHardNavigateSoftNavFallback({
-          intendedPathname,
-          currentPathname: window.location.pathname,
-          startedAtMs: startedAtRef.current,
-          nowMs: Date.now(),
-          fallbackMs: ROUTE_PROGRESS_SOFT_FALLBACK_MS,
-        });
-        if (!shouldHard) return;
-        // Soft click showed busy but App Router never updated the URL — hard recover.
-        window.location.assign(intended);
-      }, ROUTE_PROGRESS_SOFT_FALLBACK_MS);
-    },
-    []
-  );
+      const shouldHard = shouldHardNavigateSoftNavFallback({
+        intendedPathname,
+        currentPathname: window.location.pathname,
+        startedAtMs: startedAtRef.current,
+        nowMs: Date.now(),
+        fallbackMs: ROUTE_PROGRESS_SOFT_FALLBACK_MS,
+      });
+      if (!shouldHard) return;
+      // Soft click showed busy but App Router never updated the URL — hard recover.
+      window.location.assign(intended);
+    }, ROUTE_PROGRESS_SOFT_FALLBACK_MS);
+  }, []);
 
   const startPending = useCallback(
     (navId?: string | null) => {
@@ -171,7 +171,16 @@ function RouteProgressInner({ children }: { children: ReactNode }) {
   );
 
   const tryStartFromAnchor = useCallback(
-    (anchor: HTMLAnchorElement, event: { metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean; button: number }) => {
+    (
+      anchor: HTMLAnchorElement,
+      event: {
+        metaKey: boolean;
+        ctrlKey: boolean;
+        shiftKey: boolean;
+        altKey: boolean;
+        button: number;
+      }
+    ) => {
       const current = routeRef.current;
       const shouldPending = shouldStartRouteProgress({
         href: anchor.href,

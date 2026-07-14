@@ -17,8 +17,7 @@ export const RECEPTION_BOARD_OPERATIONAL_STATUSES = [
   "rescheduled",
 ] as const;
 
-export type ReceptionBoardOperationalStatus =
-  (typeof RECEPTION_BOARD_OPERATIONAL_STATUSES)[number];
+export type ReceptionBoardOperationalStatus = (typeof RECEPTION_BOARD_OPERATIONAL_STATUSES)[number];
 
 /** Live arrival queue columns (front-desk workflow). */
 export const RECEPTION_BOARD_QUEUE_COLUMN_IDS = [
@@ -32,13 +31,9 @@ export const RECEPTION_BOARD_QUEUE_COLUMN_IDS = [
   "follow_up_booked",
 ] as const;
 
-export type ReceptionBoardQueueColumnId =
-  (typeof RECEPTION_BOARD_QUEUE_COLUMN_IDS)[number];
+export type ReceptionBoardQueueColumnId = (typeof RECEPTION_BOARD_QUEUE_COLUMN_IDS)[number];
 
-export const RECEPTION_BOARD_QUEUE_COLUMN_LABELS: Record<
-  ReceptionBoardQueueColumnId,
-  string
-> = {
+export const RECEPTION_BOARD_QUEUE_COLUMN_LABELS: Record<ReceptionBoardQueueColumnId, string> = {
   scheduled: "Scheduled",
   arrived: "Arrived",
   checked_in: "Checked in",

@@ -54,7 +54,8 @@ export async function updateWorkforceTimeClockPolicyAction(
     await assertWorkforceHrManageAllowed(tenantId);
     const b = body && typeof body === "object" && body !== null ? body : {};
     const patch: Record<string, unknown> = {};
-    if ("breaksEnabled" in b) patch.breaksEnabled = Boolean((b as { breaksEnabled?: boolean }).breaksEnabled);
+    if ("breaksEnabled" in b)
+      patch.breaksEnabled = Boolean((b as { breaksEnabled?: boolean }).breaksEnabled);
     if ("autoCloseEnabled" in b) {
       patch.autoCloseEnabled = Boolean((b as { autoCloseEnabled?: boolean }).autoCloseEnabled);
     }

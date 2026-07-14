@@ -92,9 +92,7 @@ export async function loadExpensesForTenant(
 
   let q = db
     .from("fi_expenses")
-    .select(
-      "*, fi_expense_categories!fi_expenses_category_id_fkey ( code, label )"
-    )
+    .select("*, fi_expense_categories!fi_expenses_category_id_fkey ( code, label )")
     .eq("tenant_id", tid)
     .order("expense_date", { ascending: false })
     .order("created_at", { ascending: false })

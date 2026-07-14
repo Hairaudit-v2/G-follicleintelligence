@@ -38,10 +38,7 @@ export async function runPublicClinicProfileSync(
   if (input.fiClinicId?.trim()) {
     clinicIds = [input.fiClinicId.trim()];
   } else {
-    const { data, error } = await supabase
-      .from("fi_clinics")
-      .select("id")
-      .eq("tenant_id", tid);
+    const { data, error } = await supabase.from("fi_clinics").select("id").eq("tenant_id", tid);
     if (error) throw new Error(error.message);
     clinicIds = (data ?? []).map((row) => String((row as { id: string }).id));
   }

@@ -47,8 +47,7 @@ export function DocumentTemplatesSection(props: {
   const [isDefault, setIsDefault] = useState(false);
 
   const sorted = useMemo(() => {
-    const list =
-      filter === "all" ? templates : templates.filter((t) => t.category === filter);
+    const list = filter === "all" ? templates : templates.filter((t) => t.category === filter);
     return [...list].sort((a, b) => {
       if (a.category !== b.category) return a.category.localeCompare(b.category);
       return a.name.localeCompare(b.name);
@@ -207,9 +206,7 @@ export function DocumentTemplatesSection(props: {
           <select
             className={`${inputClass} w-auto min-w-[12rem]`}
             value={filter}
-            onChange={(e) =>
-              setFilter(e.target.value as DocumentTemplateCategory | "all")
-            }
+            onChange={(e) => setFilter(e.target.value as DocumentTemplateCategory | "all")}
           >
             <option value="all">All categories</option>
             {DOCUMENT_TEMPLATE_CATEGORIES.map((c) => (

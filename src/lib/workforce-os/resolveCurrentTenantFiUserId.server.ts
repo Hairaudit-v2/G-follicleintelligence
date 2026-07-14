@@ -44,9 +44,7 @@ export async function resolveCurrentTenantFiUserId(
   }
 
   const os =
-    input.skipPlatformAdminLookupForTests === true
-      ? null
-      : await loadFiOsIdentity(authUserId);
+    input.skipPlatformAdminLookupForTests === true ? null : await loadFiOsIdentity(authUserId);
   if (os && isFiOsPlatformAdminRole(os.osRole)) {
     const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tenantId, authUserId);
     if (proxy?.id) return proxy.id;

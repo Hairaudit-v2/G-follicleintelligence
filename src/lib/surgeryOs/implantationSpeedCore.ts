@@ -95,7 +95,9 @@ function resolveImplantationWindowMs(input: {
   return { startMs, endMs: endMs ?? input.nowMs };
 }
 
-function deriveTrendFromGraftEvents(events: ImplantationSpeedGraftEvent[]): ImplantationSpeedTrendDirection {
+function deriveTrendFromGraftEvents(
+  events: ImplantationSpeedGraftEvent[]
+): ImplantationSpeedTrendDirection {
   if (events.length < 4) return "stable";
 
   const sorted = [...events]
@@ -140,15 +142,12 @@ function buildSummary(input: {
     return "No implantation speed data available.";
   }
 
-  const ratePart =
-    input.rate != null ? `${input.rate} grafts/hour` : "Implantation rate pending";
+  const ratePart = input.rate != null ? `${input.rate} grafts/hour` : "Implantation rate pending";
 
   return `${input.patientLabel} — ${ratePart}; ${efficiencyLabel(input.efficiencyScore)}.`;
 }
 
-export function buildImplantationSpeed(
-  input: ImplantationSpeedInput
-): ImplantationSpeedSnapshot {
+export function buildImplantationSpeed(input: ImplantationSpeedInput): ImplantationSpeedSnapshot {
   const nowMs = (input.now ?? new Date()).getTime();
   const implantedGrafts = Math.max(0, input.implantedGrafts);
   const window = resolveImplantationWindowMs({ events: input.events, nowMs });

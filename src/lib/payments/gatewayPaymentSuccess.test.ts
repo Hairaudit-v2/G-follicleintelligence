@@ -40,7 +40,9 @@ function makeMockClient(state: TableState): SupabaseClient {
       }
       if (patch) {
         state[table] = (state[table] ?? []).map((row) =>
-          filters.every((f) => f(row)) ? { ...row, ...patch, updated_at: new Date().toISOString() } : row
+          filters.every((f) => f(row))
+            ? { ...row, ...patch, updated_at: new Date().toISOString() }
+            : row
         );
         patch = null;
       }
@@ -57,9 +59,7 @@ function makeMockClient(state: TableState): SupabaseClient {
       },
       limit() {
         return {
-          then: (
-            resolve: (value: { data: Record<string, unknown>[]; error: null }) => void
-          ) => {
+          then: (resolve: (value: { data: Record<string, unknown>[]; error: null }) => void) => {
             applyPendingMutation();
             resolve({ data: rows(), error: null });
           },
@@ -152,7 +152,14 @@ function baseInvoice(overrides: Record<string, unknown> = {}) {
 }
 
 test("isGatewayPaymentWebhookSettled is true only for recorded or duplicate outcomes", () => {
-  assert.equal(isGatewayPaymentWebhookSettled({ status: "payment_recorded", invoice: {} as never, paymentId: "p" }), true);
+  assert.equal(
+    isGatewayPaymentWebhookSettled({
+      status: "payment_recorded",
+      invoice: {} as never,
+      paymentId: "p",
+    }),
+    true
+  );
   assert.equal(
     isGatewayPaymentWebhookSettled({ status: "duplicate_already_recorded", invoice: {} as never }),
     true

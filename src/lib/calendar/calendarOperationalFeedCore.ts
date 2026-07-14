@@ -139,7 +139,10 @@ export function buildCalendarOperationalFeedFromBookings(
     items.push(
       shapeCalendarOperationalFeedItem({
         booking,
-        patientDisplayName: resolvePatientDisplayNameForBooking(booking, ctx.patientNameByBookingId),
+        patientDisplayName: resolvePatientDisplayNameForBooking(
+          booking,
+          ctx.patientNameByBookingId
+        ),
         staffSummary: intelligenceInput.staffSummary,
         roomLabel: intelligenceInput.roomLabel,
         intelligence,
@@ -177,9 +180,7 @@ export function assertCalendarOperationalFeedPayloadIsLightweight(payload: unkno
     for (const item of payload) {
       if (!item || typeof item !== "object") continue;
       for (const k of Object.keys(item as Record<string, unknown>)) {
-        if (
-          !(CALENDAR_OPERATIONAL_FEED_ITEM_KEYS as readonly string[]).includes(k)
-        ) {
+        if (!(CALENDAR_OPERATIONAL_FEED_ITEM_KEYS as readonly string[]).includes(k)) {
           throw new Error(`Unexpected calendar feed item key "${k}"`);
         }
       }

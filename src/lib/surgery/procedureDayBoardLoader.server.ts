@@ -222,11 +222,22 @@ async function loadProcedureStatusByCaseId(
   tenantId: string,
   caseIds: string[]
 ): Promise<
-  Map<string, { procedure_status: string | null; surgeon_user_id: string | null; procedure_room: string | null }>
+  Map<
+    string,
+    {
+      procedure_status: string | null;
+      surgeon_user_id: string | null;
+      procedure_room: string | null;
+    }
+  >
 > {
   const out = new Map<
     string,
-    { procedure_status: string | null; surgeon_user_id: string | null; procedure_room: string | null }
+    {
+      procedure_status: string | null;
+      surgeon_user_id: string | null;
+      procedure_room: string | null;
+    }
   >();
   const ids = uniqueStrings(caseIds);
   if (!ids.length) return out;
@@ -358,7 +369,9 @@ export async function loadProcedureDayBoardShellPayload(
       const caseId = b.case_id?.trim() || null;
       const proc = caseId ? (procedureByCase.get(caseId) ?? null) : null;
       const surgeonUserId = proc?.surgeon_user_id?.trim() || null;
-      const procedureSurgeonLabel = surgeonUserId ? (fiUserLabels.get(surgeonUserId) ?? null) : null;
+      const procedureSurgeonLabel = surgeonUserId
+        ? (fiUserLabels.get(surgeonUserId) ?? null)
+        : null;
       const calendarAssignee = b.assigned_staff_id?.trim()
         ? (staffNames.get(b.assigned_staff_id.trim()) ?? null)
         : null;

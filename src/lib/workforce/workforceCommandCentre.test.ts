@@ -102,7 +102,15 @@ describe("workforceCommandCentreCore", () => {
       tenantId: "tenant-1",
       horizonStart: "2026-07-01",
       horizonEnd: "2026-07-14",
-      staffingShortages: [{ role: "nurse", shortageCount: 2, affectedDates: ["2026-07-02"], confidence: 80, reason: "Gap" }],
+      staffingShortages: [
+        {
+          role: "nurse",
+          shortageCount: 2,
+          affectedDates: ["2026-07-02"],
+          confidence: 80,
+          reason: "Gap",
+        },
+      ],
       credentialRisks: [],
       recruitmentForecast: {
         activePipelineCount: 2,
@@ -126,7 +134,9 @@ describe("workforceCommandCentreCore", () => {
 
     const queue = buildAttentionQueue({ ...baseCompose, planning });
     assert.ok(queue.length >= 3);
-    assert.ok(queue.some((q) => q.id === "missing-wage-profiles" || q.id === "complete-wage-profiles"));
+    assert.ok(
+      queue.some((q) => q.id === "missing-wage-profiles" || q.id === "complete-wage-profiles")
+    );
   });
 
   it("buildModuleTiles formats payroll metric with currency", () => {

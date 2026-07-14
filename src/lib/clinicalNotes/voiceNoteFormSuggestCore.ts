@@ -55,12 +55,7 @@ const SECTION_FIELD_HINTS: Record<ClinicalNoteSectionKey, string[]> = {
   ],
   assessment: ["assessment", "impression", "diagnosis", "formulation"],
   plan: ["plan", "recommendation", "treatment_plan", "management_plan", "next_steps"],
-  prescription_discussion: [
-    "prescription",
-    "rx_discussion",
-    "medication_discussion",
-    "pharma",
-  ],
+  prescription_discussion: ["prescription", "rx_discussion", "medication_discussion", "pharma"],
   follow_up: ["follow_up", "followup", "review", "recall", "next_review"],
 };
 

@@ -1,6 +1,9 @@
 import "server-only";
 
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import {
+  CRON_OR_WEBHOOK_SECRET_MIN_LENGTH,
+  timingSafeUtf8Equal,
+} from "@/src/lib/security/timingSafeSecret";
 import {
   isPathologyEmailIngestionEnabledFromEnv,
   readPathologyEmailAllowedSendersFromEnv,

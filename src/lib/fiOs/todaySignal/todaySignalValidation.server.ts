@@ -132,8 +132,7 @@ export async function loadTodaySignalValidationInputs(
     },
   ];
 
-  const revisionEndpointAvailable =
-    rolloutFlags.revisionPolling || rolloutFlags.realtimeEnabled;
+  const revisionEndpointAvailable = rolloutFlags.revisionPolling || rolloutFlags.realtimeEnabled;
 
   const counts: TodaySignalValidationCounts = {
     todayFeedItemCount: feedItems.length,

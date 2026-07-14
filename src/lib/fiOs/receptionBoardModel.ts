@@ -109,9 +109,7 @@ function normalizeBookingStatus(status: string | null | undefined): string {
     .toLowerCase();
 }
 
-export function isReceptionOperationalTerminalState(
-  state: ReceptionOperationalState
-): boolean {
+export function isReceptionOperationalTerminalState(state: ReceptionOperationalState): boolean {
   return state === "cancelled" || state === "complete" || state === "no_show";
 }
 
@@ -166,10 +164,8 @@ export function deriveReceptionOperationalState(
     return "expected";
   }
 
-  const windowMin =
-    input.arrivingSoonWindowMinutes ?? RECEPTION_ARRIVING_SOON_WINDOW_MINUTES;
-  const graceMin =
-    input.runningLateGraceMinutes ?? RECEPTION_RUNNING_LATE_GRACE_MINUTES;
+  const windowMin = input.arrivingSoonWindowMinutes ?? RECEPTION_ARRIVING_SOON_WINDOW_MINUTES;
+  const graceMin = input.runningLateGraceMinutes ?? RECEPTION_RUNNING_LATE_GRACE_MINUTES;
   const windowMs = Math.max(0, windowMin) * 60_000;
   const graceMs = Math.max(0, graceMin) * 60_000;
   const now = input.nowMs;
@@ -298,8 +294,6 @@ export function compareReceptionLaneItems(
 }
 
 /** Pure sort of lane items (does not mutate input). */
-export function sortReceptionLaneItems<T extends ReceptionLaneSortItem>(
-  items: readonly T[]
-): T[] {
+export function sortReceptionLaneItems<T extends ReceptionLaneSortItem>(items: readonly T[]): T[] {
   return [...items].sort(compareReceptionLaneItems);
 }

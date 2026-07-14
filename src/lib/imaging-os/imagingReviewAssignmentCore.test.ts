@@ -20,7 +20,10 @@ describe("imagingReviewAssignmentCore", () => {
     assert.equal(record.assignment_status, "assigned");
     assert.equal(record.assignment_version, IMAGINGOS_REVIEW_ASSIGNMENT_VERSION);
 
-    const merged = mergeImagingReviewAssignmentMetadata({ capture_source: "guided_capture" }, record);
+    const merged = mergeImagingReviewAssignmentMetadata(
+      { capture_source: "guided_capture" },
+      record
+    );
     const read = readImagingReviewAssignmentRecord(merged);
     assert.equal(read?.assigned_to, "user-reviewer");
     assert.equal(merged.capture_source, "guided_capture");

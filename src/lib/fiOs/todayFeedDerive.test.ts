@@ -12,7 +12,9 @@ import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationa
 
 const NOW = new Date("2026-06-10T12:00:00.000Z");
 
-function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): TenantOperationalDashboard {
+function baseDashboard(
+  overrides: Partial<TenantOperationalDashboard> = {}
+): TenantOperationalDashboard {
   return {
     tenantId: "00000000-0000-0000-0000-000000000001",
     tenantName: "Test Clinic",
@@ -68,8 +70,16 @@ function baseDashboard(overrides: Partial<TenantOperationalDashboard> = {}): Ten
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [],
     ...overrides,
@@ -109,7 +119,10 @@ test("buildTodayFeed: named reception card 'arrived' goes to right now", () => {
   assert.equal(feed.rightNow[0]?.personLabel, "Sarah Chen");
   assert.match(feed.rightNow[0]?.actionLabel ?? "", /waiting/i);
   assert.equal(feed.rightNow[0]?.severity, "warning");
-  assert.equal(feed.rightNow[0]?.href, "/fi-admin/t1/patients/22222222-0000-0000-0000-000000000001");
+  assert.equal(
+    feed.rightNow[0]?.href,
+    "/fi-admin/t1/patients/22222222-0000-0000-0000-000000000001"
+  );
 });
 
 test("buildTodayFeed: terminal reception columns are excluded", () => {
@@ -248,7 +261,12 @@ test("buildTodayFeed: surgeon role boosts surgery-category priority above defaul
     },
   });
 
-  const defaultFeed = buildTodayFeed({ base: "/fi-admin/t1", dashboard, showCrmNav: true, now: NOW });
+  const defaultFeed = buildTodayFeed({
+    base: "/fi-admin/t1",
+    dashboard,
+    showCrmNav: true,
+    now: NOW,
+  });
   const surgeonFeed = buildTodayFeed({
     base: "/fi-admin/t1",
     dashboard,
@@ -257,8 +275,10 @@ test("buildTodayFeed: surgeon role boosts surgery-category priority above defaul
     now: NOW,
   });
 
-  const defaultScore = defaultFeed.rightNow.find((i) => i.id === "aggregate-surgery_readiness")?.priorityScore ?? 0;
-  const surgeonScore = surgeonFeed.rightNow.find((i) => i.id === "aggregate-surgery_readiness")?.priorityScore ?? 0;
+  const defaultScore =
+    defaultFeed.rightNow.find((i) => i.id === "aggregate-surgery_readiness")?.priorityScore ?? 0;
+  const surgeonScore =
+    surgeonFeed.rightNow.find((i) => i.id === "aggregate-surgery_readiness")?.priorityScore ?? 0;
   assert.ok(surgeonScore > defaultScore);
 });
 
@@ -459,11 +479,19 @@ test("consultationEntityActionLabel: avoids duplicated consultation noun", () =>
 test("todayClinicDaySubline: hides when actionable feed items exist", () => {
   assert.equal(todayClinicDaySubline({ statParts: [], hasActionableFeedItems: true }), null);
   assert.equal(
-    todayClinicDaySubline({ statParts: [], hasActionableFeedItems: false, clinicDayContextReady: false }),
+    todayClinicDaySubline({
+      statParts: [],
+      hasActionableFeedItems: false,
+      clinicDayContextReady: false,
+    }),
     "Clinic day is loading — check back shortly."
   );
   assert.equal(
-    todayClinicDaySubline({ statParts: [], hasActionableFeedItems: false, clinicDayContextReady: true }),
+    todayClinicDaySubline({
+      statParts: [],
+      hasActionableFeedItems: false,
+      clinicDayContextReady: true,
+    }),
     "Clinic activity is still warming up."
   );
 });

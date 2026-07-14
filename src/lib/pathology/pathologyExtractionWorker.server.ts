@@ -59,8 +59,7 @@ function enrichLegacyTestOutput(raw: LegacyTestExtractionOutput): PathologyPdfEx
     threshold
   );
   const requiresManualReview =
-    raw.requiresManualReview ??
-    (raw.markers.length === 0 || !confidenceSummary.meets_threshold);
+    raw.requiresManualReview ?? (raw.markers.length === 0 || !confidenceSummary.meets_threshold);
 
   return {
     provider: raw.provider as PathologyPdfExtractionOutput["provider"],
@@ -154,7 +153,9 @@ export async function runPathologyExtractionOnPdf(
     normalizedMarkers: normalized,
     extractedMarkerCount: normalized.length,
     skippedMarkerCount,
-    medicalIntelligencePreview: miPreview ? (miPreview as unknown as Record<string, unknown>) : null,
+    medicalIntelligencePreview: miPreview
+      ? (miPreview as unknown as Record<string, unknown>)
+      : null,
     ocrConfidence: raw.ocrConfidence,
     source: raw.source,
     providerAudit: raw.providerAudit,

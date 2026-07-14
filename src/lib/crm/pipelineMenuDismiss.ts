@@ -7,15 +7,10 @@
 
 import type { PipelineWorkspaceView } from "@/src/lib/crm/pipelineUiHelpers";
 
-export type PipelineMenuDismissEpochReason =
-  | "explicit_refresh"
-  | "mutation_refresh";
+export type PipelineMenuDismissEpochReason = "explicit_refresh" | "mutation_refresh";
 
 /** `${view}:${epoch}` — view change closes menus without bumping epoch. */
-export function buildPipelineMenuDismissKey(
-  view: PipelineWorkspaceView,
-  epoch: number
-): string {
+export function buildPipelineMenuDismissKey(view: PipelineWorkspaceView, epoch: number): string {
   return `${view}:${epoch}`;
 }
 

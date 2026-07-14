@@ -8,9 +8,7 @@ import { loadWorkforceCommandCentreIntelligence } from "@/src/lib/staff/workforc
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import { runStaffIdentityReadinessAuditForMember } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
-import {
-  mapOnboardingInviteDisplayStatus,
-} from "@/src/lib/workforce/onboarding/onboardingCentreCore";
+import { mapOnboardingInviteDisplayStatus } from "@/src/lib/workforce/onboarding/onboardingCentreCore";
 import { loadOnboardingChecklist } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
 import {
   loadStaffAccessCentreRowForMember,
@@ -28,7 +26,9 @@ import { loadStaffLeaveContext } from "@/src/lib/workforce/staffLeaveWorkflow.se
 
 export type StaffProfileHubOverviewData = StaffProfileOverviewModel;
 
-function mapAccessSnapshot(row: StaffAccessCentreRow | null | undefined): StaffProfileAccessSnapshot | null {
+function mapAccessSnapshot(
+  row: StaffAccessCentreRow | null | undefined
+): StaffProfileAccessSnapshot | null {
   if (!row) return null;
   return {
     authLoginStatus: row.authLoginStatus,
@@ -92,8 +92,7 @@ async function loadOnboardingInviteStatus(
   });
 
   const token = raw.invite_token?.trim() ?? "";
-  const hasInviteUrl =
-    Boolean(token) && (status === "pending" || status === "expired");
+  const hasInviteUrl = Boolean(token) && (status === "pending" || status === "expired");
 
   return { status, hasInviteUrl };
 }
@@ -112,12 +111,12 @@ export async function loadStaffProfileHubOverview(
 
   const [accessRow, checklist, onboardingInvite, identityAuditRow, identityAuditAccess] =
     await Promise.all([
-    loadStaffAccessCentreRowForMember(tid, staffMemberId),
-    loadOnboardingChecklist(tid, staffMemberId),
-    loadOnboardingInviteStatus(tid, staffMemberId),
-    runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
-    resolveStaffIdentityAuditAccess(tid),
-  ]);
+      loadStaffAccessCentreRowForMember(tid, staffMemberId),
+      loadOnboardingChecklist(tid, staffMemberId),
+      loadOnboardingInviteStatus(tid, staffMemberId),
+      runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
+      resolveStaffIdentityAuditAccess(tid),
+    ]);
 
   let workforceIntelligence = null;
   let leaveContext: StaffProfileLeaveContext | null = null;
@@ -130,11 +129,7 @@ export async function loadStaffProfileHubOverview(
           loadStaffLeaveContext({ tenantId: tid, fiStaffId: fiStaff.id }),
         ]);
         leaveContext = leaveData;
-        const intel = await loadWorkforceCommandCentreIntelligence(
-          tid,
-          [fiStaff],
-          hrByStaffId
-        );
+        const intel = await loadWorkforceCommandCentreIntelligence(tid, [fiStaff], hrByStaffId);
         workforceIntelligence = intel.perStaff[fiStaff.id] ?? null;
       }
     } catch {

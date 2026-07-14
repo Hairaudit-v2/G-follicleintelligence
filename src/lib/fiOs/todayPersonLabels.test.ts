@@ -126,8 +126,16 @@ test("Today feed item uses resolved first name over email local-part", () => {
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [
       {
@@ -285,8 +293,16 @@ test("Today feed staff compliance row shows Connor not connorgreen0310", () => {
       activeUnassignedStage: 0,
       activeOtherPipelineStage: 0,
     },
-    paymentCommercialKpis: { depositsDueCount: 0, depositsPaidTodayCount: 0, overduePaymentsCount: 0 },
-    revenueCollections: { moduleEnabled: true, unpaidIssuedInvoiceCount: 0, overdueInvoiceCount: 0 },
+    paymentCommercialKpis: {
+      depositsDueCount: 0,
+      depositsPaidTodayCount: 0,
+      overduePaymentsCount: 0,
+    },
+    revenueCollections: {
+      moduleEnabled: true,
+      unpaidIssuedInvoiceCount: 0,
+      overdueInvoiceCount: 0,
+    },
     receptionBoard: { cards: [] },
     entityAttention: [
       {

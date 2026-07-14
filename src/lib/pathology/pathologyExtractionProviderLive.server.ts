@@ -63,7 +63,9 @@ function finishExtractionOutput(params: {
   externalRequestId?: string | null;
   fallbackReason?: string | null;
 }): PathologyPdfExtractionOutput {
-  const threshold = readPathologyExtractionMinOcrConfidenceFromEnv(params as PathologyExtractionProviderEnvSlice);
+  const threshold = readPathologyExtractionMinOcrConfidenceFromEnv(
+    params as PathologyExtractionProviderEnvSlice
+  );
   const confidenceSummary = buildPathologyExtractionConfidenceSummary(
     params.markers,
     params.ocrConfidence,
@@ -176,7 +178,9 @@ async function extractMarkersWithOpenAiFromText(
 export class OpenAiPathologyExtractionProvider implements PathologyExtractionProviderAdapter {
   readonly providerId = "openai-vision-v1" as const;
 
-  isConfigured(env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice): boolean {
+  isConfigured(
+    env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice
+  ): boolean {
     return isOpenAiPathologyExtractionConfigured(env);
   }
 
@@ -265,7 +269,9 @@ export class OpenAiPathologyExtractionProvider implements PathologyExtractionPro
 export class AwsTextractPathologyExtractionProvider implements PathologyExtractionProviderAdapter {
   readonly providerId = "aws-textract-v1" as const;
 
-  isConfigured(env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice): boolean {
+  isConfigured(
+    env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice
+  ): boolean {
     return isAwsTextractPathologyExtractionConfigured(env);
   }
 
@@ -283,7 +289,8 @@ export class AwsTextractPathologyExtractionProvider implements PathologyExtracti
         requestedProviderId: requested,
         providerId: this.providerId,
         rawText,
-        reason: "AWS Textract credentials are not configured (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION).",
+        reason:
+          "AWS Textract credentials are not configured (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION).",
         latencyMs: Date.now() - started,
         credentialPresent: false,
       });
@@ -311,7 +318,9 @@ export class AwsTextractPathologyExtractionProvider implements PathologyExtracti
 export class GoogleVisionPathologyExtractionProvider implements PathologyExtractionProviderAdapter {
   readonly providerId = "google-vision-v1" as const;
 
-  isConfigured(env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice): boolean {
+  isConfigured(
+    env: PathologyExtractionProviderEnvSlice = process.env as PathologyExtractionProviderEnvSlice
+  ): boolean {
     return isGoogleVisionPathologyExtractionConfigured(env);
   }
 

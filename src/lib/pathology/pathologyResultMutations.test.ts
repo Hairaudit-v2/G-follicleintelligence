@@ -3,7 +3,10 @@ import test from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { FI_MEDICAL_INTELLIGENCE_SNAPSHOT_SOURCE } from "@/src/lib/clinical-intelligence/fiPathologyMedicalIntelligenceTypes";
-import type { PathologyResultItemRow, PathologyResultRow } from "@/src/lib/pathology/pathologyResultTypes";
+import type {
+  PathologyResultItemRow,
+  PathologyResultRow,
+} from "@/src/lib/pathology/pathologyResultTypes";
 import {
   createPathologyResult,
   markPathologyResultReviewed,

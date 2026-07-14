@@ -58,7 +58,9 @@ export function ImagingOsWorkspace({
   const urlTab = parseImagingWorkspaceTab(searchParams.get("tab"));
   const captureIntent = parseImagingCaptureIntent(searchParams.get("intent"));
   const captureSource = parsePatientPhotoQuickActionSource(searchParams.get("source"));
-  const initialProtocolSessionId = parseImagingProtocolSessionId(searchParams.get("protocolSessionId"));
+  const initialProtocolSessionId = parseImagingProtocolSessionId(
+    searchParams.get("protocolSessionId")
+  );
   const [tab, setTab] = useState<TabId>(() =>
     urlTab === "capture" ? "capture" : urlTab === "compare" ? "compare" : "gallery"
   );

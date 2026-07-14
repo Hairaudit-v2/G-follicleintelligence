@@ -93,14 +93,7 @@ export function CaseCrmQuotesPipelineCard(props: {
         entrySource: "case_quote",
       });
     },
-    [
-      cid,
-      props.clinicId,
-      props.leadId,
-      props.personId,
-      props.patientFoundationId,
-      surgeryWizard,
-    ]
+    [cid, props.clinicId, props.leadId, props.personId, props.patientFoundationId, surgeryWizard]
   );
 
   const openSurgeryFromQuote = useCallback(

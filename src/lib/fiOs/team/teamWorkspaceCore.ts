@@ -180,11 +180,7 @@ export function isFiOsTeamConsolidatedPath(pathname: string, tenantBase: string)
   return path === `${base}/team` || path.startsWith(`${base}/team/`);
 }
 
-export function isTeamTabActive(
-  pathname: string,
-  tenantBase: string,
-  segment: string
-): boolean {
+export function isTeamTabActive(pathname: string, tenantBase: string, segment: string): boolean {
   const base = tenantBase.replace(/\/+$/, "");
   const path = pathname.replace(/\/+$/, "") || "/";
   if (!segment) {

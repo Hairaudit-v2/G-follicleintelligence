@@ -43,7 +43,11 @@ function inferSessionType(input: BuildImagingSessionTaxonomyInput): string {
   ) {
     return "follow_up";
   }
-  if (capture === "consultation_os" || template === "baseline_consultation" || template === "hair_loss_consultation") {
+  if (
+    capture === "consultation_os" ||
+    template === "baseline_consultation" ||
+    template === "hair_loss_consultation"
+  ) {
     return "consultation";
   }
   if (capture === "patient_portal") return "patient_portal";
@@ -69,7 +73,8 @@ function resolveProtocolVersion(
 export function buildImagingSessionTaxonomy(
   input: BuildImagingSessionTaxonomyInput
 ): ImagingSessionTaxonomy {
-  const captureSource = normalizeKey(input.capture_source) || normalizeKey(input.upload_source) || "unknown";
+  const captureSource =
+    normalizeKey(input.capture_source) || normalizeKey(input.upload_source) || "unknown";
   const sessionType = inferSessionType(input);
   return {
     session_type: sessionType,

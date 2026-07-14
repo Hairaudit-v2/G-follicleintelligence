@@ -144,7 +144,9 @@ export function ConsultationFormVoiceAssist({
             </button>
           </div>
         ) : (
-          <p className="text-xs text-amber-200">Link a patient on the consultation to enable voice.</p>
+          <p className="text-xs text-amber-200">
+            Link a patient on the consultation to enable voice.
+          </p>
         )}
       </div>
 

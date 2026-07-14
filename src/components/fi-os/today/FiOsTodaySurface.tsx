@@ -72,18 +72,16 @@ export function FiOsTodaySurface(props: {
     now,
   });
 
-  recordTodaySignalObservationSnapshotSafe(
-    data.tenantId,
-    flattenTodayFeedItems(feed),
-    { profileKey: workspaceProfile, nowIso: now.toISOString() }
-  );
+  recordTodaySignalObservationSnapshotSafe(data.tenantId, flattenTodayFeedItems(feed), {
+    profileKey: workspaceProfile,
+    nowIso: now.toISOString(),
+  });
 
   const rightNow = groupTodayFeedItems(feed.rightNow);
   const upNext = groupTodayFeedItems(feed.upNext);
 
   const showWorkspaceBadge = Boolean(workspaceProfile && workspaceProfile !== "default");
-  const actionableFeedCount =
-    feed.rightNow.length + feed.upNext.length + feed.comingUp.length;
+  const actionableFeedCount = feed.rightNow.length + feed.upNext.length + feed.comingUp.length;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:space-y-10">
@@ -103,7 +101,9 @@ export function FiOsTodaySurface(props: {
         hasActionableFeedItems={actionableFeedCount > 0}
         clinicDayContextReady={Boolean(data.operationalDay?.todayYmd)}
         workspaceBadge={
-          showWorkspaceBadge ? formatTodayWorkspaceBadge(getWorkspaceProfileLabel(workspaceProfile!)) : null
+          showWorkspaceBadge
+            ? formatTodayWorkspaceBadge(getWorkspaceProfileLabel(workspaceProfile!))
+            : null
         }
         hourOfDay={hourOfDay}
         presenceStatus={presence.operationalStatus}

@@ -206,10 +206,7 @@ describe("runUnifiedPatientImageIngest", () => {
     assert.ok(result.imaging_os_ingest);
     assert.ok(result.imaging_session);
     assert.equal(result.canonical_view, "front");
-    assert.equal(
-      result.canonical_view,
-      result.imaging_os_ingest.canonical_photo_category
-    );
+    assert.equal(result.canonical_view, result.imaging_os_ingest.canonical_photo_category);
   });
 
   it("produces the same metadata patch shape as the legacy wrapper", () => {

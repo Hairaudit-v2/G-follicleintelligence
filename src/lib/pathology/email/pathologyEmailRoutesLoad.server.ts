@@ -32,7 +32,12 @@ type MessageStat = {
 };
 
 function aggregateMessageStats(
-  messages: Array<{ to_email: string; received_at: string | null; created_at: string; provider: string }>
+  messages: Array<{
+    to_email: string;
+    received_at: string | null;
+    created_at: string;
+    provider: string;
+  }>
 ): Map<string, MessageStat> {
   return aggregatePathologyEmailRouteMessageStats(messages);
 }

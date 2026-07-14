@@ -27,20 +27,13 @@ export default async function TeamLayout({
   const teamAccess = await resolveTeamWorkspaceAccessForViewer(tid);
   if (!teamAccess.allowed) {
     return (
-      <FiModuleAccessDenied
-        tenantId={tid}
-        moduleLabel="Team"
-        reason={teamAccess.deniedReason}
-      />
+      <FiModuleAccessDenied tenantId={tid} moduleLabel="Team" reason={teamAccess.deniedReason} />
     );
   }
 
   return (
     <div className={cn(fiOsChromeClasses.pageScrollContent, "px-4 pt-8")}>
-      <TeamSubNav
-        tenantId={tid}
-        visibleTabIds={teamAccess.tabAccess.visibleTabIds}
-      />
+      <TeamSubNav tenantId={tid} visibleTabIds={teamAccess.tabAccess.visibleTabIds} />
       <Suspense fallback={<TeamWorkspacePageFallback />}>{children}</Suspense>
     </div>
   );

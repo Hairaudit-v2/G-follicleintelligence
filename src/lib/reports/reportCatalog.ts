@@ -72,7 +72,8 @@ export const REPORT_CATALOG: readonly ReportDefinition[] = [
   {
     id: "cost_per_graft_actuals",
     title: "Cost per graft (actuals)",
-    description: "Clinical spend and graft volume for cost-per-graft actuals versus model baselines.",
+    description:
+      "Clinical spend and graft volume for cost-per-graft actuals versus model baselines.",
     category: "financial",
     requiredModules: ["financial_os"],
     defaultPeriodPreset: "90d",

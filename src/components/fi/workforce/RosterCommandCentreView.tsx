@@ -106,7 +106,9 @@ function rosterDrawerShift(
   return shifts.find((shift) => shift.id === drawer.shiftId) ?? null;
 }
 
-function rosterPeriodStartFieldLabel(cadence: RosterCommandCentrePayload["rosterPlanning"]["rosterCadence"]): string {
+function rosterPeriodStartFieldLabel(
+  cadence: RosterCommandCentrePayload["rosterPlanning"]["rosterCadence"]
+): string {
   switch (cadence) {
     case "fortnightly":
       return "Fortnight starting";
@@ -139,8 +141,7 @@ export function RosterCommandCentreView({
   const [ineligibleExpanded, setIneligibleExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
   const [quickCancelShift, setQuickCancelShift] = useState<RosterGridShift | null>(null);
-  const [quickCancelReason, setQuickCancelReason] =
-    useState<RosterQuickCancelReason>("staff_sick");
+  const [quickCancelReason, setQuickCancelReason] = useState<RosterQuickCancelReason>("staff_sick");
   const [periodAwayPendingStaffId, setPeriodAwayPendingStaffId] = useState<string | null>(null);
 
   /** Normalise once — blank strings from pages must never surface as silent denies. */
@@ -421,9 +422,7 @@ export function RosterCommandCentreView({
             notes: `${reasonLabel} (full ${periodLabel} from calendar)`,
           });
           if (!cancelResult.ok) {
-            setActionError(
-              `Leave recorded, but could not cancel a shift: ${cancelResult.error}`
-            );
+            setActionError(`Leave recorded, but could not cancel a shift: ${cancelResult.error}`);
             refresh();
             return;
           }
@@ -525,16 +524,18 @@ export function RosterCommandCentreView({
 
   return (
     <div
-      className={cn(ROSTER_PAGE_SCROLL_ROOT_CLASSES, fiOsChromeClasses.pageScrollContent, "space-y-6")}
+      className={cn(
+        ROSTER_PAGE_SCROLL_ROOT_CLASSES,
+        fiOsChromeClasses.pageScrollContent,
+        "space-y-6"
+      )}
       data-testid="roster-command-centre"
       data-roster-cadence={rosterCadence}
       data-roster-drawer-kind={drawerState.kind}
     >
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Team</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
-          Roster
-        </h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Roster</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           Build the {periodLabel} roster manually, copy a previous period, or optionally generate
           from standard hours. Adjust individual shifts at any time — changes persist until you
@@ -549,7 +550,10 @@ export function RosterCommandCentreView({
               Team overview
             </Link>
             {" · "}
-            <Link href={`/fi-admin/${tenantId}/hr-os`} className="text-cyan-400 hover:text-cyan-300">
+            <Link
+              href={`/fi-admin/${tenantId}/hr-os`}
+              className="text-cyan-400 hover:text-cyan-300"
+            >
               HR dashboard
             </Link>
           </p>
@@ -734,7 +738,11 @@ export function RosterCommandCentreView({
         </div>
 
         {actionMessage ? (
-          <p className="mt-3 text-sm text-emerald-300" role="status" data-testid="roster-action-message">
+          <p
+            className="mt-3 text-sm text-emerald-300"
+            role="status"
+            data-testid="roster-action-message"
+          >
             {actionMessage}
           </p>
         ) : null}
@@ -803,7 +811,6 @@ export function RosterCommandCentreView({
         </section>
       ) : null}
 
-
       <section className="space-y-3">
         <div>
           <h2 className="text-sm font-semibold capitalize text-slate-100">{periodLabel} roster</h2>
@@ -860,26 +867,19 @@ export function RosterCommandCentreView({
             className="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[#0B1220] p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3
-              id="roster-quick-cancel-title"
-              className="text-base font-semibold text-slate-50"
-            >
+            <h3 id="roster-quick-cancel-title" className="text-base font-semibold text-slate-50">
               Cancel shift
             </h3>
             <p className="mt-2 text-sm text-slate-400">
               {quickCancelShift.staffName ?? "Staff"} ·{" "}
-              <span className="capitalize">
-                {quickCancelShift.shift_type.replace(/_/g, " ")}
-              </span>{" "}
-              · {(quickCancelShift.localDate ?? quickCancelShift.starts_at).slice(0, 10)}
+              <span className="capitalize">{quickCancelShift.shift_type.replace(/_/g, " ")}</span> ·{" "}
+              {(quickCancelShift.localDate ?? quickCancelShift.starts_at).slice(0, 10)}
             </p>
             <label className="mt-4 block text-xs text-slate-400">
               Reason
               <select
                 value={quickCancelReason}
-                onChange={(e) =>
-                  setQuickCancelReason(e.target.value as RosterQuickCancelReason)
-                }
+                onChange={(e) => setQuickCancelReason(e.target.value as RosterQuickCancelReason)}
                 className="mt-1 w-full rounded-lg border border-white/[0.08] bg-[#0B1220] px-3 py-2 text-sm text-slate-100"
                 data-testid="roster-quick-cancel-reason"
               >
@@ -1006,8 +1006,6 @@ export function RosterCommandCentreView({
           onEditStandardHours={openStandardHoursDrawer}
         />
       ) : null}
-
-
     </div>
   );
 }

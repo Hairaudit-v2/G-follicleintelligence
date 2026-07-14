@@ -38,15 +38,12 @@ test("denied message documents manager alongside HR manager", () => {
 });
 
 test("workforce-staff-access-actions has no export const action aliases", () => {
-  const src = readFileSync(
-    join(ROOT, "src/lib/actions/workforce-staff-access-actions.ts"),
-    "utf8"
-  );
+  const src = readFileSync(join(ROOT, "src/lib/actions/workforce-staff-access-actions.ts"), "utf8");
   assert.equal(src.startsWith('"use server"'), true);
   assert.doesNotMatch(src, /export const \w+Action\s*=/);
 });
 
-test('fi-surgery-os-actions does not re-export runtime constants', () => {
+test("fi-surgery-os-actions does not re-export runtime constants", () => {
   const src = readFileSync(join(ROOT, "lib/actions/fi-surgery-os-actions.ts"), "utf8");
   assert.equal(src.startsWith('"use server"'), true);
   assert.doesNotMatch(src, /^export \{[^}]+\};?\s*$/m);

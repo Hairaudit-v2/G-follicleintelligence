@@ -260,7 +260,10 @@ function emptyGraftSessionTotals(surgery: SurgeryPublishRow) {
 
 function buildPublishGraftSummary(input: {
   surgery: SurgeryPublishRow;
-  graftSession: Awaited<ReturnType<typeof loadGraftSessionsForSurgeries>> extends Map<string, infer V>
+  graftSession: Awaited<ReturnType<typeof loadGraftSessionsForSurgeries>> extends Map<
+    string,
+    infer V
+  >
     ? V | undefined
     : never;
   graftEvents: Awaited<ReturnType<typeof loadGraftCountEventsForSurgeries>> extends Map<
@@ -284,15 +287,13 @@ function buildPublishGraftSummary(input: {
   const trayBuckets = countTrayReviewBuckets(
     graftEvents.map((e) => ({
       eventType: e.event_type,
-      reviewStatus:
-        e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+      reviewStatus: e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
     }))
   );
   const confirmedTrayTotals = computeConfirmedTrayTotals(
     graftEvents.map((e) => ({
       eventType: e.event_type,
-      reviewStatus:
-        e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
+      reviewStatus: e.event_type === "tray_count" ? (reviewStatuses.get(e.id) ?? "pending") : null,
       singles: e.singles,
       doubles: e.doubles,
       triples: e.triples,
@@ -305,7 +306,9 @@ function buildPublishGraftSummary(input: {
   const graftPhase = (graftSession?.phase ?? "extraction") as SurgeryOsGraftSessionPhase;
   const reconciliationStatus = (graftSession?.reconciliation_status ??
     "pending") as SurgeryOsGraftReconciliationStatus;
-  const totals = graftSession ? graftSessionToTotals(graftSession) : emptyGraftSessionTotals(surgery);
+  const totals = graftSession
+    ? graftSessionToTotals(graftSession)
+    : emptyGraftSessionTotals(surgery);
   const nowMs = Date.now();
 
   return {
@@ -380,19 +383,27 @@ export async function loadAndBuildSurgeryCaseIntelligenceFactsForPublish(input: 
   const surgery = await loadSurgeryRowForPublish(client, tid, sid);
   if (!surgery) return { facts: null, clinicId: null };
 
-  const [graftSessionsBySurgery, graftEventsBySurgery, teamFiUserIds, imagingImages, hairAuditLink] =
-    await Promise.all([
-      loadGraftSessionsForSurgeries(tid, [sid]),
-      loadGraftCountEventsForSurgeries(tid, [sid]),
-      loadTeamFiUserIds(client, tid, sid),
-      loadPatientImagesForSurgeryPublish(client, tid, surgery),
-      loadHairAuditLinkInputForPublish(client, tid, surgery),
-    ]);
+  const [
+    graftSessionsBySurgery,
+    graftEventsBySurgery,
+    teamFiUserIds,
+    imagingImages,
+    hairAuditLink,
+  ] = await Promise.all([
+    loadGraftSessionsForSurgeries(tid, [sid]),
+    loadGraftCountEventsForSurgeries(tid, [sid]),
+    loadTeamFiUserIds(client, tid, sid),
+    loadPatientImagesForSurgeryPublish(client, tid, surgery),
+    loadHairAuditLinkInputForPublish(client, tid, surgery),
+  ]);
 
   let trayLinksBySurgery: Awaited<ReturnType<typeof loadGraftTrayLinksForSurgeries>> = new Map();
   let trayIntelligenceByImage = new Map<
     string,
-    Awaited<ReturnType<typeof loadGraftTrayIntelligenceContextForImages>> extends Map<string, infer V>
+    Awaited<ReturnType<typeof loadGraftTrayIntelligenceContextForImages>> extends Map<
+      string,
+      infer V
+    >
       ? V
       : never
   >();

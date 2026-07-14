@@ -154,9 +154,7 @@ export default async function TenantAdminLayout({
     }
   }
   const pinFloorMode = Boolean(pinSession);
-  const timeClockPolicy = pinSession
-    ? await loadWorkforceTimeClockPolicy(tenantId)
-    : null;
+  const timeClockPolicy = pinSession ? await loadWorkforceTimeClockPolicy(tenantId) : null;
   const pinBreakState =
     pinSession && timeClockPolicy?.breaksEnabled
       ? await loadPinBreakSessionState(tenantId, pinSession.staffId)
@@ -234,9 +232,7 @@ export default async function TenantAdminLayout({
     ? null
     : await resolveTeamWorkspaceAccessForViewer(tenantId);
   const visibleTeamTabIds =
-    teamWorkspaceAccess?.allowed === true
-      ? teamWorkspaceAccess.tabAccess.visibleTabIds
-      : undefined;
+    teamWorkspaceAccess?.allowed === true ? teamWorkspaceAccess.tabAccess.visibleTabIds : undefined;
   const staffUatModeEnabled = readFiStaffUatModeEnabled();
   const staffUatRole = pinFloorMode
     ? "receptionist_pin"
@@ -270,11 +266,7 @@ export default async function TenantAdminLayout({
             : fiOsChromeClasses.tenantMainSurfaceInnerScroll
         )}
       >
-        <StaffUatLayoutMount
-          tenantId={tenantId}
-          role={staffUatRole}
-          enabled={staffUatModeEnabled}
-        >
+        <StaffUatLayoutMount tenantId={tenantId} role={staffUatRole} enabled={staffUatModeEnabled}>
           {workspaceShellEnabled ? (
             <WorkspaceShellMount tenantId={tenantId}>{children}</WorkspaceShellMount>
           ) : (

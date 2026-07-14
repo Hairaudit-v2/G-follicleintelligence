@@ -61,5 +61,16 @@ export function computeFiOsTodayStripCounts(
       if (intel.riskStatus === "at_risk" || intel.riskStatus === "blocked") atRisk += 1;
     }
   }
-  return { all, consultation, prp, surgery, arrived, waiting, completed, unassigned, withBlockers, atRisk };
+  return {
+    all,
+    consultation,
+    prp,
+    surgery,
+    arrived,
+    waiting,
+    completed,
+    unassigned,
+    withBlockers,
+    atRisk,
+  };
 }

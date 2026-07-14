@@ -215,10 +215,9 @@ export async function repairStaffTenantLinkFromInvitation(input: {
   const client = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
-  const ensured =
-    input.fiStaffId?.trim()
-      ? { fiStaffId: input.fiStaffId.trim(), email }
-      : await ensureFiStaffForMember(tid, staffMemberId, client);
+  const ensured = input.fiStaffId?.trim()
+    ? { fiStaffId: input.fiStaffId.trim(), email }
+    : await ensureFiStaffForMember(tid, staffMemberId, client);
 
   const fiStaffId = ensured.fiStaffId;
   const fiUserId = await resolveOrCreateFiUser(tid, email, client);

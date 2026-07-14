@@ -120,9 +120,10 @@ export function deriveCalendarOsBookingWarnings(input: {
   if (operational && !operational.readinessReady && operational.isSurgery) {
     push({
       kind: "readiness",
-      label: operational.readinessPercent != null
-        ? `Surgery readiness ${operational.readinessPercent}%`
-        : "Surgery readiness incomplete",
+      label:
+        operational.readinessPercent != null
+          ? `Surgery readiness ${operational.readinessPercent}%`
+          : "Surgery readiness incomplete",
       severity: operational.riskStatus === "blocked" ? "critical" : "warning",
     });
   }
@@ -181,11 +182,7 @@ export function deriveCalendarOsSurgeryIntelligence(input: {
         : null;
 
   const photographyComplete =
-    meta.photography_complete === true
-      ? true
-      : meta.photography_complete === false
-        ? false
-        : null;
+    meta.photography_complete === true ? true : meta.photography_complete === false ? false : null;
 
   const consentComplete =
     operational?.consentFlag === "signed"
@@ -213,8 +210,10 @@ export function deriveCalendarOsSurgeryIntelligence(input: {
   const endMs = Date.parse(booking.end_at);
   const expectedFinishLabel =
     Number.isFinite(endMs) && durationMin > 0
-      ? formatTimeRangeInTimezone(booking.start_at, booking.end_at, calendarTimezone).split("–").pop()?.trim() ??
-        null
+      ? (formatTimeRangeInTimezone(booking.start_at, booking.end_at, calendarTimezone)
+          .split("–")
+          .pop()
+          ?.trim() ?? null)
       : null;
 
   return {
@@ -226,7 +225,7 @@ export function deriveCalendarOsSurgeryIntelligence(input: {
       ? "Ready"
       : operational?.readinessPercent != null
         ? `${operational.readinessPercent}% ready`
-        : staffing?.displayStatus ?? null,
+        : (staffing?.displayStatus ?? null),
     readinessPercent: operational?.readinessPercent ?? staffing?.readinessScore ?? null,
     consentComplete,
     photographyComplete,
@@ -317,8 +316,13 @@ export function deriveCalendarOsStaffCoverageWarnings(input: {
   availableStaffCount: number;
 }): CalendarOsStaffCoverageWarning[] {
   const warnings: CalendarOsStaffCoverageWarning[] = [];
-  const { dayBookings, staffDirectory, unassignedBookings, surgeryReadinessIssues, availableStaffCount } =
-    input;
+  const {
+    dayBookings,
+    staffDirectory,
+    unassignedBookings,
+    surgeryReadinessIssues,
+    availableStaffCount,
+  } = input;
 
   const inactiveBlocked = staffDirectory.filter(
     (s) =>
@@ -339,7 +343,9 @@ export function deriveCalendarOsStaffCoverageWarnings(input: {
     (s) =>
       s.is_active !== false &&
       s.clinical_readiness?.clinically_available !== false &&
-      String(s.staff_role ?? "").toLowerCase().includes("nurse")
+      String(s.staff_role ?? "")
+        .toLowerCase()
+        .includes("nurse")
   ).length;
 
   if (surgeryCount > 0 && nursesAvailable === 0) {

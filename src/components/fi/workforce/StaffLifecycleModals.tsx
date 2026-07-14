@@ -261,7 +261,8 @@ export function ManageEmploymentModal({
         >
           HR OS Offboarding
         </Link>
-        . That flow revokes system access, PIN login, and permissions while preserving audit history.
+        . That flow revokes system access, PIN login, and permissions while preserving audit
+        history.
       </p>
       <form onSubmit={onSubmit} className="mt-4 space-y-4">
         <label className={labelClassName}>
@@ -477,7 +478,12 @@ export function SetMaternityLeaveModal({
           </p>
         ) : null}
         <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => setShowConfirm(false)} disabled={pending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowConfirm(false)}
+            disabled={pending}
+          >
             Back
           </Button>
           <Button type="button" onClick={applyLeave} disabled={pending}>
@@ -618,7 +624,11 @@ export function LinkHrIdentityModal({
       </p>
       <label className={labelClassName}>
         IIOHR staff record
-        <select className={inputClassName} value={selected} onChange={(e) => setSelected(e.target.value)}>
+        <select
+          className={inputClassName}
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+        >
           <option value="">Select…</option>
           {candidates.map((c) => (
             <option key={c.id} value={c.id}>

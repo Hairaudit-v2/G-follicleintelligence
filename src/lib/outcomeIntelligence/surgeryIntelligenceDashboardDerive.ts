@@ -94,7 +94,9 @@ export function parsePublishedSurgeryCaseIntelligenceEvent(
     procedureDate: facts.procedure_date,
     finalReviewedGraftCount: facts.has_final_graft_count ? facts.final_reviewed_graft_count : null,
     hasFinalGraftCount: facts.has_final_graft_count,
-    graftCountSource: isGraftCountSource(facts.graft_count_source) ? facts.graft_count_source : null,
+    graftCountSource: isGraftCountSource(facts.graft_count_source)
+      ? facts.graft_count_source
+      : null,
     mismatchBand: facts.mismatch_band,
     confidenceBand: facts.confidence_band,
     imageQuality: facts.image_quality,
@@ -147,10 +149,7 @@ export function filterPublishedCaseRows(
     if (filters.surgeonFiUserId?.trim() && row.surgeonFiUserId !== filters.surgeonFiUserId.trim()) {
       return false;
     }
-    if (
-      filters.teamFiUserId?.trim() &&
-      !row.teamFiUserIds.includes(filters.teamFiUserId.trim())
-    ) {
+    if (filters.teamFiUserId?.trim() && !row.teamFiUserIds.includes(filters.teamFiUserId.trim())) {
       return false;
     }
     if (!matchesGraftCountSourceFilter(row, filters.graftCountSource)) return false;
@@ -180,9 +179,7 @@ function incrementDistribution(
 export function buildSurgeryIntelligenceDashboardMetrics(
   rows: readonly SurgeryIntelligencePublishedCaseRow[]
 ): SurgeryIntelligenceDashboardMetrics {
-  const withFinal = rows.filter(
-    (r) => r.hasFinalGraftCount && r.finalReviewedGraftCount != null
-  );
+  const withFinal = rows.filter((r) => r.hasFinalGraftCount && r.finalReviewedGraftCount != null);
   const totalFinal = withFinal.reduce((sum, r) => sum + (r.finalReviewedGraftCount ?? 0), 0);
 
   const sourceSplit: SurgeryIntelligenceSourceSplit = {
@@ -252,7 +249,10 @@ export function buildSurgeryIntelligenceDashboardMetrics(
         casesMissingRecipientFollowUp += 1;
       }
       if (longitudinal.hairaudit_report_ready) casesReadyForHairAuditOutcomeReport += 1;
-    } else if (row.beforeAfterReady || row.imagingIntelligenceSummary?.audit_readiness.before_after_ready) {
+    } else if (
+      row.beforeAfterReady ||
+      row.imagingIntelligenceSummary?.audit_readiness.before_after_ready
+    ) {
       casesReadyForBeforeAfterComparison += 1;
     }
   }
@@ -266,9 +266,8 @@ export function buildSurgeryIntelligenceDashboardMetrics(
     sourceSplit,
     averageAiManualVariance:
       varianceSamples.length > 0
-        ? Math.round(
-            (varianceSamples.reduce((a, b) => a + b, 0) / varianceSamples.length) * 10
-          ) / 10
+        ? Math.round((varianceSamples.reduce((a, b) => a + b, 0) / varianceSamples.length) * 10) /
+          10
         : null,
     mismatchBandDistribution,
     confidenceBandDistribution,
@@ -320,7 +319,7 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
     .map((row) => {
       const caseMetadata =
         row.caseId && input.caseMetadataByCaseId
-          ? input.caseMetadataByCaseId[row.caseId] ?? null
+          ? (input.caseMetadataByCaseId[row.caseId] ?? null)
           : null;
       const hairAuditLink = resolveHairAuditLinkForSurgery({
         tenantId: input.tenantId,
@@ -330,11 +329,11 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
         caseMetadata,
         fiReportId:
           row.caseId && input.fiReportIdByCaseId
-            ? input.fiReportIdByCaseId[row.caseId] ?? null
+            ? (input.fiReportIdByCaseId[row.caseId] ?? null)
             : null,
         globalCaseSourceIds:
           row.caseId && input.globalHairAuditSourceByCaseId
-            ? input.globalHairAuditSourceByCaseId[row.caseId] ?? []
+            ? (input.globalHairAuditSourceByCaseId[row.caseId] ?? [])
             : [],
       });
 
@@ -390,7 +389,9 @@ export function buildSurgeryIntelligenceDashboardTableRows(input: {
         ),
         followUpDue: longitudinal ? isCaseDueForFollowUp(longitudinal) : false,
         beforeAfterComparisonReady:
-          longitudinal?.before_after_ready ?? row.beforeAfterReady ?? imagingAuditReadiness.before_after_ready,
+          longitudinal?.before_after_ready ??
+          row.beforeAfterReady ??
+          imagingAuditReadiness.before_after_ready,
         donorFollowUpMissing:
           longitudinal?.missing_outcome_evidence.includes("donor_follow_up") ?? false,
         recipientFollowUpMissing:

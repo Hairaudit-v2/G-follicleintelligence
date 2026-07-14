@@ -47,7 +47,12 @@ export type GenericEmailActivityRow = {
 
 export type IngestGenericEmailActivityResult =
   | { ok: true; duplicate: true; activityId: string }
-  | { ok: true; duplicate: false; activity: GenericEmailActivityRow; crmActivityEventId: string | null }
+  | {
+      ok: true;
+      duplicate: false;
+      activity: GenericEmailActivityRow;
+      crmActivityEventId: string | null;
+    }
   | { ok: false; httpStatus: number; publicMessage: string };
 
 type ServerOpts = {
@@ -65,9 +70,7 @@ function mapActivityRow(row: Record<string, unknown>): GenericEmailActivityRow {
     external_thread_id: row.external_thread_id != null ? String(row.external_thread_id) : null,
     direction: String(row.direction) as GenericEmailDirection,
     from_email: row.from_email != null ? String(row.from_email) : null,
-    to_email_hashes: Array.isArray(row.to_email_hashes)
-      ? row.to_email_hashes.map(String)
-      : [],
+    to_email_hashes: Array.isArray(row.to_email_hashes) ? row.to_email_hashes.map(String) : [],
     to_email_preview: row.to_email_preview != null ? String(row.to_email_preview) : null,
     subject_preview: row.subject_preview != null ? String(row.subject_preview) : null,
     body_preview: row.body_preview != null ? String(row.body_preview) : null,
@@ -243,7 +246,9 @@ export type GenericEmailIngestPayload = {
 export function normalizeGenericEmailIngestPayload(
   body: Record<string, unknown>
 ): Omit<GenericEmailActivityInput, "tenantId"> {
-  const directionRaw = String(body.direction ?? "inbound").trim().toLowerCase();
+  const directionRaw = String(body.direction ?? "inbound")
+    .trim()
+    .toLowerCase();
   const direction: GenericEmailDirection = directionRaw === "outbound" ? "outbound" : "inbound";
   const toRaw = body.to_emails;
   const toEmails = Array.isArray(toRaw)

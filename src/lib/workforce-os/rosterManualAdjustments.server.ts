@@ -109,7 +109,10 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
   allowOverride?: boolean;
   excludeShiftId?: string | null;
   client?: SupabaseClient;
-}): Promise<{ warnings: RosterShiftValidationWarning[]; eligibility: RosterStaffEligibilitySnapshot }> {
+}): Promise<{
+  warnings: RosterShiftValidationWarning[];
+  eligibility: RosterStaffEligibilitySnapshot;
+}> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const sid = assertNonEmptyUuid(input.staffId, "staffId");
   const supabase = input.client ?? supabaseAdmin();
@@ -355,7 +358,10 @@ export async function cancelStaffShiftWithReason(input: {
 
   const cancellationMetadata = rosterShiftCancellationAuditMetadata(input.notes);
 
-  if (input.hardDeleteGeneratedDraft && canHardDeleteGeneratedDraftShift(toAuditSnapshot(existing))) {
+  if (
+    input.hardDeleteGeneratedDraft &&
+    canHardDeleteGeneratedDraftShift(toAuditSnapshot(existing))
+  ) {
     const { error } = await supabase
       .from("fi_staff_shifts")
       .delete()
@@ -625,10 +631,7 @@ export async function loadReplacementStaffForShift(input: {
     string,
     import("@/src/lib/workforce-os/workforceRosteringEngine").StaffAvailabilityRangeInput
   >();
-  const conflictsByStaff = new Map<
-    string,
-    ReturnType<typeof detectStaffSchedulingConflicts>
-  >();
+  const conflictsByStaff = new Map<string, ReturnType<typeof detectStaffSchedulingConflicts>>();
 
   for (const staff of eligibleStaff) {
     const [blocksRes, shiftsRes] = await Promise.all([

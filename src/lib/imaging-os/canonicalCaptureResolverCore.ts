@@ -110,8 +110,12 @@ export function buildCanonicalCaptureAuditMetadata(input: {
   return {
     canonical_capture_enforced: true,
     canonical_capture_source: normalizeCanonicalCaptureSource(input.captureSource),
-    ...(input.protocolCatalogSource ? { protocol_catalog_source: input.protocolCatalogSource } : {}),
-    ...(input.protocolCatalogVersion ? { protocol_catalog_version: input.protocolCatalogVersion } : {}),
+    ...(input.protocolCatalogSource
+      ? { protocol_catalog_source: input.protocolCatalogSource }
+      : {}),
+    ...(input.protocolCatalogVersion
+      ? { protocol_catalog_version: input.protocolCatalogVersion }
+      : {}),
     ...(input.protocolTemplateSlug ? { protocol_template_slug: input.protocolTemplateSlug } : {}),
     ...(input.sessionCreated ? { canonical_session_created: true } : {}),
     ...(input.sessionReused ? { canonical_session_reused: true } : {}),
@@ -122,7 +126,6 @@ export function mergeCanonicalCaptureMetadata(
   base: Record<string, unknown> | null | undefined,
   patch: Record<string, unknown>
 ): Record<string, unknown> {
-  const root =
-    base && typeof base === "object" && !Array.isArray(base) ? { ...base } : {};
+  const root = base && typeof base === "object" && !Array.isArray(base) ? { ...base } : {};
   return { ...root, ...patch };
 }

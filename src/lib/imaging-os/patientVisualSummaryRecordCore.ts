@@ -140,12 +140,18 @@ export function buildDensityZonesFromZoneDrafts(
 export function recipientZoneDraftFromRecord(
   record: PatientVisualSummaryStaffRecord | null | undefined
 ): RecipientZoneDraft[] {
-  const byId = new Map<string, NonNullable<PatientVisualSummaryStaffRecord["recipient_zones"]>[number]>();
+  const byId = new Map<
+    string,
+    NonNullable<PatientVisualSummaryStaffRecord["recipient_zones"]>[number]
+  >();
   for (const z of record?.recipient_zones ?? []) {
     const id = z.zone_id?.trim();
     if (id) byId.set(id, z);
   }
-  const densityByLabel = new Map<string, NonNullable<PatientVisualSummaryStaffRecord["density_zones"]>[number]>();
+  const densityByLabel = new Map<
+    string,
+    NonNullable<PatientVisualSummaryStaffRecord["density_zones"]>[number]
+  >();
   for (const dz of record?.density_zones ?? []) {
     const label = dz.label?.trim();
     if (label) densityByLabel.set(label, dz);
@@ -159,8 +165,7 @@ export function recipientZoneDraftFromRecord(
       zone_id: zoneId,
       graft_count: z?.graft_count != null ? String(z.graft_count) : "",
       density_range: z?.density_range ?? "",
-      grafts_per_cm2:
-        densityRow?.grafts_per_cm2 != null ? String(densityRow.grafts_per_cm2) : "",
+      grafts_per_cm2: densityRow?.grafts_per_cm2 != null ? String(densityRow.grafts_per_cm2) : "",
       qualitative_density: qualitativeValueFromLabel(densityRow?.qualitative_label),
       singles: mix?.singles != null ? String(mix.singles) : "",
       doubles: mix?.doubles != null ? String(mix.doubles) : "",
@@ -175,9 +180,7 @@ export function recipientZoneDraftFromRecord(
   });
 }
 
-export function sumZoneGraftCounts(
-  zones: Array<{ graft_count?: number }>
-): number {
+export function sumZoneGraftCounts(zones: Array<{ graft_count?: number }>): number {
   return zones.reduce((sum, z) => sum + (z.graft_count ?? 0), 0);
 }
 
@@ -196,9 +199,10 @@ export function buildGraftTotalMismatchWarning(input: {
   return null;
 }
 
-export function normalizeRecipientZoneInput(
-  input: RecipientZoneRecordInput
-): { zone: NonNullable<PatientVisualSummaryStaffRecord["recipient_zones"]>[number] | null; errors: string[] } {
+export function normalizeRecipientZoneInput(input: RecipientZoneRecordInput): {
+  zone: NonNullable<PatientVisualSummaryStaffRecord["recipient_zones"]>[number] | null;
+  errors: string[];
+} {
   const errors: string[] = [];
   const zoneId = input.zone_id?.trim() ?? "";
   if (!zoneId || !isRecipientZoneId(zoneId)) {
@@ -209,7 +213,10 @@ export function normalizeRecipientZoneInput(
   if (input.graft_count != null && (!Number.isFinite(input.graft_count) || input.graft_count < 0)) {
     errors.push(`${RECIPIENT_ZONE_LABELS[zoneId]}: graft count must be zero or positive.`);
   }
-  if (input.grafts_per_cm2 != null && (!Number.isFinite(input.grafts_per_cm2) || input.grafts_per_cm2 < 0)) {
+  if (
+    input.grafts_per_cm2 != null &&
+    (!Number.isFinite(input.grafts_per_cm2) || input.grafts_per_cm2 < 0)
+  ) {
     errors.push(`${RECIPIENT_ZONE_LABELS[zoneId]}: grafts/cm² must be zero or positive.`);
   }
 
@@ -232,7 +239,11 @@ export function normalizeRecipientZoneInput(
   const densityRange = parseOptionalText(input.density_range);
   const notesRaw = parseOptionalText(input.notes);
   const notes =
-    notesRaw && patientSafeReportTextIsAllowed(notesRaw) ? notesRaw : notesRaw ? undefined : undefined;
+    notesRaw && patientSafeReportTextIsAllowed(notesRaw)
+      ? notesRaw
+      : notesRaw
+        ? undefined
+        : undefined;
 
   const singles = parseOptionalCount(mixInput.singles);
   const doubles = parseOptionalCount(mixInput.doubles);
@@ -265,7 +276,11 @@ export function normalizeRecipientZoneInput(
     ...(notes ? { notes } : {}),
   };
 
-  if (input.grafts_per_cm2 != null && Number.isFinite(input.grafts_per_cm2) && input.grafts_per_cm2 >= 0) {
+  if (
+    input.grafts_per_cm2 != null &&
+    Number.isFinite(input.grafts_per_cm2) &&
+    input.grafts_per_cm2 >= 0
+  ) {
     const densityLabel = RECIPIENT_ZONE_LABELS[zoneId];
     if (!zone.density_range) {
       zone.density_range = `${input.grafts_per_cm2} grafts/cm²`;

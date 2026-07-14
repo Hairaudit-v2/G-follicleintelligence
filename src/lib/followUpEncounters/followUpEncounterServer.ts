@@ -38,7 +38,8 @@ function asFollowUpRow(raw: Record<string, unknown>): FollowUpEncounterRow {
     staff_id: raw.staff_id != null ? String(raw.staff_id) : null,
     booking_id: raw.booking_id != null ? String(raw.booking_id) : null,
     encounter_type: String(raw.encounter_type) as FollowUpEncounterType,
-    legacy_source: raw.legacy_source != null ? (String(raw.legacy_source) as LegacyPatientSource) : null,
+    legacy_source:
+      raw.legacy_source != null ? (String(raw.legacy_source) as LegacyPatientSource) : null,
     legacy_external_id: raw.legacy_external_id != null ? String(raw.legacy_external_id) : null,
     visit_reason: raw.visit_reason != null ? String(raw.visit_reason) : null,
     clinical_note: raw.clinical_note != null ? String(raw.clinical_note) : null,
@@ -69,7 +70,9 @@ export async function loadLegacyPatientCandidates(
   if (error) throw new Error(error.message);
   if (!patients?.length) return [];
 
-  const personIds = Array.from(new Set(patients.map((p) => String((p as { person_id: string }).person_id))));
+  const personIds = Array.from(
+    new Set(patients.map((p) => String((p as { person_id: string }).person_id)))
+  );
   const { data: persons, error: pe } = await supabase
     .from("fi_persons")
     .select("id, metadata")
@@ -78,7 +81,10 @@ export async function loadLegacyPatientCandidates(
   if (pe) throw new Error(pe.message);
 
   const personById = new Map(
-    (persons ?? []).map((p) => [String((p as { id: string }).id), p as { id: string; metadata: unknown }])
+    (persons ?? []).map((p) => [
+      String((p as { id: string }).id),
+      p as { id: string; metadata: unknown },
+    ])
   );
 
   return patients.map((raw) => {

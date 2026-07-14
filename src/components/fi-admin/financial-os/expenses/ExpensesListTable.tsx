@@ -61,13 +61,9 @@ export function ExpensesListTable(props: {
     setEditingId(row.id);
     setLinkDraft({
       leadId: row.lead_id,
-      leadLabel: row.lead_id
-        ? row.lead_label?.trim() || `Lead ${row.lead_id.slice(0, 8)}…`
-        : null,
+      leadLabel: row.lead_id ? row.lead_label?.trim() || `Lead ${row.lead_id.slice(0, 8)}…` : null,
       caseId: row.case_id,
-      caseLabel: row.case_id
-        ? row.case_label?.trim() || `Case ${row.case_id.slice(0, 8)}…`
-        : null,
+      caseLabel: row.case_id ? row.case_label?.trim() || `Case ${row.case_id.slice(0, 8)}…` : null,
       campaignKey: row.campaign_key ?? "",
     });
   }
@@ -218,8 +214,7 @@ export function ExpensesListTable(props: {
           >
             <h3 className={financialOsClasses.formTitle}>Edit links</h3>
             <p className={financialOsClasses.formHint}>
-              Link lead, case, and campaign for attribution / CPL. Does not change amount or
-              ledger.
+              Link lead, case, and campaign for attribution / CPL. Does not change amount or ledger.
             </p>
             <div className="mt-4">
               <ExpenseLinkPickers

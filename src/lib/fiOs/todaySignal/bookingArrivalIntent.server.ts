@@ -35,7 +35,11 @@ export async function recordBookingArrivalIntentFromToken(
   now: Date = new Date()
 ): Promise<
   | { ok: true; tenantId: string; bookingId: string }
-  | { ok: false; error: string; code: "invalid_token" | "not_found" | "not_today" | "already_checked_in" }
+  | {
+      ok: false;
+      error: string;
+      code: "invalid_token" | "not_found" | "not_today" | "already_checked_in";
+    }
 > {
   const secret = resolveBookingArrivalTokenSecret();
   if (!secret) {
@@ -44,7 +48,11 @@ export async function recordBookingArrivalIntentFromToken(
 
   const payload = verifyBookingArrivalToken(token, secret, now.getTime());
   if (!payload) {
-    return { ok: false, error: "This arrival link is invalid or has expired.", code: "invalid_token" };
+    return {
+      ok: false,
+      error: "This arrival link is invalid or has expired.",
+      code: "invalid_token",
+    };
   }
 
   const booking = await loadBookingForTenant(payload.tenantId, payload.bookingId);
@@ -54,13 +62,25 @@ export async function recordBookingArrivalIntentFromToken(
 
   const st = String(booking.booking_status ?? "").trim();
   if (st === "arrived" || st === "completed" || st === "cancelled" || st === "no_show") {
-    return { ok: false, error: "This appointment is already checked in or closed.", code: "already_checked_in" };
+    return {
+      ok: false,
+      error: "This appointment is already checked in or closed.",
+      code: "already_checked_in",
+    };
   }
 
   const { localStartIso, localEndIso } = await loadReceptionOperationalDayWindow(payload.tenantId);
-  const window = assertBookingStartInOperationalWindow(booking.start_at, localStartIso, localEndIso);
+  const window = assertBookingStartInOperationalWindow(
+    booking.start_at,
+    localStartIso,
+    localEndIso
+  );
   if (!window.ok) {
-    return { ok: false, error: "This link is only valid on your appointment day.", code: "not_today" };
+    return {
+      ok: false,
+      error: "This link is only valid on your appointment day.",
+      code: "not_today",
+    };
   }
 
   const meta =

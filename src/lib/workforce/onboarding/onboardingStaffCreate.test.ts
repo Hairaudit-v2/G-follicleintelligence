@@ -194,11 +194,17 @@ function makeCreateStaffMockClient(options: {
       },
       insert(payload: Record<string, unknown>) {
         pendingInsert = payload;
-        if (table === "fi_staff_member_audit_events" || table === "fi_staff_onboarding_checklists") {
+        if (
+          table === "fi_staff_member_audit_events" ||
+          table === "fi_staff_onboarding_checklists"
+        ) {
           ops.push({ kind: "insert", table, payload });
           pendingInsert = null;
           return {
-            then(onFulfilled: (value: unknown) => unknown, onRejected?: (reason: unknown) => unknown) {
+            then(
+              onFulfilled: (value: unknown) => unknown,
+              onRejected?: (reason: unknown) => unknown
+            ) {
               return Promise.resolve({ error: null }).then(onFulfilled, onRejected);
             },
           };
@@ -289,10 +295,7 @@ test("createOnboardingStaffMember: rejects duplicate email before insert", async
     /already exists/i
   );
 
-  assert.equal(
-    mock.ops.filter((op) => op.kind === "insert" && op.table === "fi_staff").length,
-    0
-  );
+  assert.equal(mock.ops.filter((op) => op.kind === "insert" && op.table === "fi_staff").length, 0);
 });
 
 test("createOnboardingStaffMember: rolls back fi_staff when member insert fails", async () => {
@@ -341,10 +344,7 @@ test("createOnboardingStaffMember: reuses orphan fi_staff row instead of creatin
   });
 
   assert.equal(result.fiStaffId, reusableId);
-  assert.equal(
-    mock.ops.filter((op) => op.kind === "insert" && op.table === "fi_staff").length,
-    0
-  );
+  assert.equal(mock.ops.filter((op) => op.kind === "insert" && op.table === "fi_staff").length, 0);
   assert.ok(
     mock.ops.some(
       (op) =>

@@ -159,7 +159,8 @@ export function LeadFlowDashboard({
           <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
             <p className="text-sm leading-relaxed text-[#CBD5E1]">
-              No urgent enquiry follow-ups detected. Keep response times tight to protect conversion.
+              No urgent enquiry follow-ups detected. Keep response times tight to protect
+              conversion.
             </p>
           </div>
         ) : (
@@ -318,8 +319,7 @@ export function LeadFlowDashboard({
         />
         {recentActivity.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Recent enquiry activity will appear here as consultations and follow-ups are
-            captured.
+            Recent enquiry activity will appear here as consultations and follow-ups are captured.
           </p>
         ) : (
           <ul className="divide-y divide-white/[0.06]">

@@ -57,16 +57,13 @@ export function RosterCommandCentreDiagnosticCard({
         ) : null}
         <div>
           <dt className="text-xs uppercase tracking-wide text-slate-400">Schema check</dt>
-          <dd className="text-slate-100">
-            {failure.schemaCheckPassed ? "Passed" : "Failed"}
-          </dd>
+          <dd className="text-slate-100">{failure.schemaCheckPassed ? "Passed" : "Failed"}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-slate-400">Loaded counts</dt>
           <dd className="font-mono text-xs text-slate-300">
-            {formatCount("staff", counts.staffCount)} ·{" "}
-            {formatCount("shifts", counts.shiftsCount)} ·{" "}
-            {formatCount("standardHoursStaff", counts.standardHoursStaffCount)} ·{" "}
+            {formatCount("staff", counts.staffCount)} · {formatCount("shifts", counts.shiftsCount)}{" "}
+            · {formatCount("standardHoursStaff", counts.standardHoursStaffCount)} ·{" "}
             {formatCount("availability", counts.availabilityBlockCount)} ·{" "}
             {formatCount("clinicalEvents", counts.clinicalEventCount)}
           </dd>

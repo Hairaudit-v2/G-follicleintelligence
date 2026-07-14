@@ -1,6 +1,4 @@
-export type IiohrHrStaffFeedUrlSource =
-  | "IIOHR_HR_PERTH_STAFF_FEED_URL"
-  | "IIOHR_HR_STAFF_FEED_URL";
+export type IiohrHrStaffFeedUrlSource = "IIOHR_HR_PERTH_STAFF_FEED_URL" | "IIOHR_HR_STAFF_FEED_URL";
 
 function trimEnvValue(value: string | undefined): string | null {
   const trimmed = value?.replace(/\r\n/g, "").trim();
@@ -44,7 +42,8 @@ export function buildIiohrHrStaffFeedEnvDiagnostics(
     feedUrlSource: feed?.source ?? null,
     feedKeyConfigured: Boolean(readIiohrHrStaffFeedKey(getEnv)),
     cronSecretConfigured: Boolean(
-      (cronSecret && cronSecret.length >= 16) || (fiHrSyncCronSecret && fiHrSyncCronSecret.length >= 16)
+      (cronSecret && cronSecret.length >= 16) ||
+      (fiHrSyncCronSecret && fiHrSyncCronSecret.length >= 16)
     ),
     evolvedPerthTenantIdConfigured: Boolean(trimEnvValue(getEnv("EVOLVED_PERTH_TENANT_ID"))),
     legacyFeedUrlConfigured: Boolean(trimEnvValue(getEnv("IIOHR_HR_STAFF_FEED_URL"))),

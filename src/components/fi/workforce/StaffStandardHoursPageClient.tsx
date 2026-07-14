@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 
 import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { StaffStandardHoursPanel } from "@/src/components/fi/workforce/StaffStandardHoursPanel";
-import type { DefaultFullTimePattern, RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
+import type {
+  DefaultFullTimePattern,
+  RosterCadence,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
@@ -42,7 +45,8 @@ export function StaffStandardHoursIndexClient({
         <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Team</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">Standard hours</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
-          Set each staff member&apos;s working pattern before generating rosters or allocating patients.
+          Set each staff member&apos;s working pattern before generating rosters or allocating
+          patients.
         </p>
         <p className="mt-2 text-xs text-slate-500">
           <Link href={rosterHref} className="text-cyan-400 hover:text-cyan-300">
@@ -98,7 +102,9 @@ export function StaffStandardHoursIndexClient({
               </div>
               {canManage ? (
                 <Link
-                  href={buildStaffStandardHoursEditorHref(tenantId, staff.id, { returnTo: rosterHref })}
+                  href={buildStaffStandardHoursEditorHref(tenantId, staff.id, {
+                    returnTo: rosterHref,
+                  })}
                   className="rounded-lg border border-cyan-500/35 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-200 hover:bg-cyan-950/50"
                   data-testid={`standard-hours-index-link-${staff.id}`}
                 >

@@ -4,7 +4,10 @@
  */
 
 import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
-import { normalizeStaffRoleKey, type StaffRoleKey } from "@/src/lib/staffAccess/staffAccessRegistry";
+import {
+  normalizeStaffRoleKey,
+  type StaffRoleKey,
+} from "@/src/lib/staffAccess/staffAccessRegistry";
 
 /** Path suffix under `/fi-admin/[tenantId]` (leading slash, or empty for tenant Today home). */
 export type FiOsTenantHomePathSuffix =

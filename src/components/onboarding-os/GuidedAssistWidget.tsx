@@ -137,10 +137,7 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
           <h2
-            className={cn(
-              "truncate font-medium text-slate-100",
-              collapsed ? "text-xs" : "text-sm"
-            )}
+            className={cn("truncate font-medium text-slate-100", collapsed ? "text-xs" : "text-sm")}
           >
             {collapsed
               ? "Guided Assist"

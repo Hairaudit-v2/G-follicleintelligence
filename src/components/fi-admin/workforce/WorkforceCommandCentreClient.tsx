@@ -40,13 +40,7 @@ const UTILITY_MODULE_IDS = new Set([
   "hr-reconciliation",
 ]);
 
-function Badge({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className: string;
-}) {
+function Badge({ children, className }: { children: ReactNode; className: string }) {
   return (
     <span
       className={cn(
@@ -79,7 +73,9 @@ function SectionHeading({
       ) : null}
       <h2 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">{title}</h2>
       {description ? (
-        <p className="max-w-3xl text-sm leading-relaxed text-[#64748B] sm:text-[15px]">{description}</p>
+        <p className="max-w-3xl text-sm leading-relaxed text-[#64748B] sm:text-[15px]">
+          {description}
+        </p>
       ) : null}
     </header>
   );
@@ -223,7 +219,9 @@ function HealthBar({ metric }: { metric: WorkforceHealthMetric }) {
                     ? "bg-rose-500"
                     : "bg-slate-600"
             )}
-            style={{ width: `${Math.min(100, Math.max(metric.scorePercent != null ? pct : 0, 4))}%` }}
+            style={{
+              width: `${Math.min(100, Math.max(metric.scorePercent != null ? pct : 0, 4))}%`,
+            }}
           />
         </div>
       </div>
@@ -241,7 +239,9 @@ function UtilityModuleCard({ tile }: { tile: WorkforceModuleTile }) {
         <h3 className="text-sm font-semibold text-[#F8FAFC]">{tile.name}</h3>
         <Badge className={tileBadgeClass(tile.statusBadge.variant)}>{tile.statusBadge.label}</Badge>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-[#64748B] line-clamp-2">{tile.valueProposition}</p>
+      <p className="mt-2 text-xs leading-relaxed text-[#64748B] line-clamp-2">
+        {tile.valueProposition}
+      </p>
       <p className="mt-3 text-xs font-medium text-[#94A3B8]">{tile.keyMetric}</p>
       <div className="mt-auto pt-4">
         <Link
@@ -315,9 +315,13 @@ function IntelligenceScoreRing({
     <div className="rounded-2xl border border-white/[0.09] bg-[#0B1220]/60 p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">{label}</p>
-        <Badge className={intelligenceStatusBadgeClass(status)}>{intelligenceStatusLabel(status)}</Badge>
+        <Badge className={intelligenceStatusBadgeClass(status)}>
+          {intelligenceStatusLabel(status)}
+        </Badge>
       </div>
-      <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">{score}</p>
+      <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
+        {score}
+      </p>
       <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
         <div
           className={cn(
@@ -360,7 +364,10 @@ function WorkforceIntelligenceEngineSection({
         title="Team recommendations"
         description="Predictive staffing risk, readiness, and ranked next actions — what needs attention next."
       />
-      <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+      <DashboardCard
+        elevated
+        className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8"
+      >
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_100%_0%,rgba(34,193,255,0.08),transparent_60%)]"
           aria-hidden
@@ -382,7 +389,9 @@ function WorkforceIntelligenceEngineSection({
                       className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-[#0B1220]/50 px-3 py-2 text-xs"
                     >
                       <span className="text-[#CBD5E1]">{factor.label}</span>
-                      <span className="font-semibold tabular-nums text-rose-300">{factor.impact}</span>
+                      <span className="font-semibold tabular-nums text-rose-300">
+                        {factor.impact}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -401,17 +410,24 @@ function WorkforceIntelligenceEngineSection({
               <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
                 {tomorrowReadiness.readinessScore}
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{tomorrowReadiness.summary}</p>
-              {tomorrowReadiness.available && tomorrowReadiness.understaffed + tomorrowReadiness.credentialWarnings > 0 ? (
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">
+                {tomorrowReadiness.summary}
+              </p>
+              {tomorrowReadiness.available &&
+              tomorrowReadiness.understaffed + tomorrowReadiness.credentialWarnings > 0 ? (
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Staffing gaps</dt>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">
+                      Staffing gaps
+                    </dt>
                     <dd className="mt-1 font-semibold tabular-nums text-amber-200">
                       {tomorrowReadiness.understaffed}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Credential warnings</dt>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">
+                      Credential warnings
+                    </dt>
                     <dd className="mt-1 font-semibold tabular-nums text-rose-300">
                       {tomorrowReadiness.credentialWarnings}
                     </dd>
@@ -427,18 +443,25 @@ function WorkforceIntelligenceEngineSection({
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-[#64748B]">7-day score</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">{forecast.sevenDayScore}</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">
+                    {forecast.sevenDayScore}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-[#64748B]">14-day score</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">{forecast.fourteenDayScore}</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-[#F8FAFC]">
+                    {forecast.fourteenDayScore}
+                  </p>
                 </div>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-[#94A3B8]">{forecast.summary}</p>
               {forecast.staffingGapSignals.length > 0 ? (
                 <ul className="mt-3 space-y-1.5 text-xs text-[#94A3B8]">
                   {forecast.staffingGapSignals.slice(0, 2).map((signal) => (
-                    <li key={signal} className="rounded-md border border-white/[0.05] bg-[#0B1220]/40 px-2.5 py-1.5">
+                    <li
+                      key={signal}
+                      className="rounded-md border border-white/[0.05] bg-[#0B1220]/40 px-2.5 py-1.5"
+                    >
                       {signal}
                     </li>
                   ))}
@@ -460,12 +483,18 @@ function WorkforceIntelligenceEngineSection({
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2.5">
-                        <span className="text-xs font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
+                        <span className="text-xs font-bold tabular-nums text-[#64748B]">
+                          #{idx + 1}
+                        </span>
                         <Badge className={severityBadgeClass(rec.severity)}>{rec.severity}</Badge>
-                        <Badge className="bg-white/[0.04] text-[#94A3B8] ring-white/10">{rec.impact} impact</Badge>
+                        <Badge className="bg-white/[0.04] text-[#94A3B8] ring-white/10">
+                          {rec.impact} impact
+                        </Badge>
                       </div>
                       <p className="mt-2 text-base font-semibold text-[#F8FAFC]">{rec.title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-[#94A3B8]">{rec.description}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-[#94A3B8]">
+                        {rec.description}
+                      </p>
                     </div>
                     <Link
                       href={rec.route}
@@ -622,7 +651,10 @@ function SurgicalWorkforceIntelligenceSection({
         title="Surgical team insights"
         description="Procedure staffing — assignment safety, surgical capacity, and operational risk across upcoming procedures."
       />
-      <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+      <DashboardCard
+        elevated
+        className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8"
+      >
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_100%_0%,rgba(34,193,255,0.06),transparent_60%)]"
           aria-hidden
@@ -641,18 +673,24 @@ function SurgicalWorkforceIntelligenceSection({
               <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
                 {tomorrowReadiness.readinessScore}%
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{tomorrowReadiness.summary}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">
+                {tomorrowReadiness.summary}
+              </p>
               {tomorrowReadiness.surgeriesScheduled > 0 ? (
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Scheduled</dt>
+                    <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">
+                      Scheduled
+                    </dt>
                     <dd className="mt-1 font-semibold tabular-nums text-[#F8FAFC]">
                       {tomorrowReadiness.surgeriesScheduled}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">At risk</dt>
-                    <dd className="mt-1 font-semibold tabular-nums text-amber-200">{tomorrowReadiness.atRisk}</dd>
+                    <dd className="mt-1 font-semibold tabular-nums text-amber-200">
+                      {tomorrowReadiness.atRisk}
+                    </dd>
                   </div>
                 </dl>
               ) : null}
@@ -677,11 +715,15 @@ function SurgicalWorkforceIntelligenceSection({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
                 Procedure Staffing Quality
               </p>
-              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">Assignment Quality</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">
+                Assignment Quality
+              </p>
               <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
                 {staffingQuality.staffingQualityScore}%
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{staffingQuality.summary}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">
+                {staffingQuality.summary}
+              </p>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Accuracy</dt>
@@ -702,21 +744,31 @@ function SurgicalWorkforceIntelligenceSection({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
                 Weekly Clinical Capacity
               </p>
-              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">Capacity Utilization</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-[#64748B]">
+                Capacity Utilization
+              </p>
               <p className="mt-3 text-4xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-5xl">
                 {clinicalCapacity.weeklyCapacityPercent}%
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">{clinicalCapacity.summary}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#94A3B8]">
+                {clinicalCapacity.summary}
+              </p>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Unused hours</dt>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">
+                    Unused hours
+                  </dt>
                   <dd className="mt-1 font-semibold tabular-nums text-[#22C1FF]">
                     {Math.round(clinicalCapacity.unusedHours)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">Overload risk</dt>
-                  <dd className="mt-1 font-semibold tabular-nums text-amber-200">{clinicalCapacity.overloadRisk}</dd>
+                  <dt className="text-[11px] uppercase tracking-wide text-[#64748B]">
+                    Overload risk
+                  </dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-amber-200">
+                    {clinicalCapacity.overloadRisk}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -749,7 +801,9 @@ function SurgicalWorkforceIntelligenceSection({
                         </Badge>
                         <p className="text-sm font-semibold text-[#F8FAFC]">{risk.title}</p>
                       </div>
-                      <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">{risk.recommendation}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">
+                        {risk.recommendation}
+                      </p>
                       <div className="mt-3">
                         <SurgicalIntelligenceActionButtons
                           actions={risk.actions}
@@ -781,7 +835,9 @@ function SurgicalWorkforceIntelligenceSection({
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-bold tabular-nums text-[#64748B]">#{idx + 1}</span>
+                          <span className="text-xs font-bold tabular-nums text-[#64748B]">
+                            #{idx + 1}
+                          </span>
                           <Badge className={severityBadgeClass(rec.severity)}>{rec.severity}</Badge>
                         </div>
                         <p className="mt-2 text-sm font-semibold text-[#F8FAFC]">{rec.title}</p>
@@ -871,8 +927,8 @@ export function WorkforceCommandCentreClient({
                 Team overview
               </h1>
               <p className="text-base leading-relaxed text-[#94A3B8] sm:text-lg sm:leading-8">
-                Real-time view of staffing readiness, surgical team allocation, compliance,
-                payroll exposure, and operational team performance.
+                Real-time view of staffing readiness, surgical team allocation, compliance, payroll
+                exposure, and operational team performance.
               </p>
             </div>
             {canManage ? (
@@ -895,7 +951,10 @@ export function WorkforceCommandCentreClient({
         </div>
       </header>
 
-      <section aria-label="Executive KPIs" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <section
+        aria-label="Executive KPIs"
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6"
+      >
         <ExecutiveKpiCard label="Total Staff" value={kpis.totalStaff} />
         <ExecutiveKpiCard label="Clinically Eligible" value={kpis.clinicallyEligible} />
         <ExecutiveKpiCard label="Credential Risks" value={kpis.credentialRisks} />
@@ -928,7 +987,10 @@ export function WorkforceCommandCentreClient({
           title="Workforce Priority Queue"
           description="Highest-priority workforce issues ranked by severity and planning signals — your operational command surface."
         />
-        <DashboardCard elevated className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8">
+        <DashboardCard
+          elevated
+          className="relative overflow-hidden border-[#22C1FF]/15 p-6 shadow-2xl shadow-black/55 sm:p-8"
+        >
           <div
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_0%_0%,rgba(34,193,255,0.08),transparent_60%)]"
             aria-hidden
@@ -979,19 +1041,25 @@ export function WorkforceCommandCentreClient({
             <>
               <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Scheduled</dt>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                    Scheduled
+                  </dt>
                   <dd className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
                     {procedureForecast.scheduledProcedures}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Fully staffed</dt>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                    Fully staffed
+                  </dt>
                   <dd className="mt-2 text-3xl font-bold tabular-nums text-emerald-300">
                     {procedureForecast.fullyStaffedProcedures}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Understaffed</dt>
+                  <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                    Understaffed
+                  </dt>
                   <dd className="mt-2 text-3xl font-bold tabular-nums text-amber-200">
                     {procedureForecast.understaffedProcedures}
                   </dd>
@@ -1007,7 +1075,9 @@ export function WorkforceCommandCentreClient({
               </dl>
               {procedureForecast.missingRoles.length > 0 ? (
                 <div className="mt-6 border-t border-white/[0.06] pt-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Missing roles</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                    Missing roles
+                  </p>
                   <ul className="mt-3 flex flex-wrap gap-2.5">
                     {procedureForecast.missingRoles.map((r) => (
                       <li
@@ -1022,7 +1092,9 @@ export function WorkforceCommandCentreClient({
               ) : null}
             </>
           ) : (
-            <p className="text-sm leading-relaxed text-[#94A3B8]">{buildEmptyPlanningFallbackMessage()}</p>
+            <p className="text-sm leading-relaxed text-[#94A3B8]">
+              {buildEmptyPlanningFallbackMessage()}
+            </p>
           )}
           <Link
             href={`${base}/procedure-staffing`}
@@ -1056,25 +1128,33 @@ export function WorkforceCommandCentreClient({
           {financialIntelligence.available ? (
             <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Weekly exposure</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Weekly exposure
+                </dt>
                 <dd className="mt-2 text-2xl font-bold tabular-nums text-[#22C1FF] sm:text-3xl">
                   {formatCentsAsCurrency(financialIntelligence.weeklyWageExposureCents)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Daily roster cost</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Daily roster cost
+                </dt>
                 <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
                   {formatCentsAsCurrency(financialIntelligence.dailyRosterCostCents)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Procedure labour</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Procedure labour
+                </dt>
                 <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
                   {formatCentsAsCurrency(financialIntelligence.procedureLabourCostCents)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">Avg / procedure</dt>
+                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64748B]">
+                  Avg / procedure
+                </dt>
                 <dd className="mt-2 text-2xl font-bold tabular-nums text-[#F8FAFC] sm:text-3xl">
                   {financialIntelligence.averageCostPerProcedureCents != null
                     ? formatCentsAsCurrency(financialIntelligence.averageCostPerProcedureCents)
@@ -1125,7 +1205,10 @@ export function WorkforceCommandCentreClient({
           </Link>
           .
         </p>
-        <Link href={`/fi-admin/${tenantId}/staff`} className="font-medium text-[#22C1FF] hover:underline">
+        <Link
+          href={`/fi-admin/${tenantId}/staff`}
+          className="font-medium text-[#22C1FF] hover:underline"
+        >
           FI staff directory →
         </Link>
       </footer>

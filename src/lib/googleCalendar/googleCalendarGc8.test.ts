@@ -589,7 +589,9 @@ describe("CalendarOS GC-8 — scheduled sync + monitoring", () => {
     );
 
     assert.ok(
-      mock.eventBus.adminNotifications.some((n) => n.title === "Google Calendar review queue backlog")
+      mock.eventBus.adminNotifications.some(
+        (n) => n.title === "Google Calendar review queue backlog"
+      )
     );
   });
 });

@@ -847,7 +847,10 @@ function CalendarPageImpl({
             view: data.query.view,
             dateAnchor: data.query.dateAnchor,
             payloadApproxBytes: new TextEncoder().encode(
-              JSON.stringify({ bookings: bookings.length, display: Object.keys(bookingDisplay).length })
+              JSON.stringify({
+                bookings: bookings.length,
+                display: Object.keys(bookingDisplay).length,
+              })
             ).length,
           }}
         />

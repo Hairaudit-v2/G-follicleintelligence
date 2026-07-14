@@ -571,7 +571,10 @@ export function WorkforceOsPayrollClient({
             </thead>
             <tbody>
               {rosterVariance.slice(0, 30).map((row, i) => (
-                <tr key={`${row.punchId ?? row.shiftId ?? i}`} className="border-b border-white/[0.06]">
+                <tr
+                  key={`${row.punchId ?? row.shiftId ?? i}`}
+                  className="border-b border-white/[0.06]"
+                >
                   <td className="px-4 py-3 text-[#F8FAFC]">{row.staffFullName ?? "—"}</td>
                   <td className="px-4 py-3 text-[#CBD5E1]">{row.workDate}</td>
                   <td className="px-4 py-3 capitalize text-amber-200">
@@ -647,7 +650,9 @@ export function WorkforceOsPayrollClient({
             ))}
           </ul>
         ) : (
-          <p className="mt-4 text-sm text-[#64748B]">No surgery-day shifts scheduled for this date.</p>
+          <p className="mt-4 text-sm text-[#64748B]">
+            No surgery-day shifts scheduled for this date.
+          </p>
         )}
       </DashboardCard>
 
@@ -760,9 +765,7 @@ export function WorkforceOsPayrollClient({
               <select
                 required
                 value={timesheetForm.staffMemberId}
-                onChange={(e) =>
-                  setTimesheetForm((f) => ({ ...f, staffMemberId: e.target.value }))
-                }
+                onChange={(e) => setTimesheetForm((f) => ({ ...f, staffMemberId: e.target.value }))}
                 className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[#F8FAFC]"
               >
                 <option value="">— Select —</option>
@@ -793,9 +796,7 @@ export function WorkforceOsPayrollClient({
                 min="0"
                 step="15"
                 value={timesheetForm.minutesWorked}
-                onChange={(e) =>
-                  setTimesheetForm((f) => ({ ...f, minutesWorked: e.target.value }))
-                }
+                onChange={(e) => setTimesheetForm((f) => ({ ...f, minutesWorked: e.target.value }))}
                 className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[#F8FAFC]"
               />
             </label>
@@ -865,11 +866,9 @@ export function WorkforceOsPayrollClient({
           <tbody>
             {wageProfiles.length === 0 ? (
               <tr>
-                <td
-                  colSpan={canManage ? 6 : 5}
-                  className="px-4 py-8 text-center text-[#94A3B8]"
-                >
-                  No wage profiles yet. Add profiles to enable surgery-day cost and timesheet entries.
+                <td colSpan={canManage ? 6 : 5} className="px-4 py-8 text-center text-[#94A3B8]">
+                  No wage profiles yet. Add profiles to enable surgery-day cost and timesheet
+                  entries.
                 </td>
               </tr>
             ) : (
@@ -884,9 +883,7 @@ export function WorkforceOsPayrollClient({
                   <td className="px-4 py-3 text-[#CBD5E1]">
                     {formatCentsAsCurrency(profile.baseRateCents, profile.currency)}
                   </td>
-                  <td className="px-4 py-3 text-xs text-[#94A3B8]">
-                    {profile.awardCode ?? "—"}
-                  </td>
+                  <td className="px-4 py-3 text-xs text-[#94A3B8]">{profile.awardCode ?? "—"}</td>
                   <td className="px-4 py-3 text-xs text-[#94A3B8]">
                     {profile.awardLoadingCodes.length > 0
                       ? profile.awardLoadingCodes.join(", ")
@@ -945,9 +942,7 @@ export function WorkforceOsPayrollClient({
                   required
                   className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
                   value={correctionForm.clockOutAt}
-                  onChange={(e) =>
-                    setCorrectionForm((f) => ({ ...f, clockOutAt: e.target.value }))
-                  }
+                  onChange={(e) => setCorrectionForm((f) => ({ ...f, clockOutAt: e.target.value }))}
                 />
               </label>
               <label className="block text-xs text-[#94A3B8] sm:col-span-2">
@@ -990,9 +985,7 @@ export function WorkforceOsPayrollClient({
                   required
                   className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
                   value={breakForm.breakStartAt}
-                  onChange={(e) =>
-                    setBreakForm((f) => ({ ...f, breakStartAt: e.target.value }))
-                  }
+                  onChange={(e) => setBreakForm((f) => ({ ...f, breakStartAt: e.target.value }))}
                 />
               </label>
               <label className="block text-xs text-[#94A3B8]">
@@ -1002,9 +995,7 @@ export function WorkforceOsPayrollClient({
                   required
                   className="mt-1 block w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-[#F8FAFC]"
                   value={breakForm.breakEndAt}
-                  onChange={(e) =>
-                    setBreakForm((f) => ({ ...f, breakEndAt: e.target.value }))
-                  }
+                  onChange={(e) => setBreakForm((f) => ({ ...f, breakEndAt: e.target.value }))}
                 />
               </label>
               <label className="block text-xs text-[#94A3B8] sm:col-span-2">
@@ -1128,7 +1119,8 @@ export function WorkforceOsPayrollClient({
           <div>
             <h2 className="text-sm font-semibold text-[#F8FAFC]">Timesheet approval</h2>
             <p className="mt-1 text-xs text-[#94A3B8]">
-              Draft → submit for review → approve to lock for pay. Approved entries cannot be edited.
+              Draft → submit for review → approve to lock for pay. Approved entries cannot be
+              edited.
             </p>
           </div>
           {canManage ? (
@@ -1240,9 +1232,7 @@ export function WorkforceOsPayrollClient({
                                 size="sm"
                                 variant="outline"
                                 disabled={pending}
-                                onClick={() =>
-                                  runTimesheetTransition(entry.id, "revert_to_draft")
-                                }
+                                onClick={() => runTimesheetTransition(entry.id, "revert_to_draft")}
                               >
                                 Revert
                               </Button>

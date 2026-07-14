@@ -96,7 +96,8 @@ export function GraftTrayIntelligenceSummaryCard({
       <div className={`mt-2 grid gap-1 text-violet-100/90 ${compact ? "" : "sm:grid-cols-2"}`}>
         {summary.originalAiEstimate != null ? (
           <p>
-            AI estimate: <span className="font-semibold text-violet-50">{summary.originalAiEstimate}</span>
+            AI estimate:{" "}
+            <span className="font-semibold text-violet-50">{summary.originalAiEstimate}</span>
           </p>
         ) : null}
         <p>
@@ -104,8 +105,7 @@ export function GraftTrayIntelligenceSummaryCard({
           <span className="font-semibold text-violet-50">{summary.manualCount ?? "—"}</span>
         </p>
         <p>
-          Variance:{" "}
-          <span className="font-medium">{summary.mismatchBand.replace(/_/g, " ")}</span>
+          Variance: <span className="font-medium">{summary.mismatchBand.replace(/_/g, " ")}</span>
           {summary.varianceDelta != null ? ` · Δ ${summary.varianceDelta}` : null}
         </p>
         <p>

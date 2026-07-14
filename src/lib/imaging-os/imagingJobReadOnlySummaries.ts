@@ -173,11 +173,13 @@ export function buildNorwoodGradeSummary(input: {
   }
 
   const patientScale = input.patientNorwoodScale?.trim();
-  const confidence = clinical?.recipient_assessment?.confidence ?? input.aiImageCategoryConfidence ?? 0;
+  const confidence =
+    clinical?.recipient_assessment?.confidence ?? input.aiImageCategoryConfidence ?? 0;
 
   if (patientScale) {
     return buildReadOnlyJobSummary({
-      summary_status: confidence >= CLINICAL_REVIEW_CONFIDENCE_THRESHOLD ? "complete" : "needs_review",
+      summary_status:
+        confidence >= CLINICAL_REVIEW_CONFIDENCE_THRESHOLD ? "complete" : "needs_review",
       confidence: Math.max(confidence, 0.5),
       observations: [
         `Patient record includes Norwood scale: ${patientScale}.`,

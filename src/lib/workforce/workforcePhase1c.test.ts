@@ -18,10 +18,7 @@ import { buildHrSyncRunCompletionPatch } from "@/src/lib/workforce/hrSyncAuditCo
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 
-function member(
-  id: string,
-  opts?: Partial<StaffMemberSnapshot>
-): StaffMemberSnapshot {
+function member(id: string, opts?: Partial<StaffMemberSnapshot>): StaffMemberSnapshot {
   return {
     id,
     tenantId: TENANT,

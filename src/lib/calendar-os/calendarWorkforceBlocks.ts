@@ -16,10 +16,7 @@ const WEEKDAY_TO_KEY: Record<number, StaffWeekdayKey> = {
 };
 
 /** Map clinic-local `YYYY-MM-DD` to staff weekly hours key. */
-export function weekdayKeyFromDayKey(
-  dayKey: string,
-  timeZone: string
-): StaffWeekdayKey | null {
+export function weekdayKeyFromDayKey(dayKey: string, timeZone: string): StaffWeekdayKey | null {
   const ms = zonedMidnightUtcMs(dayKey.trim(), timeZone);
   if (ms == null) return null;
   const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone })

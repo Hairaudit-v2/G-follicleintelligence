@@ -11,8 +11,7 @@ import "server-only";
  * Remove after real-tenant dual-run sign-off and full cutover.
  */
 
-const TENANT_UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TENANT_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function isTenantUuid(value: string): boolean {
   return TENANT_UUID_RE.test(value);
@@ -22,9 +21,7 @@ function isTenantUuid(value: string): boolean {
  * Parse comma-separated tenant UUIDs. Trims whitespace, validates UUIDs,
  * ignores malformed entries (including wildcards) safely.
  */
-export function parsePipelineV1TenantAllowlist(
-  raw: string | undefined
-): ReadonlySet<string> {
+export function parsePipelineV1TenantAllowlist(raw: string | undefined): ReadonlySet<string> {
   const out = new Set<string>();
   for (const part of (raw ?? "").split(",")) {
     const token = part.trim().toLowerCase();
@@ -40,14 +37,10 @@ export function parsePipelineV1TenantAllowlist(
  * Server-side tenant gate for mounting PipelineWorkspace on `/crm`.
  * Platform-admin status alone does not enable Pipeline for a tenant.
  */
-export async function isPipelineV1EnabledForTenant(
-  tenantId: string
-): Promise<boolean> {
+export async function isPipelineV1EnabledForTenant(tenantId: string): Promise<boolean> {
   const tid = tenantId.trim().toLowerCase();
   if (!tid || !isTenantUuid(tid)) return false;
 
-  const allowlist = parsePipelineV1TenantAllowlist(
-    process.env.FI_PIPELINE_V1_TENANT_ALLOWLIST
-  );
+  const allowlist = parsePipelineV1TenantAllowlist(process.env.FI_PIPELINE_V1_TENANT_ALLOWLIST);
   return allowlist.has(tid);
 }

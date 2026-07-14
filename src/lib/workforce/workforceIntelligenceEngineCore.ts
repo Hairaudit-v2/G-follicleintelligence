@@ -171,10 +171,7 @@ export function buildOverallWorkforceHealthScore(
   }
 
   if (input.missingWageProfileCount > 0) {
-    const penalty = Math.min(
-      15,
-      Math.round((input.missingWageProfileCount / totalStaff) * 30) + 2
-    );
+    const penalty = Math.min(15, Math.round((input.missingWageProfileCount / totalStaff) * 30) + 2);
     score -= penalty;
     factors.push({
       label: "Missing wage profiles",
@@ -285,7 +282,9 @@ export function buildTomorrowSurgeryReadiness(
     s.affectedDates.includes(tomorrow)
   );
   const credentialWarnings = planning.credentialRisks.filter(
-    (r) => r.daysUntilExpiry <= 1 && (r.blocksClinicalWork || r.severity === "high" || r.severity === "critical")
+    (r) =>
+      r.daysUntilExpiry <= 1 &&
+      (r.blocksClinicalWork || r.severity === "high" || r.severity === "critical")
   ).length;
 
   const understaffed = tomorrowShortages.length;
@@ -384,7 +383,8 @@ export function buildPredictiveStaffingForecast(
       overtimeSignals: [],
       credentialExpirySignals: [],
       staffingGapSignals: [],
-      summary: "Planning snapshot unavailable — refresh planning signals to generate workforce forecasts.",
+      summary:
+        "Planning snapshot unavailable — refresh planning signals to generate workforce forecasts.",
     };
   }
 
@@ -444,14 +444,13 @@ export function buildPredictiveStaffingForecast(
     overtimeSignals.push("Elevated weekly wage exposure coincides with near-term staffing gaps.");
   }
 
-  const credentialExpirySignals = fourteenDayCredRisks.slice(0, 5).map(
-    (r) =>
-      `${r.staffName}: ${r.displayName} expires ${r.expiresAt} (${r.daysUntilExpiry}d)`
-  );
+  const credentialExpirySignals = fourteenDayCredRisks
+    .slice(0, 5)
+    .map((r) => `${r.staffName}: ${r.displayName} expires ${r.expiresAt} (${r.daysUntilExpiry}d)`);
 
-  const staffingGapSignals = fourteenDayShortages.slice(0, 5).map(
-    (s) => `${s.role}: ${s.shortageCount} gap(s) across ${s.affectedDates.length} day(s)`
-  );
+  const staffingGapSignals = fourteenDayShortages
+    .slice(0, 5)
+    .map((s) => `${s.role}: ${s.shortageCount} gap(s) across ${s.affectedDates.length} day(s)`);
 
   const sevenClamped = clampIntelligenceScore(sevenDayScore);
   const fourteenClamped = clampIntelligenceScore(fourteenDayScore);

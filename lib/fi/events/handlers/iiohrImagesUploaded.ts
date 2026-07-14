@@ -129,11 +129,7 @@ function resolveSourceCaseId(
   envelope: FiEventEnvelope,
   payload: IiohrImagesUploadedPayload
 ): string {
-  return (
-    payload.academy_case_id?.trim() ||
-    envelope.identifiers?.source_case_id?.trim() ||
-    ""
-  );
+  return payload.academy_case_id?.trim() || envelope.identifiers?.source_case_id?.trim() || "";
 }
 
 function resolveSourcePatientId(
@@ -141,9 +137,7 @@ function resolveSourcePatientId(
   payload: IiohrImagesUploadedPayload
 ): string | null {
   return (
-    envelope.identifiers?.source_patient_id?.trim() ||
-    payload.patient_external_id?.trim() ||
-    null
+    envelope.identifiers?.source_patient_id?.trim() || payload.patient_external_id?.trim() || null
   );
 }
 

@@ -23,8 +23,13 @@ export const OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmployment
   OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES;
 
 /** Statuses that block scheduling / roster / surgery pools. */
-export const SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> =
-  new Set(["on_leave", "terminated", "resigned", "contract_ended", "suspended"]);
+export const SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> = new Set([
+  "on_leave",
+  "terminated",
+  "resigned",
+  "contract_ended",
+  "suspended",
+]);
 
 export const STAFF_IDENTITY_SOURCES = [
   "local",

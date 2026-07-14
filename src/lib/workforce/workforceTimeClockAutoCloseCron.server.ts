@@ -32,7 +32,10 @@ export async function runWorkforceTimeClockAutoCloseCron(): Promise<{
       .eq("tenant_id", tenantId)
       .maybeSingle();
     const tz = resolveTenantCalendarTimezone(
-      settings as { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null
+      settings as {
+        default_timezone?: string | null;
+        metadata?: Record<string, unknown> | null;
+      } | null
     );
     const today = calendarDateStringFromInstant(new Date(), tz);
 

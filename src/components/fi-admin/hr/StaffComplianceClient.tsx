@@ -85,18 +85,13 @@ export function StaffComplianceClient({
       ) : null}
 
       <DashboardCard className="mt-6 p-5" elevated>
-        <h2 className="text-sm font-semibold text-slate-100">
-          Open alerts ({alerts.length})
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">Open alerts ({alerts.length})</h2>
         {alerts.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">No open compliance alerts.</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {alerts.map((a) => (
-              <li
-                key={a.id}
-                className="rounded-lg border border-white/[0.06] px-3 py-2 text-sm"
-              >
+              <li key={a.id} className="rounded-lg border border-white/[0.06] px-3 py-2 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium text-slate-200">{a.staffName}</span>
                   <span

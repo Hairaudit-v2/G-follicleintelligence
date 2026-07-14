@@ -51,9 +51,7 @@ import {
   type FiStaffEventAssignmentRow,
   type FiStaffShiftRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
-import {
-  resolveTenantCalendarTimezone,
-} from "@/src/lib/calendar/calendarTimezone";
+import { resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { rosterAvailabilityLocalDateFromIso } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { loadActiveStandardHoursForTenant } from "@/src/lib/workforce-os/staffStandardHours.server";
 import {
@@ -145,7 +143,12 @@ export type RosterCommandCentrePayload = {
   clinics: RosterCommandCentreClinicOption[];
   staffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
   /** Roster-eligible staff only — use for the operational grid rows. */
-  rosterGridStaffOptions: Array<{ id: string; name: string; role: string | null; isActive: boolean }>;
+  rosterGridStaffOptions: Array<{
+    id: string;
+    name: string;
+    role: string | null;
+    isActive: boolean;
+  }>;
   events: RosterCommandCentreEvent[];
   shifts: RosterGridShift[];
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
@@ -507,9 +510,8 @@ async function buildBookingEvents(input: {
 export async function assertHrOsRosterManageAllowed(
   tenantId: string
 ): Promise<{ fiUserId: string }> {
-  const { assertStaffStandardHoursManageAllowed } = await import(
-    "@/src/lib/workforce-os/staffStandardHoursManageGate.server"
-  );
+  const { assertStaffStandardHoursManageAllowed } =
+    await import("@/src/lib/workforce-os/staffStandardHoursManageGate.server");
   return assertStaffStandardHoursManageAllowed(tenantId);
 }
 
@@ -517,8 +519,7 @@ export async function loadRosterCommandCentre(
   input: LoadRosterCommandCentreInput
 ): Promise<RosterCommandCentrePayload> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const rosterPlanning =
-    input.rosterPlanning ?? (await loadWorkforceRosterPlanningPolicy(tid));
+  const rosterPlanning = input.rosterPlanning ?? (await loadWorkforceRosterPlanningPolicy(tid));
 
   const periodStart =
     input.periodStart?.trim() ||
@@ -545,16 +546,22 @@ export async function loadRosterCommandCentre(
       ? mondayOfWeekIso(periodStart)
       : periodStart.slice(0, 10);
   const weekDayDates =
-    rosterPlanning.rosterCadence === "weekly"
-      ? weekDayIsoDates(weekStart)
-      : periodDayDates;
+    rosterPlanning.rosterCadence === "weekly" ? weekDayIsoDates(weekStart) : periodDayDates;
   const clinicFilter = input.clinicId?.trim() || null;
   const staffFilter = input.staffId?.trim() || null;
   const eventTypeFilter = input.eventType?.trim().toLowerCase() || null;
   const statusFilter = input.statusFilter ?? null;
 
-  const [clinics, staffRows, bookings, shiftsRes, blocksRes, eligibilityBlocksRes, standardHoursMap, tenantTimezone] =
-    await Promise.all([
+  const [
+    clinics,
+    staffRows,
+    bookings,
+    shiftsRes,
+    blocksRes,
+    eligibilityBlocksRes,
+    standardHoursMap,
+    tenantTimezone,
+  ] = await Promise.all([
     loadClinicsForTenant(tid),
     loadAllStaffForTenant(tid),
     loadBookingsForOperatorView({
@@ -707,9 +714,10 @@ export async function loadRosterCommandCentre(
   });
 
   const staffMissingStandardHours = listRosterEligibleStaffMissingStandardHours({
-    staffOptions: filterRosterGridStaffOptions(staffOptions, eligibilityContext.eligibleStaffIds).map(
-      (staff) => ({ id: staff.id, name: staff.name })
-    ),
+    staffOptions: filterRosterGridStaffOptions(
+      staffOptions,
+      eligibilityContext.eligibleStaffIds
+    ).map((staff) => ({ id: staff.id, name: staff.name })),
     standardHoursByStaffId,
     eligibleStaffIds: eligibilityContext.eligibleStaffIds,
   });

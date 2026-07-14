@@ -5,9 +5,7 @@ import { buildTransectionMonitoring } from "@/src/lib/surgeryOs/transectionMonit
 
 const surgeryId = "00000000-0000-4000-8000-000000000041";
 
-function baseInput(
-  overrides: Partial<Parameters<typeof buildTransectionMonitoring>[0]> = {}
-) {
+function baseInput(overrides: Partial<Parameters<typeof buildTransectionMonitoring>[0]> = {}) {
   return {
     surgeryId,
     patientLabel: "Jordan Patient",
@@ -23,7 +21,10 @@ describe("transectionMonitoringCore", () => {
     assert.equal(snapshot.summary, "No transection monitoring data available.");
     assert.equal(snapshot.totalGraftsReviewed, 0);
     assert.equal(snapshot.transectionRate, null);
-    assert.equal(snapshot.warnings.some((w) => w.kind === "no_data"), true);
+    assert.equal(
+      snapshot.warnings.some((w) => w.kind === "no_data"),
+      true
+    );
   });
 
   it("calculates transection rate from confirmed tray damage", () => {

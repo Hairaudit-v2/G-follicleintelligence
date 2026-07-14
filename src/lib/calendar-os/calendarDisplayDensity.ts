@@ -94,11 +94,15 @@ export function isCalendarOsDisplayDensity(v: string): v is CalendarOsDisplayDen
 export function normalizeCalendarOsDisplayDensity(
   raw: string | null | undefined
 ): CalendarOsDisplayDensity {
-  const v = String(raw ?? "").trim().toLowerCase();
+  const v = String(raw ?? "")
+    .trim()
+    .toLowerCase();
   return isCalendarOsDisplayDensity(v) ? v : "comfortable";
 }
 
-export function calendarOsDensityTokens(density: CalendarOsDisplayDensity): CalendarOsDensityTokens {
+export function calendarOsDensityTokens(
+  density: CalendarOsDisplayDensity
+): CalendarOsDensityTokens {
   return DENSITY_TOKENS[density];
 }
 
@@ -126,7 +130,10 @@ export function calendarOsDayGridTemplate(
   return `${t.dayTimeGutterWidth}px repeat(${resourceCount}, ${fluidColMin(t.dayResourceColMinWidth)})`;
 }
 
-export function calendarOsDayBodyHeightPx(density: CalendarOsDisplayDensity, gridHours: number): number {
+export function calendarOsDayBodyHeightPx(
+  density: CalendarOsDisplayDensity,
+  gridHours: number
+): number {
   const t = calendarOsDensityTokens(density);
   return gridHours * t.dayPxPerHour;
 }

@@ -13,7 +13,9 @@ const TENANT = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const AUTH_USER = "593e9dba-93c2-4e9a-a493-d5202ec9257d";
 const FI_USER = "872bf5e0-3ea6-4d49-8a7e-7085e3587b2f";
 
-function createFiUsersMockSupabase(rows: Array<{ id: string; tenant_id: string; auth_user_id: string }>) {
+function createFiUsersMockSupabase(
+  rows: Array<{ id: string; tenant_id: string; auth_user_id: string }>
+) {
   return {
     from(table: string) {
       if (table !== "fi_users") throw new Error(`Unexpected table: ${table}`);

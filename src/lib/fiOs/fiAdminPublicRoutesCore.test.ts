@@ -7,10 +7,7 @@ import {
 } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
 
 test("isFiAdminTokenPublicRoute includes onboarding and staff-access token routes", () => {
-  assert.equal(
-    isFiAdminTokenPublicRoute("/fi-admin/t-1/onboarding/invite/abc-123"),
-    true
-  );
+  assert.equal(isFiAdminTokenPublicRoute("/fi-admin/t-1/onboarding/invite/abc-123"), true);
   assert.equal(
     isFiAdminTokenPublicRoute("/fi-admin/t-1/workforce-os/staff-access/accept/abc-123"),
     true

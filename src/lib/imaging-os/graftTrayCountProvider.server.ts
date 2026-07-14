@@ -21,7 +21,10 @@ import {
   parseGraftTrayAiEstimateRow,
 } from "./graftTrayAiEstimateRowParser";
 import type { ImagingAiJobStatus } from "./imagingAiAnalysisKinds";
-import { parseGraftTrayReviewAuditTrail, type GraftTrayAiReviewAuditEntry } from "./graftTrayReviewUxCore";
+import {
+  parseGraftTrayReviewAuditTrail,
+  type GraftTrayAiReviewAuditEntry,
+} from "./graftTrayReviewUxCore";
 import type {
   GraftTrayAiEstimateRow,
   GraftTrayAiEstimateSummary,
@@ -147,7 +150,9 @@ export async function runGraftTrayCountEstimate(input: {
     const estimate = buildUnableToAssessEstimate({
       provider: "unavailable",
       providerVersion: "graft_tray_disabled_v1",
-      notes: ["Graft tray AI counting is disabled. Set FI_IMAGING_ENABLE_GRAFT_TRAY_AI_COUNT=true."],
+      notes: [
+        "Graft tray AI counting is disabled. Set FI_IMAGING_ENABLE_GRAFT_TRAY_AI_COUNT=true.",
+      ],
     });
     const comparison = compareGraftTrayAiEstimate({
       estimate,

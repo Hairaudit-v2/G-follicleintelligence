@@ -75,9 +75,7 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
     return pathname === base || pathname === `${base}/`;
   }
   if (segment === "members") {
-    return (
-      pathname.startsWith(`${base}/directory`) || pathname.startsWith(`${base}/staff/`)
-    );
+    return pathname.startsWith(`${base}/directory`) || pathname.startsWith(`${base}/staff/`);
   }
   if (segment === "staff-access") {
     return pathname.startsWith(`${base}/staff-access`);

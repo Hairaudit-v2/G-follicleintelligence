@@ -77,8 +77,8 @@ export function ConsultationImageUploadField({
 
   const canUpload = Boolean(
     persistence?.tenantId?.trim() &&
-      persistence?.patientId?.trim() &&
-      persistence?.consultationId?.trim()
+    persistence?.patientId?.trim() &&
+    persistence?.consultationId?.trim()
   );
 
   const commitUpload = useCallback(

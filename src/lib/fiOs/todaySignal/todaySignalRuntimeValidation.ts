@@ -14,11 +14,7 @@ import type {
   TodaySignalValidationStatus,
 } from "@/src/lib/fiOs/todaySignal/todaySignalValidationRegistry";
 
-export const TODAY_FEED_BUCKETS: readonly TodayFeedBucket[] = [
-  "right_now",
-  "up_next",
-  "coming_up",
-];
+export const TODAY_FEED_BUCKETS: readonly TodayFeedBucket[] = ["right_now", "up_next", "coming_up"];
 
 export const FORBIDDEN_CLIENT_PAYLOAD_KEYS: readonly string[] = [
   "patientName",
@@ -119,7 +115,11 @@ export function validateTodayFeedSafety(
     if (!item.id?.trim()) missingId = true;
     if (isActionableFeedItem(item) && !item.href?.trim()) missingHref = true;
     if (!bucketSet.has(item.bucket)) invalidBucket = true;
-    if (!Number.isFinite(item.priorityScore) || item.priorityScore < 0 || item.priorityScore > 100) {
+    if (
+      !Number.isFinite(item.priorityScore) ||
+      item.priorityScore < 0 ||
+      item.priorityScore > 100
+    ) {
       invalidScore = true;
     }
     if (item.priorityBand) {
@@ -164,7 +164,12 @@ export function validateTodayFeedPrivacy(
 ): TodaySignalValidationCheckResult[] {
   if (payloads.length === 0) {
     return [
-      result("privacy.forbidden_keys", "privacy_safety", "not_applicable", "No client payloads supplied."),
+      result(
+        "privacy.forbidden_keys",
+        "privacy_safety",
+        "not_applicable",
+        "No client payloads supplied."
+      ),
     ];
   }
 
@@ -222,11 +227,7 @@ export function validatePresenceSafety(
   }
 
   return [
-    result(
-      "presence.actor_id_exposed",
-      "presence_context",
-      actorIdExposed ? "fail" : "pass"
-    ),
+    result("presence.actor_id_exposed", "presence_context", actorIdExposed ? "fail" : "pass"),
     result(
       "presence.banned_wording",
       "presence_context",
@@ -266,23 +267,19 @@ export function validateWorkspaceSyncSafety(input: {
   const dedupeActive = shouldSkipDuplicateRevisionTick("abc", "abc") === true;
 
   return [
-    result(
-      "workspace.calendar_mapping",
-      "workspace_sync",
-      calendarMapping ? "fail" : "pass"
-    ),
+    result("workspace.calendar_mapping", "workspace_sync", calendarMapping ? "fail" : "pass"),
     result(
       "workspace.phi_payload",
       "workspace_sync",
       phiHits.size > 0 ? "fail" : "pass",
-      phiHits.size > 0 ? `Forbidden keys in workspace signals: ${[...phiHits].join(", ")}` : undefined
+      phiHits.size > 0
+        ? `Forbidden keys in workspace signals: ${[...phiHits].join(", ")}`
+        : undefined
     ),
     result(
       "workspace.count_bounded",
       "workspace_sync",
-      signals.length > WORKSPACE_SIGNAL_COUNT_WARN_THRESHOLD
-        ? "watch"
-        : "pass",
+      signals.length > WORKSPACE_SIGNAL_COUNT_WARN_THRESHOLD ? "watch" : "pass",
       signals.length > WORKSPACE_SIGNAL_COUNT_WARN_THRESHOLD
         ? `Workspace signal count ${signals.length} exceeds ${WORKSPACE_SIGNAL_COUNT_WARN_THRESHOLD}.`
         : undefined

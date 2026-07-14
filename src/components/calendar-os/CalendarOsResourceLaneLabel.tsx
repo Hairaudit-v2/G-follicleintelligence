@@ -175,7 +175,10 @@ function UtilBar({
   return (
     <div className={cn("flex items-center gap-1", className)}>
       <div
-        className={cn("h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06]", compact && "max-w-8")}
+        className={cn(
+          "h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06]",
+          compact && "max-w-8"
+        )}
         aria-hidden
       >
         <div

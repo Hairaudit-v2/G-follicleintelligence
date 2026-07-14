@@ -92,10 +92,7 @@ export async function saveHairAuditClinicDiscoverySettingsAction(
   }
 }
 
-export async function previewHairAuditClinicDiscoveryAction(
-  tenantId: string,
-  fiClinicId: string
-) {
+export async function previewHairAuditClinicDiscoveryAction(tenantId: string, fiClinicId: string) {
   try {
     await assertFiTenantPortalAccess(tenantId);
     const context = await loadClinicDiscoveryAdminContext(tenantId, fiClinicId);

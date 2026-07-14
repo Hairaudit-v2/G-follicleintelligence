@@ -9,9 +9,7 @@ import {
   classifyHairAuditImageRequest,
   parseHairAuditImageClassifyRequest,
 } from "./fiOsHairAuditImageClassifyService";
-import {
-  isClinicalHairImageClassifierAvailable,
-} from "./classifyClinicalHairImageFromModelUrl";
+import { isClinicalHairImageClassifierAvailable } from "./classifyClinicalHairImageFromModelUrl";
 
 const SAMPLE_CASE = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const SAMPLE_UPLOAD = "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44";

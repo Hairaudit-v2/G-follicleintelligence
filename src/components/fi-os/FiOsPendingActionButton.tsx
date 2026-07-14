@@ -49,9 +49,7 @@ export function FiOsPendingActionButton({
 }) {
   const isActive = activeActionKey === actionKey;
   const disabled = anyPending;
-  const displayLabel = isActive
-    ? fiOsPendingActionLabel(actionKey, label, pendingLabel)
-    : label;
+  const displayLabel = isActive ? fiOsPendingActionLabel(actionKey, label, pendingLabel) : label;
 
   return (
     <button
@@ -67,7 +65,10 @@ export function FiOsPendingActionButton({
       )}
     >
       {isActive ? (
-        <Loader2 className="h-3 w-3 shrink-0 motion-safe:animate-spin motion-reduce:animate-none" aria-hidden />
+        <Loader2
+          className="h-3 w-3 shrink-0 motion-safe:animate-spin motion-reduce:animate-none"
+          aria-hidden
+        />
       ) : null}
       <span>{displayLabel}</span>
     </button>

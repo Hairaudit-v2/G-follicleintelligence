@@ -61,7 +61,9 @@ export function StaffUatClarityFeedback({ screenKey }: { screenKey: StaffUatScre
       aria-label="UAT clarity feedback"
     >
       <p className="text-sm font-semibold text-slate-200">Was this screen clear?</p>
-      <p className="mt-1 text-xs text-slate-500">UAT only — helps us fix friction before go-live.</p>
+      <p className="mt-1 text-xs text-slate-500">
+        UAT only — helps us fix friction before go-live.
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {RATINGS.map((r) => (
           <button

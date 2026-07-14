@@ -56,8 +56,8 @@ export default async function FiAdminFrontDeskHubPage({
       <div className="p-4 sm:p-6">
         <InfoNotice variant="danger" title="Front desk could not load">
           <p className="text-sm">
-            Today failed to load. Check production Supabase migrations and Vercel function logs
-            for the server error digest.
+            Today failed to load. Check production Supabase migrations and Vercel function logs for
+            the server error digest.
           </p>
           {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
         </InfoNotice>

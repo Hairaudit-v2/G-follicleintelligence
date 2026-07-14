@@ -201,7 +201,7 @@ test("RosterCommandCentreView wires eligible grid rows and ineligible section be
 
 test("RosterWeekGrid exposes add shift cell affordance for all empty cells", () => {
   const src = readFileSync("src/components/fi/workforce/RosterWeekGrid.tsx", "utf8");
-  assert.ok(src.includes('data-testid={`add-shift-${staff.id}-${date}`}'));
+  assert.ok(src.includes("data-testid={`add-shift-${staff.id}-${date}`}"));
   assert.ok(!src.includes("generate-or-add-shift"));
 });
 

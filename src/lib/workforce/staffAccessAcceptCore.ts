@@ -42,7 +42,10 @@ export function assessStaffTenantLinkIntegrity(
   return { valid: true, staffId, fiUserId };
 }
 
-export type StaffAccessAcceptAuditKind = "newly_accepted" | "repaired_after_accepted" | "idempotent";
+export type StaffAccessAcceptAuditKind =
+  | "newly_accepted"
+  | "repaired_after_accepted"
+  | "idempotent";
 
 export function resolveStaffAccessAcceptAuditKind(input: {
   alreadyAccepted: boolean;

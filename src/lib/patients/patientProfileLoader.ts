@@ -629,7 +629,13 @@ export async function loadPatientProfile(
       followUpEncounters,
       followUpImagingSessions,
     },
-    { hrefContext: { tenantId: tid }, limit: 100, offset: 0, sort: "newest_first", viewerCanReadClinicalPhi: opts?.viewerCanReadClinicalPhi === true }
+    {
+      hrefContext: { tenantId: tid },
+      limit: 100,
+      offset: 0,
+      sort: "newest_first",
+      viewerCanReadClinicalPhi: opts?.viewerCanReadClinicalPhi === true,
+    }
   );
 
   const summary = computePatientProfileSummaryMetrics({
@@ -639,17 +645,15 @@ export async function loadPatientProfile(
     activityEvents: activity.map((e) => ({ occurred_at: e.occurred_at })),
   });
 
-  const trialConsentGate = await loadTrialConsentGateStatus(
-    tid,
-    foundationPatientId,
-    supabase
-  );
+  const trialConsentGate = await loadTrialConsentGateStatus(tid, foundationPatientId, supabase);
 
   const followUpImageCount = timelineImages.filter((img) => img.follow_up_encounter_id).length;
   const latestBookingId =
     bookingsRaw[0]?.id ?? followUpEncounters.find((e) => e.booking_id)?.booking_id ?? null;
 
-  const legacyPolicy = deriveLegacyPatientDisplayPolicy(opts?.viewerCanReadClinicalPhi ? "doctor" : "reception");
+  const legacyPolicy = deriveLegacyPatientDisplayPolicy(
+    opts?.viewerCanReadClinicalPhi ? "doctor" : "reception"
+  );
   const legacyVisibility = deriveLegacyPatientVisibilitySummary({
     patientId: foundationPatientId,
     patientMetadata: patient.metadata,

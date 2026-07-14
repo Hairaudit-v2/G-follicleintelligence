@@ -93,10 +93,7 @@ export function isPreferredCanonicalImagingImport(specifier: string): boolean {
 }
 
 /** Legacy → canonical cross-imports are permitted only via the sole workspace bridge file. */
-export function isPermittedLegacyToCanonicalCrossImport(
-  file: string,
-  specifier: string
-): boolean {
+export function isPermittedLegacyToCanonicalCrossImport(file: string, specifier: string): boolean {
   const posixFile = normalizePosixPath(file);
   const normalizedSpecifier = normalizePosixPath(specifier.trim());
   return (

@@ -68,4 +68,3 @@ describe("selectPatientPortalReleasedImages", () => {
     assert.equal(filtered[0]?.id, "released-1");
   });
 });
-

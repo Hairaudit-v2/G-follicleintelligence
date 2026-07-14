@@ -61,7 +61,7 @@ export function pipelineOpsToBoardSearchParams(
   const ops = parsePipelineOpsQuery(searchParams);
   const next: Record<string, string | string[] | undefined> = { ...searchParams };
   // Prefer created_at_desc for newest-first board window (default ops)
-  const sortRaw = String(Array.isArray(next.sort) ? next.sort[0] : next.sort ?? "")
+  const sortRaw = String(Array.isArray(next.sort) ? next.sort[0] : (next.sort ?? ""))
     .trim()
     .toLowerCase();
   if (

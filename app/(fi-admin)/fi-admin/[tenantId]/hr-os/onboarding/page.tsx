@@ -4,7 +4,10 @@ import { unstable_noStore as noStore } from "next/cache";
 import { OnboardingCentreClient } from "@/src/components/fi-admin/hr/OnboardingCentreClient";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
-import { expireStaleOnboardingInvitations, loadOnboardingPageModel } from "@/src/lib/workforce/onboarding/onboardingPage.server";
+import {
+  expireStaleOnboardingInvitations,
+  loadOnboardingPageModel,
+} from "@/src/lib/workforce/onboarding/onboardingPage.server";
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
 
 export const metadata = {

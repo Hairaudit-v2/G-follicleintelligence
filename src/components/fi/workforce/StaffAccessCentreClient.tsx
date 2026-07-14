@@ -103,13 +103,7 @@ export function StaffAccessCentreClient({
   const runAction = useCallback(
     (
       staffMemberId: string,
-      action:
-        | "send"
-        | "resend"
-        | "copy"
-        | "resetPin"
-        | "revoke"
-        | "suspend"
+      action: "send" | "resend" | "copy" | "resetPin" | "revoke" | "suspend"
     ) => {
       setError(null);
       setMessage(null);
@@ -117,51 +111,54 @@ export function StaffAccessCentreClient({
       setPendingActionKey(actionKey);
       startTransition(async () => {
         try {
-        const body = { staffMemberId };
-        let result:
-          | { ok: true; inviteUrl?: string; emailSent?: boolean; warning?: string | null }
-          | { ok: false; error: string };
+          const body = { staffMemberId };
+          let result:
+            | { ok: true; inviteUrl?: string; emailSent?: boolean; warning?: string | null }
+            | { ok: false; error: string };
 
-        if (action === "send") result = await sendStaffLoginInviteAction(tenantId, body);
-        else if (action === "resend") result = await resendStaffLoginInviteAction(tenantId, body);
-        else if (action === "copy") result = await copyStaffLoginInviteLinkAction(tenantId, body);
-        else if (action === "resetPin") result = await requestStaffPinResetLinkAction(tenantId, body);
-        else if (action === "revoke") result = await revokeStaffLoginAccessAction(tenantId, body);
-        else result = await suspendStaffLoginAccessAction(tenantId, body);
+          if (action === "send") result = await sendStaffLoginInviteAction(tenantId, body);
+          else if (action === "resend") result = await resendStaffLoginInviteAction(tenantId, body);
+          else if (action === "copy") result = await copyStaffLoginInviteLinkAction(tenantId, body);
+          else if (action === "resetPin")
+            result = await requestStaffPinResetLinkAction(tenantId, body);
+          else if (action === "revoke") result = await revokeStaffLoginAccessAction(tenantId, body);
+          else result = await suspendStaffLoginAccessAction(tenantId, body);
 
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-
-        if (action === "copy" && result.inviteUrl) {
-          try {
-            await navigator.clipboard.writeText(result.inviteUrl);
-            setCopiedStaffId(staffMemberId);
-            setMessage("Invite link copied to clipboard.");
-          } catch {
-            setMessage(result.inviteUrl);
+          if (!result.ok) {
+            setError(result.error);
+            return;
           }
-        } else if (action === "resetPin" && result.inviteUrl) {
-          try {
-            await navigator.clipboard.writeText(result.inviteUrl);
-            setCopiedStaffId(staffMemberId);
-            setMessage("PIN reset link copied — share it with the staff member. You cannot see their PIN.");
-          } catch {
-            setMessage(result.inviteUrl);
-          }
-        } else if (action === "send" || action === "resend") {
-          const baseMessage = result.emailSent
-            ? "Login invite sent by email."
-            : "Login invite created — copy the link if email delivery is not configured.";
-          setMessage(result.warning ? `${baseMessage} ${result.warning}` : baseMessage);
-        } else if (action === "revoke") {
-          setMessage("Staff login access revoked.");
-        } else if (action === "suspend") {
-          setMessage("Staff login access suspended.");
-        }
 
-        router.refresh();
+          if (action === "copy" && result.inviteUrl) {
+            try {
+              await navigator.clipboard.writeText(result.inviteUrl);
+              setCopiedStaffId(staffMemberId);
+              setMessage("Invite link copied to clipboard.");
+            } catch {
+              setMessage(result.inviteUrl);
+            }
+          } else if (action === "resetPin" && result.inviteUrl) {
+            try {
+              await navigator.clipboard.writeText(result.inviteUrl);
+              setCopiedStaffId(staffMemberId);
+              setMessage(
+                "PIN reset link copied — share it with the staff member. You cannot see their PIN."
+              );
+            } catch {
+              setMessage(result.inviteUrl);
+            }
+          } else if (action === "send" || action === "resend") {
+            const baseMessage = result.emailSent
+              ? "Login invite sent by email."
+              : "Login invite created — copy the link if email delivery is not configured.";
+            setMessage(result.warning ? `${baseMessage} ${result.warning}` : baseMessage);
+          } else if (action === "revoke") {
+            setMessage("Staff login access revoked.");
+          } else if (action === "suspend") {
+            setMessage("Staff login access suspended.");
+          }
+
+          router.refresh();
         } finally {
           setPendingActionKey(null);
         }
@@ -180,9 +177,9 @@ export function StaffAccessCentreClient({
           <h1 className="mt-2 text-2xl font-semibold text-[#F8FAFC]">Staff access</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#94A3B8]">
             Provision login access for existing active staff in{" "}
-            <span className="text-[#CBD5E1]">fi_staff_members</span> — no new staff record
-            required. Send Supabase auth invites, review PIN status, and manage access without
-            using the onboarding flow.
+            <span className="text-[#CBD5E1]">fi_staff_members</span> — no new staff record required.
+            Send Supabase auth invites, review PIN status, and manage access without using the
+            onboarding flow.
           </p>
         </div>
         <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 px-4 py-3 text-sm">
@@ -244,10 +241,7 @@ export function StaffAccessCentreClient({
           <tbody>
             {visible.length === 0 ? (
               <tr>
-                <td
-                  colSpan={canManage ? 8 : 7}
-                  className="px-4 py-8 text-center text-[#94A3B8]"
-                >
+                <td colSpan={canManage ? 8 : 7} className="px-4 py-8 text-center text-[#94A3B8]">
                   No staff match the current filters.
                 </td>
               </tr>

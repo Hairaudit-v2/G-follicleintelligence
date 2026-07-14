@@ -42,7 +42,9 @@ export async function createRecruitmentCandidateAction(
       fullName,
       email: String((b as { email?: string }).email ?? "").trim() || null,
       phone: String((b as { phone?: string }).phone ?? "").trim() || null,
-      source: String((b as { source?: string }).source ?? "direct").trim() as RecruitmentCandidateSource,
+      source: String(
+        (b as { source?: string }).source ?? "direct"
+      ).trim() as RecruitmentCandidateSource,
       roleRequirementId:
         String((b as { roleRequirementId?: string }).roleRequirementId ?? "").trim() || null,
       onboardingTemplateCode:
@@ -72,7 +74,9 @@ export async function advanceRecruitmentCandidateAction(
     const offerRaw = (b as { offerStatus?: string }).offerStatus;
     const offerStatus =
       offerRaw != null && isRecruitmentOfferStatus(String(offerRaw).trim())
-        ? (String(offerRaw).trim() as import("@/src/lib/workforce/recruitmentPipelineCore").RecruitmentOfferStatus)
+        ? (String(
+            offerRaw
+          ).trim() as import("@/src/lib/workforce/recruitmentPipelineCore").RecruitmentOfferStatus)
         : undefined;
 
     await advanceRecruitmentCandidate({

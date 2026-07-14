@@ -311,8 +311,14 @@ export function buildTodaySignalValidationWarnings(input: {
 
   if (!rolloutFlags.realtimeEnabled && rolloutFlags.revisionPolling) {
     warnings.push("Realtime is disabled; polling fallback is active.");
-  } else if (!rolloutFlags.realtimeEnabled && !rolloutFlags.revisionPolling && rolloutFlags.todaySurface) {
-    warnings.push("Neither Realtime nor revision polling is enabled; Today refresh may require manual navigation.");
+  } else if (
+    !rolloutFlags.realtimeEnabled &&
+    !rolloutFlags.revisionPolling &&
+    rolloutFlags.todaySurface
+  ) {
+    warnings.push(
+      "Neither Realtime nor revision polling is enabled; Today refresh may require manual navigation."
+    );
   }
 
   if (rolloutFlags.signalLearning && counts.todayFeedItemCount > 0 && counts.learningEnabled) {

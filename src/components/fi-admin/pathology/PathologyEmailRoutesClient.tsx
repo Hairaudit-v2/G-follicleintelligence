@@ -61,7 +61,10 @@ export function PathologyEmailRoutesClient(props: {
 
   async function handleCopy(label: string, value: string) {
     const ok = await copyText(value);
-    showFeedback(ok ? "ok" : "err", ok ? `${label} copied.` : `Could not copy ${label.toLowerCase()}.`);
+    showFeedback(
+      ok ? "ok" : "err",
+      ok ? `${label} copied.` : `Could not copy ${label.toLowerCase()}.`
+    );
   }
 
   function handleCreate(event: React.FormEvent) {
@@ -187,7 +190,9 @@ export function PathologyEmailRoutesClient(props: {
               <button
                 type="button"
                 className="rounded border border-white/10 px-2 py-1 text-xs text-[#22C1FF] hover:bg-white/5"
-                onClick={() => void handleCopy("Header name", PATHOLOGY_EMAIL_WEBHOOK_SECRET_HEADER)}
+                onClick={() =>
+                  void handleCopy("Header name", PATHOLOGY_EMAIL_WEBHOOK_SECRET_HEADER)
+                }
               >
                 Copy header
               </button>
@@ -213,8 +218,8 @@ export function PathologyEmailRoutesClient(props: {
           <h2 className="text-base font-semibold text-[#F8FAFC]">Add inbound address</h2>
           <p className="mt-2 text-sm text-[#94A3B8]">
             Register a dedicated inbound address (for example{" "}
-            <code className="text-[#CBD5E1]">pathology+evolved@inbound.yourdomain.com</code>)
-            mapped to this tenant.
+            <code className="text-[#CBD5E1]">pathology+evolved@inbound.yourdomain.com</code>) mapped
+            to this tenant.
           </p>
           <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={handleCreate}>
             <label className="block sm:col-span-2">

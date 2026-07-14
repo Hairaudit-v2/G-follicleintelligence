@@ -76,7 +76,11 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
         process.env.VERCEL_ENV === "preview";
       return (
         <div
-          className={cn(fiOsChromeClasses.pageScrollRoot, fiOsChromeClasses.pageScrollContent, "p-4 sm:p-6")}
+          className={cn(
+            fiOsChromeClasses.pageScrollRoot,
+            fiOsChromeClasses.pageScrollContent,
+            "p-4 sm:p-6"
+          )}
         >
           <RosterCommandCentreDiagnosticCard failure={result} showTechnicalDetail={showDetail} />
         </div>
@@ -114,7 +118,11 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
       process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
     return (
       <div
-        className={cn(fiOsChromeClasses.pageScrollRoot, fiOsChromeClasses.pageScrollContent, "p-4 sm:p-6")}
+        className={cn(
+          fiOsChromeClasses.pageScrollRoot,
+          fiOsChromeClasses.pageScrollContent,
+          "p-4 sm:p-6"
+        )}
       >
         <RosterCommandCentreDiagnosticCard
           failure={{

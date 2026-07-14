@@ -19,20 +19,24 @@ export function TodayFeedSection(props: {
   return (
     <section className="space-y-1" role="region" aria-labelledby={id}>
       <div className="pb-2">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-slate-500">{kicker}</p>
-        <h2 id={id} className="mt-1 text-base font-semibold tracking-tight text-slate-100 sm:text-lg">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          {kicker}
+        </p>
+        <h2
+          id={id}
+          className="mt-1 text-base font-semibold tracking-tight text-slate-100 sm:text-lg"
+        >
           {title}
         </h2>
         {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
       </div>
 
-      {children ?? (
-        items.length === 0 ? (
+      {children ??
+        (items.length === 0 ? (
           <p className="py-6 text-sm text-slate-500">{emptyText}</p>
         ) : (
           <TodayFeedLiveList items={items} />
-        )
-      )}
+        ))}
       {footer}
     </section>
   );

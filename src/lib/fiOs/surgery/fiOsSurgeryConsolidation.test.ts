@@ -69,14 +69,10 @@ function flattenMoreIds(sections = moreSections()) {
 }
 
 test("primary rail still has exactly six slots and excludes Surgery", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
   const labels = resolveFiOsMinimalNavItems(base, fullSidebar()).map((i) => i.label);
   assert.ok(!labels.some((l) => /^surgery$/i.test(l)));
@@ -86,7 +82,10 @@ test("primary rail still has exactly six slots and excludes Surgery", () => {
 test("More contains one Surgery group with consolidated destination", () => {
   const surgery = moreSections().find((s) => s.groupId === "SURGERY");
   assert.ok(surgery);
-  assert.deepEqual(surgery!.items.map((i) => i.id), [FI_OS_SURGERY_NAV_ID]);
+  assert.deepEqual(
+    surgery!.items.map((i) => i.id),
+    [FI_OS_SURGERY_NAV_ID]
+  );
   assert.equal(surgery!.items[0]!.href, `${base}/surgery`);
 });
 
@@ -109,10 +108,7 @@ test("legacy Surgery routes remain in nav catalog; staff More hides direct links
   );
   for (const legacy of FI_OS_SURGERY_LEGACY_ROUTES) {
     assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
-    assert.equal(
-      buildFiOsSurgeryLegacyHref(tenantId, legacy.suffix),
-      `${base}/${legacy.suffix}`
-    );
+    assert.equal(buildFiOsSurgeryLegacyHref(tenantId, legacy.suffix), `${base}/${legacy.suffix}`);
   }
   const staffMoreIds = flattenMoreIds();
   for (const legacy of FI_OS_SURGERY_LEGACY_ROUTES) {
@@ -121,10 +117,7 @@ test("legacy Surgery routes remain in nav catalog; staff More hides direct links
   }
   assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-os`, base), "surgery-os");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/cases`, base), "cases-worklist");
-  assert.equal(
-    getFiOsShellActiveSidebarId(`${base}/procedure-day`, base),
-    "procedure-day-board"
-  );
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/procedure-day`, base), "procedure-day-board");
   assert.equal(
     getFiOsShellActiveSidebarId(`${base}/surgery-os/intelligence`, base),
     "surgery-intelligence-dashboard"

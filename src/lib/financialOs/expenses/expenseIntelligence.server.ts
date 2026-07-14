@@ -108,9 +108,7 @@ export async function loadExpenseIntelligenceBundle(
 
   const caseIds = [
     ...new Set(
-      (procRows ?? [])
-        .map((r) => String((r as { case_id?: string }).case_id ?? ""))
-        .filter(Boolean)
+      (procRows ?? []).map((r) => String((r as { case_id?: string }).case_id ?? "")).filter(Boolean)
     ),
   ];
 
@@ -130,8 +128,7 @@ export async function loadExpenseIntelligenceBundle(
           metadata?: Record<string, unknown> | null;
         };
         const meta = r.metadata && typeof r.metadata === "object" ? r.metadata : {};
-        const fromMeta =
-          typeof meta.procedure_type === "string" ? meta.procedure_type : null;
+        const fromMeta = typeof meta.procedure_type === "string" ? meta.procedure_type : null;
         caseProcType.set(
           r.id,
           (r.treatment_type?.trim() || fromMeta?.trim() || null)?.toLowerCase() ?? null
@@ -298,9 +295,7 @@ export async function attachExpenseEntityLabels(
           external_id: string | null;
         };
         const label =
-          r.external_id?.trim() ||
-          r.treatment_type?.trim() ||
-          `Case ${String(r.id).slice(0, 8)}…`;
+          r.external_id?.trim() || r.treatment_type?.trim() || `Case ${String(r.id).slice(0, 8)}…`;
         caseLabels.set(String(r.id), label);
       }
     }

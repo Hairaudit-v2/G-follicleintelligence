@@ -1204,11 +1204,9 @@ export async function syncGoogleCalendarEvents(
   const lookbackDays = opts.lookbackDays ?? SYNC_LOOKBACK_DAYS;
   const lookaheadDays = opts.lookaheadDays ?? SYNC_LOOKAHEAD_DAYS;
   const timeMin =
-    opts.timeMin?.trim() ??
-    new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+    opts.timeMin?.trim() ?? new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
   const timeMax =
-    opts.timeMax?.trim() ??
-    new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
+    opts.timeMax?.trim() ?? new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
 
   let calendarScopes = await getGoogleInboundCalendarScopesForIntegration(ctx.integration, opts);
   const calendarSourceId = opts.calendarSourceId?.trim();

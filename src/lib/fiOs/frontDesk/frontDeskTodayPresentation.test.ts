@@ -405,7 +405,10 @@ test("12. terminal bookings have one outcome only", () => {
     })
   );
   assert.equal(pres.exceptionCards.cancelled.length, 1);
-  assert.equal(pres.lanes.every((l) => l.cards.length === 0), true);
+  assert.equal(
+    pres.lanes.every((l) => l.cards.length === 0),
+    true
+  );
   assert.equal(pres.summary.cancelledOrNoShow, 1);
 });
 
@@ -441,7 +444,9 @@ test("13. completed remains distinct from cancelled/no-show", () => {
 });
 
 test("14. running-late delegates to S3.1", () => {
-  const start = new Date(NOW_MS - (RECEPTION_RUNNING_LATE_GRACE_MINUTES + 5) * 60_000).toISOString();
+  const start = new Date(
+    NOW_MS - (RECEPTION_RUNNING_LATE_GRACE_MINUTES + 5) * 60_000
+  ).toISOString();
   const pres = build(
     payload({
       receptionCards: [
@@ -458,7 +463,9 @@ test("14. running-late delegates to S3.1", () => {
   assert.equal(c.operationalState, "running_late");
   assert.equal(c.runningLate, true);
   assert.equal(c.laneId, "running_late");
-  assert.ok(pres.lanes.find((l) => l.id === "running_late")!.cards.some((x) => x.bookingId === BOOKING_A));
+  assert.ok(
+    pres.lanes.find((l) => l.id === "running_late")!.cards.some((x) => x.bookingId === BOOKING_A)
+  );
 });
 
 test("15. arrived patient past start remains Waiting", () => {
@@ -707,8 +714,18 @@ test("26. multiple bookings for one patient remain separate by booking ID", () =
   const pres = build(
     payload({
       receptionCards: [
-        card({ id: BOOKING_A, patientId: PATIENT_1, displayName: "Alex", startAt: "2026-07-11T12:15:00.000Z" }),
-        card({ id: BOOKING_B, patientId: PATIENT_1, displayName: "Alex", startAt: "2026-07-11T14:00:00.000Z" }),
+        card({
+          id: BOOKING_A,
+          patientId: PATIENT_1,
+          displayName: "Alex",
+          startAt: "2026-07-11T12:15:00.000Z",
+        }),
+        card({
+          id: BOOKING_B,
+          patientId: PATIENT_1,
+          displayName: "Alex",
+          startAt: "2026-07-11T14:00:00.000Z",
+        }),
       ],
     })
   );

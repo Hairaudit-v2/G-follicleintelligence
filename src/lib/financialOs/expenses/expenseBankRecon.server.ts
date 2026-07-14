@@ -64,7 +64,8 @@ export async function suggestBankReconMatches(input: {
       const r = raw as Record<string, unknown>;
       return {
         id: String(r.id),
-        transaction_date: r.transaction_date != null ? String(r.transaction_date).slice(0, 10) : null,
+        transaction_date:
+          r.transaction_date != null ? String(r.transaction_date).slice(0, 10) : null,
         amount_cents: Number(r.amount_cents ?? 0),
         external_ref: r.external_ref != null ? String(r.external_ref) : null,
         description_raw: r.description_raw != null ? String(r.description_raw) : null,

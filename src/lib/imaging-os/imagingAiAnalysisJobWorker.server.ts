@@ -20,7 +20,10 @@ import {
   mergeImagingJobSummariesMetadata,
   type ReadOnlyJobSummary,
 } from "./imagingJobReadOnlySummaries";
-import { buildLiveNorwoodSignalSummary, parseImagingNorwoodProviderFlag } from "./imagingNorwoodSignalCore";
+import {
+  buildLiveNorwoodSignalSummary,
+  parseImagingNorwoodProviderFlag,
+} from "./imagingNorwoodSignalCore";
 import type { NorwoodSignalSummary } from "./imagingNorwoodSignalCore";
 import {
   buildLiveDensitySignalSummary,
@@ -215,8 +218,7 @@ export async function processImagingAiAnalysisJob(
         .eq("id", imageId)
         .maybeSingle();
       const row = imageRow as Record<string, unknown> | null;
-      const patientId =
-        row?.patient_id != null ? String(row.patient_id) : ctx.patientId;
+      const patientId = row?.patient_id != null ? String(row.patient_id) : ctx.patientId;
       if (!patientId) throw new Error("Patient id required for graft tray estimate.");
 
       const outcome = await runGraftTrayCountEstimate({
@@ -224,9 +226,7 @@ export async function processImagingAiAnalysisJob(
         patientImageId: imageId,
         patientId,
         protocolSlotSlug:
-          row?.imaging_protocol_slot_slug != null
-            ? String(row.imaging_protocol_slot_slug)
-            : null,
+          row?.imaging_protocol_slot_slug != null ? String(row.imaging_protocol_slot_slug) : null,
         imageCategory: row?.image_category != null ? String(row.image_category) : null,
         metadata: ctx.metadata,
         client: supabase,
@@ -299,9 +299,7 @@ export async function processImagingAiAnalysisJob(
       client: supabase,
     });
     const attempts =
-      typeof job.request_payload.attempt_count === "number"
-        ? job.request_payload.attempt_count
-        : 0;
+      typeof job.request_payload.attempt_count === "number" ? job.request_payload.attempt_count : 0;
     return {
       jobId: job.id,
       status: attempts + 1 < 2 ? "requeued" : "failed",

@@ -26,7 +26,9 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
       row.confirmed_patient_id != null ? String(row.confirmed_patient_id) : null,
     match_confidence: row.match_confidence != null ? Number(row.match_confidence) : null,
     match_evidence:
-      row.match_evidence && typeof row.match_evidence === "object" && !Array.isArray(row.match_evidence)
+      row.match_evidence &&
+      typeof row.match_evidence === "object" &&
+      !Array.isArray(row.match_evidence)
         ? (row.match_evidence as Record<string, unknown>)
         : {},
     extracted_patient_name:
@@ -34,7 +36,9 @@ function mapInboundDocument(row: Record<string, unknown>): PathologyInboundDocum
     extracted_dob: row.extracted_dob != null ? String(row.extracted_dob).slice(0, 10) : null,
     extracted_mrn: row.extracted_mrn != null ? String(row.extracted_mrn) : null,
     promoted_result_id: row.promoted_result_id != null ? String(row.promoted_result_id) : null,
-    extraction_status: String(row.extraction_status ?? "not_started") as PathologyInboundDocumentRow["extraction_status"],
+    extraction_status: String(
+      row.extraction_status ?? "not_started"
+    ) as PathologyInboundDocumentRow["extraction_status"],
     extraction_job_id: row.extraction_job_id != null ? String(row.extraction_job_id) : null,
     draft_result_id: row.draft_result_id != null ? String(row.draft_result_id) : null,
     ready_for_review_at: row.ready_for_review_at != null ? String(row.ready_for_review_at) : null,
@@ -105,10 +109,14 @@ function mapExtractionJob(row: Record<string, unknown>): PathologyExtractionJobR
     status: String(row.status) as PathologyExtractionJobRow["status"],
     provider: row.provider != null ? String(row.provider) : null,
     raw_extraction_json:
-      row.raw_extraction_json && typeof row.raw_extraction_json === "object" && !Array.isArray(row.raw_extraction_json)
+      row.raw_extraction_json &&
+      typeof row.raw_extraction_json === "object" &&
+      !Array.isArray(row.raw_extraction_json)
         ? (row.raw_extraction_json as Record<string, unknown>)
         : {},
-    normalized_items_json: Array.isArray(row.normalized_items_json) ? row.normalized_items_json : [],
+    normalized_items_json: Array.isArray(row.normalized_items_json)
+      ? row.normalized_items_json
+      : [],
     error_message: row.error_message != null ? String(row.error_message) : null,
     idempotency_key: String(row.idempotency_key),
     started_at: row.started_at != null ? String(row.started_at) : null,
@@ -116,7 +124,9 @@ function mapExtractionJob(row: Record<string, unknown>): PathologyExtractionJobR
     extracted_marker_count:
       row.extracted_marker_count != null ? Number(row.extracted_marker_count) : 0,
     skipped_marker_count: row.skipped_marker_count != null ? Number(row.skipped_marker_count) : 0,
-    review_status: String(row.review_status ?? "pending_review") as PathologyExtractionJobRow["review_status"],
+    review_status: String(
+      row.review_status ?? "pending_review"
+    ) as PathologyExtractionJobRow["review_status"],
     raw_text_preview: row.raw_text_preview != null ? String(row.raw_text_preview) : null,
     medical_intelligence_preview_json:
       row.medical_intelligence_preview_json &&

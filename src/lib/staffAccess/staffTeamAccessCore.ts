@@ -5,10 +5,7 @@
 import type { FiOsTeamTabId } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { FI_OS_TEAM_TABS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
-import {
-  canAccessWorkforceTabForTeamNav,
-  staffCapabilitySatisfies,
-} from "./staffCapabilityCore";
+import { canAccessWorkforceTabForTeamNav, staffCapabilitySatisfies } from "./staffCapabilityCore";
 import { TEAM_TAB_ID_TO_WORKFORCE_TAB_KEY } from "./staffCapabilityRegistry";
 import { canEditModule, type EffectiveAccessMap } from "./staffAccessCore";
 

@@ -6,7 +6,11 @@ import { z } from "zod";
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 import { markOnboardingTrainingComplete } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
-import { sendOnboardingInvite, resendOnboardingInvite, copyOnboardingInviteLink } from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
+import {
+  sendOnboardingInvite,
+  resendOnboardingInvite,
+  copyOnboardingInviteLink,
+} from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
 import {
   createOnboardingStaffMember,
   expireStaleOnboardingInvitations,
@@ -71,10 +75,7 @@ export async function createOnboardingStaffAction(
 export async function sendOnboardingInviteAction(
   tenantId: string,
   staffMemberId: string
-): Promise<
-  | { ok: true; inviteUrl: string; emailSent: boolean }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; inviteUrl: string; emailSent: boolean } | { ok: false; error: string }> {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);
     await expireStaleOnboardingInvitations(tenantId);
@@ -187,9 +188,8 @@ export async function acceptOnboardingInviteAction(
   inviteToken: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const { acceptOnboardingInvitation } = await import(
-      "@/src/lib/workforce/onboarding/onboardingInvitation.server"
-    );
+    const { acceptOnboardingInvitation } =
+      await import("@/src/lib/workforce/onboarding/onboardingInvitation.server");
     await acceptOnboardingInvitation({ tenantId, inviteToken });
     revalidateOnboardingSurfaces(tenantId);
     return { ok: true };

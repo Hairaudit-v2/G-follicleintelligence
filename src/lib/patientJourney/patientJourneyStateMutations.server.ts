@@ -32,13 +32,15 @@ function mapRow(raw: Record<string, unknown>): PatientJourneyStateRow {
     tenantId: String(raw.tenant_id),
     patientId: String(raw.patient_id),
     currentState: String(raw.current_state) as PatientJourneyState,
-    previousState: raw.previous_state != null ? (String(raw.previous_state) as PatientJourneyState) : null,
+    previousState:
+      raw.previous_state != null ? (String(raw.previous_state) as PatientJourneyState) : null,
     lastTransitionAt: String(raw.last_transition_at),
     transitionReason: String(raw.transition_reason),
     manuallyOverriddenBy:
       raw.manually_overridden_by != null ? String(raw.manually_overridden_by) : null,
     overrideExpiresAt: raw.override_expires_at != null ? String(raw.override_expires_at) : null,
-    derivedState: raw.derived_state != null ? (String(raw.derived_state) as PatientJourneyState) : null,
+    derivedState:
+      raw.derived_state != null ? (String(raw.derived_state) as PatientJourneyState) : null,
   };
 }
 
@@ -113,7 +115,10 @@ export async function applyPatientJourneyTransition(
     if (existing) return { changed: false, row: existing };
   }
 
-  if (fromState && !isPatientJourneyTransitionAllowed(fromState, input.toState, input.source === "manual")) {
+  if (
+    fromState &&
+    !isPatientJourneyTransitionAllowed(fromState, input.toState, input.source === "manual")
+  ) {
     throw new Error(`Transition from ${fromState} to ${input.toState} is not allowed.`);
   }
 

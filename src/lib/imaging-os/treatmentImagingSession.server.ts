@@ -93,14 +93,12 @@ async function findActiveTreatmentSessionForBooking(
   return null;
 }
 
-export async function ensureTreatmentImagingSession(
-  input: {
-    tenantId: string;
-    patientId: string;
-    booking: FiBookingRow;
-    client?: SupabaseClient;
-  }
-): Promise<{ sessionId: string; created: boolean; progress: Record<string, unknown> }> {
+export async function ensureTreatmentImagingSession(input: {
+  tenantId: string;
+  patientId: string;
+  booking: FiBookingRow;
+  client?: SupabaseClient;
+}): Promise<{ sessionId: string; created: boolean; progress: Record<string, unknown> }> {
   const client = input.client ?? supabaseAdmin();
   const tid = input.tenantId.trim();
   const pid = input.patientId.trim();
@@ -173,13 +171,11 @@ async function loadClinicImagingSettings(
   return parseTreatmentImagingClinicSettings(metadata);
 }
 
-export async function loadTreatmentImagingChecklistForBooking(
-  input: {
-    tenantId: string;
-    booking: FiBookingRow;
-    client?: SupabaseClient;
-  }
-): Promise<TreatmentImagingChecklistPayload> {
+export async function loadTreatmentImagingChecklistForBooking(input: {
+  tenantId: string;
+  booking: FiBookingRow;
+  client?: SupabaseClient;
+}): Promise<TreatmentImagingChecklistPayload> {
   const hints = bookingHints(input.booking);
   const applies = requiresTreatmentPhotosChecklist(input.booking.booking_type, hints);
   const emptyCompletion = buildTreatmentImagingCompletionState({});
@@ -232,13 +228,11 @@ export async function loadTreatmentImagingChecklistForBooking(
   };
 }
 
-export async function validateTreatmentPhotosForBookingCompletion(
-  input: {
-    tenantId: string;
-    booking: FiBookingRow;
-    client?: SupabaseClient;
-  }
-): Promise<ReturnType<typeof evaluateTreatmentImagingCompletionPolicy>> {
+export async function validateTreatmentPhotosForBookingCompletion(input: {
+  tenantId: string;
+  booking: FiBookingRow;
+  client?: SupabaseClient;
+}): Promise<ReturnType<typeof evaluateTreatmentImagingCompletionPolicy>> {
   const checklist = await loadTreatmentImagingChecklistForBooking(input);
   return checklist.completionPolicy;
 }

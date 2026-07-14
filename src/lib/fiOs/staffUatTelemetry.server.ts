@@ -3,7 +3,9 @@ import "server-only";
 import { publishFiEventBestEffort } from "@/src/lib/events/fiEventPublisher.server";
 import type { StaffUatFrictionEvent, StaffUatFeedbackInput } from "./staffUatFrictionCore";
 
-export async function persistStaffUatFeedback(input: StaffUatFeedbackInput): Promise<{ ok: boolean }> {
+export async function persistStaffUatFeedback(
+  input: StaffUatFeedbackInput
+): Promise<{ ok: boolean }> {
   const eventId = await publishFiEventBestEffort({
     tenantId: input.tenantId,
     eventName: "staff.uat.feedback",

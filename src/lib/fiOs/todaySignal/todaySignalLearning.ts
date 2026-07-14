@@ -244,10 +244,9 @@ export function calculateSignalResolutionMetrics(
 
   if (observation.resolvedAt) {
     return {
-      ageSeconds: observation.resolutionSeconds ?? calculateResolutionSeconds(
-        observation.firstSeenAt,
-        observation.resolvedAt
-      ),
+      ageSeconds:
+        observation.resolutionSeconds ??
+        calculateResolutionSeconds(observation.firstSeenAt, observation.resolvedAt),
       resolutionSeconds:
         observation.resolutionSeconds ??
         calculateResolutionSeconds(observation.firstSeenAt, observation.resolvedAt),
@@ -354,7 +353,9 @@ export function summarizeSignalLearning(
       totalOccurrences: stats.totalOccurrences,
       observationCount: stats.count,
     }))
-    .sort((a, b) => b.totalOccurrences - a.totalOccurrences || b.observationCount - a.observationCount);
+    .sort(
+      (a, b) => b.totalOccurrences - a.totalOccurrences || b.observationCount - a.observationCount
+    );
 
   const unresolved = inRange
     .filter((row) => !row.resolvedAt)
@@ -407,8 +408,7 @@ export function summarizeSignalLearning(
     .sort((a, b) => b.avgSeconds - a.avgSeconds);
 
   const criticalSignalsUnresolvedOverThreshold = unresolved.filter(
-    (row) =>
-      row.priorityBand === "critical" && row.ageSeconds >= criticalThreshold
+    (row) => row.priorityBand === "critical" && row.ageSeconds >= criticalThreshold
   );
 
   const signalsRecurringMoreThanExpected = inRange
@@ -434,7 +434,10 @@ export function summarizeSignalLearning(
 }
 
 export function flattenTodayFeedItems(
-  feed: Pick<{ rightNow: TodayFeedItem[]; upNext: TodayFeedItem[]; comingUp: TodayFeedItem[] }, "rightNow" | "upNext" | "comingUp">
+  feed: Pick<
+    { rightNow: TodayFeedItem[]; upNext: TodayFeedItem[]; comingUp: TodayFeedItem[] },
+    "rightNow" | "upNext" | "comingUp"
+  >
 ): TodayFeedItem[] {
   return [...feed.rightNow, ...feed.upNext, ...feed.comingUp];
 }

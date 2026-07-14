@@ -46,11 +46,7 @@ export default async function FiAdminTeamIdentityPage({
           </Link>
         </div>
       ) : null}
-      <StaffAccessCentreClient
-        tenantId={tid}
-        rows={data.rows}
-        canManage={manage.canManage}
-      />
+      <StaffAccessCentreClient tenantId={tid} rows={data.rows} canManage={manage.canManage} />
     </div>
   );
 }

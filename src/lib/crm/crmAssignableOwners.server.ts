@@ -66,11 +66,7 @@ export async function loadCrmAssignableOwnerOptions(
 
   const staffIds = staffRows.map((r) => String(r.id));
   const linkedUserIds = [
-    ...new Set(
-      staffRows
-        .map((r) => r.fi_user_id?.trim())
-        .filter((x): x is string => Boolean(x))
-    ),
+    ...new Set(staffRows.map((r) => r.fi_user_id?.trim()).filter((x): x is string => Boolean(x))),
   ];
 
   const membersStart = Date.now();

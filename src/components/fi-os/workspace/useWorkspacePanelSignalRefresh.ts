@@ -10,7 +10,9 @@ export type WorkspacePanelSignalRefresh = {
 };
 
 /** D6D — read soft refresh metadata for a workspace panel. */
-export function useWorkspacePanelSignalRefresh(ref: WorkspaceRef | null): WorkspacePanelSignalRefresh {
+export function useWorkspacePanelSignalRefresh(
+  ref: WorkspaceRef | null
+): WorkspacePanelSignalRefresh {
   const { getWorkspaceSignalMeta } = useWorkspaceShell();
   if (!ref) {
     return { signalRefreshToken: 0 };

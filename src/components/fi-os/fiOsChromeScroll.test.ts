@@ -23,7 +23,11 @@ function assertIncludesAll(haystack: string, needles: readonly string[], label: 
 }
 
 test("fiOsChromeClasses: shell locks viewport height without blocking nested scroll regions", () => {
-  assertIncludesAll(fiOsChromeClasses.shellRoot, ["h-[100dvh]", "max-h-[100dvh]", "overflow-hidden"], "shellRoot");
+  assertIncludesAll(
+    fiOsChromeClasses.shellRoot,
+    ["h-[100dvh]", "max-h-[100dvh]", "overflow-hidden"],
+    "shellRoot"
+  );
   assertIncludesAll(fiOsChromeClasses.shellBody, ["min-h-0", "overflow-hidden"], "shellBody");
   assert.ok(
     fiOsChromeClasses.mainScroll.includes("overflow-y-auto"),
@@ -130,17 +134,7 @@ test("buildFiOsChromeViewportStyle: clamps negative measurements to zero px", ()
 test("fiOs sidebar workflow: lower-priority modules remain in nav sections", () => {
   const base = "/fi-admin/t-1";
   const items = filterFiOsPrimarySidebarItemsByFeatureAccess(
-    resolveFiOsPrimarySidebarItems(
-      base,
-      true,
-      true,
-      null,
-      true,
-      true,
-      true,
-      true,
-      true
-    ),
+    resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true),
     null
   );
   const sections = buildFiOsSidebarWorkflowSections(items, "default");

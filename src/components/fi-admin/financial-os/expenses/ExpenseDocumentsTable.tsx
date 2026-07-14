@@ -48,7 +48,7 @@ export function ExpenseDocumentsTable(props: {
     const filename =
       typeof doc.metadata.original_filename === "string"
         ? doc.metadata.original_filename
-        : doc.storage_path.split("/").pop() ?? "document";
+        : (doc.storage_path.split("/").pop() ?? "document");
     start(async () => {
       const res = await getExpenseDocumentSignedUrlAction(props.tenantId, {
         document_id: doc.id,
@@ -91,11 +91,9 @@ export function ExpenseDocumentsTable(props: {
           const filename =
             typeof doc.metadata.original_filename === "string"
               ? doc.metadata.original_filename
-              : doc.storage_path.split("/").pop() ?? "—";
+              : (doc.storage_path.split("/").pop() ?? "—");
           const conf =
-            typeof doc.ocr_payload.confidence === "number"
-              ? doc.ocr_payload.confidence
-              : null;
+            typeof doc.ocr_payload.confidence === "number" ? doc.ocr_payload.confidence : null;
           return (
             <tr key={doc.id} className={financialOsClasses.tableRow}>
               <td className={financialOsClasses.tableCell}>
@@ -113,9 +111,7 @@ export function ExpenseDocumentsTable(props: {
                   </div>
                 ) : null}
               </td>
-              <td className={financialOsClasses.tableCellMono}>
-                {doc.ocr_provider || "—"}
-              </td>
+              <td className={financialOsClasses.tableCellMono}>{doc.ocr_provider || "—"}</td>
               <td className={financialOsClasses.tableCellMono}>
                 {doc.expense_id ? doc.expense_id.slice(0, 8) + "…" : "—"}
               </td>

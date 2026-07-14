@@ -56,7 +56,10 @@ test("suspended, on_leave, and pending_onboarding are surfaced and not active", 
     }),
     "pending_onboarding"
   );
-  assert.equal(resolveStaffLifecycleIsActive({ isActive: true, employmentStatus: "on_leave" }), false);
+  assert.equal(
+    resolveStaffLifecycleIsActive({ isActive: true, employmentStatus: "on_leave" }),
+    false
+  );
 });
 
 test("without an HR lifecycle row, is_active alone decides", () => {

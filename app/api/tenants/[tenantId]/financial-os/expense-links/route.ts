@@ -9,10 +9,7 @@ export const dynamic = "force-dynamic";
  * GET /api/tenants/[tenantId]/financial-os/expense-links?q=
  * Read-only lead/case/campaign suggestions for expense linking.
  */
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) {

@@ -143,14 +143,16 @@ export function createGoogleCalendarBackfillTestMock(input: {
                         maybeSingle: async () => ({
                           data:
                             integrations.find(
-                              (r) => r.tenant_id === val && r[col2] === val2 && r.status === "active"
+                              (r) =>
+                                r.tenant_id === val && r[col2] === val2 && r.status === "active"
                             ) ?? null,
                           error: null,
                         }),
                       }),
                     }),
                     maybeSingle: async () => ({
-                      data: integrations.find((r) => r.tenant_id === val && r[col2] === val2) ?? null,
+                      data:
+                        integrations.find((r) => r.tenant_id === val && r[col2] === val2) ?? null,
                       error: null,
                     }),
                   };
@@ -168,7 +170,9 @@ export function createGoogleCalendarBackfillTestMock(input: {
                 order: () => ({
                   limit: () => ({
                     maybeSingle: async () => ({
-                      data: integrations.find((r) => r.tenant_id === val && r.status === "active") ?? null,
+                      data:
+                        integrations.find((r) => r.tenant_id === val && r.status === "active") ??
+                        null,
                       error: null,
                     }),
                   }),
@@ -331,8 +335,14 @@ export function createGoogleCalendarBackfillTestMock(input: {
         return {
           select: () => ({
             eq: () => ({
-              in: () => ({ then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }) }),
-              order: () => ({ then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }) }),
+              in: () => ({
+                then: (resolve: (v: { data: unknown[]; error: null }) => void) =>
+                  resolve({ data: [], error: null }),
+              }),
+              order: () => ({
+                then: (resolve: (v: { data: unknown[]; error: null }) => void) =>
+                  resolve({ data: [], error: null }),
+              }),
             }),
           }),
         };

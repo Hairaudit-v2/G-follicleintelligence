@@ -19,9 +19,7 @@ export type PatientPortalVisualSummaryItem = {
   report: PatientVisualSummaryReport;
 };
 
-export function isReportVisibleInPatientPortal(
-  report: PatientVisualSummaryReport
-): boolean {
+export function isReportVisibleInPatientPortal(report: PatientVisualSummaryReport): boolean {
   return (
     patientVisualSummaryPatientAccessAllowed(report.approval) &&
     report.patientAccessAllowed &&

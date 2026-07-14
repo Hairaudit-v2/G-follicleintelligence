@@ -29,8 +29,8 @@ export const WORKSPACE_BRIDGE_ALLOWED_EXPORTS = [
 ] as const;
 
 /** Sole legacy file permitted to import from canonical `imaging-os/*`. */
-export const LEGACY_WORKSPACE_BRIDGE_FILE = "src/lib/imagingOs/imagingOsWorkspaceBridge.ts" as const;
+export const LEGACY_WORKSPACE_BRIDGE_FILE =
+  "src/lib/imagingOs/imagingOsWorkspaceBridge.ts" as const;
 
 /** Canonical module targeted by the sole legacy cross-tree bridge. */
-export const CANONICAL_WORKSPACE_BRIDGE_SPECIFIER =
-  "@/src/lib/imaging-os/workspaceBridge" as const;
+export const CANONICAL_WORKSPACE_BRIDGE_SPECIFIER = "@/src/lib/imaging-os/workspaceBridge" as const;

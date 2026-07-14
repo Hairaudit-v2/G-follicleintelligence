@@ -489,12 +489,8 @@ test("staff on maternity leave shows leave status instead of roster eligible", (
   assert.match(overview.unifiedStatus.employmentLabel, /maternity leave until/i);
   assert.equal(overview.unifiedStatus.rosterLabel, "On maternity leave");
   assert.equal(overview.unifiedStatus.trainingLabel, null);
-  assert.ok(
-    overview.blockers.some((b) => b.id === "future_shifts_during_leave")
-  );
-  assert.ok(
-    overview.actionMenu.actions.some((a) => a.id === "manage_leave")
-  );
+  assert.ok(overview.blockers.some((b) => b.id === "future_shifts_during_leave"));
+  assert.ok(overview.actionMenu.actions.some((a) => a.id === "manage_leave"));
   const rosterStage = overview.progressStages.find((s) => s.id === "roster_eligible");
   assert.equal(rosterStage?.label, "On maternity leave");
   assert.equal(rosterStage?.status, "blocked");

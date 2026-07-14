@@ -495,11 +495,7 @@ export function FiMarketingHomeView() {
           </div>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-            <Button
-              asChild
-              size="lg"
-              className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[14rem]")}
-            >
+            <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[14rem]")}>
               <Link href={c.ecosystemArchitecture.primaryCta.href}>
                 {c.ecosystemArchitecture.primaryCta.label}
                 <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />

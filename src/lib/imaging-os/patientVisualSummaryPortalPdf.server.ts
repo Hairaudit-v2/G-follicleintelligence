@@ -54,8 +54,7 @@ export async function loadPatientPortalVisualSummaryPdf(input: {
   if (error) return { ok: false, status: 500, error: error.message };
   if (!caseRow) return { ok: false, status: 404, error: "Case not found." };
 
-  const legacyPatient =
-    caseRow.patient_id != null ? String(caseRow.patient_id).trim() : "";
+  const legacyPatient = caseRow.patient_id != null ? String(caseRow.patient_id).trim() : "";
   const foundationPatient =
     (caseRow as { foundation_patient_id?: string | null }).foundation_patient_id != null
       ? String((caseRow as { foundation_patient_id: string }).foundation_patient_id).trim()

@@ -71,7 +71,9 @@ async function loadExistingSurgeryCaseIntelligenceFactsEvents(
   return (data ?? []).map((raw) => {
     const row = raw as { id: string; event_metadata?: Record<string, unknown> };
     const metadata =
-      row.event_metadata && typeof row.event_metadata === "object" && !Array.isArray(row.event_metadata)
+      row.event_metadata &&
+      typeof row.event_metadata === "object" &&
+      !Array.isArray(row.event_metadata)
         ? row.event_metadata
         : {};
     return {
@@ -124,7 +126,9 @@ async function updateSurgeryCaseIntelligenceFactsEvent(
     entity_type: data.entity_type != null ? String(data.entity_type) : null,
     event_value: data.event_value != null ? Number(data.event_value) : null,
     event_metadata:
-      data.event_metadata && typeof data.event_metadata === "object" && !Array.isArray(data.event_metadata)
+      data.event_metadata &&
+      typeof data.event_metadata === "object" &&
+      !Array.isArray(data.event_metadata)
         ? (data.event_metadata as Record<string, unknown>)
         : {},
     occurred_at: String(data.occurred_at),

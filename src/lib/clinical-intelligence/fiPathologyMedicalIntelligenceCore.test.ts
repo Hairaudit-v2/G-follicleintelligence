@@ -76,7 +76,12 @@ test("unknown or non-numeric markers are skipped safely", () => {
     items: [
       fiItem({ id: "a", test_label: "", test_code: null, result_value: "25" }),
       fiItem({ id: "b", test_label: "Notes", result_value: "see comment" }),
-      fiItem({ id: "c", test_label: "Unknown marker XYZ", result_value: "10", reference_range: "5-15" }),
+      fiItem({
+        id: "c",
+        test_label: "Unknown marker XYZ",
+        result_value: "10",
+        reference_range: "5-15",
+      }),
     ],
   });
   assert.ok(display);
@@ -181,7 +186,8 @@ test("FI OS pathology display layer does not duplicate shared clinical threshold
 });
 
 test("patient twin pathology schema accepts null latest_medical_intelligence", async () => {
-  const { patientTwinPathologySectionSchema } = await import("@/src/lib/patientTwin/patientTwinSchema");
+  const { patientTwinPathologySectionSchema } =
+    await import("@/src/lib/patientTwin/patientTwinSchema");
   const parsed = patientTwinPathologySectionSchema.parse({
     requests: [],
     results: [],

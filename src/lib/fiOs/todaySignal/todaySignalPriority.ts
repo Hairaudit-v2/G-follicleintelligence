@@ -1,8 +1,5 @@
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
-import type {
-  TodayFeedItem,
-  TodayFeedSeverity,
-} from "@/src/lib/fiOs/todayFeedDerive";
+import type { TodayFeedItem, TodayFeedSeverity } from "@/src/lib/fiOs/todayFeedDerive";
 
 /** FI-UX-REBUILD D6B — weighted priority scoring for Today feed items. */
 
@@ -442,7 +439,8 @@ function baseDimensionsForSignal(
 
     case "aggregate":
       dimensions.workflowBlocking = item.severity === "critical" ? 75 : 55;
-      dimensions.urgency = item.severity === "critical" ? 70 : item.severity === "warning" ? 55 : 35;
+      dimensions.urgency =
+        item.severity === "critical" ? 70 : item.severity === "warning" ? 55 : 35;
       dimensions.revenueImpact = /payment|financial|clearance/i.test(item.actionLabel) ? 65 : 40;
       if (item.id.includes("surgery_readiness")) reasons.push("Blocking procedure readiness");
       if (item.id.includes("surgery_payment")) reasons.push("Revenue follow-up overdue");
@@ -487,9 +485,7 @@ function severityFromBand(
 ): TodayFeedSeverity {
   const fromBand: TodayFeedSeverity =
     band === "critical" ? "critical" : band === "high" ? "warning" : "normal";
-  return SEVERITY_RANK[currentSeverity] >= SEVERITY_RANK[fromBand]
-    ? currentSeverity
-    : fromBand;
+  return SEVERITY_RANK[currentSeverity] >= SEVERITY_RANK[fromBand] ? currentSeverity : fromBand;
 }
 
 export function scoreTodaySignalPriority(

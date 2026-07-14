@@ -25,9 +25,7 @@ export default async function StaffStandardHoursSetupIndexPage({ params }: PageP
   const tid = tenantId.trim();
   const access = await resolveHrOsRouteAccess(tid);
   if (!access.ok) {
-    return (
-      <FiModuleAccessDenied tenantId={tid} moduleLabel="Team" reason={access.access.reason} />
-    );
+    return <FiModuleAccessDenied tenantId={tid} moduleLabel="Team" reason={access.access.reason} />;
   }
 
   const data = await loadStaffStandardHoursSetupIndexPage(tid);

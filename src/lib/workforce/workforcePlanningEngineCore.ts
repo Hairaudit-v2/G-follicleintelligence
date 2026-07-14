@@ -94,7 +94,10 @@ export function planningHorizonFromDate(anchorDate?: string | null): {
 }
 
 export function predictStaffingShortages(input: {
-  understaffedByDate: Array<{ workDate: string; missingRoles: Array<{ role: string; gap: number }> }>;
+  understaffedByDate: Array<{
+    workDate: string;
+    missingRoles: Array<{ role: string; gap: number }>;
+  }>;
 }): StaffingShortagePrediction[] {
   const byRole = new Map<string, { shortageCount: number; dates: Set<string> }>();
 
@@ -283,7 +286,8 @@ export function rankNextBestWorkforceActions(input: {
       description: "Validate rostered labour cost against budget before the week progresses.",
       actionType: "wage_exposure",
       href: `${base}/shift-cost?date=${encodeURIComponent(input.horizonStart)}`,
-      score: PRIORITY_SCORE.low + Math.min(100, Math.round(input.weeklyWageExposureCents / 100_000)),
+      score:
+        PRIORITY_SCORE.low + Math.min(100, Math.round(input.weeklyWageExposureCents / 100_000)),
     });
   }
 

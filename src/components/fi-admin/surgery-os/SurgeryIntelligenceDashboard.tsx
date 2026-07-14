@@ -18,7 +18,9 @@ function DistributionList({
   if (!entries.length) {
     return (
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{title}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
+          {title}
+        </h3>
         <p className="mt-2 text-sm text-[#64748B]">No data in range.</p>
       </div>
     );
@@ -46,7 +48,11 @@ function formatNullableNumber(value: number | null, suffix = ""): string {
   return `${value.toLocaleString()}${suffix}`;
 }
 
-export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligenceDashboardPayload }) {
+export function SurgeryIntelligenceDashboard({
+  data,
+}: {
+  data: SurgeryIntelligenceDashboardPayload;
+}) {
   const base = `/fi-admin/${data.tenantId}/surgery-os/intelligence`;
 
   return (
@@ -150,7 +156,9 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                 <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
                   {label}
                 </div>
-                <div className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">{value}</div>
+                <div className="mt-1 text-2xl font-semibold tabular-nums text-[#F8FAFC]">
+                  {value}
+                </div>
               </div>
             ))}
           </div>
@@ -284,9 +292,7 @@ export function SurgeryIntelligenceDashboard({ data }: { data: SurgeryIntelligen
                       <div className="space-y-1">
                         <span
                           className={
-                            row.beforeAfterComparisonReady
-                              ? "text-sky-300"
-                              : "text-[#CBD5E1]"
+                            row.beforeAfterComparisonReady ? "text-sky-300" : "text-[#CBD5E1]"
                           }
                         >
                           {row.longitudinalComparisonLabel}

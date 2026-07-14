@@ -124,11 +124,7 @@ export function deriveReceptionAppointmentNextAction(
       variant: "primary",
     };
   }
-  if (
-    appt.status === "scheduled" ||
-    appt.status === "confirmed" ||
-    appt.status === "arrived"
-  ) {
+  if (appt.status === "scheduled" || appt.status === "confirmed" || appt.status === "arrived") {
     return {
       label: "Check in patient",
       href: appt.hrefs.calendar,

@@ -62,7 +62,9 @@ function routeRow(partial: Partial<PathologyEmailRouteRow> = {}): PathologyEmail
 function createRoutesMockSupabase(state: RoutesMockState): SupabaseClient {
   function findRouteByEmail(email: string): PathologyEmailRouteRow | undefined {
     const normalized = normalizePathologyInboundEmail(email);
-    return state.routes.find((route) => normalizePathologyInboundEmail(route.inbound_email) === normalized);
+    return state.routes.find(
+      (route) => normalizePathologyInboundEmail(route.inbound_email) === normalized
+    );
   }
 
   const client = {
@@ -139,7 +141,9 @@ function createRoutesMockSupabase(state: RoutesMockState): SupabaseClient {
               id: `route-${state.nextRouteId}`,
               tenant_id: String(row.tenant_id),
               inbound_email: String(row.inbound_email),
-              route_status: String(row.route_status ?? "active") as PathologyEmailRouteRow["route_status"],
+              route_status: String(
+                row.route_status ?? "active"
+              ) as PathologyEmailRouteRow["route_status"],
               source_label: row.source_label != null ? String(row.source_label) : null,
             });
             state.routes.push(route);
@@ -278,7 +282,10 @@ function freshState(): RoutesMockState {
 }
 
 test("email normalization lowercases inbound addresses", () => {
-  assert.equal(normalizePathologyInboundEmail("  Pathology+Evolved@Example.COM "), "pathology+evolved@example.com");
+  assert.equal(
+    normalizePathologyInboundEmail("  Pathology+Evolved@Example.COM "),
+    "pathology+evolved@example.com"
+  );
   assert.equal(isValidPathologyInboundEmail("pathology+evolved@inbound.example.com"), true);
   assert.equal(isValidPathologyInboundEmail("not-an-email"), false);
 });

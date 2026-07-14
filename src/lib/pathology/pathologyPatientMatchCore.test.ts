@@ -25,25 +25,22 @@ test("scorePathologyPatientMatch: exact name + DOB yields high confidence", () =
 });
 
 test("pickBestPathologyPatientMatch: selects highest confidence candidate", () => {
-  const best = pickBestPathologyPatientMatch(
-    { patientName: "Jane Doe", dob: "1990-05-12" },
-    [
-      {
-        patientId: "patient-b",
-        fullName: "Jane Doe",
-        dateOfBirth: "1988-01-01",
-        primaryEmail: null,
-        mrn: null,
-      },
-      {
-        patientId: "patient-a",
-        fullName: "Jane Doe",
-        dateOfBirth: "1990-05-12",
-        primaryEmail: null,
-        mrn: null,
-      },
-    ]
-  );
+  const best = pickBestPathologyPatientMatch({ patientName: "Jane Doe", dob: "1990-05-12" }, [
+    {
+      patientId: "patient-b",
+      fullName: "Jane Doe",
+      dateOfBirth: "1988-01-01",
+      primaryEmail: null,
+      mrn: null,
+    },
+    {
+      patientId: "patient-a",
+      fullName: "Jane Doe",
+      dateOfBirth: "1990-05-12",
+      primaryEmail: null,
+      mrn: null,
+    },
+  ]);
   assert.ok(best);
   assert.equal(best.patientId, "patient-a");
   assert.equal(best.confidence, 0.98);

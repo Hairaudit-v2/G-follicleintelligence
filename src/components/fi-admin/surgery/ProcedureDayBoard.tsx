@@ -149,9 +149,7 @@ export function ProcedureDayBoard({ data: initialData }: { data: ProcedureDayLiv
           {isHydrating ? (
             <p className="mt-2 text-xs text-[#64748B]">Loading full procedure day details…</p>
           ) : null}
-          {hydrateError ? (
-            <p className="mt-2 text-xs text-amber-200/90">{hydrateError}</p>
-          ) : null}
+          {hydrateError ? <p className="mt-2 text-xs text-amber-200/90">{hydrateError}</p> : null}
           <ProcedureDayPrimaryActions base={base} todayYmd={data.window.todayYmd} />
         </div>
       </DashboardCard>

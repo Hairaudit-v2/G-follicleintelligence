@@ -26,9 +26,7 @@ export type WorkspaceShellContextValue = WorkspaceShellOperatorContext & {
   /** D6D — per-workspace soft refresh metadata keyed by kind:id. */
   workspaceSignalByKey: Readonly<Record<string, WorkspaceSignalSyncMeta>>;
   getWorkspaceSignalMeta: (ref: WorkspaceRef) => WorkspaceSignalSyncMeta | undefined;
-  applyWorkspaceSignalUpdates: (
-    updates: Record<string, { reason: string; at: string }>
-  ) => void;
+  applyWorkspaceSignalUpdates: (updates: Record<string, { reason: string; at: string }>) => void;
   /** Replace the stack with a single workspace (Today feed, search result). */
   openWorkspace: (ref: WorkspaceRef) => void;
   /** Push a linked entity on top (patient → lead drill-down). */

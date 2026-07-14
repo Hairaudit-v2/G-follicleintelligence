@@ -40,11 +40,7 @@ export function resolveIiohrImageStoragePath(
 }
 
 export function resolveIiohrExternalView(payload: IiohrImagesUploadedPayload): string {
-  return (
-    payload.external_view?.trim() ||
-    payload.canonical_view?.trim() ||
-    "other"
-  );
+  return payload.external_view?.trim() || payload.canonical_view?.trim() || "other";
 }
 
 export function buildIiohrPatientImageMetadata(input: {

@@ -60,9 +60,7 @@ describe("imagingOsProviderImportGuardCore", () => {
       imagingOsDir: IMAGING_OS_DIR,
       readFile: (absolutePath) => fs.readFileSync(absolutePath, "utf8"),
       listFiles: (dir) =>
-        fs
-          .readdirSync(dir)
-          .filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts")),
+        fs.readdirSync(dir).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts")),
     });
     assert.deepEqual(
       violations,

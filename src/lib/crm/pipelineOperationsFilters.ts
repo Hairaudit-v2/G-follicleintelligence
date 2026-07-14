@@ -180,9 +180,7 @@ export function isPipelineInactiveReviewLead(
   }
 
   // Meaningful activity within inactivity window excludes
-  const act = parseMs(
-    card.timestamps?.meaningfulActivityAtIso ?? card.timestamps?.updatedAtIso
-  );
+  const act = parseMs(card.timestamps?.meaningfulActivityAtIso ?? card.timestamps?.updatedAtIso);
   if (act != null) {
     const inactiveWindowMs = inactiveAgeDays * MS_DAY;
     if (nowMs - act < inactiveWindowMs) return false;

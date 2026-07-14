@@ -20,7 +20,10 @@ test("normalizeFiOsNavPath trims trailing slashes", () => {
 
 test("isInternalFiOsNavigationHref accepts tenant routes only", () => {
   assert.equal(isInternalFiOsNavigationHref("/fi-admin/t-1/calendar", ORIGIN), true);
-  assert.equal(isInternalFiOsNavigationHref("https://example.com/fi-admin/t-1", "https://example.com"), true);
+  assert.equal(
+    isInternalFiOsNavigationHref("https://example.com/fi-admin/t-1", "https://example.com"),
+    true
+  );
   assert.equal(isInternalFiOsNavigationHref("https://evil.com/fi-admin/t-1", ORIGIN), false);
   assert.equal(isInternalFiOsNavigationHref("/marketing", ORIGIN), false);
   assert.equal(isInternalFiOsNavigationHref("mailto:a@b.com", ORIGIN), false);

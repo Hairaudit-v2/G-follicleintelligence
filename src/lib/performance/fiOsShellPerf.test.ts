@@ -9,10 +9,7 @@ import type { ReceptionBoardCommandCenterPayload } from "@/src/lib/receptionBoar
 
 function assertShellPayloadSize(label: string, bytes: number, maxKb: number): void {
   const kb = bytes / 1024;
-  assert.ok(
-    kb <= maxKb,
-    `${label} shell payload ${kb.toFixed(1)}KB exceeds ${maxKb}KB budget`
-  );
+  assert.ok(kb <= maxKb, `${label} shell payload ${kb.toFixed(1)}KB exceeds ${maxKb}KB budget`);
 }
 
 describe("FI OS shell performance regression", () => {

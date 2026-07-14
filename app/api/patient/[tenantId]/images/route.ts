@@ -8,10 +8,7 @@ import { uploadPatientPortalImage } from "@/src/lib/patientPortal/patientPortalI
 
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     const tid = tenantId?.trim() ?? "";
@@ -53,10 +50,7 @@ export async function POST(
   } catch (e) {
     if (e instanceof Error) {
       const msg = e.message;
-      if (
-        msg.includes("Sign in with a patient-linked portal account") ||
-        msg.includes("consent")
-      ) {
+      if (msg.includes("Sign in with a patient-linked portal account") || msg.includes("consent")) {
         return crmJsonError(403, msg);
       }
     }

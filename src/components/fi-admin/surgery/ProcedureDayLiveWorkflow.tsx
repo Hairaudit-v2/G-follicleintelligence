@@ -25,9 +25,15 @@ import type {
 } from "@/src/lib/procedureDay/procedureDayWorkflowTypes";
 import { surgeryLinkButtonClass } from "@/src/lib/fiAdmin/surgeryPresentation";
 
-function StageTimeline({ currentStage }: { currentStage: ProcedureDayLiveCardState["currentStage"] }) {
+function StageTimeline({
+  currentStage,
+}: {
+  currentStage: ProcedureDayLiveCardState["currentStage"];
+}) {
   const idx = PROCEDURE_DAY_WORKFLOW_STAGES.indexOf(currentStage);
-  const visible = PROCEDURE_DAY_WORKFLOW_STAGES.filter((s) => s !== "completed" && s !== "discharged");
+  const visible = PROCEDURE_DAY_WORKFLOW_STAGES.filter(
+    (s) => s !== "completed" && s !== "discharged"
+  );
   return (
     <ol className="flex flex-wrap gap-2">
       {visible.map((stage) => {
@@ -39,7 +45,8 @@ function StageTimeline({ currentStage }: { currentStage: ProcedureDayLiveCardSta
             key={stage}
             className={cn(
               "rounded-full border px-3 py-1.5 text-xs font-semibold sm:text-sm",
-              active && "border-[#22C1FF]/50 bg-[#22C1FF]/15 text-[#22C1FF] ring-2 ring-[#22C1FF]/20",
+              active &&
+                "border-[#22C1FF]/50 bg-[#22C1FF]/15 text-[#22C1FF] ring-2 ring-[#22C1FF]/20",
               done && !active && "border-emerald-500/25 bg-emerald-500/10 text-emerald-200/90",
               !active && !done && "border-white/[0.08] bg-black/20 text-[#64748B]"
             )}
@@ -149,7 +156,9 @@ function LiveSurgeryCard({
       <div className="mt-5 grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-white/[0.08] bg-black/25 p-4">
           <p className="text-sm font-medium text-[#64748B]">Grafts extracted</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">{metricValue.extracted}</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
+            {metricValue.extracted}
+          </p>
           <div className="mt-3 flex gap-2">
             <button
               type="button"
@@ -188,7 +197,9 @@ function LiveSurgeryCard({
         </div>
         <div className="rounded-xl border border-white/[0.08] bg-black/25 p-4">
           <p className="text-sm font-medium text-[#64748B]">Grafts implanted</p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">{metricValue.implanted}</p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-[#F8FAFC]">
+            {metricValue.implanted}
+          </p>
           <div className="mt-3 flex gap-2">
             <button
               type="button"
@@ -259,7 +270,9 @@ function LiveSurgeryCard({
                   item.complete ? "text-emerald-400" : "text-[#475569]"
                 )}
               />
-              <span className={item.complete ? "text-[#E2E8F0]" : "text-[#94A3B8]"}>{item.label}</span>
+              <span className={item.complete ? "text-[#E2E8F0]" : "text-[#94A3B8]"}>
+                {item.label}
+              </span>
             </li>
           ))}
         </ul>
@@ -408,15 +421,19 @@ export function ProcedureDayLiveWorkflow({ data }: { data: ProcedureDayLiveBoard
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {startable[0] ? (
             <p className="text-sm text-[#94A3B8]">
-              Next up: <span className="font-medium text-[#E2E8F0]">{startable[0].patientLabel}</span>{" "}
-              at {startable[0].timeLabel}
+              Next up:{" "}
+              <span className="font-medium text-[#E2E8F0]">{startable[0].patientLabel}</span> at{" "}
+              {startable[0].timeLabel}
             </p>
           ) : (
             <p className="text-sm text-[#94A3B8]">
               {cards.length} surgery appointment{cards.length === 1 ? "" : "s"} scheduled today.
             </p>
           )}
-          <Link href={`${base}/calendar?date=${encodeURIComponent(data.window.todayYmd)}`} className={surgeryLinkButtonClass}>
+          <Link
+            href={`${base}/calendar?date=${encodeURIComponent(data.window.todayYmd)}`}
+            className={surgeryLinkButtonClass}
+          >
             Open calendar
           </Link>
           <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
@@ -438,7 +455,12 @@ export function ProcedureDayLiveWorkflow({ data }: { data: ProcedureDayLiveBoard
           const live = data.liveByBooking[card.bookingId];
           if (!live) return null;
           return (
-            <LiveSurgeryCard key={card.bookingId} tenantId={data.tenantId} card={card} live={live} />
+            <LiveSurgeryCard
+              key={card.bookingId}
+              tenantId={data.tenantId}
+              card={card}
+              live={live}
+            />
           );
         })}
       </div>

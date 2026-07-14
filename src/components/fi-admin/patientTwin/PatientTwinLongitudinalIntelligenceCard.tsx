@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import type { PatientTwinImagingGalleryItem } from "@/src/lib/patientTwin/patientTwinTypes";
 
-function StatusBadge({ label, tone }: { label: string; tone: "amber" | "rose" | "emerald" | "slate" }) {
+function StatusBadge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "amber" | "rose" | "emerald" | "slate";
+}) {
   const tones = {
     amber: "bg-amber-500/10 text-amber-200",
     rose: "bg-rose-500/10 text-rose-200",
@@ -67,7 +73,11 @@ export function PatientTwinLongitudinalIntelligenceSummary({
       <p className="text-[10px] text-slate-500">{intel.limitations[0]}</p>
       <div className="flex flex-wrap gap-2">
         {img.deep_links.links.map((link) => (
-          <Link key={link.href} href={link.href} className="text-[10px] text-sky-400 hover:text-sky-300">
+          <Link
+            key={link.href}
+            href={link.href}
+            className="text-[10px] text-sky-400 hover:text-sky-300"
+          >
             {link.label}
           </Link>
         ))}

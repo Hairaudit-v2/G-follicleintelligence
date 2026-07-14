@@ -58,7 +58,10 @@ const ARCHIVED = row({
 
 test("filterPlatformTenantList: hides archived by default", () => {
   const filtered = filterPlatformTenantList([ACTIVE_PRODUCTION, DEMO, ARCHIVED]);
-  assert.deepEqual(filtered.map((t) => t.slug), [PRODUCTION_TENANT_SLUG]);
+  assert.deepEqual(
+    filtered.map((t) => t.slug),
+    [PRODUCTION_TENANT_SLUG]
+  );
 });
 
 test("filterPlatformTenantList: includeArchived=true shows archived tenants", () => {
@@ -73,7 +76,10 @@ test("filterPlatformTenantList: includeArchived=true shows archived tenants", ()
 
 test("filterPlatformTenantList: demo tenants grouped/hidden correctly", () => {
   const withoutDemo = filterPlatformTenantList([ACTIVE_PRODUCTION, DEMO]);
-  assert.deepEqual(withoutDemo.map((t) => t.slug), [PRODUCTION_TENANT_SLUG]);
+  assert.deepEqual(
+    withoutDemo.map((t) => t.slug),
+    [PRODUCTION_TENANT_SLUG]
+  );
 
   const withDemo = filterPlatformTenantList([ACTIVE_PRODUCTION, DEMO], {
     includeDemo: true,

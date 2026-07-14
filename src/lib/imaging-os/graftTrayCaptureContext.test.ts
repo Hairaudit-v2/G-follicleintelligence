@@ -137,9 +137,7 @@ describe("graft tray link payload builders", () => {
       capturedAt: "2026-07-04T12:00:00.000Z",
     });
     assert.equal(row.status, "review_required");
-    assert.ok(
-      (row.metadata.review_reasons as string[]).includes("graft_tray_quality_review")
-    );
+    assert.ok((row.metadata.review_reasons as string[]).includes("graft_tray_quality_review"));
   });
 
   it("mergeGraftTrayImageMetadata preserves existing metadata fields", () => {

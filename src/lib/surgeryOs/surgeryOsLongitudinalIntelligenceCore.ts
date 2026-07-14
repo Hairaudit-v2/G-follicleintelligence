@@ -2,8 +2,14 @@
  * ImagingOS Phase 7 — SurgeryOS read-only longitudinal intelligence surfacing (pure).
  */
 
-import { buildImagingDeepLinks, listAvailableImagingDeepLinks } from "@/src/lib/imaging-os/imagingDeepLinksCore";
-import type { SurgeryOsVieCaptureSummary, SurgeryOsViePhaseCaptureStatus } from "./surgeryOsVieCapture.types";
+import {
+  buildImagingDeepLinks,
+  listAvailableImagingDeepLinks,
+} from "@/src/lib/imaging-os/imagingDeepLinksCore";
+import type {
+  SurgeryOsVieCaptureSummary,
+  SurgeryOsViePhaseCaptureStatus,
+} from "./surgeryOsVieCapture.types";
 
 export type SurgeryOsLongitudinalSlotStatus =
   | "complete"
@@ -42,7 +48,9 @@ function phaseStatusFromCapture(
   return "missing";
 }
 
-function deriveSlotStatuses(capture: SurgeryOsVieCaptureSummary): SurgeryOsLongitudinalSlotIntelligence[] {
+function deriveSlotStatuses(
+  capture: SurgeryOsVieCaptureSummary
+): SurgeryOsLongitudinalSlotIntelligence[] {
   const retakeWarnings = capture.warnings.filter((w) => w.kind === "pending_low_quality");
   const retakeSlots = new Set(retakeWarnings.map((w) => w.slotSlug).filter(Boolean) as string[]);
 

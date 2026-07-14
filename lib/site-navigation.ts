@@ -1,6 +1,4 @@
-import {
-  ECOSYSTEM_ARCHITECTURE_PAGE_LABEL,
-} from "@/lib/marketing/ecosystemArchitecturePageContent";
+import { ECOSYSTEM_ARCHITECTURE_PAGE_LABEL } from "@/lib/marketing/ecosystemArchitecturePageContent";
 
 /** Public marketing header — Vision through Contact (Products handled separately in `Header`). */
 export type HeaderNavItem = { label: string; href: string };

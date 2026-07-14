@@ -55,10 +55,12 @@ export async function loadSharedPatientVisualSummaryPdf(input: {
   if (error) return { ok: false, status: 500, error: error.message };
   if (!caseRow) return { ok: false, status: 404, error: "Case not found." };
 
-  const casePatientId = resolveCasePatientId(caseRow as {
-    patient_id?: string | null;
-    foundation_patient_id?: string | null;
-  });
+  const casePatientId = resolveCasePatientId(
+    caseRow as {
+      patient_id?: string | null;
+      foundation_patient_id?: string | null;
+    }
+  );
   const metadata =
     caseRow.metadata && typeof caseRow.metadata === "object" && !Array.isArray(caseRow.metadata)
       ? (caseRow.metadata as Record<string, unknown>)
@@ -72,9 +74,7 @@ export async function loadSharedPatientVisualSummaryPdf(input: {
   });
   if (!access.allowed) {
     const message =
-      access.reason === "draft"
-        ? "This summary is not approved for download."
-        : "Access denied.";
+      access.reason === "draft" ? "This summary is not approved for download." : "Access denied.";
     return { ok: false, status: 403, error: message };
   }
 

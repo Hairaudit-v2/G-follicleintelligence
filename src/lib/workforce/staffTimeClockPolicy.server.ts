@@ -99,6 +99,8 @@ export async function assertBreaksEnabledForTenant(
 ): Promise<void> {
   const policy = await loadWorkforceTimeClockPolicy(tenantId, client);
   if (!policy.breaksEnabled) {
-    throw new Error("Break tracking is disabled for this clinic. Ask HR to enable it in Payroll settings.");
+    throw new Error(
+      "Break tracking is disabled for this clinic. Ask HR to enable it in Payroll settings."
+    );
   }
 }

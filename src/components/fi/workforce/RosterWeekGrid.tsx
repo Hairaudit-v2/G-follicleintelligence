@@ -182,9 +182,7 @@ export function RosterWeekGrid({
                   >
                     {summary}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Weekly total: {weeklyTotal} h
-                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">Weekly total: {weeklyTotal} h</p>
                   {showStandardHoursEditor ? (
                     canManage ? (
                       <Link
@@ -211,10 +209,7 @@ export function RosterWeekGrid({
                   ) : null}
 
                   {canManage && onMarkPeriodAway ? (
-                    <div
-                      className="mt-2 space-y-1"
-                      data-testid={`mark-period-away-${staff.id}`}
-                    >
+                    <div className="mt-2 space-y-1" data-testid={`mark-period-away-${staff.id}`}>
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                         Mark {periodLabel} away
                       </p>

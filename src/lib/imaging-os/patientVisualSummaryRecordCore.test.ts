@@ -77,7 +77,10 @@ describe("patientVisualSummaryRecordCore", () => {
     assert.equal(drafts[0].graft_count, "120");
     assert.equal(drafts[1].graft_count, "");
     const inputs = draftsToZoneInputs(drafts);
-    assert.equal(sumZoneGraftCounts(inputs.map((z) => ({ graft_count: z.graft_count ?? undefined }))), 120);
+    assert.equal(
+      sumZoneGraftCounts(inputs.map((z) => ({ graft_count: z.graft_count ?? undefined }))),
+      120
+    );
   });
 
   it("buildGraftTotalMismatchWarning returns null without surgery total", () => {

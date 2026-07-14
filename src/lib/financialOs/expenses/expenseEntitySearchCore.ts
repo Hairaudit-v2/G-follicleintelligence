@@ -12,11 +12,7 @@ export function formatExpenseLinkSummary(input: {
   return parts.length ? parts.join(" · ") : "—";
 }
 
-export function filterCampaignKeys(
-  keys: readonly string[],
-  query: string,
-  limit = 20
-): string[] {
+export function filterCampaignKeys(keys: readonly string[], query: string, limit = 20): string[] {
   const q = query.trim().toLowerCase();
   const out: string[] = [];
   const seen = new Set<string>();

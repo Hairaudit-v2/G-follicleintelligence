@@ -204,7 +204,17 @@ test("role-oriented nav smoke: receptionist, clinical, finance, manager labels s
   assert.ok(!collectLabels(reception).some((l) => /ReceptionOS|Command Centre|LeadFlow/i.test(l)));
 
   // CRM operator
-  const crm = resolveFiOsPrimarySidebarItems(BASE, true, true, null, false, true, false, false, false);
+  const crm = resolveFiOsPrimarySidebarItems(
+    BASE,
+    true,
+    true,
+    null,
+    false,
+    true,
+    false,
+    false,
+    false
+  );
   const crmLabels = collectLabels(crm);
   assert.ok(crmLabels.some((l) => /Pipeline/i.test(l)));
   assert.ok(!crmLabels.some((l) => /Enquiries|LeadFlow|CRM|Kanban|Conversion board/i.test(l)));

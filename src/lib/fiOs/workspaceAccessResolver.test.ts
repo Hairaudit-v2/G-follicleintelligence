@@ -21,13 +21,22 @@ const CANONICAL_MEMBER = "531653ab-e07f-40e4-90f4-f4ebbdde4ba0";
 const ARCHIVED_DUP = "09f8cc84-15ab-473f-a6a7-fe913e973ca0";
 
 test("resolveWorkspaceStaffRoleKey normalizes production role labels", () => {
-  assert.equal(resolveWorkspaceStaffRoleKey({ staffRole: "Manager", roleCode: null }).roleKey, "manager");
+  assert.equal(
+    resolveWorkspaceStaffRoleKey({ staffRole: "Manager", roleCode: null }).roleKey,
+    "manager"
+  );
   assert.equal(
     resolveWorkspaceStaffRoleKey({ staffRole: null, roleCode: "Receptionist" }).roleKey,
     "reception"
   );
-  assert.equal(resolveWorkspaceStaffRoleKey({ staffRole: "Nurse", roleCode: null }).roleKey, "nurse");
-  assert.equal(resolveWorkspaceStaffRoleKey({ staffRole: "Doctor", roleCode: null }).roleKey, "doctor");
+  assert.equal(
+    resolveWorkspaceStaffRoleKey({ staffRole: "Nurse", roleCode: null }).roleKey,
+    "nurse"
+  );
+  assert.equal(
+    resolveWorkspaceStaffRoleKey({ staffRole: "Doctor", roleCode: null }).roleKey,
+    "doctor"
+  );
   assert.equal(
     resolveWorkspaceStaffRoleKey({ staffRole: "Consultant", roleCode: null }).roleKey,
     "consultant"

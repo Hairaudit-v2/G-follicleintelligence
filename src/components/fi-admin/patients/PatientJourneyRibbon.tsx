@@ -35,7 +35,9 @@ export function PatientJourneyRibbon({ journey }: { journey: PatientJourneySnaps
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">
               Patient journey
             </p>
-            <p className="text-sm font-semibold tabular-nums text-cyan-300/90">{progressPct}% complete</p>
+            <p className="text-sm font-semibold tabular-nums text-cyan-300/90">
+              {progressPct}% complete
+            </p>
           </div>
 
           <ol className="flex flex-wrap items-center gap-1 sm:gap-2" aria-label="Journey stages">
@@ -48,7 +50,9 @@ export function PatientJourneyRibbon({ journey }: { journey: PatientJourneySnaps
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-xs font-semibold sm:text-sm",
                       active && "border-cyan-400/50 bg-cyan-500/15 text-cyan-100",
-                      done && !active && "border-emerald-500/30 bg-emerald-500/10 text-emerald-200/90",
+                      done &&
+                        !active &&
+                        "border-emerald-500/30 bg-emerald-500/10 text-emerald-200/90",
                       !active && !done && "border-white/[0.08] bg-black/20 text-slate-500"
                     )}
                   >

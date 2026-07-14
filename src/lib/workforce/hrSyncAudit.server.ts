@@ -13,7 +13,10 @@ import type {
   HrSyncRunCounts,
   HrSyncRunStatus,
 } from "@/src/lib/workforce/hrSyncAuditTypes";
-import { loadIdentityLinksForTenant, loadStaffMembersForReconciliation } from "@/src/lib/workforce/identityReconciliation.server";
+import {
+  loadIdentityLinksForTenant,
+  loadStaffMembersForReconciliation,
+} from "@/src/lib/workforce/identityReconciliation.server";
 import { isDepartedEmploymentStatus } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
 import { persistDuplicateCandidatesForTenant } from "@/src/lib/workforce/staffDuplicateDetection.server";
 
@@ -44,9 +47,7 @@ function mapRunRow(raw: Record<string, unknown>): FiHrSyncRunRow {
     warnings: Array.isArray(warnings)
       ? warnings.filter((w): w is string => typeof w === "string")
       : [],
-    errors: Array.isArray(errors)
-      ? errors.filter((e): e is string => typeof e === "string")
-      : [],
+    errors: Array.isArray(errors) ? errors.filter((e): e is string => typeof e === "string") : [],
   };
 }
 

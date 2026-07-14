@@ -52,7 +52,12 @@ export function toClientImagingQualitySummary(
   record: ImagingQualityMetadataRecord
 ): Pick<
   ImagingQualityMetadataRecord,
-  "quality_score" | "quality_status" | "retake_prompt" | "blur_status" | "exposure_status" | "duplicate_status"
+  | "quality_score"
+  | "quality_status"
+  | "retake_prompt"
+  | "blur_status"
+  | "exposure_status"
+  | "duplicate_status"
 > {
   return {
     quality_score: record.quality_score,

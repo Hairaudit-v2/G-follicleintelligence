@@ -33,10 +33,7 @@ export function StaffHrTaskMapEntryBanner({
       data-testid={`hr-task-map-banner-${surface}`}
     >
       <div className="flex min-w-0 items-start gap-3">
-        <CircleHelp
-          className="mt-0.5 h-4 w-4 shrink-0 text-[#7DD3FC]"
-          aria-hidden
-        />
+        <CircleHelp className="mt-0.5 h-4 w-4 shrink-0 text-[#7DD3FC]" aria-hidden />
         <p className="text-sm text-[#CBD5E1]">{preset.message}</p>
       </div>
       <Link

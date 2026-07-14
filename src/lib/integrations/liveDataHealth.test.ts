@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  buildLiveDataHealthWarnings,
-  loadLiveDataHealthSummary,
-} from "./liveDataHealth.server";
+import { buildLiveDataHealthWarnings, loadLiveDataHealthSummary } from "./liveDataHealth.server";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
 const NOW = new Date("2026-07-03T12:00:00.000Z");

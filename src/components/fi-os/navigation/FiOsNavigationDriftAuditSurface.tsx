@@ -1,6 +1,11 @@
 "use client";
 
-import { DashboardCard, InfoNotice, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
+import {
+  DashboardCard,
+  InfoNotice,
+  SectionHeader,
+  StatCard,
+} from "@/src/components/fi-admin/dashboard-ui";
 import type { FiOsNavigationAuditPageModel } from "@/src/lib/fiOs/navigation/fiOsNavigationAudit.server";
 import type { FiOs1BWorkflowDomain } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
 import type { NavigationDriftClassification } from "@/src/lib/fiOs/navigation/fiOsNavigationDriftAudit";
@@ -36,13 +41,19 @@ function classificationTone(c: NavigationDriftClassification): string {
   }
 }
 
-export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigationAuditPageModel }) {
+export function FiOsNavigationDriftAuditSurface({
+  model,
+}: {
+  model: FiOsNavigationAuditPageModel;
+}) {
   const { report, summary } = model;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 pb-16">
       <header className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">D6G-A · Audit only</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+          D6G-A · Audit only
+        </p>
         <h1 className="text-2xl font-semibold text-slate-50">FI OS navigation drift</h1>
         <p className="max-w-3xl text-sm text-slate-400">
           Compares the current All areas drawer, collapsed rail, and command palette catalog against
@@ -51,9 +62,21 @@ export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigati
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Nav items catalogued" value={String(summary.totalItems)} icon={<Layers className="h-5 w-5" />} />
-        <StatCard label="Aligned with 1B" value={String(summary.alignedCount)} icon={<CheckCircle2 className="h-5 w-5" />} />
-        <StatCard label="Drift signals" value={String(summary.driftCount)} icon={<AlertTriangle className="h-5 w-5" />} />
+        <StatCard
+          label="Nav items catalogued"
+          value={String(summary.totalItems)}
+          icon={<Layers className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Aligned with 1B"
+          value={String(summary.alignedCount)}
+          icon={<CheckCircle2 className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Drift signals"
+          value={String(summary.driftCount)}
+          icon={<AlertTriangle className="h-5 w-5" />}
+        />
         <StatCard
           label="D6 primary rail slots"
           value={`${report.d6PrimaryRailRecommendation.length}/6`}
@@ -62,7 +85,10 @@ export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigati
       </div>
 
       <DashboardCard className="p-6" elevated>
-        <SectionHeader title="Recommended D6G primary rail" description="Target candidates — not enforced yet." />
+        <SectionHeader
+          title="Recommended D6G primary rail"
+          description="Target candidates — not enforced yet."
+        />
         <div className="mt-4 flex flex-wrap gap-2">
           {report.d6PrimaryRailRecommendation.map((slot) => (
             <span
@@ -88,7 +114,10 @@ export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigati
       ) : null}
 
       <DashboardCard className="p-6" elevated>
-        <SectionHeader title="1B domain mapping" description="Current catalog grouped by workflow domain." />
+        <SectionHeader
+          title="1B domain mapping"
+          description="Current catalog grouped by workflow domain."
+        />
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {DOMAIN_ORDER.map((domain) => {
             const rows = report.byDomain1B[domain] ?? [];
@@ -96,8 +125,7 @@ export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigati
             return (
               <div key={domain} className="rounded-lg border border-white/10 bg-[#0c1426]/60 p-4">
                 <h3 className="text-sm font-semibold text-slate-100">
-                  {domain}{" "}
-                  <span className="font-normal text-slate-500">({rows.length})</span>
+                  {domain} <span className="font-normal text-slate-500">({rows.length})</span>
                 </h3>
                 <ul className="mt-2 space-y-1 text-xs text-slate-400">
                   {rows.map((r) => (
@@ -118,10 +146,16 @@ export function FiOsNavigationDriftAuditSurface({ model }: { model: FiOsNavigati
 
       {report.legacyLabels.length > 0 ? (
         <DashboardCard className="p-6" elevated>
-          <SectionHeader title="Legacy labels" description="Module/OS language in staff-facing nav." />
+          <SectionHeader
+            title="Legacy labels"
+            description="Module/OS language in staff-facing nav."
+          />
           <ul className="mt-4 space-y-2 text-sm">
             {report.legacyLabels.map((l) => (
-              <li key={l.id} className="rounded border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+              <li
+                key={l.id}
+                className="rounded border border-amber-500/20 bg-amber-500/5 px-3 py-2"
+              >
                 <span className="font-medium text-amber-100">{l.label}</span>{" "}
                 <span className="text-slate-500">({l.id})</span>
                 {l.reasons.length ? (

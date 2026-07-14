@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { createPathologyResult, type PathologyResultItemInput } from "@/src/lib/pathology/pathologyResultMutations.server";
+import {
+  createPathologyResult,
+  type PathologyResultItemInput,
+} from "@/src/lib/pathology/pathologyResultMutations.server";
 import { loadPathologyInboxDocument } from "@/src/lib/pathology/pathologyInboxLoad.server";
 import type {
   PathologyExtractionJobRow,
@@ -29,7 +32,7 @@ function markersFromJob(job: PathologyExtractionJobRow): NormalizedPathologyMark
         result_value: String(r.result_value ?? ""),
         result_unit: r.result_unit != null ? String(r.result_unit) : null,
         reference_range: r.reference_range != null ? String(r.reference_range) : null,
-        flag: (String(r.flag ?? "unknown") as NormalizedPathologyMarker["flag"]),
+        flag: String(r.flag ?? "unknown") as NormalizedPathologyMarker["flag"],
         confidence:
           typeof r.confidence === "number" && Number.isFinite(r.confidence) ? r.confidence : null,
         source: "extraction" as const,
@@ -38,7 +41,9 @@ function markersFromJob(job: PathologyExtractionJobRow): NormalizedPathologyMark
     .filter((m) => m.test_label.trim().length > 0);
 }
 
-function resultItemsFromNormalized(markers: NormalizedPathologyMarker[]): PathologyResultItemInput[] {
+function resultItemsFromNormalized(
+  markers: NormalizedPathologyMarker[]
+): PathologyResultItemInput[] {
   return normalizedMarkersToResultItemInputs(markers);
 }
 
@@ -145,7 +150,11 @@ export async function createDraftPathologyResultFromExtraction(
     .eq("id", did);
   if (updErr) throw new Error(updErr.message);
 
-  await supabase.from("fi_pathology_extraction_jobs").update({ result_id: result.id }).eq("tenant_id", tid).eq("id", job.id);
+  await supabase
+    .from("fi_pathology_extraction_jobs")
+    .update({ result_id: result.id })
+    .eq("tenant_id", tid)
+    .eq("id", job.id);
 
   await supabase.from("fi_pathology_inbound_document_events").insert({
     tenant_id: tid,
@@ -176,10 +185,8 @@ export async function maybeAutoCreateDraftFromExtraction(
   const supabase = client ?? supabaseAdmin();
   const doc = await loadInboundRow(supabase, tenantId.trim(), documentId.trim());
   if (doc.match_status !== "matched" || doc.draft_result_id) return null;
-  if (doc.extraction_status !== "succeeded" && doc.extraction_status !== "needs_review") return null;
+  if (doc.extraction_status !== "succeeded" && doc.extraction_status !== "needs_review")
+    return null;
 
-  return createDraftPathologyResultFromExtraction(
-    { tenantId, documentId, actingUserId },
-    supabase
-  );
+  return createDraftPathologyResultFromExtraction({ tenantId, documentId, actingUserId }, supabase);
 }

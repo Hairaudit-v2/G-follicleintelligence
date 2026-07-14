@@ -131,17 +131,9 @@ const D6_PRIMARY_RAIL_MINIMAL_SLOT_IDS = new Set([
 ]);
 
 /** Primary sidebar nav ids represented on the collapsed six-slot rail. */
-const D6_PRIMARY_RAIL_NAV_IDS = new Set([
-  "dashboard",
-  "calendar",
-  "patients",
-  "team",
-  "reports",
-]);
+const D6_PRIMARY_RAIL_NAV_IDS = new Set(["dashboard", "calendar", "patients", "team", "reports"]);
 
-const TOO_GRANULAR_PRIMARY_IDS = new Set([
-  "pathology-nav",
-]);
+const TOO_GRANULAR_PRIMARY_IDS = new Set(["pathology-nav"]);
 
 const ADMIN_MORE_IDS = new Set([
   "auditos",
@@ -220,7 +212,10 @@ function subItemToCollected(
   };
 }
 
-function minimalItemToCollected(base: string, item: FiOsMinimalNavItem): FiOsCollectedNavItem | null {
+function minimalItemToCollected(
+  base: string,
+  item: FiOsMinimalNavItem
+): FiOsCollectedNavItem | null {
   if (item.kind === "action") {
     return {
       id: item.id,
@@ -324,7 +319,9 @@ export function collectFiOsCurrentNavigationModel(
   return items;
 }
 
-export function mapCurrentNavItemTo1BDomain(item: FiOsCollectedNavItem): FiOs1BWorkflowDomain | null {
+export function mapCurrentNavItemTo1BDomain(
+  item: FiOsCollectedNavItem
+): FiOs1BWorkflowDomain | null {
   return resolve1BDomainForNavItem({
     id: item.id,
     label: item.label,
@@ -496,16 +493,16 @@ export function buildNavigationDriftReport(
     FiOs1BWorkflowDomain,
     FiOsCollectedNavItem[],
   ][]) {
-    const primaryIds = rows
-      .filter((r) => r.source === "primary_sidebar")
-      .map((r) => r.id);
+    const primaryIds = rows.filter((r) => r.source === "primary_sidebar").map((r) => r.id);
     if (primaryIds.length > 1) {
       duplicateDomains.push({ domain, itemIds: primaryIds });
     }
   }
 
   const legacyLabels = reports
-    .filter((r) => r.classification === "legacy_label" || labelHasLegacyModuleLanguage(r.item.label))
+    .filter(
+      (r) => r.classification === "legacy_label" || labelHasLegacyModuleLanguage(r.item.label)
+    )
     .map((r) => ({
       id: r.item.id,
       label: r.item.label,
@@ -513,12 +510,7 @@ export function buildNavigationDriftReport(
     }));
 
   const workflowGroupDrift = reports
-    .filter(
-      (r) =>
-        r.item.workflowGroupId &&
-        r.domain1B &&
-        r.classification === "wrong_domain"
-    )
+    .filter((r) => r.item.workflowGroupId && r.domain1B && r.classification === "wrong_domain")
     .map((r) => ({
       itemId: r.item.id,
       label: r.item.label,
@@ -536,9 +528,7 @@ export function buildNavigationDriftReport(
     .filter((r) => r.d6Placement === "hidden_route_preserved")
     .map((r) => r.item.id);
 
-  const directRoutesPreserved = items
-    .filter((i) => i.href !== "#")
-    .map((i) => i.href);
+  const directRoutesPreserved = items.filter((i) => i.href !== "#").map((i) => i.href);
 
   const riskyChanges = [
     "Do not remove Calendar route or minimal-rail Calendar link — calendar internals are out of scope.",

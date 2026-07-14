@@ -23,8 +23,9 @@ export function ExpenseMultiClinicPlPanel(props: { summary: ClinicPlSummary }) {
       title="Multi-clinic operating P&L"
       description={
         <>
-          Ledger collections vs net opex by <code className={financialOsClasses.code}>clinic_id</code>{" "}
-          for {s.period_start} → {s.period_end}. Light COA seeds map categories → GL codes for export.
+          Ledger collections vs net opex by{" "}
+          <code className={financialOsClasses.code}>clinic_id</code> for {s.period_start} →{" "}
+          {s.period_end}. Light COA seeds map categories → GL codes for export.
         </>
       }
     >

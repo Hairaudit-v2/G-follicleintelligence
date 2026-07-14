@@ -11,9 +11,7 @@ export const optionalAdminKeySchema = z.object({
   adminKey: z.string().optional(),
 });
 
-const ymd = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
+const ymd = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
 
 const optionalUuid = z.string().uuid().nullable().optional();
 

@@ -83,13 +83,14 @@ export function SurgeryBookingWizard({
 
   useEffect(() => {
     let cancelled = false;
-    void loadSurgeryBookingWizardContextAction({ tenantId: tid, clinicId: clinicId || undefined }).then(
-      (res) => {
-        if (cancelled || !res.ok) return;
-        setCtx(res.data);
-        if (!clinicId && res.data.clinics[0]?.id) setClinicId(res.data.clinics[0].id);
-      }
-    );
+    void loadSurgeryBookingWizardContextAction({
+      tenantId: tid,
+      clinicId: clinicId || undefined,
+    }).then((res) => {
+      if (cancelled || !res.ok) return;
+      setCtx(res.data);
+      if (!clinicId && res.data.clinics[0]?.id) setClinicId(res.data.clinics[0].id);
+    });
     return () => {
       cancelled = true;
     };
@@ -303,246 +304,252 @@ export function SurgeryBookingWizard({
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-      <div className="flex-1 overflow-y-auto px-6 py-5">
-        {step === 1 ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400">Patient</p>
-              <p className="text-sm font-medium text-slate-100">
-                {prefill.patientDisplayName?.trim() || "Selected patient"}
-              </p>
-            </div>
-            {prefill.caseLabel ? (
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          {step === 1 ? (
+            <div className="space-y-4">
               <div>
-                <p className="text-xs text-slate-400">Case</p>
-                <p className="text-sm text-slate-200">{prefill.caseLabel}</p>
+                <p className="text-xs text-slate-400">Patient</p>
+                <p className="text-sm font-medium text-slate-100">
+                  {prefill.patientDisplayName?.trim() || "Selected patient"}
+                </p>
               </div>
-            ) : null}
-            <label className="block text-sm text-slate-300">
-              Clinic
-              <select
-                className={fieldClass}
-                value={clinicId}
-                onChange={(e) => setClinicId(e.target.value)}
-              >
-                <option value="">Select clinic…</option>
-                {(ctx?.clinics ?? []).map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.display_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="space-y-4">
-            <label className="block text-sm text-slate-300">
-              Procedure type
-              <input
-                className={fieldClass}
-                value={procedureType}
-                onChange={(e) => setProcedureType(e.target.value)}
-              />
-            </label>
-            <label className="block text-sm text-slate-300">
-              Graft estimate
-              <input
-                className={fieldClass}
-                placeholder="e.g. 2800–3200"
-                value={graftEstimate}
-                onChange={(e) => setGraftEstimate(e.target.value)}
-              />
-            </label>
-            <label className="block text-sm text-slate-300">
-              Recipient zones (comma-separated)
-              <input
-                className={fieldClass}
-                value={zonesText}
-                onChange={(e) => setZonesText(e.target.value)}
-              />
-            </label>
-            <label className="block text-sm text-slate-300">
-              Clinical notes
-              <textarea
-                className={`${fieldClass} min-h-[88px]`}
-                value={clinicalNotes}
-                onChange={(e) => setClinicalNotes(e.target.value)}
-              />
-            </label>
-            <label className="block text-sm text-slate-300">
-              Surgeon
-              <select
-                className={fieldClass}
-                value={surgeonStaffId}
-                onChange={(e) => setSurgeonStaffId(e.target.value)}
-              >
-                <option value="">Select surgeon…</option>
-                {(ctx?.staff ?? []).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.display_name} ({s.role})
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        ) : null}
-
-        {step === 3 ? (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={!clinicId || slotsLoading}
-                className="rounded border border-cyan-600/50 bg-cyan-950/40 px-2.5 py-1 text-xs font-medium text-cyan-100 hover:bg-cyan-900/50 disabled:opacity-40"
-                onClick={async () => {
-                  if (!clinicId) return;
-                  setSlotsLoading(true);
-                  setError(null);
-                  const preferred = startLocal
-                    ? fromDatetimeLocalValue(startLocal, timezone)
-                    : new Date().toISOString();
-                  const r = await findNextAvailableSurgerySlotsAction(tid, {
-                    clinicId,
-                    staffId: surgeonStaffId || null,
-                    preferredStartAt: preferred ?? new Date().toISOString(),
-                    durationMinutes: 480,
-                    limit: 6,
-                  });
-                  setSlotsLoading(false);
-                  if (!r.ok) {
-                    setError(r.error);
-                    return;
-                  }
-                  setSurgerySlots(r.slots);
-                }}
-              >
-                {slotsLoading ? "Searching…" : "Find next available surgery slots"}
-              </button>
+              {prefill.caseLabel ? (
+                <div>
+                  <p className="text-xs text-slate-400">Case</p>
+                  <p className="text-sm text-slate-200">{prefill.caseLabel}</p>
+                </div>
+              ) : null}
+              <label className="block text-sm text-slate-300">
+                Clinic
+                <select
+                  className={fieldClass}
+                  value={clinicId}
+                  onChange={(e) => setClinicId(e.target.value)}
+                >
+                  <option value="">Select clinic…</option>
+                  {(ctx?.clinics ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.display_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-            {surgerySlots.length > 0 ? (
-              <ul className="space-y-1 rounded border border-white/10 bg-slate-950/40 p-2 text-xs">
-                {surgerySlots.map((slot) => (
-                  <li key={`${slot.startAt}-${slot.roomId}`}>
-                    <button
-                      type="button"
-                      className="w-full rounded px-2 py-1 text-left text-slate-200 hover:bg-white/[0.06]"
-                      onClick={() => {
-                        const local = toDatetimeLocalValue(slot.startAt, timezone);
-                        if (local) setStartLocal(local);
-                        setRoomId(slot.roomId);
-                        if (slot.staffId) setSurgeonStaffId(slot.staffId);
-                      }}
-                    >
-                      {slot.reason} · {slot.roomLabel}
-                      {slot.staffLabel ? ` · ${slot.staffLabel}` : ""}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <label className="block text-sm text-slate-300">
-              Start date & time
-              <input
-                type="datetime-local"
-                className={fieldClass}
-                value={startLocal}
-                onChange={(e) => setStartLocal(e.target.value)}
-              />
-            </label>
-            <p className="text-xs text-slate-500">Default duration: 8 hours (surgery day).</p>
-            <label className="block text-sm text-slate-300">
-              Procedure room
-              <select className={fieldClass} value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-                <option value="">Select room…</option>
-                {roomsForClinic.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.display_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        ) : null}
+          ) : null}
 
-        {step === 4 ? (
-          <div className="space-y-4">
-            <label className="flex items-center gap-2 text-sm text-slate-300">
-              <input
-                type="checkbox"
-                checked={createDepositRequest}
-                onChange={(e) => setCreateDepositRequest(e.target.checked)}
-              />
-              Create deposit invoice when payment rules allow
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300">
-              <input
-                type="checkbox"
-                checked={confirmBooking}
-                onChange={(e) => setConfirmBooking(e.target.checked)}
-              />
-              Mark booking as confirmed (deposit clearance still applies within 14 days)
-            </label>
-            <div className="rounded border border-amber-500/30 bg-amber-950/20 p-3 text-xs text-amber-100">
-              Confirming creates the calendar appointment, updates the surgery plan, stores a
-              pre-op checklist on the booking, writes CRM/timeline audit entries, and optionally
-              raises a deposit invoice.
+          {step === 2 ? (
+            <div className="space-y-4">
+              <label className="block text-sm text-slate-300">
+                Procedure type
+                <input
+                  className={fieldClass}
+                  value={procedureType}
+                  onChange={(e) => setProcedureType(e.target.value)}
+                />
+              </label>
+              <label className="block text-sm text-slate-300">
+                Graft estimate
+                <input
+                  className={fieldClass}
+                  placeholder="e.g. 2800–3200"
+                  value={graftEstimate}
+                  onChange={(e) => setGraftEstimate(e.target.value)}
+                />
+              </label>
+              <label className="block text-sm text-slate-300">
+                Recipient zones (comma-separated)
+                <input
+                  className={fieldClass}
+                  value={zonesText}
+                  onChange={(e) => setZonesText(e.target.value)}
+                />
+              </label>
+              <label className="block text-sm text-slate-300">
+                Clinical notes
+                <textarea
+                  className={`${fieldClass} min-h-[88px]`}
+                  value={clinicalNotes}
+                  onChange={(e) => setClinicalNotes(e.target.value)}
+                />
+              </label>
+              <label className="block text-sm text-slate-300">
+                Surgeon
+                <select
+                  className={fieldClass}
+                  value={surgeonStaffId}
+                  onChange={(e) => setSurgeonStaffId(e.target.value)}
+                >
+                  <option value="">Select surgeon…</option>
+                  {(ctx?.staff ?? []).map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.display_name} ({s.role})
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {stepMissing.length > 0 ? (
-          <ul className="mt-4 space-y-2 rounded-xl border border-amber-500/25 bg-amber-950/20 p-4 text-sm text-amber-100">
-            {stepMissing.map((m) => (
-              <li key={m}>• {humanizeSurgeryBookingRequirement(m)}</li>
-            ))}
-          </ul>
-        ) : null}
-        {error ? (
-          <p className="mt-3 rounded-lg border border-rose-500/30 bg-rose-950/30 p-3 text-sm text-rose-200">
-            {humanizeStaffErrorMessage(error)}
+          {step === 3 ? (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={!clinicId || slotsLoading}
+                  className="rounded border border-cyan-600/50 bg-cyan-950/40 px-2.5 py-1 text-xs font-medium text-cyan-100 hover:bg-cyan-900/50 disabled:opacity-40"
+                  onClick={async () => {
+                    if (!clinicId) return;
+                    setSlotsLoading(true);
+                    setError(null);
+                    const preferred = startLocal
+                      ? fromDatetimeLocalValue(startLocal, timezone)
+                      : new Date().toISOString();
+                    const r = await findNextAvailableSurgerySlotsAction(tid, {
+                      clinicId,
+                      staffId: surgeonStaffId || null,
+                      preferredStartAt: preferred ?? new Date().toISOString(),
+                      durationMinutes: 480,
+                      limit: 6,
+                    });
+                    setSlotsLoading(false);
+                    if (!r.ok) {
+                      setError(r.error);
+                      return;
+                    }
+                    setSurgerySlots(r.slots);
+                  }}
+                >
+                  {slotsLoading ? "Searching…" : "Find next available surgery slots"}
+                </button>
+              </div>
+              {surgerySlots.length > 0 ? (
+                <ul className="space-y-1 rounded border border-white/10 bg-slate-950/40 p-2 text-xs">
+                  {surgerySlots.map((slot) => (
+                    <li key={`${slot.startAt}-${slot.roomId}`}>
+                      <button
+                        type="button"
+                        className="w-full rounded px-2 py-1 text-left text-slate-200 hover:bg-white/[0.06]"
+                        onClick={() => {
+                          const local = toDatetimeLocalValue(slot.startAt, timezone);
+                          if (local) setStartLocal(local);
+                          setRoomId(slot.roomId);
+                          if (slot.staffId) setSurgeonStaffId(slot.staffId);
+                        }}
+                      >
+                        {slot.reason} · {slot.roomLabel}
+                        {slot.staffLabel ? ` · ${slot.staffLabel}` : ""}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <label className="block text-sm text-slate-300">
+                Start date & time
+                <input
+                  type="datetime-local"
+                  className={fieldClass}
+                  value={startLocal}
+                  onChange={(e) => setStartLocal(e.target.value)}
+                />
+              </label>
+              <p className="text-xs text-slate-500">Default duration: 8 hours (surgery day).</p>
+              <label className="block text-sm text-slate-300">
+                Procedure room
+                <select
+                  className={fieldClass}
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value)}
+                >
+                  <option value="">Select room…</option>
+                  {roomsForClinic.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.display_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : null}
+
+          {step === 4 ? (
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={createDepositRequest}
+                  onChange={(e) => setCreateDepositRequest(e.target.checked)}
+                />
+                Create deposit invoice when payment rules allow
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={confirmBooking}
+                  onChange={(e) => setConfirmBooking(e.target.checked)}
+                />
+                Mark booking as confirmed (deposit clearance still applies within 14 days)
+              </label>
+              <div className="rounded border border-amber-500/30 bg-amber-950/20 p-3 text-xs text-amber-100">
+                Confirming creates the calendar appointment, updates the surgery plan, stores a
+                pre-op checklist on the booking, writes CRM/timeline audit entries, and optionally
+                raises a deposit invoice.
+              </div>
+            </div>
+          ) : null}
+
+          {stepMissing.length > 0 ? (
+            <ul className="mt-4 space-y-2 rounded-xl border border-amber-500/25 bg-amber-950/20 p-4 text-sm text-amber-100">
+              {stepMissing.map((m) => (
+                <li key={m}>• {humanizeSurgeryBookingRequirement(m)}</li>
+              ))}
+            </ul>
+          ) : null}
+          {error ? (
+            <p className="mt-3 rounded-lg border border-rose-500/30 bg-rose-950/30 p-3 text-sm text-rose-200">
+              {humanizeStaffErrorMessage(error)}
+            </p>
+          ) : null}
+        </div>
+
+        <aside className="hidden w-72 shrink-0 border-l border-white/10 bg-slate-950/40 p-5 lg:block">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            Booking summary
           </p>
-        ) : null}
-      </div>
-
-      <aside className="hidden w-72 shrink-0 border-l border-white/10 bg-slate-950/40 p-5 lg:block">
-        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Booking summary</p>
-        <dl className="mt-4 space-y-3 text-sm">
-          <div>
-            <dt className="text-slate-500">Patient</dt>
-            <dd className="font-medium text-slate-100">
-              {prefill.patientDisplayName?.trim() || "Selected patient"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Procedure</dt>
-            <dd className="font-medium text-slate-100">{procedureType || "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Date</dt>
-            <dd className="font-medium text-slate-100">{startLocal || "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Surgeon</dt>
-            <dd className="font-medium text-slate-100">{surgeonLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Room</dt>
-            <dd className="font-medium text-slate-100">{roomLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Clinic</dt>
-            <dd className="font-medium text-slate-100">{clinicLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Deposit</dt>
-            <dd className="font-medium text-slate-100">
-              {createDepositRequest ? "Invoice on confirm" : "Not requested"}
-            </dd>
-          </div>
-        </dl>
-      </aside>
+          <dl className="mt-4 space-y-3 text-sm">
+            <div>
+              <dt className="text-slate-500">Patient</dt>
+              <dd className="font-medium text-slate-100">
+                {prefill.patientDisplayName?.trim() || "Selected patient"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Procedure</dt>
+              <dd className="font-medium text-slate-100">{procedureType || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Date</dt>
+              <dd className="font-medium text-slate-100">{startLocal || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Surgeon</dt>
+              <dd className="font-medium text-slate-100">{surgeonLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Room</dt>
+              <dd className="font-medium text-slate-100">{roomLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Clinic</dt>
+              <dd className="font-medium text-slate-100">{clinicLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Deposit</dt>
+              <dd className="font-medium text-slate-100">
+                {createDepositRequest ? "Invoice on confirm" : "Not requested"}
+              </dd>
+            </div>
+          </dl>
+        </aside>
       </div>
 
       <StaffUatClarityFeedback screenKey="surgery_booking_wizard" />

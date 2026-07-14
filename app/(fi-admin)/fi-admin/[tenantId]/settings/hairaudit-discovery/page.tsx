@@ -36,8 +36,7 @@ export default async function HairAuditClinicDiscoveryPage({
 
   const sp = (await searchParams) ?? {};
   const rawClinic = sp.clinicId;
-  const clinicIdParam =
-    typeof rawClinic === "string" && rawClinic.trim() ? rawClinic.trim() : null;
+  const clinicIdParam = typeof rawClinic === "string" && rawClinic.trim() ? rawClinic.trim() : null;
   const resolvedClinicId =
     clinicIdParam && clinics.some((c) => c.id === clinicIdParam)
       ? clinicIdParam
@@ -61,8 +60,8 @@ export default async function HairAuditClinicDiscoveryPage({
           HairAudit public clinic discovery
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Opt in to HairAudit public clinic search. Profiles stay private until you enable
-          discovery and search visibility. No patient, case, or report data is published.
+          Opt in to HairAudit public clinic search. Profiles stay private until you enable discovery
+          and search visibility. No patient, case, or report data is published.
         </p>
       </div>
       <ClinicDiscoverySection

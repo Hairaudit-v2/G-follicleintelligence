@@ -62,8 +62,7 @@ export function ClinicalStaffingStatusCard({
 
       {!compact ? (
         <p className="mt-2 text-xs text-slate-400">
-          Team validates required roles, clinical eligibility, and availability for this
-          event.
+          Team validates required roles, clinical eligibility, and availability for this event.
         </p>
       ) : null}
 

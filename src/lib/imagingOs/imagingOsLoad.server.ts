@@ -5,10 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
-import {
-  protocolRequiredCompletionPercent,
-  type ProtocolSlotDef,
-} from "./imagingOsProtocol";
+import { protocolRequiredCompletionPercent, type ProtocolSlotDef } from "./imagingOsProtocol";
 import {
   loadResolvedProtocol,
   type ProtocolCatalogSource,

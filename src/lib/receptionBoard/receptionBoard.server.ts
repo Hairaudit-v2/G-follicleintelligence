@@ -124,12 +124,9 @@ export async function loadReceptionBoardShellPayload(
     const operationalDay = computeOperationalLocalDayUtcWindow(now, calendarTimezone);
 
     const cards = await withFiPerfSpan("reception.cards", () =>
-      loadReceptionBoardCards(
-        tid,
-        operationalDay.localStartIso,
-        operationalDay.localEndIso,
-        { enrichment: "shell" }
-      )
+      loadReceptionBoardCards(tid, operationalDay.localStartIso, operationalDay.localEndIso, {
+        enrichment: "shell",
+      })
     );
 
     // Case ids hydrate on full tier — avoids an extra round-trip on cold shell paint.
@@ -152,9 +149,10 @@ export async function loadReceptionBoardShellPayload(
       caseByBooking,
     });
 
-    const actionAlerts = sortActionAlerts(
-      buildCalendarSchedulingConflictAlerts(cards, base)
-    ).slice(0, 40);
+    const actionAlerts = sortActionAlerts(buildCalendarSchedulingConflictAlerts(cards, base)).slice(
+      0,
+      40
+    );
 
     const payload: ReceptionBoardCommandCenterPayload = {
       tenantId: tid,
@@ -217,151 +215,152 @@ export async function loadReceptionBoardCommandCenterPayload(
   const base = `/fi-admin/${tid}`;
 
   try {
+    const [operational, surgeryPayload] = await Promise.all([
+      loadTenantOperationalDashboard(tid, { includeReceptionBoard: true }),
+      loadSurgeryReadinessBoardPayload(tid, now),
+    ]);
 
-  const [operational, surgeryPayload] = await Promise.all([
-    loadTenantOperationalDashboard(tid, { includeReceptionBoard: true }),
-    loadSurgeryReadinessBoardPayload(tid, now),
-  ]);
+    const tz = operational.operationalDay.calendarTimezone;
+    const tomorrowWindow = computeTomorrowOperationalWindow(now, tz);
+    const cards = operational.receptionBoard.cards;
+    const bookingIds = cards.map((c) => c.id);
+    const patientIds = cards
+      .map((c) => c.patientId)
+      .filter((id): id is string => Boolean(id?.trim()));
 
-  const tz = operational.operationalDay.calendarTimezone;
-  const tomorrowWindow = computeTomorrowOperationalWindow(now, tz);
-  const cards = operational.receptionBoard.cards;
-  const bookingIds = cards.map((c) => c.id);
-  const patientIds = cards.map((c) => c.patientId).filter((id): id is string => Boolean(id?.trim()));
+    const caseByBookingPromise = loadBookingCaseIds(tid, bookingIds);
 
-  const caseByBookingPromise = loadBookingCaseIds(tid, bookingIds);
+    const [caseByBooking, journeyByPatient, receptionOsBoard] = await Promise.all([
+      caseByBookingPromise,
+      loadPatientJourneySnapshotsForPatients(tid, patientIds),
+      caseByBookingPromise.then((caseMap) =>
+        loadReceptionOsBoardPayload(tid, now, {
+          operational,
+          surgeryPayload,
+          caseByBooking: caseMap,
+        })
+      ),
+    ]);
 
-  const [caseByBooking, journeyByPatient, receptionOsBoard] = await Promise.all([
-    caseByBookingPromise,
-    loadPatientJourneySnapshotsForPatients(tid, patientIds),
-    caseByBookingPromise.then((caseMap) =>
-      loadReceptionOsBoardPayload(tid, now, {
-        operational,
-        surgeryPayload,
-        caseByBooking: caseMap,
+    const outstandingPaymentIds = new Set(receptionOsBoard.outstandingDeposits.map((d) => d.id));
+    const overdueIds = new Set(
+      receptionOsBoard.outstandingDeposits.filter((d) => d.isOverdue).map((d) => d.id)
+    );
+
+    const appointments = sortAppointmentsChronologically(
+      cards.map((card) => {
+        let paymentStatus: ReturnType<typeof buildAppointmentCard>["paymentStatus"] = "unknown";
+        const bookingPayments = receptionOsBoard.outstandingDeposits.filter(
+          (d) => d.hrefs.patient === (card.patientId ? `${base}/patients/${card.patientId}` : null)
+        );
+        if (bookingPayments.some((d) => overdueIds.has(d.id))) paymentStatus = "overdue";
+        else if (bookingPayments.some((d) => outstandingPaymentIds.has(d.id)))
+          paymentStatus = "due";
+        else if (card.bookingType.toLowerCase().includes("surgery")) paymentStatus = "not_required";
+
+        const journey = card.patientId ? journeyByPatient.get(card.patientId) : undefined;
+
+        return buildAppointmentCard(card, {
+          base,
+          tz,
+          caseId: caseByBooking.get(card.id) ?? null,
+          paymentStatus,
+          journeyState: journey?.state ?? null,
+          journeyStateLabel: journey ? PATIENT_JOURNEY_STATE_LABELS[journey.state] : null,
+        });
       })
-    ),
-  ]);
+    );
 
-  const outstandingPaymentIds = new Set(
-    receptionOsBoard.outstandingDeposits.map((d) => d.id)
-  );
-  const overdueIds = new Set(
-    receptionOsBoard.outstandingDeposits.filter((d) => d.isOverdue).map((d) => d.id)
-  );
+    const blockerKindMap: Record<
+      string,
+      import("./receptionBoardTypes").ReceptionBoardExtendedAlertKind
+    > = {
+      missing_consent: "missing_consent",
+      unpaid_deposit: "missing_deposit",
+      no_surgery_date: "unconfirmed_surgery",
+      missing_images: "missing_imaging",
+      incomplete_pre_op_checklist: "missing_pre_op_checklist",
+      missing_follow_up_booking: "no_follow_up_after_consultation",
+      missing_medical_clearance: "missing_medical_clearance",
+    };
+    const journeyBlockerAlerts = [...journeyByPatient.values()].flatMap((snap) =>
+      snap.blockers.map((b) => ({
+        id: `journey-${snap.patientId}-${b.kind}`,
+        kind: blockerKindMap[b.kind] ?? "surgery_readiness_incomplete",
+        title: b.label,
+        detail: `${snap.presentation.label} · patient blocker`,
+        severity: b.severity === "critical" ? ("critical" as const) : ("warning" as const),
+        href: b.href,
+        priorityScore: b.severity === "critical" ? 96 : 78,
+        bookingId: null as string | null,
+        patientId: snap.patientId,
+      }))
+    );
 
-  const appointments = sortAppointmentsChronologically(
-    cards.map((card) => {
-      let paymentStatus: ReturnType<typeof buildAppointmentCard>["paymentStatus"] = "unknown";
-      const bookingPayments = receptionOsBoard.outstandingDeposits.filter(
-        (d) => d.hrefs.patient === (card.patientId ? `${base}/patients/${card.patientId}` : null)
-      );
-      if (bookingPayments.some((d) => overdueIds.has(d.id))) paymentStatus = "overdue";
-      else if (bookingPayments.some((d) => outstandingPaymentIds.has(d.id))) paymentStatus = "due";
-      else if (card.bookingType.toLowerCase().includes("surgery")) paymentStatus = "not_required";
+    const queue = buildQueueBoard(cards, { base, tz, caseByBooking });
+    const surgeryCards = collectSurgeryCards(surgeryPayload);
 
-      const journey = card.patientId ? journeyByPatient.get(card.patientId) : undefined;
-
-      return buildAppointmentCard(card, {
-        base,
-        tz,
-        caseId: caseByBooking.get(card.id) ?? null,
-        paymentStatus,
-        journeyState: journey?.state ?? null,
-        journeyStateLabel: journey
-          ? PATIENT_JOURNEY_STATE_LABELS[journey.state]
-          : null,
-      });
-    })
-  );
-
-  const blockerKindMap: Record<string, import("./receptionBoardTypes").ReceptionBoardExtendedAlertKind> = {
-    missing_consent: "missing_consent",
-    unpaid_deposit: "missing_deposit",
-    no_surgery_date: "unconfirmed_surgery",
-    missing_images: "missing_imaging",
-    incomplete_pre_op_checklist: "missing_pre_op_checklist",
-    missing_follow_up_booking: "no_follow_up_after_consultation",
-    missing_medical_clearance: "missing_medical_clearance",
-  };
-  const journeyBlockerAlerts = [...journeyByPatient.values()].flatMap((snap) =>
-    snap.blockers.map((b) => ({
-      id: `journey-${snap.patientId}-${b.kind}`,
-      kind: blockerKindMap[b.kind] ?? "surgery_readiness_incomplete",
-      title: b.label,
-      detail: `${snap.presentation.label} · patient blocker`,
-      severity: b.severity === "critical" ? ("critical" as const) : ("warning" as const),
-      href: b.href,
-      priorityScore: b.severity === "critical" ? 96 : 78,
-      bookingId: null as string | null,
-      patientId: snap.patientId,
-    }))
-  );
-
-  const queue = buildQueueBoard(cards, { base, tz, caseByBooking });
-  const surgeryCards = collectSurgeryCards(surgeryPayload);
-
-  const osAlerts = receptionOsBoard.actionAlerts.map(mapOsAlertToBoardAlert);
-  const surgeryAlerts = buildExtendedAlertsFromSurgeryCards(
-    surgeryCards,
-    base,
-    tomorrowWindow.tomorrowYmd
-  );
-  const calendarConflictAlerts = buildCalendarSchedulingConflictAlerts(cards, base);
-  const actionAlerts = sortActionAlerts([
-    ...osAlerts,
-    ...surgeryAlerts,
-    ...journeyBlockerAlerts,
-    ...calendarConflictAlerts,
-  ]).slice(0, 40);
-
-  const tomorrowSurgeries = surgeryCards
-    .map((c) => mapTomorrowSurgeryCard(c, tomorrowWindow.tomorrowYmd))
-    .filter((c): c is NonNullable<typeof c> => c != null)
-    .sort((a, b) => a.surgeryTime.localeCompare(b.surgeryTime));
-
-  const intelligence = buildIntelligenceMetrics({
-    cards,
-    revenueBookedToday: receptionOsBoard.outstandingDeposits.reduce(
-      (sum, d) => sum + d.amountPaid,
-      0
-    ),
-    outstandingPayments: receptionOsBoard.outstandingDeposits.length,
-    conversionRateToday: null,
-    upcomingFollowUps: receptionOsBoard.actionAlerts.filter(
-      (a) => a.kind === "no_follow_up_after_consultation"
-    ).length,
-    unreadPatientTasks: 0,
-  });
-
-  const liveEvents = buildLiveActivityFeed({
-    cards,
-    communicationEvents: receptionOsBoard.communicationTimeline,
-    base,
-    loadedAt: now.toISOString(),
-  });
-
-  const payload: ReceptionBoardCommandCenterPayload = {
-    tenantId: tid,
-    tenantName: operational.tenantName,
-    loadedAt: now.toISOString(),
-    operationalDay: operational.operationalDay,
-    appointments,
-    queue,
-    actionAlerts,
-    quickActions: appendProcedureDayQuickActionIfEnabled(
-      buildQuickActions(base),
+    const osAlerts = receptionOsBoard.actionAlerts.map(mapOsAlertToBoardAlert);
+    const surgeryAlerts = buildExtendedAlertsFromSurgeryCards(
+      surgeryCards,
       base,
-      readFiProcedureDayEnabled()
-    ),
-    tomorrowSurgeries,
-    intelligence,
-    liveEvents,
-    receptionCards: cards,
-    loadTier: "full",
-  };
-  recordFiPerfPayloadBytes(JSON.stringify(payload).length);
-  return payload;
+      tomorrowWindow.tomorrowYmd
+    );
+    const calendarConflictAlerts = buildCalendarSchedulingConflictAlerts(cards, base);
+    const actionAlerts = sortActionAlerts([
+      ...osAlerts,
+      ...surgeryAlerts,
+      ...journeyBlockerAlerts,
+      ...calendarConflictAlerts,
+    ]).slice(0, 40);
+
+    const tomorrowSurgeries = surgeryCards
+      .map((c) => mapTomorrowSurgeryCard(c, tomorrowWindow.tomorrowYmd))
+      .filter((c): c is NonNullable<typeof c> => c != null)
+      .sort((a, b) => a.surgeryTime.localeCompare(b.surgeryTime));
+
+    const intelligence = buildIntelligenceMetrics({
+      cards,
+      revenueBookedToday: receptionOsBoard.outstandingDeposits.reduce(
+        (sum, d) => sum + d.amountPaid,
+        0
+      ),
+      outstandingPayments: receptionOsBoard.outstandingDeposits.length,
+      conversionRateToday: null,
+      upcomingFollowUps: receptionOsBoard.actionAlerts.filter(
+        (a) => a.kind === "no_follow_up_after_consultation"
+      ).length,
+      unreadPatientTasks: 0,
+    });
+
+    const liveEvents = buildLiveActivityFeed({
+      cards,
+      communicationEvents: receptionOsBoard.communicationTimeline,
+      base,
+      loadedAt: now.toISOString(),
+    });
+
+    const payload: ReceptionBoardCommandCenterPayload = {
+      tenantId: tid,
+      tenantName: operational.tenantName,
+      loadedAt: now.toISOString(),
+      operationalDay: operational.operationalDay,
+      appointments,
+      queue,
+      actionAlerts,
+      quickActions: appendProcedureDayQuickActionIfEnabled(
+        buildQuickActions(base),
+        base,
+        readFiProcedureDayEnabled()
+      ),
+      tomorrowSurgeries,
+      intelligence,
+      liveEvents,
+      receptionCards: cards,
+      loadTier: "full",
+    };
+    recordFiPerfPayloadBytes(JSON.stringify(payload).length);
+    return payload;
   } finally {
     finishFiPerfCollection();
   }

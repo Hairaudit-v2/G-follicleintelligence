@@ -207,10 +207,7 @@ export function resolvePersonDisplayNameForToday(
  * Derives a first-name token from an existing Today personLabel string,
  * optionally enriched with structured profile fields when available.
  */
-export function todayFirstNameFromLabel(
-  label: string,
-  input: TodayPersonLabelInput = {}
-): string {
+export function todayFirstNameFromLabel(label: string, input: TodayPersonLabelInput = {}): string {
   const trimmed = label.trim();
   const email = pickString(input.email) ?? (trimmed && isEmailLike(trimmed) ? trimmed : undefined);
   const labelLooksLikeEmailLocal = looksLikeEmailLocalPartLabel(trimmed, email);

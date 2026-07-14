@@ -25,10 +25,7 @@ export function isPipelineMoreDiagnosticEnabled(): boolean {
   return process.env.NEXT_PUBLIC_FI_PIPELINE_MORE_DIAG === "1";
 }
 
-export function moreLog(
-  event: string,
-  fields?: Omit<PipelineMoreLogEntry, "ts" | "event">
-): void {
+export function moreLog(event: string, fields?: Omit<PipelineMoreLogEntry, "ts" | "event">): void {
   if (!isPipelineMoreDiagnosticEnabled()) return;
   const entry: PipelineMoreLogEntry = {
     ts: Date.now(),

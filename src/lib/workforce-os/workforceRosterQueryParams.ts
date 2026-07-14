@@ -195,10 +195,7 @@ export function defaultRosterCommandCentreDateRange(
     endsAt: range.endsAt,
     periodStart: range.periodStart,
     periodDayDates: range.periodDayDates,
-    weekStart:
-      planning.rosterCadence === "monthly"
-        ? mondayOfWeekIso(ref)
-        : range.periodStart,
+    weekStart: planning.rosterCadence === "monthly" ? mondayOfWeekIso(ref) : range.periodStart,
   };
 }
 

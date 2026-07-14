@@ -125,16 +125,7 @@ export function CalendarOsDayResourceView({
         gridConfig,
         lane,
       }),
-    [
-      query,
-      lane,
-      bookings,
-      resourceColumns,
-      staffDirectory,
-      rooms,
-      staffIdByUserId,
-      gridConfig,
-    ]
+    [query, lane, bookings, resourceColumns, staffDirectory, rooms, staffIdByUserId, gridConfig]
   );
 
   const placementsByResource = useMemo(() => {
@@ -232,7 +223,12 @@ export function CalendarOsDayResourceView({
       <div className="border-b border-white/[0.024] px-2 py-0.5 text-[10px] text-slate-500">
         {calendarDayHeading(lane, calendarTimezone)}
       </div>
-      <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden", fiOsCalFloatingAssistScrollPad)}>
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overflow-x-hidden",
+          fiOsCalFloatingAssistScrollPad
+        )}
+      >
         <div className="relative w-full min-w-0">
           <div
             ref={headerRef}
@@ -251,7 +247,12 @@ export function CalendarOsDayResourceView({
                   row.kind === "unassigned" && "bg-amber-950/25"
                 )}
               >
-                <CalendarOsResourceLaneLabel row={row} density={density} horizontal sticky={false} />
+                <CalendarOsResourceLaneLabel
+                  row={row}
+                  density={density}
+                  horizontal
+                  sticky={false}
+                />
               </div>
             ))}
           </div>

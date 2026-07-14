@@ -73,8 +73,11 @@ export function buildPipelinePresentation(
   const perms = input.permissions;
   const loadTier = detectLoadTier(input);
 
-  const { cardsById, duplicateLeadIds, uniqueSourceCount, createdAtByLeadId } =
-    mintCanonicalCards(input.leads, base, nowMs);
+  const { cardsById, duplicateLeadIds, uniqueSourceCount, createdAtByLeadId } = mintCanonicalCards(
+    input.leads,
+    base,
+    nowMs
+  );
 
   const orphanTaskIds: string[] = [];
   const allTasksForBuckets: PipelineTaskInput[] = [];
@@ -139,9 +142,8 @@ export function buildPipelinePresentation(
   for (const card of cardsById.values()) {
     if (
       card.stage.backendSlug &&
-      resolvePipelineStaffStage(
-        stageDefFromSlug(card.stage.backendSlug, card.stage.backendLabel)
-      ).source === "fallback"
+      resolvePipelineStaffStage(stageDefFromSlug(card.stage.backendSlug, card.stage.backendLabel))
+        .source === "fallback"
     ) {
       unknownStageLeadIds.push(card.leadId);
     }
@@ -234,9 +236,7 @@ export function buildPipelinePresentation(
     conversionInconsistencies: conversionInconsistencies
       .slice()
       .sort((a, b) =>
-        a.leadId === b.leadId
-          ? a.kind.localeCompare(b.kind)
-          : a.leadId.localeCompare(b.leadId)
+        a.leadId === b.leadId ? a.kind.localeCompare(b.kind) : a.leadId.localeCompare(b.leadId)
       ),
   };
 
@@ -336,11 +336,7 @@ function preferKanbanWinner(a: CrmKanbanLeadCard, b: CrmKanbanLeadCard): number 
   return sta.localeCompare(stb);
 }
 
-function buildBaseCard(
-  row: CrmKanbanLeadCard,
-  base: string,
-  _nowMs: number
-): PipelineLeadCard {
+function buildBaseCard(row: CrmKanbanLeadCard, base: string, _nowMs: number): PipelineLeadCard {
   const lead = row.lead;
   const leadId = lead.id.trim();
   const personMeta = (row.person?.metadata ?? {}) as Record<string, unknown>;
@@ -380,7 +376,7 @@ function buildBaseCard(
   const metaLostAt = lostAtFromMeta(lead.metadata as Record<string, unknown>);
   const lostAtIso =
     life.state === "lost" || resolved.columnId === "closed_lost"
-      ? metaLostAt ?? stageEnteredAtIso ?? updatedAtIso
+      ? (metaLostAt ?? stageEnteredAtIso ?? updatedAtIso)
       : metaLostAt;
 
   return {
@@ -662,10 +658,7 @@ export function resolveConsultationSummary(
     .filter(({ c }) => {
       const st = (c.status ?? "").toLowerCase();
       return (
-        st === "completed" ||
-        st === "no_show" ||
-        st === "cancelled" ||
-        Boolean(c.cancelledAtIso)
+        st === "completed" || st === "no_show" || st === "cancelled" || Boolean(c.cancelledAtIso)
       );
     })
     .sort((a, b) => b.ms - a.ms || a.c.bookingId.localeCompare(b.c.bookingId));
@@ -833,10 +826,7 @@ function enrichUrgencyAndBlockers(
   if (card.followUps.dueTodayCount > 0) flags.add("due_today");
   if (card.owner.unassigned) flags.add("unassigned");
   if (card.score.highValue) flags.add("high_value");
-  if (
-    card.consultation.state === "due_today" ||
-    card.consultation.state === "booked"
-  ) {
+  if (card.consultation.state === "due_today" || card.consultation.state === "booked") {
     flags.add("consultation_due");
   }
   if (card.consultation.state === "no_show") flags.add("consultation_no_show");
@@ -849,10 +839,7 @@ function enrichUrgencyAndBlockers(
   let primaryLabel: string | null = null;
   for (const f of flagList) {
     const level = URGENCY_LEVEL[f];
-    if (
-      !highest ||
-      severityRank(level) < severityRank(highest)
-    ) {
+    if (!highest || severityRank(level) < severityRank(highest)) {
       highest = level;
       primaryLabel = URGENCY_LABEL[f];
     }
@@ -894,10 +881,7 @@ function severityRank(s: PipelineUrgencyLevel): number {
 // Actions
 // ---------------------------------------------------------------------------
 
-function assignCardActions(
-  card: PipelineLeadCard,
-  perms: PipelinePresentationPermissions
-): void {
+function assignCardActions(card: PipelineLeadCard, perms: PipelinePresentationPermissions): void {
   const nav: PipelineCardActionId[] = ["open_lead"];
   if (card.person.patientId || card.conversion.patientId) {
     nav.push("open_patient");
@@ -911,8 +895,7 @@ function assignCardActions(
 
   const life = card.lifecycle.state;
   const inconsistentTerminal =
-    card.lifecycle.warningCodes.length > 0 &&
-    (life === "converted" || life === "lost");
+    card.lifecycle.warningCodes.length > 0 && (life === "converted" || life === "lost");
 
   const mut: PipelineCardActionId[] = [];
 
@@ -1134,9 +1117,7 @@ function buildFilters(
 
       const oid = card.owner.userId ?? "unassigned";
       const ol = ownerCounts.get(oid) ?? {
-        label: card.owner.unassigned
-          ? "Unassigned"
-          : card.owner.displayName ?? "Owner",
+        label: card.owner.unassigned ? "Unassigned" : (card.owner.displayName ?? "Owner"),
         count: 0,
       };
       ol.count += 1;
@@ -1242,10 +1223,7 @@ function staffSafeStageLabel(label: string): string {
 // Sort helpers
 // ---------------------------------------------------------------------------
 
-function toSortable(
-  card: PipelineLeadCard,
-  createdAtIso: string | null
-): PipelineSortableLead {
+function toSortable(card: PipelineLeadCard, createdAtIso: string | null): PipelineSortableLead {
   return {
     leadId: card.leadId,
     urgencyFlags: card.urgency.flags,
@@ -1382,7 +1360,9 @@ function contactFromPersonMeta(meta: Record<string, unknown>): PipelineLeadCard[
   };
 }
 
-function sourceFromLeadMeta(meta: Record<string, unknown> | null | undefined): PipelineLeadCard["source"] {
+function sourceFromLeadMeta(
+  meta: Record<string, unknown> | null | undefined
+): PipelineLeadCard["source"] {
   const m = meta ?? {};
   const key =
     asStr(m.lead_source) ||
@@ -1390,9 +1370,7 @@ function sourceFromLeadMeta(meta: Record<string, unknown> | null | undefined): P
     asStr(m.source_key) ||
     asStr(m.external_source_system);
   const external =
-    asStr(m.external_source_system) ||
-    asStr(m.source_system) ||
-    (m.hubspot ? "hubspot" : null);
+    asStr(m.external_source_system) || asStr(m.source_system) || (m.hubspot ? "hubspot" : null);
   if (!key && !external) {
     return { key: null, label: "Unknown source", externalSystem: null };
   }
@@ -1410,22 +1388,13 @@ function sourceFromLeadMeta(meta: Record<string, unknown> | null | undefined): P
 
 function lostReasonFromMeta(meta: Record<string, unknown> | null | undefined): string | null {
   const m = meta ?? {};
-  return (
-    asStr(m.lost_reason) ||
-    asStr(m.crm_lost_reason) ||
-    asStr(m.lostReason) ||
-    null
-  );
+  return asStr(m.lost_reason) || asStr(m.crm_lost_reason) || asStr(m.lostReason) || null;
 }
 
 function lostAtFromMeta(meta: Record<string, unknown> | null | undefined): string | null {
   const m = meta ?? {};
   const raw =
-    asStr(m.lost_at) ||
-    asStr(m.lostAt) ||
-    asStr(m.closed_at) ||
-    asStr(m.closedAt) ||
-    null;
+    asStr(m.lost_at) || asStr(m.lostAt) || asStr(m.closed_at) || asStr(m.closedAt) || null;
   if (!raw) return null;
   return parseMs(raw) != null ? raw : null;
 }

@@ -198,8 +198,7 @@ export function PatientOsDashboard({
         />
         {activeJourneys.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">
-            Active patient journeys will appear when cases are linked to patient records on
-            Surgery.
+            Active patient journeys will appear when cases are linked to patient records on Surgery.
           </p>
         ) : (
           <ul className="space-y-3">

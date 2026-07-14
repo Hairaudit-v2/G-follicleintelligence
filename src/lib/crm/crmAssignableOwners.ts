@@ -81,13 +81,18 @@ export function isSystemOrSeedIdentity(input: {
   const meta = input.metadata ?? null;
   if (meta) {
     if (meta.is_seed === true || meta.is_test === true || meta.is_system === true) return true;
-    if (meta.account_type === "seed" || meta.account_type === "system" || meta.account_type === "service") {
+    if (
+      meta.account_type === "seed" ||
+      meta.account_type === "system" ||
+      meta.account_type === "service"
+    ) {
       return true;
     }
     const src = String(meta.source ?? meta.seed_source ?? "")
       .trim()
       .toLowerCase();
-    if (src === "seed" || src === "crm_seed" || src === "smoketest" || src === "system") return true;
+    if (src === "seed" || src === "crm_seed" || src === "smoketest" || src === "system")
+      return true;
   }
 
   const email = String(input.email ?? "")
@@ -117,7 +122,11 @@ export function isSystemOrSeedIdentity(input: {
   if (/^smoke\+[a-z0-9._-]+$/.test(local)) return true;
   if (local.startsWith("noreply") || local.startsWith("no-reply")) return true;
   if (local === "system" || local === "automation" || local === "service") return true;
-  if (local.startsWith("system+") || local.startsWith("service+") || local.startsWith("automation+")) {
+  if (
+    local.startsWith("system+") ||
+    local.startsWith("service+") ||
+    local.startsWith("automation+")
+  ) {
     return true;
   }
 
@@ -137,7 +146,8 @@ export function isSystemOrSeedIdentity(input: {
   if (/^crm seed\s*\d*$/i.test(name)) return true;
 
   // Non-human roles
-  if (role === "system" || role === "service" || role === "bot" || role === "automation") return true;
+  if (role === "system" || role === "service" || role === "bot" || role === "automation")
+    return true;
   if (staffRole === "system" || staffRole === "service" || staffRole === "bot") return true;
 
   return false;
@@ -188,9 +198,7 @@ export function buildCrmOwnerSecondaryLabel(input: {
 function formatRoleLabel(role: string | null | undefined): string | null {
   const r = String(role ?? "").trim();
   if (!r) return null;
-  return r
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return r.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ---------------------------------------------------------------------------
@@ -248,8 +256,7 @@ export function resolveCrmAssignableOwners(input: {
     }));
 
     // Prefer best active row for labels
-    const labelRow =
-      rows.find((r) => r.isActive && !r.archivedAt) ?? rows[0]!;
+    const labelRow = rows.find((r) => r.isActive && !r.archivedAt) ?? rows[0]!;
 
     if (
       isSystemOrSeedIdentity({

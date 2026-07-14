@@ -15,8 +15,7 @@ export const RECONCILIATION_RECOMMENDATIONS = [
   "MANUAL_REVIEW_REQUIRED",
 ] as const;
 
-export type ReconciliationRecommendationType =
-  (typeof RECONCILIATION_RECOMMENDATIONS)[number];
+export type ReconciliationRecommendationType = (typeof RECONCILIATION_RECOMMENDATIONS)[number];
 
 export type StaffReconciliationRecommendation = {
   recommendation: ReconciliationRecommendationType;
@@ -126,10 +125,7 @@ export function generateStaffReconciliationRecommendation(input: {
     return {
       recommendation: "ARCHIVE_EMPTY_RECORD",
       confidence,
-      reasoning: [
-        ...reasoning,
-        "FI record appears manually created with no operational footprint",
-      ],
+      reasoning: [...reasoning, "FI record appears manually created with no operational footprint"],
       suggestedExternalId: input.iiohrMatch.externalId,
       suggestedTargetStaffMemberId: input.iiohrMatch.linkedStaffMemberId ?? null,
       suggestedSourceStaffMemberId: input.fiRecord.staffMemberId,
@@ -188,12 +184,16 @@ export function generateStaffReconciliationRecommendation(input: {
   return {
     recommendation: "MERGE_INTO_EXISTING",
     confidence,
-    reasoning: [...reasoning, ...(canonical?.reasoning ?? []), "Merge weaker record into canonical survivor"],
+    reasoning: [
+      ...reasoning,
+      ...(canonical?.reasoning ?? []),
+      "Merge weaker record into canonical survivor",
+    ],
     suggestedExternalId: input.iiohrMatch.externalId,
     suggestedTargetStaffMemberId: canonical?.canonicalStaffId ?? input.fiRecord.staffMemberId,
     suggestedSourceStaffMemberId:
       canonical?.canonicalStaffId === input.fiRecord.staffMemberId
-        ? input.iiohrMatch.linkedStaffMemberId ?? null
+        ? (input.iiohrMatch.linkedStaffMemberId ?? null)
         : input.fiRecord.staffMemberId,
   };
 }

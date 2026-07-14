@@ -57,7 +57,11 @@ describe("hairAuditLinkCompatibilityAudit", () => {
   });
 
   it("legacy alias keys resolve hairaudit case id without structured block", () => {
-    for (const key of ["hairaudit_case_id", "hair_audit_case_id", "hairaudit_source_case_id"] as const) {
+    for (const key of [
+      "hairaudit_case_id",
+      "hair_audit_case_id",
+      "hairaudit_source_case_id",
+    ] as const) {
       const snapshot = parseLegacyHairAuditLinkMetadataSnapshot({ [key]: HAIRAUDIT_CASE });
       assert.equal(snapshot.hairaudit_case_id, HAIRAUDIT_CASE, key);
     }

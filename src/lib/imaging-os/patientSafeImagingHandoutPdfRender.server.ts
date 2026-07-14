@@ -57,7 +57,13 @@ export async function renderPatientSafeImagingHandoutPdfBytes(input: {
   let page = pdf.addPage([PAGE_W, PAGE_H]);
   const y = { y: PAGE_H - MARGIN };
 
-  page.drawText(input.title, { x: MARGIN, y: y.y, size: 16, font: bold, color: rgb(0.05, 0.05, 0.08) });
+  page.drawText(input.title, {
+    x: MARGIN,
+    y: y.y,
+    size: 16,
+    font: bold,
+    color: rgb(0.05, 0.05, 0.08),
+  });
   y.y -= 22;
   if (input.clinicName?.trim()) {
     page.drawText(input.clinicName.trim(), {
@@ -69,7 +75,14 @@ export async function renderPatientSafeImagingHandoutPdfBytes(input: {
     });
     y.y -= 16;
   }
-  drawLines(page, y, wrapToWidth(input.disclaimer, regular, 9, CONTENT_W), 9, regular, rgb(0.4, 0.4, 0.45));
+  drawLines(
+    page,
+    y,
+    wrapToWidth(input.disclaimer, regular, 9, CONTENT_W),
+    9,
+    regular,
+    rgb(0.4, 0.4, 0.45)
+  );
   y.y -= 8;
 
   for (const card of input.cards) {

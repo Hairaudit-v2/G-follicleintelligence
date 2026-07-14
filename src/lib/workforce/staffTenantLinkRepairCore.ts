@@ -2,7 +2,8 @@
  * Pure helpers for staff invite/login tenant linking — no server-only imports.
  */
 
-const FI_ADMIN_TENANT_PATH = /^\/fi-admin\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/|$)/i;
+const FI_ADMIN_TENANT_PATH =
+  /^\/fi-admin\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/|$)/i;
 
 export function extractTenantIdFromFiAdminPath(path: string | null | undefined): string | null {
   const raw = String(path ?? "").trim();
@@ -22,7 +23,9 @@ export function readMetadataTenantId(
   metadata: Record<string, unknown> | null | undefined
 ): string | null {
   const raw = metadata?.fi_tenant_id;
-  const tid = String(raw ?? "").trim().toLowerCase();
+  const tid = String(raw ?? "")
+    .trim()
+    .toLowerCase();
   return tid || null;
 }
 
@@ -78,8 +81,16 @@ export function formatCrossTenantInviteWarning(input: {
 export function blocksStaffAccessLoginForEmploymentStatus(
   employmentStatus: string | null | undefined
 ): boolean {
-  const status = String(employmentStatus ?? "").trim().toLowerCase();
-  return status === "terminated" || status === "resigned" || status === "contract_ended" || status === "contract_expired" || status === "merged";
+  const status = String(employmentStatus ?? "")
+    .trim()
+    .toLowerCase();
+  return (
+    status === "terminated" ||
+    status === "resigned" ||
+    status === "contract_ended" ||
+    status === "contract_expired" ||
+    status === "merged"
+  );
 }
 
 export function resolvePostLoginDestination(input: {

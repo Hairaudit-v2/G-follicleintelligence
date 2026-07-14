@@ -123,10 +123,7 @@ export function CalendarOsWeekResourceView({
     [resourceRows, cells, bookings]
   );
 
-  const grouped = useMemo(
-    () => groupCalendarOsResourceRowsByRole(rowsWithUtil),
-    [rowsWithUtil]
-  );
+  const grouped = useMemo(() => groupCalendarOsResourceRowsByRole(rowsWithUtil), [rowsWithUtil]);
 
   const cellLookup = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -153,9 +150,16 @@ export function CalendarOsWeekResourceView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {showSparseBanner ? <CalendarOsEmptyContext context={sparseContext} variant="week-banner" /> : null}
+      {showSparseBanner ? (
+        <CalendarOsEmptyContext context={sparseContext} variant="week-banner" />
+      ) : null}
 
-      <div className={cn("min-h-0 flex-1 overflow-y-auto overflow-x-hidden", fiOsCalFloatingAssistScrollPad)}>
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overflow-x-hidden",
+          fiOsCalFloatingAssistScrollPad
+        )}
+      >
         <div
           className="w-full min-w-0"
           data-testid="calendar-week-grid"

@@ -11,7 +11,10 @@ import {
 } from "@/src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults";
 import { resolveWorkforceEventTypeFromSurgery } from "@/src/lib/workforce-os/workforceClinicalEventMapping";
 import { loadRosterAssignableStaff } from "@/src/lib/workforce-os/workforceRosterCommandCentre.server";
-import { countAssignedRoles, resolveClinicalStaffingTemplate } from "@/src/lib/workforce-os/workforceRosteringEngine";
+import {
+  countAssignedRoles,
+  resolveClinicalStaffingTemplate,
+} from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
   listAwardLoadingPlaceholders,
   listWorkforceWageProfiles,
@@ -281,9 +284,8 @@ export async function applyRecommendedProcedureTeam(input: {
   const recommendation = snapshot.recommendations.find((r) => r.surgeryId === sid);
   if (!recommendation) throw new Error("No staffing recommendation for surgery.");
 
-  const { assignStaffToClinicalEventAction } = await import(
-    "@/src/lib/workforce-os/workforceRostering.server"
-  );
+  const { assignStaffToClinicalEventAction } =
+    await import("@/src/lib/workforce-os/workforceRostering.server");
 
   let assignedCount = 0;
   let skippedCount = 0;

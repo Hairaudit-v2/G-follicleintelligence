@@ -20,11 +20,7 @@ type UseProcedureDayRefreshOptions = {
 export function useProcedureDayRefresh(
   opts: UseProcedureDayRefreshOptions
 ): ProcedureDayRefreshState {
-  const {
-    tenantId,
-    initialData,
-    hydrateFullOnMount = initialData.loadTier === "shell",
-  } = opts;
+  const { tenantId, initialData, hydrateFullOnMount = initialData.loadTier === "shell" } = opts;
   const [data, setData] = useState(initialData);
   const [isHydrating, setIsHydrating] = useState(false);
   const [hydrateError, setHydrateError] = useState<string | null>(null);
@@ -40,10 +36,10 @@ export function useProcedureDayRefresh(
     setIsHydrating(true);
     setHydrateError(null);
     try {
-      const res = await fetch(
-        `/api/tenants/${encodeURIComponent(tenantId.trim())}/procedure-day`,
-        { cache: "no-store", credentials: "same-origin" }
-      );
+      const res = await fetch(`/api/tenants/${encodeURIComponent(tenantId.trim())}/procedure-day`, {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
       if (!res.ok) throw new Error(`Hydrate failed (${res.status})`);
       const json = (await res.json()) as { data?: ProcedureDayLiveBoardPayload };
       if (!json.data) throw new Error("Invalid procedure day payload.");

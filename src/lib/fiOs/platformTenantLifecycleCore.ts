@@ -21,11 +21,15 @@ export type FiPlatformTenantListOptions = {
   includeHidden?: boolean;
 };
 
-export function isTenantArchived(tenant: Pick<FiPlatformTenantLifecycleRow, "archived_at">): boolean {
+export function isTenantArchived(
+  tenant: Pick<FiPlatformTenantLifecycleRow, "archived_at">
+): boolean {
   return Boolean(tenant.archived_at?.trim());
 }
 
-export function isTenantDemo(tenant: Pick<FiPlatformTenantLifecycleRow, "is_demo" | "slug">): boolean {
+export function isTenantDemo(
+  tenant: Pick<FiPlatformTenantLifecycleRow, "is_demo" | "slug">
+): boolean {
   return tenant.is_demo === true || KNOWN_DEMO_TENANT_SLUGS.has(tenant.slug.trim().toLowerCase());
 }
 
@@ -131,7 +135,10 @@ export function canArchiveTenant(
 }
 
 export function tenantLifecycleBadges(
-  tenant: Pick<FiPlatformTenantLifecycleRow, "archived_at" | "is_demo" | "slug" | "is_production_visible">
+  tenant: Pick<
+    FiPlatformTenantLifecycleRow,
+    "archived_at" | "is_demo" | "slug" | "is_production_visible"
+  >
 ): Array<"Archived" | "Demo" | "Sandbox" | "Hidden"> {
   const badges: Array<"Archived" | "Demo" | "Sandbox" | "Hidden"> = [];
   if (isTenantArchived(tenant)) badges.push("Archived");

@@ -162,11 +162,14 @@ describe("buildGraftTrayIntelligenceSummary", () => {
       hasNewerActiveJob: true,
     });
 
-    assert.equal(isGraftTrayEstimateSupersededStale({
-      estimateAnalysisJobId: JOB_ID,
-      estimateAnalysisJobStatus: "superseded",
-      hasNewerActiveJob: true,
-    }), true);
+    assert.equal(
+      isGraftTrayEstimateSupersededStale({
+        estimateAnalysisJobId: JOB_ID,
+        estimateAnalysisJobStatus: "superseded",
+        hasNewerActiveJob: true,
+      }),
+      true
+    );
     assert.equal(summary.supersededStaleJob, true);
     assert.equal(summary.hasFinalCount, false);
     assert.equal(summary.finalAcceptedCount, null);

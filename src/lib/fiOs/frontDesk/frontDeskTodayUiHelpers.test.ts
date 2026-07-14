@@ -138,22 +138,14 @@ test("payments href is always /payments", () => {
 
 test("patients search uses q= contract", () => {
   const href = frontDeskPatientsSearchHref("11111111-1111-1111-1111-111111111111", "Alex Chen");
-  assert.equal(
-    href,
-    "/fi-admin/11111111-1111-1111-1111-111111111111/patients?q=Alex%20Chen"
-  );
+  assert.equal(href, "/fi-admin/11111111-1111-1111-1111-111111111111/patients?q=Alex%20Chen");
 });
 
 test("operational state labels are staff-clean", () => {
   for (const label of Object.values(FRONT_DESK_OPERATIONAL_STATE_LABELS)) {
     assert.ok(staffFacingCopyIsClean(label), label);
   }
-  for (const id of [
-    "check_in",
-    "start_consultation",
-    "complete",
-    "take_payment",
-  ] as const) {
+  for (const id of ["check_in", "start_consultation", "complete", "take_payment"] as const) {
     assert.ok(staffFacingCopyIsClean(frontDeskCardActionLabel(id)));
   }
   assert.equal(staffFacingCopyIsClean("ReceptionOS"), false);

@@ -22,8 +22,7 @@ export async function applyRecommendedProcedureTeamAction(
   tenantId: string,
   surgeryId: string
 ): Promise<
-  | { ok: true; assignedCount: number; skippedCount: number }
-  | { ok: false; error: string }
+  { ok: true; assignedCount: number; skippedCount: number } | { ok: false; error: string }
 > {
   try {
     const { fiUserId } = await assertWorkforceHrManageAllowed(tenantId);

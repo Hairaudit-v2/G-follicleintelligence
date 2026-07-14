@@ -19,10 +19,7 @@ import {
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { parseConfigurationTab } from "@/src/lib/fi/configurationTabs";
 import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
-import {
-  brandingDebugEnabled,
-  logBrandingDebug,
-} from "@/src/lib/fi/foundation/brandingDebug";
+import { brandingDebugEnabled, logBrandingDebug } from "@/src/lib/fi/foundation/brandingDebug";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { canViewTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";

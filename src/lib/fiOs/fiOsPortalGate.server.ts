@@ -51,7 +51,10 @@ async function assertTenantRowExists(tenantId: string): Promise<boolean> {
   return Boolean((data as { id: string }).id);
 }
 
-async function assertTenantAccessibleForPortal(tenantId: string, authUserId: string): Promise<boolean> {
+async function assertTenantAccessibleForPortal(
+  tenantId: string,
+  authUserId: string
+): Promise<boolean> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenants")

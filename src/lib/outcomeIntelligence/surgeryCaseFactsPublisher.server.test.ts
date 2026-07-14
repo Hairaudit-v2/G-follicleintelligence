@@ -110,9 +110,7 @@ function createAnalyticsEventsMock(initial: StoredRow[] = []) {
                 select() {
                   return {
                     single() {
-                      const idx = store.findIndex(
-                        (row) => row[col] === val && row[col2] === val2
-                      );
+                      const idx = store.findIndex((row) => row[col] === val && row[col2] === val2);
                       if (idx < 0) {
                         return Promise.resolve({
                           data: null,

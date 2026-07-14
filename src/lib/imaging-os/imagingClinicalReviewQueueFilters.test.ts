@@ -27,7 +27,9 @@ function baseRow(overrides: Partial<ReviewQueueFilterRow> = {}): ReviewQueueFilt
 describe("imagingClinicalReviewQueueFilters", () => {
   it("filters by review reason", () => {
     assert.equal(
-      matchesImagingReviewQueueFilters(baseRow(), { reviewReason: "low_classification_confidence" }),
+      matchesImagingReviewQueueFilters(baseRow(), {
+        reviewReason: "low_classification_confidence",
+      }),
       true
     );
     assert.equal(
@@ -91,7 +93,10 @@ describe("imagingClinicalReviewQueueFilters", () => {
     const wizardRow = baseRow({
       metadata: { capture_source: "imaging_os_wizard" },
     });
-    assert.equal(matchesImagingReviewQueueFilters(wizardRow, { captureSource: "guided_capture" }), true);
+    assert.equal(
+      matchesImagingReviewQueueFilters(wizardRow, { captureSource: "guided_capture" }),
+      true
+    );
     assert.equal(
       matchesImagingReviewQueueFilters(wizardRow, { captureSource: "imaging_os_wizard" }),
       true

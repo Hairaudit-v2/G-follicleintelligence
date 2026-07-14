@@ -178,10 +178,7 @@ export function filterPipelineColumns(
   nowMs: number = Date.now()
 ): PipelinePresentationColumn[] {
   return columns.map((col) => {
-    if (
-      filters.staffColumnIds.length > 0 &&
-      !filters.staffColumnIds.includes(col.id)
-    ) {
+    if (filters.staffColumnIds.length > 0 && !filters.staffColumnIds.includes(col.id)) {
       return { ...col, cards: [], count: 0 };
     }
     const cards = col.cards.filter((card) => cardMatchesFilters(card, filters, nowMs));
@@ -209,10 +206,11 @@ export function filterPipelineFollowUps(
         if (!key || !filters.sources.includes(key)) return false;
       }
       if (filters.ownerIds.length > 0) {
-        const oid = card.owner.userId
-          ? `owner:${card.owner.userId}`
-          : "unassigned";
-        if (!filters.ownerIds.includes(oid) && !filters.ownerIds.includes(card.owner.userId ?? "")) {
+        const oid = card.owner.userId ? `owner:${card.owner.userId}` : "unassigned";
+        if (
+          !filters.ownerIds.includes(oid) &&
+          !filters.ownerIds.includes(card.owner.userId ?? "")
+        ) {
           return false;
         }
       }

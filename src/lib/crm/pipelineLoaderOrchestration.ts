@@ -16,14 +16,8 @@ import {
   toPipelineMoveStageDefinitionsForClient,
   toPipelinePresentationPermissions,
 } from "@/src/lib/crm/pipelineLoader";
-import type {
-  PipelineFullPayload,
-  PipelineShellPayload,
-} from "@/src/lib/crm/pipelineLoader.types";
-import type {
-  CrmKanbanLeadCard,
-  FiCrmPipelineStageRow,
-} from "@/src/lib/crm/types";
+import type { PipelineFullPayload, PipelineShellPayload } from "@/src/lib/crm/pipelineLoader.types";
+import type { CrmKanbanLeadCard, FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 
 export type PipelineLoaderTiming = {
   tenantId: string;
@@ -217,7 +211,14 @@ export async function loadPipelineFullPayload(
   const loadReminders = deps.loadReminderJobsByLeadIds;
   const nowMs = deps.nowMs?.() ?? Date.now();
 
-  if (!getSessionContext || !loadBoardIndex || !loadTasks || !loadComms || !loadConsults || !loadReminders) {
+  if (
+    !getSessionContext ||
+    !loadBoardIndex ||
+    !loadTasks ||
+    !loadComms ||
+    !loadConsults ||
+    !loadReminders
+  ) {
     throw new Error("Pipeline loader deps incomplete");
   }
 

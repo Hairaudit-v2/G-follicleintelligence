@@ -127,7 +127,8 @@ export async function runClinicalImageAnalysis(
     protocolSlotSlug,
     anatomicalRegion,
     hasRegionLink: input.hasRegionLink ?? false,
-    isAdminFallback: input.isAdminFallback ?? captureSource === "appointment_procedure_admin_fallback",
+    isAdminFallback:
+      input.isAdminFallback ?? captureSource === "appointment_procedure_admin_fallback",
     capturedBeforeEnforcement: !protocolSessionId && !protocolSlotSlug,
   });
 
@@ -138,8 +139,7 @@ export async function runClinicalImageAnalysis(
   if (mode === "stub" || !isOpenAiApiKeyConfigured()) {
     base = buildStubClinicalImageAnalysis({
       externalCategory:
-        input.externalCategory ??
-        String(row.ai_image_category ?? row.image_category ?? "other"),
+        input.externalCategory ?? String(row.ai_image_category ?? row.image_category ?? "other"),
       legacyUploadType: input.legacyUploadType,
       idempotencyKey: iid,
     });
@@ -271,8 +271,7 @@ export async function runClinicalImageAnalysis(
         confidence: recipient.result.confidence_score,
         observations,
         reviewRequired:
-          recipient.result.confidence_score < 0.65 ||
-          recipient.result.documentation_gap_detected,
+          recipient.result.confidence_score < 0.65 || recipient.result.documentation_gap_detected,
       });
       recipientFindings = {
         recipient_quality_rating: recipient.result.recipient_quality_rating,

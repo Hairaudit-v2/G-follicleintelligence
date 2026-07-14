@@ -25,10 +25,7 @@ const createBodySchema = z.object({
   route_status: z.enum(["active", "disabled"]).optional(),
 });
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) return crmJsonError(400, "Missing tenantId.");
@@ -47,10 +44,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ tenantId: string }> }
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) return crmJsonError(400, "Missing tenantId.");

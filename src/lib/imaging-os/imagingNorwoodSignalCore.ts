@@ -142,12 +142,15 @@ export function buildLiveNorwoodSignalSummary(input: LiveNorwoodSignalInput): No
         ...STAFF_LIMITATIONS,
         "Live Norwood provider is enabled but unavailable for this image.",
       ],
-      observations: ["Provider could not produce a pattern staff signal — manual review recommended."],
+      observations: [
+        "Provider could not produce a pattern staff signal — manual review recommended.",
+      ],
       provider: "unavailable",
     });
   }
 
-  const confidence = clinical?.recipient_assessment?.confidence ?? input.aiImageCategoryConfidence ?? 0;
+  const confidence =
+    clinical?.recipient_assessment?.confidence ?? input.aiImageCategoryConfidence ?? 0;
   const observations: string[] = [];
   if (clinical?.recipient_assessment?.observations?.length) {
     observations.push(

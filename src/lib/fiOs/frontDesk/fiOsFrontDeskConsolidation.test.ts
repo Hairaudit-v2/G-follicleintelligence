@@ -30,17 +30,7 @@ const tenantId = "t-front-desk-1";
 const base = `/fi-admin/${tenantId}`;
 
 function fullSidebar() {
-  return resolveFiOsPrimarySidebarItems(
-    base,
-    true,
-    true,
-    null,
-    true,
-    true,
-    true,
-    true,
-    true
-  );
+  return resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, true, true, true);
 }
 
 function moreSections() {
@@ -59,14 +49,10 @@ function flattenMoreIds(sections = moreSections()) {
 }
 
 test("primary rail has exactly six slots and includes Front desk", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
   const labels = resolveFiOsMinimalNavItems(base, fullSidebar()).map((i) => i.label);
   assert.ok(labels.some((l) => l === "Front desk"));
@@ -88,16 +74,11 @@ test("Front desk destination includes all required tabs and legacy deep links", 
   const subIds = new Set(subs.map((s) => s.id));
   for (const tab of FI_OS_FRONT_DESK_TABS) {
     assert.ok(subIds.has(tab.navSubItemId), `missing tab ${tab.navSubItemId}`);
-    assert.ok(
-      isFiOsFrontDeskConsolidatedPath(buildFiOsFrontDeskTabHref(tenantId, tab), base)
-    );
+    assert.ok(isFiOsFrontDeskConsolidatedPath(buildFiOsFrontDeskTabHref(tenantId, tab), base));
   }
   for (const legacy of FI_OS_FRONT_DESK_LEGACY_ROUTES) {
     assert.ok(subIds.has(legacy.id), `missing legacy ${legacy.id}`);
-    assert.equal(
-      buildFiOsFrontDeskLegacyHref(tenantId, legacy.suffix),
-      `${base}/${legacy.suffix}`
-    );
+    assert.equal(buildFiOsFrontDeskLegacyHref(tenantId, legacy.suffix), `${base}/${legacy.suffix}`);
   }
 });
 

@@ -94,11 +94,7 @@ export async function linkHairAuditOutcomeReportForSurgery(
     sendToReview: input.sendToReview,
   });
 
-  if (
-    planned.outcome.kind === "linked" &&
-    !dryRun &&
-    planned.nextMetadata
-  ) {
+  if (planned.outcome.kind === "linked" && !dryRun && planned.nextMetadata) {
     const { error } = await supabase
       .from("fi_cases")
       .update({ metadata: planned.nextMetadata })

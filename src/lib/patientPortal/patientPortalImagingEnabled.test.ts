@@ -6,7 +6,10 @@ import { isPatientPortalImagingEnabled } from "./patientPortalImagingEnabled";
 describe("isPatientPortalImagingEnabled", () => {
   it("defaults off in production when unset", () => {
     assert.equal(
-      isPatientPortalImagingEnabled({ NODE_ENV: "production", FI_PORTAL_IMAGING_ENABLED: undefined }),
+      isPatientPortalImagingEnabled({
+        NODE_ENV: "production",
+        FI_PORTAL_IMAGING_ENABLED: undefined,
+      }),
       false
     );
   });
@@ -24,14 +27,20 @@ describe("isPatientPortalImagingEnabled", () => {
 
   it("defaults on in non-production when unset", () => {
     assert.equal(
-      isPatientPortalImagingEnabled({ NODE_ENV: "development", FI_PORTAL_IMAGING_ENABLED: undefined }),
+      isPatientPortalImagingEnabled({
+        NODE_ENV: "development",
+        FI_PORTAL_IMAGING_ENABLED: undefined,
+      }),
       true
     );
   });
 
   it("respects explicit false in non-production", () => {
     assert.equal(
-      isPatientPortalImagingEnabled({ NODE_ENV: "development", FI_PORTAL_IMAGING_ENABLED: "false" }),
+      isPatientPortalImagingEnabled({
+        NODE_ENV: "development",
+        FI_PORTAL_IMAGING_ENABLED: "false",
+      }),
       false
     );
   });

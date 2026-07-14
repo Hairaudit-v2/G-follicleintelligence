@@ -170,9 +170,7 @@ export function WorkforceOsPlanningClient({
             </div>
             <div>
               <dt className="text-[#64748B]">Late-stage candidates</dt>
-              <dd className="mt-1 text-[#E2E8F0]">
-                {planning.recruitmentForecast.lateStageCount}
-              </dd>
+              <dd className="mt-1 text-[#E2E8F0]">{planning.recruitmentForecast.lateStageCount}</dd>
             </div>
             <div>
               <dt className="text-[#64748B]">Pipeline coverage</dt>
@@ -195,7 +193,9 @@ export function WorkforceOsPlanningClient({
         <h2 className="text-lg font-semibold text-[#F8FAFC]">Next best actions</h2>
         <ul className="mt-4 space-y-3">
           {planning.nextBestActions.length === 0 ? (
-            <li className="text-sm text-[#94A3B8]">No actions required — workforce signals are healthy.</li>
+            <li className="text-sm text-[#94A3B8]">
+              No actions required — workforce signals are healthy.
+            </li>
           ) : (
             planning.nextBestActions.map((action) => (
               <li

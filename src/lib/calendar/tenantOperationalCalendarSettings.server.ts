@@ -58,10 +58,12 @@ export type TenantOperationalCalendarSettingsResult = {
 /**
  * Shell fast path — timezone + legacy metadata grid only (no `fi_calendar_settings` round-trip).
  */
-export function resolveShellCalendarSettingsFromTenantRow(input: {
-  defaultTimezone?: string | null;
-  metadata?: unknown;
-} | null): TenantOperationalCalendarSettingsResult {
+export function resolveShellCalendarSettingsFromTenantRow(
+  input: {
+    defaultTimezone?: string | null;
+    metadata?: unknown;
+  } | null
+): TenantOperationalCalendarSettingsResult {
   const calendarTimezone = getCalendarTimeZone(
     input
       ? {

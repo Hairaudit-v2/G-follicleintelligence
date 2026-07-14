@@ -6,9 +6,7 @@ import {
   computeEffectiveAccess,
   type StaffAccessGrantInput,
 } from "@/src/lib/staffAccess/staffAccessCore";
-import {
-  resolveTeamWorkspaceTabAccess,
-} from "@/src/lib/staffAccess/staffTeamAccessCore";
+import { resolveTeamWorkspaceTabAccess } from "@/src/lib/staffAccess/staffTeamAccessCore";
 import {
   rosterClearGeneratedConfirmMessage,
   rosterCreateBlankActionLabel,
@@ -41,7 +39,10 @@ test("roster workflow action labels support manual-first fortnight editing", () 
   assert.equal(rosterCreateBlankActionLabel("fortnightly"), "Create blank fortnight");
   assert.equal(rosterRegenerateGeneratedActionLabel(), "Regenerate from standard hours");
   assert.match(rosterCreateBlankConfirmMessage("fortnightly"), /manual rostering/i);
-  assert.match(rosterClearGeneratedConfirmMessage("fortnightly"), /Manual shifts will not be removed/i);
+  assert.match(
+    rosterClearGeneratedConfirmMessage("fortnightly"),
+    /Manual shifts will not be removed/i
+  );
 });
 
 test("generated scheduled shifts are editable and hard-deletable by managers", () => {

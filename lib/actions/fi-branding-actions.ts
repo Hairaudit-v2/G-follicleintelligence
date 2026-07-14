@@ -64,9 +64,10 @@ async function assertBrandingWriteAllowed(
  * Next rejects with "Only plain objects ... can be passed to Server Actions").
  * Always returns a plain JSON-like object; never a File/Blob/Error/class instance.
  */
-export async function uploadTenantLogoAction(formData: FormData): Promise<
-  | { ok: true; branding: NormalizedTenantBranding; message: string }
-  | { ok: false; error: string }
+export async function uploadTenantLogoAction(
+  formData: FormData
+): Promise<
+  { ok: true; branding: NormalizedTenantBranding; message: string } | { ok: false; error: string }
 > {
   const fields = readTenantLogoUploadFormData(formData);
   if (!fields.ok) return { ok: false, error: fields.error };

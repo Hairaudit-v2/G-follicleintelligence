@@ -12,7 +12,10 @@ export function ReportRecentRunsPanel(props: {
   const { runs, busy, onOpen } = props;
 
   return (
-    <section className={cn(financialOsClasses.formPanel, "space-y-3")} data-testid="report-recent-runs">
+    <section
+      className={cn(financialOsClasses.formPanel, "space-y-3")}
+      data-testid="report-recent-runs"
+    >
       <div>
         <p className={financialOsClasses.metricLabel}>Snapshots</p>
         <h2 className="text-sm font-semibold text-slate-50">Recent report runs</h2>

@@ -35,7 +35,10 @@ function OperationsCentrePrimaryActions({
         Open reception board
       </Link>
       {showProcedureDayNav ? (
-        <Link href={resolveProcedureDayNavHref(base, true)} className={operationsCentreLinkButtonClass}>
+        <Link
+          href={resolveProcedureDayNavHref(base, true)}
+          className={operationsCentreLinkButtonClass}
+        >
           Open surgery day
         </Link>
       ) : null}

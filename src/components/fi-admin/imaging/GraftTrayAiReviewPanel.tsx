@@ -70,16 +70,13 @@ export function GraftTrayAiReviewPanel({
         </p>
         <p>
           Manual count:{" "}
-          <span className="font-semibold text-violet-50">
-            {estimate.manual_graft_count ?? "—"}
-          </span>
+          <span className="font-semibold text-violet-50">{estimate.manual_graft_count ?? "—"}</span>
           {estimate.manual_count_source !== "missing"
             ? ` (${estimate.manual_count_source.replace(/_/g, " ")})`
             : null}
         </p>
         <p>
-          Mismatch:{" "}
-          <span className="font-medium">{estimate.mismatch_band.replace(/_/g, " ")}</span>
+          Mismatch: <span className="font-medium">{estimate.mismatch_band.replace(/_/g, " ")}</span>
           {estimate.delta != null ? ` · Δ ${estimate.delta}` : null}
         </p>
         <p>
@@ -183,10 +180,11 @@ export function GraftTrayAiReviewPanel({
                   </p>
                   <p className="text-slate-400">
                     AI {entry.previous_ai_estimate ?? "—"} · manual{" "}
-                    {entry.previous_manual_count ?? "—"} · final{" "}
-                    {entry.final_accepted_count ?? "—"}
+                    {entry.previous_manual_count ?? "—"} · final {entry.final_accepted_count ?? "—"}
                   </p>
-                  {entry.staff_note ? <p className="text-slate-500">Note: {entry.staff_note}</p> : null}
+                  {entry.staff_note ? (
+                    <p className="text-slate-500">Note: {entry.staff_note}</p>
+                  ) : null}
                 </li>
               ))}
           </ul>

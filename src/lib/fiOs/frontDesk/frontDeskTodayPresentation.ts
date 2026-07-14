@@ -125,7 +125,10 @@ export function buildFrontDeskTodayPresentation(
       startAtIso: row.startAt,
       nowMs,
     });
-    cardsByBookingId.set(row.id, baseCardFromReceptionRow(row, state, base, tz, nowMs, opts.mutationMode));
+    cardsByBookingId.set(
+      row.id,
+      baseCardFromReceptionRow(row, state, base, tz, nowMs, opts.mutationMode)
+    );
   }
 
   // 4–5. Index appointments; merge payment + journey by bookingId only.
@@ -441,11 +444,7 @@ function normalizeUuid(value: string | null | undefined): string | null {
   const v = value?.trim();
   if (!v) return null;
   // Accept uuid-shaped strings only; do not invent IDs from composites.
-  if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-      v
-    )
-  ) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)) {
     return null;
   }
   return v;
@@ -487,9 +486,7 @@ function isAttentionKindAllowed(kind: string): boolean {
   return false;
 }
 
-function mapPayloadSeverity(
-  severity: ReceptionBoardActionAlert["severity"]
-): FrontDeskSeverity {
+function mapPayloadSeverity(severity: ReceptionBoardActionAlert["severity"]): FrontDeskSeverity {
   switch (severity) {
     case "blocked":
     case "critical":
@@ -504,7 +501,11 @@ function mapPayloadSeverity(
 
 function attachBlockerToCard(card: FrontDeskTodayCard, item: FrontDeskAttentionItem): void {
   const blockerId = `${item.severity}:${item.kind}:${item.id}`;
-  if (card.blocker.items.some((b) => b.id === blockerId || (b.kind === item.kind && b.label === item.title))) {
+  if (
+    card.blocker.items.some(
+      (b) => b.id === blockerId || (b.kind === item.kind && b.label === item.title)
+    )
+  ) {
     return;
   }
   card.blocker.items.push({
@@ -533,10 +534,8 @@ function finalizeCardBlockers(card: FrontDeskTodayCard): void {
 function compareBlockers(a: FrontDeskCardBlocker, b: FrontDeskCardBlocker): number {
   const sr = SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity];
   if (sr !== 0) return sr;
-  const pa =
-    EXTENDED_ALERT_PRIORITY[a.kind as keyof typeof EXTENDED_ALERT_PRIORITY] ?? 0;
-  const pb =
-    EXTENDED_ALERT_PRIORITY[b.kind as keyof typeof EXTENDED_ALERT_PRIORITY] ?? 0;
+  const pa = EXTENDED_ALERT_PRIORITY[a.kind as keyof typeof EXTENDED_ALERT_PRIORITY] ?? 0;
+  const pb = EXTENDED_ALERT_PRIORITY[b.kind as keyof typeof EXTENDED_ALERT_PRIORITY] ?? 0;
   if (pb !== pa) return pb - pa;
   const k = a.kind.localeCompare(b.kind);
   if (k !== 0) return k;

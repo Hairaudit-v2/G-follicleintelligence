@@ -47,13 +47,13 @@ export const OPERATIONAL_READINESS_CRITERIA: {
 ];
 
 function isPaid(status: string | null | undefined): boolean {
-  const s = String(status ?? "").trim().toLowerCase();
+  const s = String(status ?? "")
+    .trim()
+    .toLowerCase();
   return s === "paid" || s === "satisfied" || s === "complete" || s === "completed";
 }
 
-export function scoreOperationalReadiness(
-  input: OperationalReadinessInput
-): {
+export function scoreOperationalReadiness(input: OperationalReadinessInput): {
   criteria: OperationalReadinessCriterionResult[];
   passed: number;
   total: number;
@@ -62,8 +62,7 @@ export function scoreOperationalReadiness(
 } {
   const bookingComplete = Boolean(input.consultBookingId?.trim() && input.surgeryBookingId?.trim());
   const consentComplete = input.consentSigned === true;
-  const paymentComplete =
-    input.depositRecorded === true || isPaid(input.paymentStatus);
+  const paymentComplete = input.depositRecorded === true || isPaid(input.paymentStatus);
   const staffAssigned = input.staffAssigned === true;
   const roomAssigned = input.roomAssigned === true;
   const procedureCompleted =
@@ -123,8 +122,7 @@ export function scoreOperationalReadiness(
   const passed = criteria.filter((c) => c.pass).length;
   const total = criteria.length;
   const percent = total === 0 ? 0 : Math.round((passed / total) * 100);
-  const calendarOk =
-    input.calendarBlockerCount == null || input.calendarBlockerCount === 0;
+  const calendarOk = input.calendarBlockerCount == null || input.calendarBlockerCount === 0;
 
   return {
     criteria,
@@ -135,7 +133,9 @@ export function scoreOperationalReadiness(
   };
 }
 
-export function formatOperationalReadinessReport(score: ReturnType<typeof scoreOperationalReadiness>): string {
+export function formatOperationalReadinessReport(
+  score: ReturnType<typeof scoreOperationalReadiness>
+): string {
   const lines = [
     `Operational Readiness: ${score.passed}/${score.total} (${score.percent}%) — ${score.ready ? "READY" : "NOT READY"}`,
     "",

@@ -7,10 +7,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
 import { deriveGrossMinutesWorked, sumBreakMinutes } from "./staffTimeClockCore";
 import { loadWorkforceTimeClockPolicy } from "./staffTimeClockPolicy.server";
-import {
-  createTimesheetEntry,
-  updateTimesheetEntryLabour,
-} from "./wageProfile.server";
+import { createTimesheetEntry, updateTimesheetEntryLabour } from "./wageProfile.server";
 import type { TimesheetEntry } from "./wageProfileCore";
 
 export async function syncTimesheetEntryFromPunch(opts: {
@@ -46,13 +43,17 @@ export async function syncTimesheetEntryFromPunch(opts: {
 
   const breakMinutes = policy.breaksEnabled
     ? sumBreakMinutes(
-        ((breaks ?? []) as { break_start_at: string; break_end_at: string | null; status: string }[]).map(
-          (b) => ({
-            breakStartAt: String(b.break_start_at),
-            breakEndAt: b.break_end_at != null ? String(b.break_end_at) : null,
-            status: "closed" as const,
-          })
-        )
+        (
+          (breaks ?? []) as {
+            break_start_at: string;
+            break_end_at: string | null;
+            status: string;
+          }[]
+        ).map((b) => ({
+          breakStartAt: String(b.break_start_at),
+          breakEndAt: b.break_end_at != null ? String(b.break_end_at) : null,
+          status: "closed" as const,
+        }))
       )
     : 0;
 
@@ -72,8 +73,7 @@ export async function syncTimesheetEntryFromPunch(opts: {
       ? `Synced from PIN punch (${breakMinutes} min breaks deducted).`
       : "Synced from PIN punch.";
 
-  const timesheetEntryId =
-    row.timesheet_entry_id != null ? String(row.timesheet_entry_id) : null;
+  const timesheetEntryId = row.timesheet_entry_id != null ? String(row.timesheet_entry_id) : null;
 
   if (!timesheetEntryId) {
     try {

@@ -457,8 +457,7 @@ export function calculateWorkforceReadinessScore(
 ): WorkforceReadinessScoreResult {
   const now = input.now ?? new Date();
   const employmentStatus = input.employment_status ?? null;
-  const terminatedLike =
-    employmentStatus != null && isOperationallyIneligible(employmentStatus);
+  const terminatedLike = employmentStatus != null && isOperationallyIneligible(employmentStatus);
 
   if (terminatedLike) {
     const signals = buildWorkforceIdentityReadinessSignals(

@@ -112,7 +112,8 @@ export function computeTodaySignalRevision(
   return stableJsonHash(payload);
 }
 
-function stableJsonHash(value: unknown): string {  const json = JSON.stringify(value);
+function stableJsonHash(value: unknown): string {
+  const json = JSON.stringify(value);
   let h = 2166136261;
   for (let i = 0; i < json.length; i += 1) {
     h ^= json.charCodeAt(i);
@@ -121,6 +122,7 @@ function stableJsonHash(value: unknown): string {  const json = JSON.stringify(v
   return (h >>> 0).toString(16).padStart(8, "0");
 }
 
-export type TodaySignalEngineOutput = {  entitySignals: readonly TodayEntityAttentionSignal[];
+export type TodaySignalEngineOutput = {
+  entitySignals: readonly TodayEntityAttentionSignal[];
   feedItems: readonly TodayFeedItem[];
 };

@@ -10,7 +10,9 @@ import type { SurgeonProcedurePerformanceRecord } from "@/src/lib/surgeryOs/surg
 
 const surgeonId = "00000000-0000-4000-8000-000000000101";
 
-function record(overrides: Partial<SurgeonProcedurePerformanceRecord> = {}): SurgeonProcedurePerformanceRecord {
+function record(
+  overrides: Partial<SurgeonProcedurePerformanceRecord> = {}
+): SurgeonProcedurePerformanceRecord {
   return {
     surgeryId: "00000000-0000-4000-8000-000000000401",
     surgeonId,
@@ -30,7 +32,13 @@ describe("surgeonPerformanceScoreCore", () => {
     const high = buildSurgeonPerformanceScore({
       surgeonId,
       surgeonName: "Dr Seetal",
-      records: [record({ extractionVelocityPerHour: 900, implantationSpeedPerHour: 850, transectionRate: 0.5 })],
+      records: [
+        record({
+          extractionVelocityPerHour: 900,
+          implantationSpeedPerHour: 850,
+          transectionRate: 0.5,
+        }),
+      ],
       consistencyScore: 95,
     });
     assert.ok(high.score >= 0 && high.score <= 100);
@@ -38,7 +46,13 @@ describe("surgeonPerformanceScoreCore", () => {
     const low = buildSurgeonPerformanceScore({
       surgeonId,
       surgeonName: "Dr Seetal",
-      records: [record({ extractionVelocityPerHour: 200, implantationSpeedPerHour: 180, transectionRate: 14 })],
+      records: [
+        record({
+          extractionVelocityPerHour: 200,
+          implantationSpeedPerHour: 180,
+          transectionRate: 14,
+        }),
+      ],
       consistencyScore: 30,
     });
     assert.ok(low.score >= 0 && low.score <= 100);
@@ -63,7 +77,13 @@ describe("surgeonPerformanceScoreCore", () => {
       {
         surgeonId: "00000000-0000-4000-8000-000000000102",
         surgeonName: "Dr Patel",
-        records: [record({ extractionVelocityPerHour: 500, implantationSpeedPerHour: 480, transectionRate: 6 })],
+        records: [
+          record({
+            extractionVelocityPerHour: 500,
+            implantationSpeedPerHour: 480,
+            transectionRate: 6,
+          }),
+        ],
         consistencyScore: 60,
       },
     ]);

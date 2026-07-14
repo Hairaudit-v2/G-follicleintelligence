@@ -251,7 +251,11 @@ export async function loadPathologyResultWorkspacePayload(
 
   const reviewedAt = (resRow as { reviewed_at: string | null }).reviewed_at;
   const status = String((resRow as { status: string }).status);
-  const reviewState = reviewedAt ? "Reviewed" : status === "pending_review" ? "Awaiting review" : status;
+  const reviewState = reviewedAt
+    ? "Reviewed"
+    : status === "pending_review"
+      ? "Awaiting review"
+      : status;
 
   return {
     resultId: rid,
@@ -315,9 +319,7 @@ export async function loadConsultationWorkspacePayload(
   const display = await loadConsultationWorkspaceDisplay(tid, row);
   const base = `/fi-admin/${tid}`;
   const subject =
-    display.patientName ??
-    display.leadName ??
-    `Consultation ${consultationId.slice(0, 8)}…`;
+    display.patientName ?? display.leadName ?? `Consultation ${consultationId.slice(0, 8)}…`;
   const primary = consultationPrimaryAction(base, row.id, row.status);
 
   let appointmentLabel: string | null = null;

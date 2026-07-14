@@ -64,7 +64,10 @@ export function extractAsciiTextFromBytes(bytes: Uint8Array, maxChars = 12000): 
       out += " ";
     }
   }
-  return out.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  return out
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /**

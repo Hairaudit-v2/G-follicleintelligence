@@ -66,10 +66,12 @@ export async function generatePatientVisualSummaryShareLink(input: {
   if (error) throw new Error(error.message);
   if (!caseRow) throw new Error("Case not found.");
 
-  const casePatientId = resolveCasePatientId(caseRow as {
-    patient_id?: string | null;
-    foundation_patient_id?: string | null;
-  });
+  const casePatientId = resolveCasePatientId(
+    caseRow as {
+      patient_id?: string | null;
+      foundation_patient_id?: string | null;
+    }
+  );
   if (!casePatientId || casePatientId !== patientId) {
     throw new Error("Case does not belong to this patient.");
   }

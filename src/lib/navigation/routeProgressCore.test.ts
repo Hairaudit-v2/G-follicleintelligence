@@ -60,10 +60,7 @@ test("shouldStartRouteProgress ignores same route and modified clicks", () => {
 });
 
 test("isSameRoute ignores trailing slash differences", () => {
-  assert.equal(
-    isSameRoute({ pathname: "/a/", search: "" }, { pathname: "/a", search: "" }),
-    true
-  );
+  assert.equal(isSameRoute({ pathname: "/a/", search: "" }, { pathname: "/a", search: "" }), true);
 });
 
 test("routeProgressClearDelayMs enforces minimum visible time", () => {

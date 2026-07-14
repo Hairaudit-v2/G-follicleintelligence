@@ -200,7 +200,10 @@ test("concurrent stale reclaim only allows one processor", async () => {
   const reclaimedCount = [first, second].filter((r) => r.reclaimed).length;
   assert.equal(reclaimedCount, 1);
   const loser = [first, second].find((r) => !r.reclaimed);
-  assert.equal(loser && !loser.reclaimed ? loser.reason : null, "already_running_or_reclaimed_by_other_worker");
+  assert.equal(
+    loser && !loser.reclaimed ? loser.reason : null,
+    "already_running_or_reclaimed_by_other_worker"
+  );
 });
 
 test("completed step remains idempotent", async () => {

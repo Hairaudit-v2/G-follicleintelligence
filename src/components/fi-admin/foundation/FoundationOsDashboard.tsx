@@ -179,8 +179,8 @@ export function FoundationOsDashboard({
 
       {newClinic ? (
         <InfoNotice variant="info" title="Fresh workspace">
-          Health record metrics will populate as you onboard patients, link cases, capture media, and
-          record clinical milestones.
+          Health record metrics will populate as you onboard patients, link cases, capture media,
+          and record clinical milestones.
         </InfoNotice>
       ) : null}
 

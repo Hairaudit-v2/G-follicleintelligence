@@ -2,7 +2,10 @@
 
 import { DashboardCard, InfoNotice, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import type { PresenceSummary } from "@/src/lib/fiOs/presence/presenceTypes";
-import { getImplementedPresenceSources, getPresenceSourcesByStatus } from "@/src/lib/fiOs/presence/presenceSourceMap";
+import {
+  getImplementedPresenceSources,
+  getPresenceSourcesByStatus,
+} from "@/src/lib/fiOs/presence/presenceSourceMap";
 
 function toneClass(tone: PresenceSummary["operationalStatus"]["tone"]): string {
   switch (tone) {
@@ -19,7 +22,9 @@ function toneClass(tone: PresenceSummary["operationalStatus"]["tone"]): string {
 
 export function PresenceIntelligenceSurface(props: { summary: PresenceSummary }) {
   const { summary } = props;
-  const roleSnapshots = summary.snapshots.filter((s) => s.actorKind === "role" || s.actorKind === "clinic");
+  const roleSnapshots = summary.snapshots.filter(
+    (s) => s.actorKind === "role" || s.actorKind === "clinic"
+  );
   const arrivalWatch = summary.snapshots.filter(
     (s) =>
       s.signalKind === "patient_arrival_intent" ||
@@ -35,9 +40,12 @@ export function PresenceIntelligenceSurface(props: { summary: PresenceSummary })
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8 sm:px-6">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">Presence intelligence</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+          Presence intelligence
+        </h1>
         <p className="text-sm text-slate-400">
-          Operational role coverage derived from existing signals — not payroll or staff surveillance.
+          Operational role coverage derived from existing signals — not payroll or staff
+          surveillance.
         </p>
       </header>
 
@@ -107,8 +115,8 @@ export function PresenceIntelligenceSurface(props: { summary: PresenceSummary })
 
       <InfoNotice variant="info" title="Source disclaimer">
         <p className="text-sm text-slate-400">
-          Presence is inferred from operational signals only. Unknown sources return safe unknown states.
-          No individual staff tracking, last-active timestamps, or productivity scoring.
+          Presence is inferred from operational signals only. Unknown sources return safe unknown
+          states. No individual staff tracking, last-active timestamps, or productivity scoring.
         </p>
         <ul className="mt-3 space-y-1 text-xs text-slate-500">
           <li>Active sources: {implemented.length}</li>

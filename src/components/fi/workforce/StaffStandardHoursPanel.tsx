@@ -7,7 +7,10 @@ import {
   saveStaffStandardHoursAction,
   generateRosterFromStandardHoursAction,
 } from "@/src/lib/actions/workforce-roster-actions";
-import type { DefaultFullTimePattern, RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
+import type {
+  DefaultFullTimePattern,
+  RosterCadence,
+} from "@/src/lib/workforce/rosterCadencePolicyCore";
 import {
   applyStandardHoursTemplate,
   computeStandardHoursWeeklyTotal,
@@ -187,9 +190,7 @@ export function StaffStandardHoursPanel({
   ) {
     const setter = cycleWeek === 1 ? setWeekA : setWeekB;
     setter((prev) =>
-      prev.map((d) =>
-        d.weekday === weekday ? { ...d, ...patch, cycle_week: cycleWeek } : d
-      )
+      prev.map((d) => (d.weekday === weekday ? { ...d, ...patch, cycle_week: cycleWeek } : d))
     );
   }
 
@@ -419,8 +420,8 @@ export function StaffStandardHoursPanel({
       {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
       <p className="text-[11px] text-slate-500">
-        Sample: {formatHmToDisplay("07:30")}–{formatHmToDisplay("17:30")} Mon/Tue/Thu/Fri with Wed RDO
-        = 4 × 10-hour shifts.
+        Sample: {formatHmToDisplay("07:30")}–{formatHmToDisplay("17:30")} Mon/Tue/Thu/Fri with Wed
+        RDO = 4 × 10-hour shifts.
       </p>
     </div>
   );

@@ -54,7 +54,8 @@ function moreSections(opts?: {
     showNavigationAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
     showProcedureDayNav: opts?.showProcedureDayNav ?? false,
     showSurgeryAdminSurfaces: opts?.showNavigationAdminSurfaces ?? false,
-    showTeamAdminSurfaces: opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
+    showTeamAdminSurfaces:
+      opts?.showTeamAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
     showReportsAdminSurfaces:
       opts?.showReportsAdminSurfaces ?? opts?.showNavigationAdminSurfaces ?? false,
     showSettingsAdminSurfaces:
@@ -67,14 +68,10 @@ function allMoreItemIds(sections = moreSections()) {
 }
 
 test("primary rail has exactly six slots in canonical order", () => {
-  assert.deepEqual([...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS], [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.equal(primaryRailSlotIds().length, 6);
 });
 
@@ -82,14 +79,10 @@ test("minimal nav exposes Today, Calendar, Patients, Front desk, Team, More", ()
   const sidebar = fullSidebar();
   const items = resolveFiOsMinimalNavItems(base, sidebar);
   assert.equal(items.length, 6);
-  assert.deepEqual(items.map((i) => i.id), [
-    "today",
-    "calendar",
-    "patients",
-    "front-desk",
-    "team",
-    "more",
-  ]);
+  assert.deepEqual(
+    items.map((i) => i.id),
+    ["today", "calendar", "patients", "front-desk", "team", "more"]
+  );
   assert.deepEqual(
     items.map((i) => i.label),
     ["Today", "Calendar", "Patients", "Front desk", "Team", "More"]
@@ -117,9 +110,7 @@ function flattenMoreIds(sections = moreSections()) {
 }
 
 function flattenMoreSubLabels(sections = moreSections()) {
-  return sections.flatMap((s) =>
-    s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? [])
-  );
+  return sections.flatMap((s) => s.items.flatMap((i) => i.subItems?.map((sub) => sub.label) ?? []));
 }
 
 test("secondary workflow routes remain in More drawer after regrouping", () => {
@@ -202,7 +193,10 @@ test("exactly one Front desk row on primary rail; no Surgery rows", () => {
 test("Team grouping in More consolidates under one team destination on primary rail", () => {
   const team = moreSections().find((s) => s.groupId === "TEAM");
   assert.ok(team);
-  assert.deepEqual(team!.items.map((i) => i.id), ["team"]);
+  assert.deepEqual(
+    team!.items.map((i) => i.id),
+    ["team"]
+  );
   const subIds = team!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.ok(subIds.includes("team-overview"));
   assert.ok(subIds.includes("team-staff"));
@@ -226,7 +220,10 @@ test("Reports grouping consolidates under More only; D6 admin when allowed", () 
   const staffSections = moreSections({ showNavigationAdminSurfaces: false });
   const staffReports = staffSections.find((s) => s.groupId === "REPORTS");
   assert.ok(staffReports);
-  assert.deepEqual(staffReports!.items.map((i) => i.id), ["reports"]);
+  assert.deepEqual(
+    staffReports!.items.map((i) => i.id),
+    ["reports"]
+  );
   const staffSubIds = staffReports!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
   assert.ok(staffSubIds.includes("reports-analytics"));
   assert.ok(!staffSubIds.includes("analytics-legacy"));
@@ -253,7 +250,10 @@ test("Reports grouping consolidates under More only; D6 admin when allowed", () 
 test("Pipeline workflow group consolidates to one door in More drawer", () => {
   const pipeline = moreSections().find((s) => s.groupId === "PIPELINE");
   assert.ok(pipeline);
-  assert.deepEqual(pipeline!.items.map((i) => i.id), ["crm"]);
+  assert.deepEqual(
+    pipeline!.items.map((i) => i.id),
+    ["crm"]
+  );
   assert.equal(pipeline!.items[0]!.label, "Pipeline");
   assert.ok(pipeline!.items[0]!.href.endsWith("/crm"));
 });

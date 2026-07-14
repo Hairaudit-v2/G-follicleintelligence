@@ -90,7 +90,9 @@ export function isFrontDeskTabActive(
   if (!segment) {
     return path === `${base}/front-desk` || path === `${base}/front-desk/`;
   }
-  return path === `${base}/front-desk/${segment}` || path.startsWith(`${base}/front-desk/${segment}/`);
+  return (
+    path === `${base}/front-desk/${segment}` || path.startsWith(`${base}/front-desk/${segment}/`)
+  );
 }
 
 export type FiOsFrontDeskSidebarSubItem = {

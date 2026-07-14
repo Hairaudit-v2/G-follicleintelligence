@@ -110,7 +110,10 @@ describe("S4.5D one Pipeline door", () => {
 
   it("17 More drawer contains one Pipeline entry", () => {
     const pipeline = morePipelineItems();
-    assert.deepEqual(pipeline.map((i) => i.id), ["crm"]);
+    assert.deepEqual(
+      pipeline.map((i) => i.id),
+      ["crm"]
+    );
     assert.equal(pipeline[0]!.label, "Pipeline");
   });
 

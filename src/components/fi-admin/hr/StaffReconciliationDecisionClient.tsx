@@ -42,14 +42,14 @@ function RecordPanel({
       <dl className="mt-3 grid gap-1 text-xs text-slate-400">
         <div className="flex justify-between gap-2">
           <dt>Role</dt>
-          <dd className="text-slate-200 capitalize">{(history.roleCode ?? "—").replace(/_/g, " ")}</dd>
+          <dd className="text-slate-200 capitalize">
+            {(history.roleCode ?? "—").replace(/_/g, " ")}
+          </dd>
         </div>
         <div className="flex justify-between gap-2">
           <dt>Created</dt>
           <dd className="text-slate-200">
-            {history.createdAt
-              ? `${history.daysSinceCreated} days ago`
-              : "—"}
+            {history.createdAt ? `${history.daysSinceCreated} days ago` : "—"}
           </dd>
         </div>
         <div className="flex justify-between gap-2">
@@ -217,7 +217,9 @@ export function StaffReconciliationDecisionClient({
                       <Button
                         type="button"
                         size="sm"
-                        disabled={pending || card.recommendation.recommendation === "MANUAL_REVIEW_REQUIRED"}
+                        disabled={
+                          pending || card.recommendation.recommendation === "MANUAL_REVIEW_REQUIRED"
+                        }
                         onClick={() =>
                           run(
                             () =>
@@ -270,11 +272,17 @@ export function StaffReconciliationDecisionClient({
       </div>
 
       <p className="mt-4 text-xs text-slate-500">
-        <Link href={`/fi-admin/${tenantId}/hr-os/sync-health`} className="text-cyan-400 hover:text-cyan-300">
+        <Link
+          href={`/fi-admin/${tenantId}/hr-os/sync-health`}
+          className="text-cyan-400 hover:text-cyan-300"
+        >
           Sync health
         </Link>
         {" · "}
-        <Link href={`/fi-admin/${tenantId}/hr-os/duplicates`} className="text-cyan-400 hover:text-cyan-300">
+        <Link
+          href={`/fi-admin/${tenantId}/hr-os/duplicates`}
+          className="text-cyan-400 hover:text-cyan-300"
+        >
           Duplicate review
         </Link>
       </p>

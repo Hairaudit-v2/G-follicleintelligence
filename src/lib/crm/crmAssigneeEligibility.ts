@@ -181,10 +181,7 @@ export function filterCrmAssignableOwnerOptions<
   T extends { id: string; role?: string | null; email?: string | null },
 >(
   options: readonly T[],
-  staffByFiUserId: ReadonlyMap<
-    string,
-    CrmAssigneeStaffSignal | readonly CrmAssigneeStaffSignal[]
-  >
+  staffByFiUserId: ReadonlyMap<string, CrmAssigneeStaffSignal | readonly CrmAssigneeStaffSignal[]>
 ): T[] {
   return options.filter((o) => {
     const id = o.id.trim();

@@ -40,11 +40,7 @@ export function evaluateCalendarConflicts(
   const violations: CalendarConflictViolation[] = [];
 
   if (
-    isOutsideClinicBusinessHours(
-      input.candidate.start_at,
-      input.candidate.end_at,
-      input.gridConfig
-    )
+    isOutsideClinicBusinessHours(input.candidate.start_at, input.candidate.end_at, input.gridConfig)
   ) {
     violations.push({
       kind: "outside_clinic_hours",

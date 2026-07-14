@@ -18,10 +18,7 @@ describe("recruitmentPipelineCore", () => {
   });
 
   it("assertRecruitmentStageTransition blocks terminal moves", () => {
-    assert.throws(
-      () => assertRecruitmentStageTransition("hired", "applied"),
-      /terminal stage/
-    );
+    assert.throws(() => assertRecruitmentStageTransition("hired", "applied"), /terminal stage/);
     assert.throws(
       () => assertRecruitmentStageTransition("applied", "hired"),
       /offer or reference check/

@@ -14,7 +14,10 @@ import {
   IMAGE_CLASSIFICATION_RESULT_V1_VERSION,
   NORMALIZED_IMAGE_SIGNAL_V1_VERSION,
 } from "@follicle/intelligence-core/contracts";
-import type { FiAiImageCategory, FiAiImageClassificationResult } from "@/src/lib/hair-intelligence/imageClassification/types";
+import type {
+  FiAiImageCategory,
+  FiAiImageClassificationResult,
+} from "@/src/lib/hair-intelligence/imageClassification/types";
 import type { ImageSignalSourceSystemV1 } from "@follicle/intelligence-core/contracts";
 import {
   mapExternalLabelToPhotoCategoryV1,
@@ -61,9 +64,7 @@ function mapFiCaptureSourceToContractV1(
   }
 }
 
-function resolveCaptureSource(
-  request: UnifiedImageClassifyRequest
-): ImageCaptureSourceV1 {
+function resolveCaptureSource(request: UnifiedImageClassifyRequest): ImageCaptureSourceV1 {
   const normalized = normalizeFiImageCaptureSource(request.capture_source);
   if (normalized !== "unknown") {
     return mapFiCaptureSourceToContractV1(normalized);
@@ -184,7 +185,9 @@ export function buildNormalizedImageSignalV1(input: {
     subject_id: subjectId,
     classification_results: [input.classification],
     image_metadata: {
-      ...(input.request.image_content_type ? { content_type: input.request.image_content_type } : {}),
+      ...(input.request.image_content_type
+        ? { content_type: input.request.image_content_type }
+        : {}),
       ...(input.request.image_size_bytes != null
         ? { size_bytes: input.request.image_size_bytes }
         : {}),

@@ -160,9 +160,12 @@ export function readPatientVisualSummaryStaffRecord(
   return raw as PatientVisualSummaryStaffRecord;
 }
 
-function formatNotRecordedValue<T>(value: T | null | undefined): T | typeof PATIENT_VISUAL_SUMMARY_NOT_RECORDED {
+function formatNotRecordedValue<T>(
+  value: T | null | undefined
+): T | typeof PATIENT_VISUAL_SUMMARY_NOT_RECORDED {
   if (value == null) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
-  if (typeof value === "number" && !Number.isFinite(value)) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
+  if (typeof value === "number" && !Number.isFinite(value))
+    return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
   return value;
 }
 
@@ -180,8 +183,7 @@ export function buildGraftTypeSummary(input: {
       fiveHair: PATIENT_VISUAL_SUMMARY_NOT_RECORDED,
     };
   }
-  const hasAny =
-    c.singles > 0 || c.doubles > 0 || c.triples > 0 || c.multiples > 0;
+  const hasAny = c.singles > 0 || c.doubles > 0 || c.triples > 0 || c.multiples > 0;
   if (!hasAny) {
     return {
       singles: PATIENT_VISUAL_SUMMARY_NOT_RECORDED,
@@ -236,11 +238,10 @@ export function buildRecipientZones(input: {
   });
 }
 
-export function formatZoneDisplayValue(
-  value: number | string | undefined | null
-): string {
+export function formatZoneDisplayValue(value: number | string | undefined | null): string {
   if (value == null) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
-  if (typeof value === "number" && !Number.isFinite(value)) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
+  if (typeof value === "number" && !Number.isFinite(value))
+    return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
   if (typeof value === "string" && !value.trim()) return PATIENT_VISUAL_SUMMARY_NOT_RECORDED;
   return String(value);
 }
@@ -256,9 +257,7 @@ export function buildDensityZones(
     const qualitative = z.qualitative_label?.trim();
     if (!label || !qualitative) continue;
     const graftsPerCm2 =
-      z.grafts_per_cm2 != null && Number.isFinite(z.grafts_per_cm2)
-        ? z.grafts_per_cm2
-        : undefined;
+      z.grafts_per_cm2 != null && Number.isFinite(z.grafts_per_cm2) ? z.grafts_per_cm2 : undefined;
     out.push({
       label,
       qualitativeLabel: qualitative,
@@ -294,7 +293,10 @@ export function extractPatientSafeHairlinePrinciples(input: {
   return found.filter((p) => patientSafeReportTextIsAllowed(p));
 }
 
-function imageMatchesPhotoSlot(image: PatientImageRow, slot: PatientVisualSummaryPhotoSlot): boolean {
+function imageMatchesPhotoSlot(
+  image: PatientImageRow,
+  slot: PatientVisualSummaryPhotoSlot
+): boolean {
   const attribution = mapToFiImageAttributionType({
     ai_category: image.ai_image_category,
     anatomical_region: image.anatomical_region,
@@ -430,7 +432,7 @@ function collectUploadedViews(images: PatientImageRow[]): string[] {
     const canonical =
       typeof meta.canonical_view === "string"
         ? meta.canonical_view
-        : img.imaging_protocol_slot_slug ?? img.anatomical_region ?? img.image_category;
+        : (img.imaging_protocol_slot_slug ?? img.anatomical_region ?? img.image_category);
     if (canonical?.trim()) {
       views.add(canonical.trim().replace(/_/g, " "));
     }
@@ -446,10 +448,7 @@ function collectRetakeViews(images: PatientImageRow[]): string[] {
       const status = (staff as { status?: string }).status;
       if (status === "retake_required") {
         const view =
-          img.imaging_protocol_slot_slug ??
-          img.anatomical_region ??
-          img.image_category ??
-          "view";
+          img.imaging_protocol_slot_slug ?? img.anatomical_region ?? img.image_category ?? "view";
         views.push(String(view).replace(/_/g, " "));
       }
     }
@@ -488,7 +487,9 @@ export function patientSafeReportTextIsAllowed(text: string): boolean {
   return !FORBIDDEN_REPORT_PATTERNS.some((re) => re.test(t));
 }
 
-export function patientVisualSummaryReportIsPatientSafe(report: PatientVisualSummaryReport): boolean {
+export function patientVisualSummaryReportIsPatientSafe(
+  report: PatientVisualSummaryReport
+): boolean {
   const texts: string[] = [
     report.header.patientDisplay,
     report.header.clinicName ?? "",

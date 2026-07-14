@@ -65,21 +65,21 @@ export async function ensureDefaultDocumentTemplatesForTenant(
   const existing = await loadDocumentTemplatesForTenant(tid, supabase);
   const have = new Set(existing.map((r) => `${r.category}::${r.slug}`));
   const now = new Date().toISOString();
-  const rows = DOCUMENT_TEMPLATE_DEFAULTS.filter(
-    (d) => !have.has(`${d.category}::${d.slug}`)
-  ).map((d) => ({
-    tenant_id: tid,
-    category: d.category,
-    slug: d.slug,
-    name: d.name,
-    body: d.body,
-    is_default: d.is_default ?? true,
-    is_active: true,
-    version: 1,
-    metadata: {},
-    created_at: now,
-    updated_at: now,
-  }));
+  const rows = DOCUMENT_TEMPLATE_DEFAULTS.filter((d) => !have.has(`${d.category}::${d.slug}`)).map(
+    (d) => ({
+      tenant_id: tid,
+      category: d.category,
+      slug: d.slug,
+      name: d.name,
+      body: d.body,
+      is_default: d.is_default ?? true,
+      is_active: true,
+      version: 1,
+      metadata: {},
+      created_at: now,
+      updated_at: now,
+    })
+  );
   if (rows.length === 0) return { created: 0 };
   const { error } = await supabase.from("fi_document_templates").insert(rows);
   if (error) throw new Error(error.message);
@@ -104,7 +104,10 @@ export async function upsertDocumentTemplate(
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
   const now = new Date().toISOString();
-  const slug = params.slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+  const slug = params.slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-");
   if (!slug) throw new Error("slug is required");
   const name = params.name.trim();
   const body = params.body.trim();

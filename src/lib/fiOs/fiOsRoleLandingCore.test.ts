@@ -65,18 +65,9 @@ describe("resolveFiOsPostLoginPathSuffix", () => {
   });
 
   it("maps workspace profile when staff role key is absent", () => {
-    assert.equal(
-      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "reception" }),
-      "/front-desk"
-    );
-    assert.equal(
-      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "consultant" }),
-      "/crm"
-    );
-    assert.equal(
-      resolveFiOsPostLoginPathSuffix({ workspaceProfile: "finance" }),
-      "/financial-os"
-    );
+    assert.equal(resolveFiOsPostLoginPathSuffix({ workspaceProfile: "reception" }), "/front-desk");
+    assert.equal(resolveFiOsPostLoginPathSuffix({ workspaceProfile: "consultant" }), "/crm");
+    assert.equal(resolveFiOsPostLoginPathSuffix({ workspaceProfile: "finance" }), "/financial-os");
   });
 });
 

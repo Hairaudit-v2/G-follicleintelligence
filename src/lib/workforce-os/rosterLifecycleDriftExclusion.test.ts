@@ -10,7 +10,9 @@ import {
 
 const PERIOD = ["2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10"];
 
-function staffRow(p: Partial<RosterStaffRowContext> & Pick<RosterStaffRowContext, "id">): RosterStaffRowContext {
+function staffRow(
+  p: Partial<RosterStaffRowContext> & Pick<RosterStaffRowContext, "id">
+): RosterStaffRowContext {
   return {
     is_active: true,
     tenant_id: "t1",
@@ -70,5 +72,8 @@ test("inactive duplicate (Dr Seetal) is excluded and labelled as a duplicate pro
 
   // Scheduling must never target the duplicate record.
   const gridOptions = filterRosterGridStaffOptions(staffRows, ctx.eligibleStaffIds);
-  assert.equal(gridOptions.some((s) => s.id === "old-dup"), false);
+  assert.equal(
+    gridOptions.some((s) => s.id === "old-dup"),
+    false
+  );
 });

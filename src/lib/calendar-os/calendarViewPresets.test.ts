@@ -34,7 +34,10 @@ describe("calendarViewPresets", () => {
   it("resolves surgery day preset", () => {
     const preset = calendarOsViewPresetById("surgery_day");
     assert.ok(preset);
-    assert.equal(activeCalendarOsViewPresetId(query({ view: "day", bookingType: "surgery" })), "surgery_day");
+    assert.equal(
+      activeCalendarOsViewPresetId(query({ view: "day", bookingType: "surgery" })),
+      "surgery_day"
+    );
   });
 
   it("resolves nursing preset from role bucket", () => {

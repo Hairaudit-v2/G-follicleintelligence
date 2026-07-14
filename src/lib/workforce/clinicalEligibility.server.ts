@@ -166,8 +166,7 @@ export async function evaluateStaffClinicalEligibilityForMember(input: {
     credentials,
     certifications,
     complianceAlerts: alerts,
-    trainingComplete:
-      (hr.training_required_count ?? 0) === 0 && hr.onboardingStatus === "complete",
+    trainingComplete: (hr.training_required_count ?? 0) === 0 && hr.onboardingStatus === "complete",
     sopAcknowledgementsComplete: (hr.required_documents_missing_count ?? 0) === 0,
     managerApproved: hr.onboardingStatus === "complete",
     rolePermissionsActive: input.procedurePrivilegeEligible !== false,

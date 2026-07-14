@@ -3,9 +3,7 @@ import { describe, it } from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-  WORKFORCE_ACTOR_FI_USER_NOT_LINKED_MESSAGE,
-} from "@/src/lib/workforce-os/workforceMutationErrorsCore";
+import { WORKFORCE_ACTOR_FI_USER_NOT_LINKED_MESSAGE } from "@/src/lib/workforce-os/workforceMutationErrorsCore";
 import { createAvailabilityBlock } from "@/src/lib/workforce-os/workforceRostering.server";
 import { setStaffMaternityLeave } from "@/src/lib/workforce/staffLeaveWorkflow.server";
 
@@ -76,7 +74,8 @@ function createMaternityLeaveMockSupabase(initialMember: StaffMemberRow) {
                   },
                   maybeSingle: async () => {
                     const matches =
-                      String(member.tenant_id) === filters.find((f) => f.col === "tenant_id")?.val &&
+                      String(member.tenant_id) ===
+                        filters.find((f) => f.col === "tenant_id")?.val &&
                       String(member.id) === filters.find((f) => f.col === "id")?.val;
                     return { data: matches ? member : null, error: null };
                   },
@@ -123,8 +122,7 @@ function createMaternityLeaveMockSupabase(initialMember: StaffMemberRow) {
       if (table === "fi_staff_availability_blocks") {
         return {
           insert(row: Record<string, unknown>) {
-            const createdBy =
-              row.created_by != null ? String(row.created_by) : null;
+            const createdBy = row.created_by != null ? String(row.created_by) : null;
             if (createdBy && !VALID_FI_USER_IDS.has(createdBy)) {
               return {
                 select: () => ({

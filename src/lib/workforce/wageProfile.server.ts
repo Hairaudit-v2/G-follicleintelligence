@@ -6,10 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveStaffMemberContext } from "@/src/lib/workforce/workforceStaffMemberResolve.server";
 
-import {
-  resolveTimesheetTransition,
-  type TimesheetApprovalAction,
-} from "./timesheetApprovalCore";
+import { resolveTimesheetTransition, type TimesheetApprovalAction } from "./timesheetApprovalCore";
 import {
   computeGrossLabourCostCents,
   computeSurgeryDayStaffingCost,
@@ -83,9 +80,7 @@ function mapTimesheetEntry(
     minutesWorked: Number(row.minutes_worked ?? 0),
     rateTypeSnapshot: normalizeWageRateType(String(row.rate_type_snapshot)),
     baseRateCentsSnapshot: Number(row.base_rate_cents_snapshot),
-    awardLoadingsSnapshot: Array.isArray(loadings)
-      ? (loadings as AwardLoadingSnapshot[])
-      : [],
+    awardLoadingsSnapshot: Array.isArray(loadings) ? (loadings as AwardLoadingSnapshot[]) : [],
     grossCostCents: Number(row.gross_cost_cents ?? 0),
     status: String(row.status) as TimesheetStatus,
     notes: row.notes != null ? String(row.notes) : null,
@@ -107,7 +102,10 @@ async function loadStaffNameMap(
     .in("id", staffMemberIds);
   if (error) throw new Error(error.message);
   return new Map(
-    (data ?? []).map((r) => [String((r as { id: string }).id), String((r as { full_name: string }).full_name)])
+    (data ?? []).map((r) => [
+      String((r as { id: string }).id),
+      String((r as { full_name: string }).full_name),
+    ])
   );
 }
 
@@ -228,9 +226,7 @@ export async function listWorkforceWageProfiles(
     rows.map((r) => String(r.staff_member_id)),
     supabase
   );
-  return rows.map((r) =>
-    mapWageProfile(r, nameMap.get(String(r.staff_member_id)) ?? null)
-  );
+  return rows.map((r) => mapWageProfile(r, nameMap.get(String(r.staff_member_id)) ?? null));
 }
 
 export async function upsertWorkforceWageProfile(input: {
@@ -348,9 +344,7 @@ export async function listTimesheetEntries(
     rows.map((r) => String(r.staff_member_id)),
     supabase
   );
-  return rows.map((r) =>
-    mapTimesheetEntry(r, nameMap.get(String(r.staff_member_id)) ?? null)
-  );
+  return rows.map((r) => mapTimesheetEntry(r, nameMap.get(String(r.staff_member_id)) ?? null));
 }
 
 export async function createTimesheetEntry(input: {
@@ -677,9 +671,7 @@ export async function computeSurgeryDayStaffingCostForDate(
   if (membersRes.error) throw new Error(membersRes.error.message);
 
   const profileByFiStaff = new Map(
-    profiles
-      .filter((p) => p.fiStaffId)
-      .map((p) => [p.fiStaffId as string, p])
+    profiles.filter((p) => p.fiStaffId).map((p) => [p.fiStaffId as string, p])
   );
   const profileByMember = new Map(profiles.map((p) => [p.staffMemberId, p]));
   const memberByFiStaff = new Map(

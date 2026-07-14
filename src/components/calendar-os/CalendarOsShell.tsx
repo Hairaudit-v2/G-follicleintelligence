@@ -107,7 +107,12 @@ export function CalendarOsShell({
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-white/[0.06] bg-[#060d18]/95 px-2 py-1">
         <div className="flex min-w-0 flex-1 items-center gap-x-2 gap-y-1">
           <div className={fiOsCalDesktopOnly}>
-            <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
+            <CalendarOsPresetBar
+              tenantId={data.tenantId}
+              query={data.query}
+              route={route}
+              compact
+            />
           </div>
           <div className={cn(fiOsCalTabletOnly, "min-w-0 flex-1")}>
             <button
@@ -125,11 +130,19 @@ export function CalendarOsShell({
             </button>
             {tabletPresetsOpen ? (
               <div className="mt-1">
-                <CalendarOsPresetBar tenantId={data.tenantId} query={data.query} route={route} compact />
+                <CalendarOsPresetBar
+                  tenantId={data.tenantId}
+                  query={data.query}
+                  route={route}
+                  compact
+                />
               </div>
             ) : null}
           </div>
-          <span className={cn("hidden h-3 w-px bg-white/[0.08] xl:block", fiOsCalDesktopOnly)} aria-hidden />
+          <span
+            className={cn("hidden h-3 w-px bg-white/[0.08] xl:block", fiOsCalDesktopOnly)}
+            aria-hidden
+          />
           <CalendarOsViewControls
             tenantId={data.tenantId}
             query={data.query}
@@ -144,7 +157,9 @@ export function CalendarOsShell({
 
       <div className={cn("flex min-h-0 min-w-0 flex-1", fiOsCalTabletGridMinHeight)}>
         {sidebar ? (
-          <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">{sidebar}</div>
+          <div className="hidden w-48 shrink-0 border-r border-white/[0.05] lg:block">
+            {sidebar}
+          </div>
         ) : null}
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -186,7 +201,9 @@ export function CalendarOsShell({
         </div>
 
         {rightPanel ? (
-          <div className="hidden w-64 shrink-0 border-l border-white/[0.05] xl:block">{rightPanel}</div>
+          <div className="hidden w-64 shrink-0 border-l border-white/[0.05] xl:block">
+            {rightPanel}
+          </div>
         ) : null}
       </div>
     </div>

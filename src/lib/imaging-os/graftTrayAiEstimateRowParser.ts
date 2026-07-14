@@ -22,10 +22,7 @@ import {
   type GraftTrayMismatchBand,
 } from "./graftTrayCountTypes";
 
-function isUnionMember<T extends readonly string[]>(
-  values: T,
-  value: unknown
-): value is T[number] {
+function isUnionMember<T extends readonly string[]>(values: T, value: unknown): value is T[number] {
   return typeof value === "string" && (values as readonly string[]).includes(value);
 }
 
@@ -99,9 +96,7 @@ export function parseGraftTrayManualCountSource(
   throw new Error(`Invalid graft tray manual_count_source: ${JSON.stringify(value)}`);
 }
 
-export function parseGraftTrayAiReviewAction(
-  value: unknown
-): GraftTrayAiReviewAction | null {
+export function parseGraftTrayAiReviewAction(value: unknown): GraftTrayAiReviewAction | null {
   if (value == null) return null;
   if (isUnionMember(GRAFT_TRAY_AI_REVIEW_ACTIONS, value)) return value;
   return null;
@@ -115,9 +110,7 @@ export function parseGraftTrayAiEstimateRow(row: unknown): GraftTrayAiEstimateRo
   const r = row as Record<string, unknown>;
   const manualCountSourceRaw = r.manual_count_source;
   const manualCountSource =
-    manualCountSourceRaw == null
-      ? null
-      : parseGraftTrayManualCountSource(manualCountSourceRaw);
+    manualCountSourceRaw == null ? null : parseGraftTrayManualCountSource(manualCountSourceRaw);
 
   return {
     id: readRequiredString(r.id, "id"),
@@ -132,7 +125,8 @@ export function parseGraftTrayAiEstimateRow(row: unknown): GraftTrayAiEstimateRo
     corrected_graft_count: readNullableInt(r.corrected_graft_count),
     delta: readNullableInt(r.delta),
     mismatch_band: parseGraftTrayMismatchBand(r.mismatch_band),
-    confidence: typeof r.confidence === "number" && Number.isFinite(r.confidence) ? r.confidence : 0,
+    confidence:
+      typeof r.confidence === "number" && Number.isFinite(r.confidence) ? r.confidence : 0,
     confidence_band: parseGraftTrayConfidenceBand(r.confidence_band),
     image_quality: parseGraftTrayImageQuality(r.image_quality),
     assessable: r.assessable === true,
@@ -199,7 +193,8 @@ export function parseGraftTrayAiEstimateSummaryFromMetadata(
       fallback: "unable_to_assess",
     }),
     delta: readNullableInt(e.delta),
-    confidence: typeof e.confidence === "number" && Number.isFinite(e.confidence) ? e.confidence : 0,
+    confidence:
+      typeof e.confidence === "number" && Number.isFinite(e.confidence) ? e.confidence : 0,
     confidence_band: parseGraftTrayConfidenceBand(e.confidence_band, { fallback: "unknown" }),
     image_quality: parseGraftTrayImageQuality(e.image_quality, { fallback: "unknown" }),
     assessable: e.assessable === true,

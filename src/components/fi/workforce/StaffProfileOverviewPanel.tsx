@@ -17,7 +17,9 @@ import { cn } from "@/lib/utils";
 function ProgressRail({ stages }: { stages: StaffLifecycleProgressStage[] }) {
   return (
     <DashboardCard className="p-4 sm:p-5">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Lifecycle progress</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+        Lifecycle progress
+      </p>
       <ol className="mt-4 flex flex-col gap-0 sm:flex-row sm:items-start sm:justify-between">
         {stages.map((stage, index) => (
           <li
@@ -31,9 +33,12 @@ function ProgressRail({ stages }: { stages: StaffLifecycleProgressStage[] }) {
             <span
               className={cn(
                 "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                stage.status === "complete" && "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30",
-                stage.status === "current" && "bg-[#22C1FF]/20 text-[#22C1FF] ring-1 ring-[#22C1FF]/40",
-                stage.status === "blocked" && "bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30",
+                stage.status === "complete" &&
+                  "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30",
+                stage.status === "current" &&
+                  "bg-[#22C1FF]/20 text-[#22C1FF] ring-1 ring-[#22C1FF]/40",
+                stage.status === "blocked" &&
+                  "bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30",
                 stage.status === "upcoming" && "bg-white/5 text-slate-500 ring-1 ring-white/10"
               )}
               aria-hidden
@@ -55,7 +60,9 @@ function AttentionPanel({ blockers }: { blockers: StaffLifecycleBlocker[] }) {
   if (blockers.length === 0) {
     return (
       <DashboardCard className="p-4 sm:p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">What needs attention</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+          What needs attention
+        </p>
         <p className="mt-3 text-sm text-emerald-200/90">
           No blockers detected — staff lifecycle pathways look clear from available data.
         </p>
@@ -65,7 +72,9 @@ function AttentionPanel({ blockers }: { blockers: StaffLifecycleBlocker[] }) {
 
   return (
     <DashboardCard className="p-4 sm:p-5">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">What needs attention</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+        What needs attention
+      </p>
       <ul className="mt-3 space-y-3">
         {blockers.map((blocker) => (
           <li
@@ -99,7 +108,9 @@ function RecommendedNextStep({
 
   return (
     <DashboardCard className="p-4 sm:p-5" data-testid="staff-profile-recommended-step">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Recommended next step</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+        Recommended next step
+      </p>
       {matchingBlocker ? (
         <p className="mt-2 text-xs text-[#94A3B8]">{matchingBlocker.description}</p>
       ) : step.description ? (

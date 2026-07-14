@@ -37,13 +37,9 @@ async function assertSurgeryBookingAnchorsBelongToTenant(
   const tid = tenantId.trim();
   const checks: Array<{ table: string; id: string; label: string }> = [
     { table: "fi_patients", id: body.patientId, label: "Patient" },
-    ...(body.caseId?.trim()
-      ? [{ table: "fi_cases", id: body.caseId, label: "Case" }]
-      : []),
+    ...(body.caseId?.trim() ? [{ table: "fi_cases", id: body.caseId, label: "Case" }] : []),
     ...(body.leadId?.trim() ? [{ table: "fi_crm_leads", id: body.leadId, label: "Lead" }] : []),
-    ...(body.personId?.trim()
-      ? [{ table: "fi_persons", id: body.personId, label: "Person" }]
-      : []),
+    ...(body.personId?.trim() ? [{ table: "fi_persons", id: body.personId, label: "Person" }] : []),
     { table: "fi_clinics", id: body.clinicId, label: "Clinic" },
     { table: "fi_clinic_rooms", id: body.roomId, label: "Room" },
   ];
@@ -146,7 +142,10 @@ export async function confirmSurgeryBooking(
     supabase
   );
 
-  if ((body.bookingStatus ?? "scheduled") === "confirmed" && booking.booking_status !== "confirmed") {
+  if (
+    (body.bookingStatus ?? "scheduled") === "confirmed" &&
+    booking.booking_status !== "confirmed"
+  ) {
     booking = await updateBooking(
       {
         tenantId: tid,
@@ -160,11 +159,7 @@ export async function confirmSurgeryBooking(
   const preOpChecklist = preOpChecklistDisplayItems(buildPreOpChecklistFlagsForBookingDraft(body));
 
   let depositInvoiceId: string | null = null;
-  if (
-    body.createDepositRequest &&
-    body.caseId?.trim() &&
-    readFiPaymentsEnabled()
-  ) {
+  if (body.createDepositRequest && body.caseId?.trim() && readFiPaymentsEnabled()) {
     try {
       const invoice = await createDepositInvoiceFromSurgeryCase({
         tenantId: tid,
@@ -223,9 +218,8 @@ export async function confirmSurgeryBooking(
   }
 
   if (booking.patient_id) {
-    const { advancePatientJourneyOnEvent } = await import(
-      "@/src/lib/patientJourney/patientJourneyState.server"
-    );
+    const { advancePatientJourneyOnEvent } =
+      await import("@/src/lib/patientJourney/patientJourneyState.server");
     await advancePatientJourneyOnEvent({
       tenantId: tid,
       patientId: booking.patient_id,

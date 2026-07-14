@@ -176,7 +176,13 @@ export function CalendarOsViewControls({
   }, [moreOpen]);
 
   return (
-    <div className={cn(fiOsCalTabletChipScroll, "xl:flex-wrap xl:overflow-visible xl:whitespace-normal", !inline && "px-0")}>
+    <div
+      className={cn(
+        fiOsCalTabletChipScroll,
+        "xl:flex-wrap xl:overflow-visible xl:whitespace-normal",
+        !inline && "px-0"
+      )}
+    >
       {PRIMARY_VIEW_MODES.map((mode) => {
         const active = isViewModeActive(query, mode.id);
         return (
@@ -193,14 +199,14 @@ export function CalendarOsViewControls({
         <button
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
-          className={cn(
-            viewChipClass(moreActive),
-            "inline-flex items-center gap-0.5"
-          )}
+          className={cn(viewChipClass(moreActive), "inline-flex items-center gap-0.5")}
           aria-expanded={moreOpen}
         >
           {activeMore ? activeMore.label : "More"}
-          <ChevronDown className={cn("h-2.5 w-2.5 transition", moreOpen && "rotate-180")} aria-hidden />
+          <ChevronDown
+            className={cn("h-2.5 w-2.5 transition", moreOpen && "rotate-180")}
+            aria-hidden
+          />
         </button>
         {moreOpen ? (
           <>

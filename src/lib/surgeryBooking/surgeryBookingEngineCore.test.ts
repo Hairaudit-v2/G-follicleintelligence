@@ -47,7 +47,9 @@ describe("surgeryBookingEngineCore", () => {
       "Select a clinic.",
     ]);
     const partial = { patientId: PATIENT, clinicId: CLINIC };
-    assert.ok(listSurgeryBookingMissingRequirements(partial, 2).includes("Enter a procedure type."));
+    assert.ok(
+      listSurgeryBookingMissingRequirements(partial, 2).includes("Enter a procedure type.")
+    );
   });
 
   it("builds tenant-scoped surgery booking create payload", () => {
@@ -61,9 +63,10 @@ describe("surgeryBookingEngineCore", () => {
   });
 
   it("stores procedure metadata without cross-tenant identifiers in display fields", () => {
-    const meta = buildSurgeryBookingMetadata(baseBody(), preOpChecklistDisplayItems(
-      buildPreOpChecklistFlagsForBookingDraft(baseBody())
-    ));
+    const meta = buildSurgeryBookingMetadata(
+      baseBody(),
+      preOpChecklistDisplayItems(buildPreOpChecklistFlagsForBookingDraft(baseBody()))
+    );
     assert.equal(meta.technique, "FUE hair transplant");
     assert.equal(meta.graft_count_estimate, "3000");
     assert.equal(meta.surgery_booking_engine_v1, true);

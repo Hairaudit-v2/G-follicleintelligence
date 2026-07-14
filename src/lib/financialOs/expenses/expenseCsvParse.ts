@@ -63,7 +63,11 @@ const HEADER_ALIASES: Record<ExpenseCsvColumnKey, readonly string[]> = {
 };
 
 function normalizeHeader(h: string): string {
-  return h.replace(/^\uFEFF/, "").trim().toLowerCase().replace(/\s+/g, " ");
+  return h
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
 }
 
 /** Minimal RFC4180-ish CSV split (handles quoted commas and "" escapes). */
@@ -98,7 +102,10 @@ export function splitCsvLine(line: string): string[] {
 }
 
 export function parseCsvRows(text: string): string[][] {
-  const normalized = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const normalized = text
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
   const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
   return lines.map(splitCsvLine);
 }
