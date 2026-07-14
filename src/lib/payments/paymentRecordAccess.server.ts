@@ -12,6 +12,10 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { isPaymentMutationRole } from "@/src/lib/payments/paymentRecordModel";
 import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
+import {
+  normalizeFiTenantAdminRole,
+  tenantAdminRoleAllowsPaymentMutation,
+} from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 export class PaymentRecordAccessError extends Error {
   constructor(
@@ -42,9 +46,46 @@ async function loadFiUserForTenant(
   };
 }
 
+/** Active `fi_tenant_admin_users` finance writers (`finance_admin` / `clinic_admin`). */
+async function fiUserAllowsPaymentMutationViaTenantAdmin(
+  tenantId: string,
+  fiUserId: string
+): Promise<boolean> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_tenant_admin_users")
+    .select("admin_role, status")
+    .eq("tenant_id", tenantId.trim())
+    .eq("fi_user_id", fiUserId.trim())
+    .maybeSingle();
+  if (error) throw new PaymentRecordAccessError(500, "Could not verify tenant admin role.");
+  if (!data) return false;
+  const st = String((data as { status: string | null }).status ?? "")
+    .trim()
+    .toLowerCase();
+  if (st !== "active") return false;
+  const role = normalizeFiTenantAdminRole(
+    String((data as { admin_role: string | null }).admin_role ?? "")
+  );
+  return tenantAdminRoleAllowsPaymentMutation(role);
+}
+
+async function assertFiUserMayMutatePayments(row: {
+  id: string;
+  role: string;
+}, tenantId: string): Promise<void> {
+  if (isPaymentMutationRole(row.role)) return;
+  if (await fiUserAllowsPaymentMutationViaTenantAdmin(tenantId, row.id)) return;
+  throw new PaymentRecordAccessError(
+    403,
+    "Finance or manager access required to record payments."
+  );
+}
+
 /**
- * Mutations: finance-capable roles on `fi_users` (`PAYMENT_MUTATION_ROLES_LOWER`), impersonating platform-admin, or scoped `FI_ADMIN_API_KEY`.
- * **Not** aligned with `fi_tenant_admin_users` capability grants — see `docs/design/fi-payment-records-access.md`.
+ * Mutations: finance-capable `fi_users.role` (`PAYMENT_MUTATION_ROLES_LOWER`), active
+ * `finance_admin` / `clinic_admin` on `fi_tenant_admin_users`, impersonating platform-admin
+ * (target must satisfy one of the above), or scoped `FI_ADMIN_API_KEY`.
  * Staff PIN sessions are always blocked (even if role would allow).
  */
 export async function assertPaymentRecordWriteAllowed(
@@ -81,23 +122,13 @@ export async function assertPaymentRecordWriteAllowed(
     if (!row) {
       throw new PaymentRecordAccessError(403, "Impersonated user is not a member of this tenant.");
     }
-    if (!isPaymentMutationRole(row.role)) {
-      throw new PaymentRecordAccessError(
-        403,
-        "Finance or manager access required to record payments."
-      );
-    }
+    await assertFiUserMayMutatePayments(row, tid);
     return { actorFiUserId: row.id };
   }
 
   const row = await loadFiUserForTenant(tid, authUserId);
   if (!row) throw new PaymentRecordAccessError(403, "Not a member of this tenant.");
-  if (!isPaymentMutationRole(row.role)) {
-    throw new PaymentRecordAccessError(
-      403,
-      "Finance or manager access required to record payments."
-    );
-  }
+  await assertFiUserMayMutatePayments(row, tid);
   return { actorFiUserId: row.id };
 }
 

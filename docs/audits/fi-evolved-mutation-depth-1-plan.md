@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **IN PROGRESS**  
+**Status:** **IN PROGRESS / AMBER** (MD-01+MD-02 PASS; MD-03 FAIL — P1 payment-write gate for `finance_admin` fixed in code, re-bake after deploy)  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  

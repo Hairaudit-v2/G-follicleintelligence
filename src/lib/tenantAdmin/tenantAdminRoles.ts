@@ -64,6 +64,15 @@ export function tenantAdminRoleAllowsBookingsBoardNav(role: FiTenantAdminRole | 
   return role === "clinic_admin" || role === "operations_admin" || role === "finance_admin";
 }
 
+/**
+ * Manual payment / invoice write paths (`assertPaymentRecordWriteAllowed`).
+ * Matches product copy: finance_admin = "Revenue, invoices, payments…"; clinic_admin has full finance caps.
+ */
+export function tenantAdminRoleAllowsPaymentMutation(role: FiTenantAdminRole | null): boolean {
+  if (!role) return false;
+  return role === "clinic_admin" || role === "finance_admin";
+}
+
 /** Read-only dashboard / AnalyticsOS-style read paths. */
 export function tenantAdminRoleAllowsAnalyticsNav(role: FiTenantAdminRole | null): boolean {
   if (!role) return false;
