@@ -20,7 +20,15 @@
 | Weighted operational (audit-1 model) | **≈ 46 → ≈ 66 / 100** — still **NOT READY** for unrestricted daily use |
 | Weighted commercial (audit-1 model) | **≈ 38 → ≈ 55 / 100** — still **NOT READY** for self-serve multi-clinic |
 
-**Honesty rule applied:** Lift where mutate/reload and role-doorway evidence exists. Do **not** invent ≥ 95 go-live while BLK-SEC / DR P0s are open. OW-06 Reception/Nurse ordinary write remains **SKIP** (no raw passwords; impersonation-only deferred).
+**Honesty rule applied:** Lift where mutate/reload and role-doorway evidence exists. Do **not** invent ≥ 95 go-live while BLK-SEC / DR P0s are open.
+
+### Preconditions confirmed (evidence lock — do not regress)
+
+| Lock | Verdict |
+| ---- | ------- |
+| `FI-EVOLVED-ORDINARY-WRITE-1` | **GREEN — complete** — OW-01–05 PASS under raw `manager@` Consultant (**not** provisional / impersonation-only). Evidence: `8432111a`, `5d619625`, `d7295b45` |
+| OW-06 Reception/Nurse | **PASS** via impersonation (optional path; Jesika then Evie) — closed in ordinary-write findings |
+| MD-04 Doctor | **PASS (observe)** closed (`1ba867c2`) — **not** open / SKIP / deferred |
 
 ---
 
@@ -40,8 +48,8 @@
 | `FI-TRUST-MONEY-AND-READINESS-1` | GREEN | prior trust close | Money truth, Source labels, readiness/tomorrow |
 | `FI-CI-SIGNAL-HYGIENE-1` | GREEN / CLOSED | `87ce552e` | Trust trio GREEN; public smoke 144/0/66; typecheck local green |
 | `FI-EVOLVED-OPERATIONAL-PILOT-1` | GREEN (scoped) | `1149d125` + findings | S1–S5 doorways; FD check-in; F-PILOT-06/11/18 live PASS |
-| `FI-EVOLVED-MUTATION-DEPTH-1` | GREEN (scoped) | `6df88546` + findings | MD-01/02/03/05 mutate+reload; MD-04 SKIP |
-| `FI-EVOLVED-ORDINARY-WRITE-1` | GREEN | `8432111a` / `5d619625` | Raw Consultant Pipeline write parity; OW-06 SKIP |
+| `FI-EVOLVED-MUTATION-DEPTH-1` | GREEN (scoped) | `6df88546` + `1ba867c2` + findings | MD-01/02/03/05 mutate+reload; MD-04 PASS (observe) |
+| `FI-EVOLVED-ORDINARY-WRITE-1` | GREEN — complete | `8432111a` / `5d619625` / `d7295b45` | Raw Consultant Pipeline write (OW-01–05); OW-06 impersonation Reception/Nurse PASS |
 | Formal P0 registry | Partial | operator checklist + backup audit | **BLK-SEC-01** Block (E4–E6); SEC-02 / SEC-05 / LEG-01 Complete 2026-06-30 |
 
 ---
@@ -90,7 +98,7 @@
 | 3 | UX coherence | 52 | **64** | +12 | Role landings F-PILOT-06/11/18; residual soft-nav / dual doors |
 | 4 | Data integrity | 68 | **72** | +4 | Mutate+hard-reload held (FD, Pipeline, Money); fixture P2s remain |
 | 5 | Permission and security safety | 58 | **62** | +4 | Write-gate honesty improved; **DR/SEC P0s still open** — capped |
-| 6 | Staff operational readiness | 42 | **70** | +28 | S1–S5 bake help-needed 0; OW-06 / raw frontline still SKIP |
+| 6 | Staff operational readiness | 42 | **70** | +28 | S1–S5 bake help-needed 0; raw Consultant OW GREEN; OW-06 impersonation PASS; Reception/Nurse raw passwords still unavailable |
 | 7 | Owner and reporting usefulness | 55 | **56** | +1 | No new owner home work |
 | 8 | Tablet and mobile readiness | 50 | **50** | 0 | Tablet **not observed** in pilot (desktop only) |
 | 9 | Evolved Hair production readiness | 40 | **58** | +18 | Formal scorecard 63; still NO-GO on P0 DR |
@@ -132,10 +140,11 @@
 | ---- | ---------------------------- |
 | Security / BLK-SEC-01 | Open P0 — E1–E3 attached (`blk-sec-01-pitr-*.png`, RPO/RTO sign-off); E4–E6 drill log empty — Security stays **0** |
 | Procedure Day / Stripe / AI | Explicit non-goals for this rescore window |
-| OW-06 Reception/Nurse ordinary write | **SKIP** — no raw passwords; impersonation path deferred to Phase B |
+| Reception/Nurse **raw-password** ordinary write | Still no raw passwords — OW-06 already **PASS** under impersonation; raw frontline remains future if credentials appear |
 | Soft-nav P2s (F-PILOT-03/09/12/16, Money soft-click) | Observe-only; UX/performance only +1 partial |
 | Tablet purity | Not evidenced |
 | ≥ 95 go-live narrative | Forbidden while P0 DR open |
+| Consultant ordinary-write / MD-04 | **Locked GREEN / PASS observe** — do not treat as open in this rescore |
 
 ---
 
@@ -147,7 +156,7 @@
 | CI-TRIAGE-TEAM-01 | Quarantined `team-workspace-nav` | Honest un-quarantine or fix |
 | CI-FIX-01 | Optional `FI_E2E_*` fixtures | Set from `.env.local` only if real; else document MISSING |
 | Prettier | Format check ~1181 files | Batch format; no force-push |
-| OW-06 | Reception/Nurse ordinary write via **impersonation** | Platform admin impersonate Jesika/Roslyn then Evie |
+| Raw frontline passwords | Reception/Nurse raw ordinary write | Only if credentials available; OW-06 impersonation already PASS |
 
 ---
 

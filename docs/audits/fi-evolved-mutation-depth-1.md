@@ -5,13 +5,28 @@
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)  
-**Prior pilot:** `FI-EVOLVED-OPERATIONAL-PILOT-1` GREEN (scoped) at `a8052a2b`
+**Prior pilot:** `FI-EVOLVED-OPERATIONAL-PILOT-1` GREEN (scoped) at `a8052a2b`  
+**MD-04 closure commit:** `1ba867c2`
+
+---
+
+## Preconditions confirmed (evidence lock)
+
+**Source of truth (user-confirmed 2026-07-14) — do not regress:**
+
+| Lock | Verdict |
+| ---- | ------- |
+| MD-04 Doctor | **PASS — observe-only closure** (commit `1ba867c2`) — **not** open, SKIP, or deferred |
+| MD-04 scope | Identity, `/doctor`, Patients / Calendar / surgery readiness / consultation hub verified; help-needed **0** |
+| MD-04 mutation | No safe mutation exercised — **unscored** (not failed) |
+
+Future audits / rescored notes **must not** list MD-04 as open, SKIP, or deferred.
 
 ---
 
 ## Executive summary
 
-Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, **MD-04 Doctor**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. **MD-04** closed via raw-password Doctor `tlbpmg@gmail.com` (reclassify `c5bf4e56`): identity/landing/ordinary paths PASS; no safe reversible SMOKETEST doctor mutation available — scored nav/landing/write-capability observe only (Calendar ClinicOS READ-ONLY; consultation intake locked on Completed fixture). Help-needed: **0**. **Operational constraint:** no raw passwords for Reception or Nurse (impersonation only); Doctor raw now available (`tlbpmg@`); Consultant `manager@` (and Finance `harsh@` when needed).
+Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nurse**, **MD-03 Finance**, **MD-04 Doctor**, and **MD-05 raw-password** PASS. MD-03 previously FAILED because the payment write gate ignored active `finance_admin` tenant-admin roles; fix `6df88546` is live on production. MD-05: ordinary login as `manager@evolvedhair.com.au` (no platform-admin impersonation) — Consultant workspace, bare tenant settle → `/crm`, Pipeline spot-check held. **MD-04** closed as **PASS (observe)** via raw-password Doctor `tlbpmg@gmail.com` (reclassify `c5bf4e56`; closure docs `1ba867c2`): identity/landing/ordinary paths PASS; no safe reversible SMOKETEST doctor mutation available — scored nav/landing/write-capability observe only (Calendar ClinicOS READ-ONLY; consultation intake locked on Completed fixture). Mutation unscored, not failed. Help-needed: **0**. **Operational constraint:** no raw passwords for Reception or Nurse (impersonation only); Doctor raw now available (`tlbpmg@`); Consultant `manager@` (and Finance `harsh@` when needed).
 
 ---
 
@@ -169,7 +184,7 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 
 ### Observe (not scored as MD-05 fail)
 
-- Raw-password Consultant session shows Pipeline **Read-only** banner (“browse Pipeline and open leads, but changes are unavailable”) — identity/landing purity for MD-05 still PASS; mutation depth already covered under MD-01 impersonation path. Not treated as P0 identity/security loss.
+- At MD-05 bake time, raw-password Consultant Pipeline showed a **Read-only** banner — identity/landing purity for MD-05 still PASS. That write gap was later closed under `FI-EVOLVED-ORDINARY-WRITE-1` (OW-01–05 PASS, raw `manager@`; evidence `8432111a` / `5d619625`). Do not treat Consultant ordinary-write as still open or impersonation-only.
 
 ---
 
@@ -234,9 +249,9 @@ Mutation+reload depth bake complete 2026-07-14. **MD-01 Consultant**, **MD-02 Nu
 | 3 | MD-03 Finance PASS or safe SKIP | **PASS** |
 | 4 | MD-05 raw-password login | **PASS** |
 | 5 | MD-06 no P0 | **PASS** |
-| 6 | MD-04 Doctor PASS or SKIP | **PASS** (observe — raw `tlbpmg@`; no safe mutation fixture) |
+| 6 | MD-04 Doctor observe closed | **PASS** (observe — raw `tlbpmg@`; commit `1ba867c2`; mutation unscored, not failed) |
 
-**Overall verdict:** **GREEN (scoped)** — MD-01–05 closed; MD-04 Doctor observe PASS (no safe clinical mutation); no P0
+**Overall verdict:** **GREEN (scoped)** — MD-01–05 closed; MD-04 Doctor **PASS (observe)** closed — not open/SKIP; no P0
 
 ---
 

@@ -1,11 +1,19 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **GREEN (scoped)** — MD-01+MD-02+MD-03+MD-05 PASS; MD-04 Doctor optional SKIP  
+**Status:** **GREEN (scoped)** — MD-01+MD-02+MD-03+MD-04+MD-05 PASS (MD-04 observe)  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
-**Prior (GREEN scoped):** `FI-EVOLVED-OPERATIONAL-PILOT-1` at `a8052a2b`
+**Prior (GREEN scoped):** `FI-EVOLVED-OPERATIONAL-PILOT-1` at `a8052a2b`  
+**MD-04 closure commit:** `1ba867c2`  
+**Findings:** [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md)
+
+---
+
+## Preconditions confirmed (evidence lock)
+
+**Do not regress:** **MD-04 Doctor** is **PASS — observe-only closure** (commit `1ba867c2`). Do **not** list MD-04 as open, SKIP, or deferred in audits, rescored notes, or scorecards. Mutation was unscored (no safe fixture), not failed.
 
 ---
 
@@ -24,7 +32,7 @@ Reception check-in + reload already **PASS** in the operational pilot. This mile
 | Pipeline stage-move + hard reload | Consultant | SMOKETEST lead or known golden/SMOKETEST patient only |
 | Safe clinical path mutation + hard reload | Nurse | No live-patient capture; SMOKETEST / fixture only |
 | Money / invoice safe path + hard reload | Finance | Only if mutation is reversible / fixture-safe |
-| Doctor mutation | Doctor | Only if safe fixture path exists; otherwise skip |
+| Doctor observe / safe mutation | Doctor | Closed **PASS (observe)** under raw `tlbpmg@` — no safe mutation fixture; mutation unscored |
 | ≥1 raw-password login | Reception or Consultant preferred | Observability / purity vs impersonation |
 
 All mutations **SMOKETEST-only** (or explicitly known golden lead/patient). No production patient data writes.
@@ -50,7 +58,7 @@ All mutations **SMOKETEST-only** (or explicitly known golden lead/patient). No p
 | MD-01 | Consultant Pipeline stage-move + hard reload | Stage (or equivalent status) holds after full reload; no silent revert |
 | MD-02 | Nurse safe clinical mutation + hard reload | Mutation holds after reload on SMOKETEST/fixture path |
 | MD-03 | Finance Money/invoice safe mutation + hard reload | Mutation holds if exercised; else documented SKIP with reason |
-| MD-04 | Doctor safe mutation (optional) | PASS if safe fixture; else SKIP |
+| MD-04 | Doctor observe / safe mutation (optional) | **PASS (observe)** — identity/`/doctor`/hubs; mutation unscored (not failed) |
 | MD-05 | ≥1 raw-password staff login | Ordinary login without impersonation wrapper for Reception or Consultant (or documented alternative role) |
 | MD-06 | No P0 | No identity, security, or patient-record loss |
 
@@ -63,9 +71,9 @@ All mutations **SMOKETEST-only** (or explicitly known golden lead/patient). No p
 3. **MD-03 PASS or SKIP (safe)** — Finance Money/invoice mutation holds, or documented why unsafe to mutate
 4. **MD-05 PASS** — ≥1 raw-password login evidence
 5. **MD-06** — No P0 identity / security / patient-record issue
-6. Doctor **MD-04** PASS or explicit SKIP (not blocking if no safe fixture)
+6. Doctor **MD-04** PASS (observe) — closed; not open/SKIP
 
-**Exit met 2026-07-14:** MD-01–03 + MD-05 PASS; MD-04 SKIP; MD-06 PASS → **GREEN (scoped)**
+**Exit met 2026-07-14:** MD-01–05 PASS (MD-04 observe via `1ba867c2`); MD-06 PASS → **GREEN (scoped)**
 
 ---
 

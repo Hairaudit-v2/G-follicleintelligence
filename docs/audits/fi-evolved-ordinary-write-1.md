@@ -1,20 +1,37 @@
 # FI-EVOLVED-ORDINARY-WRITE-1 — Findings
 
 **Milestone:** `FI-EVOLVED-ORDINARY-WRITE-1`  
-**Status:** **GREEN (complete)**  
+**Status:** **GREEN — complete**  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-ordinary-write-1-plan.md](./fi-evolved-ordinary-write-1-plan.md)  
 **Prior:** `FI-EVOLVED-OPERATIONAL-PILOT-1` GREEN (scoped) · `FI-EVOLVED-MUTATION-DEPTH-1` GREEN (scoped)  
-**Fix SHA:** `8432111a` (live on production for re-bake)
+**Evidence commits:** `8432111a` · `5d619625` · `d7295b45`
+
+---
+
+## Preconditions confirmed (evidence lock)
+
+**Source of truth (user-confirmed 2026-07-14) — do not regress in rescored docs:**
+
+| Lock | Verdict |
+| ---- | ------- |
+| Milestone status | **GREEN — complete** (not provisional, not incomplete) |
+| Consultant ordinary-write | **Raw** `manager@` Consultant — **not** impersonation-only |
+| OW-01–05 | **PASS** under ordinary session |
+| Session chrome | Switch workspace / Sign out only; **no** Read-only banner; **no** Exit impersonation |
+| Mutation proof | Change stage: Treatment planning → Quote sent; hard reload held; reverted |
+| True read-only | Roles that should be denied remain denied |
+
+Future rescored notes / scorecards **must not** call Consultant ordinary-write provisional, impersonation-only, or incomplete.
 
 ---
 
 ## Executive summary
 
-Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolvedhair.com.au` (no Exit impersonation) saw Pipeline Read-only while impersonation/platform-admin proxy could mutate. Root cause: CRM shell granted via `fi_staff.staff_role`, but `canUseClinicFeatures` ignored those staff roles. Fix `8432111a` grants ClinicOS mutate for CRM-operational staff roles. Prod re-bake: stage-move + hard reload **PASS**; golden lead reverted.
+Ordinary raw-password Consultant write parity restored and locked GREEN. Pre-fix: `manager@evolvedhair.com.au` (no Exit impersonation) saw Pipeline Read-only while impersonation/platform-admin proxy could mutate. Root cause: CRM shell granted via `fi_staff.staff_role`, but `canUseClinicFeatures` ignored those staff roles. Fix `8432111a` grants ClinicOS mutate for CRM-operational staff roles. Prod re-bake under raw Consultant: stage-move + hard reload **PASS**; golden lead reverted. Evidence: `8432111a`, `5d619625`, `d7295b45`.
 
-**OW-06 (impersonation):** Reception (Jesika) + Nurse (Evie) Front desk Start treatment + hard reload **PASS**; soft-nav Front desk→Calendar **PASS** on Reception. No Read-only banners. Revert unavailable via UI (no undo to Waiting) — SMOKETEST left In treatment (safe).
+**OW-06 (impersonation):** Reception (Jesika) + Nurse (Evie) Front desk Start treatment + hard reload **PASS**; soft-nav Front desk→Calendar **PASS** on Reception. No Read-only banners. Revert unavailable via UI (no undo to Waiting) — SMOKETEST left In treatment (safe). OW-06 is optional frontline coverage via impersonation — it does **not** qualify the Consultant ordinary-write result (OW-01–05 are raw-session PASS).
 
 ---
 
@@ -101,7 +118,7 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 | 6 | OW-07 no P0 | **PASS** |
 | 7 | OW-06 optional PASS or SKIP | **PASS** (Reception + Nurse impersonation write + reload) |
 
-**Overall verdict:** **GREEN (complete)** — Consultant ordinary-write + OW-06 impersonation Reception/Nurse write paths closed.
+**Overall verdict:** **GREEN — complete** — Consultant ordinary-write (raw `manager@`, OW-01–05 PASS) + OW-06 impersonation Reception/Nurse write paths closed.
 
 ---
 
@@ -134,7 +151,7 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 
 **Session:** Ordinary raw-password `tlbpmg@gmail.com` · **Doctor workspace** · **no Exit impersonation**  
 **Hosts:** cursor-ide-browser on Evolved `c2615b95-…`  
-**Also closes:** mutation-depth **MD-04** as **PASS (observe)** — see [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md)
+**Also closes:** mutation-depth **MD-04** as **PASS (observe)** — docs commit `1ba867c2`; see [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md). Do **not** re-list MD-04 as open.
 
 | Check | Result |
 | ----- | ------ |

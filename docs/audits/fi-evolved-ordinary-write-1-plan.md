@@ -1,17 +1,25 @@
 # FI-EVOLVED-ORDINARY-WRITE-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-ORDINARY-WRITE-1`  
-**Status:** **GREEN (complete)** — Consultant ordinary-write + OW-06 impersonation Reception/Nurse write PASS  
+**Status:** **GREEN — complete** — Consultant ordinary-write (raw `manager@`, OW-01–05 PASS) + OW-06 impersonation Reception/Nurse write PASS  
 **Date:** 2026-07-14  
 **Mode:** Live production bake (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
-**Prior (GREEN scoped):** `FI-EVOLVED-OPERATIONAL-PILOT-1` · `FI-EVOLVED-MUTATION-DEPTH-1` (MD-01+MD-02+MD-03+MD-05 PASS; MD-04 SKIP)
+**Prior (GREEN scoped):** `FI-EVOLVED-OPERATIONAL-PILOT-1` · `FI-EVOLVED-MUTATION-DEPTH-1` (MD-01–MD-05 PASS; MD-04 PASS observe)  
+**Evidence commits:** `8432111a` · `5d619625` · `d7295b45`  
+**Findings:** [fi-evolved-ordinary-write-1.md](./fi-evolved-ordinary-write-1.md)
 
 ---
 
-## 1. Problem statement
+## Preconditions confirmed (evidence lock)
 
-**Ordinary Consultant write parity is broken relative to impersonation.**
+**Do not regress:** Consultant ordinary-write is **GREEN — complete** under raw `manager@` Consultant (OW-01–05 PASS). It is **not** provisional, **not** incomplete, and **not** impersonation-only. See findings evidence lock.
+
+---
+
+## 1. Problem statement (historical — closed)
+
+**Ordinary Consultant write parity was broken relative to impersonation** (closed by fix `8432111a` + raw re-bake).
 
 Under **platform-admin impersonation**, `manager@evolvedhair.com.au` (Consultant workspace) completed Pipeline stage-move + hard reload (**MD-01 PASS**). Under the same identity via **raw password** (**MD-05 PASS** for identity/landing), Pipeline showed a **Read-only** banner: browse and open leads, but changes unavailable.
 
@@ -60,9 +68,9 @@ Mirror prior pilots — do **not** expand:
 - CI polish / hygiene follow-ups
 - HR-DRIFT-01 unless it **blocks** ordinary write (mapping missing → write denied)
 - Soft-nav P2 backlog
-- Doctor ordinary-write (unless it falls out of the same root cause)
+- Doctor ordinary **mutation** write (MD-04 closed as observe-only; no safe clinical mutation fixture)
 - Re-litigating MD-01–MD-03 impersonation results
-- Reception / Nurse / Doctor **raw-password** ordinary-write — no passwords available for those roles; bake via platform impersonation only. Ordinary raw sessions remain Consultant `manager@` (+ Finance when held)
+- Reception / Nurse **raw-password** ordinary-write — no passwords for those roles; OW-06 covered via platform impersonation. Ordinary raw Consultant write is closed under `manager@` (OW-01–05). Doctor raw observe closed under `tlbpmg@` (MD-04).
 
 ---
 
@@ -90,11 +98,11 @@ Likely code anchors (start points, not exhaustive):
 
 | Priority | Role | Identity | Expectation |
 | -------- | ---- | -------- | ----------- |
-| **Primary** | Consultant | `manager@evolvedhair.com.au` **raw password** (no impersonation) | Pipeline writes + stage-move + reload parity with MD-01 |
-| Optional | Reception | *(no raw password available — impersonation-only)* | SKIP for ordinary-write; Front desk covered under pilot/impersonation |
-| Optional | Nurse | *(no raw password available — impersonation-only)* | SKIP for ordinary-write; clinical path covered under MD-02 impersonation |
+| **Primary** | Consultant | `manager@evolvedhair.com.au` **raw password** (no impersonation) | **CLOSED PASS** — Pipeline writes + stage-move + reload (OW-01–05) |
+| Optional | Reception | Impersonation (no raw password) | **OW-06 PASS** — Front desk Start treatment + reload (Jesika) |
+| Optional | Nurse | Impersonation (no raw password) | **OW-06 PASS** — Front desk Start treatment + reload (Evie) |
 
-Do **not** score Consultant ordinary write as PASS while Exit impersonation is visible.
+Do **not** score Consultant ordinary write as PASS while Exit impersonation is visible. Do **not** re-label closed Consultant ordinary-write as impersonation-only or provisional.
 
 ---
 
@@ -131,7 +139,7 @@ Do **not** score Consultant ordinary write as PASS while Exit impersonation is v
 4. **OW-04** — Write does not require impersonation
 5. **OW-05** — Legitimate read-only roles remain read-only
 6. **OW-07** — No P0 identity / security / patient-record issue
-7. **OW-06** optional — PASS or explicit SKIP (does not block GREEN if Consultant path is solid)
+7. **OW-06** optional — **PASS** (impersonation Reception/Nurse); does not redefine Consultant ordinary-write (raw OW-01–05)
 
 **AMBER** if root cause is known and a safe temporary SOP exists but ordinary write still blocked.  
 **RED** if ordinary Consultant cannot mutate Pipeline and no safe workaround without developer intervention.
@@ -162,7 +170,7 @@ Do **not** score Consultant ordinary write as PASS while Exit impersonation is v
 
 ## 13. Related
 
-- [fi-evolved-ordinary-write-1.md](./fi-evolved-ordinary-write-1.md) — findings stub
-- [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md) — MD-05 Read-only observe; MD-01 impersonation write PASS
+- [fi-evolved-ordinary-write-1.md](./fi-evolved-ordinary-write-1.md) — findings (**GREEN — complete**)
+- [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md) — MD-01–05 PASS; MD-04 PASS observe
 - [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)
 - [fi-evolved-operational-pilot-1.md](./fi-evolved-operational-pilot-1.md) — prior GREEN (scoped)

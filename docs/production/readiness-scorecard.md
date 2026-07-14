@@ -6,6 +6,8 @@
 **Status:** FI-READINESS-RESCORE-2 — **63 / 100** (prior Task 6: **48 / 100**; still below target; **NO-GO**)  
 **Assessment basis:** Existing GREEN Evolved bake evidence (pilot / mutation-depth / ordinary-write / trust / CI hygiene) — **not** a new live clinic bake. See [fi-readiness-rescore-2.md](../audits/fi-readiness-rescore-2.md).
 
+**Evidence locks (do not regress):** Consultant ordinary-write **GREEN — complete** (raw `manager@`, OW-01–05; **not** provisional/impersonation-only). MD-04 Doctor **PASS (observe)** closed (`1ba867c2`) — **not** open/SKIP.
+
 **Related docs**
 
 - [FI-PH1 sprint definition](./fi-ph1-production-hardening-sprint.md)
@@ -54,7 +56,7 @@
 
 | Category | Weight | Score | Max | Notes / evidence |
 |----------|-------:|------:|----:|------------------|
-| CRM / LeadFlow | 15 | 12 | 15 | Pipeline mutate+reload (MD-01) + raw Consultant ordinary write (OW-03 / `8432111a`); OW-06 Reception/Nurse still SKIP |
+| CRM / LeadFlow | 15 | 12 | 15 | Pipeline mutate+reload (MD-01) + raw Consultant ordinary write GREEN (OW-01–05 / `8432111a`·`5d619625`); OW-06 Reception/Nurse impersonation PASS (`d7295b45`); MD-04 Doctor PASS observe (`1ba867c2`) |
 | Calendar | 15 | 12 | 15 | Reception Calendar + FD check-in; F-PILOT-11 filter live PASS; soft-nav P2 residual |
 | Patient | 10 | 7 | 10 | Patients hub across role bake; ImagingOS reachability; Finance Patients door (F-PILOT-18) |
 | Consultation | 10 | 6 | 10 | Consult hub reachable; F-PILOT-08 linkage honesty still open |
@@ -88,7 +90,7 @@ Retained for audit trail. Superseded by FI-READINESS-RESCORE-2 above.
 |-----|------------:|------------------|
 | Security (open P0) | 10 | **BLK-SEC-01** restore drill (E4–E6) — SEC-02/05/LEG-01 already Complete in checklist |
 | Surgery | 7 | Procedure day production dry-run or explicit accepted deferral |
-| CRM / LeadFlow | 3 | Soft-nav / OW-06 / remaining checklist rows |
+| CRM / LeadFlow | 3 | Soft-nav / remaining checklist rows (ordinary-write + OW-06 already GREEN) |
 | Calendar | 3 | Soft-nav + sync health review |
 | Patient | 3 | Broader production patient workflow sign-off |
 | Consultation | 4 | Completeness + linkage honesty (F-PILOT-08) |
