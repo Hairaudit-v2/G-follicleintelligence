@@ -110,3 +110,23 @@ Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolve
 - [fi-evolved-ordinary-write-1-plan.md](./fi-evolved-ordinary-write-1-plan.md)
 - [fi-evolved-mutation-depth-1.md](./fi-evolved-mutation-depth-1.md)
 - [fi-evolved-operational-pilot-1.md](./fi-evolved-operational-pilot-1.md)
+
+---
+
+## Follow-up — Doctor raw-password identity (`tlbpmg@`)
+
+**Date:** 2026-07-14  
+**Script:** `scripts/reclassify-evolved-tlbpmg-to-doctor.ts` (`--commit`)  
+**Auth user:** `b6c79e17-0fb2-46b3-835a-f7626c79b52b` · `tlbpmg@gmail.com`
+
+| Field | Before | After |
+| ----- | ------ | ----- |
+| Evolved `fi_users` | absent | `member` (`fdb53ac9-…`) |
+| Evolved `fi_staff` | absent | `staff_role=doctor`, `workspace_profile=doctor`, DOCTOR position type |
+| Auth `fi_role` / `fi_tenant_id` | null / null | `member` / Evolved |
+| Demo Clinic `fi_users.role` | `tenant_backend` | `member` (demoted) |
+| Demo Clinic `fi_tenant_admin_users` | `clinic_admin` (invited) | deleted |
+| Derived workspace | `default` | `doctor` |
+| Derived landing | _(empty)_ | `/doctor` |
+
+**Next:** re-login as `tlbpmg@gmail.com` (raw password) and bake Doctor workspace / ordinary-write paths.
