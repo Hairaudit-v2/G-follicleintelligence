@@ -9,7 +9,8 @@
 
 - [Final P0 execution dashboard](./final-p0-execution-dashboard.md)
 - [Production evidence registry](./production-evidence-registry.md)
-- [Readiness scorecard](./readiness-scorecard.md) — **48 / 100**
+- [Readiness scorecard](./readiness-scorecard.md) — **63 / 100** (FI-READINESS-RESCORE-2; Task 6 baseline was **48 / 100**)
+- [FI-READINESS-RESCORE-2](../audits/fi-readiness-rescore-2.md) — docs rescore from GREEN bake evidence (2026-07-14)
 - [Smoketest journey](./evolved-smoketest-journey.md) — **0 / 12 steps executed**
 
 ---
@@ -19,6 +20,8 @@
 # NO-GO
 
 Evolved Hair Restoration **must not** deploy to production operational use until all open P0 blockers are **Complete** or formally **Accepted risk** with executive sign-off.
+
+**Rescore note (2026-07-14):** Clinic bake / mutation / ordinary-write GREEN evidence lifted the formal scorecard **48 → 63 / 100**. Decision class remains **NO-GO** (still &lt; 85; security P0s uncured — especially BLK-SEC-01).
 
 ---
 

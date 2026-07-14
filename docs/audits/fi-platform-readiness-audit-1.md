@@ -24,7 +24,7 @@
 
 ### Bottom line
 
-Follicle Intelligence is a **deep vertical platform codebase** with real multi-tenant persistence across CRM, patients, calendar, consultations, surgery cases, finance engines, imaging, workforce and platform admin. After the UX rebuild it is **easier to navigate at the chrome layer**, but it is **not yet a hireable single product**. Critical surgery-day and payments features are **off by default**, pipeline and finance retain dual surfaces, post-login still dumps many clinic roles into **`/cases`**, operational readiness criteria fail even when journey smoke “passes,” and formal Evolved production decision remains **NO-GO (48/100, 2026-06-27)** until P0 evidence is re-scored.
+Follicle Intelligence is a **deep vertical platform codebase** with real multi-tenant persistence across CRM, patients, calendar, consultations, surgery cases, finance engines, imaging, workforce and platform admin. After the UX rebuild it is **easier to navigate at the chrome layer**, but it is **not yet a hireable single product**. Critical surgery-day and payments features are **off by default**, pipeline and finance retain dual surfaces, and operational readiness criteria still fail a full go-live bar. **FI-READINESS-RESCORE-2 (2026-07-14)** refreshed scores from GREEN Evolved bake evidence to formal **63/100** and weighted ops **≈66/100** — still **NO-GO** while security P0s (e.g. BLK-SEC-01) remain open. See [fi-readiness-rescore-2.md](./fi-readiness-rescore-2.md).
 
 **Do not treat route existence, dual-run mounts, unit test volume, or smoke PASS as production completeness.**
 
@@ -88,6 +88,8 @@ Remaining highest-impact blockers before broad daily use:
 | 5% | Tablet/mobile |
 
 **Weighted operational score ≈ 46 / 100** — **NOT READY** for unrestricted daily use.
+
+> **Rescore (2026-07-14):** [FI-READINESS-RESCORE-2](./fi-readiness-rescore-2.md) lifts weighted ops to **≈ 66 / 100** and formal production scorecard to **63 / 100** from GREEN bake evidence. Still **NOT READY** / **NO-GO** — BLK-SEC P0s uncured. Table above is the audit-1 baseline; do not treat it as current without the rescore doc.
 
 ### Weighted commercial-readiness score
 
