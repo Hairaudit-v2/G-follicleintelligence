@@ -1,7 +1,7 @@
 # FI-EVOLVED-MUTATION-DEPTH-1 — Findings
 
 **Milestone:** `FI-EVOLVED-MUTATION-DEPTH-1`  
-**Status:** **IN PROGRESS** (MD-01 complete)  
+**Status:** **IN PROGRESS** (MD-01 + MD-02 complete)  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-mutation-depth-1-plan.md](./fi-evolved-mutation-depth-1-plan.md)  
@@ -11,7 +11,7 @@
 
 ## Executive summary
 
-Mutation+reload depth bake started 2026-07-14. **MD-01 Consultant Pipeline stage-move + hard reload PASS** on golden SMOKETEST lead `c9a58f3d-…` (Treatment planning → Quote sent held after full reload; reverted). Help-needed: **0**. Nurse / Finance / raw-password still open.
+Mutation+reload depth bake continued 2026-07-14. **MD-01 Consultant Pipeline stage-move + hard reload PASS** on golden SMOKETEST lead `c9a58f3d-…`. **MD-02 Nurse safe clinical mutation + hard reload PASS** — Front desk check-in on SMOKETEST-TMRW Deposit Due held after full reload (Running late → Waiting). ImagingOS reachable (no capture). Help-needed: **0**. Finance / raw-password still open.
 
 ---
 
@@ -20,7 +20,7 @@ Mutation+reload depth bake started 2026-07-14. **MD-01 Consultant Pipeline stage
 | ID | Role | Identity | Mutation target | Status |
 | -- | ---- | -------- | --------------- | ------ |
 | MD-01 | Consultant | `manager@evolvedhair.com.au` (impersonation) · Consultant workspace | Pipeline stage-move + hard reload (golden SMOKETEST) | **PASS** |
-| MD-02 | Nurse | TBD | Safe clinical path + hard reload | Pending |
+| MD-02 | Nurse | `evieshackleton1@gmail.com` (impersonation) · Nurse workspace | Front desk check-in + hard reload (SMOKETEST-TMRW Deposit Due) | **PASS** |
 | MD-03 | Finance | TBD | Money/invoice if safe + hard reload | Pending |
 | MD-04 | Doctor | TBD | Only if safe fixture | Pending / optional SKIP |
 | MD-05 | Raw password | Reception or Consultant preferred | Ordinary login (no impersonation) | Pending |
@@ -32,11 +32,11 @@ Mutation+reload depth bake started 2026-07-14. **MD-01 Consultant Pipeline stage
 | ID | Check | Result | Notes |
 | -- | ----- | ------ | ----- |
 | MD-01 | Consultant Pipeline stage-move + hard reload | **PASS** | Golden lead stage held after full reload; reverted; help-needed 0 |
-| MD-02 | Nurse safe clinical + reload | Pending | — |
+| MD-02 | Nurse safe clinical + reload | **PASS** | SMOKETEST Front desk check-in held after full reload; ImagingOS reachability OK; help-needed 0 |
 | MD-03 | Finance Money/invoice + reload | Pending | — |
 | MD-04 | Doctor safe mutation | Pending | Optional |
 | MD-05 | ≥1 raw-password login | Pending | — |
-| MD-06 | No P0 | **PASS (so far)** | No identity / security / patient-record loss in MD-01 |
+| MD-06 | No P0 | **PASS (so far)** | No identity / security / patient-record loss in MD-01 / MD-02 |
 
 ---
 
@@ -70,18 +70,50 @@ Mutation+reload depth bake started 2026-07-14. **MD-01 Consultant Pipeline stage
 
 ---
 
+## Session MD-02 — Nurse Front desk check-in + hard reload
+
+**Host:** `https://follicleintelligence.ai`  
+**Surface:** `/front-desk` (Nurse workspace landing)  
+**Fixture:** `SMOKETEST-TMRW-20260714 SMOKETEST-TMRW-DEPOSIT-DUE surgery` (10:00 HT) — seed-evolved-smoketest-tomorrow-board  
+**Identity:** Impersonating `evieshackleton1` · profile `evieshackleton1@gmail.com` · **Nurse workspace**  
+**Help-needed count:** **0**
+
+| Step | Result |
+| ---- | ------ |
+| Session present | **PASS** — Nurse workspace; Exit impersonation; Front desk current; CDP/banner `evieshackleton1` |
+| Before mutation | Running late **1** / Waiting **1**; DEPOSIT-DUE card CTA **Check in patient**; UNAVAILABLE already Waiting (prior Reception S1 check-in) |
+| Mutation | **Check in patient** on DEPOSIT-DUE → toast **Check in patient — saved** |
+| Soft refresh | Running late **0** / Waiting **2**; DEPOSIT-DUE CTA → **Start consultation** |
+| Hard reload | Full navigate to `/front-desk` |
+| After reload | Running late **0** / Waiting **2** held; both SMOKETEST cards Waiting + Start consultation |
+| Revert | **Not available** via More actions (no Undo check-in; Cancel / Mark no-show / Complete visit left untouched as more destructive). Left checked-in on SMOKETEST fixture — acceptable |
+| Imaging path | **Reachable** — direct `/patients/287348d5-…/imaging` → ImagingOS · Clinical imaging workspace (Gallery/Capture/Protocols/zone data). **No capture/zone mutation** (not safely reversible for this bake) |
+| Verdict | **PASS** |
+
+### Evidence URLs
+
+- Front desk (mutation + reload): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/front-desk`
+- ImagingOS (reachability only): `https://follicleintelligence.ai/fi-admin/c2615b95-b707-4485-aa5f-be8f78ec868a/patients/287348d5-18bd-4434-9bab-7caafacbfe86/imaging`
+
+### Observe (not scored as MD-02 fail)
+
+- Brief board lag after save toast: card stayed in Running late with Check in still visible until Refresh / hydrate completed — same class as prior Payment due hydrate flicker; did not lose the mutation.
+- More actions on checked-in card: Start treatment / Complete visit / Mark no-show / Cancel appointment / Find patient / Open calendar / Open patient — no undo check-in.
+
+---
+
 ## Exit checklist
 
 | # | Criterion | Result |
 | - | --------- | ------ |
 | 1 | MD-01 Consultant stage-move + reload | **PASS** |
-| 2 | MD-02 Nurse safe clinical + reload | Pending |
+| 2 | MD-02 Nurse safe clinical + reload | **PASS** |
 | 3 | MD-03 Finance PASS or safe SKIP | Pending |
 | 4 | MD-05 raw-password login | Pending |
 | 5 | MD-06 no P0 | **PASS (so far)** |
 | 6 | MD-04 Doctor PASS or SKIP | Pending |
 
-**Overall verdict:** **IN PROGRESS** — MD-01 closed; continue MD-02 / MD-05
+**Overall verdict:** **IN PROGRESS** — MD-01 + MD-02 closed; continue MD-03 / MD-05
 
 ---
 
