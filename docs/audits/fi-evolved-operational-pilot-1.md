@@ -5,7 +5,7 @@
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-operational-pilot-1-plan.md](./fi-evolved-operational-pilot-1-plan.md)  
-**Kickoff commit:** *(filled after push)*
+**Kickoff commit:** `8a058a46`
 
 ---
 
