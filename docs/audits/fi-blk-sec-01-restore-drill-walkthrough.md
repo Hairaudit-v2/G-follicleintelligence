@@ -26,13 +26,13 @@
 
 Do **not** re-screenshot PITR or re-sign RPO/RTO unless settings changed.
 
-**Still open**
+**Progress (2026-07-14)**
 
-| # | Item | Closure target |
-|---|------|----------------|
-| E4 | DB restore drill into isolated staging | Drill log + SQL / screenshot artifacts |
-| E5 | Storage restore + signed URL test | Drill log + curl/log artifact |
-| E6 | Master checklist backup/restore ticks | Tick boxes + optional signed/export note in audit |
+| # | Item | Status | Where evidence lives |
+|---|------|--------|----------------------|
+| E4 | DB restore drill into isolated staging | ☑ PASS (DB + read-only app smoke 8/8) | [`fi-security-restore-drill-1.md`](../security/fi-security-restore-drill-1.md); backup audit drill log; local gitignored JSON under `docs/security/restore-drill-evidence/` |
+| E5 | Storage restore + signed URL test | ☐ Still open | Bucket metadata only; Phase C below |
+| E6 | Master checklist backup/restore ticks | ☐ Blocked on E5 | Do not tick DB+Storage restore until E5 |
 
 ---
 

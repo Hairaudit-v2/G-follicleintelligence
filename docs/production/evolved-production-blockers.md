@@ -242,10 +242,10 @@
 | Field | Detail |
 |-------|--------|
 | **Severity** | Critical |
-| **Production impact** | Master checklist items **Backup / PITR setup** and **DB + Storage restore drill** remain unchecked. Production PHI without verified restore invalidates DR commitments. |
+| **Production impact** | E1–E4 evidenced (PITR/RPO + isolated DB restore + app smoke 2026-07-14). **E5 Storage restore + signed URL** and **E6** still open — master **DB + Storage restore drill** remains unticked. Incomplete Storage DR invalidates full DR commitments. |
 | **Remediation priority** | P0 |
-| **Evidence** | [fi-os-supabase-backup-setup.md](../runbooks/fi-os-supabase-backup-setup.md); [fi-os-storage-backup-restore-drill.md](../runbooks/fi-os-storage-backup-restore-drill.md) |
-| **Mitigation (FI-PH1)** | Complete drills or document dated deferral with executive risk acceptance |
+| **Evidence** | [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md); [fi-security-restore-drill-1.md](../security/fi-security-restore-drill-1.md); [fi-os-storage-backup-restore-drill.md](../runbooks/fi-os-storage-backup-restore-drill.md) |
+| **Mitigation (FI-PH1)** | Complete E5 Storage drill + E6 ticks, or document dated deferral with executive risk acceptance |
 
 ### BLK-SEC-02 — Secrets rotation and Vercel cron not verified
 

@@ -17,11 +17,11 @@
 
 | Domain | Items | Verified | Pending | Blocking |
 |--------|------:|---------:|--------:|---------:|
-| Infrastructure | 3 | 0 | 3 | 3 |
+| Infrastructure | 3 | 2 | 1 | 1 |
 | Security | 4 | 0 | 4 | 4 |
 | Identity | 3 | 0 | 3 | 3 |
 | Financial | 3 | 0 | 3 | 3 |
-| **Total** | **13** | **0** | **13** | **13** |
+| **Total** | **13** | **2** | **11** | **11** |
 
 **Engineering-only evidence (not production deployment proof):**
 
@@ -54,10 +54,10 @@
 |-------|-------|
 | **Blocker** | BLK-SEC-01 |
 | **Evidence source** | Isolated staging restore per [fi-os-supabase-backup-setup.md](../runbooks/fi-os-supabase-backup-setup.md) §7 |
-| **Expected artifact** | Drill log table in [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md) |
-| **Verification date** | — |
-| **Verified by** | — |
-| **Status** | **Pending** |
+| **Expected artifact** | Drill log table in [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md); findings [`fi-security-restore-drill-1.md`](../security/fi-security-restore-drill-1.md) |
+| **Verification date** | 2026-07-14 |
+| **Verified by** | thelo (operator); verifier initials pending |
+| **Status** | **Complete (E4)** — staging `jzphojhurhguitfuuizo`; DB validator + app smoke 8/8 PASS; auth orphan SQL optional follow-up |
 
 ### E-INF-03 — Storage restore confirmation
 
@@ -68,7 +68,7 @@
 | **Expected artifact** | Signed URL read test output in backup audit drill log |
 | **Verification date** | — |
 | **Verified by** | — |
-| **Status** | **Pending** |
+| **Status** | **Pending (E5)** — bucket metadata inventoried on staging only; no binary restore / signed-URL artifact |
 
 ---
 

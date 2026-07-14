@@ -12,8 +12,8 @@
 - [ ] **Rotate and store secrets** — `SUPABASE_SERVICE_ROLE_KEY`, `FI_ADMIN_API_KEY`, `FI_REMINDER_CRON_SECRET`, `CRON_SECRET`, `FI_TIMELY_WEBHOOK_SECRET`, `IIOHR_HR_SYNC_SECRET`, `FI_LEGACY_FI_API_SECRET` (legacy `/api/fi/*` machine routes, if enabled) in secret manager; never in `NEXT_PUBLIC_*`.
 - [x] **Remove query-string `adminKey` in production** — `extractAdminKeyFromRequest` / `extractFiAdminKeyFromRequestParts` (`src/lib/crm/fiAdminKeyTransport.ts`); non-prod query only with **`FI_ALLOW_ADMIN_KEY_QUERY`**. Prefer **`x-fi-admin-key`** or **`Authorization: Bearer`** matching **`FI_ADMIN_API_KEY`**; scrub access logs.
 - [x] **Staging parity** — `checkFiTenantPortalApiAccess` uses explicit **`FI_ALLOW_INSECURE_API`** (`src/lib/fiAdmin/insecureFiApiBypass.ts`); **ignored in production**. Public previews with `NODE_ENV=production` no longer auto-allow without session.
-- [ ] **Backup / PITR setup** — pending manual completion: [`fi-os-supabase-backup-setup.md`](fi-os-supabase-backup-setup.md) (enable PITR, verify daily backups, RPO/RTO, service role rotation, `auth.users` in DR scope, pre-migration backup rule, access list).
-- [ ] **DB + Storage restore drill** — pending manual completion: [`fi-os-storage-backup-restore-drill.md`](fi-os-storage-backup-restore-drill.md) (quarterly drill, signed URLs, isolated staging, no prod PHI in unsecured dev).
+- [x] **Backup / PITR setup** — E1–E3 evidenced 2026-06-30 (PITR screenshot, daily/PITR view, RPO/RTO sign-off). Remaining policy items (service role rotation acknowledgement, named access list, pre-migration rule attestation) tracked separately; see [backup-disaster-recovery-audit.md](../production/evidence/backup-disaster-recovery-audit.md).
+- [ ] **DB + Storage restore drill** — **E4 PASS** 2026-07-14 (isolated staging DB + app smoke); **E5 Storage restore + signed URL still open** — do not tick until E5: [`fi-os-storage-backup-restore-drill.md`](fi-os-storage-backup-restore-drill.md); findings [`fi-security-restore-drill-1.md`](../security/fi-security-restore-drill-1.md).
 - [x] **Production release checklist** — ordered promote flow + `smoke:prod` + manual matrix: [`fi-os-production-release-checklist.md`](fi-os-production-release-checklist.md).
 - [x] **Rollback playbook** — Vercel rollback, DB via PITR/restore only, migration failure, pause cron/webhooks, reminders/storage cautions: [`fi-os-rollback-playbook.md`](fi-os-rollback-playbook.md).
 - [ ] **Vercel cron** — configure jobs + secrets for reminder and HR POST; confirm only one active reminder processor (Edge vs Next).
@@ -59,7 +59,7 @@
 - [ ] Auth settings — site URL, redirect URLs for FI Admin + patient portal.
 - [ ] **RLS policies** reviewed after each migration deploy.
 - [ ] **Storage policies** for `fi-intakes` (and other buckets) — no public list; backup/restore drill [`fi-os-storage-backup-restore-drill.md`](fi-os-storage-backup-restore-drill.md).
-- [ ] **Database backups / PITR** tier purchase and retention — follow [`fi-os-supabase-backup-setup.md`](fi-os-supabase-backup-setup.md).
+- [x] **Database backups / PITR** tier + retention — E1–E2 attachments 2026-06-30; follow [`fi-os-supabase-backup-setup.md`](fi-os-supabase-backup-setup.md) for ongoing verification.
 - [ ] **Auth user provisioning** for platform admins (`fi_os_identities`) — least privilege.
 
 ---

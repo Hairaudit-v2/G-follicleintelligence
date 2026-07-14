@@ -47,9 +47,9 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 2.1 | Restore **database** to isolated staging from production backup/PITR point | Drill log table in [backup audit](./evidence/backup-disaster-recovery-audit.md) | ☐ |
-| 2.2 | Verify sample row counts / non-PHI checksum on restored DB | SQL output pasted in drill log | ☐ |
-| 2.3 | Confirm `auth.users` + `fi_users.auth_user_id` alignment spot-check | Drill log § auth linkage | ☐ |
+| 2.1 | Restore **database** to isolated staging from production backup/PITR point | Drill log + [`fi-security-restore-drill-1.md`](../security/fi-security-restore-drill-1.md); project `jzphojhurhguitfuuizo` | ☑ |
+| 2.2 | Verify sample row counts / non-PHI checksum on restored DB | 17/17 critical tables in findings + DB evidence JSON (2026-07-14) | ☑ |
+| 2.3 | Confirm `auth.users` + `fi_users.auth_user_id` alignment spot-check | Staff map 11/11 PASS; dedicated auth orphan SQL still open | ☐ |
 
 **Runbook:** [`docs/runbooks/fi-os-supabase-backup-setup.md`](../runbooks/fi-os-supabase-backup-setup.md) §7
 
@@ -149,7 +149,7 @@
 
 | Blocker | Final status | Owner | Evidence link | Date |
 |---------|--------------|-------|---------------|------|
-| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — drill pending | 2026-06-30 |
+| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — E4 PASS 2026-07-14; **E5–E6 open** | 2026-07-14 |
 | BLK-SEC-02 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [cron audit](./evidence/cron-and-secrets-audit.md) — IIOHR bridge 2026-06-30 | 2026-06-30 |
 | BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
 | BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |

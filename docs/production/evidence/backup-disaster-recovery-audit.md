@@ -15,11 +15,11 @@
 | PITR enabled on production Supabase project | **Yes (E1)** | `attachments/blk-sec-01-pitr-2026-06-30.png` |
 | Daily automated backups succeeding | **Yes (E2)** | `attachments/blk-sec-01-daily-backups-2026-06-30.png` (PITR mode) |
 | Documented restore procedure exists | **Yes** | Runbooks present and cross-linked |
-| Storage restore drill executed | **No (E5)** | Drill log template empty; no signed-URL artifact |
-| DB restore drill executed | **No (E4)** | Drill log template empty; no staging restore record |
+| Storage restore drill executed | **No (E5)** | Bucket metadata inventoried on staging; **no** Storage binary restore / signed-URL artifact |
+| DB restore drill executed | **Yes (E4)** | Isolated staging `jzphojhurhguitfuuizo`; DB + app validators PASS 2026-07-14 — see drill log + [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) |
 | RPO/RTO signed | **Yes (E3)** | Paul Green 30 June 2026 — § RPO/RTO below |
 
-**Verdict:** BLK-SEC-01 **remains blocking**. PITR + RPO/RTO (E1–E3) are attached; **DB + storage restore drill (E4–E5) and master checklist tick (E6) are still missing**.
+**Verdict:** BLK-SEC-01 **remains blocking**. E1–E4 evidenced; **E5 Storage restore + signed URL** and **E6 master checklist tick** still open. Security scorecard stays **0** while any P0 E remains open.
 
 ---
 
@@ -119,8 +119,8 @@ No destructive or production restore operations were run.
 |-------|-------|
 | Validated | Yes — gap confirmed against runbooks + checklist |
 | Resolved automatically | **No** — requires Supabase/Vercel operator access |
-| Still blocking production | **Yes** — E4–E6 only |
-| Task 5 disposition | **Still blocking** — operator checklist §2–3 (restore drills); E1–E3 complete 2026-06-30 |
+| Still blocking production | **Yes** — E5–E6 only (E4 DB+app PASS 2026-07-14) |
+| Task 5 disposition | **Still blocking** — operator checklist §3 (storage); §2 DB largely done; E1–E3 complete 2026-06-30 |
 
 ---
 
@@ -133,22 +133,24 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 | E1 | PITR enabled screenshot (retention window visible) | attachments/blk-sec-01-pitr-2026-06-30.png | Paul Green | 2026-06-30 | ☑ |
 | E2 | Daily backup success (7-day view) | attachments/blk-sec-01-daily-backups-2026-06-30.png | Paul Green | 2026-06-30 | ☑ |
 | E3 | RPO/RTO signed by clinical + ops | Row in this doc § RPO/RTO | Sprint lead | 2026-06-30 | ☑ |
-| E4 | DB restore drill log (isolated staging) | § Restore drill log below | Platform / infra | | ☐ Scheduled |
-| E5 | Storage restore + signed URL test | § Storage drill log below | Platform / infra | | ☐ Scheduled |
-| E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ |
+| E4 | DB restore drill log (isolated staging) | § Restore drill log below + [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) | Platform / infra | 2026-07-14 | ☑ Complete (app smoke 8/8; auth orphan SQL still optional follow-up) |
+| E5 | Storage restore + signed URL test | § Restore drill log — Storage rows | Platform / infra | | ☐ Still blocking |
+| E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ Blocked on E5 |
 
 ### Restore drill log (template)
 
 | Field | Value |
 |-------|-------|
-| Operator | Paul Green (scheduled) |
-| Date (UTC) | 2026-07-14 — **prep only** (marker registered); restore TBD |
-| Environment | Isolated staging only (restore not started) |
-| Source backup timestamp | Choose PITR **after** `2026-07-14T06:21:38.292Z` and **within 7-day retention** |
-| DB restore result | ☐ Pass / ☐ Fail |
-| Row count / checksum sample | Pending drill — post-restore use marker SQL below |
-| Storage bucket restored | `fi-intakes` (pending) |
-| Signed URL read test | ☐ Pass / ☐ Fail |
+| Operator | thelo |
+| Date (UTC) | 2026-07-14 |
+| Environment | Isolated staging only — project `jzphojhurhguitfuuizo` |
+| Source backup timestamp | PITR after marker `2026-07-14T06:21:38.292Z` (exact selected UTC **not** captured in validator env) |
+| DB restore result | ☑ Pass / ☐ Fail — DB validator PASS `2026-07-14T08:17:59.643Z`; findings [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) |
+| Row count / checksum sample | 17/17 critical tables counted; marker lead present; see findings Critical table results |
+| App validation | ☑ Pass — operational-day smoke **8/8**; app validated `2026-07-14T09:37:18.138Z`; local evidence `docs/security/restore-drill-evidence/restored-application-jzphojhurhguitfuuizo-2026-07-14T09-37-18-138Z.json` (gitignored) |
+| Auth linkage | Partial — 11/11 linked `fi_users`→`fi_staff` PASS; dedicated `auth.users` orphan SQL **PENDING** |
+| Storage bucket restored | ☐ Pending — bucket **metadata** only on staging (4 buckets listed); binary restore/copy not done |
+| Signed URL read test | ☐ Pass / ☐ Fail — **PENDING** (no artifact) |
 | Verifier | — |
 
 ### Recovery marker (E4 prep — 2026-07-14)
@@ -169,11 +171,11 @@ PITR retention is **7 days** (not extended). The Jun-30 journey marker is outsid
 | Staging SQL | [`attachments/blk-sec-01-recovery-marker-verify.sql`](./attachments/blk-sec-01-recovery-marker-verify.sql) |
 | Legacy (superseded) | `SMOKETEST-JOURNEY-001-20260630` / `66b47348-bf0e-48b7-a188-accbee0db4a3` (`2026-06-30T12:26:30Z`) — outside 7d PITR |
 
-**Next E4 step:** Restore / clone production DB into a **new isolated staging** Supabase project from a PITR timestamp **after** the new marker and **within 7-day retention**; confirm marker SQL Pass in staging; capture walkthrough Phase B artifacts. Do **not** restore onto production. Do **not** extend retention for this drill.
+**Next step (E5):** Per [`fi-blk-sec-01-restore-drill-walkthrough.md`](../../audits/fi-blk-sec-01-restore-drill-walkthrough.md) Phase C — restore/copy intakes (or configured bucket) into isolated staging at a timestamp aligned with DB restore; signed URL read + redacted log; PHI attestation. Then E6 master ticks. Do **not** restore onto production.
 
-**2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3). DB + storage restore drill (E4–E5) scheduled per [`fi-os-storage-backup-restore-drill.md`](../../runbooks/fi-os-storage-backup-restore-drill.md) — requires isolated staging project; not executed in this session.
+**2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3).
 
-**2026-07-14 status:** Fresh recovery marker seeded and verified on production (within 7-day PITR). E4 restore into staging still pending.
+**2026-07-14 status:** Fresh recovery marker seeded/verified on production; E4 DB restore into isolated staging `jzphojhurhguitfuuizo` **PASS** (DB + read-only app smoke 8/8). **E5 Storage still open.**
 
 ### RPO / RTO Operational Sign-Off
 
