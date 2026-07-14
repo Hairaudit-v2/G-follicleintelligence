@@ -1,5 +1,5 @@
 /**
- * CalendarOS display pipeline — filter bypass and dev trace helpers (pure, testable).
+ * CalendarOS display pipeline — URL filter application and dev trace helpers (pure, testable).
  */
 
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -13,6 +13,17 @@ import {
   resourceColumnIdForBooking,
   resolveDisplayResourceColumnId,
 } from "@/src/lib/calendar/operationalCalendarLayout";
+
+/**
+ * F-PILOT-11: drop CalendarOS-mapped rows rejected by booking URL filters
+ * (`type`, status, staff, clinic, …) so `type=prp` cannot still show Surgery cards.
+ */
+export function applyCalendarOsBookingUrlFilters(
+  mappedBookings: readonly FiBookingRow[],
+  bookingFilterExcludedIds: ReadonlySet<string>
+): FiBookingRow[] {
+  return mappedBookings.filter((b) => !bookingFilterExcludedIds.has(b.id));
+}
 
 export type CalendarOsDisplayPipelineEventTrace = {
   eventId: string;

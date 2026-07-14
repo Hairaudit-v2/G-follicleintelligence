@@ -54,10 +54,14 @@ export function tenantAdminRoleAllowsCrmShellNav(role: FiTenantAdminRole | null)
   return role === "clinic_admin" || role === "operations_admin";
 }
 
-/** Bookings / PatientOS / calendar operator surfaces (not finance-only or read-only dashboard). */
+/**
+ * Bookings / PatientOS / calendar operator surfaces.
+ * finance_admin is included so Patients directory is reachable (not redirected to Surgery `/cases`).
+ * Primary nav still clinical-blocks Calendar for finance via `primaryNavClinicalBlocks`.
+ */
 export function tenantAdminRoleAllowsBookingsBoardNav(role: FiTenantAdminRole | null): boolean {
   if (!role) return false;
-  return role === "clinic_admin" || role === "operations_admin";
+  return role === "clinic_admin" || role === "operations_admin" || role === "finance_admin";
 }
 
 /** Read-only dashboard / AnalyticsOS-style read paths. */

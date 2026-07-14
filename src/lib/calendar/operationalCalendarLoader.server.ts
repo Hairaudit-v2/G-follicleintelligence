@@ -85,7 +85,10 @@ import {
   mapFiCalendarEventsToOperationalCalendar,
 } from "@/src/lib/calendar/calendarOsEvents.server";
 import { calendarOsOverlapRowsForDisplayContext } from "@/src/lib/calendar/calendarOsEventsCore";
-import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
+import {
+  applyCalendarOsBookingUrlFilters,
+  buildCalendarOsDisplayPipelineTrace,
+} from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { buildOperationalFeedForGridBookings } from "@/src/lib/calendar/calendarOperationalFeed.server";
 import { resolveCalendarV2EnabledForViewer } from "@/src/lib/calendar-os/calendarOsFeatureFlag.server";
@@ -765,8 +768,11 @@ export async function loadOperationalCalendarGridData(
     resources.staffIdByUserId,
     resources.staffDirectory
   );
-  /** CalendarOS rows bypass booking URL filters (status, staff, clinic, etc.); search applies later. */
-  const structuredCalendarOs = calendarOsMapped.bookings;
+  /** Apply the same booking URL filters (type/status/staff/clinic) as fi_bookings — F-PILOT-11. */
+  const structuredCalendarOs = applyCalendarOsBookingUrlFilters(
+    calendarOsMapped.bookings,
+    bookingFilterExcludedIds
+  );
 
   resourceColumns = await augmentStaffResourceColumnsForProviderLinks(
     tid,

@@ -24,6 +24,23 @@ describe("resolveFiOsPostLoginPathSuffix", () => {
     assert.equal(resolveFiOsPostLoginPathSuffix({ staffRoleKey: "manager" }), "");
   });
 
+  it("F-PILOT-06: consultant workspace profile wins over manager staff_role (bare → /crm)", () => {
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({
+        staffRoleKey: "manager",
+        workspaceProfile: "consultant",
+      }),
+      "/crm"
+    );
+    assert.equal(
+      resolveFiOsPostLoginPathSuffix({
+        staffRoleKey: "Manager",
+        workspaceProfile: "consultant",
+      }),
+      "/crm"
+    );
+  });
+
   it("maps finance tenant admin to Money hub", () => {
     assert.equal(
       resolveFiOsPostLoginPathSuffix({ tenantAdminRole: "finance_admin" }),

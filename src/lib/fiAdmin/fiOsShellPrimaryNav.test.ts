@@ -21,6 +21,16 @@ test("resolveFiOsPrimarySidebarItems: finance_admin persona disables operational
   assert.equal(rx?.disabled, true);
 });
 
+test("F-PILOT-18: finance_admin Patients rail targets /patients and is enabled with bookings board", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, false, true, "finance_admin");
+  const patients = items.find((i) => i.id === "patients");
+  assert.ok(patients);
+  assert.equal(patients?.href, `${base}/patients`);
+  assert.equal(patients?.disabled, false);
+  const cal = items.find((i) => i.id === "calendar");
+  assert.equal(cal?.disabled, true);
+});
+
 test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
   const all = resolveFiOsPrimarySidebarItems(base, true, true);
   assert.ok(all.find((i) => i.id === "crm" && !i.disabled));

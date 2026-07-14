@@ -41,9 +41,10 @@ export function resolveFiOsPostLoginPathSuffix(input: {
   if (staff === "consultant") return "/crm";
   if (staff === "doctor") return "/doctor";
   if (staff === "nurse") return "/front-desk";
-  if (staff === "owner" || staff === "manager") return "";
   if (staff === "trainer") return "/team";
   if (staff === "auditor") return "";
+  // owner/manager: fall through so workspace_profile / tenant admin can override
+  // (e.g. manager@ with Consultant workspace → /crm). Hard Today only as last resort.
 
   // Unnormalized production labels (e.g. "Contractor Doctor / Hair Transplant Surgeon").
   const staffLower = staffRaw.toLowerCase();
@@ -70,6 +71,8 @@ export function resolveFiOsPostLoginPathSuffix(input: {
   if (profile === "finance") return "/financial-os";
   if (profile === "director" || profile === "clinic_manager") return "";
   if (profile === "academy_trainer") return "/team";
+
+  if (staff === "owner" || staff === "manager") return "";
 
   // Default: Today (operational home), never Cases.
   return "";

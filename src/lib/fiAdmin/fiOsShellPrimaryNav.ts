@@ -110,7 +110,8 @@ function primaryNavClinicalBlocks(role: FiTenantAdminRole | null | undefined): {
       cases: true,
       rx: true,
       doctor: true,
-      patients: true,
+      // F-PILOT-18: Patients directory must stay reachable (balances / records), not Surgery cases.
+      patients: false,
       patientTwin: true,
       analytics: false,
       audit: false,

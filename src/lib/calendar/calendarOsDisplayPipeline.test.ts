@@ -3,7 +3,10 @@ import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
+import {
+  applyCalendarOsBookingUrlFilters,
+  buildCalendarOsDisplayPipelineTrace,
+} from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import {
   CALENDAR_OS_EVENT_META_FLAG,
   type FiCalendarEventOverlapRow,
@@ -17,6 +20,21 @@ import { resolveDisplayResourceColumnId } from "@/src/lib/calendar/operationalCa
 import { buildClinicalStaffPickerReadiness } from "@/src/lib/staff/clinicalStaffPicker";
 
 const STAFF_A = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+
+describe("applyCalendarOsBookingUrlFilters", () => {
+  it("F-PILOT-11: excludes CalendarOS surgery rows when type=prp filter rejects them", () => {
+    const surgeryId = randomUUID();
+    const prpId = randomUUID();
+    const mapped = [
+      calendarOsBooking({ id: surgeryId, booking_type: "surgery" }),
+      calendarOsBooking({ id: prpId, booking_type: "prp" }),
+    ];
+    const kept = applyCalendarOsBookingUrlFilters(mapped, new Set([surgeryId]));
+    assert.equal(kept.length, 1);
+    assert.equal(kept[0]?.id, prpId);
+    assert.equal(kept[0]?.booking_type, "prp");
+  });
+});
 
 function sampleEventRow(
   overrides: Partial<FiCalendarEventOverlapRow> = {}
