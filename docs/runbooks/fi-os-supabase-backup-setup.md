@@ -71,6 +71,13 @@ Before **production** migration apply:
 ## 7. Staging restore drill schedule
 
 - [ ] **At least quarterly:** perform a **non-production** restore drill (new Supabase project or dedicated staging) from backup or PITR to a **known timestamp**, without touching production.
+- [ ] **Before restore:** register/verify a **recovery marker** on production (non-PHI / `SMOKETEST-` synthetic row). There is no separate `fi_restore_drill_markers` insert table — use the Evolved journey probe + read-only verify script:
+
+  ```text
+  node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/verify-blk-sec-01-recovery-marker.ts
+  ```
+
+  Record marker id / row id / `created_at` in the [backup audit](../production/evidence/backup-disaster-recovery-audit.md). After staging restore, re-run the same check (or staging SQL) against the **staging** DB. Choose a restore timestamp **after** the marker. **Never** restore onto production.
 - [ ] Use **synthetic or anonymised** data policy for staging; never copy production PHI into unsecured laptops or public preview URLs (see [storage drill](fi-os-storage-backup-restore-drill.md)).
 - [ ] Log drill date, owner, outcome, and gaps in the master checklist or internal tracker.
 

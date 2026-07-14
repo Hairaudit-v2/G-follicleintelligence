@@ -1,7 +1,7 @@
 # BLK-SEC-01 — Recovery marker (E4 prep)
 
 **Drill:** Restore drill E4–E6  
-**Date registered (UTC):** 2026-07-14T06:12:54.325Z  
+**Date registered (UTC):** 2026-07-14T06:13:58.653Z  
 **Environment:** Production (read-only verify only — no restore, no new PHI writes)  
 **Operator:** Platform / infra (FI agent)
 
