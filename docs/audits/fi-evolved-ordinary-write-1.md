@@ -1,32 +1,18 @@
 # FI-EVOLVED-ORDINARY-WRITE-1 — Findings
 
 **Milestone:** `FI-EVOLVED-ORDINARY-WRITE-1`  
-**Status:** **IN PROGRESS — FIX LANDED, AWAITING PROD RE-BAKE**  
+**Status:** **GREEN**  
 **Date:** 2026-07-14  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Plan:** [fi-evolved-ordinary-write-1-plan.md](./fi-evolved-ordinary-write-1-plan.md)  
-**Prior:** `FI-EVOLVED-OPERATIONAL-PILOT-1` GREEN (scoped) · `FI-EVOLVED-MUTATION-DEPTH-1` GREEN (scoped)
+**Prior:** `FI-EVOLVED-OPERATIONAL-PILOT-1` GREEN (scoped) · `FI-EVOLVED-MUTATION-DEPTH-1` GREEN (scoped)  
+**Fix SHA:** `8432111a` (live on production for re-bake)
 
 ---
 
 ## Executive summary
 
-**P1 confirmed under raw-password Consultant.** Ordinary `manager@evolvedhair.com.au` (Consultant workspace, no Exit impersonation) can open Pipeline and leads but is gated Read-only. Impersonation/platform-admin tenant proxy still writes because `validPlatformAdminTenantProxy` ORs into `canMutate`.
-
-**Root cause:** CRM shell is granted via active `fi_staff.staff_role` (`consultant` / reception / manager), but ClinicOS mutation (`canUseClinicFeatures` → Pipeline `permissions.canMutate`) only looked at `fi_users.role` admin/operator roles, elevated OS roles, and tenant-admin ops roles — not ordinary CRM staff. Same identity under platform-admin proxy bypasses that gap.
-
-**Fix (code):** Grant development ClinicOS mutations for CRM-operational `fi_users.role` (`consultant`, `manager`) and active `fi_staff.staff_role` values aligned with shell staff nav. Nurse/doctor/`member` without those staff roles stay denied.
-
----
-
-## Kickoff readiness
-
-| Item | Result |
-| ---- | ------ |
-| Plan read | **Done** |
-| Findings status | **IN PROGRESS** |
-| Browser login | Raw `manager@evolvedhair.com.au` — Consultant workspace; profile menu = Switch workspace / Sign out only (no Exit impersonation) |
-| First action | Capture Complete (OW-01 / OW-02) |
+Ordinary raw-password Consultant write parity restored. Pre-fix: `manager@evolvedhair.com.au` (no Exit impersonation) saw Pipeline Read-only while impersonation/platform-admin proxy could mutate. Root cause: CRM shell granted via `fi_staff.staff_role`, but `canUseClinicFeatures` ignored those staff roles. Fix `8432111a` grants ClinicOS mutate for CRM-operational staff roles. Prod re-bake: stage-move + hard reload **PASS**; golden lead reverted.
 
 ---
 
@@ -35,9 +21,9 @@
 | ID | Role | Identity | Mutation target | Status |
 | -- | ---- | -------- | --------------- | ------ |
 | OW-01 | Consultant purity | `manager@` raw | Session / claims | **PASS** |
-| OW-02 | Consultant write gate | `manager@` raw | Pipeline Read-only vs writable | **FAIL** (pre-fix; fix pending prod) |
-| OW-03 | Consultant stage-move + reload | `manager@` raw | Golden SMOKETEST stage-move | **BLOCKED** pending prod deploy |
-| OW-06 | Reception/Nurse (optional) | TBD raw | One safe write path | **SKIP** (pending Consultant GREEN) |
+| OW-02 | Consultant write gate | `manager@` raw | Pipeline writable | **PASS** (post-fix) |
+| OW-03 | Consultant stage-move + reload | `manager@` raw | Golden SMOKETEST | **PASS** |
+| OW-06 | Reception/Nurse (optional) | — | — | **SKIP** (Consultant path solid) |
 
 ---
 
@@ -45,13 +31,13 @@
 
 | ID | Check | Result | Notes |
 | -- | ------ | ------ | ----- |
-| OW-01 | Raw Consultant purity | **PASS** | `/front-desk` + `/crm`; Consultant workspace; `manager@evolvedh…`; profile menu has Sign out / Switch workspace only — **no Exit impersonation** |
-| OW-02 | Pipeline writable (raw) | **FAIL** (pre-fix) | Exact banner: `Read-only: you can browse Pipeline and open leads, but changes are unavailable.` Lead preview: `Your role can view this lead but not change CRM data here.` Golden lead `c9a58f3d-…` (SMOKETEST-OPDAY-20260702) opens; stage-move unavailable. Stage shown as Treatment planning / Status open. |
-| OW-03 | Stage-move + reload (raw) | — | Awaiting production deploy of write-gate fix |
-| OW-04 | No impersonation required | — | Will score after ordinary write succeeds |
-| OW-05 | True read-only preserved | **PASS** (unit) | Tests: `member` alone, `nurse`, `doctor`, `dashboard_viewer` still denied |
-| OW-06 | Optional ordinary write | **SKIP** | Consultant path not GREEN yet |
-| OW-07 | No P0 | **PASS** | Identity correct; read-only is over-gate, not identity breach |
+| OW-01 | Raw Consultant purity | **PASS** | Consultant workspace; `manager@…`; profile = Switch workspace / Sign out only — **no Exit impersonation** |
+| OW-02 | Pipeline writable (raw) | **PASS** | Pre-fix: banner `Read-only: you can browse Pipeline and open leads, but changes are unavailable.` + lead “not change CRM data”. Post-`8432111a`: banner gone; **New enquiry**; Change stage combobox present |
+| OW-03 | Stage-move + reload (raw) | **PASS** | Golden `c9a58f3d-…` SMOKETEST-OPDAY-20260702: Treatment planning → Quote sent (`fi_admin_lead_slideover`); hard reload held Quote sent; reverted → Treatment planning |
+| OW-04 | No impersonation required | **PASS** | Entire bake under ordinary raw session |
+| OW-05 | True read-only preserved | **PASS** | Unit: `member` alone, `nurse`, `doctor`, `dashboard_viewer` still denied |
+| OW-06 | Optional ordinary write | **SKIP** | Not needed for GREEN |
+| OW-07 | No P0 | **PASS** | SMOKETEST-only; reverted |
 
 ---
 
@@ -59,12 +45,11 @@
 
 | Layer | Behaviour |
 | ----- | --------- |
-| Shell access | `getCrmShellPageSession` allows via `isCrmShellNavStaffRole(fi_staff.staff_role)` when `fi_users.role` is `member` |
-| Mutation UI | `resolvePipelinePermissionsFromSession` → `canMutateClinicFromOperatorContext({ canUseClinicFeatures })` |
-| Mutation flag | `CrmShellSession.canUseClinicFeatures` ← `resolveDevelopmentClinicAccessForTenant` |
-| Pre-fix gap | Dev clinic access ignored CRM-operational staff roles; `member` + `staff_role=consultant` → shell yes, mutate no |
-| Impersonation path | Platform-admin full session / `validPlatformAdminTenantProxy` grants `canMutate` even when operator clinic-features false — explains MD-01 PASS vs MD-05 Read-only |
-| Server API | `assertCrmTenantMutationAllowed` also calls `resolveDevelopmentClinicAccessForTenant` — same gate (UI + API) |
+| Shell access | Granted via `isCrmShellNavStaffRole(fi_staff.staff_role)` when `fi_users.role` is `member` |
+| Mutation flag | `canUseClinicFeatures` ← `resolveDevelopmentClinicAccessForTenant` |
+| Pre-fix gap | Dev clinic access omitted CRM-operational staff roles → shell yes / mutate no |
+| Impersonation path | `validPlatformAdminTenantProxy` ORs into Pipeline `canMutate` — MD-01 wrote, MD-05 read-only |
+| Fix | Align development clinic gate with CRM shell staff personas (+ `consultant`/`manager` fi_users roles) |
 
 ---
 
@@ -72,10 +57,9 @@
 
 | Item | Detail |
 | ---- | ------ |
+| SHA | **`8432111a`** |
 | Files | `src/lib/fiOs/developmentClinicAccess.ts`, `.server.ts`, `.test.ts` |
-| Change | Add `consultant`/`manager` to fi-user clinic roles; grant via `DEVELOPMENT_CLINIC_STAFF_ROLES_LOWER` (consultant, reception, receptionist, manager, owner) when loading active `fi_staff.staff_role` |
-| Tests | OW parity unit tests for ordinary staff grant + nurse/doctor/`member` denial |
-| Deploy | Pending push → production before OW-02/OW-03 re-bake |
+| Change | `DEVELOPMENT_CLINIC_STAFF_ROLES_LOWER` + load active `fi_staff.staff_role`; add `consultant`/`manager` to fi-user clinic roles |
 
 ---
 
@@ -83,7 +67,7 @@
 
 | ID | Severity | Status | Summary |
 | -- | -------- | ------ | ------- |
-| OW-P1-01 | **P1** | **Fix landed (awaiting prod bake)** | Raw Consultant Pipeline Read-only vs impersonation write — ordinary CRM staff excluded from `canUseClinicFeatures` |
+| OW-P1-01 | **P1** | **Fixed** (`8432111a`) | Raw Consultant Pipeline Read-only vs impersonation write |
 
 ---
 
@@ -92,14 +76,14 @@
 | # | Criterion | Result |
 | - | --------- | ------ |
 | 1 | OW-01 raw Consultant purity | **PASS** |
-| 2 | OW-02 Pipeline writable (raw) | FAIL pre-fix → re-bake after deploy |
-| 3 | OW-03 stage-move + reload (raw) | — |
-| 4 | OW-04 no impersonation required | — |
-| 5 | OW-05 true read-only preserved | **PASS** (unit) |
+| 2 | OW-02 Pipeline writable (raw) | **PASS** |
+| 3 | OW-03 stage-move + reload (raw) | **PASS** |
+| 4 | OW-04 no impersonation required | **PASS** |
+| 5 | OW-05 true read-only preserved | **PASS** |
 | 6 | OW-07 no P0 | **PASS** |
 | 7 | OW-06 optional PASS or SKIP | **SKIP** |
 
-**Overall verdict:** AMBER until production re-bake scores OW-02/OW-03.
+**Overall verdict:** **GREEN**
 
 ---
 
