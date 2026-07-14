@@ -1,9 +1,9 @@
 # FI-EVOLVED-OPERATIONAL-PILOT-1 — Audit plan
 
 **Milestone:** `FI-EVOLVED-OPERATIONAL-PILOT-1`  
-**Status:** Plan ready / not started  
+**Status:** **IN PROGRESS** — live bake started 2026-07-14  
 **Date:** 2026-07-14  
-**Mode:** Audit-only plan first — live clinic-day bake **not started**  
+**Mode:** Live clinic-day bake in progress (Decision B host)  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Prior (closed foundations):** role landings · Pipeline · Money · reception · clinical-intelligence trust · staff mapping · golden-patient · CI/typecheck hygiene (`FI-CI-SIGNAL-HYGIENE-1` **COMPLETE / CLOSED**)
 
@@ -116,15 +116,15 @@ This milestone **assumes** those gates hold and gathers **real clinic-day usage*
 
 ---
 
-## 8. Method (when live bake starts — not this commit)
+## 8. Method (live bake — started 2026-07-14)
 
-1. Confirm staff mapping gate before clinic day
-2. Observe / time-box ordinary workflows per role on production (Decision B host)
+1. Confirm staff mapping gate before clinic day — **done (PASS)** at kickoff
+2. Observe / time-box ordinary workflows per role on production (Decision B host) — **S1 Reception Jesika in progress**
 3. Log evidence against §5–§6; score help-needed metric
 4. File findings in [fi-evolved-operational-pilot-1.md](./fi-evolved-operational-pilot-1.md)
 5. Only then decide GREEN / AMBER / RED on exit criteria
 
-**This commit:** plan + stub only. **Do not start** live pilot bake here.
+**Kickoff:** findings marked IN PROGRESS; roster initialized; reception first gate underway.
 
 ---
 
