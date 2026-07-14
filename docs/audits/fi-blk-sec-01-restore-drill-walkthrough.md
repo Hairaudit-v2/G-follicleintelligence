@@ -31,8 +31,8 @@ Do **not** re-screenshot PITR or re-sign RPO/RTO unless settings changed.
 | # | Item | Status | Where evidence lives |
 |---|------|--------|----------------------|
 | E4 | DB restore drill into isolated staging | ☑ PASS (DB + read-only app smoke 8/8) | [`fi-security-restore-drill-1.md`](../security/fi-security-restore-drill-1.md); backup audit drill log; local gitignored JSON under `docs/security/restore-drill-evidence/` |
-| E5 | Storage restore + signed URL test | ☐ Still open | Bucket metadata only; Phase C below |
-| E6 | Master checklist backup/restore ticks | ☐ Blocked on E5 | Do not tick DB+Storage restore until E5 |
+| E5 | Storage restore + signed URL test | ☑ AMBER (14/14 checksums; signed PASS; unsigned DENIED) | Findings Storage section; `npm run audit:restore-drill:storage`; long-term Storage backup still undefined |
+| E6 | Master checklist backup/restore ticks | ☐ Still open | Verifier + cleanup + formal P0 close |
 
 ---
 

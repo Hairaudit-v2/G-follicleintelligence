@@ -55,6 +55,9 @@ supabase/.branches/
 # Local disaster-recovery drill evidence (do not commit)
 /docs/security/restore-drill-evidence/
 
+# Temporary Storage drill binaries (never commit)
+/.tmp-restore-drill-storage/
+
 # Local agent / IDE artifacts (do not commit)
 /mcps/
 /terminals/

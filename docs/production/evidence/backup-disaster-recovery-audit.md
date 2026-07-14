@@ -15,11 +15,11 @@
 | PITR enabled on production Supabase project | **Yes (E1)** | `attachments/blk-sec-01-pitr-2026-06-30.png` |
 | Daily automated backups succeeding | **Yes (E2)** | `attachments/blk-sec-01-daily-backups-2026-06-30.png` (PITR mode) |
 | Documented restore procedure exists | **Yes** | Runbooks present and cross-linked |
-| Storage restore drill executed | **No (E5)** | Bucket metadata inventoried on staging; **no** Storage binary restore / signed-URL artifact |
-| DB restore drill executed | **Yes (E4)** | Isolated staging `jzphojhurhguitfuuizo`; DB + app validators PASS 2026-07-14 — see drill log + [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) |
+| Storage restore drill executed | **Yes — AMBER (E5)** | 14/14 objects size+SHA-256 verified; signed URL PASS; unsigned private DENIED; long-term Storage backup not defined — [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) |
+| DB restore drill executed | **Yes (E4)** | Isolated staging `jzphojhurhguitfuuizo`; DB + app validators PASS 2026-07-14 — see drill log + findings |
 | RPO/RTO signed | **Yes (E3)** | Paul Green 30 June 2026 — § RPO/RTO below |
 
-**Verdict:** BLK-SEC-01 **remains blocking**. E1–E4 evidenced; **E5 Storage restore + signed URL** and **E6 master checklist tick** still open. Security scorecard stays **0** while any P0 E remains open.
+**Verdict:** BLK-SEC-01 **remains blocking**. E1–E5 evidenced (E5 **AMBER**); **E6 master checklist / verifier / cleanup** still open. Security scorecard stays **0** until E6 closes.
 
 ---
 
@@ -119,8 +119,8 @@ No destructive or production restore operations were run.
 |-------|-------|
 | Validated | Yes — gap confirmed against runbooks + checklist |
 | Resolved automatically | **No** — requires Supabase/Vercel operator access |
-| Still blocking production | **Yes** — E5–E6 only (E4 DB+app PASS 2026-07-14) |
-| Task 5 disposition | **Still blocking** — operator checklist §3 (storage); §2 DB largely done; E1–E3 complete 2026-06-30 |
+| Still blocking production | **Yes** — E6 only (E1–E4 PASS; E5 AMBER 2026-07-14) |
+| Task 5 disposition | **Still blocking** — E6 verifier/cleanup + long-term Storage backup decision; E1–E5 technical drill done |
 
 ---
 
@@ -134,8 +134,8 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 | E2 | Daily backup success (7-day view) | attachments/blk-sec-01-daily-backups-2026-06-30.png | Paul Green | 2026-06-30 | ☑ |
 | E3 | RPO/RTO signed by clinical + ops | Row in this doc § RPO/RTO | Sprint lead | 2026-06-30 | ☑ |
 | E4 | DB restore drill log (isolated staging) | § Restore drill log below + [`fi-security-restore-drill-1.md`](../../security/fi-security-restore-drill-1.md) | Platform / infra | 2026-07-14 | ☑ Complete (app smoke 8/8; auth orphan SQL still optional follow-up) |
-| E5 | Storage restore + signed URL test | § Restore drill log — Storage rows | Platform / infra | | ☐ Still blocking |
-| E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ Blocked on E5 |
+| E5 | Storage restore + signed URL test | § Restore drill log — Storage rows; `npm run audit:restore-drill:storage` | Platform / infra | 2026-07-14 | ☑ AMBER (technical PASS; long-term Storage backup undefined) |
+| E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ Still open (verifier / cleanup / P0 close) |
 
 ### Restore drill log (template)
 
@@ -149,8 +149,8 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 | Row count / checksum sample | 17/17 critical tables counted; marker lead present; see findings Critical table results |
 | App validation | ☑ Pass — operational-day smoke **8/8**; app validated `2026-07-14T09:37:18.138Z`; local evidence `docs/security/restore-drill-evidence/restored-application-jzphojhurhguitfuuizo-2026-07-14T09-37-18-138Z.json` (gitignored) |
 | Auth linkage | Partial — 11/11 linked `fi_users`→`fi_staff` PASS; dedicated `auth.users` orphan SQL **PENDING** |
-| Storage bucket restored | ☐ Pending — bucket **metadata** only on staging (4 buckets listed); binary restore/copy not done |
-| Signed URL read test | ☐ Pass / ☐ Fail — **PENDING** (no artifact) |
+| Storage bucket restored | ☑ `patient-images` + `tenant-branding` binaries on isolated recovery — 14 objects / 20 054 377 bytes; 12 copied this run; 14 SHA-256 match |
+| Signed URL read test | ☑ Pass — short-lived signed GET PASS; unsigned private DENIED; branding readable per policy |
 | Verifier | — |
 
 ### Recovery marker (E4 prep — 2026-07-14)
@@ -171,11 +171,11 @@ PITR retention is **7 days** (not extended). The Jun-30 journey marker is outsid
 | Staging SQL | [`attachments/blk-sec-01-recovery-marker-verify.sql`](./attachments/blk-sec-01-recovery-marker-verify.sql) |
 | Legacy (superseded) | `SMOKETEST-JOURNEY-001-20260630` / `66b47348-bf0e-48b7-a188-accbee0db4a3` (`2026-06-30T12:26:30Z`) — outside 7d PITR |
 
-**Next step (E5):** Per [`fi-blk-sec-01-restore-drill-walkthrough.md`](../../audits/fi-blk-sec-01-restore-drill-walkthrough.md) Phase C — restore/copy intakes (or configured bucket) into isolated staging at a timestamp aligned with DB restore; signed URL read + redacted log; PHI attestation. Then E6 master ticks. Do **not** restore onto production.
+**Next step (E6):** Verifier initials; master checklist formal close; cleanup/retention of drill project; confirm production Vercel never points at drill keys; file quarterly reminder; decide operated long-term Storage backup to promote E5 AMBER → PASS. Do **not** restore onto production.
 
 **2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3).
 
-**2026-07-14 status:** Fresh recovery marker seeded/verified on production; E4 DB restore into isolated staging `jzphojhurhguitfuuizo` **PASS** (DB + read-only app smoke 8/8). **E5 Storage still open.**
+**2026-07-14 status:** E4 DB+app PASS; E5 Storage binary drill **AMBER** (14/14 checksums + access controls; no independent long-term Storage backup yet).
 
 ### RPO / RTO Operational Sign-Off
 

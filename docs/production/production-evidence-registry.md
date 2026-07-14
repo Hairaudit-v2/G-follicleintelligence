@@ -17,11 +17,11 @@
 
 | Domain | Items | Verified | Pending | Blocking |
 |--------|------:|---------:|--------:|---------:|
-| Infrastructure | 3 | 2 | 1 | 1 |
+| Infrastructure | 3 | 3 | 0 | 0 |
 | Security | 4 | 0 | 4 | 4 |
 | Identity | 3 | 0 | 3 | 3 |
 | Financial | 3 | 0 | 3 | 3 |
-| **Total** | **13** | **2** | **11** | **11** |
+| **Total** | **13** | **3** | **10** | **10** |
 
 **Engineering-only evidence (not production deployment proof):**
 
@@ -68,7 +68,7 @@
 | **Expected artifact** | Signed URL read test output in backup audit drill log |
 | **Verification date** | — |
 | **Verified by** | — |
-| **Status** | **Pending (E5)** — bucket metadata inventoried on staging only; no binary restore / signed-URL artifact |
+| **Status** | **Complete — AMBER (E5)** — 14/14 binaries size+SHA-256; signed URL PASS; unsigned private DENIED; independent long-term Storage backup not defined |
 
 ---
 

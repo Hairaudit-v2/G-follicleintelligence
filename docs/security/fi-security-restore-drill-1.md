@@ -85,16 +85,29 @@ Read-only operational-day smoke against restored staging app (`FI_BASE_URL=http:
 
 ## Storage validation
 
-Database restore does not prove Storage binary recovery. Record separate Storage restore evidence here.
+Database restore does not prove Storage binary recovery. E5 binary copy + access checks executed 2026-07-14 via `npm run audit:restore-drill:storage` (source production read-only → destination `jzphojhurhguitfuuizo` only). Aggregate evidence only — no object paths, signed URLs, or PHI in this sheet.
+
+| Bucket | Objects | Total bytes | Copied | Verified | Checksum match |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `patient-images` | 13 | 20 033 896 | 12 | 13 | 13 |
+| `tenant-branding` | 1 | 20 481 | 0 (already present) | 1 | 1 |
+| **Totals** | **14** | **20 054 377** | **12** | **14** | **14** |
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Bucket metadata inventoried | PASS | DB validator `storage_bucket_metadata_inventory` — 4 buckets (`hli-intakes`, `patient-images`, `tenant-branding`, `fi-financial-documents`); non-public |
-| Critical object classes identified | PENDING | Intakes / patient images / financial docs named in plan; no drill copy scope recorded |
-| Storage restore/copy target isolated | PENDING | No Storage restore/copy into drill prefix evidenced |
-| Signed URL read succeeded | PENDING | No signed-URL artifact |
-| Signed token redacted from evidence | PENDING | N/A until signed-URL test exists |
-| Expiry / wrong-tenant behavior checked | PENDING | Not run |
+| Bucket metadata inventoried | PASS | DB validator earlier; E5 scoped to `patient-images` + `tenant-branding` (14 objects) |
+| Critical object classes identified | PASS (scoped) | Patient images + tenant branding; intakes/financial buckets out of this E5 cut |
+| Storage restore/copy target isolated | PASS | Destination project `jzphojhurhguitfuuizo` only; production write APIs unused |
+| Signed URL read succeeded | PASS | Short-lived signed URL GET on one private `patient-images` object |
+| Unsigned private access | DENIED | Public/unsigned URL for same private object did not return content |
+| Tenant-branding application read | PASS | Readable per existing destination bucket policy (signed path; bucket non-public) |
+| Application read | PASS | Signed download treated as storage application read |
+| Temporary-file cleanup | PASS | `.tmp-restore-drill-storage/` temps deleted after checksum validation |
+| PHI handling attestation | PASS | No filenames, patient IDs, signed URLs, keys, or object paths committed; source ops list/download only; production policies unchanged |
+| Signed token redacted from evidence | PASS | Tokens never written to committed docs; evidence JSON gitignored under `docs/security/restore-drill-evidence/` |
+| Independent long-term Storage backup | NOT DEFINED | No operated secondary/cold Storage backup yet → E5 verdict **AMBER** |
+
+**Storage evidence (local, gitignored):** `docs/security/restore-drill-evidence/restored-storage-jzphojhurhguitfuuizo-2026-07-14T09-56-03-768Z.json` (verdict AMBER).
 
 ## External integration isolation
 
@@ -117,16 +130,16 @@ Controls applied for the app validator run (see application evidence `sideEffect
 | Evidence item | Verdict | Notes |
 | --- | --- | --- |
 | E4 DB restore drill | PASS | Isolated staging `jzphojhurhguitfuuizo`; marker + counts + DB JSON PASS; app smoke **8/8 PASS** (read-only). Auth orphan SQL + dashboard PITR/available screenshots still desirable. |
-| E5 Storage restore drill | PENDING | Bucket **metadata** only; no Storage binary restore / signed-URL read artifact |
-| E6 master checklist closure | PENDING | Blocked on E5 (+ optional auth orphan note / verifier). Do not tick DB+Storage restore drill until E5 PASS |
+| E5 Storage restore drill | AMBER | 14/14 objects verified (size + SHA-256); signed URL PASS; unsigned private DENIED; branding read PASS; **independent long-term Storage backup not defined** |
+| E6 master checklist closure | PENDING | E4 PASS + E5 AMBER evidenced; needs verifier initials, cleanup confirmation, master checklist formal close, long-term Storage backup decision |
 
 ## Remaining gaps
 
-- **E5:** Restore/copy `fi-intakes` (or configured intakes bucket) to isolated staging at aligned timestamp; signed URL read + redacted curl/log; PHI attestation — see [`docs/audits/fi-blk-sec-01-restore-drill-walkthrough.md`](../audits/fi-blk-sec-01-restore-drill-walkthrough.md) Phase C.
+- **E6:** Verifier initials; tick/confirm master checklist restore-drill row; cleanup or controlled retention of drill project; confirm no production Vercel env points at drill keys; file next quarterly reminder.
+- **Long-term Storage backup posture:** Choose and document operated secondary (native/export/rclone/etc.) to promote E5 AMBER → PASS.
 - **Auth orphan SQL (walkthrough B3):** Attach `auth.users` ↔ `fi_users.auth_user_id` spot-check output (non-PHI counts only).
 - **Timestamps:** Record selected PITR recovery point UTC and dashboard “database available” time into drill env / this sheet.
-- **E6:** Tick master checklist DB+Storage restore drill only after E5; update P0 closure when E1–E6 complete with verifier.
-- **Cleanup:** Drill project/buckets teardown or controlled retention; confirm no production Vercel env points at drill keys; file next quarterly reminder.
+- Optional: expand E5 scope to `hli-intakes` / `fi-financial-documents` if those hold production-critical binaries for Evolved.
 - Mutation journey (`--execute`) intentionally skipped for this evidence cut.
 
 ## Cleanup confirmation
@@ -134,7 +147,7 @@ Controls applied for the app validator run (see application evidence `sideEffect
 | Cleanup item | Result |
 | --- | --- |
 | Drill project disabled/deleted or retained under approved controls | PENDING |
-| Drill buckets/prefixes removed or lifecycle-managed | PENDING (Storage drill not started) |
+| Drill buckets/prefixes removed or lifecycle-managed | PENDING (binaries remain on isolated recovery for drill retention — lifecycle TBD) |
 | No production Vercel env points at drill keys | PENDING (operator confirm) |
-| Local evidence retained in ignored directory only | PASS — `docs/security/restore-drill-evidence/` is gitignored |
+| Local evidence retained in ignored directory only | PASS — `docs/security/restore-drill-evidence/` + `.tmp-restore-drill-storage/` gitignored |
 | Next quarterly reminder filed | PENDING |

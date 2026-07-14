@@ -62,7 +62,7 @@
 | Consultation | 10 | 6 | 10 | Consult hub reachable; F-PILOT-08 linkage honesty still open |
 | Surgery | 15 | 8 | 15 | Readiness observed; procedure day still flag-off / out of scope — **no lift** |
 | Financial | 15 | 13 | 15 | Money trust GREEN; MD-03 due-date mutate+reload (`6df88546`); Stripe inbox still off |
-| Security | 10 | 0 | 10 | **Open P0:** BLK-SEC-01 only (E1–E4 ✓ PITR/RPO + DB+app restore 2026-07-14; **E5–E6 Storage + master tick still open**). BLK-SEC-02 / BLK-SEC-05 / BLK-LEG-01 Complete — rubric: any open P0 = 0 (no Security lift) |
+| Security | 10 | 0 | 10 | **Open P0:** BLK-SEC-01 only (E1–E5 ✓ technical; E5 **AMBER**; **E6 master/verifier still open**). Rubric: any open P0 = 0 (no Security lift) |
 | Performance | 5 | 1 | 5 | Desktop bake usable; soft-nav lag / cold-load not staff-signed |
 | Monitoring | 5 | 4 | 5 | CI hygiene + trust e2e GREEN; formal `smoke:prod` evidence still incomplete |
 | **Total** | **100** | **63** | **100** | **Target: ≥ 95 — NOT MET** · decision class **NO-GO** (&lt; 85) |
@@ -88,7 +88,7 @@ Retained for audit trail. Superseded by FI-READINESS-RESCORE-2 above.
 
 | Gap | Points lost | Blocker / action |
 |-----|------------:|------------------|
-| Security (open P0) | 10 | **BLK-SEC-01** Storage restore + E6 (E4 DB+app PASS 2026-07-14) — SEC-02/05/LEG-01 already Complete |
+| Security (open P0) | 10 | **BLK-SEC-01** E6 closure (E5 AMBER 2026-07-14; long-term Storage backup + verifier) — SEC-02/05/LEG-01 Complete |
 | Surgery | 7 | Procedure day production dry-run or explicit accepted deferral |
 | CRM / LeadFlow | 3 | Soft-nav / remaining checklist rows (ordinary-write + OW-06 already GREEN) |
 | Calendar | 3 | Soft-nav + sync health review |
@@ -98,7 +98,7 @@ Retained for audit trail. Superseded by FI-READINESS-RESCORE-2 above.
 | Performance | 4 | Staff latency sign-off |
 | Monitoring | 1 | Production `smoke:prod` green close-out |
 
-**Primary blockers preventing ≥ 95:** **BLK-SEC-01** still open on **E5 Storage restore + signed URL** and **E6** (E1–E4 evidenced) — see [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md) and [fi-security-restore-drill-1.md](../security/fi-security-restore-drill-1.md). Clinic bake GREEN does **not** clear DR P0.
+**Primary blockers preventing ≥ 95:** **BLK-SEC-01** still open on **E6** (E1–E5 evidenced; E5 AMBER — long-term Storage backup undefined) — see [backup-disaster-recovery-audit.md](./evidence/backup-disaster-recovery-audit.md) and [fi-security-restore-drill-1.md](../security/fi-security-restore-drill-1.md). Clinic bake GREEN does **not** clear DR P0.
 
 ---
 

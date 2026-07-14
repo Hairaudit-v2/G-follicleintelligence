@@ -59,9 +59,9 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 3.1 | Restore `fi-intakes` (or `FI_STORAGE_BUCKET_INTAKES`) to staging at aligned timestamp | Drill log in [backup audit](./evidence/backup-disaster-recovery-audit.md) | ☐ |
-| 3.2 | Signed URL read test on restored prefix | curl/log output in drill log | ☐ |
-| 3.3 | Confirm no production PHI restored to unsecured dev | Operator attestation in drill log | ☐ |
+| 3.1 | Restore scoped Storage buckets to isolated staging (this drill: `patient-images` + `tenant-branding`) | Findings + `audit:restore-drill:storage` — 14 objs verified | ☑ AMBER |
+| 3.2 | Signed URL read test on restored prefix | Short-lived signed GET PASS; unsigned private DENIED | ☑ |
+| 3.3 | Confirm no production PHI restored to unsecured dev | Attestation in findings — temps cleaned; no paths/URLs committed | ☑ |
 
 **Runbook:** [`docs/runbooks/fi-os-storage-backup-restore-drill.md`](../runbooks/fi-os-storage-backup-restore-drill.md)
 
@@ -149,7 +149,7 @@
 
 | Blocker | Final status | Owner | Evidence link | Date |
 |---------|--------------|-------|---------------|------|
-| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — E4 PASS 2026-07-14; **E5–E6 open** | 2026-07-14 |
+| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — E4 PASS; **E5 AMBER**; **E6 open** | 2026-07-14 |
 | BLK-SEC-02 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [cron audit](./evidence/cron-and-secrets-audit.md) — IIOHR bridge 2026-06-30 | 2026-06-30 |
 | BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
 | BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
