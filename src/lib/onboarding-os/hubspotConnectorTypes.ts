@@ -236,6 +236,7 @@ export type HubspotConnectorSnapshot = {
     } | null;
     latestBackup: { status: HubspotSyncRunStatus; completedAt: string | null } | null;
   };
+  workspaceStatus: import("./hubspotWorkspaceStatus").HubspotWorkspaceStatus;
   calculatedAt: string;
 };
 

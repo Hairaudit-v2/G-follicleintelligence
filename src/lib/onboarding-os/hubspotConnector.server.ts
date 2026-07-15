@@ -51,6 +51,7 @@ import type {
 } from "./hubspotConnectorTypes";
 import { isHubspotImportStatus, isHubspotSyncRunStatus } from "./hubspotConnectorTypes";
 import { resolveHubspotSecondaryBackupActionState } from "./hubspotSecondaryBackupActionCore";
+import { aggregateHubspotWorkspaceStatus } from "./hubspotWorkspaceStatus";
 import type { ExternalConnectorStatus } from "./externalConnectorTypes";
 
 type ServerOpts = {
@@ -127,6 +128,7 @@ type SyncRunRow = {
   secondary_complete?: boolean | null;
   secondary_checkpoints?: Record<string, unknown> | null;
   secondary_capabilities?: Record<string, unknown> | null;
+  secondary_counters?: Record<string, { active: number; archived: number; discovered: number; complete: boolean }> | null;
 };
 
 type IntegrationRow = {
@@ -1975,7 +1977,17 @@ async function buildConnectorSnapshot(
     .limit(10);
 
   const recentSyncRuns = ((runRows ?? []) as SyncRunRow[]).map(mapSyncRunRow);
-  const latestSyncRun = recentSyncRuns[0] ?? null;
+  const runSourceRows = (runRows ?? []) as SyncRunRow[];
+  const isSecondaryRun = (row: Record<string, unknown>) => {
+    const detail = (row.detail ?? {}) as Record<string, unknown>;
+    return (
+      String(detail.milestone ?? "").includes("SECONDARY") ||
+      (row.secondary_capabilities != null &&
+        typeof row.secondary_capabilities === "object" &&
+        Object.keys(row.secondary_capabilities as Record<string, unknown>).length > 0)
+    );
+  };
+  const latestSyncRun = recentSyncRuns[runSourceRows.findIndex((row) => !isSecondaryRun(row))] ?? null;
 
   const [
     { data: credentialRow },
@@ -2011,15 +2023,6 @@ async function buildConnectorSnapshot(
       .eq("status", "started"),
   ]);
 
-  const isSecondaryRun = (row: Record<string, unknown>) => {
-    const detail = (row.detail ?? {}) as Record<string, unknown>;
-    return (
-      String(detail.milestone ?? "").includes("SECONDARY") ||
-      (row.secondary_capabilities != null &&
-        typeof row.secondary_capabilities === "object" &&
-        Object.keys(row.secondary_capabilities as Record<string, unknown>).length > 0)
-    );
-  };
   const activeSecondaryRun = ((activeRows ?? []) as Record<string, unknown>[]).some(isSecondaryRun);
   const grantedScopes = ((scopeRows ?? []) as { scope_key: string; granted: boolean }[])
     .filter((row) => row.granted)
@@ -2050,6 +2053,21 @@ async function buildConnectorSnapshot(
     stagingContacts: contactQueue,
     stagingDeals: dealQueue,
     authVerified,
+  });
+
+  const workspaceStatus = aggregateHubspotWorkspaceStatus({
+    authVerified,
+    runs: runSourceRows.map((row) => ({
+      ...mapSyncRunRow(row),
+      secondaryCounters: row.secondary_counters ?? undefined,
+      secondaryCapabilities: row.secondary_capabilities,
+    })),
+    importReview: {
+      staged: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "staged").length,
+      approved: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "approved").length,
+      rejected: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "rejected").length,
+      imported: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "imported").length,
+    },
   });
 
   return {
@@ -2084,6 +2102,7 @@ async function buildConnectorSnapshot(
           }
         : null,
     },
+    workspaceStatus,
     calculatedAt: new Date().toISOString(),
   };
 }
