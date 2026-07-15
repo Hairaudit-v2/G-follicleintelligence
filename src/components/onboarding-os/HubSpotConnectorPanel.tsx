@@ -10,8 +10,10 @@ import {
   loadHubspotConnectorSnapshotAction,
   rejectHubspotDealAction,
   rejectHubspotLeadAction,
+  runHubspotEngagementBackupAction,
   runHubspotSecondaryBackupAction,
   runHubspotSyncAction,
+  verifyHubspotEngagementCapabilitiesAction,
   verifyHubspotSecondaryCapabilitiesAction,
 } from "@/lib/actions/fi-onboarding-os-hubspot-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -267,6 +269,8 @@ export function HubSpotConnectorPanel({
   const latestRun = snapshot?.latestSyncRun;
   const secondaryAction = snapshot?.secondaryBackupAction;
   const secondaryEvidence = snapshot?.secondaryEvidence;
+  const engagementAction = snapshot?.engagementBackupAction;
+  const engagementEvidence = snapshot?.engagementEvidence;
 
   const contactQueue =
     queueFilter === "staged"
@@ -336,6 +340,52 @@ export function HubSpotConnectorPanel({
         kind: "err",
         text: `Live check completed. Missing read access: ${res.secondaryProbe?.missingScopes.join(", ") || "unknown"}. No backup was started.`,
       });
+    });
+  }
+
+  function checkEngagementBackupAccess() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await verifyHubspotEngagementCapabilitiesAction(tenantId, integrationId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      refreshSnapshot(res.snapshot);
+      if (res.engagementProbe?.anyGranted && !res.engagementProbe.missingScopes.length) {
+        setMessage({
+          kind: "ok",
+          text: "Engagement backup access verified. Notes, emails, conversations, files, and forms read endpoints are available.",
+        });
+        return;
+      }
+      if (res.engagementProbe?.anyGranted) {
+        setMessage({
+          kind: "ok",
+          text: `Partial engagement access verified. Missing scopes remain: ${res.engagementProbe.missingScopes.join(", ")}. Supported objects can still back up.`,
+        });
+        return;
+      }
+      setMessage({
+        kind: "err",
+        text: `Engagement live check completed. Missing read access: ${res.engagementProbe?.missingScopes.join(", ") || "unknown"}. No backup was started.`,
+      });
+    });
+  }
+
+  function runEngagementBackup() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await runHubspotEngagementBackupAction(tenantId, integrationId, sessionId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      setMessage({
+        kind: "ok",
+        text: "Engagements and communications backup finished. Restricted staging only — no timeline promotion and no customer content shown.",
+      });
+      router.refresh();
     });
   }
 
@@ -479,6 +529,27 @@ export function HubSpotConnectorPanel({
         </p>
       </div>
 
+      {(section === "full" || section === "backup") ? (
+        <div className="space-y-2 rounded-lg border border-slate-700/60 bg-slate-900/30 p-3 text-xs text-slate-400">
+          <p className="font-medium text-slate-200">Engagements &amp; communications</p>
+          <p>Restricted staging only · no timeline promotion · no customer content shown</p>
+          <p>
+            Live engagement probe:{" "}
+            {engagementEvidence?.liveCapabilityProbe?.outcome ?? "No evidence"}
+            {engagementEvidence?.liveCapabilityProbe?.anyGranted ? " · access available" : ""}
+          </p>
+          <p>
+            Latest engagement backup:{" "}
+            {engagementEvidence?.latestBackup?.status ?? "No backup recorded"}
+          </p>
+          {engagementAction?.missingScopes?.length ? (
+            <p className="text-amber-300">
+              Missing scopes: {engagementAction.missingScopes.join(", ")}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       {(section === "full" || section === "backup") && canMutate ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -511,6 +582,30 @@ export function HubSpotConnectorPanel({
         ) : null}
         {secondaryAction?.visible && secondaryAction.disabledReason ? (
           <span className="text-xs text-amber-300">{secondaryAction.disabledReason}</span>
+        ) : null}
+        <button
+          type="button"
+          disabled={pending || engagementAction?.activeRun}
+          onClick={checkEngagementBackupAccess}
+          className="rounded border border-violet-500/40 px-4 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Check engagement backup access
+        </button>
+        {engagementAction?.visible ? (
+          <button
+            type="button"
+            disabled={pending || engagementAction.disabled}
+            title={engagementAction.disabledReason ?? undefined}
+            onClick={runEngagementBackup}
+            className="rounded border border-violet-500/40 px-4 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Back up engagements and communications
+          </button>
+        ) : engagementAction?.activeRun ? (
+          <span className="text-xs text-violet-300">Engagement backup in progress…</span>
+        ) : null}
+        {engagementAction?.visible && engagementAction.disabledReason ? (
+          <span className="text-xs text-amber-300">{engagementAction.disabledReason}</span>
         ) : null}
       </div> : null}
 
