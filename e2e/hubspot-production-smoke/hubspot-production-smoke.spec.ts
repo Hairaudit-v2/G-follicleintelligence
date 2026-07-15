@@ -73,12 +73,17 @@ async function collectPageErrors(page: Page): Promise<{
   };
   const onRequestFailed = (request: Request) => {
     const url = request.url();
+    const failureText = request.failure()?.errorText ?? "failed";
+    // Soft navigations / RSC often abort prior fetches to the same route; not a real failure.
+    if (/ERR_ABORTED/i.test(failureText)) {
+      return;
+    }
     if (!/hubspot|integrations\/hubspot|import-review/i.test(url) && request.resourceType() !== "document") {
       return;
     }
     try {
       const u = new URL(url);
-      failedRequests.push(`${request.failure()?.errorText ?? "failed"} ${u.origin}${u.pathname}`);
+      failedRequests.push(`${failureText} ${u.origin}${u.pathname}`);
     } catch {
       failedRequests.push("failed request (url redacted)");
     }
@@ -440,21 +445,26 @@ baseTest.describe("FI HubSpot low-role optional smoke @hubspot-production-smoke"
       const tenantId = hubspotTenantId();
       await login.goto(`/fi-admin/${tenantId}/settings/integrations/hubspot?tab=configuration`);
       await login.signIn(lowRoleEmail(), lowRolePassword());
-      await page.waitForLoadState("domcontentloaded");
+      await page.waitForURL(new RegExp(`/fi-admin/${tenantId}/`), { timeout: 45_000 });
+      expect(page.url(), "Low-role must authenticate into fi-admin").toMatch(
+        new RegExp(`/fi-admin/${tenantId}/`),
+      );
+      expect(page.url(), "Low-role must leave the login screen").not.toMatch(/\/login/i);
+
+      const denyRe =
+        /404|not found|This page could not be found|Could not load this workspace|Access denied|Forbidden/i;
 
       const hubspotConfigBody = await page.locator("body").innerText();
       const hubspotConfigDenied =
-        /404|not found|This page could not be found|Could not load this workspace|Access denied|Forbidden|sign in to os/i.test(
-          `${page.url()} ${hubspotConfigBody}`,
-        ) || !(await page.getByRole("heading", { name: /Authentication/i }).count());
+        denyRe.test(`${page.url()} ${hubspotConfigBody}`) ||
+        (await page.getByRole("heading", { name: /Authentication/i }).count()) === 0;
       expect(hubspotConfigDenied, "Low-role must not access HubSpot Configuration tab").toBe(true);
 
       await page.goto(`/fi-admin/${tenantId}/configuration`, { waitUntil: "domcontentloaded" });
       const tenantConfigBody = await page.locator("body").innerText();
       const tenantConfigDenied =
-        /404|not found|This page could not be found|Could not load this workspace|Access denied|Forbidden|sign in to os/i.test(
-          `${page.url()} ${tenantConfigBody}`,
-        ) || !(await page.getByRole("heading", { name: /^Configuration$/i }).count());
+        denyRe.test(`${page.url()} ${tenantConfigBody}`) ||
+        (await page.getByRole("heading", { name: /^Configuration$/i }).count()) === 0;
       expect(tenantConfigDenied, "Low-role must not access tenant Configuration hub").toBe(true);
 
       await page.goto(`/fi-admin/${tenantId}/settings/integrations/hubspot?tab=import-review`, {
@@ -462,10 +472,7 @@ baseTest.describe("FI HubSpot low-role optional smoke @hubspot-production-smoke"
       });
       const reviewBody = await page.locator("body").innerText();
       const reviewUrl = page.url();
-      const reviewDenied =
-        /404|not found|This page could not be found|Could not load this workspace|Access denied|Forbidden|sign in to os/i.test(
-          `${reviewUrl} ${reviewBody}`,
-        );
+      const reviewDenied = denyRe.test(`${reviewUrl} ${reviewBody}`);
       const reviewAllowedRead =
         !reviewDenied &&
         (await page.getByRole("heading", { name: /HubSpot management/i }).count()) > 0;

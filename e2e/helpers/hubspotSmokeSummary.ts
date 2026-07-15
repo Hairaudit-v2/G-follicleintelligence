@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 export type SmokeStatus = "PASS" | "FAIL" | "SKIPPED";
@@ -34,7 +34,23 @@ const DEFAULT_SUMMARY_PATH = join(
   "hubspot-production-smoke-summary.json",
 );
 
+const AXIS_KEYS = [
+  "mutationGuard",
+  "canonicalTabs",
+  "redirects",
+  "validBatchId",
+  "invalidBatchId",
+  "tenantIsolation",
+  "lowRole",
+] as const;
+
 let summary: HubspotSmokeSummary | null = null;
+
+function preferStatus(a: SmokeStatus, b: SmokeStatus): SmokeStatus {
+  if (a === "FAIL" || b === "FAIL") return "FAIL";
+  if (a === "PASS" || b === "PASS") return "PASS";
+  return "SKIPPED";
+}
 
 export function initHubspotSmokeSummary(input: {
   deploymentUrl: string;
@@ -100,23 +116,76 @@ export function addSmokeNote(note: string): void {
 
 export function computeSmokeVerdict(): "GREEN" | "AMBER" | "RED" {
   const s = getHubspotSmokeSummary();
-  const failed = s.tests.some((t) => t.status === "FAIL");
+  const failed =
+    s.tests.some((t) => t.status === "FAIL") || AXIS_KEYS.some((k) => s[k] === "FAIL");
   if (failed) {
     s.verdict = "RED";
     return "RED";
   }
+  // Missing deployed commit is an evidence note, not a failed smoke axis.
+  if (!s.deployedCommit) {
+    const note = "Deployed commit SHA unset locally (CI may set NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA)";
+    if (!s.notes.includes(note)) s.notes.push(note);
+  }
   const skippedOptional =
-    s.lowRole === "SKIPPED" ||
-    s.tests.some((t) => t.status === "SKIPPED") ||
-    !s.deployedCommit;
+    s.lowRole === "SKIPPED" || s.tests.some((t) => t.status === "SKIPPED");
   s.verdict = skippedOptional ? "AMBER" : "GREEN";
   return s.verdict;
 }
 
+function mergeSummaries(base: HubspotSmokeSummary, next: HubspotSmokeSummary): HubspotSmokeSummary {
+  const testsByName = new Map<string, SmokeTestResult>();
+  for (const t of base.tests) testsByName.set(t.name, t);
+  for (const t of next.tests) {
+    const prev = testsByName.get(t.name);
+    if (!prev) {
+      testsByName.set(t.name, t);
+      continue;
+    }
+    testsByName.set(t.name, {
+      name: t.name,
+      status: preferStatus(prev.status, t.status),
+      ...(t.detail || prev.detail ? { detail: t.detail ?? prev.detail } : {}),
+    });
+  }
+
+  const notes = Array.from(new Set([...base.notes, ...next.notes]));
+
+  const merged: HubspotSmokeSummary = {
+    suite: "FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1",
+    deploymentUrl: next.deploymentUrl || base.deploymentUrl,
+    deployedCommit: next.deployedCommit ?? base.deployedCommit,
+    suiteCommit: next.suiteCommit ?? base.suiteCommit,
+    timestamp: next.timestamp || base.timestamp,
+    verdict: "AMBER",
+    mutationGuard: preferStatus(base.mutationGuard, next.mutationGuard),
+    canonicalTabs: preferStatus(base.canonicalTabs, next.canonicalTabs),
+    redirects: preferStatus(base.redirects, next.redirects),
+    validBatchId: preferStatus(base.validBatchId, next.validBatchId),
+    invalidBatchId: preferStatus(base.invalidBatchId, next.invalidBatchId),
+    tenantIsolation: preferStatus(base.tenantIsolation, next.tenantIsolation),
+    lowRole: preferStatus(base.lowRole, next.lowRole),
+    tests: Array.from(testsByName.values()),
+    notes,
+  };
+  return merged;
+}
+
 export function writeHubspotSmokeSummary(path = DEFAULT_SUMMARY_PATH): string {
-  const s = getHubspotSmokeSummary();
-  computeSmokeVerdict();
+  let s = getHubspotSmokeSummary();
   mkdirSync(dirname(path), { recursive: true });
+  if (existsSync(path)) {
+    try {
+      const prev = JSON.parse(readFileSync(path, "utf8")) as HubspotSmokeSummary;
+      if (prev?.suite === "FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1") {
+        s = mergeSummaries(prev, s);
+        summary = s;
+      }
+    } catch {
+      // ignore corrupt prior summary
+    }
+  }
+  computeSmokeVerdict();
   writeFileSync(path, `${JSON.stringify(s, null, 2)}\n`, "utf8");
   return path;
 }
