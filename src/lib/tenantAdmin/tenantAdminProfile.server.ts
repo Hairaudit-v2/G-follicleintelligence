@@ -19,8 +19,6 @@ import {
   sessionCapsAllowConfigurationHub,
   type FiTenantAdminCapability,
 } from "@/src/lib/fiAdmin/tenantAdminCapabilities";
-import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
-import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 
 export type FiTenantAdminUserRow = {
   id: string;
@@ -202,6 +200,10 @@ function isTenantBackendFiRole(role: string): boolean {
  * Effective capability set for tenant-backend personas and explicit legacy CRM / super-tenant roles.
  * Clinical members (`fi_users.role` ≠ `tenant_backend`) get an empty set here; route helpers union
  * legacy paths (e.g. reminders) where appropriate.
+ *
+ * Platform admins only receive full caps when not impersonating. During impersonation, capabilities
+ * come from the target member row / tenant-admin profile — otherwise config gates stay elevated and
+ * Reception preview incorrectly unlocks Configuration.
  */
 export async function resolveSessionTenantAdminCapabilities(
   tenantId: string
@@ -217,11 +219,6 @@ export async function resolveSessionTenantAdminCapabilities(
   const navAuth = await resolveShellAuthUserId(authId);
   const row = await loadFiUserRow(tid, navAuth);
   if (!row) return new Set();
-
-  const os = await loadFiOsIdentity(authId);
-  if (os && isFiOsPlatformAdminRole(os.osRole)) {
-    return ALL_TENANT_ADMIN_CAPABILITIES;
-  }
 
   const rl = row.role.trim().toLowerCase();
   if (legacyFiUserRoleGrantsAllCapabilities(rl)) {
@@ -333,10 +330,8 @@ export async function canManageTenantBranding(tenantId: string): Promise<boolean
   const authId = await resolveAuthUserId(null);
   if (!authId) return false;
 
+  // Full platform-admin session only — impersonation must use the target's caps.
   if (await isFiOsPlatformAdminFullSessionBypass(authId)) return true;
-
-  const os = await loadFiOsIdentity(authId);
-  if (os && isFiOsPlatformAdminRole(os.osRole)) return true;
 
   const caps = await resolveSessionTenantAdminCapabilities(tid);
   return caps.has("manage_clinic_settings") || caps.has("manage_admin_users");
