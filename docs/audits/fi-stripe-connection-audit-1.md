@@ -1,7 +1,9 @@
 # FI-STRIPE-CONNECTION-AUDIT-1
 
-**Audit date:** 2026-07-15 (Australia/Brisbane)  
-**Scope:** read-only Stripe connection, FI OS repository at `origin/main`, and production Supabase project `iqqvzgxoimxchhcnbzxl`  
+**Audit date:** 2026-07-15 (Australia/Brisbane)
+
+**Scope:** read-only Stripe connection, FI OS repository at `origin/main`, and production Supabase project `iqqvzgxoimxchhcnbzxl`
+
 **Change controls:** no Stripe or production writes; no HubSpot files or branch changes
 
 ## Verdict
