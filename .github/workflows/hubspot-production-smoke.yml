@@ -1,0 +1,140 @@
+name: HubSpot Production Smoke
+
+# FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1
+# Non-mutating authenticated smoke against the canonical HubSpot workspace.
+# Never runs mutation paths; traces disabled; privacy-safe artifacts only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: "Production base URL (defaults to FI_E2E_PRODUCTION_URL / https://follicleintelligence.ai)"
+        required: false
+        type: string
+        default: ""
+  # Optional post-deploy hook: enable repo variable FI_HUBSPOT_SMOKE_AFTER_CI=true
+  # so a successful default-branch CI run triggers this smoke against production.
+  workflow_run:
+    workflows:
+      - "CI"
+    types:
+      - completed
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: hubspot-production-smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hubspot-production-smoke:
+    name: HubSpot production smoke (read-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Never on forks/PRs without secrets. workflow_run requires explicit opt-in var.
+    if: >
+      github.event.repository.fork == false &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'workflow_run' &&
+          vars.FI_HUBSPOT_SMOKE_AFTER_CI == 'true' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event != 'pull_request'
+        )
+      )
+
+    env:
+      FI_E2E_BASE_URL: ${{ github.event.inputs.deployment_url || vars.FI_E2E_PRODUCTION_URL || 'https://follicleintelligence.ai' }}
+      FI_E2E_TENANT_ID: ${{ secrets.FI_E2E_TENANT_ID }}
+      FI_E2E_PRODUCTION_ADMIN_EMAIL: ${{ secrets.FI_E2E_PRODUCTION_ADMIN_EMAIL }}
+      FI_E2E_PRODUCTION_ADMIN_PASSWORD: ${{ secrets.FI_E2E_PRODUCTION_ADMIN_PASSWORD }}
+      FI_E2E_LOW_ROLE_EMAIL: ${{ secrets.FI_E2E_LOW_ROLE_EMAIL }}
+      FI_E2E_LOW_ROLE_PASSWORD: ${{ secrets.FI_E2E_LOW_ROLE_PASSWORD }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Guard — production URL only
+        env:
+          DISPATCH_URL: ${{ github.event.inputs.deployment_url }}
+        run: |
+          set -euo pipefail
+          echo "Target host configured (value not echoed beyond allowlist check)"
+          case "${FI_E2E_BASE_URL}" in
+            https://follicleintelligence.ai|https://follicleintelligence.ai/|https://www.follicleintelligence.ai|https://www.follicleintelligence.ai/)
+              echo "URL allowlist OK"
+              ;;
+            *)
+              if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${DISPATCH_URL}" ]; then
+                echo "workflow_dispatch override URL accepted"
+              else
+                echo "::error::Refusing non-production URL without explicit workflow_dispatch override"
+                exit 1
+              fi
+              ;;
+          esac
+
+      - name: Guard — required secrets present
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in FI_E2E_TENANT_ID FI_E2E_PRODUCTION_ADMIN_EMAIL FI_E2E_PRODUCTION_ADMIN_PASSWORD; do
+            # Indirect expansion without printing values
+            eval "val=\${$key}"
+            if [ -z "${val}" ]; then
+              echo "::error::Missing secret: $key"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Secrets are not available (forks / PR contexts). Aborting without targeting production."
+            exit 1
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run HubSpot production smoke
+        run: npm run test:e2e:hubspot-production-smoke
+        env:
+          CI: "true"
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hubspot-production-smoke-report
+          path: playwright-report/hubspot-production-smoke/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload privacy-safe screenshots + JSON summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hubspot-production-smoke-evidence
+          path: |
+            test-results/hubspot-production-smoke-summary.json
+            test-results/hubspot-production-smoke-screenshots/
+            test-results/hubspot-production-smoke-playwright.json
+          if-no-files-found: ignore
+          retention-days: 14

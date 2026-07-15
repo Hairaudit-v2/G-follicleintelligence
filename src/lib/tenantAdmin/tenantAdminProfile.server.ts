@@ -16,6 +16,7 @@ import {
   ALL_TENANT_ADMIN_CAPABILITIES,
   capabilitiesForTenantAdminRole,
   crmOperatorCapabilityPreset,
+  sessionCapsAllowConfigurationHub,
   type FiTenantAdminCapability,
 } from "@/src/lib/fiAdmin/tenantAdminCapabilities";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
@@ -289,20 +290,7 @@ export async function canManageTenantAdminUsersRoute(tenantId: string): Promise<
 
 export async function canViewTenantConfigurationHub(tenantId: string): Promise<boolean> {
   const caps = await resolveSessionTenantAdminCapabilities(tenantId);
-  if (
-    caps.has("manage_clinic_settings") ||
-    caps.has("manage_finance_settings") ||
-    caps.has("manage_operations") ||
-    caps.has("manage_admin_users")
-  ) {
-    return true;
-  }
-  const authId = await resolveAuthUserId(null);
-  if (!authId) return false;
-  const navAuth = await resolveShellAuthUserId(authId);
-  const row = await loadFiUserRow(tenantId.trim(), navAuth);
-  if (!row) return false;
-  return !isTenantBackendFiRole(row.role);
+  return sessionCapsAllowConfigurationHub(caps);
 }
 
 export async function canViewSecurityAuditNav(tenantId: string): Promise<boolean> {

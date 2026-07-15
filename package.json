@@ -46,6 +46,7 @@
     "test:e2e:cross-browser": "playwright test e2e/security e2e/journeys",
     "test:e2e:security:production": "node scripts/run-e2e-security-production.mjs",
     "test:e2e:smoke:production": "node scripts/run-e2e-smoke-production.mjs",
+    "test:e2e:hubspot-production-smoke": "playwright test -c playwright.hubspot-production-smoke.config.ts",
     "replay:intelligence-event-logs": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/replay-intelligence-event-logs.ts",
     "test:unit": "node scripts/run-unit-tests.mjs",
     "test:branding": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/fi/foundation/tenantBrandingCore.test.ts src/lib/fi/foundation/tenantBrandingFormCore.test.ts src/lib/fi/foundation/tenantBrandingStorage.test.ts src/lib/tenantAdmin/tenantBrandingPermissions.test.ts lib/actions/fi-configuration-actions.branding.test.ts",

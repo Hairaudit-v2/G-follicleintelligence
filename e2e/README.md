@@ -14,6 +14,7 @@ value and tagged for selective execution.
 | `@a11y` | Keyboard + semantic markup on public pages | None | Included in smoke CI |
 | `@authenticated` | Tenant admin login → dashboard, cross-tenant, staff PIN | Demo env secrets | Authenticated projects only (public projects `grepInvert`); trust-trio job when secrets + staging URL set |
 | `@mutation` | Patient create (demo tenant, opt-in) | `FI_E2E_ALLOW_MUTATIONS=1` | Optional |
+| `@hubspot-production-smoke` | Canonical HubSpot workspace (production, read-only) | `FI_E2E_PRODUCTION_ADMIN_*` | `hubspot-production-smoke.yml` (manual / opt-in post-CI) |
 
 Critical revenue path (lead → case → consultation → payment) remains in the
 [clinic readiness runbook](../docs/smoke/fi-os-clinic-readiness-runbook.md) for
@@ -51,6 +52,10 @@ npx playwright install --with-deps       # full cross-browser matrix
 | `FI_E2E_STAFF_ID` | Staff PIN tests | Staff record UUID on demo tenant |
 | `FI_E2E_STAFF_PIN` | Staff PIN tests | 4-digit floor PIN |
 | `FI_E2E_ALLOW_MUTATIONS` | Mutation tests | Must be `1` — demo tenant only |
+| `FI_E2E_PRODUCTION_ADMIN_EMAIL` | HubSpot production smoke | Production admin (read-only suite) |
+| `FI_E2E_PRODUCTION_ADMIN_PASSWORD` | HubSpot production smoke | Production admin password |
+| `FI_E2E_LOW_ROLE_EMAIL` | Optional HubSpot smoke | Low-role gating (AMBER skip if unset) |
+| `FI_E2E_LOW_ROLE_PASSWORD` | Optional HubSpot smoke | Low-role password |
 | `FI_E2E_PERF_BUDGET_MS` | Optional | Page load budget (default 8000) |
 | `FI_E2E_BROWSERS` | Optional | Limit browsers, e.g. `chromium,firefox` |
 
@@ -86,6 +91,19 @@ FI_E2E_DEMO_ADMIN_EMAIL=tester+smoketest@yourdomain.test \
 FI_E2E_DEMO_ADMIN_PASSWORD=<secret> \
 npm run test:e2e:authenticated
 ```
+
+**HubSpot production smoke (read-only; never commits storage state):**
+
+```
+FI_E2E_BASE_URL=https://follicleintelligence.ai \
+FI_E2E_TENANT_ID=c2615b95-b707-4485-aa5f-be8f78ec868a \
+FI_E2E_PRODUCTION_ADMIN_EMAIL=<secret> \
+FI_E2E_PRODUCTION_ADMIN_PASSWORD=<secret> \
+npm run test:e2e:hubspot-production-smoke
+```
+
+Evidence: `test-results/hubspot-production-smoke-summary.json` and
+`test-results/hubspot-production-smoke-screenshots/`. Traces are disabled.
 
 **Full suite:**
 

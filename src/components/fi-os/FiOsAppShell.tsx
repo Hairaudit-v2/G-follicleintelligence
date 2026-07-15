@@ -90,6 +90,8 @@ type FiOsAppShellProps = {
   showAuditOsNav?: boolean;
   /** `/configuration` hub link in primary sidebar. */
   showConfigurationHubNav?: boolean;
+  /** HubSpot import review without requiring Configuration hub caps (CRM-read). */
+  showHubspotImportNav?: boolean;
   /** Payments payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
   showFiPaymentsInboxNav?: boolean;
   /** Surgery day board (`/procedure-day`) when `FI_PROCEDURE_DAY_ENABLED` is true. */
@@ -131,6 +133,7 @@ function FiOsAppShellBody({
   showRemindersSettingsNav = true,
   showAuditOsNav = true,
   showConfigurationHubNav = true,
+  showHubspotImportNav = false,
   showFiPaymentsInboxNav = false,
   showProcedureDayNav = false,
   showHrOsNav = false,
@@ -414,6 +417,7 @@ function FiOsAppShellBody({
               showStaffAndServicesNav={showStaffAndServicesNav}
               showAdminUsersNav={showAdminUsersNav}
               showConfigurationHubNav={showConfigurationHubNav}
+              showHubspotImportNav={showHubspotImportNav}
               showTaxLocalisationSettingsNav={showTaxLocalisationSettingsNav}
               showRemindersSettingsNav={showRemindersSettingsNav}
               featureAccess={featureAccess}

@@ -47,6 +47,8 @@ type Props = {
   sessionId?: string | null;
   initialSnapshot?: HubspotConnectorSnapshot | null;
   section?: "full" | "backup" | "review" | "configuration";
+  /** When false, omit Sync / Approve / Reject controls (CRM-read / reception). Default true. */
+  canMutate?: boolean;
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
@@ -63,18 +65,20 @@ function ContactReviewCard({
   tenantId,
   contact,
   pending,
+  canMutate,
   onApprove,
   onReject,
 }: {
   tenantId: string;
   contact: HubspotStagingContact;
   pending: boolean;
+  canMutate: boolean;
   onApprove: () => void;
   onReject: () => void;
 }) {
   const badge = HUBSPOT_IMPORT_STATUS_BADGES[contact.importStatus];
   const typeLabel = HUBSPOT_LEAD_TYPE_LABELS[contact.normalizedLeadType];
-  const canReview = contact.importStatus === "staged" || contact.importStatus === "reviewed";
+  const canReview = canMutate && (contact.importStatus === "staged" || contact.importStatus === "reviewed");
 
   return (
     <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4 space-y-3">
@@ -119,13 +123,15 @@ function ContactReviewCard({
       ) : (
         <>
           <p className="text-[11px] text-slate-500">
-            {contact.importStatus === "approved"
-              ? "Approved — ready for staged import review."
-              : contact.importStatus === "rejected"
-                ? "Rejected — will not be imported."
-                : contact.importStatus === "imported"
-                  ? "Imported into FI."
-                  : "Review complete."}
+            {!canMutate && (contact.importStatus === "staged" || contact.importStatus === "reviewed")
+              ? "Read-only — approve/reject requires clinic operator access."
+              : contact.importStatus === "approved"
+                ? "Approved — ready for staged import review."
+                : contact.importStatus === "rejected"
+                  ? "Rejected — will not be imported."
+                  : contact.importStatus === "imported"
+                    ? "Imported into FI."
+                    : "Review complete."}
           </p>
           {contact.importStatus === "approved" ? (
             <Link
@@ -145,18 +151,20 @@ function DealReviewCard({
   tenantId,
   deal,
   pending,
+  canMutate,
   onApprove,
   onReject,
 }: {
   tenantId: string;
   deal: HubspotStagingDeal;
   pending: boolean;
+  canMutate: boolean;
   onApprove: () => void;
   onReject: () => void;
 }) {
   const badge = HUBSPOT_IMPORT_STATUS_BADGES[deal.importStatus];
   const typeLabel = HUBSPOT_LEAD_TYPE_LABELS[deal.normalizedLeadType];
-  const canReview = deal.importStatus === "staged" || deal.importStatus === "reviewed";
+  const canReview = canMutate && (deal.importStatus === "staged" || deal.importStatus === "reviewed");
 
   return (
     <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4 space-y-3">
@@ -201,13 +209,15 @@ function DealReviewCard({
       ) : (
         <>
           <p className="text-[11px] text-slate-500">
-            {deal.importStatus === "approved"
-              ? "Approved — ready for staged import review."
-              : deal.importStatus === "rejected"
-                ? "Rejected — will not be imported."
-                : deal.importStatus === "imported"
-                  ? "Imported into FI."
-                  : "Review complete."}
+            {!canMutate && (deal.importStatus === "staged" || deal.importStatus === "reviewed")
+              ? "Read-only — approve/reject requires clinic operator access."
+              : deal.importStatus === "approved"
+                ? "Approved — ready for staged import review."
+                : deal.importStatus === "rejected"
+                  ? "Rejected — will not be imported."
+                  : deal.importStatus === "imported"
+                    ? "Imported into FI."
+                    : "Review complete."}
           </p>
           {deal.importStatus === "approved" ? (
             <Link
@@ -230,6 +240,7 @@ export function HubSpotConnectorPanel({
   sessionId,
   initialSnapshot,
   section = "full",
+  canMutate = true,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -468,7 +479,7 @@ export function HubSpotConnectorPanel({
         </p>
       </div>
 
-      {(section === "full" || section === "backup") ? <div className="flex flex-wrap items-center gap-2">
+      {(section === "full" || section === "backup") && canMutate ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}
@@ -548,6 +559,7 @@ export function HubSpotConnectorPanel({
                   tenantId={tenantId}
                   contact={contact}
                   pending={pending}
+                  canMutate={canMutate}
                   onApprove={() => approveContact(contact.id)}
                   onReject={() => rejectContact(contact.id)}
                 />
@@ -566,6 +578,7 @@ export function HubSpotConnectorPanel({
                 tenantId={tenantId}
                 deal={deal}
                 pending={pending}
+                canMutate={canMutate}
                 onApprove={() => approveDeal(deal.id)}
                 onReject={() => rejectDeal(deal.id)}
               />

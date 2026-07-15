@@ -30,10 +30,13 @@ export function HubspotCrmImportCentre({
   tenantId,
   initialBatch,
   stagingPreview,
+  canMutate = true,
 }: {
   tenantId: string;
   initialBatch: FiImportBatchRow | null;
   stagingPreview: StagingRowDb[];
+  /** When false, omit upload / dry-run / import / rollback controls. Default true. */
+  canMutate?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -176,26 +179,32 @@ export function HubspotCrmImportCentre({
         <p className="mt-1 text-xs text-slate-400">
           Stage 1: persons, patients (when qualified), CRM leads, deal id mappings.
         </p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-200 hover:bg-white/[0.07]">
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              className="hidden"
-              disabled={pending}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) onUpload(f);
-                e.target.value = "";
-              }}
-            />
-            Choose CSV
-          </label>
-          <p className="text-xs text-slate-400">
-            Expected columns include Record ID, First Name, Last Name, Email, Phone Number, Lead
-            Status, Stage of Journey, Associated Deal IDs, etc.
+        {canMutate ? (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-200 hover:bg-white/[0.07]">
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                disabled={pending}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) onUpload(f);
+                  e.target.value = "";
+                }}
+              />
+              Choose CSV
+            </label>
+            <p className="text-xs text-slate-400">
+              Expected columns include Record ID, First Name, Last Name, Email, Phone Number, Lead
+              Status, Stage of Journey, Associated Deal IDs, etc.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-4 text-xs text-slate-500">
+            Read-only — CSV upload requires clinic operator access.
           </p>
-        </div>
+        )}
       </DashboardCard>
 
       {batchId ? (
@@ -247,30 +256,38 @@ export function HubspotCrmImportCentre({
               rows.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={pending || !canDryRun}
-                onClick={onDryRun}
-                className="rounded-md bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Run dry-run
-              </button>
-              <button
-                type="button"
-                disabled={pending || !canImport}
-                onClick={onImport}
-                className="rounded-md bg-emerald-700 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Import first 100 valid rows
-              </button>
-              <button
-                type="button"
-                disabled={pending || !canRollback}
-                onClick={onRollback}
-                className="rounded-md border border-rose-500/50 bg-rose-950/40 px-3 py-2 text-sm font-medium text-rose-100 hover:bg-rose-900/50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Rollback batch
-              </button>
+              {canMutate ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={pending || !canDryRun}
+                    onClick={onDryRun}
+                    className="rounded-md bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Run dry-run
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pending || !canImport}
+                    onClick={onImport}
+                    className="rounded-md bg-emerald-700 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Import first 100 valid rows
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pending || !canRollback}
+                    onClick={onRollback}
+                    className="rounded-md border border-rose-500/50 bg-rose-950/40 px-3 py-2 text-sm font-medium text-rose-100 hover:bg-rose-900/50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Rollback batch
+                  </button>
+                </>
+              ) : (
+                <p className="text-xs text-slate-500">
+                  Read-only — dry-run and import require clinic operator access.
+                </p>
+              )}
             </div>
             <p className="mt-2 text-xs text-slate-500">
               Batch status:{" "}
