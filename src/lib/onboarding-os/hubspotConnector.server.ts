@@ -127,7 +127,6 @@ type AuthSessionRow = {
   auth_status: string;
 };
 
-const HUBSPOT_API_BASE = "https://api.hubapi.com";
 const HUBSPOT_CONTACT_PROPERTIES = [
   "firstname",
   "lastname",
