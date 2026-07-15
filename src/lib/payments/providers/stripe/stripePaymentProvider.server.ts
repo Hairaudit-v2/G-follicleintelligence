@@ -11,6 +11,10 @@ import {
   readStripeSecretKey,
   readStripeWebhookSecret,
 } from "@/src/lib/payments/fiPaymentEnv.server";
+import {
+  assertStripeConnectionReady,
+  assertStripeWebhookEventMode,
+} from "@/src/lib/payments/stripeConnectionReadiness.server";
 
 async function loadStripe() {
   const mod = await import("stripe");
@@ -33,6 +37,9 @@ export function createStripePaymentProvider(): FiPaymentProvider {
         );
       }
       const stripe = new StripeSdk(secret);
+      await assertStripeConnectionReady({
+        retrieveAccount: () => stripe.accounts.retrieve(),
+      });
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         success_url: success,
@@ -82,7 +89,9 @@ export function createStripePaymentProvider(): FiPaymentProvider {
       const raw =
         typeof input.rawBody === "string" ? input.rawBody : input.rawBody.toString("utf8");
       const StripeSdk = await loadStripe();
-      return StripeSdk.webhooks.constructEvent(raw, sig, whSecret);
+      const event = StripeSdk.webhooks.constructEvent(raw, sig, whSecret);
+      assertStripeWebhookEventMode(event.livemode);
+      return event;
     },
 
     mapWebhookToPaymentEvent(rawEvent: unknown): MappedPaymentWebhookEvent {

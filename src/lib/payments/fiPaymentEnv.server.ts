@@ -1,5 +1,10 @@
 import "server-only";
 
+import type {
+  StripeConnectionConfig,
+  StripeMode,
+} from "@/src/lib/payments/stripeConnectionReadinessCore";
+
 function truthyEnv(v: string | undefined): boolean {
   const s = v?.trim().toLowerCase();
   return s === "1" || s === "true" || s === "yes";
@@ -21,6 +26,29 @@ export function readStripeSecretKey(): string | undefined {
 export function readStripeWebhookSecret(): string | undefined {
   const k = process.env.STRIPE_WEBHOOK_SECRET?.trim();
   return k || undefined;
+}
+
+export function readStripeExpectedAccountId(): string | undefined {
+  const id = process.env.STRIPE_EXPECTED_ACCOUNT_ID?.trim();
+  return id || undefined;
+}
+
+export function readStripeExpectedMode(): StripeMode | undefined {
+  const mode = process.env.STRIPE_EXPECTED_MODE?.trim().toLowerCase();
+  return mode === "test" || mode === "live" ? mode : undefined;
+}
+
+export function readStripeLiveModeAllowed(): boolean {
+  return truthyEnv(process.env.FI_STRIPE_LIVE_MODE_ALLOWED);
+}
+
+export function readStripeConnectionConfig(): StripeConnectionConfig {
+  return {
+    secretKey: readStripeSecretKey(),
+    expectedAccountId: readStripeExpectedAccountId(),
+    expectedMode: readStripeExpectedMode(),
+    liveModeAllowed: readStripeLiveModeAllowed(),
+  };
 }
 
 export function readFiPaymentSuccessUrl(): string | undefined {

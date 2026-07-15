@@ -10,7 +10,7 @@
 
 **AMBER — integration code and production schema are materially scaffolded, but production-live Stripe processing is not verified.**
 
-The Stripe connector is authenticated to account `acct_1TN2F45CMnrQiyQG`, displayed as **Follicle Intel**. This is consistent with FI naming, but the connector exposes insufficient account profile detail to independently prove that it is the intended Evolved business account. Production contains one Stripe-labelled succeeded payment/PaymentIntent mapping, but no Stripe webhook events, no Stripe connector/auth records, and no reconciliation rows. That isolated row is not sufficient evidence of a live end-to-end payment.
+The Stripe connector is authenticated to account `acct_1TN2F45CMnrQiyQG`, displayed as **Follicle Intel**. On 2026-07-15 the account owner confirmed this is the intended Evolved business Stripe account. Production contains one Stripe-labelled succeeded payment/PaymentIntent mapping, but no Stripe webhook events, no Stripe connector/auth records, and no reconciliation rows. That isolated row is not sufficient evidence of a live end-to-end payment.
 
 ## Connected account verification
 
@@ -18,7 +18,7 @@ The Stripe connector is authenticated to account `acct_1TN2F45CMnrQiyQG`, displa
 |---|---|
 | Account/business display name | Follicle Intel |
 | Account ID | `acct_1TN2F45CMnrQiyQG` |
-| Intended Evolved business account | **PARTIAL** — naming is consistent; legal/business ownership was not exposed by the connector |
+| Intended Evolved business account | **IMPLEMENTED / VERIFIED** — confirmed by the account owner on 2026-07-15 |
 | Country | **UNKNOWN** |
 | Default currency | **UNKNOWN** |
 | Live/test capability state | **UNKNOWN** |
