@@ -1,7 +1,3 @@
-import { loadEnvConfig } from "@next/env";
-
-loadEnvConfig(process.cwd());
-
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const INTEGRATION_ID = "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6";
 
