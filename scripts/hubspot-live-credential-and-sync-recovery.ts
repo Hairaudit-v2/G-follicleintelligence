@@ -18,6 +18,7 @@ async function main(): Promise<void> {
   if (!live.ok) throw new Error(live.error);
   process.stdout.write(`${JSON.stringify({ phase: "live_probe", ...live.verification })}\n`);
   if (!live.verification.credentialValid || !live.verification.portalIdentityMatch) return;
+  if (process.argv.includes("--probe-only")) return;
 
   const sync = await connector.runHubspotSync(INTEGRATION_ID, TENANT_ID, {
     actorAuthUserId,
