@@ -12,6 +12,7 @@ import {
   rejectHubspotLeadAction,
   runHubspotSecondaryBackupAction,
   runHubspotSyncAction,
+  verifyHubspotSecondaryCapabilitiesAction,
 } from "@/lib/actions/fi-onboarding-os-hubspot-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
@@ -302,6 +303,29 @@ export function HubSpotConnectorPanel({
     });
   }
 
+  function checkLiveBackupAccess() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await verifyHubspotSecondaryCapabilitiesAction(tenantId, integrationId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      refreshSnapshot(res.snapshot);
+      if (res.secondaryProbe?.allGranted) {
+        setMessage({
+          kind: "ok",
+          text: "Live backup access verified. All six secondary read endpoints are available.",
+        });
+        return;
+      }
+      setMessage({
+        kind: "err",
+        text: `Live check completed. Missing read access: ${res.secondaryProbe?.missingScopes.join(", ") || "unknown"}. No backup was started.`,
+      });
+    });
+  }
+
   function approveContact(contactId: string) {
     setMessage(null);
     startTransition(async () => {
@@ -431,6 +455,11 @@ export function HubSpotConnectorPanel({
         <p>
           Live API capability probe:{" "}
           {secondaryEvidence?.liveCapabilityProbe?.outcome ?? "No evidence"}
+          {secondaryEvidence?.liveCapabilityProbe
+            ? secondaryEvidence.liveCapabilityProbe.allGranted
+              ? " · all six available"
+              : " · permission gap"
+            : ""}
         </p>
         <p>
           Latest backup health: {secondaryEvidence?.latestBackup?.status ?? "No backup recorded"}
@@ -445,6 +474,14 @@ export function HubSpotConnectorPanel({
           className="rounded bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
         >
           Sync now
+        </button>
+        <button
+          type="button"
+          disabled={pending || secondaryAction?.activeRun}
+          onClick={checkLiveBackupAccess}
+          className="rounded border border-emerald-500/40 px-4 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Check live backup access
         </button>
         {secondaryAction?.visible ? (
           <button

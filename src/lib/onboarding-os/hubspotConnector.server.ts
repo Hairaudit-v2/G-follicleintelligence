@@ -20,6 +20,7 @@ import {
   runHubspotSecondaryBackup,
   secondaryScopeFor,
   type HubspotSecondaryKind,
+  type SecondaryCapability,
   type SecondaryCounter,
 } from "./hubspotSecondaryBackupEngine.server";
 
@@ -140,6 +141,32 @@ type IntegrationRow = {
 type AuthSessionRow = {
   auth_status: string;
 };
+
+type VerificationEvidenceRow = {
+  outcome: string;
+  detail: Record<string, unknown> | null;
+  provider_payload: Record<string, unknown> | null;
+  occurred_at: string;
+};
+
+function verificationMode(row: VerificationEvidenceRow): string {
+  return String(row.detail?.verification_mode ?? row.provider_payload?.verification_mode ?? "");
+}
+
+function isLiveSecondaryProbe(row: VerificationEvidenceRow): boolean {
+  return (
+    verificationMode(row) === "live_probe_secondary_objects" &&
+    row.detail?.test_mode !== true &&
+    row.provider_payload?.test_mode !== true &&
+    row.detail?.stub !== true &&
+    row.provider_payload?.stub !== true
+  );
+}
+
+function liveSecondaryCapabilitiesAllGranted(row: VerificationEvidenceRow | undefined): boolean {
+  const capabilities = (row?.detail?.capabilities ?? {}) as Record<string, Record<string, unknown>>;
+  return HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind]?.granted === true);
+}
 
 const HUBSPOT_CONTACT_PROPERTIES = [
   "firstname",
@@ -923,6 +950,98 @@ async function runResumableHubspotBackup(
   }
 }
 
+/** Probe the six read-only secondary endpoints without creating a sync run or staging records. */
+export async function verifyHubspotSecondaryCapabilitiesLive(
+  integrationId: string,
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<
+  | {
+      ok: true;
+      capabilities: Record<HubspotSecondaryKind, SecondaryCapability>;
+      allGranted: boolean;
+      missingScopes: string[];
+    }
+  | { ok: false; error: string }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot") {
+    return { ok: false, error: "HubSpot connector not found." };
+  }
+
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token) {
+    return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+  }
+
+  const { data: session } = await supabase
+    .from("fi_external_connector_auth_sessions")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("integration_id", integrationId)
+    .maybeSingle();
+  if (!session) return { ok: false, error: "Connector auth session not found." };
+
+  const capabilities = await probeHubspotSecondaryCapabilities(token);
+  const now = new Date().toISOString();
+  for (const kind of HUBSPOT_SECONDARY_KINDS) {
+    const scope = secondaryScopeFor(kind);
+    const { error } = await supabase.from("fi_external_connector_permission_scopes").upsert(
+      {
+        auth_session_id: session.id,
+        integration_id: integrationId,
+        tenant_id: tenantId,
+        provider: "hubspot",
+        scope_key: scope,
+        scope_label: scope,
+        required: true,
+        granted: capabilities[kind].granted,
+        recorded_at: now,
+      },
+      { onConflict: "auth_session_id,scope_key" }
+    );
+    if (error) return { ok: false, error: "Unable to record live HubSpot capability." };
+  }
+
+  const allGranted = HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind].granted);
+  const missingScopes = HUBSPOT_SECONDARY_KINDS.filter((kind) => !capabilities[kind].granted).map(
+    secondaryScopeFor
+  );
+  const { error: eventError } = await supabase
+    .from("fi_external_connector_verification_events")
+    .insert({
+      auth_session_id: session.id,
+      integration_id: integrationId,
+      tenant_id: tenantId,
+      provider: "hubspot",
+      auth_status: allGranted ? "verified" : "insufficient_permissions",
+      outcome: allGranted ? "success" : "warning",
+      actor_auth_user_id: auth.actorAuthUserId,
+      actor_fi_user_id: auth.fiUserId,
+      actor_label: auth.actorLabel,
+      detail: {
+        verification_mode: "live_probe_secondary_objects",
+        test_mode: false,
+        stub: false,
+        capabilities,
+        missing_scopes: missingScopes,
+      },
+      provider_payload: {
+        verification_mode: "live_probe_secondary_objects",
+        test_mode: false,
+        stub: false,
+        response_bodies_retained: false,
+      },
+    });
+  if (eventError) return { ok: false, error: "Unable to record live HubSpot verification." };
+
+  return { ok: true, capabilities, allGranted, missingScopes };
+}
+
 /** Run the six read-only secondary-object backups through the existing encrypted connector credential. */
 export async function runHubspotSecondaryObjectBackup(
   integrationId: string,
@@ -943,7 +1062,12 @@ export async function runHubspotSecondaryObjectBackup(
   const integration = await loadIntegration(supabase, integrationId, tenantId);
   if (!integration || integration.provider !== "hubspot")
     return { ok: false, error: "HubSpot connector not found." };
-  const [{ data: credentialRow }, { data: scopeRows }, { data: activeRows }] = await Promise.all([
+  const [
+    { data: credentialRow },
+    { data: scopeRows },
+    { data: activeRows },
+    { data: verificationRows },
+  ] = await Promise.all([
     supabase
       .from("fi_external_connector_credentials")
       .select("id")
@@ -963,6 +1087,13 @@ export async function runHubspotSecondaryObjectBackup(
       .eq("integration_id", integrationId)
       .eq("tenant_id", tenantId)
       .eq("status", "started"),
+    supabase
+      .from("fi_external_connector_verification_events")
+      .select("outcome, detail, provider_payload, occurred_at")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .order("occurred_at", { ascending: false })
+      .limit(25),
   ]);
   const activeSecondaryRun = ((activeRows ?? []) as Record<string, unknown>[]).some((row) => {
     const detail = (row.detail ?? {}) as Record<string, unknown>;
@@ -978,6 +1109,9 @@ export async function runHubspotSecondaryObjectBackup(
       (row) => row.scope_key
     ),
     activeRun: activeSecondaryRun,
+    liveCapabilitiesVerified: liveSecondaryCapabilitiesAllGranted(
+      ((verificationRows ?? []) as VerificationEvidenceRow[]).find(isLiveSecondaryProbe)
+    ),
     operatorAuthorized: true,
   });
   if (!actionState.visible)
@@ -1895,31 +2029,18 @@ async function buildConnectorSnapshot(
   ).includes(integration.status as ExternalConnectorStatus)
     ? (integration.status as ExternalConnectorStatus)
     : "draft";
+  const events = (verificationRows ?? []) as VerificationEvidenceRow[];
+  const liveProbe = events.find(isLiveSecondaryProbe);
   const secondaryBackupAction = resolveHubspotSecondaryBackupActionState({
     credentialConfigured: Boolean(credentialRow),
     connectorStatus,
     grantedScopes,
     activeRun: activeSecondaryRun,
+    liveCapabilitiesVerified: liveSecondaryCapabilitiesAllGranted(liveProbe),
     operatorAuthorized,
   });
-
-  type VerificationEvidenceRow = {
-    outcome: string;
-    detail: Record<string, unknown> | null;
-    provider_payload: Record<string, unknown> | null;
-    occurred_at: string;
-  };
-  const events = (verificationRows ?? []) as VerificationEvidenceRow[];
-  const verificationMode = (row: VerificationEvidenceRow) =>
-    String(row.detail?.verification_mode ?? row.provider_payload?.verification_mode ?? "");
   const isTestVerification = (row: VerificationEvidenceRow) =>
     row.detail?.test_mode === true || row.provider_payload?.test_mode === true;
-  const liveProbe = events.find(
-    (row) =>
-      verificationMode(row).startsWith("live_probe") &&
-      row.detail?.stub !== true &&
-      row.provider_payload?.stub !== true
-  );
   const configurationVerification = events.find(isTestVerification);
   const secondaryRunRow = ((runRows ?? []) as SyncRunRow[]).find((row) => isSecondaryRun(row));
 
@@ -1948,7 +2069,11 @@ async function buildConnectorSnapshot(
           }
         : null,
       liveCapabilityProbe: liveProbe
-        ? { outcome: liveProbe.outcome, occurredAt: liveProbe.occurred_at }
+        ? {
+            outcome: liveProbe.outcome,
+            occurredAt: liveProbe.occurred_at,
+            allGranted: liveSecondaryCapabilitiesAllGranted(liveProbe),
+          }
         : null,
       latestBackup: secondaryRunRow
         ? {

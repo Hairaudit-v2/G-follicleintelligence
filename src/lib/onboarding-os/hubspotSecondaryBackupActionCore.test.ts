@@ -11,6 +11,7 @@ const ready = {
   connectorStatus: "configured" as const,
   grantedScopes: HUBSPOT_SECONDARY_REQUIRED_SCOPES,
   activeRun: false,
+  liveCapabilitiesVerified: true,
   operatorAuthorized: true,
 };
 
@@ -70,5 +71,15 @@ describe("HubSpot secondary backup operator action", () => {
   it("does not depend on live-sync availability, health, test mode, or prior completion", () => {
     const state = resolveHubspotSecondaryBackupActionState(ready);
     assert.equal(state.disabled, false);
+  });
+
+  it("requires a successful live secondary capability probe", () => {
+    const state = resolveHubspotSecondaryBackupActionState({
+      ...ready,
+      liveCapabilitiesVerified: false,
+    });
+    assert.equal(state.visible, true);
+    assert.equal(state.disabled, true);
+    assert.match(state.disabledReason ?? "", /check live backup access/i);
   });
 });

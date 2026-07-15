@@ -229,7 +229,11 @@ export type HubspotConnectorSnapshot = {
   secondaryBackupAction: import("./hubspotSecondaryBackupActionCore").HubspotSecondaryBackupActionState;
   secondaryEvidence: {
     configurationVerification: { outcome: string; occurredAt: string } | null;
-    liveCapabilityProbe: { outcome: string; occurredAt: string } | null;
+    liveCapabilityProbe: {
+      outcome: string;
+      occurredAt: string;
+      allGranted: boolean;
+    } | null;
     latestBackup: { status: HubspotSyncRunStatus; completedAt: string | null } | null;
   };
   calculatedAt: string;

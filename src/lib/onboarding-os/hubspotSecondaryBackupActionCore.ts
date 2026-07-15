@@ -26,6 +26,7 @@ export function resolveHubspotSecondaryBackupActionState(input: {
   connectorStatus: ExternalConnectorStatus;
   grantedScopes: readonly string[];
   activeRun: boolean;
+  liveCapabilitiesVerified: boolean;
   operatorAuthorized: boolean;
 }): HubspotSecondaryBackupActionState {
   const granted = new Set(input.grantedScopes);
@@ -72,6 +73,15 @@ export function resolveHubspotSecondaryBackupActionState(input: {
       disabled: true,
       disabledReason: `Missing recorded secondary permission${missingScopes.length === 1 ? "" : "s"}: ${missingScopes.join(", ")}.`,
       missingScopes,
+      activeRun: false,
+    };
+  }
+  if (!input.liveCapabilitiesVerified) {
+    return {
+      visible: true,
+      disabled: true,
+      disabledReason: "Run Check live backup access before starting the backup.",
+      missingScopes: [],
       activeRun: false,
     };
   }
