@@ -94,3 +94,20 @@ Do not change the endpoint until the existing configuration is inspected.
 - Stored payment methods.
 
 Each deferred area requires its own data-minimisation, tenant-mapping, lifecycle, reconciliation, security, and rollback design before any Stripe records are created.
+
+## Pre-live deployment evidence — 2026-07-15
+
+| Check | Result |
+|---|---|
+| Isolated branch | `codex/fi-stripe-connection-audit-1` |
+| Commit | `74a20e51e25ecd66a703e8d282330eca0b99c051` |
+| Vercel preview deployment | `dpl_gQtheGCgxN5iU7iLahjku5tnfFio` |
+| Preview status | READY |
+| Preview URL | `https://g-follicleintelligence-5bwom2j7i-fi-ai-ef8ee84f.vercel.app` |
+| Build errors | None |
+| Preview runtime errors/fatals after deployment | None observed |
+| Production promotion | **BLOCKED / NOT ATTEMPTED** |
+
+Production was running a promoted deployment from `codex/fi-hubspot-live-sync-recovery` at the time of this check. The Stripe branch was based on `main`; promoting it directly could regress newer HubSpot recovery work. Integrate the three Stripe commits onto the current production code line and rebuild a preview before promotion.
+
+The preview is protected by Vercel Authentication. Environment-variable name/scope inspection was unavailable through the connected Vercel read interface, and the local CLI could not reach Vercel. Stripe webhook endpoint inventory was also unavailable through the connected Stripe read interface. These checks remain open and no configuration was changed.
