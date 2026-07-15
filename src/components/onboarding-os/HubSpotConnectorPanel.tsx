@@ -251,6 +251,8 @@ export function HubSpotConnectorPanel({
 
   const health = snapshot?.syncHealth;
   const latestRun = snapshot?.latestSyncRun;
+  const secondaryAction = snapshot?.secondaryBackupAction;
+  const secondaryEvidence = snapshot?.secondaryEvidence;
 
   const contactQueue =
     queueFilter === "staged"
@@ -292,7 +294,10 @@ export function HubSpotConnectorPanel({
         setMessage({ kind: "err", text: res.error });
         return;
       }
-      setMessage({ kind: "ok", text: "Secondary-object backup complete. Records remain in restricted staging only." });
+      setMessage({
+        kind: "ok",
+        text: "Secondary-object backup complete. Records remain in restricted staging only.",
+      });
       router.refresh();
     });
   }
@@ -418,7 +423,21 @@ export function HubSpotConnectorPanel({
 
       {health?.summary ? <p className="text-xs text-slate-500">{health.summary}</p> : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 rounded-lg border border-slate-700/60 bg-slate-900/30 p-3 text-xs text-slate-400 sm:grid-cols-3">
+        <p>
+          Configuration/test verification:{" "}
+          {secondaryEvidence?.configurationVerification?.outcome ?? "No evidence"}
+        </p>
+        <p>
+          Live API capability probe:{" "}
+          {secondaryEvidence?.liveCapabilityProbe?.outcome ?? "No evidence"}
+        </p>
+        <p>
+          Latest backup health: {secondaryEvidence?.latestBackup?.status ?? "No backup recorded"}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}
@@ -427,14 +446,22 @@ export function HubSpotConnectorPanel({
         >
           Sync now
         </button>
-        <button
-          type="button"
-          disabled={pending}
-          onClick={runSecondaryBackup}
-          className="rounded border border-cyan-500/40 px-4 py-2 text-sm font-medium text-cyan-200 hover:bg-cyan-500/10 disabled:opacity-50"
-        >
-          Back up secondary objects
-        </button>
+        {secondaryAction?.visible ? (
+          <button
+            type="button"
+            disabled={pending || secondaryAction.disabled}
+            title={secondaryAction.disabledReason ?? undefined}
+            onClick={runSecondaryBackup}
+            className="rounded border border-cyan-500/40 px-4 py-2 text-sm font-medium text-cyan-200 hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Back up secondary objects
+          </button>
+        ) : secondaryAction?.activeRun ? (
+          <span className="text-xs text-cyan-300">Secondary-object backup in progress…</span>
+        ) : null}
+        {secondaryAction?.visible && secondaryAction.disabledReason ? (
+          <span className="text-xs text-amber-300">{secondaryAction.disabledReason}</span>
+        ) : null}
       </div>
 
       <div className="space-y-3">
