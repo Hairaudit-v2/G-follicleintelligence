@@ -61,7 +61,7 @@ test("crmOperatorCapabilityPreset matches operations_admin finance/admin exclusi
   assert.equal(crm.has("manage_admin_users"), false);
 });
 
-test("sessionCapsAllowConfigurationHub: empty / viewer denied; clinic ops finance admin allowed", () => {
+test("sessionCapsAllowConfigurationHub: empty / viewer / ops / CRM operator denied; clinic finance admin allowed", () => {
   assert.equal(sessionCapsAllowConfigurationHub(new Set()), false);
   assert.equal(sessionCapsAllowConfigurationHub(null), false);
   assert.equal(
@@ -78,10 +78,10 @@ test("sessionCapsAllowConfigurationHub: empty / viewer denied; clinic ops financ
   );
   assert.equal(
     sessionCapsAllowConfigurationHub(capabilitiesForTenantAdminRole("operations_admin")),
-    true,
+    false,
   );
   assert.equal(
     sessionCapsAllowConfigurationHub(crmOperatorCapabilityPreset()),
-    true,
+    false,
   );
 });
