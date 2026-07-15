@@ -291,6 +291,7 @@ export default async function TenantAdminLayout({
         showRemindersSettingsNav={showRemindersSettingsNav}
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
+        showHubspotImportNav={showCrmNav}
         showFiPaymentsInboxNav={showFiPaymentsInboxNav}
         showProcedureDayNav={showProcedureDayNav}
         showHrOsNav={showHrOsNav}

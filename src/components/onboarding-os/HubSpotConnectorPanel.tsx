@@ -10,7 +10,9 @@ import {
   loadHubspotConnectorSnapshotAction,
   rejectHubspotDealAction,
   rejectHubspotLeadAction,
+  runHubspotSecondaryBackupAction,
   runHubspotSyncAction,
+  verifyHubspotSecondaryCapabilitiesAction,
 } from "@/lib/actions/fi-onboarding-os-hubspot-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import {
@@ -44,6 +46,9 @@ type Props = {
   integrationLabel?: string;
   sessionId?: string | null;
   initialSnapshot?: HubspotConnectorSnapshot | null;
+  section?: "full" | "backup" | "review" | "configuration";
+  /** When false, omit Sync / Approve / Reject controls (CRM-read / reception). Default true. */
+  canMutate?: boolean;
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
@@ -60,18 +65,20 @@ function ContactReviewCard({
   tenantId,
   contact,
   pending,
+  canMutate,
   onApprove,
   onReject,
 }: {
   tenantId: string;
   contact: HubspotStagingContact;
   pending: boolean;
+  canMutate: boolean;
   onApprove: () => void;
   onReject: () => void;
 }) {
   const badge = HUBSPOT_IMPORT_STATUS_BADGES[contact.importStatus];
   const typeLabel = HUBSPOT_LEAD_TYPE_LABELS[contact.normalizedLeadType];
-  const canReview = contact.importStatus === "staged" || contact.importStatus === "reviewed";
+  const canReview = canMutate && (contact.importStatus === "staged" || contact.importStatus === "reviewed");
 
   return (
     <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4 space-y-3">
@@ -116,13 +123,15 @@ function ContactReviewCard({
       ) : (
         <>
           <p className="text-[11px] text-slate-500">
-            {contact.importStatus === "approved"
-              ? "Approved — ready for staged import review."
-              : contact.importStatus === "rejected"
-                ? "Rejected — will not be imported."
-                : contact.importStatus === "imported"
-                  ? "Imported into FI."
-                  : "Review complete."}
+            {!canMutate && (contact.importStatus === "staged" || contact.importStatus === "reviewed")
+              ? "Read-only — approve/reject requires clinic operator access."
+              : contact.importStatus === "approved"
+                ? "Approved — ready for staged import review."
+                : contact.importStatus === "rejected"
+                  ? "Rejected — will not be imported."
+                  : contact.importStatus === "imported"
+                    ? "Imported into FI."
+                    : "Review complete."}
           </p>
           {contact.importStatus === "approved" ? (
             <Link
@@ -142,18 +151,20 @@ function DealReviewCard({
   tenantId,
   deal,
   pending,
+  canMutate,
   onApprove,
   onReject,
 }: {
   tenantId: string;
   deal: HubspotStagingDeal;
   pending: boolean;
+  canMutate: boolean;
   onApprove: () => void;
   onReject: () => void;
 }) {
   const badge = HUBSPOT_IMPORT_STATUS_BADGES[deal.importStatus];
   const typeLabel = HUBSPOT_LEAD_TYPE_LABELS[deal.normalizedLeadType];
-  const canReview = deal.importStatus === "staged" || deal.importStatus === "reviewed";
+  const canReview = canMutate && (deal.importStatus === "staged" || deal.importStatus === "reviewed");
 
   return (
     <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4 space-y-3">
@@ -198,13 +209,15 @@ function DealReviewCard({
       ) : (
         <>
           <p className="text-[11px] text-slate-500">
-            {deal.importStatus === "approved"
-              ? "Approved — ready for staged import review."
-              : deal.importStatus === "rejected"
-                ? "Rejected — will not be imported."
-                : deal.importStatus === "imported"
-                  ? "Imported into FI."
-                  : "Review complete."}
+            {!canMutate && (deal.importStatus === "staged" || deal.importStatus === "reviewed")
+              ? "Read-only — approve/reject requires clinic operator access."
+              : deal.importStatus === "approved"
+                ? "Approved — ready for staged import review."
+                : deal.importStatus === "rejected"
+                  ? "Rejected — will not be imported."
+                  : deal.importStatus === "imported"
+                    ? "Imported into FI."
+                    : "Review complete."}
           </p>
           {deal.importStatus === "approved" ? (
             <Link
@@ -226,6 +239,8 @@ export function HubSpotConnectorPanel({
   integrationLabel = "HubSpot",
   sessionId,
   initialSnapshot,
+  section = "full",
+  canMutate = true,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -250,6 +265,8 @@ export function HubSpotConnectorPanel({
 
   const health = snapshot?.syncHealth;
   const latestRun = snapshot?.latestSyncRun;
+  const secondaryAction = snapshot?.secondaryBackupAction;
+  const secondaryEvidence = snapshot?.secondaryEvidence;
 
   const contactQueue =
     queueFilter === "staged"
@@ -280,6 +297,45 @@ export function HubSpotConnectorPanel({
         text: `Sync complete — ${run?.contactsStaged ?? 0} contact(s) and ${run?.dealsStaged ?? 0} deal(s) staged for review. No FI leads created.`,
       });
       router.refresh();
+    });
+  }
+
+  function runSecondaryBackup() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await runHubspotSecondaryBackupAction(tenantId, integrationId, sessionId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      setMessage({
+        kind: "ok",
+        text: "Secondary-object backup complete. Records remain in restricted staging only.",
+      });
+      router.refresh();
+    });
+  }
+
+  function checkLiveBackupAccess() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await verifyHubspotSecondaryCapabilitiesAction(tenantId, integrationId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      refreshSnapshot(res.snapshot);
+      if (res.secondaryProbe?.allGranted) {
+        setMessage({
+          kind: "ok",
+          text: "Live backup access verified. All six secondary read endpoints are available.",
+        });
+        return;
+      }
+      setMessage({
+        kind: "err",
+        text: `Live check completed. Missing read access: ${res.secondaryProbe?.missingScopes.join(", ") || "unknown"}. No backup was started.`,
+      });
     });
   }
 
@@ -404,7 +460,26 @@ export function HubSpotConnectorPanel({
 
       {health?.summary ? <p className="text-xs text-slate-500">{health.summary}</p> : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 rounded-lg border border-slate-700/60 bg-slate-900/30 p-3 text-xs text-slate-400 sm:grid-cols-3">
+        <p>
+          Configuration/test verification:{" "}
+          {secondaryEvidence?.configurationVerification?.outcome ?? "No evidence"}
+        </p>
+        <p>
+          Live API capability probe:{" "}
+          {secondaryEvidence?.liveCapabilityProbe?.outcome ?? "No evidence"}
+          {secondaryEvidence?.liveCapabilityProbe
+            ? secondaryEvidence.liveCapabilityProbe.allGranted
+              ? " · all six available"
+              : " · permission gap"
+            : ""}
+        </p>
+        <p>
+          Latest backup health: {secondaryEvidence?.latestBackup?.status ?? "No backup recorded"}
+        </p>
+      </div>
+
+      {(section === "full" || section === "backup") && canMutate ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}
@@ -413,9 +488,33 @@ export function HubSpotConnectorPanel({
         >
           Sync now
         </button>
-      </div>
+        <button
+          type="button"
+          disabled={pending || secondaryAction?.activeRun}
+          onClick={checkLiveBackupAccess}
+          className="rounded border border-emerald-500/40 px-4 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Check live backup access
+        </button>
+        {secondaryAction?.visible ? (
+          <button
+            type="button"
+            disabled={pending || secondaryAction.disabled}
+            title={secondaryAction.disabledReason ?? undefined}
+            onClick={runSecondaryBackup}
+            className="rounded border border-cyan-500/40 px-4 py-2 text-sm font-medium text-cyan-200 hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Back up secondary objects
+          </button>
+        ) : secondaryAction?.activeRun ? (
+          <span className="text-xs text-cyan-300">Secondary-object backup in progress…</span>
+        ) : null}
+        {secondaryAction?.visible && secondaryAction.disabledReason ? (
+          <span className="text-xs text-amber-300">{secondaryAction.disabledReason}</span>
+        ) : null}
+      </div> : null}
 
-      <div className="space-y-3">
+      {section === "full" || section === "review" ? <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-medium text-slate-300">Review queue</h3>
           <div className="flex flex-wrap gap-2 text-xs">
@@ -460,6 +559,7 @@ export function HubSpotConnectorPanel({
                   tenantId={tenantId}
                   contact={contact}
                   pending={pending}
+                  canMutate={canMutate}
                   onApprove={() => approveContact(contact.id)}
                   onReject={() => rejectContact(contact.id)}
                 />
@@ -478,6 +578,7 @@ export function HubSpotConnectorPanel({
                 tenantId={tenantId}
                 deal={deal}
                 pending={pending}
+                canMutate={canMutate}
                 onApprove={() => approveDeal(deal.id)}
                 onReject={() => rejectDeal(deal.id)}
               />
@@ -488,7 +589,7 @@ export function HubSpotConnectorPanel({
             No deals in staging queue. Run a manual sync after verifying HubSpot credentials.
           </p>
         )}
-      </div>
+      </div> : null}
     </section>
   );
 }

@@ -22,6 +22,8 @@ type Props = {
   tenantId: string;
   integrationId?: string | null;
   integrationLabel?: string;
+  /** When false, omit Import / Cancel / Merge controls. Default true. */
+  canMutate?: boolean;
 };
 
 function ConfidenceBadge({ score, blocking }: { score: number; blocking: boolean }) {
@@ -99,12 +101,14 @@ function ReviewCard({
   tenantId,
   integrationId,
   pending,
+  canMutate,
   onDone,
 }: {
   item: ImportReviewItem;
   tenantId: string;
   integrationId: string;
   pending: boolean;
+  canMutate: boolean;
   onDone: () => void;
 }) {
   const staging = item.staging;
@@ -205,31 +209,37 @@ function ReviewCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={pending || item.proposedAction === "blocked"}
-          onClick={handleImport}
-          className="rounded bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
-        >
-          Import Now
-        </button>
-        <button
-          type="button"
-          disabled={pending}
-          onClick={handleCancel}
-          className="rounded border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-50"
-        >
-          Cancel Import
-        </button>
-        {isContact && topMatch?.entityType === "person" && (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={handleMerge}
-            className="rounded border border-amber-500/40 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
-          >
-            Merge Existing
-          </button>
+        {canMutate ? (
+          <>
+            <button
+              type="button"
+              disabled={pending || item.proposedAction === "blocked"}
+              onClick={handleImport}
+              className="rounded bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
+            >
+              Import Now
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={handleCancel}
+              className="rounded border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+            >
+              Cancel Import
+            </button>
+            {isContact && topMatch?.entityType === "person" && (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={handleMerge}
+                className="rounded border border-amber-500/40 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
+              >
+                Merge Existing
+              </button>
+            )}
+          </>
+        ) : (
+          <p className="text-xs text-slate-500">Read-only — import actions require clinic operator access.</p>
         )}
       </div>
     </div>
@@ -240,6 +250,7 @@ export function ImportReviewPanel({
   tenantId,
   integrationId: initialIntegrationId,
   integrationLabel: initialLabel,
+  canMutate = true,
 }: Props) {
   const router = useRouter();
   const [items, setItems] = useState<ImportReviewItem[]>([]);
@@ -301,14 +312,15 @@ export function ImportReviewPanel({
 
       <div className="space-y-4">
         {items.map((item) => (
-          <ReviewCard
-            key={`${item.kind}-${item.staging.id}`}
-            item={item}
-            tenantId={tenantId}
-            integrationId={integrationId}
-            pending={pending}
-            onDone={onDone}
-          />
+            <ReviewCard
+              key={`${item.kind}-${item.staging.id}`}
+              item={item}
+              tenantId={tenantId}
+              integrationId={integrationId}
+              pending={pending}
+              canMutate={canMutate}
+              onDone={onDone}
+            />
         ))}
       </div>
     </div>

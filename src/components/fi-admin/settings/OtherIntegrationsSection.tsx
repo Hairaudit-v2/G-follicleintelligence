@@ -109,6 +109,7 @@ export function OtherIntegrationsSection({
               label={hubSpotConnected ? "Connector registered" : "Not connected"}
             />
           </div>
+          {false ? <>
           <ul className="space-y-2 text-sm text-[#94A3B8]">
             <li>
               <Link href={`${base}/configuration`} className="text-[#22C1FF] hover:underline">
@@ -144,6 +145,17 @@ export function OtherIntegrationsSection({
                 : "Set FI_HUBSPOT_WEBHOOK_SECRET (Bearer) and/or HUBSPOT_CLIENT_SECRET (signature v3) on the server before go-live."
             }
           />
+          </> : null}
+          <p className="text-sm text-[#94A3B8]">
+            Credentials, backups, staged imports, webhooks, configuration, and audit evidence are
+            managed in one tenant-scoped workspace.
+          </p>
+          <Link
+            href={`${base}/settings/integrations/hubspot`}
+            className="inline-flex rounded-md bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500"
+          >
+            Manage
+          </Link>
         </div>
 
         <div className="space-y-3 border-t border-white/[0.06] pt-5">

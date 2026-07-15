@@ -9,6 +9,21 @@ import { isFiOsRoleAllowedForPlatformTenantProvisioning } from "@/src/lib/fiOs/p
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import { logStructured } from "@/src/lib/server/structuredLog";
 
+import {
+  HubspotReadError,
+  hubspotReadJson,
+  runHubspotObjectBackup,
+} from "./hubspotBackupEngine.server";
+import {
+  HUBSPOT_SECONDARY_KINDS,
+  probeHubspotSecondaryCapabilities,
+  runHubspotSecondaryBackup,
+  secondaryScopeFor,
+  type HubspotSecondaryKind,
+  type SecondaryCapability,
+  type SecondaryCounter,
+} from "./hubspotSecondaryBackupEngine.server";
+
 import { createConnectorSyncEvent } from "./externalConnector.server";
 import {
   decryptExternalConnectorSecret,
@@ -35,12 +50,17 @@ import type {
   HubspotSyncRun,
 } from "./hubspotConnectorTypes";
 import { isHubspotImportStatus, isHubspotSyncRunStatus } from "./hubspotConnectorTypes";
+import { resolveHubspotSecondaryBackupActionState } from "./hubspotSecondaryBackupActionCore";
+import { aggregateHubspotWorkspaceStatus } from "./hubspotWorkspaceStatus";
+import type { ExternalConnectorStatus } from "./externalConnectorTypes";
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;
   actorAuthUserId?: string | null;
   skipAuthCheck?: boolean;
   allowTenantMemberRead?: boolean;
+  /** Explicit service-runner bypass; never set from a client action or request payload. */
+  trustedServiceOperation?: boolean;
   /** Test hook — inject contacts/deals instead of calling HubSpot API. */
   fetchHubspotOverride?: (accessToken: string) => Promise<{
     contacts: HubspotApiContact[];
@@ -105,6 +125,10 @@ type SyncRunRow = {
   started_at: string;
   completed_at: string | null;
   created_at: string;
+  secondary_complete?: boolean | null;
+  secondary_checkpoints?: Record<string, unknown> | null;
+  secondary_capabilities?: Record<string, unknown> | null;
+  secondary_counters?: Record<string, { active: number; archived: number; discovered: number; complete: boolean }> | null;
 };
 
 type IntegrationRow = {
@@ -113,13 +137,39 @@ type IntegrationRow = {
   provider: string;
   config: Record<string, unknown>;
   status: string;
+  metadata?: Record<string, unknown>;
 };
 
 type AuthSessionRow = {
   auth_status: string;
 };
 
-const HUBSPOT_API_BASE = "https://api.hubapi.com";
+type VerificationEvidenceRow = {
+  outcome: string;
+  detail: Record<string, unknown> | null;
+  provider_payload: Record<string, unknown> | null;
+  occurred_at: string;
+};
+
+function verificationMode(row: VerificationEvidenceRow): string {
+  return String(row.detail?.verification_mode ?? row.provider_payload?.verification_mode ?? "");
+}
+
+function isLiveSecondaryProbe(row: VerificationEvidenceRow): boolean {
+  return (
+    verificationMode(row) === "live_probe_secondary_objects" &&
+    row.detail?.test_mode !== true &&
+    row.provider_payload?.test_mode !== true &&
+    row.detail?.stub !== true &&
+    row.provider_payload?.stub !== true
+  );
+}
+
+function liveSecondaryCapabilitiesAllGranted(row: VerificationEvidenceRow | undefined): boolean {
+  const capabilities = (row?.detail?.capabilities ?? {}) as Record<string, Record<string, unknown>>;
+  return HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind]?.granted === true);
+}
+
 const HUBSPOT_CONTACT_PROPERTIES = [
   "firstname",
   "lastname",
@@ -147,6 +197,16 @@ export type HubspotActionResult<T = void> = { ok: true; data?: T } | { ok: false
 export type RunHubspotSyncResult =
   | { ok: true; syncRun: HubspotSyncRun; snapshot: HubspotConnectorSnapshot }
   | { ok: false; error: string };
+
+export type HubspotLiveVerificationResult = {
+  credentialValid: boolean;
+  portalIdentityMatch: boolean;
+  capabilities: Record<
+    "account_identity" | "contacts_read" | "deals_read" | "pipelines_read",
+    boolean
+  >;
+  privateAppExpansion: "possible_in_hubspot" | "unknown";
+};
 
 function resolveMasterKey(): Buffer | null {
   return deriveExternalConnectorMasterKey(process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY);
@@ -219,6 +279,14 @@ async function resolveWriteAuth(
   | { ok: true; actorAuthUserId: string; fiUserId: string | null; actorLabel: string }
   | { ok: false; error: string }
 > {
+  if (opts.trustedServiceOperation && opts.actorAuthUserId && opts.supabaseClientForTests) {
+    return {
+      ok: true,
+      actorAuthUserId: opts.actorAuthUserId,
+      fiUserId: null,
+      actorLabel: "HubSpot recovery service",
+    };
+  }
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) {
     return {
@@ -242,6 +310,9 @@ async function resolveReadAuth(
   tenantId: string,
   opts: ServerOpts
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (opts.trustedServiceOperation && opts.actorAuthUserId && opts.supabaseClientForTests) {
+    return { ok: true };
+  }
   const platform = await resolvePlatformAdminAuth({ ...opts, skipAuthCheck: false });
   if (platform.ok) return { ok: true };
 
@@ -348,7 +419,7 @@ function parseAccessTokenFromCredentialPayload(serialized: string): string | nul
   }
 }
 
-async function loadHubspotAccessToken(
+export async function loadHubspotAccessToken(
   supabase: SupabaseClient,
   integrationId: string
 ): Promise<string | null> {
@@ -385,6 +456,170 @@ async function loadAuthVerified(supabase: SupabaseClient, integrationId: string)
   return row?.auth_status === "verified";
 }
 
+/** Live, minimal, read-only probe using the already encrypted connector credential. */
+export async function verifyHubspotCredentialLive(
+  integrationId: string,
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<
+  { ok: true; verification: HubspotLiveVerificationResult } | { ok: false; error: string }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot")
+    return { ok: false, error: "HubSpot connector not found." };
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token)
+    return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+
+  const capabilities: HubspotLiveVerificationResult["capabilities"] = {
+    account_identity: false,
+    contacts_read: false,
+    deals_read: false,
+    pipelines_read: false,
+  };
+  let portalIdentityMatch = false;
+  let credentialValid = false;
+  try {
+    const identity = await hubspotReadJson<{ portalId?: number | string }>(
+      "/integrations/v1/me",
+      token
+    );
+    capabilities.account_identity = true;
+    credentialValid = true;
+    const configured = String(integration.config?.portal_id ?? "").trim();
+    portalIdentityMatch = Boolean(
+      configured && identity.portalId != null && configured === String(identity.portalId)
+    );
+    if (
+      !portalIdentityMatch &&
+      identity.portalId != null &&
+      configured &&
+      !/^\d+$/.test(configured)
+    ) {
+      const { error: repairError } = await supabase
+        .from("fi_tenant_external_integrations")
+        .update({
+          config: { ...integration.config, portal_id: String(identity.portalId) },
+          metadata: {
+            ...(integration.metadata ?? {}),
+            portal_identity_recovery: {
+              previous_portal_id: configured,
+              repaired_at: new Date().toISOString(),
+              verification_mode: "live_probe",
+            },
+          },
+        })
+        .eq("id", integrationId)
+        .eq("tenant_id", tenantId);
+      if (!repairError) portalIdentityMatch = true;
+    }
+  } catch (error) {
+    if (!(error instanceof HubspotReadError) || error.status !== 401) credentialValid = true;
+  }
+
+  for (const probe of [
+    ["contacts_read", "/crm/v3/objects/contacts", { limit: "1", archived: "false" }],
+    ["deals_read", "/crm/v3/objects/deals", { limit: "1", archived: "false" }],
+    ["pipelines_read", "/crm/v3/pipelines/deals", {}],
+  ] as const) {
+    try {
+      await hubspotReadJson<Record<string, unknown>>(probe[1], token, probe[2]);
+      capabilities[probe[0]] = true;
+      credentialValid = true;
+    } catch (error) {
+      if (error instanceof HubspotReadError && error.status === 401) credentialValid = false;
+    }
+  }
+
+  const { data: session } = await supabase
+    .from("fi_external_connector_auth_sessions")
+    .select("id")
+    .eq("integration_id", integrationId)
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  if (!session) return { ok: false, error: "Connector auth session not found." };
+  const allRequired =
+    capabilities.contacts_read && capabilities.deals_read && capabilities.pipelines_read;
+  const authStatus =
+    credentialValid && portalIdentityMatch && allRequired
+      ? "verified"
+      : credentialValid
+        ? "insufficient_permissions"
+        : "failed";
+  const now = new Date().toISOString();
+  await supabase
+    .from("fi_external_connector_auth_sessions")
+    .update({
+      auth_status: authStatus,
+      verified_at: authStatus === "verified" ? now : null,
+      scopes_granted: Object.entries(capabilities)
+        .filter(([, value]) => value)
+        .map(([key]) => key),
+      provider_payload: { verification_mode: "live_probe", test_mode: false, stub: false },
+      updated_at: now,
+    })
+    .eq("id", (session as { id: string }).id);
+
+  for (const [scopeKey, granted] of [
+    ["contacts.read", capabilities.contacts_read],
+    ["deals.read", capabilities.deals_read],
+    ["pipelines.read", capabilities.pipelines_read],
+  ] as const) {
+    await supabase.from("fi_external_connector_permission_scopes").upsert(
+      {
+        auth_session_id: (session as { id: string }).id,
+        integration_id: integrationId,
+        tenant_id: tenantId,
+        provider: "hubspot",
+        scope_key: scopeKey,
+        scope_label: scopeKey,
+        required: true,
+        granted,
+        recorded_at: now,
+      },
+      { onConflict: "auth_session_id,scope_key" }
+    );
+  }
+
+  await supabase.from("fi_external_connector_verification_events").insert({
+    auth_session_id: (session as { id: string }).id,
+    integration_id: integrationId,
+    tenant_id: tenantId,
+    provider: "hubspot",
+    auth_status: authStatus,
+    outcome: authStatus === "verified" ? "success" : credentialValid ? "warning" : "failure",
+    actor_auth_user_id: auth.actorAuthUserId,
+    actor_fi_user_id: auth.fiUserId,
+    actor_label: auth.actorLabel,
+    detail: {
+      verification_mode: "live_probe",
+      test_mode: false,
+      stub: false,
+      portal_identity_match: portalIdentityMatch,
+      capabilities,
+    },
+    provider_payload: {
+      verification_mode: "live_probe",
+      test_mode: false,
+      stub: false,
+      response_bodies_retained: false,
+    },
+  });
+
+  return {
+    ok: true,
+    verification: {
+      credentialValid,
+      portalIdentityMatch,
+      capabilities,
+      privateAppExpansion: "possible_in_hubspot",
+    },
+  };
+}
+
 async function loadIntegration(
   supabase: SupabaseClient,
   integrationId: string,
@@ -392,7 +627,7 @@ async function loadIntegration(
 ): Promise<IntegrationRow | null> {
   const { data, error } = await supabase
     .from("fi_tenant_external_integrations")
-    .select("id, tenant_id, provider, config, status")
+    .select("id, tenant_id, provider, config, status, metadata")
     .eq("id", integrationId)
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -405,26 +640,7 @@ async function hubspotGet<T>(
   accessToken: string,
   params?: Record<string, string>
 ): Promise<T> {
-  const url = new URL(`${HUBSPOT_API_BASE}${path}`);
-  if (params) {
-    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  }
-
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`HubSpot API error (${res.status}): ${body.slice(0, 300)}`);
-  }
-
-  return (await res.json()) as T;
+  return hubspotReadJson<T>(path, accessToken, params ?? {});
 }
 
 async function fetchAllHubspotObjects<T extends { id?: string }>(
@@ -570,6 +786,476 @@ async function loadExistingDealStaging(
   return ((data ?? []) as DealStagingRow[]).map(mapDealStagingRow);
 }
 
+function safeSyncFailureDetail(error: unknown): Record<string, unknown> {
+  if (error instanceof HubspotReadError) {
+    return {
+      error_category: error.category,
+      provider_status: error.status || null,
+      retry_after_seconds: error.retryAfterSeconds,
+      response_body_retained: false,
+    };
+  }
+  const message = error instanceof Error ? error.message : "";
+  const safeReason = message.startsWith("Unable to ") ? message : "Internal sync operation failed.";
+  return { error_category: "internal", safe_reason: safeReason, response_body_retained: false };
+}
+
+async function runResumableHubspotBackup(
+  supabase: SupabaseClient,
+  integrationId: string,
+  tenantId: string,
+  accessToken: string,
+  auth: { actorAuthUserId: string; fiUserId: string | null; actorLabel: string },
+  opts: ServerOpts
+): Promise<RunHubspotSyncResult> {
+  const { data: existingStarted } = await supabase
+    .from("fi_external_hubspot_sync_runs")
+    .select("*")
+    .eq("integration_id", integrationId)
+    .eq("tenant_id", tenantId)
+    .eq("status", "started")
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let run = existingStarted as Record<string, unknown> | null;
+  if (!run) {
+    const { data, error } = await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .insert({
+        integration_id: integrationId,
+        tenant_id: tenantId,
+        status: "started",
+        detail: { read_only: true, provider: "hubspot", resumable: true, promotion_enabled: false },
+        started_at: new Date().toISOString(),
+      })
+      .select("*")
+      .single();
+    if (error || !data) return { ok: false, error: "Unable to start HubSpot backup run." };
+    run = data as Record<string, unknown>;
+    await appendHubspotImportAudit(supabase, {
+      integrationId,
+      tenantId,
+      syncRunId: String(run.id),
+      action: "sync_started",
+      actorAuthUserId: auth.actorAuthUserId,
+      actorFiUserId: auth.fiUserId,
+      actorLabel: auth.actorLabel,
+      detail: { read_only: true, resumable: true, promotion_enabled: false },
+    });
+  }
+
+  try {
+    const pipelines = await fetchHubspotPipelinesReadOnly(accessToken);
+    await upsertPipelineMappings(supabase, integrationId, tenantId, pipelines);
+    const counters = await runHubspotObjectBackup({
+      supabase,
+      accessToken,
+      integrationId,
+      tenantId,
+      syncRun: run,
+      pipelineNames: buildPipelineNameMap(pipelines),
+    });
+    const failed = counters.contactsFailed + counters.dealsFailed;
+    const skipped = counters.contactsSkipped + counters.dealsSkipped;
+    const status: HubspotSyncRun["status"] = failed > 0 || skipped > 0 ? "partial" : "completed";
+    const { data: finalized, error: finalizeError } = await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .update({
+        status,
+        completed_at: new Date().toISOString(),
+        contacts_discovered: counters.contactsDiscovered,
+        contacts_staged: counters.contactsStaged,
+        contacts_skipped: counters.contactsSkipped,
+        contacts_archived: counters.contactsArchived,
+        contacts_duplicates: counters.contactsDuplicates,
+        contacts_failed: counters.contactsFailed,
+        deals_discovered: counters.dealsDiscovered,
+        deals_staged: counters.dealsStaged,
+        deals_skipped: counters.dealsSkipped,
+        deals_archived: counters.dealsArchived,
+        deals_duplicates: counters.dealsDuplicates,
+        deals_failed: counters.dealsFailed,
+        association_count: counters.associationCount,
+        health_score: status === "completed" ? 100 : 70,
+        detail: {
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          pagination_truncated: false,
+          contacts_complete: true,
+          deals_complete: true,
+          response_bodies_retained: false,
+        },
+      })
+      .eq("id", run.id)
+      .eq("status", "started")
+      .select("*")
+      .single();
+    if (finalizeError || !finalized)
+      return { ok: false, error: "Unable to atomically finalize HubSpot backup run." };
+
+    await appendHubspotImportAudit(supabase, {
+      integrationId,
+      tenantId,
+      syncRunId: String(run.id),
+      action: "sync_completed",
+      actorAuthUserId: auth.actorAuthUserId,
+      actorFiUserId: auth.fiUserId,
+      actorLabel: auth.actorLabel,
+      detail: {
+        status,
+        contacts_discovered: counters.contactsDiscovered,
+        deals_discovered: counters.dealsDiscovered,
+      },
+    });
+    const snapshot = await loadHubspotConnectorSnapshot(tenantId, integrationId, {
+      ...opts,
+      skipAuthCheck: true,
+      allowTenantMemberRead: true,
+    });
+    if (!snapshot.ok) return { ok: false, error: snapshot.error };
+    return {
+      ok: true,
+      syncRun: mapSyncRunRow(finalized as SyncRunRow),
+      snapshot: snapshot.snapshot,
+    };
+  } catch (error) {
+    await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .update({
+        status: "failed",
+        completed_at: new Date().toISOString(),
+        detail: {
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          ...safeSyncFailureDetail(error),
+        },
+      })
+      .eq("id", run.id)
+      .eq("status", "started");
+    await appendHubspotImportAudit(supabase, {
+      integrationId,
+      tenantId,
+      syncRunId: String(run.id),
+      action: "sync_failed",
+      actorAuthUserId: auth.actorAuthUserId,
+      actorFiUserId: auth.fiUserId,
+      actorLabel: auth.actorLabel,
+      detail: safeSyncFailureDetail(error),
+    });
+    return {
+      ok: false,
+      error: "HubSpot backup failed; a sanitized resumable checkpoint was retained.",
+    };
+  }
+}
+
+/** Probe the six read-only secondary endpoints without creating a sync run or staging records. */
+export async function verifyHubspotSecondaryCapabilitiesLive(
+  integrationId: string,
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<
+  | {
+      ok: true;
+      capabilities: Record<HubspotSecondaryKind, SecondaryCapability>;
+      allGranted: boolean;
+      missingScopes: string[];
+    }
+  | { ok: false; error: string }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot") {
+    return { ok: false, error: "HubSpot connector not found." };
+  }
+
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token) {
+    return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+  }
+
+  const { data: session } = await supabase
+    .from("fi_external_connector_auth_sessions")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("integration_id", integrationId)
+    .maybeSingle();
+  if (!session) return { ok: false, error: "Connector auth session not found." };
+
+  const capabilities = await probeHubspotSecondaryCapabilities(token);
+  const now = new Date().toISOString();
+  for (const kind of HUBSPOT_SECONDARY_KINDS) {
+    const scope = secondaryScopeFor(kind);
+    const { error } = await supabase.from("fi_external_connector_permission_scopes").upsert(
+      {
+        auth_session_id: session.id,
+        integration_id: integrationId,
+        tenant_id: tenantId,
+        provider: "hubspot",
+        scope_key: scope,
+        scope_label: scope,
+        required: true,
+        granted: capabilities[kind].granted,
+        recorded_at: now,
+      },
+      { onConflict: "auth_session_id,scope_key" }
+    );
+    if (error) return { ok: false, error: "Unable to record live HubSpot capability." };
+  }
+
+  const allGranted = HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind].granted);
+  const missingScopes = HUBSPOT_SECONDARY_KINDS.filter((kind) => !capabilities[kind].granted).map(
+    secondaryScopeFor
+  );
+  const { error: eventError } = await supabase
+    .from("fi_external_connector_verification_events")
+    .insert({
+      auth_session_id: session.id,
+      integration_id: integrationId,
+      tenant_id: tenantId,
+      provider: "hubspot",
+      auth_status: allGranted ? "verified" : "insufficient_permissions",
+      outcome: allGranted ? "success" : "warning",
+      actor_auth_user_id: auth.actorAuthUserId,
+      actor_fi_user_id: auth.fiUserId,
+      actor_label: auth.actorLabel,
+      detail: {
+        verification_mode: "live_probe_secondary_objects",
+        test_mode: false,
+        stub: false,
+        capabilities,
+        missing_scopes: missingScopes,
+      },
+      provider_payload: {
+        verification_mode: "live_probe_secondary_objects",
+        test_mode: false,
+        stub: false,
+        response_bodies_retained: false,
+      },
+    });
+  if (eventError) return { ok: false, error: "Unable to record live HubSpot verification." };
+
+  return { ok: true, capabilities, allGranted, missingScopes };
+}
+
+/** Run the six read-only secondary-object backups through the existing encrypted connector credential. */
+export async function runHubspotSecondaryObjectBackup(
+  integrationId: string,
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<
+  | {
+      ok: true;
+      runId: string;
+      status: "completed" | "partial";
+      counters: Record<HubspotSecondaryKind, SecondaryCounter>;
+    }
+  | { ok: false; error: string }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot")
+    return { ok: false, error: "HubSpot connector not found." };
+  const [
+    { data: credentialRow },
+    { data: scopeRows },
+    { data: activeRows },
+    { data: verificationRows },
+  ] = await Promise.all([
+    supabase
+      .from("fi_external_connector_credentials")
+      .select("id")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("fi_external_connector_permission_scopes")
+      .select("scope_key, granted")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .eq("granted", true),
+    supabase
+      .from("fi_external_hubspot_sync_runs")
+      .select("id, detail, secondary_capabilities")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .eq("status", "started"),
+    supabase
+      .from("fi_external_connector_verification_events")
+      .select("outcome, detail, provider_payload, occurred_at")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .order("occurred_at", { ascending: false })
+      .limit(25),
+  ]);
+  const activeSecondaryRun = ((activeRows ?? []) as Record<string, unknown>[]).some((row) => {
+    const detail = (row.detail ?? {}) as Record<string, unknown>;
+    const capabilities = (row.secondary_capabilities ?? {}) as Record<string, unknown>;
+    return (
+      String(detail.milestone ?? "").includes("SECONDARY") || Object.keys(capabilities).length > 0
+    );
+  });
+  const actionState = resolveHubspotSecondaryBackupActionState({
+    credentialConfigured: Boolean(credentialRow),
+    connectorStatus: integration.status as ExternalConnectorStatus,
+    grantedScopes: ((scopeRows ?? []) as { scope_key: string; granted: boolean }[]).map(
+      (row) => row.scope_key
+    ),
+    activeRun: activeSecondaryRun,
+    liveCapabilitiesVerified: liveSecondaryCapabilitiesAllGranted(
+      ((verificationRows ?? []) as VerificationEvidenceRow[]).find(isLiveSecondaryProbe)
+    ),
+    operatorAuthorized: true,
+  });
+  if (!actionState.visible)
+    return { ok: false, error: "A secondary-object backup is already running." };
+  if (actionState.disabled)
+    return {
+      ok: false,
+      error: actionState.disabledReason ?? "Secondary-object backup is unavailable.",
+    };
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token)
+    return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+  const capabilities = await probeHubspotSecondaryCapabilities(token);
+  const now = new Date().toISOString();
+  const { data: session } = await supabase
+    .from("fi_external_connector_auth_sessions")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("integration_id", integrationId)
+    .maybeSingle();
+  if (!session) return { ok: false, error: "Connector auth session not found." };
+  for (const kind of HUBSPOT_SECONDARY_KINDS) {
+    await supabase.from("fi_external_connector_permission_scopes").upsert(
+      {
+        auth_session_id: session.id,
+        integration_id: integrationId,
+        tenant_id: tenantId,
+        provider: "hubspot",
+        scope_key: secondaryScopeFor(kind),
+        scope_label: secondaryScopeFor(kind),
+        required: true,
+        granted: capabilities[kind].granted,
+        recorded_at: now,
+      },
+      { onConflict: "auth_session_id,scope_key" }
+    );
+  }
+  const allGranted = HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind].granted);
+  await supabase.from("fi_external_connector_verification_events").insert({
+    auth_session_id: session.id,
+    integration_id: integrationId,
+    tenant_id: tenantId,
+    provider: "hubspot",
+    auth_status: allGranted ? "verified" : "insufficient_permissions",
+    outcome: allGranted ? "success" : "warning",
+    actor_auth_user_id: auth.actorAuthUserId,
+    actor_fi_user_id: auth.fiUserId,
+    actor_label: auth.actorLabel,
+    detail: {
+      verification_mode: "live_probe_secondary_objects",
+      test_mode: false,
+      stub: false,
+      capabilities,
+    },
+    provider_payload: {
+      verification_mode: "live_probe_secondary_objects",
+      test_mode: false,
+      stub: false,
+      response_bodies_retained: false,
+    },
+  });
+  const { data: run, error: runError } = await supabase
+    .from("fi_external_hubspot_sync_runs")
+    .insert({
+      tenant_id: tenantId,
+      integration_id: integrationId,
+      status: "started",
+      started_at: now,
+      detail: {
+        milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1",
+        read_only: true,
+        resumable: true,
+        promotion_enabled: false,
+        response_bodies_retained: false,
+      },
+      secondary_capabilities: capabilities,
+    })
+    .select("*")
+    .single();
+  if (runError || !run)
+    return { ok: false, error: "Unable to start HubSpot secondary backup run." };
+  try {
+    const counters = await runHubspotSecondaryBackup({
+      supabase,
+      accessToken: token,
+      tenantId,
+      integrationId,
+      syncRun: run as Record<string, unknown>,
+      capabilities,
+    });
+    const supported = HUBSPOT_SECONDARY_KINDS.filter((kind) => capabilities[kind].granted);
+    const incomplete = supported.some(
+      (kind) => counters[kind].failed > 0 || !counters[kind].complete
+    );
+    const missing = HUBSPOT_SECONDARY_KINDS.filter((kind) => !capabilities[kind].granted);
+    const status = incomplete || missing.length ? "partial" : "completed";
+    const { error } = await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .update({
+        status,
+        completed_at: new Date().toISOString(),
+        secondary_complete: !incomplete && missing.length === 0,
+        secondary_counters: counters,
+        secondary_capabilities: capabilities,
+        health_score: status === "completed" ? 100 : 70,
+        detail: {
+          milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1",
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          response_bodies_retained: false,
+          missing_capabilities: missing,
+        },
+      })
+      .eq("id", run.id)
+      .eq("status", "started");
+    if (error) throw new Error("Unable to atomically finalize HubSpot secondary backup run.");
+    return { ok: true, runId: String(run.id), status, counters };
+  } catch (error) {
+    await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .update({
+        status: "failed",
+        completed_at: new Date().toISOString(),
+        health_score: 0,
+        detail: {
+          milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1",
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          ...safeSyncFailureDetail(error),
+        },
+      })
+      .eq("id", run.id)
+      .eq("status", "started");
+    return {
+      ok: false,
+      error: "HubSpot secondary backup failed; sanitized resumable checkpoints were retained.",
+    };
+  }
+}
+
 /** Run read-only HubSpot sync into staging tables. Never writes to HubSpot. */
 export async function runHubspotSync(
   integrationId: string,
@@ -597,6 +1283,10 @@ export async function runHubspotSync(
       ok: false,
       error: "OAuth access token not available — store connector credentials first.",
     };
+  }
+
+  if (!opts.fetchHubspotOverride) {
+    return runResumableHubspotBackup(supabase, integrationId, tenantId, accessToken!, auth, opts);
   }
 
   const now = new Date().toISOString();
@@ -987,7 +1677,13 @@ export async function runHubspotSync(
     return { ok: false, error: syncError ?? "HubSpot sync failed." };
   }
 
-  const snapshot = await buildConnectorSnapshot(supabase, integrationId, tenantId);
+  const snapshot = await buildConnectorSnapshot(
+    supabase,
+    integrationId,
+    tenantId,
+    integration,
+    true
+  );
   return {
     ok: true,
     syncRun: mapSyncRunRow(updatedRun as SyncRunRow),
@@ -1243,10 +1939,25 @@ export async function loadHubspotSyncRuns(
   return { ok: true, runs: ((data ?? []) as SyncRunRow[]).map(mapSyncRunRow) };
 }
 
+/** Privacy-safe audit metadata. This deliberately excludes provider payloads and staging identities. */
+export async function loadHubspotAuditEvidence(integrationId: string, tenantId: string) {
+  const supabase = supabaseAdmin();
+  const [{ data: verifications }, { data: audit }] = await Promise.all([
+    supabase.from("fi_external_connector_verification_events").select("outcome, occurred_at, detail").eq("integration_id", integrationId).eq("tenant_id", tenantId).order("occurred_at", { ascending: false }).limit(20),
+    supabase.from("fi_external_hubspot_import_audit").select("action, occurred_at, actor_label, detail").eq("integration_id", integrationId).eq("tenant_id", tenantId).order("occurred_at", { ascending: false }).limit(20),
+  ]);
+  return {
+    verifications: (verifications ?? []).map((row: Record<string, unknown>) => ({ outcome: String(row.outcome ?? "unknown"), occurredAt: String(row.occurred_at ?? ""), type: String((row.detail as Record<string, unknown> | null)?.event_type ?? "verification") })),
+    audit: (audit ?? []).map((row: Record<string, unknown>) => ({ action: String(row.action ?? "event"), occurredAt: String(row.occurred_at ?? ""), operator: row.actor_label ? "operator recorded" : "system", type: String((row.detail as Record<string, unknown> | null)?.event_type ?? "audit") })),
+  };
+}
+
 async function buildConnectorSnapshot(
   supabase: SupabaseClient,
   integrationId: string,
-  tenantId: string
+  tenantId: string,
+  integration: IntegrationRow,
+  operatorAuthorized: boolean
 ): Promise<HubspotConnectorSnapshot> {
   const authVerified = await loadAuthVerified(supabase, integrationId);
 
@@ -1279,7 +1990,75 @@ async function buildConnectorSnapshot(
     .limit(10);
 
   const recentSyncRuns = ((runRows ?? []) as SyncRunRow[]).map(mapSyncRunRow);
-  const latestSyncRun = recentSyncRuns[0] ?? null;
+  const runSourceRows = (runRows ?? []) as SyncRunRow[];
+  const isSecondaryRun = (row: Record<string, unknown>) => {
+    const detail = (row.detail ?? {}) as Record<string, unknown>;
+    return (
+      String(detail.milestone ?? "").includes("SECONDARY") ||
+      (row.secondary_capabilities != null &&
+        typeof row.secondary_capabilities === "object" &&
+        Object.keys(row.secondary_capabilities as Record<string, unknown>).length > 0)
+    );
+  };
+  const latestSyncRun = recentSyncRuns[runSourceRows.findIndex((row) => !isSecondaryRun(row))] ?? null;
+
+  const [
+    { data: credentialRow },
+    { data: scopeRows },
+    { data: verificationRows },
+    { data: activeRows },
+  ] = await Promise.all([
+    supabase
+      .from("fi_external_connector_credentials")
+      .select("id")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("fi_external_connector_permission_scopes")
+      .select("scope_key, granted")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .eq("granted", true),
+    supabase
+      .from("fi_external_connector_verification_events")
+      .select("outcome, detail, provider_payload, occurred_at")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .order("occurred_at", { ascending: false })
+      .limit(25),
+    supabase
+      .from("fi_external_hubspot_sync_runs")
+      .select("id, detail, secondary_capabilities")
+      .eq("integration_id", integrationId)
+      .eq("tenant_id", tenantId)
+      .eq("status", "started"),
+  ]);
+
+  const activeSecondaryRun = ((activeRows ?? []) as Record<string, unknown>[]).some(isSecondaryRun);
+  const grantedScopes = ((scopeRows ?? []) as { scope_key: string; granted: boolean }[])
+    .filter((row) => row.granted)
+    .map((row) => row.scope_key);
+  const connectorStatus = (
+    ["configured", "active", "draft", "paused", "error", "disconnected"] as const
+  ).includes(integration.status as ExternalConnectorStatus)
+    ? (integration.status as ExternalConnectorStatus)
+    : "draft";
+  const events = (verificationRows ?? []) as VerificationEvidenceRow[];
+  const liveProbe = events.find(isLiveSecondaryProbe);
+  const secondaryBackupAction = resolveHubspotSecondaryBackupActionState({
+    credentialConfigured: Boolean(credentialRow),
+    connectorStatus,
+    grantedScopes,
+    activeRun: activeSecondaryRun,
+    liveCapabilitiesVerified: liveSecondaryCapabilitiesAllGranted(liveProbe),
+    operatorAuthorized,
+  });
+  const isTestVerification = (row: VerificationEvidenceRow) =>
+    row.detail?.test_mode === true || row.provider_payload?.test_mode === true;
+  const configurationVerification = events.find(isTestVerification);
+  const secondaryRunRow = ((runRows ?? []) as SyncRunRow[]).find((row) => isSecondaryRun(row));
 
   const syncHealth = calculateHubspotSyncHealth({
     latestSyncRun,
@@ -1287,6 +2066,21 @@ async function buildConnectorSnapshot(
     stagingContacts: contactQueue,
     stagingDeals: dealQueue,
     authVerified,
+  });
+
+  const workspaceStatus = aggregateHubspotWorkspaceStatus({
+    authVerified,
+    runs: runSourceRows.map((row) => ({
+      ...mapSyncRunRow(row),
+      secondaryCounters: row.secondary_counters ?? undefined,
+      secondaryCapabilities: row.secondary_capabilities,
+    })),
+    importReview: {
+      staged: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "staged").length,
+      approved: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "approved").length,
+      rejected: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "rejected").length,
+      imported: [...contactQueue, ...dealQueue].filter((row) => row.importStatus === "imported").length,
+    },
   });
 
   return {
@@ -1297,6 +2091,31 @@ async function buildConnectorSnapshot(
     recentSyncRuns,
     contactQueue,
     dealQueue,
+    secondaryBackupAction,
+    secondaryEvidence: {
+      configurationVerification: configurationVerification
+        ? {
+            outcome: configurationVerification.outcome,
+            occurredAt: configurationVerification.occurred_at,
+          }
+        : null,
+      liveCapabilityProbe: liveProbe
+        ? {
+            outcome: liveProbe.outcome,
+            occurredAt: liveProbe.occurred_at,
+            allGranted: liveSecondaryCapabilitiesAllGranted(liveProbe),
+          }
+        : null,
+      latestBackup: secondaryRunRow
+        ? {
+            status: isHubspotSyncRunStatus(secondaryRunRow.status)
+              ? secondaryRunRow.status
+              : "failed",
+            completedAt: secondaryRunRow.completed_at,
+          }
+        : null,
+    },
+    workspaceStatus,
     calculatedAt: new Date().toISOString(),
   };
 }
@@ -1317,6 +2136,13 @@ export async function loadHubspotConnectorSnapshot(
     return { ok: false, error: "Integration is not a HubSpot connector." };
   }
 
-  const snapshot = await buildConnectorSnapshot(supabase, integrationId, tenantId);
+  const write = await resolveWriteAuth(tenantId, opts);
+  const snapshot = await buildConnectorSnapshot(
+    supabase,
+    integrationId,
+    tenantId,
+    integration,
+    write.ok
+  );
   return { ok: true, snapshot };
 }

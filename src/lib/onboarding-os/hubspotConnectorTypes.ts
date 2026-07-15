@@ -226,6 +226,17 @@ export type HubspotConnectorSnapshot = {
   recentSyncRuns: readonly HubspotSyncRun[];
   contactQueue: readonly HubspotStagingContact[];
   dealQueue: readonly HubspotStagingDeal[];
+  secondaryBackupAction: import("./hubspotSecondaryBackupActionCore").HubspotSecondaryBackupActionState;
+  secondaryEvidence: {
+    configurationVerification: { outcome: string; occurredAt: string } | null;
+    liveCapabilityProbe: {
+      outcome: string;
+      occurredAt: string;
+      allGranted: boolean;
+    } | null;
+    latestBackup: { status: HubspotSyncRunStatus; completedAt: string | null } | null;
+  };
+  workspaceStatus: import("./hubspotWorkspaceStatus").HubspotWorkspaceStatus;
   calculatedAt: string;
 };
 

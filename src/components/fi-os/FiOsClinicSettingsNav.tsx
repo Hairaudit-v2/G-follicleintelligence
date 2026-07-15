@@ -24,6 +24,7 @@ export function FiOsClinicSettingsNav({
   showStaffAndServicesNav,
   showAdminUsersNav,
   showConfigurationHubNav = true,
+  showHubspotImportNav = false,
   showTaxLocalisationSettingsNav = true,
   showRemindersSettingsNav = true,
   featureAccess: featureAccessProp = null,
@@ -32,6 +33,8 @@ export function FiOsClinicSettingsNav({
   showStaffAndServicesNav: boolean;
   showAdminUsersNav: boolean;
   showConfigurationHubNav?: boolean;
+  /** CRM-read members may open Import Review without Configuration hub access. */
+  showHubspotImportNav?: boolean;
   showTaxLocalisationSettingsNav?: boolean;
   showRemindersSettingsNav?: boolean;
   featureAccess?: Partial<Record<FiFeatureKey, boolean>> | null;
@@ -67,9 +70,10 @@ export function FiOsClinicSettingsNav({
   const showTax = showTaxLocalisationSettingsNav && featureOn(featureAccess, "settings");
   const showAdminUsers = showAdminUsersNav && featureOn(featureAccess, "settings");
   const showHubspot =
-    showConfigurationHubNav &&
-    featureOn(featureAccess, "crm") &&
-    featureOn(featureAccess, "settings");
+    (showConfigurationHubNav &&
+      featureOn(featureAccess, "crm") &&
+      featureOn(featureAccess, "settings")) ||
+    (showHubspotImportNav && featureOn(featureAccess, "crm"));
 
   if (
     !showConfiguration &&
@@ -172,8 +176,8 @@ export function FiOsClinicSettingsNav({
         ) : null}
         {showHubspot ? (
           <Link
-            href={`${base}/settings/imports/hubspot`}
-            className={linkCls(`${base}/settings/imports/hubspot`)}
+            href={`${base}/settings/integrations/hubspot?tab=import-review`}
+            className={linkCls(`${base}/settings/integrations/hubspot`)}
           >
             HubSpot import
           </Link>

@@ -490,17 +490,22 @@ export async function verifyConnectorCredentials(
   const grantedKeys = verification.grantedScopes.filter((s) => s.granted).map((s) => s.scopeKey);
   const now = new Date().toISOString();
 
+  // Configuration tests are append-only evidence. They must not replace the
+  // credential session's last live API status, granted-scope inventory, or
+  // provider payload.
   const patch: Record<string, unknown> = {
     auth_method: input.authMethod,
-    auth_status: verification.authStatus,
-    scopes_granted: grantedKeys,
-    provider_payload: verification.providerPayload,
     updated_at: now,
   };
+  if (!verification.testMode) {
+    patch.auth_status = verification.authStatus;
+    patch.scopes_granted = grantedKeys;
+    patch.provider_payload = verification.providerPayload;
+  }
 
   if (input.tokenExpiresAt) patch.token_expires_at = input.tokenExpiresAt;
-  if (verification.authStatus === "verified") patch.verified_at = now;
-  if (verification.authStatus === "pending") patch.verified_at = null;
+  if (!verification.testMode && verification.authStatus === "verified") patch.verified_at = now;
+  if (!verification.testMode && verification.authStatus === "pending") patch.verified_at = null;
 
   const { data: updated, error: updateErr } = await supabase
     .from("fi_external_connector_auth_sessions")
@@ -513,14 +518,16 @@ export async function verifyConnectorCredentials(
     return { ok: false, error: updateErr?.message ?? "Failed to update auth session." };
   }
 
-  await recordConnectorPermissionScopes(
-    sessionRow.id,
-    integrationId,
-    tenantId,
-    provider,
-    { ...opts, skipAuthCheck: true },
-    grantedKeys
-  );
+  if (!verification.testMode) {
+    await recordConnectorPermissionScopes(
+      sessionRow.id,
+      integrationId,
+      tenantId,
+      provider,
+      { ...opts, skipAuthCheck: true },
+      grantedKeys
+    );
+  }
 
   await recordConnectorVerificationEvent(
     sessionRow.id,

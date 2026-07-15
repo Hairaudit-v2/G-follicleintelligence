@@ -15,7 +15,7 @@ export default function FollicleIntelligenceHubspotImportRedirectPage({
 }) {
   const tenantId = typeof searchParams.tenantId === "string" ? searchParams.tenantId.trim() : "";
   if (tenantId) {
-    redirect(`/fi-admin/${tenantId}/settings/imports/hubspot`);
+    redirect(`/fi-admin/${tenantId}/settings/integrations/hubspot?tab=import-review`);
   }
   return (
     <div className="mx-auto max-w-lg p-8 text-slate-200">
@@ -24,7 +24,7 @@ export default function FollicleIntelligenceHubspotImportRedirectPage({
         Add <span className="font-mono text-cyan-300">?tenantId=</span> with your tenant UUID to
         open the import centre, or use the FI Admin path{" "}
         <span className="font-mono text-cyan-300">
-          /fi-admin/&lt;tenantId&gt;/settings/imports/hubspot
+          /fi-admin/&lt;tenantId&gt;/settings/integrations/hubspot?tab=import-review
         </span>
         .
       </p>

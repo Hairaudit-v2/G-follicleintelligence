@@ -71,6 +71,29 @@ export function hasTenantAdminCapability(
   return Boolean(caps?.has(cap));
 }
 
+/**
+ * Caps that unlock the tenant Configuration hub / HubSpot Configuration surfaces.
+ * Intentionally excludes `manage_operations` so CRM operators / operations_admin
+ * keep ops workflows without opening branding, API-key, and connector config.
+ */
+export const CONFIGURATION_HUB_CAPABILITIES = [
+  "manage_clinic_settings",
+  "manage_finance_settings",
+  "manage_admin_users",
+] as const satisfies readonly FiTenantAdminCapability[];
+
+/**
+ * Pure gate for Configuration hub visibility.
+ * Clinical / reception / CRM-operator members without clinic/finance/admin
+ * settings caps are denied.
+ */
+export function sessionCapsAllowConfigurationHub(
+  caps: ReadonlySet<FiTenantAdminCapability> | null | undefined
+): boolean {
+  if (!caps || caps.size === 0) return false;
+  return CONFIGURATION_HUB_CAPABILITIES.some((cap) => caps.has(cap));
+}
+
 /** Preserves CRM operator behaviour without granting admin-user management. */
 export function crmOperatorCapabilityPreset(): ReadonlySet<FiTenantAdminCapability> {
   return OPERATIONS_ADMIN;

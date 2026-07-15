@@ -10,6 +10,52 @@ export function hasDemoCredentials(): boolean {
   );
 }
 
+/**
+ * Production HubSpot smoke credentials (read-only suite only).
+ * Prefer dedicated production secrets; never commit values or storage-state files.
+ */
+export function hasProductionAdminCredentials(): boolean {
+  return Boolean(
+    process.env.FI_E2E_PRODUCTION_ADMIN_EMAIL?.trim() &&
+      process.env.FI_E2E_PRODUCTION_ADMIN_PASSWORD?.trim() &&
+      process.env.FI_E2E_TENANT_ID?.trim() &&
+      process.env.FI_E2E_BASE_URL?.trim(),
+  );
+}
+
+export function productionAdminEmail(): string {
+  const email = process.env.FI_E2E_PRODUCTION_ADMIN_EMAIL?.trim();
+  if (!email) throw new Error("Missing FI_E2E_PRODUCTION_ADMIN_EMAIL");
+  return email;
+}
+
+export function productionAdminPassword(): string {
+  const password = process.env.FI_E2E_PRODUCTION_ADMIN_PASSWORD?.trim();
+  if (!password) throw new Error("Missing FI_E2E_PRODUCTION_ADMIN_PASSWORD");
+  return password;
+}
+
+/** Optional low-role user for gated HubSpot smoke (AMBER skip when unset). */
+export function hasLowRoleCredentials(): boolean {
+  return Boolean(
+    process.env.FI_E2E_LOW_ROLE_EMAIL?.trim() &&
+      process.env.FI_E2E_LOW_ROLE_PASSWORD?.trim() &&
+      process.env.FI_E2E_TENANT_ID?.trim(),
+  );
+}
+
+export function lowRoleEmail(): string {
+  const email = process.env.FI_E2E_LOW_ROLE_EMAIL?.trim();
+  if (!email) throw new Error("Missing FI_E2E_LOW_ROLE_EMAIL");
+  return email;
+}
+
+export function lowRolePassword(): string {
+  const password = process.env.FI_E2E_LOW_ROLE_PASSWORD?.trim();
+  if (!password) throw new Error("Missing FI_E2E_LOW_ROLE_PASSWORD");
+  return password;
+}
+
 export function demoAdminEmail(): string {
   const email = process.env.FI_E2E_DEMO_ADMIN_EMAIL?.trim();
   if (!email) {

@@ -7,6 +7,7 @@ import {
   crmOperatorCapabilityPreset,
   FI_TENANT_ADMIN_CAPABILITIES,
   hasTenantAdminCapability,
+  sessionCapsAllowConfigurationHub,
 } from "./tenantAdminCapabilities";
 
 test("FI_TENANT_ADMIN_CAPABILITIES: fixed eight capabilities", () => {
@@ -58,4 +59,29 @@ test("crmOperatorCapabilityPreset matches operations_admin finance/admin exclusi
   const ops = capabilitiesForTenantAdminRole("operations_admin");
   assert.deepEqual(Array.from(crm).sort(), Array.from(ops).sort());
   assert.equal(crm.has("manage_admin_users"), false);
+});
+
+test("sessionCapsAllowConfigurationHub: empty / viewer / ops / CRM operator denied; clinic finance admin allowed", () => {
+  assert.equal(sessionCapsAllowConfigurationHub(new Set()), false);
+  assert.equal(sessionCapsAllowConfigurationHub(null), false);
+  assert.equal(
+    sessionCapsAllowConfigurationHub(capabilitiesForTenantAdminRole("dashboard_viewer")),
+    false,
+  );
+  assert.equal(
+    sessionCapsAllowConfigurationHub(capabilitiesForTenantAdminRole("clinic_admin")),
+    true,
+  );
+  assert.equal(
+    sessionCapsAllowConfigurationHub(capabilitiesForTenantAdminRole("finance_admin")),
+    true,
+  );
+  assert.equal(
+    sessionCapsAllowConfigurationHub(capabilitiesForTenantAdminRole("operations_admin")),
+    false,
+  );
+  assert.equal(
+    sessionCapsAllowConfigurationHub(crmOperatorCapabilityPreset()),
+    false,
+  );
 });

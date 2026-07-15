@@ -111,7 +111,8 @@ function projectRefFromUrl(rawUrl: string): string {
 }
 
 function sha256(buf: ArrayBuffer | Buffer | Uint8Array): string {
-  return createHash("sha256").update(Buffer.from(buf)).digest("hex");
+  const bytes = buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf;
+  return createHash("sha256").update(bytes).digest("hex");
 }
 
 function client(url: string, key: string): SupabaseClient {
