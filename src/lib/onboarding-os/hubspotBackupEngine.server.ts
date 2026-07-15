@@ -145,7 +145,18 @@ function associationRows(
       }
     }
   }
-  return rows;
+  const unique = new Map<string, Record<string, unknown>>();
+  for (const row of rows) {
+    const key = [row.tenant_id, row.integration_id, row.from_object_type, row.from_hubspot_id, row.to_object_type, row.to_hubspot_id].join("|");
+    const previous = unique.get(key);
+    if (!previous) {
+      unique.set(key, row);
+      continue;
+    }
+    const types = new Set([...(previous.association_types as string[]), ...(row.association_types as string[])]);
+    previous.association_types = [...types];
+  }
+  return [...unique.values()];
 }
 
 async function existingIds(
