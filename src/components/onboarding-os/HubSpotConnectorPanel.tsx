@@ -46,6 +46,7 @@ type Props = {
   integrationLabel?: string;
   sessionId?: string | null;
   initialSnapshot?: HubspotConnectorSnapshot | null;
+  section?: "full" | "backup" | "review" | "configuration";
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
@@ -228,6 +229,7 @@ export function HubSpotConnectorPanel({
   integrationLabel = "HubSpot",
   sessionId,
   initialSnapshot,
+  section = "full",
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -466,7 +468,7 @@ export function HubSpotConnectorPanel({
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      {section !== "review" ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}
@@ -499,9 +501,9 @@ export function HubSpotConnectorPanel({
         {secondaryAction?.visible && secondaryAction.disabledReason ? (
           <span className="text-xs text-amber-300">{secondaryAction.disabledReason}</span>
         ) : null}
-      </div>
+      </div> : null}
 
-      <div className="space-y-3">
+      {section === "full" || section === "review" ? <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-medium text-slate-300">Review queue</h3>
           <div className="flex flex-wrap gap-2 text-xs">
@@ -574,7 +576,7 @@ export function HubSpotConnectorPanel({
             No deals in staging queue. Run a manual sync after verifying HubSpot credentials.
           </p>
         )}
-      </div>
+      </div> : null}
     </section>
   );
 }
