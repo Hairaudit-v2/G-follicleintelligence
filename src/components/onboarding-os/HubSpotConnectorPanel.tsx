@@ -468,7 +468,7 @@ export function HubSpotConnectorPanel({
         </p>
       </div>
 
-      {section !== "review" ? <div className="flex flex-wrap items-center gap-2">
+      {(section === "full" || section === "backup") ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}

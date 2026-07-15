@@ -1939,6 +1939,19 @@ export async function loadHubspotSyncRuns(
   return { ok: true, runs: ((data ?? []) as SyncRunRow[]).map(mapSyncRunRow) };
 }
 
+/** Privacy-safe audit metadata. This deliberately excludes provider payloads and staging identities. */
+export async function loadHubspotAuditEvidence(integrationId: string, tenantId: string) {
+  const supabase = supabaseAdmin();
+  const [{ data: verifications }, { data: audit }] = await Promise.all([
+    supabase.from("fi_external_connector_verification_events").select("outcome, occurred_at, detail").eq("integration_id", integrationId).eq("tenant_id", tenantId).order("occurred_at", { ascending: false }).limit(20),
+    supabase.from("fi_external_hubspot_import_audit").select("action, occurred_at, actor_label, detail").eq("integration_id", integrationId).eq("tenant_id", tenantId).order("occurred_at", { ascending: false }).limit(20),
+  ]);
+  return {
+    verifications: (verifications ?? []).map((row: Record<string, unknown>) => ({ outcome: String(row.outcome ?? "unknown"), occurredAt: String(row.occurred_at ?? ""), type: String((row.detail as Record<string, unknown> | null)?.event_type ?? "verification") })),
+    audit: (audit ?? []).map((row: Record<string, unknown>) => ({ action: String(row.action ?? "event"), occurredAt: String(row.occurred_at ?? ""), operator: row.actor_label ? "operator recorded" : "system", type: String((row.detail as Record<string, unknown> | null)?.event_type ?? "audit") })),
+  };
+}
+
 async function buildConnectorSnapshot(
   supabase: SupabaseClient,
   integrationId: string,

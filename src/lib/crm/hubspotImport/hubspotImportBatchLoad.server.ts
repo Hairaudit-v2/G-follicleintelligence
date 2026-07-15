@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isUuid } from "@/src/lib/validation/uuid";
 import type { HubspotContactParsedRow } from "./hubspotContactCsvColumns";
 
 export type StagingRowDb = {
@@ -78,6 +79,7 @@ export async function loadHubspotImportBatch(
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const bid = batchId.trim();
+  if (!isUuid(bid)) return { batch: null, stagingPreview: [], stagingTotal: 0 };
 
   const { data: batch, error: be } = await supabase
     .from("fi_import_batches")
@@ -118,6 +120,7 @@ export async function loadAllStagingRowsForBatch(
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const bid = batchId.trim();
+  if (!isUuid(bid)) throw new Error("Invalid import batch identifier.");
 
   const { data: b, error: be } = await supabase
     .from("fi_import_batches")
