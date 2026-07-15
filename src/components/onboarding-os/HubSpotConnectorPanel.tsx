@@ -10,6 +10,7 @@ import {
   loadHubspotConnectorSnapshotAction,
   rejectHubspotDealAction,
   rejectHubspotLeadAction,
+  runHubspotSecondaryBackupAction,
   runHubspotSyncAction,
 } from "@/lib/actions/fi-onboarding-os-hubspot-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -283,6 +284,19 @@ export function HubSpotConnectorPanel({
     });
   }
 
+  function runSecondaryBackup() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await runHubspotSecondaryBackupAction(tenantId, integrationId, sessionId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      setMessage({ kind: "ok", text: "Secondary-object backup complete. Records remain in restricted staging only." });
+      router.refresh();
+    });
+  }
+
   function approveContact(contactId: string) {
     setMessage(null);
     startTransition(async () => {
@@ -412,6 +426,14 @@ export function HubSpotConnectorPanel({
           className="rounded bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
         >
           Sync now
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={runSecondaryBackup}
+          className="rounded border border-cyan-500/40 px-4 py-2 text-sm font-medium text-cyan-200 hover:bg-cyan-500/10 disabled:opacity-50"
+        >
+          Back up secondary objects
         </button>
       </div>
 

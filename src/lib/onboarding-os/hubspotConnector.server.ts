@@ -14,6 +14,14 @@ import {
   hubspotReadJson,
   runHubspotObjectBackup,
 } from "./hubspotBackupEngine.server";
+import {
+  HUBSPOT_SECONDARY_KINDS,
+  probeHubspotSecondaryCapabilities,
+  runHubspotSecondaryBackup,
+  secondaryScopeFor,
+  type HubspotSecondaryKind,
+  type SecondaryCounter,
+} from "./hubspotSecondaryBackupEngine.server";
 
 import { createConnectorSyncEvent } from "./externalConnector.server";
 import {
@@ -830,6 +838,69 @@ async function runResumableHubspotBackup(
       detail: safeSyncFailureDetail(error),
     });
     return { ok: false, error: "HubSpot backup failed; a sanitized resumable checkpoint was retained." };
+  }
+}
+
+/** Run the six read-only secondary-object backups through the existing encrypted connector credential. */
+export async function runHubspotSecondaryObjectBackup(
+  integrationId: string,
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<{ ok: true; runId: string; status: "completed" | "partial"; counters: Record<HubspotSecondaryKind, SecondaryCounter> } | { ok: false; error: string }> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot") return { ok: false, error: "HubSpot connector not found." };
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token) return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+  const capabilities = await probeHubspotSecondaryCapabilities(token);
+  const now = new Date().toISOString();
+  const { data: session } = await supabase.from("fi_external_connector_auth_sessions").select("id")
+    .eq("tenant_id", tenantId).eq("integration_id", integrationId).maybeSingle();
+  if (!session) return { ok: false, error: "Connector auth session not found." };
+  for (const kind of HUBSPOT_SECONDARY_KINDS) {
+    await supabase.from("fi_external_connector_permission_scopes").upsert({
+      auth_session_id: session.id, integration_id: integrationId, tenant_id: tenantId, provider: "hubspot",
+      scope_key: secondaryScopeFor(kind), scope_label: secondaryScopeFor(kind), required: true,
+      granted: capabilities[kind].granted, recorded_at: now,
+    }, { onConflict: "auth_session_id,scope_key" });
+  }
+  const allGranted = HUBSPOT_SECONDARY_KINDS.every((kind) => capabilities[kind].granted);
+  await supabase.from("fi_external_connector_verification_events").insert({
+    auth_session_id: session.id, integration_id: integrationId, tenant_id: tenantId, provider: "hubspot",
+    auth_status: allGranted ? "verified" : "insufficient_permissions", outcome: allGranted ? "success" : "warning",
+    actor_auth_user_id: auth.actorAuthUserId, actor_fi_user_id: auth.fiUserId, actor_label: auth.actorLabel,
+    detail: { verification_mode: "live_probe_secondary_objects", test_mode: false, stub: false, capabilities },
+    provider_payload: { verification_mode: "live_probe_secondary_objects", test_mode: false, stub: false, response_bodies_retained: false },
+  });
+  const { data: run, error: runError } = await supabase.from("fi_external_hubspot_sync_runs").insert({
+    tenant_id: tenantId, integration_id: integrationId, status: "started", started_at: now,
+    detail: { milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1", read_only: true, resumable: true,
+      promotion_enabled: false, response_bodies_retained: false }, secondary_capabilities: capabilities,
+  }).select("*").single();
+  if (runError || !run) return { ok: false, error: "Unable to start HubSpot secondary backup run." };
+  try {
+    const counters = await runHubspotSecondaryBackup({ supabase, accessToken: token, tenantId, integrationId,
+      syncRun: run as Record<string, unknown>, capabilities });
+    const supported = HUBSPOT_SECONDARY_KINDS.filter((kind) => capabilities[kind].granted);
+    const incomplete = supported.some((kind) => counters[kind].failed > 0 || !counters[kind].complete);
+    const missing = HUBSPOT_SECONDARY_KINDS.filter((kind) => !capabilities[kind].granted);
+    const status = incomplete || missing.length ? "partial" : "completed";
+    const { error } = await supabase.from("fi_external_hubspot_sync_runs").update({ status,
+      completed_at: new Date().toISOString(), secondary_complete: !incomplete && missing.length === 0,
+      secondary_counters: counters, secondary_capabilities: capabilities, health_score: status === "completed" ? 100 : 70,
+      detail: { milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1", read_only: true, resumable: true,
+        promotion_enabled: false, response_bodies_retained: false, missing_capabilities: missing },
+    }).eq("id", run.id).eq("status", "started");
+    if (error) throw new Error("Unable to atomically finalize HubSpot secondary backup run.");
+    return { ok: true, runId: String(run.id), status, counters };
+  } catch (error) {
+    await supabase.from("fi_external_hubspot_sync_runs").update({ status: "failed", completed_at: new Date().toISOString(),
+      health_score: 0, detail: { milestone: "FI-HUBSPOT-SECONDARY-OBJECT-BACKUP-1", read_only: true,
+        resumable: true, promotion_enabled: false, ...safeSyncFailureDetail(error) },
+    }).eq("id", run.id).eq("status", "started");
+    return { ok: false, error: "HubSpot secondary backup failed; sanitized resumable checkpoints were retained." };
   }
 }
 
