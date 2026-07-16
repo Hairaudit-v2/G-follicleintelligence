@@ -4,6 +4,7 @@
 **Created:** 2026-07-16  
 **Parent closeout:** `evidence-fi-hubspot-phase-o-closeout.md`  
 **Blocks Phase O:** No  
+**Programme handoff:** Listed in `fi-hubspot-backup-1-backlog-handoff.md`; parent programme closed GREEN — COMPLETE in `evidence-fi-hubspot-backup-1-final-closeout.md`
 
 Privacy-safe milestone record only. Do not paste emails, names, form responses, or patient data into this file.
 

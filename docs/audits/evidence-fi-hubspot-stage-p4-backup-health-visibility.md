@@ -7,7 +7,10 @@
 **Does not claim Stage P complete.**  
 **Does not implement Stage P5.**
 
+> **Superseded for programme status (2026-07-16):** Stage P5 final closeout completed; FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. This file remains the authoritative P4 health-visibility proof. The “exact next gate: P5” wording below is historical to this stage.
+
 ---
+
 
 ## 1. P4 verdict
 

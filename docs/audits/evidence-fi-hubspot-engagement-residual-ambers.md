@@ -5,6 +5,8 @@
 **Forms inventory / form submissions:** GREEN (not active blockers)
 
 > **Superseded for Phase O closeout (2026-07-16):** Authoritative verdict is now **GREEN WITH DOCUMENTED LIMITATIONS** in `evidence-fi-hubspot-phase-o-closeout.md`. Contact associations are an **ACCEPTED LIMITATION — NON-BLOCKING**. CLI `partial` is an **ACCEPTED OPERATOR OVERRIDE**. This file remains as interim residual analysis; do not treat its Overall Phase O AMBER row as current.
+>
+> **Programme closeout (2026-07-16):** FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. Production PASS was claimed in `evidence-fi-hubspot-phase-o-production-gate.md`; do not treat residual “Production PASS | Not claimed” as current programme status.
 
 Privacy-safe only: no emails, names, field values, or clinical content.
 

@@ -7,7 +7,10 @@
 **Does not claim Stage P complete.**  
 **Does not implement Stage P3.**
 
+> **Superseded for programme status (2026-07-16):** Stages P3–P4 completed GREEN; FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. This file remains the authoritative P2 proof.
+
 ---
+
 
 ## 1. P2 verdict
 

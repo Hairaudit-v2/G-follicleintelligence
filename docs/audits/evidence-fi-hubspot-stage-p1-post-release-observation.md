@@ -5,6 +5,8 @@
 **Milestone:** Stage P1 (controlled post-release observation)  
 **Machine-readable:** `evidence-fi-hubspot-stage-p1-post-release-observation.json`  
 
+> **Superseded for programme status (2026-07-16):** FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. The P2 “BLOCKED” row below remains interim Stage P1 sequencing only; Stages P2–P4 later completed GREEN.
+
 **Precondition:** Stage P0 AMBER — `docs/audits/evidence-fi-hubspot-stage-p0-operational-baseline.md` (commit `6ba5b623`)
 
 **Explicit no-write statement:** P1 did **not** create HubSpot test records, did **not** run a production backup, did **not** click Sync / secondary / engagement backup controls, did **not** deploy, and did **not** change production environment variables.

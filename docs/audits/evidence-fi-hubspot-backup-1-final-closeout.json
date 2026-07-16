@@ -1,0 +1,256 @@
+{
+  "evidenceType": "hubspot_backup_1_final_closeout",
+  "milestone": "FI-HUBSPOT-BACKUP-1",
+  "verdict": "green_complete",
+  "closedAt": "2026-07-16",
+  "phaseODatasetVerdict": "green_with_documented_limitations",
+  "explanatoryStatement": "Historical HubSpot recovery, production workspace recovery, authenticated access, incremental notes capture, fixed UTC cutoff handling, safe watermark advancement, fail-closed error behaviour, idempotent replay, scheduled production execution, failure notification, operator recovery procedures and real backup-health visibility are verified GREEN.",
+  "phaseOLimitationStatement": "Phase O remains GREEN WITH DOCUMENTED LIMITATIONS as its dataset-level classification. Those limitations do not block the completed FI-HUBSPOT-BACKUP-1 milestone.",
+  "supersedesProgrammeStatusIn": [
+    "docs/audits/evidence-fi-hubspot-stage-p0-operational-baseline.md",
+    "docs/audits/evidence-fi-hubspot-stage-p1-post-release-observation.md",
+    "docs/audits/evidence-fi-hubspot-incremental-production-gate.md",
+    "docs/audits/evidence-fi-hubspot-stage-p2-incremental-notes-proof.md",
+    "docs/audits/evidence-fi-hubspot-stage-p3-scheduled-operations.md",
+    "docs/audits/evidence-fi-hubspot-stage-p4-backup-health-visibility.md",
+    "docs/audits/evidence-fi-hubspot-engagement-residual-ambers.md",
+    "docs/audits/fi-hubspot-engagement-communications-backup-1-closeout.md"
+  ],
+  "productionRecovery": {
+    "verdict": "green",
+    "authenticatedSmoke": "green",
+    "productionPassClaimed": true,
+    "recoveryCommit": "c0f1c06a",
+    "phaseOProductionGateDeploy": "dpl_6UF8GSzt4catsmfz1PqLmw7YoRgt",
+    "phaseOProductionGateSha": "3bf43f22d5828089ba48c086e21e60d62de51b8b",
+    "currentHealthDeploy": "dpl_B4LZy2s65UsXssVeGzVN458DYMwz",
+    "currentHealthSha": "2aee523cb3ffff469f03a79aa8f99dc534c03fb0",
+    "alias": "follicleintelligence.ai"
+  },
+  "historicalBackup": {
+    "verdict": "green",
+    "backupRunId": "66f72f09-d333-4bb0-9c39-5da7b912e964",
+    "messages": "green",
+    "forms": "green",
+    "formSubmissions": "green",
+    "fileMetadata": "green",
+    "fileBodies": "out_of_scope",
+    "contactAssociations": "accepted_limitation",
+    "cliEngineStatus": "partial",
+    "operatorOverride": "green_with_documented_limitations",
+    "unresolvedRedControls": 0
+  },
+  "incrementalProtection": {
+    "dataset": "notes",
+    "version": "v1",
+    "verdict": "green",
+    "fixedUtcCutoffs": true,
+    "perDatasetWatermark": true,
+    "watermarkAfterVerification": true,
+    "failedRunAdvancesWatermark": false,
+    "idempotentReplayVerified": true,
+    "canonicalNoteId": "113007728535",
+    "firstCaptureInserted": 1,
+    "replayInserted": 0,
+    "replayUnchanged": 1,
+    "finalDestinationRows": 1,
+    "duplicateGroups": 0,
+    "crossTenantRows": 0,
+    "searchSortRepairCommit": "d213ad51",
+    "currentWatermark": "2026-07-16T03:45:02.366Z"
+  },
+  "scheduledOperations": {
+    "verdict": "green",
+    "scheduler": "vercel_cron",
+    "cron": "0 16 * * *",
+    "timezone": "Australia/Brisbane",
+    "localTime": "02:00",
+    "endpoint": "/api/cron/hubspot/incremental-notes-backup",
+    "firstScheduledRunId": "3b0a231b-9a0c-4ab4-a6d9-81bca8b2c3b4",
+    "firstScheduledOutcome": "empty_success",
+    "verificationAutomatic": true,
+    "failureNotificationVerified": true,
+    "concurrencyFailClosed": true,
+    "retryImmutableCutoffs": true,
+    "stuckRecoveryOperatorControlled": true,
+    "killSwitch": "FI_HUBSPOT_INCREMENTAL_BACKUP_ENABLED"
+  },
+  "healthVisibility": {
+    "verdict": "green",
+    "states": ["healthy", "needs_review", "failed"],
+    "derivedFromRealSources": true,
+    "productionStatus": "healthy",
+    "operatorActionRequired": false,
+    "ordinaryUserExecutionControls": false,
+    "pageViewStartsBackup": false,
+    "nextExpectedAt": "2026-07-16T16:00:00.000Z"
+  },
+  "controlMatrix": {
+    "historicalBackupExecution": "green",
+    "messages": "green",
+    "forms": "green",
+    "formSubmissions": "green",
+    "fileMetadata": "green",
+    "fileBodies": "out_of_scope",
+    "contactAssociations": "accepted_limitation",
+    "productionWorkspaceRecovery": "green",
+    "authenticatedProductionSmoke": "green",
+    "invalidBatchIdProtection": "green",
+    "legacyRedirects": "green",
+    "auditAndHistoryEvidence": "green",
+    "incrementalNotesEngine": "green",
+    "explicitFixedUtcCutoffs": "green",
+    "perDatasetWatermark": "green",
+    "watermarkAfterVerification": "green",
+    "failedRunFailClosed": "green",
+    "resumeImmutableCutoffs": "green",
+    "sameRangeReplay": "green",
+    "duplicateProtection": "green",
+    "tenantIsolation": "green",
+    "scheduledProductionRun": "green",
+    "concurrencyProtection": "green",
+    "retryHandling": "green",
+    "stuckRunRecovery": "green",
+    "failureNotification": "green",
+    "operatorRunbook": "green",
+    "backupHealthVisibility": "green",
+    "ordinaryUserExecutionControls": "none",
+    "redControls": "none",
+    "programme": "green_complete"
+  },
+  "acceptedLimitations": [
+    {
+      "id": 1,
+      "text": "Incremental backup v1 supports notes only",
+      "classification": ["accepted_limitation", "future_dataset_expansion"]
+    },
+    {
+      "id": 2,
+      "text": "Archived notes are outside the current HubSpot Search path",
+      "classification": ["accepted_limitation", "non_blocking_follow_up"]
+    },
+    {
+      "id": 3,
+      "text": "HubSpot Search may have indexing delay",
+      "classification": ["accepted_limitation"]
+    },
+    {
+      "id": 4,
+      "text": "File bodies were outside the historical engagement milestone",
+      "classification": ["accepted_limitation"]
+    },
+    {
+      "id": 5,
+      "text": "Contact associations were not exposed by the live submissions API",
+      "classification": ["accepted_limitation"]
+    },
+    {
+      "id": 6,
+      "text": "Deterministic CSV contact enrichment is separately available for 3,107 rows",
+      "classification": ["non_blocking_follow_up"]
+    },
+    {
+      "id": 7,
+      "text": "Notification HubSpot integration reference remains in metadata because integration_id FK is calendar-specific",
+      "classification": ["non_blocking_follow_up"]
+    },
+    {
+      "id": 8,
+      "text": "Overview smoke has a stale 4,750 fixture",
+      "classification": ["test_maintenance_item"]
+    }
+  ],
+  "backlogHandoff": {
+    "document": "docs/audits/fi-hubspot-backup-1-backlog-handoff.md",
+    "items": [
+      "FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1",
+      "FI-HUBSPOT-INCREMENTAL-DATASET-EXPANSION-1",
+      "FI-HUBSPOT-ARCHIVED-NOTE-RECOVERY-1",
+      "FI-ADMIN-NOTIFICATIONS-INTEGRATION-FK-GENERALISATION-1",
+      "FI-HUBSPOT-OVERVIEW-SMOKE-FIXTURE-REFRESH-1"
+    ]
+  },
+  "operationalOwnership": {
+    "owner": "Follicle Intelligence / Evolved platform operations",
+    "scheduler": "vercel_cron",
+    "cadence": "daily 02:00 Australia/Brisbane",
+    "endpoint": "/api/cron/hubspot/incremental-notes-backup",
+    "healthSurface": "HubSpot → Backup & Sync",
+    "notificationSource": "hubspot_incremental_backup",
+    "runbook": "docs/runbooks/hubspot-incremental-backup.md",
+    "disableControl": "FI_HUBSPOT_INCREMENTAL_BACKUP_ENABLED=false",
+    "hardDisable": "remove cron and redeploy",
+    "watermarkRule": "never rewind manually",
+    "stuckRecovery": "operator-reviewed only",
+    "ordinaryStaffExecutionControls": false
+  },
+  "evidenceIndex": [
+    {
+      "stage": "phase_o_closeout",
+      "path": "docs/audits/evidence-fi-hubspot-phase-o-closeout.md",
+      "commit": "cfdf08c4"
+    },
+    {
+      "stage": "production_recovery_gate",
+      "path": "docs/audits/evidence-fi-hubspot-phase-o-production-gate.md",
+      "commit": "062d7d12"
+    },
+    {
+      "stage": "p0_baseline",
+      "path": "docs/audits/evidence-fi-hubspot-stage-p0-operational-baseline.md",
+      "commit": "6ba5b623"
+    },
+    {
+      "stage": "p1_observation",
+      "path": "docs/audits/evidence-fi-hubspot-stage-p1-post-release-observation.md",
+      "commit": "bfae119b"
+    },
+    {
+      "stage": "incremental_implementation",
+      "path": "docs/audits/evidence-fi-hubspot-incremental-backup-implementation.md",
+      "commit": "34ca0374"
+    },
+    {
+      "stage": "incremental_deployment_gate",
+      "path": "docs/audits/evidence-fi-hubspot-incremental-production-gate.md",
+      "commit": "ec9341dd"
+    },
+    {
+      "stage": "p2_proof",
+      "path": "docs/audits/evidence-fi-hubspot-stage-p2-incremental-notes-proof.md",
+      "commit": "aac0d23f"
+    },
+    {
+      "stage": "p3_scheduled_proof",
+      "path": "docs/audits/evidence-fi-hubspot-stage-p3-scheduled-operations.md",
+      "commit": "8e157041"
+    },
+    {
+      "stage": "p4_health_proof",
+      "path": "docs/audits/evidence-fi-hubspot-stage-p4-backup-health-visibility.md",
+      "commit": "8398135e"
+    },
+    {
+      "stage": "p5_final_closeout",
+      "path": "docs/audits/evidence-fi-hubspot-backup-1-final-closeout.md",
+      "commit": "committed_by_final_p5_closeout_commit",
+      "parentCommit": "41fe7676972881c7f1acfebfa87067fc1d81a4b6"
+    }
+  ],
+  "unresolvedRedControls": 0,
+  "productionPassClaimed": true,
+  "programmeClosed": true,
+  "nextProgrammeStage": "FI-HUBSPOT-IMPORT-1 — Controlled HubSpot-to-FI OS migration",
+  "safety": {
+    "productionWritePerformed": false,
+    "backupRunPerformed": false,
+    "scheduleChanged": false,
+    "hubspotRecordCreatedOrAltered": false,
+    "rawCsvXlsxAdded": false,
+    "patientDataIntroduced": false,
+    "noteContentCopiedIntoEvidence": false,
+    "optionalBacklogMarkedComplete": false
+  },
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-backup-1-final-closeout.md",
+  "closeoutCommitMessage": "audit(hubspot): close FI-HUBSPOT-BACKUP-1"
+}

@@ -6,6 +6,8 @@
 
 **Does not claim Stage P2 GREEN.**
 
+> **Superseded for programme status (2026-07-16):** Stage P2 later completed GREEN (`evidence-fi-hubspot-stage-p2-incremental-notes-proof.md`). FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. The “Stage P2 remains pending” wording below is historical to this gate only.
+
 ---
 
 ## 1. Verdict

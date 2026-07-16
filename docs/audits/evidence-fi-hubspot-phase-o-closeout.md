@@ -7,7 +7,8 @@
 **Evidence classification:** Privacy-safe operational metadata only  
 
 **Final Phase O verdict:** GREEN WITH DOCUMENTED LIMITATIONS  
-**Production PASS:** CLAIMED — see `evidence-fi-hubspot-phase-o-production-gate.md` (smoke GREEN `2026-07-16T01:37:47.958Z`; deploy READY `3bf43f22`)
+**Production PASS:** CLAIMED — see `evidence-fi-hubspot-phase-o-production-gate.md` (smoke GREEN `2026-07-16T01:37:47.958Z`; deploy READY `3bf43f22`)  
+**Programme closeout:** FI-HUBSPOT-BACKUP-1 closed **GREEN — COMPLETE** — see `evidence-fi-hubspot-backup-1-final-closeout.md`
 
 This file supersedes interim Phase O AMBER / residual-AMBER operator verdicts in:
 

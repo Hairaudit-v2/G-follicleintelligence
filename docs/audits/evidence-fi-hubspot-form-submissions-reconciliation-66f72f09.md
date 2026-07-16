@@ -11,6 +11,8 @@
 
 ## Recommended closeout wording
 
+> **Superseded for programme blockers (2026-07-16):** Forms inventory residual and contact-linkage residual were later closed as GREEN / ACCEPTED LIMITATION in `evidence-fi-hubspot-phase-o-closeout.md`. FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. Historical residual AMBER wording in this file remains interim only.
+
 Live engagement backup completed with exit code 0 and partial status. Messages, forms, submissions and files completed. Canonical-ID reconciliation shows **zero baseline Conversion IDs missing** from destination and **zero duplicate** `hubspot_submission_id` groups. The **1,091** destination-only IDs are **not** post-export live growth: all have `hubspot_created_at` on or before the FI-HUBSPOT-BACKUP-1 download cutoff (`2026-07-15T08:42Z`). They match the documented gap between the **selected-form CSV baseline (4,220)** and the **portal forms-inventory total (5,310)**; destination now holds **5,311** (inventory +1). Parent-form and tenant integrity pass. **Phase O for the +1,091 count discrepancy: GREEN.** Residual **AMBER** remains for (a) forms inventory 48 vs staged definitions 46, and (b) contact linkage not populated from the Forms Submissions API payload shape (`contactId` absent on all 5,311 raw payloads; 0 contact association edges). No production restore PASS is claimed until those residual items are accepted or fixed. Current staging data and run evidence must be retained. **Do not rerun form_submissions** for the +1,091 alone — no repeatable pagination/duplication defect found.
 
 ---

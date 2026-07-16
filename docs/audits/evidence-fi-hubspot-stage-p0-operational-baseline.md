@@ -5,6 +5,8 @@
 **Milestone:** Stage P0 (operational baseline and incremental-backup readiness)  
 **Machine-readable:** `evidence-fi-hubspot-stage-p0-operational-baseline.json`  
 
+> **Superseded for programme status (2026-07-16):** FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. This P0 AMBER baseline (including “no incremental entry point”) remains valid as interim Stage P planning evidence only.
+
 **Phase O precondition (accepted, not reopened):**
 
 | Control | State |

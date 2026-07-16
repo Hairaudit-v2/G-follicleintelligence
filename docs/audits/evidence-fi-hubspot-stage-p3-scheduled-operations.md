@@ -7,7 +7,10 @@
 **Does not claim Stage P complete.**  
 **Does not implement Stage P4.**
 
+> **Superseded for programme status (2026-07-16):** Stage P4 completed GREEN; FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. This file remains the authoritative P3 scheduled-operations proof. The “exact next gate: P4” wording below is historical to this stage.
+
 ---
+
 
 ## 1 / 24. P3 verdict
 

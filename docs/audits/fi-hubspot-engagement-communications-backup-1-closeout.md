@@ -5,6 +5,8 @@ Closed: 2026-07-16 (dataset / API-fidelity closeout)
 Environment: Production (`iqqvzgxoimxchhcnbzxl`), run `66f72f09-d333-4bb0-9c39-5da7b912e964`  
 Evidence classification: Privacy-safe operational metadata only  
 
+> **Superseded for programme / production PASS wording (2026-07-16):** Production PASS was later **CLAIMED** in `evidence-fi-hubspot-phase-o-production-gate.md`. FI-HUBSPOT-BACKUP-1 is closed **GREEN — COMPLETE** in `evidence-fi-hubspot-backup-1-final-closeout.md`. Rows below that say “Production PASS NOT CLAIMED” remain historical to this engagement closeout draft.
+
 **Authoritative Phase O closeout:** `evidence-fi-hubspot-phase-o-closeout.md` (+ JSON)  
 Submission reconciliation: `evidence-fi-hubspot-form-submissions-reconciliation-66f72f09.md` (**GREEN**)  
 Forms inventory: `evidence-fi-hubspot-forms-reconciliation.md` (**GREEN** — 46 listable + 2 non-listable types explained)  
