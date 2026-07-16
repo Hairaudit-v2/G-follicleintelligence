@@ -532,6 +532,7 @@ export function GuidedAssistWidget({
           suggestionSource: tip.suggestionSource ?? "catalog",
           isNextBestAction: Boolean(tip.isNextBestAction),
           experienceLevel: payload.experienceLevel,
+          todayRole: payload.todayRole ?? null,
           operationalOnly: true,
           forceShow: Boolean(payload.forceShowActive),
         },

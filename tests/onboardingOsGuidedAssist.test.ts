@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { GUIDED_ASSIST_TIPS } from "../src/lib/onboarding-os/guidedAssistCatalog";
 import {
+  buildGuidedAssistHealthExportCsv,
   buildGuidedAssistSessionPayload,
   computeGuidedAssistOnboardingPhase,
   expandGuidedAssistPageKeys,
@@ -14,6 +15,7 @@ import {
   selectGuidedAssistTips,
   summarizeGuidedAssistHealthMetrics,
   summarizeGuidedAssistUsageEvents,
+  tipCodeMatchesHealthRole,
 } from "../src/lib/onboarding-os/guidedAssistCore";
 import {
   GUIDED_ASSIST_WHATS_NEW_VERSION,
@@ -21,6 +23,12 @@ import {
   withWhatsNewSeenMetadata,
 } from "../src/lib/onboarding-os/guidedAssistWhatsNew";
 import { GUIDED_ASSIST_LOG_ALIASES } from "../src/lib/onboarding-os/guidedAssistLog";
+import {
+  applyRolloutItemToggle,
+  buildGuidedAssistRolloutSnapshot,
+  emptyGuidedAssistRolloutStatus,
+  GUIDED_ASSIST_ROLLOUT_ITEMS,
+} from "../src/lib/onboarding-os/guidedAssistRollout";
 import {
   getEmptyStateTour,
   getContextualTips,
@@ -1115,10 +1123,14 @@ describe("Clinic guide — polish monitoring & what’s new", () => {
         { tip_code: "doctor_scales_shortcuts", helpful: true },
       ],
       tipTitle: (c) => `Title:${c}`,
+      tipPreview: (c) => `Preview for ${c}`,
       quickActionTitle: (c) => `QA:${c}`,
+      quickActionPreview: () => "Operational shortcut",
+      topLimit: 5,
     });
 
     assert.equal(health.adoptionRate, 0.3);
+    assert.equal(health.roleFilter, "all");
     assert.equal(health.tipsShown, 3);
     assert.equal(health.quickActionsClicked, 2);
     assert.equal(health.toursCompleted, 1);
@@ -1127,8 +1139,75 @@ describe("Clinic guide — polish monitoring & what’s new", () => {
     assert.equal(health.thumbsUpRate, 0.6);
     assert.equal(health.topTips[0]?.code, "pipeline_enquiries");
     assert.equal(health.topTips[0]?.title, "Title:pipeline_enquiries");
+    assert.ok(health.topTips[0]?.preview.includes("Preview"));
+    assert.ok(health.topTips[0]!.barPercent >= 6);
     assert.equal(health.topQuickActions[0]?.code, "qa_start_imaging");
     assert.ok(health.painPoints.some((p) => p.code === "doctor_scales_shortcuts" && p.thumbsDown === 2));
+  });
+
+  it("role filter uses event detail.todayRole and catalog tip roles", () => {
+    const health = summarizeGuidedAssistHealthMetrics({
+      tenantId: BASE_CTX.tenantId,
+      windowDays: 7,
+      roleFilter: "doctor",
+      usersWithGuideOn: 1,
+      usersWithPreferenceRow: 2,
+      events: [
+        {
+          event_kind: "tip_shown",
+          guidance_code: "x",
+          detail: { todayRole: "doctor" },
+        },
+        {
+          event_kind: "tip_shown",
+          guidance_code: "y",
+          detail: { todayRole: "reception" },
+        },
+        {
+          event_kind: "tip_shown",
+          guidance_code: "doctor_scales_shortcuts",
+        },
+      ],
+      feedback: [],
+    });
+    assert.equal(health.tipsShown, 2); // doctor detail + doctor_scales_shortcuts catalog
+    assert.equal(health.roleFilter, "doctor");
+    assert.equal(tipCodeMatchesHealthRole("doctor_scales_shortcuts", "doctor"), true);
+  });
+
+  it("buildGuidedAssistHealthExportCsv emits event and feedback rows", () => {
+    const csv = buildGuidedAssistHealthExportCsv({
+      events: [
+        {
+          occurred_at: "2026-07-01T00:00:00Z",
+          event_kind: "tip_shown",
+          guidance_code: "pipeline_enquiries",
+          detail: { todayRole: "reception" },
+        },
+      ],
+      feedback: [{ tip_code: "pipeline_enquiries", helpful: true, updated_at: "2026-07-02" }],
+    });
+    assert.ok(csv.includes("section,occurred_at"));
+    assert.ok(csv.includes("event"));
+    assert.ok(csv.includes("feedback"));
+    assert.ok(csv.includes("pipeline_enquiries"));
+  });
+
+  it("rollout checklist tracks completion and 100% celebration state", () => {
+    let status = emptyGuidedAssistRolloutStatus();
+    for (const item of GUIDED_ASSIST_ROLLOUT_ITEMS) {
+      status = applyRolloutItemToggle(status, item.id, true, new Date("2026-07-17T12:00:00Z"));
+    }
+    const snap = buildGuidedAssistRolloutSnapshot(BASE_CTX.tenantId, status);
+    assert.equal(snap.isComplete, true);
+    assert.equal(snap.percent, 100);
+    assert.equal(snap.completedCount, GUIDED_ASSIST_ROLLOUT_ITEMS.length);
+    assert.ok(snap.completedAtIso);
+
+    status = applyRolloutItemToggle(status, GUIDED_ASSIST_ROLLOUT_ITEMS[0].id, false);
+    const open = buildGuidedAssistRolloutSnapshot(BASE_CTX.tenantId, status);
+    assert.equal(open.isComplete, false);
+    assert.ok(open.percent < 100);
   });
 });
 

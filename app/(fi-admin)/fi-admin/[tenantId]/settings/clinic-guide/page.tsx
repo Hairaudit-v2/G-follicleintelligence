@@ -5,6 +5,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { ClinicGuideSettingsSection } from "@/src/components/onboarding-os/ClinicGuideSettingsSection";
 import { GuidedAssistHealthPanel } from "@/src/components/onboarding-os/GuidedAssistHealthPanel";
+import { GuidedAssistRolloutChecklist } from "@/src/components/onboarding-os/GuidedAssistRolloutChecklist";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
@@ -118,6 +119,9 @@ export default async function ClinicGuideSettingsPage({
 
       {showUsage ? (
         <>
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
+            <GuidedAssistRolloutChecklist tenantId={tid} />
+          </div>
           <div className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
             <GuidedAssistHealthPanel tenantId={tid} />
           </div>

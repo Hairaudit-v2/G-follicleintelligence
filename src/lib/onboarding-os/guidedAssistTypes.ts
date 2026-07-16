@@ -530,10 +530,52 @@ export type GuidedAssistUsageSummary = {
   reliantUsers: readonly GuidedAssistReliantUser[];
 };
 
+/** Admin Guide Health time window. */
+export const GUIDED_ASSIST_HEALTH_WINDOW_DAYS = [7, 30] as const;
+export type GuidedAssistHealthWindowDays = (typeof GUIDED_ASSIST_HEALTH_WINDOW_DAYS)[number];
+
+/** Filters for Guide Health (tenant-scoped). */
+export type GuidedAssistHealthFilters = {
+  windowDays: GuidedAssistHealthWindowDays;
+  /**
+   * When set (not `all`), restrict tip/QA aggregates to that Today role
+   * via event detail.todayRole and/or catalog tip roles.
+   */
+  role: GuidedAssistTodayRoleKey | "all";
+};
+
+export type GuidedAssistHealthRankedTip = {
+  code: string;
+  title: string;
+  /** Short operational preview from catalog body. */
+  preview: string;
+  count: number;
+  /** 0–100 share of max count in the list (for bar width). */
+  barPercent: number;
+};
+
+export type GuidedAssistHealthRankedQuickAction = {
+  code: string;
+  title: string;
+  preview: string;
+  count: number;
+  barPercent: number;
+};
+
+export type GuidedAssistHealthPainPoint = {
+  code: string;
+  title: string;
+  preview: string;
+  thumbsDown: number;
+  thumbsUp: number;
+  barPercent: number;
+};
+
 /** Admin “Guide Health” snapshot (tenant-scoped, operational UX metrics only). */
 export type GuidedAssistHealthSnapshot = {
   tenantId: string;
   windowDays: number;
+  roleFilter: GuidedAssistTodayRoleKey | "all";
   /** Users with assist_enabled true / known preference rows with fi_user_id. */
   adoptionRate: number;
   usersWithGuideOn: number;
@@ -545,9 +587,36 @@ export type GuidedAssistHealthSnapshot = {
   thumbsUpRate: number;
   quickActionsClicked: number;
   toursCompleted: number;
-  topTips: readonly { code: string; title: string; count: number }[];
-  topQuickActions: readonly { code: string; title: string; count: number }[];
-  painPoints: readonly { code: string; title: string; thumbsDown: number; thumbsUp: number }[];
+  topTips: readonly GuidedAssistHealthRankedTip[];
+  topQuickActions: readonly GuidedAssistHealthRankedQuickAction[];
+  painPoints: readonly GuidedAssistHealthPainPoint[];
+};
+
+/** Rollout checklist item completion map (item id → ISO timestamp or true). */
+export type GuidedAssistRolloutStatus = {
+  /** itemId → completedAt ISO string */
+  completed: Record<string, string>;
+  /** When the checklist first reached 100%. */
+  completedAtIso: string | null;
+  updatedAtIso: string | null;
+};
+
+export type GuidedAssistRolloutItemView = {
+  id: string;
+  label: string;
+  description: string;
+  completed: boolean;
+  completedAtIso: string | null;
+};
+
+export type GuidedAssistRolloutSnapshot = {
+  tenantId: string;
+  items: readonly GuidedAssistRolloutItemView[];
+  completedCount: number;
+  totalCount: number;
+  percent: number;
+  isComplete: boolean;
+  completedAtIso: string | null;
 };
 
 export const GUIDED_ASSIST_SAFETY_NOTICE =

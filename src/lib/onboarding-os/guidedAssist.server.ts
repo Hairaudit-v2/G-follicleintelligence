@@ -30,10 +30,18 @@ import {
   parseSnoozedTips,
   resolveEffectiveGuidedAssistEnabled,
   resolveGuidedAssistPageKey,
+  buildGuidedAssistHealthExportCsv,
   summarizeGuidedAssistHealthMetrics,
   summarizeGuidedAssistUsageEvents,
+  tipCodeMatchesHealthRole,
   validateGuidedAssistSnoozeHours,
 } from "./guidedAssistCore";
+import {
+  applyRolloutItemToggle,
+  buildGuidedAssistRolloutSnapshot,
+  parseRolloutStatusFromMetadata,
+  withRolloutStatusMetadata,
+} from "./guidedAssistRollout";
 import {
   buildWeeklyProgressSummary,
   computeEngagementStreakUpdate,
@@ -64,9 +72,13 @@ import type {
   GuidedAssistEngagementSnapshot,
   GuidedAssistEventKind,
   GuidedAssistExperienceLevel,
+  GuidedAssistHealthFilters,
   GuidedAssistHealthSnapshot,
+  GuidedAssistHealthWindowDays,
+  GuidedAssistRolloutSnapshot,
   GuidedAssistSessionPayload,
   GuidedAssistTenantDefaults,
+  GuidedAssistTodayRoleKey,
   GuidedAssistUsageSummary,
   GuidedAssistUserPreferences,
 } from "./guidedAssistTypes";
@@ -1128,12 +1140,38 @@ export async function markGuidedAssistWhatsNewSeen(
   }
 }
 
+function normalizeHealthFilters(
+  filters: Partial<GuidedAssistHealthFilters> | number | undefined
+): GuidedAssistHealthFilters {
+  // Back-compat: number was windowDays only.
+  if (typeof filters === "number") {
+    const d = filters === 7 ? 7 : 30;
+    return { windowDays: d, role: "all" };
+  }
+  const windowDays: GuidedAssistHealthWindowDays =
+    filters?.windowDays === 7 ? 7 : 30;
+  const roleRaw = filters?.role ?? "all";
+  const allowed: readonly (GuidedAssistTodayRoleKey | "all")[] = [
+    "all",
+    "reception",
+    "consultant",
+    "doctor",
+    "nurse",
+    "finance",
+    "admin",
+  ];
+  const role = allowed.includes(roleRaw as GuidedAssistTodayRoleKey | "all")
+    ? (roleRaw as GuidedAssistTodayRoleKey | "all")
+    : "all";
+  return { windowDays, role };
+}
+
 /**
  * Admin “Guide Health” snapshot — adoption, feedback, tips & quick actions (tenant-scoped).
  */
 export async function loadGuidedAssistHealthSnapshot(
   tenantId: string,
-  windowDays = 30,
+  filters: Partial<GuidedAssistHealthFilters> | number = { windowDays: 30, role: "all" },
   serverOpts: ServerOpts = {}
 ): Promise<{ ok: true; health: GuidedAssistHealthSnapshot } | { ok: false; error: string }> {
   try {
@@ -1146,7 +1184,7 @@ export async function loadGuidedAssistHealthSnapshot(
 
     const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
     const tid = tenantId.trim();
-    const days = Math.max(1, Math.min(Math.floor(windowDays) || 30, 90));
+    const { windowDays: days, role: roleFilter } = normalizeHealthFilters(filters);
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
     const [prefsRes, eventsRes, feedbackRes] = await Promise.all([
@@ -1181,6 +1219,7 @@ export async function loadGuidedAssistHealthSnapshot(
     const health = summarizeGuidedAssistHealthMetrics({
       tenantId: tid,
       windowDays: days,
+      roleFilter,
       usersWithGuideOn,
       usersWithPreferenceRow,
       events: (eventsRes.data ?? []) as {
@@ -1190,11 +1229,16 @@ export async function loadGuidedAssistHealthSnapshot(
       }[],
       feedback: (feedbackRes.data ?? []) as { tip_code: string; helpful: boolean }[],
       tipTitle: (code) => getGuidedAssistTipByCode(code)?.title ?? code,
+      tipPreview: (code) => getGuidedAssistTipByCode(code)?.body ?? "",
       quickActionTitle: (code) => getGuidedAssistQuickActionByCode(code)?.label ?? code,
+      quickActionPreview: (code) => getGuidedAssistQuickActionByCode(code)?.description ?? "",
+      topLimit: 5,
     });
 
     guidedAssistDevLog("health", "snapshot", {
       tenantId: tid,
+      windowDays: days,
+      role: roleFilter,
       adoptionRate: health.adoptionRate,
       tipsShown: health.tipsShown,
       thumbsUpRate: health.thumbsUpRate,
@@ -1205,6 +1249,174 @@ export async function loadGuidedAssistHealthSnapshot(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Failed to load Guide Health.",
+    };
+  }
+}
+
+/**
+ * Admin CSV export of events + feedback for the health window (tenant-scoped).
+ */
+export async function exportGuidedAssistHealthCsv(
+  tenantId: string,
+  filters: Partial<GuidedAssistHealthFilters> | number = { windowDays: 30, role: "all" },
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; csv: string; filename: string } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    if (!(await canViewGuidedAssistUsageSummary(tenantId, serverOpts))) {
+      return { ok: false, error: "Admin access is required to export Guide Health." };
+    }
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const { windowDays: days, role: roleFilter } = normalizeHealthFilters(filters);
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+    const [eventsRes, feedbackRes] = await Promise.all([
+      supabase
+        .from("fi_guided_assist_events")
+        .select("occurred_at, event_kind, guidance_code, guidance_area, page_key, detail")
+        .eq("tenant_id", tid)
+        .gte("occurred_at", since)
+        .order("occurred_at", { ascending: false })
+        .limit(5000),
+      supabase
+        .from("fi_guided_assist_feedback")
+        .select("tip_code, helpful, comment, page_key, updated_at")
+        .eq("tenant_id", tid)
+        .gte("updated_at", since)
+        .order("updated_at", { ascending: false })
+        .limit(2000),
+    ]);
+
+    if (eventsRes.error) return { ok: false, error: eventsRes.error.message };
+    if (feedbackRes.error) return { ok: false, error: feedbackRes.error.message };
+
+    let events = (eventsRes.data ?? []) as {
+      occurred_at?: string | null;
+      event_kind: string;
+      guidance_code: string | null;
+      guidance_area?: string | null;
+      page_key?: string | null;
+      detail?: Record<string, unknown> | null;
+    }[];
+
+    if (roleFilter !== "all") {
+      events = events.filter((ev) => {
+        const detail = ev.detail && typeof ev.detail === "object" ? ev.detail : null;
+        const detailRole =
+          detail && detail.todayRole != null ? String(detail.todayRole).trim() : "";
+        if (detailRole) return detailRole === roleFilter || detailRole === "all";
+        const code = ev.guidance_code ? String(ev.guidance_code).trim() : "";
+        if (!code) return true;
+        return tipCodeMatchesHealthRole(code, roleFilter);
+      });
+    }
+
+    let feedback = (feedbackRes.data ?? []) as {
+      tip_code: string;
+      helpful: boolean;
+      comment?: string | null;
+      page_key?: string | null;
+      updated_at?: string | null;
+    }[];
+    if (roleFilter !== "all") {
+      feedback = feedback.filter((fb) => tipCodeMatchesHealthRole(fb.tip_code, roleFilter));
+    }
+
+    const csv = buildGuidedAssistHealthExportCsv({ events, feedback });
+    const filename = `clinic-guide-health-${tid.slice(0, 8)}-${days}d${
+      roleFilter !== "all" ? `-${roleFilter}` : ""
+    }.csv`;
+
+    return { ok: true, csv, filename };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to export Guide Health CSV.",
+    };
+  }
+}
+
+/** Load tenant rollout checklist (admin). Status on tenant default prefs metadata. */
+export async function loadGuidedAssistRolloutSnapshot(
+  tenantId: string,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; rollout: GuidedAssistRolloutSnapshot } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    if (!(await canViewGuidedAssistUsageSummary(tenantId, serverOpts))) {
+      return { ok: false, error: "Admin access is required to view the rollout checklist." };
+    }
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const row = await ensureTenantDefaultRow(supabase, tid);
+    const meta =
+      row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {};
+    const status = parseRolloutStatusFromMetadata(meta);
+    return { ok: true, rollout: buildGuidedAssistRolloutSnapshot(tid, status) };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load rollout checklist.",
+    };
+  }
+}
+
+/** Toggle a rollout checklist item for the tenant (admin). */
+export async function setGuidedAssistRolloutItem(
+  tenantId: string,
+  itemId: string,
+  completed: boolean,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; rollout: GuidedAssistRolloutSnapshot } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    if (!(await canManageGuidedAssistTenantDefaults(tenantId, serverOpts))) {
+      return { ok: false, error: "Clinic admin access is required to update rollout status." };
+    }
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const row = await ensureTenantDefaultRow(supabase, tid);
+    const meta =
+      row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {};
+    const current = parseRolloutStatusFromMetadata(meta);
+    const next = applyRolloutItemToggle(current, itemId, completed);
+    if (next === current && !completed && !current.completed[itemId]) {
+      // invalid id or no-op
+    }
+    const nextMeta = withRolloutStatusMetadata(meta, next);
+
+    const { error } = await supabase
+      .from("fi_guided_assist_preferences")
+      .update({ metadata: nextMeta })
+      .eq("id", row.id)
+      .eq("tenant_id", tid)
+      .is("fi_user_id", null);
+    if (error) return { ok: false, error: error.message };
+
+    guidedAssistDevLog("rollout", completed ? "item_done" : "item_cleared", {
+      tenantId: tid,
+      itemId,
+    });
+
+    return { ok: true, rollout: buildGuidedAssistRolloutSnapshot(tid, next) };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update rollout checklist.",
     };
   }
 }

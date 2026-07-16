@@ -54,6 +54,7 @@ import type {
   GuidedAssistSnoozedTips,
   GuidedAssistTenantDefaults,
   GuidedAssistTipView,
+  GuidedAssistTodayRoleKey,
   GuidedAssistUserPreferences,
   GuidedAssistViewerContext,
 } from "./guidedAssistTypes";
@@ -645,6 +646,57 @@ export function summarizeGuidedAssistUsageEvents(
   };
 }
 
+function previewText(raw: string | null | undefined, max = 110): string {
+  const t = String(raw ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!t) return "";
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1).trimEnd()}…`;
+}
+
+function withBarPercent<T extends { count: number }>(
+  rows: T[]
+): (T & { barPercent: number })[] {
+  const max = rows.reduce((m, r) => Math.max(m, r.count), 0);
+  return rows.map((r) => ({
+    ...r,
+    barPercent: max > 0 ? Math.max(6, Math.round((r.count / max) * 100)) : 0,
+  }));
+}
+
+/** Whether a tip code is relevant for a Today role filter (catalog roles + "all"). */
+export function tipCodeMatchesHealthRole(
+  code: string,
+  role: GuidedAssistTodayRoleKey | "all",
+  tipRoles?: readonly GuidedAssistTodayRoleKey[] | null
+): boolean {
+  if (role === "all") return true;
+  const roles = tipRoles ?? GUIDED_ASSIST_TIPS.find((t) => t.code === code)?.roles ?? null;
+  if (!roles || roles.length === 0) return true; // unscoped catalog tips count for all
+  if (roles.includes("all")) return true;
+  return roles.includes(role);
+}
+
+function eventMatchesHealthRole(
+  ev: {
+    guidance_code: string | null;
+    detail?: Record<string, unknown> | null;
+  },
+  role: GuidedAssistTodayRoleKey | "all"
+): boolean {
+  if (role === "all") return true;
+  const detail = ev.detail && typeof ev.detail === "object" ? ev.detail : null;
+  const detailRole =
+    detail && detail.todayRole != null ? String(detail.todayRole).trim() : "";
+  if (detailRole) {
+    return detailRole === role || detailRole === "all";
+  }
+  const code = ev.guidance_code ? String(ev.guidance_code).trim() : "";
+  if (!code) return true;
+  return tipCodeMatchesHealthRole(code, role);
+}
+
 /**
  * Pure “Guide Health” aggregation for admin Settings (tenant-scoped inputs only).
  * Resolves tip/action titles via optional label lookups (catalog SSOT).
@@ -652,6 +704,7 @@ export function summarizeGuidedAssistUsageEvents(
 export function summarizeGuidedAssistHealthMetrics(opts: {
   tenantId: string;
   windowDays: number;
+  roleFilter?: GuidedAssistTodayRoleKey | "all";
   usersWithGuideOn: number;
   usersWithPreferenceRow: number;
   events: readonly {
@@ -661,10 +714,19 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
   }[];
   feedback: readonly { tip_code: string; helpful: boolean }[];
   tipTitle?: (code: string) => string;
+  tipPreview?: (code: string) => string;
   quickActionTitle?: (code: string) => string;
-}): Omit<GuidedAssistHealthSnapshot, never> {
+  quickActionPreview?: (code: string) => string;
+  topLimit?: number;
+}): GuidedAssistHealthSnapshot {
   const tipTitle = opts.tipTitle ?? ((c: string) => c);
+  const tipPreview =
+    opts.tipPreview ??
+    ((c: string) => previewText(GUIDED_ASSIST_TIPS.find((t) => t.code === c)?.body));
   const qaTitle = opts.quickActionTitle ?? ((c: string) => c);
+  const qaPreview = opts.quickActionPreview ?? ((c: string) => "");
+  const roleFilter = opts.roleFilter ?? "all";
+  const topLimit = Math.max(1, Math.min(opts.topLimit ?? 5, 10));
 
   const tipShown = new Map<string, number>();
   const qaClicked = new Map<string, number>();
@@ -673,6 +735,7 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
   let toursCompleted = 0;
 
   for (const ev of opts.events) {
+    if (!eventMatchesHealthRole(ev, roleFilter)) continue;
     const kind = String(ev.event_kind ?? "");
     const code = ev.guidance_code ? String(ev.guidance_code).trim() : "";
     if (kind === "tip_shown") {
@@ -698,6 +761,7 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
   for (const row of opts.feedback) {
     const code = String(row.tip_code ?? "").trim();
     if (!code) continue;
+    if (!tipCodeMatchesHealthRole(code, roleFilter)) continue;
     if (row.helpful) {
       thumbsUp += 1;
       upByTip.set(code, (upByTip.get(code) ?? 0) + 1);
@@ -713,29 +777,48 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
   const adoptionRate =
     usersWithPreferenceRow > 0 ? Math.min(1, usersWithGuideOn / usersWithPreferenceRow) : 0;
 
-  const topTips = [...tipShown.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8)
-    .map(([code, count]) => ({ code, title: tipTitle(code), count }));
+  const topTips = withBarPercent(
+    [...tipShown.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topLimit)
+      .map(([code, count]) => ({
+        code,
+        title: tipTitle(code),
+        preview: previewText(tipPreview(code)),
+        count,
+      }))
+  );
 
-  const topQuickActions = [...qaClicked.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8)
-    .map(([code, count]) => ({ code, title: qaTitle(code), count }));
+  const topQuickActions = withBarPercent(
+    [...qaClicked.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topLimit)
+      .map(([code, count]) => ({
+        code,
+        title: qaTitle(code),
+        preview: previewText(qaPreview(code)),
+        count,
+      }))
+  );
 
-  const painPoints = [...downByTip.entries()]
-    .sort((a, b) => b[1] - a[1] || (upByTip.get(a[0]) ?? 0) - (upByTip.get(b[0]) ?? 0))
-    .slice(0, 8)
-    .map(([code, thumbsDownCount]) => ({
-      code,
-      title: tipTitle(code),
-      thumbsDown: thumbsDownCount,
-      thumbsUp: upByTip.get(code) ?? 0,
-    }));
+  const painPoints = withBarPercent(
+    [...downByTip.entries()]
+      .sort((a, b) => b[1] - a[1] || (upByTip.get(a[0]) ?? 0) - (upByTip.get(b[0]) ?? 0))
+      .slice(0, topLimit)
+      .map(([code, thumbsDownCount]) => ({
+        code,
+        title: tipTitle(code),
+        preview: previewText(tipPreview(code)),
+        thumbsDown: thumbsDownCount,
+        thumbsUp: upByTip.get(code) ?? 0,
+        count: thumbsDownCount,
+      }))
+  ).map(({ count: _c, ...rest }) => rest);
 
   return {
     tenantId: opts.tenantId.trim(),
     windowDays: opts.windowDays,
+    roleFilter,
     adoptionRate,
     usersWithGuideOn,
     usersWithPreferenceRow,
@@ -749,6 +832,66 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
     topQuickActions,
     painPoints,
   };
+}
+
+/** Escape a CSV field (RFC-ish). */
+export function escapeCsvField(value: string | number | boolean | null | undefined): string {
+  const s = value == null ? "" : String(value);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+/** Build CSV for admin export (events + feedback rows). */
+export function buildGuidedAssistHealthExportCsv(opts: {
+  events: readonly {
+    occurred_at?: string | null;
+    event_kind: string;
+    guidance_code: string | null;
+    guidance_area?: string | null;
+    page_key?: string | null;
+    detail?: Record<string, unknown> | null;
+  }[];
+  feedback: readonly {
+    tip_code: string;
+    helpful: boolean;
+    comment?: string | null;
+    page_key?: string | null;
+    updated_at?: string | null;
+  }[];
+}): string {
+  const lines: string[] = [];
+  lines.push(
+    ["section", "occurred_at", "kind_or_helpful", "code", "area_or_page", "extra"].join(",")
+  );
+  for (const ev of opts.events) {
+    const detailRole =
+      ev.detail && typeof ev.detail === "object" && ev.detail.todayRole != null
+        ? String(ev.detail.todayRole)
+        : "";
+    lines.push(
+      [
+        escapeCsvField("event"),
+        escapeCsvField(ev.occurred_at ?? ""),
+        escapeCsvField(ev.event_kind),
+        escapeCsvField(ev.guidance_code),
+        escapeCsvField(ev.guidance_area ?? ev.page_key ?? ""),
+        escapeCsvField(detailRole),
+      ].join(",")
+    );
+  }
+  for (const fb of opts.feedback) {
+    lines.push(
+      [
+        escapeCsvField("feedback"),
+        escapeCsvField(fb.updated_at ?? ""),
+        escapeCsvField(fb.helpful ? "helpful" : "unhelpful"),
+        escapeCsvField(fb.tip_code),
+        escapeCsvField(fb.page_key ?? ""),
+        escapeCsvField(fb.comment ?? ""),
+      ].join(",")
+    );
+  }
+  return lines.join("\n");
 }
 
 export function buildGuidedAssistSetupFlagsFromChecklist(checklist: {

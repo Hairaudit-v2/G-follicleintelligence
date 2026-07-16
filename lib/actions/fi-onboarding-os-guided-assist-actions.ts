@@ -7,8 +7,10 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import {
   dismissGuidedAssistTip,
   enableGuidedAssistForAllStaff,
+  exportGuidedAssistHealthCsv,
   incrementGuidedAssistTodayHomeViews,
   loadGuidedAssistHealthSnapshot,
+  loadGuidedAssistRolloutSnapshot,
   loadGuidedAssistSettingsState,
   loadGuidedAssistUsageSummary,
   markGuidedAssistWhatsNewSeen,
@@ -16,14 +18,19 @@ import {
   recordGuidedAssistTipFeedback,
   setGuidedAssistEnabledForUser,
   setGuidedAssistForceShow,
+  setGuidedAssistRolloutItem,
   setGuidedAssistTenantDefaults,
   snoozeGuidedAssistTip,
   touchGuidedAssistEngagement,
 } from "@/src/lib/onboarding-os/guidedAssist.server";
 import type {
   GuidedAssistEventKind,
+  GuidedAssistHealthFilters,
   GuidedAssistHealthSnapshot,
+  GuidedAssistHealthWindowDays,
+  GuidedAssistRolloutSnapshot,
   GuidedAssistSettingsState,
+  GuidedAssistTodayRoleKey,
   GuidedAssistUsageSummary,
 } from "@/src/lib/onboarding-os/guidedAssistTypes";
 
@@ -370,23 +377,107 @@ export async function loadGuidedAssistUsageSummaryAction(
   }
 }
 
-/** Admin: Guide Health adoption + feedback snapshot (tenant-scoped). */
+const healthFiltersSchema = z.object({
+  windowDays: z.union([z.literal(7), z.literal(30)]).optional(),
+  role: z
+    .enum(["all", "reception", "consultant", "doctor", "nurse", "finance", "admin"])
+    .optional(),
+});
+
+/** Admin: Guide Health adoption + feedback snapshot (tenant-scoped, filterable). */
 export async function loadGuidedAssistHealthSnapshotAction(
   tenantId: string,
-  windowDays = 30
+  filters: Partial<GuidedAssistHealthFilters> | GuidedAssistHealthWindowDays = 30
 ): Promise<{ ok: true; health: GuidedAssistHealthSnapshot } | { ok: false; error: string }> {
   try {
     const tid = tenantIdSchema.parse(tenantId);
     const authId = await resolveActorAuthId();
     if (!authId) return { ok: false, error: "Authentication required." };
 
-    return loadGuidedAssistHealthSnapshot(tid, windowDays, {
+    const normalized: Partial<GuidedAssistHealthFilters> =
+      typeof filters === "number"
+        ? { windowDays: filters === 7 ? 7 : 30, role: "all" }
+        : healthFiltersSchema.parse(filters ?? {});
+
+    return loadGuidedAssistHealthSnapshot(tid, normalized, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid request." };
+    return { ok: false, error: e instanceof Error ? e.message : "Failed to load Guide Health." };
+  }
+}
+
+/** Admin: CSV export of guide events + feedback for the selected window/role. */
+export async function exportGuidedAssistHealthCsvAction(
+  tenantId: string,
+  filters: Partial<GuidedAssistHealthFilters> = { windowDays: 30, role: "all" }
+): Promise<
+  { ok: true; csv: string; filename: string } | { ok: false; error: string }
+> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const normalized = healthFiltersSchema.parse(filters ?? {});
+    return exportGuidedAssistHealthCsv(tid, normalized, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid request." };
+    return { ok: false, error: e instanceof Error ? e.message : "Failed to export CSV." };
+  }
+}
+
+/** Admin: load Clinic guide rollout checklist for this tenant. */
+export async function loadGuidedAssistRolloutSnapshotAction(
+  tenantId: string
+): Promise<{ ok: true; rollout: GuidedAssistRolloutSnapshot } | { ok: false; error: string }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    return loadGuidedAssistRolloutSnapshot(tid, {
       actorAuthUserId: authId,
       skipAuthCheck: true,
     });
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to load Guide Health." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load rollout checklist.",
+    };
+  }
+}
+
+/** Admin: toggle a rollout checklist item. */
+export async function setGuidedAssistRolloutItemAction(
+  tenantId: string,
+  itemId: string,
+  completed: boolean
+): Promise<{ ok: true; rollout: GuidedAssistRolloutSnapshot } | { ok: false; error: string }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const id = z.string().min(1).max(80).parse(itemId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await setGuidedAssistRolloutItem(tid, id, Boolean(completed), {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (result.ok) revalidateTenantAssistPaths(tid);
+    return result;
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid request." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update rollout checklist.",
+    };
   }
 }
 
