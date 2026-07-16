@@ -71,6 +71,27 @@ test("fiOsChromeClasses: shell locks viewport height without blocking nested scr
     fiOsChromeClasses.mainScrollFloatingAssistPad.includes("safe-area-inset-bottom"),
     "main scroll pad respects safe area"
   );
+  assert.ok(
+    fiOsChromeClasses.guidedAssistDockDefault.includes("fi-os-bottom-chrome-offset"),
+    "clinic guide dock uses measured bottom chrome offset"
+  );
+  assert.ok(
+    fiOsChromeClasses.guidedAssistDockDefault.includes("safe-area-inset-bottom"),
+    "clinic guide dock respects safe-area-inset-bottom"
+  );
+  assert.ok(
+    fiOsChromeClasses.guidedAssistDockDefault.includes("lg:bottom-"),
+    "clinic guide drops mobile bottom-nav offset at lg"
+  );
+  assert.ok(
+    fiOsChromeClasses.guidedAssistDock.includes("transition-"),
+    "clinic guide animates reposition"
+  );
+  assert.ok(
+    fiOsChromeClasses.guidedAssistBodyScroll.includes("50dvh") ||
+      fiOsChromeClasses.guidedAssistBodyScroll.includes("max-h-"),
+    "clinic guide body is height-capped on short viewports"
+  );
 });
 
 test("fiOsChromeClasses: sidebar rail and drawer establish scroll boundaries", () => {

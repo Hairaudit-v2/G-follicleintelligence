@@ -18,6 +18,22 @@ import type { GuidedAssistSessionPayload } from "@/src/lib/onboarding-os/guidedA
 
 import { GuidedAssistToggle } from "./GuidedAssistToggle";
 
+/** Prefer collapsed clinic guide on narrow phones so it does not compete with bottom nav. */
+function usePrefersCollapsedAssistDefault(): boolean {
+  const [prefersCollapsed, setPrefersCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(max-width: 639px)");
+    const apply = () => setPrefersCollapsed(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  return prefersCollapsed;
+}
+
 export function GuidedAssistWidget({
   tenantId,
   initialPayload,
@@ -30,14 +46,27 @@ export function GuidedAssistWidget({
   const [payload, setPayload] = useState(initialPayload);
   const pathname = usePathname() ?? "";
   const onCalendarSurface = isFiOsTenantCalendarPath(pathname);
-  const [collapsed, setCollapsed] = useState(onCalendarSurface);
+  const prefersCollapsedDefault = usePrefersCollapsedAssistDefault();
+  const [collapsed, setCollapsed] = useState(true);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const shownTipCodesRef = useRef<Set<string>>(new Set());
+  const hydratedCollapseRef = useRef(false);
 
   useEffect(() => {
     setPayload(initialPayload);
   }, [initialPayload]);
+
+  // Initial collapse: calendar always; phones prefer collapsed; desktop can open after hydrate.
+  useEffect(() => {
+    if (hydratedCollapseRef.current && !onCalendarSurface) return;
+    hydratedCollapseRef.current = true;
+    if (onCalendarSurface || prefersCollapsedDefault) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
+  }, [onCalendarSurface, prefersCollapsedDefault, pathname]);
 
   useEffect(() => {
     if (onCalendarSurface) setCollapsed(true);
@@ -128,10 +157,10 @@ export function GuidedAssistWidget({
   return (
     <aside
       className={cn(
-        "pointer-events-auto fixed z-40",
+        fiOsChromeClasses.guidedAssistDock,
         onCalendarSurface
-          ? "bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 w-auto max-w-[min(100vw-1.5rem,18rem)] xl:right-4 xl:left-auto xl:w-[min(100vw-2rem,24rem)]"
-          : "bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 w-[min(100vw-2rem,24rem)]",
+          ? fiOsChromeClasses.guidedAssistDockCalendar
+          : fiOsChromeClasses.guidedAssistDockDefault,
         collapsed
           ? "rounded-full border border-cyan-500/25 bg-[#071018]/95 px-1 py-1 shadow-lg backdrop-blur-md"
           : "rounded-xl border border-cyan-500/20 bg-[#071018]/95 shadow-2xl backdrop-blur-md",
@@ -140,6 +169,7 @@ export function GuidedAssistWidget({
       aria-label="Clinic guide"
       data-testid="guided-assist-widget"
       data-guided-assist-collapsed={collapsed ? "true" : "false"}
+      data-guided-assist-surface={onCalendarSurface ? "calendar" : "default"}
     >
       <div
         className={cn(
@@ -173,7 +203,7 @@ export function GuidedAssistWidget({
             onClick={toggleCollapsed}
             className="rounded-md p-1 text-slate-400 hover:bg-white/5 hover:text-slate-200"
             aria-expanded={!collapsed}
-            aria-label={collapsed ? "Expand guided assist" : "Collapse guided assist"}
+            aria-label={collapsed ? "Expand clinic guide" : "Collapse clinic guide"}
           >
             {collapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
@@ -181,7 +211,7 @@ export function GuidedAssistWidget({
       </div>
 
       {!collapsed ? (
-        <div className="max-h-[min(60vh,28rem)] space-y-3 overflow-y-auto px-4 py-3">
+        <div className={fiOsChromeClasses.guidedAssistBodyScroll}>
           <p className="text-xs leading-relaxed text-slate-400">{payload.safetyNotice}</p>
 
           {!payload.assistEnabled ? (
@@ -193,7 +223,8 @@ export function GuidedAssistWidget({
 
           {payload.roleFirstActive ? (
             <p className="text-[10px] font-medium uppercase tracking-wide text-cyan-400/90">
-              Getting started · visit {Math.min(payload.todayHomeViews + 1, payload.roleFirstViewLimit)} of{" "}
+              Getting started · visit{" "}
+              {Math.min(payload.todayHomeViews + 1, payload.roleFirstViewLimit)} of{" "}
               {payload.roleFirstViewLimit}
             </p>
           ) : null}
@@ -213,7 +244,7 @@ export function GuidedAssistWidget({
                 onClick={() =>
                   onNextActionClick(payload.nextAction!.code, payload.nextAction!.area)
                 }
-                className="mt-3 inline-flex text-sm font-medium text-cyan-300 hover:text-cyan-200"
+                className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-cyan-300 hover:text-cyan-200"
               >
                 Continue →
               </Link>

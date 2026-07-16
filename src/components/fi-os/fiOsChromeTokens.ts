@@ -86,6 +86,25 @@ export const fiOsChromeClasses = {
     "fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around gap-0.5 border-t border-white/[0.08] bg-[#060d18]/96 px-1 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden",
   /** Extra bottom padding on `<main>` when the mobile bottom nav is mounted. */
   mainColumnMobileBottomNavPad: "pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0",
+  /**
+   * Fixed Clinic guide (Guided Assist) — clears measured bottom chrome + safe area.
+   * `--fi-os-bottom-chrome-offset` is set by `FiOsAppShell` ResizeObserver (0 when no bottom nav).
+   * `lg:` drops the mobile offset because bottom nav is `lg:hidden`.
+   */
+  guidedAssistDock:
+    "pointer-events-auto fixed z-[45] transition-[bottom,left,right,width,max-width,border-radius,padding] duration-200 ease-out motion-reduce:transition-none",
+  /** Default (non-calendar) dock — bottom-right, above mobile nav on small screens. */
+  guidedAssistDockDefault:
+    "bottom-[calc(var(--fi-os-bottom-chrome-offset,0px)+0.75rem+env(safe-area-inset-bottom,0px))] right-3 w-[min(100vw-1.5rem,24rem)] max-w-[min(100vw-1.5rem,24rem)] sm:right-4 lg:bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] lg:right-4",
+  /**
+   * Calendar surface: left on phones so day grid stays clear; right on xl.
+   * Still clears bottom nav via the same CSS variable.
+   */
+  guidedAssistDockCalendar:
+    "bottom-[calc(var(--fi-os-bottom-chrome-offset,0px)+0.5rem+env(safe-area-inset-bottom,0px))] left-3 right-auto w-auto max-w-[min(100vw-1.5rem,18rem)] lg:bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] xl:left-auto xl:right-4 xl:w-[min(100vw-2rem,24rem)] xl:max-w-[min(100vw-2rem,24rem)]",
+  /** Expanded panel body max height on short viewports (leaves room for nav + chrome). */
+  guidedAssistBodyScroll:
+    "max-h-[min(50dvh,22rem)] space-y-3 overflow-y-auto overscroll-y-contain px-4 py-3 sm:max-h-[min(60vh,28rem)] [overflow-scrolling:touch]",
   /** Mobile drawer panel */
   sidebarDrawer:
     "relative flex h-full max-h-[100dvh] min-h-0 w-[min(88vw,300px)] flex-col overflow-hidden border-r border-white/[0.1] bg-[#060d18] shadow-2xl",
