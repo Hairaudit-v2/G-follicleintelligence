@@ -1,0 +1,186 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 624
+  },
+  "mode": "inventory",
+  "summary": {
+    "totalSourceContacts": 4750,
+    "alreadyLinked": 624,
+    "readyToLink": 3972,
+    "proposedNewLeads": 46,
+    "patientReview": 4,
+    "quarantined": 104,
+    "excluded": 0,
+    "conflicts": 0,
+    "appliedThisBatch": 624,
+    "remaining": 4018,
+    "migrationCompletionPercent": 15.4
+  },
+  "dataQuality": {
+    "missingNames": 151,
+    "missingEmails": 92,
+    "missingPhones": 609,
+    "invalidEmails": 0,
+    "invalidPhoneFormats": 7,
+    "duplicateHubspotIds": 0,
+    "duplicateEmails": 2,
+    "duplicatePhones": 73,
+    "multipleFiLeadTargets": 0,
+    "sourceIdsAlreadyMapped": 624,
+    "crossTenantCandidates": 0,
+    "possibleTestOrSmoke": 94,
+    "possiblePatientOverlap": 4,
+    "missingStages": 4750,
+    "missingOwners": 4750,
+    "malformedTimestamps": 0
+  },
+  "deferredEnrichment": {
+    "missingOwner": 4750,
+    "missingStage": 4750
+  },
+  "decisionCounts": {
+    "already_applied": 624,
+    "quarantine_test_or_smoke": 94,
+    "link_existing_lead": 3972,
+    "create_new_lead": 46,
+    "quarantine_duplicate_source": 4,
+    "quarantine_ambiguous_identity": 6,
+    "patient_link_review_required": 4
+  },
+  "sampleReady": [
+    {
+      "hubspotContactId": "1516801",
+      "displayName": "Graham McCorry",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "151801",
+      "displayName": "Corey McIntosh",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "151977485896",
+      "displayName": "Hiu Ching (Dawn) Chan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152071694716",
+      "displayName": "Sandeep Beniwal",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "1521801",
+      "displayName": "Trent Leverett",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152273746600",
+      "displayName": "Maung Wai",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152371379309",
+      "displayName": "Garion Evans",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152430725787",
+      "displayName": "Derek O'Melia",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152474670095",
+      "displayName": "Zamar Mustafa",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152519853632",
+      "displayName": "Shez.85@hotmail.com",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152533146292",
+      "displayName": "Devron Hayden",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152562123172",
+      "displayName": "Marjorie Rios",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152582974509",
+      "displayName": "isurugihan@gmail.com",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152640694325",
+      "displayName": "Austinn Rowland",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "152647123050",
+      "displayName": "Austin Rock Rock",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "15276363843",
+      "displayName": "Marc Marusco",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "153004972927",
+      "displayName": "Ehsan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "153201763743",
+      "displayName": "Kiera Hogan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "153334995553",
+      "displayName": "T Rich",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "153346808478",
+      "displayName": "Bindi Beazley",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    }
+  ],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 624
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 2624
+  },
+  "mode": "inventory",
+  "summary": {
+    "totalSourceContacts": 4750,
+    "alreadyLinked": 2624,
+    "readyToLink": 1972,
+    "proposedNewLeads": 46,
+    "patientReview": 4,
+    "quarantined": 104,
+    "excluded": 0,
+    "conflicts": 0,
+    "appliedThisBatch": 2624,
+    "remaining": 2018,
+    "migrationCompletionPercent": 57.5
+  },
+  "dataQuality": {
+    "missingNames": 151,
+    "missingEmails": 92,
+    "missingPhones": 609,
+    "invalidEmails": 0,
+    "invalidPhoneFormats": 7,
+    "duplicateHubspotIds": 0,
+    "duplicateEmails": 2,
+    "duplicatePhones": 73,
+    "multipleFiLeadTargets": 0,
+    "sourceIdsAlreadyMapped": 2624,
+    "crossTenantCandidates": 0,
+    "possibleTestOrSmoke": 94,
+    "possiblePatientOverlap": 4,
+    "missingStages": 4750,
+    "missingOwners": 4750,
+    "malformedTimestamps": 0
+  },
+  "deferredEnrichment": {
+    "missingOwner": 4750,
+    "missingStage": 4750
+  },
+  "decisionCounts": {
+    "already_applied": 2624,
+    "quarantine_test_or_smoke": 94,
+    "create_new_lead": 46,
+    "quarantine_duplicate_source": 4,
+    "quarantine_ambiguous_identity": 6,
+    "patient_link_review_required": 4,
+    "link_existing_lead": 1972
+  },
+  "sampleReady": [
+    {
+      "hubspotContactId": "63807798192",
+      "displayName": "Jake Campbell",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "63838824989",
+      "displayName": "Prabhjit Singh",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "63853306778",
+      "displayName": "Hamid Hafid",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "63892737553",
+      "displayName": "Brenton Dorsett",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "63936440177",
+      "displayName": "David Carey",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64161199176",
+      "displayName": "Rueben Robinson",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64165367316",
+      "displayName": "Hamish Jolly",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64176059259",
+      "displayName": "Ali Mahmood Awan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64277995537",
+      "displayName": "Kul Pabla",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64316612714",
+      "displayName": "Hien Chong",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "643351",
+      "displayName": "Emma Reid",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64473498797",
+      "displayName": "Nischay Kumar",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64524588977",
+      "displayName": "Chris Vollmer",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64638841655",
+      "displayName": "Vincent Holland",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64671935869",
+      "displayName": "Shuvra Saha",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64721773645",
+      "displayName": "Konnor Smith",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64851309713",
+      "displayName": "Akramul Hassan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64859109163",
+      "displayName": "Alex Payne",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "64885882145",
+      "displayName": "Emil Gabe",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "65029283865",
+      "displayName": "Barrie Jubb",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    }
+  ],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 2624
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

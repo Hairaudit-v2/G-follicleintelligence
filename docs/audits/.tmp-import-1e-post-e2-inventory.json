@@ -1,0 +1,186 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "mode": "inventory",
+  "summary": {
+    "totalSourceContacts": 4750,
+    "alreadyLinked": 374,
+    "readyToLink": 4222,
+    "proposedNewLeads": 46,
+    "patientReview": 4,
+    "quarantined": 104,
+    "excluded": 0,
+    "conflicts": 0,
+    "appliedThisBatch": 374,
+    "remaining": 4268,
+    "migrationCompletionPercent": 10.1
+  },
+  "dataQuality": {
+    "missingNames": 151,
+    "missingEmails": 92,
+    "missingPhones": 609,
+    "invalidEmails": 0,
+    "invalidPhoneFormats": 7,
+    "duplicateHubspotIds": 0,
+    "duplicateEmails": 2,
+    "duplicatePhones": 73,
+    "multipleFiLeadTargets": 0,
+    "sourceIdsAlreadyMapped": 374,
+    "crossTenantCandidates": 0,
+    "possibleTestOrSmoke": 94,
+    "possiblePatientOverlap": 4,
+    "missingStages": 4750,
+    "missingOwners": 4750,
+    "malformedTimestamps": 0
+  },
+  "deferredEnrichment": {
+    "missingOwner": 4750,
+    "missingStage": 4750
+  },
+  "decisionCounts": {
+    "already_applied": 374,
+    "quarantine_test_or_smoke": 94,
+    "link_existing_lead": 4222,
+    "create_new_lead": 46,
+    "quarantine_duplicate_source": 4,
+    "quarantine_ambiguous_identity": 6,
+    "patient_link_review_required": 4
+  },
+  "sampleReady": [
+    {
+      "hubspotContactId": "1284851",
+      "displayName": "Thomas Whitford (HTI)",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "128715930033",
+      "displayName": "Vikas Chand",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "128939274497",
+      "displayName": "Nicholas Kerwin",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "128950004347",
+      "displayName": "Sara Fogarty Ramirez",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "128959161144",
+      "displayName": "steven Young",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "128959730177",
+      "displayName": "Lovkesh Middha",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129100925840",
+      "displayName": "Sasha Molyneaux",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129327852629",
+      "displayName": "Jay",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129430771868",
+      "displayName": "Shane",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129442097775",
+      "displayName": "Jack",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129662180452",
+      "displayName": "Tess",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129687898381",
+      "displayName": "Olivia",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "129960883003",
+      "displayName": "Jarred Bow",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130002110877",
+      "displayName": "Mana Thang (Panlong)",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130074881284",
+      "displayName": "Jordan Makins",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130100496223",
+      "displayName": "Roki Augustin",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130236604003",
+      "displayName": "Annette",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130502069929",
+      "displayName": "Leewayne Qualla",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130523688767",
+      "displayName": "Sonam phuntsho Phuntsho",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "130798255654",
+      "displayName": "Ryan",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    }
+  ],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

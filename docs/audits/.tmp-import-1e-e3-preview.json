@@ -1,0 +1,1307 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "mode": "preview",
+  "preview": {
+    "batchId": "d0b9258b-81ec-4503-a449-a39eb9371463",
+    "checksum": "e40ab1dbe82f89a7952ac57df6f4c25f99f9184976665d0eb1a36b1bbe1f891b",
+    "links": [
+      {
+        "hubspotContactId": "1284851",
+        "leadId": "031cdd40-5ba7-4734-ba36-3bb2a8966dcc",
+        "displayName": "Thomas Whitford (HTI)"
+      },
+      {
+        "hubspotContactId": "128715930033",
+        "leadId": "f82324ee-0f0b-46b4-b9b1-067771aca46b",
+        "displayName": "Vikas Chand"
+      },
+      {
+        "hubspotContactId": "128939274497",
+        "leadId": "eec26546-eeee-4363-9a23-0cace8fb889c",
+        "displayName": "Nicholas Kerwin"
+      },
+      {
+        "hubspotContactId": "128950004347",
+        "leadId": "90d7c206-b146-4152-9017-b81ff5ff9649",
+        "displayName": "Sara Fogarty Ramirez"
+      },
+      {
+        "hubspotContactId": "128959161144",
+        "leadId": "00041c87-6dff-45da-9820-718c2ec9d69d",
+        "displayName": "steven Young"
+      },
+      {
+        "hubspotContactId": "128959730177",
+        "leadId": "a676e90c-4d28-45cf-b0ac-9a154ab87e6c",
+        "displayName": "Lovkesh Middha"
+      },
+      {
+        "hubspotContactId": "129100925840",
+        "leadId": "67c053eb-351a-402c-a8b5-1e23d890d7e2",
+        "displayName": "Sasha Molyneaux"
+      },
+      {
+        "hubspotContactId": "129327852629",
+        "leadId": "c23c62f8-8fb0-4756-8d60-7d7ad518db47",
+        "displayName": "Jay"
+      },
+      {
+        "hubspotContactId": "129430771868",
+        "leadId": "3fd6da15-68a5-435d-91a9-34b7afbc6c92",
+        "displayName": "Shane"
+      },
+      {
+        "hubspotContactId": "129442097775",
+        "leadId": "ff629ccc-c193-4acb-b1e9-659bf25e1179",
+        "displayName": "Jack"
+      },
+      {
+        "hubspotContactId": "129662180452",
+        "leadId": "b2916b87-a234-441b-9b2b-8845832bd5b4",
+        "displayName": "Tess"
+      },
+      {
+        "hubspotContactId": "129687898381",
+        "leadId": "5a337186-6973-47b0-a7d5-df1745d4134c",
+        "displayName": "Olivia"
+      },
+      {
+        "hubspotContactId": "129960883003",
+        "leadId": "9551c031-fad3-47f7-af5f-7ff0d37ffc6c",
+        "displayName": "Jarred Bow"
+      },
+      {
+        "hubspotContactId": "130002110877",
+        "leadId": "812616db-1687-4e17-b020-5f7c55a91013",
+        "displayName": "Mana Thang (Panlong)"
+      },
+      {
+        "hubspotContactId": "130074881284",
+        "leadId": "52423493-411b-40ad-b3a9-c0d8da4fc30c",
+        "displayName": "Jordan Makins"
+      },
+      {
+        "hubspotContactId": "130100496223",
+        "leadId": "81281fa8-fd05-4519-b642-38d698fde24a",
+        "displayName": "Roki Augustin"
+      },
+      {
+        "hubspotContactId": "130236604003",
+        "leadId": "8aa9572e-23ed-43f4-85af-591342fa3356",
+        "displayName": "Annette"
+      },
+      {
+        "hubspotContactId": "130502069929",
+        "leadId": "df84eb4c-7375-4f6d-af9f-af445879eca5",
+        "displayName": "Leewayne Qualla"
+      },
+      {
+        "hubspotContactId": "130523688767",
+        "leadId": "0f659c32-8c1b-4913-87c2-3098a8ae1037",
+        "displayName": "Sonam phuntsho Phuntsho"
+      },
+      {
+        "hubspotContactId": "130798255654",
+        "leadId": "5daf6a43-9464-487f-b24a-fce96205bf9b",
+        "displayName": "Ryan"
+      },
+      {
+        "hubspotContactId": "130805334438",
+        "leadId": "e5f0a603-cc32-488a-b62b-0bf1d9a76b9f",
+        "displayName": "Bikram Singh"
+      },
+      {
+        "hubspotContactId": "130842635119",
+        "leadId": "b888a5a1-d7a8-4c92-a4a3-254dde11462c",
+        "displayName": "craig@cpelectrical.com.au"
+      },
+      {
+        "hubspotContactId": "130975085996",
+        "leadId": "0f5a4926-8503-4300-a942-24378ddfed4f",
+        "displayName": "Ben"
+      },
+      {
+        "hubspotContactId": "131074687606",
+        "leadId": "1334f03a-e784-4c56-b2d9-d8b2e10f266a",
+        "displayName": "Kurt"
+      },
+      {
+        "hubspotContactId": "131116326442",
+        "leadId": "90f21786-29b2-434f-822d-6bea88bb92c4",
+        "displayName": "Kritan"
+      },
+      {
+        "hubspotContactId": "131270236840",
+        "leadId": "7da31739-98e3-404e-ab8c-139bcb748806",
+        "displayName": "Matt windust"
+      },
+      {
+        "hubspotContactId": "131360550190",
+        "leadId": "99878518-db31-4fe2-9c5f-3c5c4a1b011b",
+        "displayName": "Samuel Davison"
+      },
+      {
+        "hubspotContactId": "131402967704",
+        "leadId": "ba0858a9-3d24-44b7-ac08-147d170b0ab3",
+        "displayName": "Germaine"
+      },
+      {
+        "hubspotContactId": "131545194511",
+        "leadId": "3733338a-6369-4f21-928b-c3295a9654d0",
+        "displayName": "Stephen Mackin"
+      },
+      {
+        "hubspotContactId": "131550235772",
+        "leadId": "d7d711f5-2b92-4f81-9070-6fcfa35db7c2",
+        "displayName": "Gerry"
+      },
+      {
+        "hubspotContactId": "131618121588",
+        "leadId": "6328e9ba-3d7f-4c18-ab4a-bb8f7ff69cc1",
+        "displayName": "Filipe Beretta"
+      },
+      {
+        "hubspotContactId": "131639694396",
+        "leadId": "3ad0cd51-6e8a-416f-b4aa-7edbfd2ed4c4",
+        "displayName": "Micky"
+      },
+      {
+        "hubspotContactId": "13165044607",
+        "leadId": "acb30a34-628f-44f8-a56a-1562ccefd27c",
+        "displayName": "Talah Carr"
+      },
+      {
+        "hubspotContactId": "131660341603",
+        "leadId": "bae7912b-da9e-4303-a06b-235215653c97",
+        "displayName": "Evelyn Praxl"
+      },
+      {
+        "hubspotContactId": "131677651009",
+        "leadId": "27fa0d9f-c98e-4ae6-b6fb-a3afb41d7572",
+        "displayName": "Lee"
+      },
+      {
+        "hubspotContactId": "131705258336",
+        "leadId": "1b24021b-b0e8-4044-a65e-9f8dfa820715",
+        "displayName": "Raga"
+      },
+      {
+        "hubspotContactId": "131716804512",
+        "leadId": "5acdf1eb-a716-476a-97db-5fb7eb155ba3",
+        "displayName": "Adam"
+      },
+      {
+        "hubspotContactId": "131739555961",
+        "leadId": "d9aecc40-49ca-44c5-85c9-23662214c887",
+        "displayName": "Bradley wood Wood"
+      },
+      {
+        "hubspotContactId": "131780469331",
+        "leadId": "cd83a3fd-9548-4672-95b5-cfd0fb2ec027",
+        "displayName": "Liam"
+      },
+      {
+        "hubspotContactId": "131996134698",
+        "leadId": "8dc14b1f-fbdd-46c7-9da9-baf6da22224a",
+        "displayName": "Ryan Frazer Frazer"
+      },
+      {
+        "hubspotContactId": "132051552166",
+        "leadId": "fc862a20-3877-46d4-a7af-c35332e05295",
+        "displayName": "Tony"
+      },
+      {
+        "hubspotContactId": "1322101",
+        "leadId": "b465f755-89d5-492a-8749-210bb2d837c8",
+        "displayName": "Josh Di Vincenzo"
+      },
+      {
+        "hubspotContactId": "13231448142",
+        "leadId": "e2f6c57d-a435-4e43-af66-1dde67432e4e",
+        "displayName": "Abdi Hassan"
+      },
+      {
+        "hubspotContactId": "13239659016",
+        "leadId": "bd9f93ad-8200-4022-88f8-47f7626d1e84",
+        "displayName": "John Quinn"
+      },
+      {
+        "hubspotContactId": "13268359467",
+        "leadId": "997ff564-4983-4f10-8781-5f97fb011d2d",
+        "displayName": "Jonathon Calabrese"
+      },
+      {
+        "hubspotContactId": "132759601969",
+        "leadId": "19a6de59-72db-46ba-8312-8977568cb892",
+        "displayName": "Mauro Scrafton"
+      },
+      {
+        "hubspotContactId": "132788235139",
+        "leadId": "723b93ff-f497-43ee-8e67-5031a1632d60",
+        "displayName": "Stacey"
+      },
+      {
+        "hubspotContactId": "132840900434",
+        "leadId": "c68133db-85f9-46cd-b7ee-d7902afa99ec",
+        "displayName": "Antim rani"
+      },
+      {
+        "hubspotContactId": "132874008836",
+        "leadId": "d6f8488b-9e31-4e6f-b2a0-0196537e543f",
+        "displayName": "Nelson"
+      },
+      {
+        "hubspotContactId": "132890078780",
+        "leadId": "84c24606-8305-457c-8bd9-beb3ef745dc3",
+        "displayName": "Marcelo Macedo"
+      },
+      {
+        "hubspotContactId": "132895210508",
+        "leadId": "e857ba94-ee90-427c-bcce-a29e532e7bad",
+        "displayName": "Juliana Gluszczak"
+      },
+      {
+        "hubspotContactId": "133026025231",
+        "leadId": "973d8500-9bde-4b49-bb6f-d278c55aa4ff",
+        "displayName": "Mohamad Risath Thajedeen"
+      },
+      {
+        "hubspotContactId": "133028159246",
+        "leadId": "43edda56-52a3-4552-8164-a2d19ff0bbf3",
+        "displayName": "Pee Jay Wangchuk"
+      },
+      {
+        "hubspotContactId": "133082417747",
+        "leadId": "ab4f8a4a-a24a-4c0f-a901-632f9efa1333",
+        "displayName": "Penny Lomas"
+      },
+      {
+        "hubspotContactId": "133202326785",
+        "leadId": "c56384d9-4a5e-4826-8afe-5b21147cbf7a",
+        "displayName": "Gurvinder Sidhu"
+      },
+      {
+        "hubspotContactId": "1333151",
+        "leadId": "19fa67a8-2cf0-49aa-a879-95a6298aef34",
+        "displayName": "Murhaf Hayani"
+      },
+      {
+        "hubspotContactId": "133450042402",
+        "leadId": "5a233c4e-ea55-4ff0-9ba3-c5ed3bc1bf9f",
+        "displayName": "Linda sagrott"
+      },
+      {
+        "hubspotContactId": "1335351",
+        "leadId": "6cabac31-0415-48bf-b043-76a18b0a7422",
+        "displayName": "Keykhosrow (KK) Goshvadi"
+      },
+      {
+        "hubspotContactId": "133581250858",
+        "leadId": "4689c526-6097-425a-8170-67b62864b917",
+        "displayName": "Justine Henderson"
+      },
+      {
+        "hubspotContactId": "133760524067",
+        "leadId": "dade96a3-23c6-4887-aa71-11f6a932cfe7",
+        "displayName": "Sean Flaherty"
+      },
+      {
+        "hubspotContactId": "133833356544",
+        "leadId": "5180ca7f-49fa-4ad5-adc9-d5d5e1e2fb2a",
+        "displayName": "Kyle"
+      },
+      {
+        "hubspotContactId": "133910758460",
+        "leadId": "fb912b82-bc74-4468-928a-f36902b16722",
+        "displayName": "Mudassar Ayaz"
+      },
+      {
+        "hubspotContactId": "1340901",
+        "leadId": "65edad76-c3ae-4892-8bed-cf9e5cf0ff6a",
+        "displayName": "Jason Marslen"
+      },
+      {
+        "hubspotContactId": "134159708168",
+        "leadId": "75a2f7be-4096-4d5b-8098-f5feba388e9e",
+        "displayName": "Josie"
+      },
+      {
+        "hubspotContactId": "13428464389",
+        "leadId": "74d1f59a-ff2e-4d49-a5b8-14b1e953188d",
+        "displayName": "Shivayogi Hiremath"
+      },
+      {
+        "hubspotContactId": "134327585858",
+        "leadId": "027361e2-dd1a-46c1-bfc7-1b82a572fc83",
+        "displayName": "Paul"
+      },
+      {
+        "hubspotContactId": "134349199465",
+        "leadId": "87c59e98-d5f9-4099-902c-af7c281c5746",
+        "displayName": "Michael Metcalf"
+      },
+      {
+        "hubspotContactId": "1343751",
+        "leadId": "a81f0faf-3a97-40b9-b1ef-1e478f25fe5f",
+        "displayName": "Glen Strindberg"
+      },
+      {
+        "hubspotContactId": "1347051",
+        "leadId": "6230e41c-9dd7-4525-b766-224ea6039218",
+        "displayName": "Danis Komakech"
+      },
+      {
+        "hubspotContactId": "134712010078",
+        "leadId": "2c0a222d-1034-43ac-9767-82e3125dae8f",
+        "displayName": "John"
+      },
+      {
+        "hubspotContactId": "1347351",
+        "leadId": "b4e2beae-be38-4b9e-9aca-ef190e24ca2c",
+        "displayName": "Padraig Mangan"
+      },
+      {
+        "hubspotContactId": "13483539087",
+        "leadId": "d59ac7d1-f78b-40a1-8524-937a65f1f832",
+        "displayName": "Brodie Wilson"
+      },
+      {
+        "hubspotContactId": "13486135398",
+        "leadId": "d83f2da8-d27a-4307-bb11-45ede71c1042",
+        "displayName": "Antonia"
+      },
+      {
+        "hubspotContactId": "13528277636",
+        "leadId": "4d98cf90-4998-43aa-b354-e999da7ba568",
+        "displayName": "Jamie Ronci"
+      },
+      {
+        "hubspotContactId": "135291959074",
+        "leadId": "ed534c43-71fb-4362-ae79-bfd051867cd3",
+        "displayName": "Steve"
+      },
+      {
+        "hubspotContactId": "13530331936",
+        "leadId": "749deb3d-175e-4679-890d-8d3ff2e64500",
+        "displayName": "Simon Poynton"
+      },
+      {
+        "hubspotContactId": "135529252882",
+        "leadId": "5ebf4968-f52c-4091-9963-b58643e53723",
+        "displayName": "Cam Orton"
+      },
+      {
+        "hubspotContactId": "135629319747",
+        "leadId": "4513a3a6-c3b2-4f50-9bb0-2cb23d4b42d7",
+        "displayName": "Varun"
+      },
+      {
+        "hubspotContactId": "135701856915",
+        "leadId": "eb68aff4-d57b-4cdf-a9d5-47b9124ef074",
+        "displayName": "William Hendry"
+      },
+      {
+        "hubspotContactId": "135742021141",
+        "leadId": "db0c2060-2fde-4afe-b189-1bbfe6a59e63",
+        "displayName": "Quentin Steiner"
+      },
+      {
+        "hubspotContactId": "135964102173",
+        "leadId": "0a50ce50-7283-44ea-8ae2-4b84f7343763",
+        "displayName": "Nazir Mahdowi"
+      },
+      {
+        "hubspotContactId": "135964109900",
+        "leadId": "a861ed8e-2858-4d48-adc8-6358b13b26b2",
+        "displayName": "Dusan Tepavcevic"
+      },
+      {
+        "hubspotContactId": "136006796864",
+        "leadId": "21de4f5d-30bf-4982-99ab-55bac9b879ca",
+        "displayName": "Aditya J Jp"
+      },
+      {
+        "hubspotContactId": "136061717390",
+        "leadId": "7205bdb6-8fc4-49fe-a4f5-b5f0bb906ea2",
+        "displayName": "Jamie Lunnon"
+      },
+      {
+        "hubspotContactId": "136105054342",
+        "leadId": "9a567782-69e3-4a85-8d8f-c895e100a79d",
+        "displayName": "Matthew sturgeon"
+      },
+      {
+        "hubspotContactId": "136174400042",
+        "leadId": "709c4a81-46e7-4b74-9c54-e4a7ce9d005f",
+        "displayName": "Eric"
+      },
+      {
+        "hubspotContactId": "136316720477",
+        "leadId": "2d18467d-78fd-4e67-989f-e8fee724dc3e",
+        "displayName": "Marol Marol"
+      },
+      {
+        "hubspotContactId": "1363501",
+        "leadId": "132e778e-e175-460a-9e93-dadd3c53943b",
+        "displayName": "Nardia Kelemete"
+      },
+      {
+        "hubspotContactId": "136371073977",
+        "leadId": "971f48f7-fb62-46c4-af94-8b3ca4f7ca37",
+        "displayName": "luke doyle"
+      },
+      {
+        "hubspotContactId": "1364251",
+        "leadId": "9ee0772d-3f54-4259-9776-7f8662335930",
+        "displayName": "Kamal Katyal"
+      },
+      {
+        "hubspotContactId": "136684263292",
+        "leadId": "a7a20f60-b56d-4b90-99b3-0bd9b8a2d8a0",
+        "displayName": "Dean Hiden"
+      },
+      {
+        "hubspotContactId": "136685437964",
+        "leadId": "829577a2-cf76-4f27-b34c-1c710a138ed5",
+        "displayName": "Rita Kim"
+      },
+      {
+        "hubspotContactId": "13675743907",
+        "leadId": "c18df6b6-5612-416f-94d1-f2c3fb8186ed",
+        "displayName": "Kraigy James"
+      },
+      {
+        "hubspotContactId": "1368701",
+        "leadId": "6794cac8-ae0e-4f6c-8ce5-45ff09d04059",
+        "displayName": "Archie Dejesus"
+      },
+      {
+        "hubspotContactId": "1369201",
+        "leadId": "573e3481-e9de-4ed5-b04c-46da1d5d4841",
+        "displayName": "Seve Burgio"
+      },
+      {
+        "hubspotContactId": "137267661678",
+        "leadId": "0796b29c-7ad5-42ff-8c1a-69843b64d59b",
+        "displayName": "Michael Bartley"
+      },
+      {
+        "hubspotContactId": "137290322865",
+        "leadId": "1f3e650b-8b80-488b-875b-948238275d00",
+        "displayName": "Aaron Pepper"
+      },
+      {
+        "hubspotContactId": "137465924253",
+        "leadId": "0d1af251-e991-4720-b7c2-2cf27d2a92a1",
+        "displayName": "Shakir Sass"
+      },
+      {
+        "hubspotContactId": "1375401",
+        "leadId": "d36e2cdc-5b06-41ef-81f7-1f38f988ba49",
+        "displayName": "Cameron Dormer"
+      },
+      {
+        "hubspotContactId": "13755221649",
+        "leadId": "5d0e8f24-cda7-40ac-8929-b03053d0d5d2",
+        "displayName": "Yvonne Bui Bui"
+      },
+      {
+        "hubspotContactId": "137584510905",
+        "leadId": "2352b7a7-b32f-486b-bd98-14491cf0af9a",
+        "displayName": "Don van Wyk"
+      },
+      {
+        "hubspotContactId": "137616165556",
+        "leadId": "007c95df-e6f2-4151-a6aa-20b0ff284f3c",
+        "displayName": "Rajveer Deol"
+      },
+      {
+        "hubspotContactId": "137748934033",
+        "leadId": "09a3f19c-4409-46d4-b587-a2e44e68d2e7",
+        "displayName": "Angus Fairbairn"
+      },
+      {
+        "hubspotContactId": "138047279772",
+        "leadId": "1e13e8c7-4d16-4e86-a617-291865adfbf3",
+        "displayName": "amra_qld@hotmail.com Halilovic"
+      },
+      {
+        "hubspotContactId": "138069733678",
+        "leadId": "2f96e18e-3aaf-486c-a109-d140de234e27",
+        "displayName": "Adam Richardson"
+      },
+      {
+        "hubspotContactId": "138093696531",
+        "leadId": "0921970b-0612-49ce-b5e2-2432734adf38",
+        "displayName": "David"
+      },
+      {
+        "hubspotContactId": "138112373557",
+        "leadId": "f790eb06-6ee5-4723-88fd-52e5ddc8ec0e",
+        "displayName": "Oliver Relton"
+      },
+      {
+        "hubspotContactId": "138225360641",
+        "leadId": "6b4d0000-0f44-4939-abf4-206ae0eadfe8",
+        "displayName": "Hayden White"
+      },
+      {
+        "hubspotContactId": "138584629063",
+        "leadId": "a6a8c5ba-1682-4c04-8926-c5917bc6db1b",
+        "displayName": "Sam"
+      },
+      {
+        "hubspotContactId": "1386501",
+        "leadId": "cfa119c9-f253-4a68-b4cc-7aad1d11dcfb",
+        "displayName": "Vamanan Yogendran (HTI)"
+      },
+      {
+        "hubspotContactId": "13910519163",
+        "leadId": "2b491c36-d067-4174-aa5f-a0f166ec6e2c",
+        "displayName": "Pemba Pema"
+      },
+      {
+        "hubspotContactId": "1392901",
+        "leadId": "02f30bfd-9090-431c-8690-7223d402efb3",
+        "displayName": "Adrian Archer"
+      },
+      {
+        "hubspotContactId": "1395551",
+        "leadId": "6d70657a-382c-46c6-a8ce-c228497c5046",
+        "displayName": "Bharat Khanna"
+      },
+      {
+        "hubspotContactId": "139570265862",
+        "leadId": "1f5161c9-cbda-4d7b-949a-fa8a623ce67e",
+        "displayName": "Michael Kaplan"
+      },
+      {
+        "hubspotContactId": "139617526299",
+        "leadId": "61d54a46-4d90-464c-bdb0-e6699a734d66",
+        "displayName": "Shruti Sharma"
+      },
+      {
+        "hubspotContactId": "139780966504",
+        "leadId": "bde54059-80bf-4cd6-ac2c-e57b7520dc8c",
+        "displayName": "Pinal Patel"
+      },
+      {
+        "hubspotContactId": "139876578385",
+        "leadId": "224d50ea-5178-4bc7-9c93-f259c5d5c1c6",
+        "displayName": "FIFO Roster"
+      },
+      {
+        "hubspotContactId": "140168209807",
+        "leadId": "15258288-58b3-4299-b776-80973a707b5c",
+        "displayName": "David"
+      },
+      {
+        "hubspotContactId": "140419265890",
+        "leadId": "8072bb92-1f38-499e-bba0-c61c2e6567f6",
+        "displayName": "John"
+      },
+      {
+        "hubspotContactId": "140494143835",
+        "leadId": "f4e131d0-3c31-4a81-b628-f1ba71877d32",
+        "displayName": "Michael"
+      },
+      {
+        "hubspotContactId": "140683566862",
+        "leadId": "a7138f76-1716-4ef6-96af-cd4f2c0cd088",
+        "displayName": "Robert Michaud"
+      },
+      {
+        "hubspotContactId": "140683567382",
+        "leadId": "07ab3bf3-c386-4983-a5b8-7350e460fcf2",
+        "displayName": "Troy Sprigg"
+      },
+      {
+        "hubspotContactId": "140685853543",
+        "leadId": "1d3cac80-d3f8-4c48-aa80-ef47a85693fb",
+        "displayName": "Muhammad Aljanaby"
+      },
+      {
+        "hubspotContactId": "1407451",
+        "leadId": "1d32f7d6-bf75-4894-bdd1-57d022b933dc",
+        "displayName": "Jonathan Hotinski"
+      },
+      {
+        "hubspotContactId": "140763407783",
+        "leadId": "9870c139-acd1-495e-a95a-c7ba749c7b75",
+        "displayName": "Ian"
+      },
+      {
+        "hubspotContactId": "140766852164",
+        "leadId": "b70126ef-92f3-4989-bf11-2617ee938994",
+        "displayName": "Amir"
+      },
+      {
+        "hubspotContactId": "140851748495",
+        "leadId": "b7c40ab7-5e0d-4dbf-a253-66aeb4da3540",
+        "displayName": "How much approx cost for this ?"
+      },
+      {
+        "hubspotContactId": "141272278550",
+        "leadId": "2122ecaa-522d-45d3-aea2-4593276afa55",
+        "displayName": "brechristensen@outlook.com Christensen"
+      },
+      {
+        "hubspotContactId": "141471808876",
+        "leadId": "86705740-deb4-416d-b260-cfc92d60dd2c",
+        "displayName": "Jaswinder Kaur"
+      },
+      {
+        "hubspotContactId": "141560550030",
+        "leadId": "0a5100f2-3275-4651-a347-42fbc3d32d82",
+        "displayName": "David Murray"
+      },
+      {
+        "hubspotContactId": "14161002564",
+        "leadId": "bc25e228-5cde-4ac1-b605-b272e3ed4ac4",
+        "displayName": "Lap Wong"
+      },
+      {
+        "hubspotContactId": "14174100769",
+        "leadId": "788d335f-22f5-4f9b-87e6-916be557c809",
+        "displayName": "Daniel"
+      },
+      {
+        "hubspotContactId": "1417651",
+        "leadId": "aa5ad657-3cab-4802-8a37-b777b7ec84cc",
+        "displayName": "Kartikeye Sharma"
+      },
+      {
+        "hubspotContactId": "141984421510",
+        "leadId": "22046d9c-b411-4eab-bc25-cf8cc72c5fff",
+        "displayName": "Harley Drabsch"
+      },
+      {
+        "hubspotContactId": "142064447611",
+        "leadId": "b8476c9e-2845-4344-8762-561ff442f138",
+        "displayName": "Sravya Garimella"
+      },
+      {
+        "hubspotContactId": "14207355925",
+        "leadId": "77c58eb0-06cc-4739-bf1d-ed046404e7b5",
+        "displayName": "Jeremy Hutchings"
+      },
+      {
+        "hubspotContactId": "142194562864",
+        "leadId": "7796d90d-d9ca-433a-9630-cf8adc58a0db",
+        "displayName": "wafa khan"
+      },
+      {
+        "hubspotContactId": "142234836815",
+        "leadId": "0329d75b-4e22-476b-8cc0-c027853fe28a",
+        "displayName": "malik.rajat305@gmail.com"
+      },
+      {
+        "hubspotContactId": "14234008188",
+        "leadId": "84e1f220-7afa-476b-ade5-23d14c726a61",
+        "displayName": "Tia Hope Hope"
+      },
+      {
+        "hubspotContactId": "14235043448",
+        "leadId": "077d3640-3ca4-44f7-8c46-76abf2ee3486",
+        "displayName": "Tristen Young"
+      },
+      {
+        "hubspotContactId": "14240338802",
+        "leadId": "d17a4a78-6e77-4c1b-9429-382c399892b9",
+        "displayName": "Nadia Hendricks"
+      },
+      {
+        "hubspotContactId": "142429684613",
+        "leadId": "70c48f9e-2f29-4d0e-80cd-224ee9b4a8c0",
+        "displayName": "Mohamed Kamel"
+      },
+      {
+        "hubspotContactId": "142497496690",
+        "leadId": "76b68909-956c-4ecd-baf1-b7de6b0f1d07",
+        "displayName": "Esther Odera"
+      },
+      {
+        "hubspotContactId": "142560934268",
+        "leadId": "3e4b0e59-f5c2-47e4-ae15-13e2519e9d31",
+        "displayName": "Bobby O Connell"
+      },
+      {
+        "hubspotContactId": "142566495615",
+        "leadId": "dc77a698-5717-409d-8205-7fdb43a9c887",
+        "displayName": "Brayden Jones Jones"
+      },
+      {
+        "hubspotContactId": "142661499685",
+        "leadId": "ff00ec86-bca4-49bc-8e76-524bbee72ad5",
+        "displayName": "Kendrawilliams134@gmail.com"
+      },
+      {
+        "hubspotContactId": "142685243472",
+        "leadId": "1914007c-06fa-45c0-8865-c6f433a38340",
+        "displayName": "Juan Jaimes"
+      },
+      {
+        "hubspotContactId": "142794813304",
+        "leadId": "09e35417-3069-4362-bc4a-e7139ba4243b",
+        "displayName": "Haque Nurul haque"
+      },
+      {
+        "hubspotContactId": "142822546603",
+        "leadId": "8ccb0b90-4714-42ef-b9cf-3e14c4b953bb",
+        "displayName": "Mo Addin"
+      },
+      {
+        "hubspotContactId": "142886493512",
+        "leadId": "1659c934-72af-46d2-9e60-0551295d5d8f",
+        "displayName": "Stephen Reed"
+      },
+      {
+        "hubspotContactId": "142920628641",
+        "leadId": "5e3e6d05-94fe-4cca-a0d9-b0b9bbe9e933",
+        "displayName": "Paul  Thistleton"
+      },
+      {
+        "hubspotContactId": "142963484282",
+        "leadId": "e00ea62d-bae5-425a-ac79-9e624f2029fa",
+        "displayName": "Tim Iannucci"
+      },
+      {
+        "hubspotContactId": "1431301",
+        "leadId": "3f74fec1-bc5d-43df-b4ab-261cb1f5b081",
+        "displayName": "Amelia Thornycroft"
+      },
+      {
+        "hubspotContactId": "14319471463",
+        "leadId": "ffb8df13-ca97-4a98-8ab3-f8c4344e1821",
+        "displayName": "Harry Sachdeva"
+      },
+      {
+        "hubspotContactId": "143316110981",
+        "leadId": "31610022-2f0c-4159-a18e-22b52bf7237a",
+        "displayName": "Sunny Wixjo"
+      },
+      {
+        "hubspotContactId": "143482933924",
+        "leadId": "57fed8ad-8e64-44cd-9eed-33130aa41b45",
+        "displayName": "Mr.jackfitzpatrick42@gmail.com"
+      },
+      {
+        "hubspotContactId": "143565302299",
+        "leadId": "5b18d9df-ba89-4351-b2c9-f6701cb90f38",
+        "displayName": "Dana Akkach"
+      },
+      {
+        "hubspotContactId": "1436451",
+        "leadId": "b2f84d24-4050-46ae-abc3-e46185409d29",
+        "displayName": "Adrienne Yuen"
+      },
+      {
+        "hubspotContactId": "143676420671",
+        "leadId": "378462c2-7220-42ac-9b92-708d1adb44f2",
+        "displayName": "Nicholas Micevski"
+      },
+      {
+        "hubspotContactId": "143815036746",
+        "leadId": "00961b8a-617a-40e4-bd3b-9c0dec131b05",
+        "displayName": "bapbenn@gmail.com"
+      },
+      {
+        "hubspotContactId": "144063296681",
+        "leadId": "6ebea492-8c3f-4bec-b77a-25131abf2cf7",
+        "displayName": "Brandon"
+      },
+      {
+        "hubspotContactId": "14411483315",
+        "leadId": "ae373d44-41eb-4eb0-ba50-2298a3343f00",
+        "displayName": "Rinchen Tshewang"
+      },
+      {
+        "hubspotContactId": "1442651",
+        "leadId": "ac008979-401c-4d0d-84e8-3d02f86a3ed5",
+        "displayName": "Kenny Wilson"
+      },
+      {
+        "hubspotContactId": "1443151",
+        "leadId": "74c10a56-1114-4578-9174-6e1912b43396",
+        "displayName": "Shubham Kumar"
+      },
+      {
+        "hubspotContactId": "144414206797",
+        "leadId": "cf76a156-02cb-46d9-80df-4932208339c8",
+        "displayName": "Myles Martin"
+      },
+      {
+        "hubspotContactId": "1444201",
+        "leadId": "2db85682-9c5a-48fa-ab60-f22857c51b29",
+        "displayName": "Dustin Higgs"
+      },
+      {
+        "hubspotContactId": "1445051",
+        "leadId": "98533bba-f0b9-4704-b68e-030743007157",
+        "displayName": "karan Goraya"
+      },
+      {
+        "hubspotContactId": "144527491892",
+        "leadId": "78ba701a-7495-406d-b51e-415b6fb89a4a",
+        "displayName": "Victoria Lancaster"
+      },
+      {
+        "hubspotContactId": "1446551",
+        "leadId": "25c667a5-c917-4f4b-9103-ee9a62a6dae1",
+        "displayName": "Ryan Manning"
+      },
+      {
+        "hubspotContactId": "144670269498",
+        "leadId": "7c2778eb-07ae-4274-8a0b-269ffb08e685",
+        "displayName": "Brad wilson"
+      },
+      {
+        "hubspotContactId": "144670320778",
+        "leadId": "ba7afc02-2282-47db-b068-e7f1be45e493",
+        "displayName": "Mark Justins"
+      },
+      {
+        "hubspotContactId": "144855912345",
+        "leadId": "823bc6b1-8c64-4322-88eb-d53be49359ae",
+        "displayName": "Joel Jacob"
+      },
+      {
+        "hubspotContactId": "144942749483",
+        "leadId": "f69cc1ea-4ab0-4b6f-b08e-d021ce9e88ef",
+        "displayName": "Callan Roe"
+      },
+      {
+        "hubspotContactId": "144982536514",
+        "leadId": "1c180729-3ba0-4ed2-ad4c-a77017b25db6",
+        "displayName": "Huss Abey"
+      },
+      {
+        "hubspotContactId": "144989024939",
+        "leadId": "bd0563cb-44e1-4d28-935b-f43f4e06736c",
+        "displayName": "Salman"
+      },
+      {
+        "hubspotContactId": "145028055311",
+        "leadId": "acf8524d-3dbe-4d6e-b434-3ab15f8eb885",
+        "displayName": "Andy Duncan"
+      },
+      {
+        "hubspotContactId": "145033951057",
+        "leadId": "2b2cd0cb-b424-473a-8c7f-bd66cd7d1bdb",
+        "displayName": "Rhys Ross"
+      },
+      {
+        "hubspotContactId": "145182736024",
+        "leadId": "6b7af990-a8c0-4791-9657-ad4330aed044",
+        "displayName": "Simron bhardwaj"
+      },
+      {
+        "hubspotContactId": "145259972128",
+        "leadId": "f18b5d3e-5f7a-4841-abfc-71960eab7ff8",
+        "displayName": "Samr"
+      },
+      {
+        "hubspotContactId": "145374212752",
+        "leadId": "048cf866-f28b-4ea6-bd23-b542724dd2ef",
+        "displayName": "john.kuruvilla38@gmail.com Kuruvilla"
+      },
+      {
+        "hubspotContactId": "145406352442",
+        "leadId": "3e50b127-3a77-4bb7-9272-4ab032d421b8",
+        "displayName": "Henry Booth"
+      },
+      {
+        "hubspotContactId": "145416592480",
+        "leadId": "aecdd25c-51f5-484e-9644-09b94833b44a",
+        "displayName": "Budianto Bong"
+      },
+      {
+        "hubspotContactId": "145430342761",
+        "leadId": "f84c5527-bb80-4e8b-9674-97e07bf2cd3f",
+        "displayName": "Glenn McNeill"
+      },
+      {
+        "hubspotContactId": "145446001417",
+        "leadId": "14f78b1b-0ff2-4b1e-ab1d-7a15c2b4bdc2",
+        "displayName": "Rachel Adams"
+      },
+      {
+        "hubspotContactId": "145571963516",
+        "leadId": "ca2c2730-c4bb-4808-b7d9-87f5cc7f21e1",
+        "displayName": "Anna Sareen"
+      },
+      {
+        "hubspotContactId": "145584521768",
+        "leadId": "09bd06ef-7fc2-4e9c-98cb-526e25ace396",
+        "displayName": "Mallory Anne Perkins"
+      },
+      {
+        "hubspotContactId": "145634282055",
+        "leadId": "312e03c5-b6ac-4e26-92de-a405d9c2a9d0",
+        "displayName": "Erika"
+      },
+      {
+        "hubspotContactId": "145726277928",
+        "leadId": "4197939f-6508-4978-9f30-850cf90f5a5c",
+        "displayName": "Andy"
+      },
+      {
+        "hubspotContactId": "145790645266",
+        "leadId": "75003d46-eb69-49b9-915e-e88bbe827489",
+        "displayName": "Anjali Anhali"
+      },
+      {
+        "hubspotContactId": "145814262818",
+        "leadId": "80a41bf7-2958-49cd-812a-f3d940e28b88",
+        "displayName": "Ugyen Wangchuk"
+      },
+      {
+        "hubspotContactId": "145906694949",
+        "leadId": "b19605d4-f576-4828-a062-f54243b3921d",
+        "displayName": "Gerard"
+      },
+      {
+        "hubspotContactId": "146000513458",
+        "leadId": "67bdb465-7574-4330-8cd2-511bd6f8898d",
+        "displayName": "jun"
+      },
+      {
+        "hubspotContactId": "146028336205",
+        "leadId": "88bef974-6315-4fb6-b6b7-1236294c9e09",
+        "displayName": "Darshan Raghuvanshi"
+      },
+      {
+        "hubspotContactId": "14624883834",
+        "leadId": "914c21af-93ad-4db1-9a1a-cb8412303bb3",
+        "displayName": "Isacco Milan"
+      },
+      {
+        "hubspotContactId": "146432155963",
+        "leadId": "68cb7cd9-fd43-4106-9e87-d07df06ec722",
+        "displayName": "Nelson Laurance"
+      },
+      {
+        "hubspotContactId": "14645831976",
+        "leadId": "cc588b1f-2d78-41b6-9b32-3bcd19c938c2",
+        "displayName": "Andy Williams"
+      },
+      {
+        "hubspotContactId": "14668046136",
+        "leadId": "757d5fae-a73b-4040-bf55-a89b91e37864",
+        "displayName": "Ajaykumar Dama"
+      },
+      {
+        "hubspotContactId": "146703357506",
+        "leadId": "5fb611e0-f23f-40cd-9559-4023a69de228",
+        "displayName": "Harjinder singh pandher"
+      },
+      {
+        "hubspotContactId": "14670547562",
+        "leadId": "689261fd-a9ac-4769-bae9-b96212534f1a",
+        "displayName": "Rose"
+      },
+      {
+        "hubspotContactId": "146729982855",
+        "leadId": "d99edb1a-8623-4614-bb0b-a72c3c1a4a97",
+        "displayName": "treeescheeer@gmail.com"
+      },
+      {
+        "hubspotContactId": "14675493634",
+        "leadId": "e7030acc-fece-46f3-aadd-6d7db83304f9",
+        "displayName": "Feriz"
+      },
+      {
+        "hubspotContactId": "14692661641",
+        "leadId": "fc5d13cd-7815-4e82-ac2b-50daee67e142",
+        "displayName": "Rory Watts"
+      },
+      {
+        "hubspotContactId": "147191873568",
+        "leadId": "290545a7-1b44-42b5-bf45-bc939fb7740d",
+        "displayName": "creativeseeding@gmail.com"
+      },
+      {
+        "hubspotContactId": "147192820815",
+        "leadId": "3f22c3ee-9c02-4b33-9cb0-f6ad7ce95b30",
+        "displayName": "Dragan Karamzov"
+      },
+      {
+        "hubspotContactId": "14723469741",
+        "leadId": "d6b5133c-db7b-4c9e-8606-f2257162b123",
+        "displayName": "Joe"
+      },
+      {
+        "hubspotContactId": "147238846827",
+        "leadId": "d2c06955-39e7-4bc3-8464-dcfc676bbeda",
+        "displayName": "Hina Syeda"
+      },
+      {
+        "hubspotContactId": "147690017943",
+        "leadId": "7405f707-2c6e-4791-a0a4-331207d1f1ea",
+        "displayName": "Mauricio Guzman"
+      },
+      {
+        "hubspotContactId": "14769334544",
+        "leadId": "256043a3-f983-40e5-8966-39e922e49e15",
+        "displayName": "Kamal"
+      },
+      {
+        "hubspotContactId": "14774073203",
+        "leadId": "4ea81bca-382b-4cf1-8ac1-e0270713a5f4",
+        "displayName": "Rajpal Singh"
+      },
+      {
+        "hubspotContactId": "147800749737",
+        "leadId": "4bbc17bd-454a-47b1-aa90-25c89ef6f1b2",
+        "displayName": "Shaun Fitzpatrick"
+      },
+      {
+        "hubspotContactId": "147833321048",
+        "leadId": "cadf67ea-f4e9-41b2-8377-6ab35d913538",
+        "displayName": "Josh Gard"
+      },
+      {
+        "hubspotContactId": "147834808160",
+        "leadId": "57386e44-3347-43ee-99b6-6a855ca31dfd",
+        "displayName": "Emmet Gough"
+      },
+      {
+        "hubspotContactId": "1478751",
+        "leadId": "aedebca9-8663-4503-97ac-3b8fabb95536",
+        "displayName": "Hossein Hamadani"
+      },
+      {
+        "hubspotContactId": "1479501",
+        "leadId": "c453ba53-9028-40ff-aca3-74941bd0d7fa",
+        "displayName": "Muhammad Hadi Ghanchi"
+      },
+      {
+        "hubspotContactId": "148042075203",
+        "leadId": "2ad763e7-9945-4bdc-a347-c2de02eace81",
+        "displayName": "Hrishikeshsinh Maharaul"
+      },
+      {
+        "hubspotContactId": "148288806741",
+        "leadId": "7e47d8c2-bab9-4460-bc8d-133cab2de06a",
+        "displayName": "Mary"
+      },
+      {
+        "hubspotContactId": "148344233389",
+        "leadId": "7b2faf4f-42e4-49dd-bef0-8bb20a13bd66",
+        "displayName": "triumph@iinet.net.au"
+      },
+      {
+        "hubspotContactId": "148397297973",
+        "leadId": "017ffa92-d3a4-4dad-8ac9-d69d9c5e17fe",
+        "displayName": "Daniel Kalinowski"
+      },
+      {
+        "hubspotContactId": "148722829365",
+        "leadId": "d8ad22c3-f12e-45b6-8315-56b386477778",
+        "displayName": "Mohmood"
+      },
+      {
+        "hubspotContactId": "148744032339",
+        "leadId": "538bcafa-4873-4761-a38d-7656bc8f8c5c",
+        "displayName": "Sona Faiazi"
+      },
+      {
+        "hubspotContactId": "148805520709",
+        "leadId": "fc57696d-9499-4bfa-92a6-52228d4f5c73",
+        "displayName": "Joseph Gopu"
+      },
+      {
+        "hubspotContactId": "148805557167",
+        "leadId": "06fb4580-b7bf-4ba9-8138-2e583b67edec",
+        "displayName": "lachlan cotter"
+      },
+      {
+        "hubspotContactId": "148833217150",
+        "leadId": "c0c0b9c2-9603-431f-95a1-53882bd3a4b7",
+        "displayName": "Sham praba"
+      },
+      {
+        "hubspotContactId": "149035198514",
+        "leadId": "7b595574-5ee5-43d6-9c25-d280e80b264e",
+        "displayName": "Sahil Sondhi"
+      },
+      {
+        "hubspotContactId": "14936132398",
+        "leadId": "ff215ffb-a628-446c-bbe4-fcf0ab094567",
+        "displayName": "Jamie Perkins"
+      },
+      {
+        "hubspotContactId": "1493751",
+        "leadId": "171c9bce-a002-45ab-a2f1-5c2cd53bbf53",
+        "displayName": "Adam Gilbert"
+      },
+      {
+        "hubspotContactId": "149386001271",
+        "leadId": "697168ad-6bd5-4057-935b-42d3c5cd0e08",
+        "displayName": "Daniel Penn"
+      },
+      {
+        "hubspotContactId": "14964144233",
+        "leadId": "37bacdef-f4e5-4add-87b0-4247820b8528",
+        "displayName": "Shekhar"
+      },
+      {
+        "hubspotContactId": "149715291452",
+        "leadId": "0e56fa53-1275-47a9-b639-77cd5b1f3867",
+        "displayName": "Leonardo Castiblanco"
+      },
+      {
+        "hubspotContactId": "1498251",
+        "leadId": "8da9386a-3f7c-45bb-819c-2d2a5b5757d0",
+        "displayName": "Keith Barry HTI)"
+      },
+      {
+        "hubspotContactId": "149992207186",
+        "leadId": "1969a341-0e06-45ff-95ee-2f2b10ec72dc",
+        "displayName": "Rajesh"
+      },
+      {
+        "hubspotContactId": "150210482508",
+        "leadId": "a9772211-2b44-440e-8127-a84d3934dfb0",
+        "displayName": "Maurice O’Driscoll"
+      },
+      {
+        "hubspotContactId": "15028214860",
+        "leadId": "626b0dbe-820c-4006-bfbb-ff11f0863760",
+        "displayName": "Nick Chapman"
+      },
+      {
+        "hubspotContactId": "150452784254",
+        "leadId": "92f3becb-f864-4b46-b096-f11ecc5d2da8",
+        "displayName": "Angelina"
+      },
+      {
+        "hubspotContactId": "150483980684",
+        "leadId": "2ce6c9c7-79c7-4305-9038-192657f01f1b",
+        "displayName": "Sebastian Rynhart"
+      },
+      {
+        "hubspotContactId": "150489961328",
+        "leadId": "07e080fe-e61d-4709-8384-fe745ab76c09",
+        "displayName": "Justin Harrington"
+      },
+      {
+        "hubspotContactId": "15058392447",
+        "leadId": "92579421-590a-4087-844a-34f017b64714",
+        "displayName": "John Humphreys Humphreys"
+      },
+      {
+        "hubspotContactId": "15059764816",
+        "leadId": "b733cee7-976e-4b2a-90de-02c3f423c060",
+        "displayName": "Pierce Connelly"
+      },
+      {
+        "hubspotContactId": "150690417591",
+        "leadId": "05c31793-2fdd-48a0-b511-779338acce84",
+        "displayName": "Keith"
+      },
+      {
+        "hubspotContactId": "150814696797",
+        "leadId": "c6c00568-69cb-4ad4-8a53-d41f2221b180",
+        "displayName": "Timothy Ngai"
+      },
+      {
+        "hubspotContactId": "15088033842",
+        "leadId": "b7c4d908-17fc-4074-b581-f1ed2bd8d2e6",
+        "displayName": "Daljit Singh"
+      },
+      {
+        "hubspotContactId": "150993228340",
+        "leadId": "45dd1995-006e-42d6-ab76-e8f40a016034",
+        "displayName": "Anthony Hope"
+      },
+      {
+        "hubspotContactId": "150995026182",
+        "leadId": "a3b40e5d-e692-4aaf-97e9-2606546213bc",
+        "displayName": "Thando Thenga"
+      },
+      {
+        "hubspotContactId": "15115920753",
+        "leadId": "98204518-4845-49ad-aefe-7a4be422b318",
+        "displayName": "Dylan Watkins"
+      },
+      {
+        "hubspotContactId": "151307007553",
+        "leadId": "00cafcc4-c1cc-461a-9a83-aeacc5f939c4",
+        "displayName": "Adam Chidlow"
+      },
+      {
+        "hubspotContactId": "151352689064",
+        "leadId": "6686c058-18ad-4ecf-bec5-fb4b917ccf88",
+        "displayName": "Simmy"
+      },
+      {
+        "hubspotContactId": "151442115234",
+        "leadId": "efdb11a7-750c-45d2-879a-1dab8a29ca5b",
+        "displayName": "chris.dore@hotmail.com"
+      },
+      {
+        "hubspotContactId": "1515551",
+        "leadId": "6f0365f2-b73e-4c77-b9b8-ed636f30cd16",
+        "displayName": "Daniel Dixon"
+      },
+      {
+        "hubspotContactId": "151579617057",
+        "leadId": "2a8db2fb-9782-4e3d-b46b-3598c1cec88b",
+        "displayName": "Mohit Sandhir"
+      },
+      {
+        "hubspotContactId": "151627178545",
+        "leadId": "4fbf9f81-30c0-47e1-86b8-8314e23e744d",
+        "displayName": "Patrick French"
+      }
+    ],
+    "creates": [],
+    "quarantined": 104,
+    "patientReviewsExcluded": 4,
+    "dataQuality": {
+      "missingNames": 151,
+      "missingEmails": 92,
+      "missingPhones": 609,
+      "invalidEmails": 0,
+      "invalidPhoneFormats": 7,
+      "duplicateHubspotIds": 0,
+      "duplicateEmails": 2,
+      "duplicatePhones": 73,
+      "multipleFiLeadTargets": 0,
+      "sourceIdsAlreadyMapped": 374,
+      "crossTenantCandidates": 0,
+      "possibleTestOrSmoke": 94,
+      "possiblePatientOverlap": 4,
+      "missingStages": 4750,
+      "missingOwners": 4750,
+      "malformedTimestamps": 0
+    },
+    "batchStatus": "approved",
+    "plainLanguage": {
+      "primaryAction": "Apply approved batch",
+      "patientsStaffUsersNotificationsUnchanged": true,
+      "tablesThatMayChange": [
+        "fi_import_batches",
+        "fi_external_record_mappings",
+        "fi_hubspot_contact_lead_pilot_decisions"
+      ]
+    }
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

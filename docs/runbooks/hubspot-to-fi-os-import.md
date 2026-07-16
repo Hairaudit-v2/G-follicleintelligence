@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1D** (contact→lead pilot with patient-protection)  
+Current gate: **1E** (controlled contact→lead expansion; E1–E8 GREEN; E9 pending approval)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -179,6 +179,47 @@ Hard rules for 1D:
 
 `FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion`
 
+## Contact→lead expansion (1E)
+
+UI: `/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration`  
+Kind: `hubspot_contact_lead_expansion_1e`  
+Batch policy: E1 max **100**, then **250** (500 only after ≥3 reconciled batches + explicit flag).  
+Prior batch must reconcile (unexplained=0) before the next apply.
+
+### Commands
+
+```bash
+npm run hubspot:contact-migration:inventory
+npm run hubspot:contact-migration:preview
+npm run hubspot:contact-migration:gate
+
+FI_HUBSPOT_CONTACT_LEAD_EXPANSION_CONFIRM=<batchId> node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-contact-lead-expansion.ts \
+  --apply --approved-batch-id <batchId> --checksum <checksum>
+
+node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-contact-lead-expansion.ts \
+  --reconcile --batch-id <batchId>
+```
+
+Hard rules for 1E (inherits 1D):
+
+- Never create `fi_patients` or auto-link patients via email alone
+- Prefer additive `fi_external_record_mappings` for existing-lead links
+- No notifications, reminders, appointments, or watermark changes
+- Replay must be idempotent; rollback preview batch-scoped
+- Unreconciled prior expansion batch blocks the next apply
+
+### E8 production position (2026-07-16)
+
+- Batch `a0e2bdc3-1e7b-4681-a685-5ccb6fefdfad`: 500 links, 0 creates, patients 829→829
+- Mappings 2624→3124; replay already_applied ×500; rollback preview 500 mappings
+- Eight consecutive reconciled batches (E1–E8); gate open for E9 (≤500, requires approval)
+
+### Next gate (after full 1E GREEN)
+
+`FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot`
+
 ## Safety checklist before any apply
 
 - [x] Preview JSON reviewed (1B)
@@ -189,4 +230,12 @@ Hard rules for 1D:
 - [x] Backup watermark unchanged
 - [x] Rollback preview prepared (not executed — mappings correct)
 - [x] 1C: preview checksum + batch id confirmed; mappings ≤ 10; operator-approved only
-- [ ] 1D: patient count unchanged; ≤25 contacts; confirm token = batch id
+- [x] 1D: patient count unchanged; ≤25 contacts; confirm token = batch id
+- [x] 1E E1: patient count unchanged; ≤100 contacts; reconcile unexplained=0; gate open for E2
+- [x] 1E E2: patient count unchanged; ≤250 link-only contacts; reconcile unexplained=0; gate open for E3
+- [x] 1E E3: patient count unchanged; ≤250 link-only contacts; reconcile unexplained=0; gate open for E4
+- [x] 1E E4: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E5
+- [x] 1E E5: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E6
+- [x] 1E E6: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E7
+- [x] 1E E7: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E8
+- [x] 1E E8: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E9

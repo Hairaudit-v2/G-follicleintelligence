@@ -1,0 +1,186 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 1124
+  },
+  "mode": "inventory",
+  "summary": {
+    "totalSourceContacts": 4750,
+    "alreadyLinked": 1124,
+    "readyToLink": 3472,
+    "proposedNewLeads": 46,
+    "patientReview": 4,
+    "quarantined": 104,
+    "excluded": 0,
+    "conflicts": 0,
+    "appliedThisBatch": 1124,
+    "remaining": 3518,
+    "migrationCompletionPercent": 25.9
+  },
+  "dataQuality": {
+    "missingNames": 151,
+    "missingEmails": 92,
+    "missingPhones": 609,
+    "invalidEmails": 0,
+    "invalidPhoneFormats": 7,
+    "duplicateHubspotIds": 0,
+    "duplicateEmails": 2,
+    "duplicatePhones": 73,
+    "multipleFiLeadTargets": 0,
+    "sourceIdsAlreadyMapped": 1124,
+    "crossTenantCandidates": 0,
+    "possibleTestOrSmoke": 94,
+    "possiblePatientOverlap": 4,
+    "missingStages": 4750,
+    "missingOwners": 4750,
+    "malformedTimestamps": 0
+  },
+  "deferredEnrichment": {
+    "missingOwner": 4750,
+    "missingStage": 4750
+  },
+  "decisionCounts": {
+    "already_applied": 1124,
+    "quarantine_test_or_smoke": 94,
+    "link_existing_lead": 3472,
+    "create_new_lead": 46,
+    "quarantine_duplicate_source": 4,
+    "quarantine_ambiguous_identity": 6,
+    "patient_link_review_required": 4
+  },
+  "sampleReady": [
+    {
+      "hubspotContactId": "200592712547",
+      "displayName": "Domenic calderone",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20070151323",
+      "displayName": "Aravind Panoor Diwakar",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "200751512743",
+      "displayName": "Jeremy Goldspring",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20080283739",
+      "displayName": "Trudy Sharp",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "200922412328",
+      "displayName": "Nima Ghasemi",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201020320060",
+      "displayName": "Loveleen Khanna",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201157047577",
+      "displayName": "Nawal",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201204932881",
+      "displayName": "Rosar",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20120716907",
+      "displayName": "Charles",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20122154383",
+      "displayName": "Adrianoravish Kr",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201388288931",
+      "displayName": "Nee",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201397253212",
+      "displayName": "Waseem",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201399022398",
+      "displayName": "donotreply.memberservices@hostplus.com.au",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "2014051",
+      "displayName": "William Lee",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20156425139",
+      "displayName": "Kelvin Chiam",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201597770903",
+      "displayName": "Emily Scott",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201669695303",
+      "displayName": "Nafisul Haque",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201672433592",
+      "displayName": "Umar Farooz",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "201751474028",
+      "displayName": "Garth",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    },
+    {
+      "hubspotContactId": "20183323519",
+      "displayName": "Mick Sirovy",
+      "reasonCode": "person_source_id_single_lead",
+      "identityTier": "tier2_explicit_hubspot_ref"
+    }
+  ],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 1124
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

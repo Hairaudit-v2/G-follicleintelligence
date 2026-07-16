@@ -1,0 +1,25 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "mode": "gate-status",
+  "gate": {
+    "priorBatchId": "7025f783-a688-473e-8723-bc5db692998c",
+    "reconciled": true,
+    "status": "import_completed"
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 374
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

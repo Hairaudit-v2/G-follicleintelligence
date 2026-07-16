@@ -1,0 +1,41 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 1624
+  },
+  "mode": "reconcile",
+  "reconciliation": {
+    "batchId": "5102a4bf-6648-4b36-9733-3b2176b4762e",
+    "approvedRecords": 500,
+    "appliedMappings": 500,
+    "newLeads": 0,
+    "alreadyApplied": 0,
+    "quarantined": 0,
+    "excluded": 0,
+    "failedClosed": 0,
+    "unexplained": 0,
+    "balanced": true,
+    "leadCountBefore": 4706,
+    "leadCountAfter": 4706,
+    "patientCountBefore": 829,
+    "patientCountAfter": 829,
+    "patientMutationCount": 0,
+    "sideEffects": [],
+    "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
+    "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
+    "watermarkUnchanged": true
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 1624
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

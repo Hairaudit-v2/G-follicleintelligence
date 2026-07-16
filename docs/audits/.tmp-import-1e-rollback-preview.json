@@ -1,0 +1,528 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 124
+  },
+  "mode": "rollback-preview",
+  "rollback": {
+    "ok": true,
+    "removableMappings": [
+      {
+        "id": "4d0a9616-d632-4812-a227-f4b60928b9f6",
+        "hubspotContactId": "101388228534",
+        "leadId": "c0c9ad2c-7e88-4a43-80d5-11bbd7089d6f"
+      },
+      {
+        "id": "f42948ae-e30b-4826-b626-253b3a4bb522",
+        "hubspotContactId": "101394938135",
+        "leadId": "08048770-f81a-4e54-9353-7944543a23e4"
+      },
+      {
+        "id": "0373b1e3-2883-4bd6-be42-25a1c3f49c91",
+        "hubspotContactId": "10144877409",
+        "leadId": "71cb9a92-b3cb-413d-9dce-da8ac96728aa"
+      },
+      {
+        "id": "06defb70-45cb-4c25-8ae9-0f06ff479ccc",
+        "hubspotContactId": "101508287801",
+        "leadId": "c28c492d-52b6-4b86-9792-d96158ef9b71"
+      },
+      {
+        "id": "9a2b1cb2-e758-4852-b2c1-7544d543660a",
+        "hubspotContactId": "101517282430",
+        "leadId": "f719cbcb-2925-498b-94af-6e9ae6ec0771"
+      },
+      {
+        "id": "fa022883-c590-48d2-b9a2-68d270887eb9",
+        "hubspotContactId": "10152224821",
+        "leadId": "120a4cab-c666-4c2d-b05b-a1eeab64ea94"
+      },
+      {
+        "id": "b5c6facb-935a-4884-828f-99ec01509a79",
+        "hubspotContactId": "101531796789",
+        "leadId": "a24e072b-a1ce-4178-a086-e442e047d58d"
+      },
+      {
+        "id": "6119c285-a1c6-45bf-a448-a1a5eceae684",
+        "hubspotContactId": "101696811386",
+        "leadId": "e42e7faa-3de8-4766-8e3a-1454adf59a1e"
+      },
+      {
+        "id": "5840b26b-18ef-4918-bd68-db13e87d71db",
+        "hubspotContactId": "101700711575",
+        "leadId": "d424970e-5dbc-4f09-88dd-b465ce7c59c7"
+      },
+      {
+        "id": "b6bbefd1-9e45-414c-898a-3a62df1cc872",
+        "hubspotContactId": "101739554688",
+        "leadId": "0951e9ee-0486-4bbe-90f1-278a0d5cd427"
+      },
+      {
+        "id": "ae80f36b-dee4-4337-b1aa-ce5523d9a036",
+        "hubspotContactId": "101967604498",
+        "leadId": "ec4d8688-d33f-4657-ae37-9fbf1d906a90"
+      },
+      {
+        "id": "18725156-e16b-4a05-ba29-0e2c31de7f7d",
+        "hubspotContactId": "102017917607",
+        "leadId": "eb4919ce-6427-42bd-bdee-5848fc38b978"
+      },
+      {
+        "id": "d78fcaca-b6c4-4519-a210-945dda30065d",
+        "hubspotContactId": "102206618729",
+        "leadId": "4a8db5b7-4834-4fdb-be6c-873169639e00"
+      },
+      {
+        "id": "7763631e-4b31-4aab-8907-9df123e2997b",
+        "hubspotContactId": "102210490653",
+        "leadId": "a626648c-a286-424d-9530-f40e94a4ac05"
+      },
+      {
+        "id": "5466e16f-242e-485a-997e-d1d3e8c9e0dc",
+        "hubspotContactId": "102223498933",
+        "leadId": "bd07496f-c488-4b39-acaa-a210392a815b"
+      },
+      {
+        "id": "0424d0c2-e7e0-476d-972f-4263c2a37f14",
+        "hubspotContactId": "102226725790",
+        "leadId": "a20e9ecf-5c6b-4587-af84-8d6e3a723793"
+      },
+      {
+        "id": "07f64bcd-c88a-4be9-b14a-156ce2a39044",
+        "hubspotContactId": "102231007915",
+        "leadId": "252d495c-560a-422f-97c6-a4f9b0cc6e69"
+      },
+      {
+        "id": "d1825435-e33b-447e-91a0-143d2e555e13",
+        "hubspotContactId": "102232591626",
+        "leadId": "43d310d5-cdfe-4e2f-b94e-d53939aed0bd"
+      },
+      {
+        "id": "a5eb0bad-2f34-4753-91f2-cec0d16b63c9",
+        "hubspotContactId": "102236059469",
+        "leadId": "4781a6ad-5f19-481b-a740-0c8d317675d4"
+      },
+      {
+        "id": "b54ad906-7eaa-45d7-8caa-2edf15d2b683",
+        "hubspotContactId": "102471803654",
+        "leadId": "593af571-f58a-4c62-a07f-9571621acd3f"
+      },
+      {
+        "id": "06d1baa4-a451-4714-bbd3-991631be77b9",
+        "hubspotContactId": "102514164803",
+        "leadId": "2b444bac-95d6-4811-942c-6b1299caaf77"
+      },
+      {
+        "id": "1e27b75c-7496-4d39-858d-20ada740caac",
+        "hubspotContactId": "103029706862",
+        "leadId": "54a21d93-7c14-4483-ab7f-6879a7114af6"
+      },
+      {
+        "id": "085f61c1-5914-4cfd-83e2-eed1eb582d1a",
+        "hubspotContactId": "103163922018",
+        "leadId": "d031e4ce-a9ba-4b77-b1c4-30a40c7f4b0b"
+      },
+      {
+        "id": "f8b56264-fa72-4f9a-99e9-f8080943e809",
+        "hubspotContactId": "103347582351",
+        "leadId": "34c2fc9b-3872-4050-bb53-9783f934f053"
+      },
+      {
+        "id": "c5b27304-69aa-4723-9a1e-8ad4b4da7c80",
+        "hubspotContactId": "102491379323",
+        "leadId": "2dcdf8bc-4a95-4dde-ad49-152bcde24c74"
+      },
+      {
+        "id": "d4fba1c7-ca5c-4afc-b70d-25734be1ce77",
+        "hubspotContactId": "1027301",
+        "leadId": "5571fbd5-0811-40f0-ae72-fe2f42671461"
+      },
+      {
+        "id": "34650908-f537-4567-b903-e3a18deca7f8",
+        "hubspotContactId": "103118376801",
+        "leadId": "b68dc100-263e-46ba-96d7-e31f193c12a4"
+      },
+      {
+        "id": "1350d229-d5e8-4916-aa1e-0b15c0cf0fd0",
+        "hubspotContactId": "103171422999",
+        "leadId": "46400a5d-15a3-4a4e-810c-e79aa71cd165"
+      },
+      {
+        "id": "48bb7b9d-b956-47ad-b90e-8414066d5f28",
+        "hubspotContactId": "10334791269",
+        "leadId": "0202d1ca-08d3-43eb-8014-3276cbf04855"
+      },
+      {
+        "id": "dcc042e5-93fe-4323-9a57-b83cdda6b825",
+        "hubspotContactId": "10250195994",
+        "leadId": "91faef3d-f7b1-45ce-8ea9-8c4673804397"
+      },
+      {
+        "id": "23a8694e-43b9-4e8b-8f67-4d0181afe971",
+        "hubspotContactId": "10278114166",
+        "leadId": "b44e0807-8503-41b8-9845-428a11cc8ec9"
+      },
+      {
+        "id": "cd6a885a-e067-4bb0-887e-fdb50bf2a0d2",
+        "hubspotContactId": "103162538937",
+        "leadId": "ac2b32c4-731b-4172-9809-00df9eae797d"
+      },
+      {
+        "id": "1c73d587-e676-45a2-a018-2d6e7339c817",
+        "hubspotContactId": "10319285872",
+        "leadId": "80fd3091-7383-497c-b050-cb7499e1799a"
+      },
+      {
+        "id": "525e00aa-7f2d-4e2a-8164-292be0be1b9c",
+        "hubspotContactId": "103362313033",
+        "leadId": "bbe4d9bb-a8b7-469b-b174-b3729edeb4f6"
+      },
+      {
+        "id": "4511a088-1345-4571-ad07-62d9e1b5eadb",
+        "hubspotContactId": "103376112729",
+        "leadId": "9a304dc5-b4bd-4d20-a823-50171f2973cd"
+      },
+      {
+        "id": "8c6d1768-44cf-4116-b4b8-d1028528dd80",
+        "hubspotContactId": "10338665763",
+        "leadId": "3579a3d9-e961-482b-9cf7-35dd22ac3551"
+      },
+      {
+        "id": "368857a6-50da-45b3-8be6-1f1b06d5fd94",
+        "hubspotContactId": "103387319917",
+        "leadId": "5a945676-60c8-4eee-a3b7-5c0c0fe8dda1"
+      },
+      {
+        "id": "0385fc38-590a-48e8-9fb5-6dedd0f95a9a",
+        "hubspotContactId": "103554545440",
+        "leadId": "0649da70-d8bc-4da7-89f1-cf131a65b6bb"
+      },
+      {
+        "id": "5d2545cc-3bb5-4f46-b4c2-0312c14490d8",
+        "hubspotContactId": "103566100758",
+        "leadId": "4b305bb5-7054-4c8d-807a-d7b8b48fd2aa"
+      },
+      {
+        "id": "afacaa3a-08c2-4394-a35f-51d1f506ad8b",
+        "hubspotContactId": "103599130182",
+        "leadId": "a7ce534b-b038-4886-b22d-6bdd44bb27b8"
+      },
+      {
+        "id": "003df0c8-f0cb-4b87-bc81-f8fd554772fe",
+        "hubspotContactId": "103821087273",
+        "leadId": "d0cdbc21-c497-4a6f-823f-16309fb03845"
+      },
+      {
+        "id": "dce7df4d-06cb-4c9d-a05b-63503580905a",
+        "hubspotContactId": "103902448409",
+        "leadId": "bccf800e-9be2-4e32-ba4e-cdc34a570e8d"
+      },
+      {
+        "id": "90ab5a2a-7334-4abe-9796-065647f5da86",
+        "hubspotContactId": "104077996621",
+        "leadId": "90589e82-f891-4338-9e4e-bd5c52255a3e"
+      },
+      {
+        "id": "633b9d5e-a7c0-4547-8c5e-5bfeccb0ab44",
+        "hubspotContactId": "104102757918",
+        "leadId": "a3716d8f-3f5d-4dc4-b9a1-3e6858dfe922"
+      },
+      {
+        "id": "9757626a-0308-41e6-8abe-cb3efe4a130a",
+        "hubspotContactId": "104112600857",
+        "leadId": "3db303c3-1337-41b3-adf2-85c88322a2f5"
+      },
+      {
+        "id": "17c910ad-4bfc-4f62-bbb3-463d884fd4f7",
+        "hubspotContactId": "104246122836",
+        "leadId": "24df960d-6b68-477e-a4c6-e7bbc54deab4"
+      },
+      {
+        "id": "0da48b14-5f05-46b7-824d-5c73c956340c",
+        "hubspotContactId": "104305669422",
+        "leadId": "68752a1d-6e6f-41dd-a443-ada82a60d1c1"
+      },
+      {
+        "id": "6db1f61c-062e-4b2d-bcbd-4c7146d26880",
+        "hubspotContactId": "104330429800",
+        "leadId": "96072050-42ff-4b65-bd96-aa94320d7dd0"
+      },
+      {
+        "id": "1371f4e0-8d9b-4f03-98ca-b18189ead6a0",
+        "hubspotContactId": "104343179806",
+        "leadId": "f8f4e47f-bc03-4605-8f29-bff3d892f748"
+      },
+      {
+        "id": "3cf1fecf-c827-470c-92db-3b84b16fb609",
+        "hubspotContactId": "104343600414",
+        "leadId": "46b33b56-db12-4f57-95a3-3ae69cbac499"
+      },
+      {
+        "id": "844de924-175e-407a-aa7a-d90e246e1ed1",
+        "hubspotContactId": "104529598575",
+        "leadId": "f8bf693a-1fce-4285-9977-36dd0584b7d6"
+      },
+      {
+        "id": "288e949c-0b38-487c-8c3a-fe6af4ac9df3",
+        "hubspotContactId": "104618409541",
+        "leadId": "bda22059-e0f0-4004-87a6-95017ac9d7ca"
+      },
+      {
+        "id": "960662b7-3c5a-40be-97bd-2764f6393e86",
+        "hubspotContactId": "104805094036",
+        "leadId": "2ab34fb6-b3a5-4aff-a1a0-c4b8a7851f6f"
+      },
+      {
+        "id": "1bd21b6a-e6ac-4c11-92ad-e39b7264f3ee",
+        "hubspotContactId": "105140427578",
+        "leadId": "7fa63e60-738e-41e8-b20d-8aec1978ec40"
+      },
+      {
+        "id": "60ef64d3-7f55-498d-a010-71d08dd69f89",
+        "hubspotContactId": "105450055608",
+        "leadId": "d08ccf9d-906f-4755-97aa-8303e87ca02f"
+      },
+      {
+        "id": "a9fe0c9a-e514-451a-a7e4-d494d5b254d6",
+        "hubspotContactId": "105882691399",
+        "leadId": "c4320124-1051-463e-b0e5-acbde1aeb881"
+      },
+      {
+        "id": "4f2f4f07-e8f9-41c9-a37f-88f415012188",
+        "hubspotContactId": "106222504868",
+        "leadId": "84dda763-f023-4a59-8a6c-fbec0f001c8f"
+      },
+      {
+        "id": "c9856fbf-39de-453d-829b-e164f44816ba",
+        "hubspotContactId": "106510729742",
+        "leadId": "0128eac2-d340-44e3-abaf-334ac3d94c34"
+      },
+      {
+        "id": "ab65bc82-81d4-453e-8f82-3e809f1d7f10",
+        "hubspotContactId": "106524460308",
+        "leadId": "a30d3e2b-0291-4156-8923-254f7b6d914b"
+      },
+      {
+        "id": "68095140-e7e1-4e59-a2b7-54dbd9d4d273",
+        "hubspotContactId": "106609856314",
+        "leadId": "4a5d7745-f668-4fa2-8a0f-a1cbfe14ce21"
+      },
+      {
+        "id": "af68fe2d-4b96-4947-88e2-79591faffe07",
+        "hubspotContactId": "106629327026",
+        "leadId": "d96d42b5-75c0-4194-b7b2-61951dfbfeaf"
+      },
+      {
+        "id": "0b459c58-d2df-4526-87ac-e3adc70498af",
+        "hubspotContactId": "106795402039",
+        "leadId": "c9ab52fb-1287-4d09-9c7b-41f96dedee1c"
+      },
+      {
+        "id": "422c10c1-5e02-4e0d-9a3c-42a427e77f15",
+        "hubspotContactId": "106859422559",
+        "leadId": "e0367c4d-3a9a-47d6-b095-65af9a9cebdd"
+      },
+      {
+        "id": "b3c415bd-696a-4911-a807-e3fe7a7bf309",
+        "hubspotContactId": "106910090363",
+        "leadId": "d92f7871-6d25-49fd-b314-552f3e223ff1"
+      },
+      {
+        "id": "8cbb7ddb-c2d8-4be2-b6d7-0d2fba25397c",
+        "hubspotContactId": "10706805569",
+        "leadId": "f40a0de9-4f9e-4261-b0d1-8e6825073011"
+      },
+      {
+        "id": "243aa866-1d6b-4535-a270-380d19e4858d",
+        "hubspotContactId": "107091067189",
+        "leadId": "b4c0ea7d-9fce-4227-819e-f856dead4509"
+      },
+      {
+        "id": "11642dde-beca-4a6c-9a6a-50347d76a341",
+        "hubspotContactId": "107108975727",
+        "leadId": "1fc2c591-4148-4b11-a31f-157687908ff1"
+      },
+      {
+        "id": "3b027cdc-4c52-44d3-9370-d1b0a6ac28a9",
+        "hubspotContactId": "107513438504",
+        "leadId": "c2843537-9d1a-4551-acde-d2f41df28d2e"
+      },
+      {
+        "id": "a6dce097-7deb-44dd-93dc-84b516672ac7",
+        "hubspotContactId": "107562649525",
+        "leadId": "b6418419-fbfa-4ef3-95f2-1b3532ab4c83"
+      },
+      {
+        "id": "a8733273-b21b-444c-b60b-1aa3cc52c5c9",
+        "hubspotContactId": "104357620753",
+        "leadId": "1d1964ff-b521-45ac-93e3-6740ca66b927"
+      },
+      {
+        "id": "ba9a2426-a6a8-4097-ab1d-c4a10ddc9c95",
+        "hubspotContactId": "104533486489",
+        "leadId": "f788493b-981a-4eb5-ab44-14dfc4987714"
+      },
+      {
+        "id": "15dd3884-b533-4d0f-8886-e76deda14383",
+        "hubspotContactId": "104651786404",
+        "leadId": "fed18a49-7092-4d56-98e9-81a3be58609b"
+      },
+      {
+        "id": "72cb7024-aa62-4560-8551-6a26dbe55328",
+        "hubspotContactId": "104756191417",
+        "leadId": "e9cd5955-cb96-49eb-9b0b-4f7ddf7962da"
+      },
+      {
+        "id": "96c3f801-8f52-4a21-b745-94206a22dcc9",
+        "hubspotContactId": "104826113288",
+        "leadId": "649ba7fa-89ac-494a-9021-fd632c455493"
+      },
+      {
+        "id": "4f69f146-fd04-4b4b-9754-a532fe6f0572",
+        "hubspotContactId": "105216537614",
+        "leadId": "12187fac-6cdb-47e9-b261-09b3d54972c4"
+      },
+      {
+        "id": "a45e27a8-de09-4d70-bfef-3a4ea0ce4826",
+        "hubspotContactId": "105698818917",
+        "leadId": "75486701-b8d9-477a-a41d-1cb9fb462d1a"
+      },
+      {
+        "id": "bfc0d80e-5b25-4803-ad3c-76ebbc584091",
+        "hubspotContactId": "105887293868",
+        "leadId": "4323b185-ccf6-4724-8a1b-c1ef08b7e324"
+      },
+      {
+        "id": "9bf9223c-77f0-4e15-b11a-cb88e1f14f71",
+        "hubspotContactId": "106261145747",
+        "leadId": "5896f2ab-019b-4d9f-b340-1b3a02df3102"
+      },
+      {
+        "id": "af2d638a-6498-4247-aeba-b78d3d8a464a",
+        "hubspotContactId": "106523873943",
+        "leadId": "03694e2b-360c-429b-89d2-92e2ed2c2501"
+      },
+      {
+        "id": "85873b57-81ef-4e06-b446-e43db9030eb7",
+        "hubspotContactId": "106555448718",
+        "leadId": "28028373-ff42-4ffe-bdbe-c8f4e310ea93"
+      },
+      {
+        "id": "8cfa5dbb-1856-4313-823a-40731e7efd24",
+        "hubspotContactId": "106878594429",
+        "leadId": "c26ba019-474a-4685-8646-7ca800669a62"
+      },
+      {
+        "id": "8976952b-eb73-4cc6-a365-db440980087e",
+        "hubspotContactId": "107055936028",
+        "leadId": "a08648f2-fe3b-4226-ad16-57faebe77291"
+      },
+      {
+        "id": "eebeb7bf-5856-430e-9cd9-28778278da62",
+        "hubspotContactId": "107108268318",
+        "leadId": "52ca521d-9133-4c75-8586-8477540ce7b1"
+      },
+      {
+        "id": "e72b4080-d2b0-4768-b062-064872559682",
+        "hubspotContactId": "107320539319",
+        "leadId": "4929372a-52e9-4d0d-be33-6458d1a87495"
+      },
+      {
+        "id": "55fd7668-e9bb-4f88-8eb9-20184a460684",
+        "hubspotContactId": "107481371946",
+        "leadId": "cc9cec66-38df-4f00-b48c-680c8e509ca9"
+      },
+      {
+        "id": "171fd56c-511e-4ddd-81a8-4fa716055e29",
+        "hubspotContactId": "107531802763",
+        "leadId": "1495babf-df43-4bdd-92f8-715b7ed66b4f"
+      },
+      {
+        "id": "287c2a18-6003-4ca8-ae9a-ae2f7486921b",
+        "hubspotContactId": "104479900674",
+        "leadId": "a73bc363-3195-415b-8e77-0969b6f4af0d"
+      },
+      {
+        "id": "7b0038e6-b4db-46d0-b46a-d60ac072c222",
+        "hubspotContactId": "104598691670",
+        "leadId": "5ca8b3ae-5de2-471b-a791-ca0a5e94ebd7"
+      },
+      {
+        "id": "59b85b1f-f0a4-4751-8d5b-343f9f4046e4",
+        "hubspotContactId": "104772198268",
+        "leadId": "7f85b9de-8f7c-4e9d-8b33-9270ad2a11a4"
+      },
+      {
+        "id": "a3818ca8-8c42-4e2b-9bde-12b35139ee29",
+        "hubspotContactId": "104949296701",
+        "leadId": "519fcfab-d7d2-4ceb-8d21-9871c58294c7"
+      },
+      {
+        "id": "4099d497-3bcd-427e-95ac-534c59e1fed2",
+        "hubspotContactId": "105445563661",
+        "leadId": "ac8556b2-338a-44bd-b64a-32e151bf3e9a"
+      },
+      {
+        "id": "54739ecd-928b-4465-a643-e17359653139",
+        "hubspotContactId": "105733345929",
+        "leadId": "219b6c8f-4821-40df-b468-5cc85fa6c9b3"
+      },
+      {
+        "id": "e9521d09-5b78-42cc-b2bc-75cca783c462",
+        "hubspotContactId": "106161083530",
+        "leadId": "c9635440-691a-4b11-8a89-ba024e25b9f0"
+      },
+      {
+        "id": "77d2ac67-9158-4c92-b182-2b0f11120e7e",
+        "hubspotContactId": "106476919928",
+        "leadId": "74e6e9db-c813-43c3-9452-5b057db3064f"
+      },
+      {
+        "id": "dd9f6dc1-5c2b-431e-83af-7a8e7be3a87c",
+        "hubspotContactId": "106611183632",
+        "leadId": "db08df5d-60c9-4afb-aa90-7f35fe2f3407"
+      },
+      {
+        "id": "1d7831e9-dd19-4061-bbbc-f199c5114990",
+        "hubspotContactId": "106869238559",
+        "leadId": "96698725-b6da-42a0-bbb5-7a7500df290e"
+      },
+      {
+        "id": "99b38199-020a-4cfd-b250-66478f56e4b2",
+        "hubspotContactId": "106870293669",
+        "leadId": "83a59154-16d6-4228-ae23-71a7705f318b"
+      },
+      {
+        "id": "87ddfe4d-adb7-4a26-8f15-c7c40acfea5c",
+        "hubspotContactId": "107003845774",
+        "leadId": "963efd37-fea8-46a6-9d59-d9b4af9221cc"
+      },
+      {
+        "id": "f1201fa5-b643-4d5c-9836-b94f66cd646c",
+        "hubspotContactId": "107116523923",
+        "leadId": "0f5bc436-2a83-4d34-b553-c2fb612b2973"
+      },
+      {
+        "id": "5e7d89c1-1297-4353-b277-f0ed3508f722",
+        "hubspotContactId": "107514892630",
+        "leadId": "6fe26857-2021-4c37-ae34-5108c9a759d5"
+      }
+    ],
+    "newLeadsEligible": [],
+    "blockedLeads": [],
+    "watermark": "2026-07-16T03:45:02.366+00:00"
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 124
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}
