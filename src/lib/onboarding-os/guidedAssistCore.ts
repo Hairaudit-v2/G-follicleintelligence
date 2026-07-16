@@ -8,14 +8,22 @@ import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 import { GUIDED_ASSIST_NEXT_ACTIONS, GUIDED_ASSIST_TIPS } from "./guidedAssistCatalog";
 import {
+  getContextualTips,
+  getEmptyStateTour,
+  mergeContextualTips,
+  resolveTimeOfDay,
+} from "./getContextualTips";
+import {
   getRoleFirstTips,
   mapViewerToGuidedAssistTodayRole,
   mergeRoleFirstTipsWithCatalog,
   shouldUseRoleFirstTips,
 } from "./getRoleFirstTips";
+import { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
 import type {
   GuidedAssistArea,
   GuidedAssistAreaInsight,
+  GuidedAssistClinicStats,
   GuidedAssistNextActionView,
   GuidedAssistResolvedPreferences,
   GuidedAssistRoleScope,
@@ -32,6 +40,8 @@ import {
   GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
   GUIDED_ASSIST_SAFETY_NOTICE,
 } from "./guidedAssistTypes";
+
+export { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
 
 export function resolveGuidedAssistPageKey(pathname: string, tenantBase: string): string {
   return normalizeFiAdminTenantPathSuffix(pathname, tenantBase);
@@ -85,102 +95,6 @@ function matchesRoleScope(
   if (profiles.includes(workspaceProfileKey)) return true;
   if (tenantAdminRole && adminRoles.includes(tenantAdminRole)) return true;
   return false;
-}
-
-/**
- * Expand the current route suffix so tips fire on both new hubs and legacy aliases
- * (e.g. Front desk ↔ reception/tomorrow, Surgery ↔ surgery-os/cases).
- */
-export function expandGuidedAssistPageKeys(pageKey: string): string[] {
-  const p = pageKey.trim().replace(/\/+$/, "");
-  const keys = new Set<string>([p]);
-
-  if (p === "" || p === "dashboard") {
-    keys.add("");
-    keys.add("dashboard");
-  }
-
-  if (
-    p === "front-desk" ||
-    p.startsWith("front-desk/") ||
-    p === "reception" ||
-    p === "reception-board" ||
-    p === "reception-os" ||
-    p === "operations" ||
-    p === "tomorrow"
-  ) {
-    keys.add("front-desk");
-    if (p === "tomorrow" || p === "front-desk/tomorrow") {
-      keys.add("front-desk/tomorrow");
-      keys.add("tomorrow");
-    }
-  }
-
-  if (
-    p === "surgery" ||
-    p.startsWith("surgery/") ||
-    p === "surgery-os" ||
-    p.startsWith("surgery-os/") ||
-    p === "cases" ||
-    p.startsWith("cases/") ||
-    p === "surgery-readiness" ||
-    p.startsWith("surgery-readiness/") ||
-    p === "procedure-day" ||
-    p.startsWith("procedure-day/")
-  ) {
-    keys.add("surgery");
-    keys.add("surgery-os");
-    keys.add("cases");
-    keys.add("surgery-readiness");
-  }
-
-  if (p === "crm" || p.startsWith("crm/") || p === "leadflow" || p.startsWith("leadflow/")) {
-    keys.add("crm");
-    keys.add("leadflow");
-  }
-
-  if (
-    p === "team" ||
-    p.startsWith("team/") ||
-    p === "staff" ||
-    p.startsWith("staff/") ||
-    p.startsWith("workforce-os") ||
-    p.startsWith("hr-os")
-  ) {
-    keys.add("team");
-    keys.add("staff");
-  }
-
-  if (
-    p === "financial-os" ||
-    p.startsWith("financial-os/") ||
-    p === "financial" ||
-    p.startsWith("financial/") ||
-    p === "payments" ||
-    p.startsWith("payments/")
-  ) {
-    keys.add("financial-os");
-    keys.add("payments");
-    keys.add("financial");
-  }
-
-  if (
-    p === "reports" ||
-    p.startsWith("reports/") ||
-    p === "analytics" ||
-    p.startsWith("analytics/") ||
-    p === "operations"
-  ) {
-    keys.add("reports");
-    keys.add("analytics");
-  }
-
-  if (p === "doctor" || p.startsWith("doctor/")) {
-    keys.add("doctor");
-    keys.add("consultations");
-  }
-
-  return [...keys];
 }
 
 function matchesPageKey(pageKey: string, tipPageKey: string, prefix?: boolean): boolean {
@@ -238,7 +152,17 @@ export function selectGuidedAssistTips(
   const nowMs = now.getTime();
   const tenantBase = `/fi-admin/${ctx.tenantId}`;
 
+  const tourStepCodes = new Set(
+    GUIDED_ASSIST_TIPS.flatMap((t) => (t.tourSteps?.length ? [...t.tourSteps] : []))
+  );
+
   const eligible = GUIDED_ASSIST_TIPS.filter((tip) => {
+    // Empty-state tour roots are offered via emptyStateTour (Tour me), not the tip list.
+    if (tip.emptyStateKey) return false;
+    // Tour step tips only appear inside an active tour.
+    if (tourStepCodes.has(tip.code)) return false;
+    // Contextual tips are selected separately (time/condition).
+    if (tip.contextTriggers) return false;
     if (!matchesRoleScope(tip.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole))
       return false;
     if (!matchesPageKey(ctx.pageKey, tip.pageKey, tip.pageKeyPrefix)) return false;
@@ -293,6 +217,19 @@ function toTipView(
     actionHref: tip.actionHrefSuffix
       ? `${tenantBase}/${tip.actionHrefSuffix.replace(/^\/+/, "")}`
       : null,
+    emptyStateKey: tip.emptyStateKey ?? null,
+    tourStepCodes: tip.tourSteps?.length ? [...tip.tourSteps] : null,
+  };
+}
+
+export function emptyGuidedAssistClinicStats(): GuidedAssistClinicStats {
+  return {
+    openLeadCount: 0,
+    todayBookingCount: 0,
+    openTaskCount: 0,
+    openSurgeryCaseCount: 0,
+    paymentRecordCount: 0,
+    hourLocal: null,
   };
 }
 
@@ -302,6 +239,8 @@ export function buildGuidedAssistSessionPayload(opts: {
   userPreferences: GuidedAssistUserPreferences;
   maxTips?: number;
   roleFirstViewLimit?: number;
+  clinicStats?: GuidedAssistClinicStats | null;
+  now?: Date;
 }): GuidedAssistSessionPayload {
   const maxTips = opts.maxTips ?? 3;
   const roleFirstViewLimit = opts.roleFirstViewLimit ?? GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT;
@@ -310,6 +249,9 @@ export function buildGuidedAssistSessionPayload(opts: {
     workspaceProfileKey: opts.ctx.workspaceProfileKey,
     tenantAdminRole: opts.ctx.tenantAdminRole,
   });
+  const stats = opts.clinicStats ?? emptyGuidedAssistClinicStats();
+  const now = opts.now ?? new Date();
+  const timeOfDay = resolveTimeOfDay(stats.hourLocal);
 
   const roleFirstActive =
     opts.resolved.assistEnabled &&
@@ -320,11 +262,13 @@ export function buildGuidedAssistSessionPayload(opts: {
     });
 
   let tips: GuidedAssistTipView[] = [];
+  let emptyStateTour = null as GuidedAssistSessionPayload["emptyStateTour"];
+
   if (opts.resolved.assistEnabled) {
     const catalogTips = selectGuidedAssistTips(
       opts.ctx,
       opts.userPreferences,
-      new Date(),
+      now,
       maxTips
     );
     if (roleFirstActive) {
@@ -338,6 +282,23 @@ export function buildGuidedAssistSessionPayload(opts: {
     } else {
       tips = catalogTips;
     }
+
+    const contextual = getContextualTips({
+      ctx: opts.ctx,
+      prefs: opts.userPreferences,
+      stats,
+      timeOfDay,
+      nowMs: now.getTime(),
+      maxTips: 2,
+    });
+    tips = mergeContextualTips(contextual, tips, maxTips);
+
+    emptyStateTour = getEmptyStateTour({
+      pageKey: opts.ctx.pageKey,
+      stats,
+      tenantId: opts.ctx.tenantId,
+      dismissedTipCodes: opts.userPreferences.dismissedTipCodes,
+    });
   }
 
   const nextAction = opts.resolved.assistEnabled ? selectGuidedAssistNextAction(opts.ctx) : null;
@@ -354,6 +315,9 @@ export function buildGuidedAssistSessionPayload(opts: {
     todayHomeViews,
     roleFirstViewLimit,
     shouldIncrementTodayHomeViews: roleFirstActive && tips.length > 0,
+    emptyStateTour,
+    clinicStats: stats,
+    timeOfDay,
   };
 }
 

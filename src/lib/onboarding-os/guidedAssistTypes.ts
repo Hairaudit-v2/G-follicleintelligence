@@ -56,6 +56,52 @@ export type GuidedAssistTodayRoleKey = (typeof GUIDED_ASSIST_TODAY_ROLE_KEYS)[nu
 /** Default number of Today page exposures that use role-first tip ordering. */
 export const GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT = 5;
 
+/** Empty-state tour keys (matched from route + clinic stats). */
+export const GUIDED_ASSIST_EMPTY_STATE_KEYS = [
+  "pipeline_empty",
+  "front_desk_empty",
+  "money_empty",
+  "surgery_empty",
+  "calendar_empty",
+] as const;
+
+export type GuidedAssistEmptyStateKey = (typeof GUIDED_ASSIST_EMPTY_STATE_KEYS)[number];
+
+export const GUIDED_ASSIST_TIME_OF_DAY = ["morning", "afternoon", "evening", "any"] as const;
+export type GuidedAssistTimeOfDay = (typeof GUIDED_ASSIST_TIME_OF_DAY)[number];
+
+/**
+ * Operational conditions from lightweight clinic stats (never clinical).
+ * Evaluated in getContextualTips / resolveEmptyStateKey.
+ */
+export const GUIDED_ASSIST_CONTEXT_CONDITIONS = [
+  "zero_leads",
+  "open_leads",
+  "zero_today_bookings",
+  "today_bookings",
+  "open_tasks",
+  "zero_payment_records",
+  "zero_open_surgery_cases",
+] as const;
+
+export type GuidedAssistContextCondition = (typeof GUIDED_ASSIST_CONTEXT_CONDITIONS)[number];
+
+export type GuidedAssistContextTriggers = {
+  timeOfDay?: GuidedAssistTimeOfDay;
+  condition?: GuidedAssistContextCondition;
+};
+
+/** Lightweight operational counts for contextual + empty-state tips (tenant-scoped). */
+export type GuidedAssistClinicStats = {
+  openLeadCount: number;
+  todayBookingCount: number;
+  openTaskCount: number;
+  openSurgeryCaseCount: number;
+  paymentRecordCount: number;
+  /** Local clinic hour 0–23 when known; omit for “any”. */
+  hourLocal?: number | null;
+};
+
 export type GuidedAssistTipDefinition = {
   code: string;
   area: GuidedAssistArea;
@@ -76,6 +122,15 @@ export type GuidedAssistTipDefinition = {
    * the tip is eligible for the first-N-logins role-first window.
    */
   roles?: readonly GuidedAssistTodayRoleKey[];
+  /**
+   * When set, this tip is the **tour root** for an empty state (shows “Tour me”).
+   * `tourSteps` lists tip codes for the sequenced walkthrough.
+   */
+  emptyStateKey?: GuidedAssistEmptyStateKey;
+  /** Tip codes for empty-state / onboarding tours (3–5 steps typical). */
+  tourSteps?: readonly string[];
+  /** Optional time-of-day / stats conditions (operational only). */
+  contextTriggers?: GuidedAssistContextTriggers;
   dismissible: boolean;
   snoozeHours?: number;
   /** Operational CTA — never patient-specific clinical recommendations. */
@@ -144,6 +199,10 @@ export type GuidedAssistTipView = {
   snoozeHours: number | null;
   actionLabel: string | null;
   actionHref: string | null;
+  /** Present on tour-root tips when an empty-state tour is available. */
+  emptyStateKey?: GuidedAssistEmptyStateKey | null;
+  /** Resolved tour step tip codes (tour root only). */
+  tourStepCodes?: readonly string[] | null;
 };
 
 export type GuidedAssistNextActionView = {
@@ -153,6 +212,15 @@ export type GuidedAssistNextActionView = {
   title: string;
   description: string;
   href: string;
+};
+
+export type GuidedAssistEmptyStateTourView = {
+  emptyStateKey: GuidedAssistEmptyStateKey;
+  rootTipCode: string;
+  title: string;
+  body: string;
+  /** Ordered step tips for the walkthrough. */
+  steps: GuidedAssistTipView[];
 };
 
 export type GuidedAssistSessionPayload = {
@@ -172,6 +240,12 @@ export type GuidedAssistSessionPayload = {
   roleFirstViewLimit: number;
   /** Client should call increment once when true and assist is enabled. */
   shouldIncrementTodayHomeViews: boolean;
+  /** Active empty-state tour offer for this route (Tour me). */
+  emptyStateTour: GuidedAssistEmptyStateTourView | null;
+  /** Snapshot used for contextual copy (may be zeros if load failed). */
+  clinicStats: GuidedAssistClinicStats | null;
+  /** Local time band used for contextual tips. */
+  timeOfDay: GuidedAssistTimeOfDay | null;
 };
 
 export type GuidedAssistAreaInsight = {

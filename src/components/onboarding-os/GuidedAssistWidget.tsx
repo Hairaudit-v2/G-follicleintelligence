@@ -50,11 +50,15 @@ export function GuidedAssistWidget({
   const [collapsed, setCollapsed] = useState(true);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  /** Index into emptyStateTour.steps; null = tour not active. */
+  const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
   const shownTipCodesRef = useRef<Set<string>>(new Set());
   const hydratedCollapseRef = useRef(false);
+  const tourActive = tourStepIndex != null && payload.emptyStateTour != null;
 
   useEffect(() => {
     setPayload(initialPayload);
+    setTourStepIndex(null);
   }, [initialPayload]);
 
   // Initial collapse: calendar always; phones prefer collapsed; desktop can open after hydrate.
@@ -150,6 +154,47 @@ export function GuidedAssistWidget({
     });
   };
 
+  const startTour = () => {
+    if (!payload.emptyStateTour?.steps.length) return;
+    setCollapsed(false);
+    setTourStepIndex(0);
+    void recordGuidedAssistClientEventAction(tenantId, {
+      eventKind: "next_action_clicked",
+      guidanceCode: payload.emptyStateTour.rootTipCode,
+      guidanceArea: "reception_os",
+      pageKey: payload.pageKey,
+      detail: { kind: "tour_start", emptyStateKey: payload.emptyStateTour.emptyStateKey },
+    });
+  };
+
+  const skipTour = () => {
+    const root = payload.emptyStateTour?.rootTipCode;
+    setTourStepIndex(null);
+    if (root) {
+      void dismissTip(root);
+    }
+  };
+
+  const completeTour = () => {
+    const root = payload.emptyStateTour?.rootTipCode;
+    setTourStepIndex(null);
+    if (root) {
+      void dismissTip(root);
+    }
+    void recordGuidedAssistClientEventAction(tenantId, {
+      eventKind: "tip_dismissed",
+      guidanceCode: root ?? "tour_complete",
+      pageKey: payload.pageKey,
+      detail: { kind: "tour_complete" },
+    });
+  };
+
+  const tourStep =
+    tourActive && payload.emptyStateTour
+      ? payload.emptyStateTour.steps[tourStepIndex!] ?? null
+      : null;
+  const tourTotal = payload.emptyStateTour?.steps.length ?? 0;
+
   if (!payload.assistEnabled && !payload.isOnboardingPhase) {
     return null;
   }
@@ -186,9 +231,11 @@ export function GuidedAssistWidget({
           >
             {collapsed
               ? "Help"
-              : payload.assistEnabled
-                ? "What to do next"
-                : "Clinic guide is off"}
+              : tourActive
+                ? "Tour"
+                : payload.assistEnabled
+                  ? "What to do next"
+                  : "Clinic guide is off"}
           </h2>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -221,7 +268,7 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
 
-          {payload.roleFirstActive ? (
+          {payload.roleFirstActive && !tourActive ? (
             <p className="text-[10px] font-medium uppercase tracking-wide text-cyan-400/90">
               Getting started · visit{" "}
               {Math.min(payload.todayHomeViews + 1, payload.roleFirstViewLimit)} of{" "}
@@ -229,7 +276,90 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
 
-          {payload.assistEnabled && payload.nextAction ? (
+          {/* Empty-state tour offer */}
+          {payload.assistEnabled && payload.emptyStateTour && !tourActive ? (
+            <section
+              className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
+              data-testid="guided-assist-tour-offer"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-cyan-300/90">
+                Empty screen
+              </p>
+              <h3 className="mt-1 text-sm font-medium text-slate-100">
+                {payload.emptyStateTour.title}
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                {payload.emptyStateTour.body}
+              </p>
+              <button
+                type="button"
+                onClick={startTour}
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-3 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30"
+              >
+                Tour me
+              </button>
+            </section>
+          ) : null}
+
+          {/* Active tour steps (collapses other tips) */}
+          {tourActive && tourStep ? (
+            <section
+              className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3"
+              data-testid="guided-assist-tour-step"
+              aria-live="polite"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-cyan-300/90">
+                Step {tourStepIndex! + 1} of {tourTotal}
+              </p>
+              <h3 className="mt-1 text-sm font-medium text-slate-100">{tourStep.title}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">{tourStep.body}</p>
+              {tourStep.actionHref && tourStep.actionLabel ? (
+                <Link
+                  href={tourStep.actionHref}
+                  className="mt-2 inline-flex text-xs font-medium text-cyan-300 hover:text-cyan-200"
+                >
+                  {tourStep.actionLabel} →
+                </Link>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {tourStepIndex! > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setTourStepIndex((i) => Math.max(0, (i ?? 0) - 1))}
+                    className="min-h-11 rounded-lg border border-white/15 px-3 text-xs font-medium text-slate-200 hover:bg-white/5"
+                  >
+                    Back
+                  </button>
+                ) : null}
+                {tourStepIndex! < tourTotal - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setTourStepIndex((i) => (i ?? 0) + 1)}
+                    className="min-h-11 flex-1 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={completeTour}
+                    className="min-h-11 flex-1 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30"
+                  >
+                    Mark complete
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={skipTour}
+                  className="min-h-11 rounded-lg px-3 text-xs text-slate-400 hover:text-slate-200"
+                >
+                  Skip tour
+                </button>
+              </div>
+            </section>
+          ) : null}
+
+          {!tourActive && payload.assistEnabled && payload.nextAction ? (
             <section className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3">
               <div className="mb-2 flex items-center gap-2 text-cyan-200">
                 <Compass className="h-4 w-4 shrink-0" aria-hidden />
@@ -251,7 +381,7 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {payload.assistEnabled && payload.tips.length > 0 ? (
+          {!tourActive && payload.assistEnabled && payload.tips.length > 0 ? (
             <ul className="space-y-2">
               {payload.tips.map((tip) => (
                 <li
@@ -303,7 +433,11 @@ export function GuidedAssistWidget({
             </ul>
           ) : null}
 
-          {payload.assistEnabled && payload.tips.length === 0 && !payload.nextAction ? (
+          {!tourActive &&
+          payload.assistEnabled &&
+          payload.tips.length === 0 &&
+          !payload.nextAction &&
+          !payload.emptyStateTour ? (
             <p className="text-sm text-slate-400">
               No tips for this screen right now. Try Today, Front desk, Pipeline, or Settings — or
               finish the next setup step above when shown.

@@ -15,6 +15,12 @@ import {
   summarizeGuidedAssistUsageEvents,
 } from "../src/lib/onboarding-os/guidedAssistCore";
 import {
+  getEmptyStateTour,
+  getContextualTips,
+  resolveEmptyStateKey,
+  resolveTimeOfDay,
+} from "../src/lib/onboarding-os/getContextualTips";
+import {
   getRoleFirstTips,
   mapViewerToGuidedAssistTodayRole,
   shouldUseRoleFirstTips,
@@ -329,6 +335,73 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     });
     assert.equal(afterWindow.roleFirstActive, false);
     assert.equal(afterWindow.shouldIncrementTodayHomeViews, false);
+  });
+
+  it("empty-state tour resolves for pipeline with zero leads", () => {
+    const stats = {
+      openLeadCount: 0,
+      todayBookingCount: 0,
+      openTaskCount: 0,
+      openSurgeryCaseCount: 0,
+      paymentRecordCount: 0,
+      hourLocal: 10,
+    };
+    assert.equal(resolveEmptyStateKey("crm", stats), "pipeline_empty");
+    const tour = getEmptyStateTour({
+      pageKey: "crm",
+      stats,
+      tenantId: BASE_CTX.tenantId,
+    });
+    assert.ok(tour);
+    assert.equal(tour!.emptyStateKey, "pipeline_empty");
+    assert.ok(tour!.steps.length >= 3);
+    assert.ok(!tour!.steps.some((s) => /diagnos|prescri/i.test(s.body)));
+  });
+
+  it("contextual tips use time of day and interpolate counts", () => {
+    assert.equal(resolveTimeOfDay(9), "morning");
+    assert.equal(resolveTimeOfDay(14), "afternoon");
+    assert.equal(resolveTimeOfDay(19), "evening");
+    const tips = getContextualTips({
+      ctx: {
+        tenantId: BASE_CTX.tenantId,
+        pageKey: "",
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+      },
+      prefs: { dismissedTipCodes: [], snoozedTips: {} },
+      stats: {
+        openLeadCount: 3,
+        todayBookingCount: 2,
+        openTaskCount: 0,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 1,
+        hourLocal: 9,
+      },
+      timeOfDay: "morning",
+    });
+    assert.ok(tips.some((t) => t.code === "ctx_morning_front_desk"));
+    const load = getContextualTips({
+      ctx: {
+        tenantId: BASE_CTX.tenantId,
+        pageKey: "",
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+      },
+      prefs: { dismissedTipCodes: [], snoozedTips: {} },
+      stats: {
+        openLeadCount: 0,
+        todayBookingCount: 5,
+        openTaskCount: 0,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 1,
+        hourLocal: 11,
+      },
+      timeOfDay: "morning",
+    });
+    const bookingTip = load.find((t) => t.code === "ctx_today_bookings_load");
+    assert.ok(bookingTip);
+    assert.match(bookingTip!.body, /5/);
   });
 });
 

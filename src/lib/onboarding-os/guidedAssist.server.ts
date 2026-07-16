@@ -25,12 +25,16 @@ import {
   validateGuidedAssistSnoozeHours,
 } from "./guidedAssistCore";
 import type {
+  GuidedAssistClinicStats,
   GuidedAssistEventKind,
   GuidedAssistSessionPayload,
   GuidedAssistTenantDefaults,
   GuidedAssistUsageSummary,
   GuidedAssistUserPreferences,
 } from "./guidedAssistTypes";
+import { emptyGuidedAssistClinicStats } from "./guidedAssistCore";
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 
 export type GuidedAssistPreferencesRow = {
   id: string;
@@ -200,6 +204,107 @@ export async function recordGuidedAssistEvent(
   }
 }
 
+/**
+ * Lightweight operational counts for empty-state + contextual tips (tenant-scoped).
+ * Best-effort: failures return zeros so the guide still loads.
+ */
+export async function loadGuidedAssistClinicStats(
+  tenantId: string,
+  serverOpts: ServerOpts = {}
+): Promise<GuidedAssistClinicStats> {
+  const tid = tenantId.trim();
+  const stats = emptyGuidedAssistClinicStats();
+  try {
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    let hourLocal: number | null = null;
+    let todayYmd = "";
+    try {
+      const cal = await loadTenantOperationalCalendarSettings(tid);
+      const tz = cal.calendarTimezone || "Australia/Brisbane";
+      const now = new Date();
+      todayYmd = calendarDateStringFromInstant(now, tz);
+      const hourFmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: tz,
+        hour: "numeric",
+        hour12: false,
+      });
+      const h = Number(hourFmt.format(now));
+      hourLocal = Number.isFinite(h) ? h % 24 : null;
+    } catch {
+      todayYmd = new Date().toISOString().slice(0, 10);
+      hourLocal = new Date().getUTCHours();
+    }
+    stats.hourLocal = hourLocal;
+
+    const dayStart = `${todayYmd}T00:00:00.000Z`;
+    const dayEnd = `${todayYmd}T23:59:59.999Z`;
+
+    const [leads, bookings, tasks, cases, payments] = await Promise.all([
+      supabase
+        .from("fi_crm_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .is("archived_at", null)
+        .limit(1),
+      supabase
+        .from("fi_bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .gte("start_at", dayStart)
+        .lte("start_at", dayEnd)
+        .not("booking_status", "eq", "cancelled")
+        .limit(1),
+      supabase
+        .from("fi_crm_tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .in("status", ["open", "pending", "todo"])
+        .limit(1),
+      supabase
+        .from("fi_cases")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .limit(1),
+      supabase
+        .from("fi_payment_records")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .limit(1),
+    ]);
+
+    // open leads: best-effort count (archived_at may not exist — retry simpler)
+    if (leads.error) {
+      const retry = await supabase
+        .from("fi_crm_leads")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .limit(1);
+      stats.openLeadCount = retry.count ?? 0;
+    } else {
+      stats.openLeadCount = leads.count ?? 0;
+    }
+    stats.todayBookingCount = bookings.error ? 0 : (bookings.count ?? 0);
+    if (tasks.error) {
+      const retry = await supabase
+        .from("fi_crm_tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .limit(1);
+      stats.openTaskCount = retry.count ?? 0;
+    } else {
+      stats.openTaskCount = tasks.count ?? 0;
+    }
+    stats.openSurgeryCaseCount = cases.error ? 0 : (cases.count ?? 0);
+    stats.paymentRecordCount = payments.error ? 0 : (payments.count ?? 0);
+  } catch (e) {
+    logStructured("warn", "guided_assist.clinic_stats_error", {
+      tenantId: tid,
+      error: String(e),
+    });
+  }
+  return stats;
+}
+
 export async function loadGuidedAssistSessionPayload(
   tenantId: string,
   pathname: string,
@@ -216,13 +321,14 @@ export async function loadGuidedAssistSessionPayload(
     const tenantBase = `/fi-admin/${tid}`;
     const pageKey = resolveGuidedAssistPageKey(pathname, tenantBase);
 
-    const [tenantDefaultRow, userRow, workspaceProfileKey, adminProf, homePayload] =
+    const [tenantDefaultRow, userRow, workspaceProfileKey, adminProf, homePayload, clinicStats] =
       await Promise.all([
         ensureTenantDefaultRow(supabase, tid),
         ensureUserPreferenceRow(supabase, tid, auth.fiUserId),
         loadWorkspaceProfileKeyForViewer(tid),
         loadActiveTenantAdminProfileForSession(tid, auth.actorAuthUserId),
         loadFiHomeDashboardPayload(tid, { showCrmShellChecklistItems: false }),
+        loadGuidedAssistClinicStats(tid, serverOpts),
       ]);
 
     const setupFlags = buildGuidedAssistSetupFlagsFromChecklist(homePayload.checklist);
@@ -248,6 +354,7 @@ export async function loadGuidedAssistSessionPayload(
       ctx,
       resolved,
       userPreferences,
+      clinicStats,
     });
 
     return { ok: true, payload };
