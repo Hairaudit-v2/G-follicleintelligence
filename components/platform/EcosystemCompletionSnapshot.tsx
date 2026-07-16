@@ -3,13 +3,14 @@
 import Link from "next/link";
 
 import { GlassCard } from "@/components/marketing/FiMarketingPrimitives";
-import { PlatformProgressAnimatedBar } from "@/components/platform/PlatformProgressPrimitives";
+import { PlatformProgressStatusBadge } from "@/components/platform/PlatformProgressPrimitives";
 import { cn } from "@/lib/utils";
 import {
   FI_ECOSYSTEM_COMPLETION_SUMMARY,
   FI_ECOSYSTEM_PLATFORM_COMPLETION,
   getPlatformProgressSnapshot,
   PLATFORM_PROGRESS_MODULES,
+  type PlatformProgressStatus,
 } from "@/lib/marketing/platformProgressPageContent";
 import { ExternalLink } from "lucide-react";
 
@@ -18,19 +19,15 @@ type EcosystemCompletionSnapshotProps = {
   className?: string;
 };
 
-function CompletionCard({
+function StatusCountCard({
   label,
-  percent,
+  value,
   detail,
-  href,
-  external,
   accent = "amber",
 }: {
   label: string;
-  percent: number;
+  value: string | number;
   detail?: string;
-  href?: string;
-  external?: boolean;
   accent?: "amber" | "cyan" | "emerald" | "violet";
 }) {
   const borderClass =
@@ -51,51 +48,65 @@ function CompletionCard({
           ? "text-violet-200/70"
           : "text-amber-200/70";
 
-  const body = (
-    <>
+  return (
+    <GlassCard className={cn(borderClass, "!p-5 sm:!p-6")}>
       <p className={cn("text-[10px] font-semibold uppercase tracking-[0.22em]", labelClass)}>
         {label}
       </p>
       <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
-        ~{percent}
-        <span className="text-xl text-muted-foreground">%</span>
+        {value}
       </p>
-      <div className="mt-4">
-        <PlatformProgressAnimatedBar percent={percent} status="Production" delay={0.04} />
-      </div>
       {detail ? (
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{detail}</p>
+      ) : null}
+    </GlassCard>
+  );
+}
+
+function SatelliteStatusCard({
+  name,
+  description,
+  status,
+  href,
+  external,
+}: {
+  name: string;
+  description: string;
+  status: PlatformProgressStatus;
+  href?: string;
+  external?: boolean;
+}) {
+  const body = (
+    <>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <p className="font-display text-lg font-semibold tracking-tight text-foreground">{name}</p>
+        <PlatformProgressStatusBadge status={status} />
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
+      {external && href ? (
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-200/80 group-hover:text-cyan-100">
+          View platform
+          <ExternalLink className="h-3 w-3 opacity-80" aria-hidden />
+        </span>
       ) : null}
     </>
   );
 
   if (href) {
     return (
-      <GlassCard
-        className={cn(
-          borderClass,
-          "!p-5 transition-[border-color,background-color] duration-200 hover:border-amber-400/25 sm:!p-6",
-          external && "group"
-        )}
-      >
+      <GlassCard className="group border-violet-400/12 !p-5 transition-[border-color] duration-200 hover:border-amber-400/25 sm:!p-6">
         <Link
           href={href}
           {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
         >
           {body}
-          {external ? (
-            <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-200/80 group-hover:text-cyan-100">
-              View platform
-              <ExternalLink className="h-3 w-3 opacity-80" aria-hidden />
-            </span>
-          ) : null}
         </Link>
       </GlassCard>
     );
   }
 
-  return <GlassCard className={cn(borderClass, "!p-5 sm:!p-6")}>{body}</GlassCard>;
+  return <GlassCard className="border-violet-400/12 !p-5 sm:!p-6">{body}</GlassCard>;
 }
 
 export function EcosystemCompletionSnapshot({
@@ -103,15 +114,21 @@ export function EcosystemCompletionSnapshot({
   className,
 }: EcosystemCompletionSnapshotProps) {
   const snapshot = getPlatformProgressSnapshot(PLATFORM_PROGRESS_MODULES);
-  const { overallEcosystemPercent, fiOsCorePlatformPercent } = FI_ECOSYSTEM_COMPLETION_SUMMARY;
+  const { overallEcosystemPercent, fiOsCorePlatformPercent, retiredFromPublicUi } =
+    FI_ECOSYSTEM_COMPLETION_SUMMARY;
+  const counts = snapshot.statusCounts;
 
   if (variant === "admin") {
     return (
       <div className={cn("space-y-4", className)}>
+        <p className="text-[0.65rem] leading-relaxed text-[#94A3B8]">
+          Historical completion estimates retired from public UI on {retiredFromPublicUi}. Prefer
+          status counts below for operator communication.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-amber-400/15 bg-[#141C33]/60 px-4 py-3">
             <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
-              Overall FI ecosystem
+              Historical overall (internal)
             </p>
             <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-[#F8FAFC]">
               ~{overallEcosystemPercent}%
@@ -119,7 +136,7 @@ export function EcosystemCompletionSnapshot({
           </div>
           <div className="rounded-xl border border-cyan-400/15 bg-[#141C33]/60 px-4 py-3">
             <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
-              FI OS core platform
+              Historical FI OS core (internal)
             </p>
             <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-[#F8FAFC]">
               ~{fiOsCorePlatformPercent}%
@@ -142,23 +159,26 @@ export function EcosystemCompletionSnapshot({
             </p>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {FI_ECOSYSTEM_PLATFORM_COMPLETION.map((platform) => (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {(
+            [
+              "Deployed",
+              "Operational Pilot",
+              "Advanced Build",
+              "In Development",
+              "Research and Future Development",
+            ] as const
+          ).map((status) => (
             <div
-              key={platform.id}
+              key={status}
               className="rounded-xl border border-white/[0.07] bg-[#0F1528]/70 px-3 py-3 sm:px-4"
             >
-              <p className="text-sm font-semibold text-[#F8FAFC]">{platform.name}</p>
-              <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-cyan-300/90">
-                ~{platform.completionPercent}%
+              <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">
+                {status}
               </p>
-              <div className="mt-2">
-                <PlatformProgressAnimatedBar
-                  percent={platform.completionPercent}
-                  status="Production"
-                  delay={0}
-                />
-              </div>
+              <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-cyan-300/90">
+                {counts[status]}
+              </p>
             </div>
           ))}
         </div>
@@ -168,30 +188,41 @@ export function EcosystemCompletionSnapshot({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <CompletionCard
-          label="Overall FI ecosystem completion"
-          percent={overallEcosystemPercent}
-          detail="Weighted completion across FI OS, HairAudit, IIOHR, HLI, and connected ecosystem infrastructure."
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatusCountCard
+          label="Systems tracked"
+          value={snapshot.activeModuleCount}
+          detail="Connected modules in the public progress registry."
           accent="amber"
         />
-        <CompletionCard
-          label="FI OS core platform"
-          percent={fiOsCorePlatformPercent}
-          detail={`${snapshot.activeModuleCount} connected OS modules — clinical, surgical, business, workforce, and deployment infrastructure inside Follicle Intelligence.`}
+        <StatusCountCard
+          label="Deployed"
+          value={counts.Deployed}
+          detail="Available for routine operational use within approved scope."
+          accent="emerald"
+        />
+        <StatusCountCard
+          label="Operational pilot"
+          value={counts["Operational Pilot"]}
+          detail="Live in controlled clinical or operational use."
           accent="cyan"
+        />
+        <StatusCountCard
+          label="Advanced build"
+          value={counts["Advanced Build"]}
+          detail="Core workflows exist; integration and readiness continue."
+          accent="violet"
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {FI_ECOSYSTEM_PLATFORM_COMPLETION.map((platform) => (
-          <CompletionCard
+          <SatelliteStatusCard
             key={platform.id}
-            label={platform.name}
-            percent={platform.completionPercent}
-            detail={platform.description}
+            name={platform.name}
+            description={platform.description}
+            status={platform.status ?? "Advanced Build"}
             href={platform.href}
             external={platform.external}
-            accent="violet"
           />
         ))}
       </div>

@@ -3,10 +3,7 @@
 import Link from "next/link";
 
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
-import {
-  PlatformProgressAnimatedBar,
-  PlatformProgressStatusBadge,
-} from "@/components/platform/PlatformProgressPrimitives";
+import { PlatformProgressStatusBadge } from "@/components/platform/PlatformProgressPrimitives";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -43,23 +40,11 @@ function ModuleStatusCard({
           <PlatformProgressStatusBadge status={mod.status} />
         </div>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
-            {mod.completionPercent}
-            <span className="text-base text-muted-foreground">%</span>
+        {mod.latestMilestone ? (
+          <p className="mt-4 text-[11px] font-medium leading-snug text-amber-100/75">
+            {mod.latestMilestone}
           </p>
-          <p className="max-w-none text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-amber-100/75 sm:max-w-[10rem] sm:text-right">
-            {mod.stage}
-          </p>
-        </div>
-
-        <div className="mt-3">
-          <PlatformProgressAnimatedBar
-            percent={mod.completionPercent}
-            status={mod.status}
-            delay={0.06 + index * 0.03}
-          />
-        </div>
+        ) : null}
 
         <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
           {mod.description}

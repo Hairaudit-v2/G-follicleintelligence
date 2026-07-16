@@ -23,8 +23,9 @@ export type ViePlatformPhaseStatus = ViePlatformPhase["status"];
 
 export const VIE_PLATFORM_PROGRESS = {
   name: "VIE",
-  status: "Pilot Ready" as const,
-  statusLabel: "Visual Intelligence Layer" as const,
+  status: "Operational Pilot" as const,
+  statusLabel: undefined as string | undefined,
+  /** Historical internal estimate only — not shown on public progress UI. */
   progressPercent: 86,
   completedPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "completed").map(
     (p) => `${p.id} ${p.label}`
@@ -32,10 +33,10 @@ export const VIE_PLATFORM_PROGRESS = {
   pendingPhases: VIE_PLATFORM_PHASES.filter((p) => p.status === "pending").map(
     (p) => `${p.id} ${p.label}`
   ),
-  platformStage: "VIE-7 · outcome intelligence engine",
+  platformStage: "Outcome intelligence in pilot; audit packs and global benchmarking remain",
   platformDescription:
-    "Protocol-driven clinical photography intelligence — guided capture, quality accept/retake loop, longitudinal comparison, same-angle alignment, outcome readiness signals, and surgical progress visualization. Audit evidence packs, AI clinical interpretation, and global benchmarking remain.",
-  latestMilestone: "VIE-7 Outcome Intelligence Engine completed",
+    "Protocol-driven clinical photography intelligence — guided capture, quality accept/retake, longitudinal comparison, alignment support and outcome readiness signals. Audit evidence packs, broader AI clinical interpretation and global benchmarking remain future work.",
+  latestMilestone: "Longitudinal comparison and outcome readiness signals in pilot scope",
 } as const;
 
 export type ViePlatformProgress = typeof VIE_PLATFORM_PROGRESS;
@@ -48,19 +49,18 @@ export const VIE_PLATFORM_CHANGELOG_IDS = {
 
 export const VIE_PLATFORM_LATEST_RELEASE_DATE = "2026-06-26" as const;
 
-/** Platform progress registry row — single source for name, %, status, stage, description. */
+/** Platform progress registry row — public status is the maturity signal. */
 export function buildViePlatformProgressModule(): PlatformProgressModule {
   const p = VIE_PLATFORM_PROGRESS;
   return {
     id: "visual-intelligence-engine",
     name: p.name,
     completionPercent: p.progressPercent,
-    stage: p.platformStage,
     description: p.platformDescription,
     status: p.status,
-    statusLabel: p.statusLabel,
     latestMilestone: p.latestMilestone,
     learnMoreHref: "/platform/imaging-os",
+    evidenceNote: "VIE-1…VIE-7 completed in tracker; VIE-8–10 pending.",
   };
 }
 

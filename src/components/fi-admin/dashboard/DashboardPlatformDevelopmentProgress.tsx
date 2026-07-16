@@ -37,24 +37,33 @@ export function DashboardPlatformDevelopmentProgress() {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#F8FAFC]">{mod.name}</p>
-                <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
-                  {mod.stage}
-                </p>
+                {mod.latestMilestone ? (
+                  <p className="mt-0.5 text-[10px] font-medium leading-snug tracking-[0.02em] text-slate-500">
+                    {mod.latestMilestone}
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-sm font-semibold tabular-nums text-cyan-300/90">
-                  {mod.completionPercent}%
-                </span>
+                {typeof mod.completionPercent === "number" ? (
+                  <span
+                    className="font-mono text-sm font-semibold tabular-nums text-cyan-300/90"
+                    title="Historical internal estimate only"
+                  >
+                    ~{mod.completionPercent}%
+                  </span>
+                ) : null}
                 <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
               </div>
             </div>
-            <div className="mt-2.5">
-              <PlatformProgressAnimatedBar
-                percent={mod.completionPercent}
-                status={mod.status}
-                delay={0}
-              />
-            </div>
+            {typeof mod.completionPercent === "number" ? (
+              <div className="mt-2.5">
+                <PlatformProgressAnimatedBar
+                  percent={mod.completionPercent}
+                  status={mod.status}
+                  delay={0}
+                />
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>

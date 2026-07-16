@@ -14,13 +14,12 @@ describe("viePlatformProgress", () => {
     assert.equal(mod.name, VIE_PLATFORM_PROGRESS.name);
     assert.equal(mod.completionPercent, VIE_PLATFORM_PROGRESS.progressPercent);
     assert.equal(mod.status, VIE_PLATFORM_PROGRESS.status);
-    assert.equal(mod.statusLabel, VIE_PLATFORM_PROGRESS.statusLabel);
-    assert.equal(mod.stage, VIE_PLATFORM_PROGRESS.platformStage);
     assert.equal(mod.description, VIE_PLATFORM_PROGRESS.platformDescription);
     assert.equal(mod.latestMilestone, VIE_PLATFORM_PROGRESS.latestMilestone);
   });
 
-  it("tracks 86% with VIE-1 through VIE-7 completed", () => {
+  it("tracks historical 86% estimate with VIE-1 through VIE-7 completed", () => {
+    assert.equal(VIE_PLATFORM_PROGRESS.status, "Operational Pilot");
     assert.equal(VIE_PLATFORM_PROGRESS.progressPercent, 86);
     assert.equal(VIE_PLATFORM_PROGRESS.completedPhases.length, 7);
     assert.equal(VIE_PLATFORM_PROGRESS.pendingPhases.length, 3);

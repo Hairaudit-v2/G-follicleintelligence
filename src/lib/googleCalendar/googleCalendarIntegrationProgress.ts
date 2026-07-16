@@ -7,8 +7,9 @@ import type { PlatformProgressModule } from "@/lib/marketing/platformProgressPag
 
 export const GOOGLE_CALENDAR_INTEGRATION_PROGRESS = {
   name: "CalendarOS",
-  status: "Operational beta" as const,
-  statusLabel: "Operational Beta" as const,
+  status: "Operational Pilot" as const,
+  statusLabel: undefined as string | undefined,
+  /** Historical internal estimate only — not shown on public progress UI. */
   progressPercent: 90,
   completed: [
     "Outbound FI appointment creation to Google",
@@ -29,26 +30,25 @@ export const GOOGLE_CALENDAR_INTEGRATION_PROGRESS = {
     "Patient/staff assignment intelligence from native Google events",
     "Production monitoring dashboard",
   ],
-  platformStage: "GC-11 · calendar settings centre",
+  platformStage: "Calendar connector and settings centre in operational pilot",
   platformDescription:
-    "Native CalendarOS Google connector — OAuth, outbound FI appointment creation, multi-calendar inbound sync, admin scope manager, sync health monitoring, conflict review queue, Calendar Settings Centre, and focused global CSP allowlist for Google Calendar/Auth.",
-  latestMilestone: "GC-11 Calendar Settings Centre deployed",
+    "Native calendar connector for clinic scheduling — outbound appointment creation, multi-calendar inbound sync, settings centre, sync health visibility and conflict review. Further routing intelligence remains in build.",
+  latestMilestone: "Calendar settings centre and connector health in pilot operations",
 } as const;
 
 export type GoogleCalendarIntegrationProgress = typeof GOOGLE_CALENDAR_INTEGRATION_PROGRESS;
 
-/** Platform progress registry row — single source for name, %, status, stage, description. */
+/** Platform progress registry row — public status is the maturity signal. */
 export function buildGoogleCalendarPlatformProgressModule(): PlatformProgressModule {
   const p = GOOGLE_CALENDAR_INTEGRATION_PROGRESS;
   return {
     id: "calendar-os",
     name: p.name,
     completionPercent: p.progressPercent,
-    stage: p.platformStage,
     description: p.platformDescription,
     status: p.status,
-    statusLabel: p.statusLabel,
     latestMilestone: p.latestMilestone,
+    evidenceNote: "GC-1…GC-11 tracker items largely complete; remaining routing/monitoring work.",
   };
 }
 
