@@ -1,0 +1,50 @@
+{
+  "evidenceType": "hubspot_phase_o_production_gate",
+  "milestone": "FI-HUBSPOT-BACKUP-1 Phase O production gate",
+  "recordedAt": "2026-07-16",
+  "productionPassClaimed": false,
+  "push": {
+    "featureBranch": "codex/fi-hubspot-live-sync-recovery",
+    "featureTipSha": "cfdf08c4067c1f3a80c95c4398efc9c42b9a7ce6",
+    "mergedToMain": true,
+    "mainHeadSha": "8fe2a3924e644b78295017e07b304fc67f931a26",
+    "featureTipIsAncestorOfMainHead": true
+  },
+  "deployment": {
+    "mechanism": "vercel_git_integration_main",
+    "deploymentId": "dpl_BqzrpkMs8UPac5L9vELaitzJBHMc",
+    "target": "production",
+    "readyState": "READY",
+    "deployedSha": "8fe2a3924e644b78295017e07b304fc67f931a26",
+    "matchesOriginMainHead": true,
+    "aliases": [
+      "follicleintelligence.ai",
+      "www.follicleintelligence.ai"
+    ],
+    "inspectorUrl": "https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/BqzrpkMs8UPac5L9vELaitzJBHMc"
+  },
+  "authenticatedSmoke": {
+    "suite": "FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1",
+    "baseUrl": "https://follicleintelligence.ai",
+    "suiteCommit": "8fe2a3924e644b78295017e07b304fc67f931a26",
+    "verdict": "red",
+    "blocker": "FI_E2E_PRODUCTION_ADMIN_* unavailable locally; DEMO admin alias lacks Configuration hub access so overview/configuration return notFound",
+    "demoAliasDiagnostic": {
+      "overview": { "hubspotHeading": 0, "notFound": 1 },
+      "importReview": { "hubspotHeading": 1, "notFound": 0 },
+      "configuration": { "hubspotHeading": 0, "notFound": 1 }
+    },
+    "githubWorkflowDispatchAttempted": false,
+    "githubCliAuthenticated": false,
+    "summaryPathLocal": "test-results/hubspot-production-smoke-summary.json"
+  },
+  "gates": {
+    "recoveryStackPushed": true,
+    "mergedToMain": true,
+    "productionDeploymentReady": true,
+    "deployedShaMatchesMainHead": true,
+    "authenticatedSmokePassed": false,
+    "productionPassClaimed": false
+  },
+  "nextAction": "Provide FI_E2E_PRODUCTION_ADMIN_* with Configuration hub access, or gh auth login + workflow_dispatch HubSpot Production Smoke; re-run smoke; claim Production PASS only on GREEN."
+}
