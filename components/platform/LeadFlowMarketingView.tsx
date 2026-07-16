@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
+import { FiOsScreenshot } from "@/components/marketing/FiOsScreenshot";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -10,6 +11,11 @@ import {
   LEADFLOW_PAGE_CONTENT,
   type LeadFlowCapabilityMaturity,
 } from "@/lib/marketing/leadFlowPageContent";
+import {
+  FIOS_DEMO_DATA_NOTE,
+  FIOS_LEADFLOW,
+  FIOS_SCREENSHOTS,
+} from "@/lib/marketing/fiosScreenshots";
 import {
   MARKETING_CTA_PRIMARY_CLASS,
   MARKETING_CTA_SECONDARY_CLASS,
@@ -225,6 +231,35 @@ export function LeadFlowMarketingView() {
               </li>
             ))}
           </ul>
+        </FadeIn>
+      </Section>
+
+      {/* Product imagery */}
+      <Section
+        id="leadflow-product"
+        className="scroll-mt-28 border-b border-border/40 bg-[radial-gradient(ellipse_at_50%_0%,rgb(42_168_220_/0.06),transparent_50%),rgb(3_5_10)] py-16 sm:py-20"
+        aria-labelledby="leadflow-product-heading"
+      >
+        <FadeIn>
+          <SectionHeading
+            id="leadflow-product-heading"
+            eyebrow="LeadFlow in FI OS"
+            title="See enquiry ownership on the board"
+            description="Every enquiry moves through a visible journey — from first contact to consultation and conversion."
+          />
+          <div className="mx-auto mt-10 max-w-5xl">
+            {FIOS_LEADFLOW.map((id) => (
+              <FiOsScreenshot
+                key={id}
+                asset={FIOS_SCREENSHOTS[id]}
+                featured
+                sizes="(max-width: 1024px) 100vw, 900px"
+              />
+            ))}
+          </div>
+          <p className="mt-6 text-center text-xs text-muted-foreground/80 sm:text-sm">
+            {FIOS_DEMO_DATA_NOTE}
+          </p>
         </FadeIn>
       </Section>
 

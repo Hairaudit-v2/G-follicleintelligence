@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
+import { FiOsHomeProductShowcase } from "@/components/marketing/FiOsHomeProductShowcase";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -644,6 +645,8 @@ export function FiMarketingHomeView() {
           </div>
         </FadeIn>
       </Section>
+
+      <FiOsHomeProductShowcase />
 
       {/* Section 6 — Surgery intelligence (dominant) */}
       <Section

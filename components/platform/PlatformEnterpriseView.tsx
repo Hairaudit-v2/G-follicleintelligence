@@ -5,9 +5,15 @@ import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
+import { FiOsScreenshot } from "@/components/marketing/FiOsScreenshot";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
+import {
+  FIOS_DEMO_DATA_NOTE,
+  FIOS_PLATFORM,
+  FIOS_SCREENSHOTS,
+} from "@/lib/marketing/fiosScreenshots";
 import { PLATFORM_PAGE_CONTENT } from "@/lib/marketing/platformPageContent";
 import {
   MARKETING_CTA_PRIMARY_CLASS,
@@ -280,6 +286,36 @@ export function PlatformEnterpriseView() {
               </li>
             ))}
           </ul>
+        </FadeIn>
+      </Section>
+
+      <Section
+        id="platform-product-showcase"
+        className="border-b border-border/50 bg-[radial-gradient(ellipse_at_50%_0%,rgb(42_168_220_/0.06),transparent_50%),rgb(3_5_10)] py-16 sm:py-20 md:py-24"
+        aria-labelledby="platform-product-showcase-heading"
+      >
+        <FadeIn>
+          <SectionHeading
+            id="platform-product-showcase-heading"
+            eyebrow="FI OS modules"
+            title="Working views across the operating system"
+            description="Patients, LeadFlow, calendar and surgery — connected clinic workflows in one environment."
+          />
+          <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2">
+            {FIOS_PLATFORM.map((id, index) => (
+              <li key={id} className="min-w-0">
+                <FadeIn delay={0.04 * (index % 4)}>
+                  <FiOsScreenshot
+                    asset={FIOS_SCREENSHOTS[id]}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </FadeIn>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-center text-xs text-muted-foreground/80 sm:text-sm">
+            {FIOS_DEMO_DATA_NOTE}
+          </p>
         </FadeIn>
       </Section>
 

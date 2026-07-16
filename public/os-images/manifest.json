@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-07-16T10:36:04.112Z",
+  "note": "Chrome identity replaced with FI Demonstration Clinic / demo@follicleintelligence.ai. Body names softened where practical. Clean tenant recapture still preferred.",
+  "results": [
+    {
+      "key": "today",
+      "source": "Screenshot_16-7-2026_20454_follicleintelligence.ai.jpeg",
+      "out": "fios-today-command-centre.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "2200x1120",
+      "beforeBytes": 170656,
+      "afterBytes": 44454
+    },
+    {
+      "key": "calendar",
+      "source": "Screenshot_16-7-2026_20516_follicleintelligence.ai.jpeg",
+      "out": "fios-calendar-week-view.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "3000x1180",
+      "beforeBytes": 290049,
+      "afterBytes": 70560
+    },
+    {
+      "key": "frontDesk",
+      "source": "Screenshot_16-7-2026_20555_follicleintelligence.ai.jpeg",
+      "out": "fios-front-desk-today.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "2400x1080",
+      "beforeBytes": 159035,
+      "afterBytes": 39692
+    },
+    {
+      "key": "patients",
+      "source": "Screenshot_16-7-2026_20539_follicleintelligence.ai.jpeg",
+      "out": "fios-patient-journey-workspace.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "2400x1040",
+      "beforeBytes": 183251,
+      "afterBytes": 42886
+    },
+    {
+      "key": "pipeline",
+      "source": "Screenshot_16-7-2026_201155_follicleintelligence.ai.jpeg",
+      "out": "fios-leadflow-pipeline-board.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "3000x1140",
+      "beforeBytes": 210550,
+      "afterBytes": 64424
+    },
+    {
+      "key": "surgery",
+      "source": "Screenshot_16-7-2026_201356_follicleintelligence.ai.jpeg",
+      "out": "fios-surgery-workspace.webp",
+      "sourceDims": "3314x1230",
+      "outDims": "2400x560",
+      "beforeBytes": 204875,
+      "afterBytes": 28876
+    }
+  ]
+}

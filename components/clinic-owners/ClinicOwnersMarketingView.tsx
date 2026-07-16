@@ -4,12 +4,18 @@ import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
+import { FiOsScreenshot } from "@/components/marketing/FiOsScreenshot";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import {
   CLINIC_OWNERS_PAGE_CONTENT,
   type ClinicOwnerVisibilityMaturity,
 } from "@/lib/marketing/clinicOwnersPageContent";
+import {
+  FIOS_CLINIC_OWNERS,
+  FIOS_DEMO_DATA_NOTE,
+  FIOS_SCREENSHOTS,
+} from "@/lib/marketing/fiosScreenshots";
 import {
   MARKETING_CTA_PRIMARY_CLASS,
   MARKETING_CTA_SECONDARY_CLASS,
@@ -128,6 +134,37 @@ export function ClinicOwnersMarketingView() {
           </FadeIn>
         </div>
       </section>
+
+      {/* Owner workflow imagery */}
+      <Section
+        id="owner-workflows"
+        className="scroll-mt-28 border-b border-border/50 bg-[radial-gradient(ellipse_at_40%_0%,rgb(42_168_220_/0.06),transparent_50%),rgb(3_5_10)] py-16 sm:py-20 md:py-24"
+        aria-labelledby="owner-workflows-heading"
+      >
+        <FadeIn>
+          <SectionHeading
+            id="owner-workflows-heading"
+            eyebrow="Owner visibility"
+            title="The workflows owners watch every day"
+            description="Today priorities, front-desk flow and calendar coordination — the operating views that keep a clinic moving."
+          />
+          <ul className="mt-10 grid list-none gap-6 p-0 md:grid-cols-3">
+            {FIOS_CLINIC_OWNERS.map((id, index) => (
+              <li key={id} className="min-w-0">
+                <FadeIn delay={0.04 * index}>
+                  <FiOsScreenshot
+                    asset={FIOS_SCREENSHOTS[id]}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </FadeIn>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-center text-xs text-muted-foreground/80 sm:text-sm">
+            {FIOS_DEMO_DATA_NOTE}
+          </p>
+        </FadeIn>
+      </Section>
 
       {/* Problem */}
       <Section
