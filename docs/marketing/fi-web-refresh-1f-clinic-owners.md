@@ -103,9 +103,23 @@ Aspect ratio preserved (`w-auto`). No stretch/crop in CSS.
 
 ### Screenshots
 
-`docs/marketing/screenshots/fi-web-refresh-1f-logo/`
+`docs/marketing/screenshots/fi-web-refresh-1f-logo/` (initial)
 
 - `desktop-header.png`
 - `desktop-header-narrow.png`
 - `mobile-header.png`
 - `desktop-header-scrolled.png` (sticky state)
+
+### Correction — FI-WEB-REFRESH-1H-A
+
+Further header lockup correction:
+
+| Field | Value |
+| --- | --- |
+| Root cause of cropping | Previous header PNG cropped the chevron mark too tightly (side bounds cut tips); container used fixed ratios that visually clipped artwork |
+| Replacement asset | `public/brand/follicle-intelligence-logo-header-white.png` recreated from `Logo Files/png/White logo - no background.png` with full-mark crop + breathing room (137×128 source) |
+| Rendered | ~30–32px height desktop; ~30px mobile; `object-contain` |
+| Lockup | **FI OS** (primary) + **HAIR RESTORATION** (muted, `lg+` only) |
+| Removed | Full “Follicle Intelligence / Hair restoration operating system” two-line header wordmark |
+| Colour | Light foreground for FI OS; muted descriptor — no red/full-wordmark emphasis |
+| Screenshots | `docs/marketing/screenshots/fi-web-refresh-1h-a-header/` |

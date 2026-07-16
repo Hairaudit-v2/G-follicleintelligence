@@ -46,26 +46,29 @@ export function Header() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:gap-4 sm:px-6">
         <Link
           href="/"
-          className="flex min-w-0 shrink-0 items-center gap-2.5 font-semibold tracking-tight sm:gap-3"
+          className="group flex min-w-0 shrink-0 items-center gap-2.5 tracking-tight sm:gap-3"
           aria-label="Follicle Intelligence home"
         >
-          <Image
-            src={PUBLIC_IMAGES.follicleLogoHeaderWhite}
-            alt="Follicle Intelligence"
-            width={36}
-            height={26}
-            className="h-6 w-auto sm:h-7"
-            sizes="(max-width: 640px) 24px, 28px"
-            priority
-          />
-          <div className="min-w-0 leading-none">
-            <span className="block text-[13px] text-foreground sm:text-sm">
-              Follicle Intelligence
+          {/* Full approved mark; object-contain + no overflow so artwork is never clipped. */}
+          <span className="relative flex h-[30px] w-[34px] shrink-0 items-center justify-center sm:h-8 sm:w-[36px]">
+            <Image
+              src={PUBLIC_IMAGES.follicleLogoHeaderWhite}
+              alt=""
+              width={137}
+              height={128}
+              className="h-full w-full object-contain object-center"
+              sizes="(max-width: 640px) 30px, 34px"
+              priority
+            />
+          </span>
+          <span className="min-w-0 leading-none">
+            <span className="block text-[11px] font-semibold tracking-[0.06em] text-foreground sm:text-[12px]">
+              FI OS
             </span>
-            <span className="mt-0.5 hidden text-[9px] uppercase tracking-[0.28em] text-muted-foreground sm:mt-1 sm:block sm:text-[10px]">
-              Hair restoration operating system
+            <span className="mt-1 hidden text-[7px] font-medium uppercase tracking-[0.24em] text-muted-foreground lg:block lg:text-[8px]">
+              Hair restoration
             </span>
-          </div>
+          </span>
         </Link>
 
         <div className="flex min-w-0 flex-1 items-center justify-end gap-6 lg:gap-8">
