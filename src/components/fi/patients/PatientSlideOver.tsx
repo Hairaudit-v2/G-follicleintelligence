@@ -13,6 +13,10 @@ import {
 } from "react";
 import { loadPatientSlideOverBundleAction } from "@/lib/actions/fi-patient-actions";
 import type { PatientSlideOverPayload } from "@/src/lib/patients/patientSlideOverLoader";
+import {
+  buildCanonicalPatientProfileHref,
+  patientProfileCacheKey,
+} from "@/src/lib/patients/resolvePatientProfile";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
 import { PatientBookNextAppointmentCard } from "./shared/PatientBookNextAppointmentCard";
 import { PatientConsultationsCard } from "./shared/PatientConsultationsCard";
@@ -174,9 +178,11 @@ export function PatientSlideOverPanel({
       setLoading(false);
       return;
     }
+    // Fail closed on navigation: never keep patient A's payload while loading B.
+    setPayload(null);
+    setLoadError(null);
     let cancelled = false;
     setLoading(true);
-    setLoadError(null);
     void loadPatientSlideOverBundleAction(tenantId, patientId).then((r) => {
       if (cancelled) return;
       setLoading(false);
@@ -192,12 +198,16 @@ export function PatientSlideOverPanel({
     };
   }, [open, patientId, tenantId, signalRefreshToken]);
 
-  const href = payload ? `/fi-admin/${tenantId}/patients/${payload.patientId}` : "#";
+  const href = payload
+    ? buildCanonicalPatientProfileHref(tenantId, payload.patientId)
+    : "#";
+  const panelKey = patientProfileCacheKey(tenantId, patientId || "none");
 
   if (!open) return null;
 
   return (
     <div
+      key={panelKey}
       className="fixed inset-0 z-40 flex justify-end bg-black/30 sm:items-stretch"
       role="presentation"
       onMouseDown={(e) => {

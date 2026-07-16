@@ -13,6 +13,8 @@ import {
   loadPatientOutcomeProtocols,
 } from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.server";
+import { resolvePatientProfile } from "@/src/lib/patients/resolvePatientProfile.server";
+import { buildCanonicalPatientProfileHref } from "@/src/lib/patients/resolvePatientProfile";
 
 export const dynamic = "force-dynamic";
 
@@ -54,12 +56,19 @@ export default async function PatientTwinV1RoutePage({
     );
   }
 
-  const twin = await loadPatientTwinV1({ tenantId: tid, foundationPatientId: pid });
+  const resolved = await resolvePatientProfile({ tenantId: tid, patientId: pid });
+  if (!resolved.ok) notFound();
+  const canonicalPatientId = resolved.data.patientId;
+
+  const twin = await loadPatientTwinV1({
+    tenantId: tid,
+    foundationPatientId: canonicalPatientId,
+  });
   if (!twin) notFound();
 
   const [outcomeMeasurements, outcomeProtocols] = await Promise.all([
-    loadPatientOutcomeMeasurements(tid, pid),
-    loadPatientOutcomeProtocols(tid, pid),
+    loadPatientOutcomeMeasurements(tid, canonicalPatientId),
+    loadPatientOutcomeProtocols(tid, canonicalPatientId),
   ]);
 
   const clinicalIntel: PatientClinicalIntelligenceView = {
@@ -67,7 +76,7 @@ export default async function PatientTwinV1RoutePage({
     recommendedNextStep: twin.completeness?.recommended_actions?.[0]?.label ?? null,
   };
 
-  const profileHref = `/fi-admin/${tid}/patients/${pid}`;
+  const profileHref = buildCanonicalPatientProfileHref(tid, canonicalPatientId);
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -80,7 +89,7 @@ export default async function PatientTwinV1RoutePage({
       </Link>
       <PatientTwinDashboard
         tenantId={tid}
-        patientId={pid}
+        patientId={canonicalPatientId}
         twin={twin}
         clinicalIntel={clinicalIntel}
         outcomeMeasurements={outcomeMeasurements}

@@ -154,8 +154,12 @@ export async function loadClinicOsGlobalSearchResults(
     const patients: ClinicOsGlobalSearchPatient[] =
       patientBlock?.patients.map((hit) => {
         const { email, phone } = patientEmailPhoneFromSubtitle(hit.subtitle);
+        const patientId = hit.patientId ?? hit.id;
         return {
-          id: hit.id,
+          entityType: "patient" as const,
+          id: patientId,
+          patientId,
+          personId: hit.personId ?? null,
           name: hit.title,
           email,
           phone,

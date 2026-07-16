@@ -8,6 +8,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { enrichCasesWithExternalAndNames } from "./patientRecord";
 import type { FoundationSupabase } from "./types";
+import { searchCanonicalPatients } from "@/src/lib/patients/canonicalPatientSearch.server";
+import { type CanonicalPatientSearchHit } from "@/src/lib/patients/resolvePatientProfile";
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
@@ -22,6 +24,11 @@ export type FoundationSearchHit = {
   href: string;
   source_system: string | null;
   warning: string | null;
+  /** Present for patient hits — always `"patient"` with canonical `fi_patients.id`. */
+  entityType?: "patient";
+  /** Canonical `fi_patients.id` when type is patient. */
+  patientId?: string;
+  personId?: string | null;
 };
 
 export type SearchFoundationRecordsParams = {
@@ -69,13 +76,19 @@ function adminBase(tenantId: string): string {
   return `/fi-admin/${tenantId}`;
 }
 
-function patientHref(
-  tenantId: string,
-  foundationPatientId: string | null,
-  globalPatientId: string | null
-): string {
-  const slug = foundationPatientId ?? globalPatientId;
-  return `${adminBase(tenantId)}/patients/${slug ?? ""}`;
+function canonicalHitToFoundationHit(hit: CanonicalPatientSearchHit): FoundationSearchHit {
+  return {
+    id: hit.patientId,
+    patientId: hit.patientId,
+    personId: hit.personId,
+    entityType: "patient",
+    title: hit.displayName,
+    subtitle: [hit.email, hit.phone].filter(Boolean).join(" · "),
+    type: "patient",
+    href: hit.profileHref,
+    source_system: null,
+    warning: null,
+  };
 }
 
 export async function searchFoundationRecords(
@@ -108,73 +121,18 @@ export async function searchFoundationRecords(
   };
 
   if (want("patients")) {
-    let q = supabase
-      .from("v_fi_patient_resolution")
-      .select("*")
-      .eq("tenant_id", tid)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (query) {
-      const p = `%${escapeIlikePattern(query)}%`;
-      const parts = [
-        `display_name.ilike.${p}`,
-        `email.ilike.${p}`,
-        `phone.ilike.${p}`,
-        `source_system.ilike.${p}`,
-        `source_patient_id.ilike.${p}`,
-      ];
-      if (uuidLike(query)) {
-        const id = query.trim();
-        parts.push(`global_patient_id.eq.${id}`);
-        parts.push(`foundation_patient_id.eq.${id}`);
-        parts.push(`person_id.eq.${id}`);
-      }
-      q = q.or(parts.join(","));
-    }
-
-    const { data, error } = await q;
-    if (error) throw new Error(error.message);
-    for (const row of data ?? []) {
-      const r = row as {
-        global_patient_id: string | null;
-        foundation_patient_id: string | null;
-        person_id: string | null;
-        source_system: string;
-        source_patient_id: string;
-        display_name: string | null;
-        email: string | null;
-        phone: string | null;
-      };
-      const slug = r.foundation_patient_id ?? r.global_patient_id;
-      if (!slug) continue;
-      const title = r.display_name?.trim() || "Patient (unnamed)";
-      const subtitle =
-        [r.email, r.phone].filter(Boolean).join(" · ") ||
-        `${r.source_system}:${r.source_patient_id}`;
-      let warning: string | null = null;
-      if (r.global_patient_id && !r.foundation_patient_id) {
-        warning = "No foundation patient linked for this global stub.";
-      }
-      if (!r.person_id && r.foundation_patient_id) {
-        warning = warning ? `${warning} No person_id on record.` : "No person_id resolved.";
-      }
-      const dedupeKey = r.foundation_patient_id
-        ? `fp:${r.foundation_patient_id}`
-        : `gp:${r.global_patient_id}`;
-      pushPatient(
-        {
-          id: slug,
-          title,
-          subtitle,
-          type: "patient",
-          href: patientHref(tid, r.foundation_patient_id, r.global_patient_id),
-          source_system: r.source_system ?? null,
-          warning,
-        },
-        dedupeKey
-      );
-      if (patients.length >= limit) break;
+    // Canonical clinic search: fi_patients.id only — never global stubs, person IDs, or smoke fixtures.
+    const hits = await searchCanonicalPatients(
+      {
+        tenantId: tid,
+        query: query ?? "",
+        limit,
+        excludeSmokeOrTest: true,
+      },
+      supabase
+    );
+    for (const hit of hits) {
+      pushPatient(canonicalHitToFoundationHit(hit), `fp:${hit.patientId}`);
     }
   }
 

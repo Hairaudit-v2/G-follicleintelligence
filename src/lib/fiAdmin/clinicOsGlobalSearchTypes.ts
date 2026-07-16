@@ -1,7 +1,10 @@
 /** Shared types for Clinic OS global search (client + server). */
 
 export type ClinicOsGlobalSearchPatient = {
+  entityType: "patient";
   id: string;
+  patientId: string;
+  personId: string | null;
   name: string;
   email: string | null;
   phone: string | null;

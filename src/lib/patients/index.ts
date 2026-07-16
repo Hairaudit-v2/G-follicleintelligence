@@ -6,6 +6,8 @@ export * from "./patientLabels";
 export * from "./patientDirectoryQuery";
 export * from "./patientDirectoryMetrics";
 export * from "./patientProfileSummary";
+export * from "./resolvePatientProfile";
+export * from "./patientSmokeIdentity";
 export * from "./clinicalDetailsPolicy";
 export * from "./clinicalDetailsChangedFields";
 export * from "./clinicalDetailsLabels";

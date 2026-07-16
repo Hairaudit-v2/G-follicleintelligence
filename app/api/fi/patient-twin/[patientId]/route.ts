@@ -39,7 +39,21 @@ export async function GET(
       return NextResponse.json({ ok: false, error: access.message }, { status: access.status });
     }
 
-    const twin = await loadPatientTwinV1({ tenantId: tenant_id, foundationPatientId: pid });
+    const { resolvePatientProfile } = await import(
+      "@/src/lib/patients/resolvePatientProfile.server"
+    );
+    const resolved = await resolvePatientProfile({
+      tenantId: tenant_id,
+      patientId: pid,
+    });
+    if (!resolved.ok) {
+      return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
+    }
+
+    const twin = await loadPatientTwinV1({
+      tenantId: resolved.data.tenantId,
+      foundationPatientId: resolved.data.patientId,
+    });
     if (!twin) {
       return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
     }

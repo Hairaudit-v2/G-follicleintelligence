@@ -28,6 +28,7 @@ import {
   mapActivityRowForTimeline,
 } from "@/src/lib/patients/timeline/patientTimelineBuild";
 import type { PatientTimelineBuildResult } from "@/src/lib/patients/timeline/patientTimelineTypes";
+import { resolvePatientProfile } from "@/src/lib/patients/resolvePatientProfile.server";
 import {
   loadTrialConsentGateStatus,
   type TrialConsentGateStatus,
@@ -136,26 +137,21 @@ export type PatientProfileLoadResult =
   | { ok: true; mode: "legacy_global"; data: PatientProfileLegacyGlobalData }
   | { ok: false; error: "not_found" };
 
-async function resolveSlugToFoundationOrGlobal(
+/**
+ * @deprecated Ordinary profile routes must use {@link resolvePatientProfile}.
+ * Kept only for explicitly named legacy-global diagnostics — never selects first-row mappings.
+ */
+export async function resolveLegacyGlobalPatientSlug(
   supabase: SupabaseClient,
   tenantId: string,
   slug: string
 ): Promise<
-  | { kind: "foundation"; foundationPatientId: string }
   | { kind: "legacy_global"; globalPatientId: string }
+  | { kind: "ambiguous" }
   | { kind: "none" }
 > {
   const tid = tenantId.trim();
   const s = slug.trim();
-  const { data: asPatient, error: pErr } = await supabase
-    .from("fi_patients")
-    .select("id")
-    .eq("tenant_id", tid)
-    .eq("id", s)
-    .maybeSingle();
-  if (pErr) throw new Error(pErr.message);
-  if (asPatient) return { kind: "foundation", foundationPatientId: s };
-
   const { data: asGlobal, error: gErr } = await supabase
     .from("fi_global_patients")
     .select("id")
@@ -171,11 +167,15 @@ async function resolveSlugToFoundationOrGlobal(
     .eq("tenant_id", tid)
     .eq("global_patient_id", s);
   if (rErr) throw new Error(rErr.message);
-  const fids = (resRows ?? [])
-    .map((r) => (r as { foundation_patient_id: string | null }).foundation_patient_id)
-    .filter((x): x is string => Boolean(x));
-  if (fids.length > 0) return { kind: "foundation", foundationPatientId: fids[0]! };
-
+  const fids = Array.from(
+    new Set(
+      (resRows ?? [])
+        .map((r) => (r as { foundation_patient_id: string | null }).foundation_patient_id)
+        .filter((x): x is string => Boolean(x))
+    )
+  );
+  // Fail closed: never silently pick the first of many foundation mappings.
+  if (fids.length > 0) return { kind: "ambiguous" };
   return { kind: "legacy_global", globalPatientId: s };
 }
 
@@ -200,17 +200,14 @@ export async function loadPatientProfile(
 ): Promise<PatientProfileLoadResult> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
-  const anchor = await resolveSlugToFoundationOrGlobal(supabase, tid, patientSlug);
-  if (anchor.kind === "none") return { ok: false, error: "not_found" };
-  if (anchor.kind === "legacy_global") {
-    return {
-      ok: true,
-      mode: "legacy_global",
-      data: { tenantId: tid, globalPatientId: anchor.globalPatientId },
-    };
-  }
+  const resolved = await resolvePatientProfile(
+    { tenantId: tid, patientId: patientSlug },
+    supabase
+  );
+  if (!resolved.ok) return { ok: false, error: "not_found" };
 
-  const foundationPatientId = anchor.foundationPatientId;
+  const foundationPatientId = resolved.data.patientId;
+  const personId = resolved.data.personId;
 
   const { data: patRow, error: pe } = await supabase
     .from("fi_patients")
@@ -224,7 +221,6 @@ export async function loadPatientProfile(
   if (!patRow) return { ok: false, error: "not_found" };
 
   const pr = patRow as Record<string, unknown>;
-  const personId = String(pr.person_id);
 
   const { data: personRow, error: perr } = await supabase
     .from("fi_persons")

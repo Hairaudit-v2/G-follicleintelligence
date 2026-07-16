@@ -12,7 +12,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ tena
   try {
     const { tenantId } = await params;
     if (!tenantId?.trim()) {
-      return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Tenant workspace required.", code: "TENANT_REQUIRED" },
+        { status: 400 }
+      );
     }
 
     const gate = await checkFiTenantPortalApiAccess(request, tenantId);

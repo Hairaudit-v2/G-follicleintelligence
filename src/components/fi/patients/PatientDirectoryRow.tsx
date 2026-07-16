@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PatientDirectoryRow as PatientDirectoryRowModel } from "@/src/lib/patients/patientDirectoryLoader";
+import { buildCanonicalPatientProfileHref } from "@/src/lib/patients/resolvePatientProfile";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
 
@@ -10,7 +11,7 @@ export function PatientDirectoryRow({
   tenantId: string;
   row: PatientDirectoryRowModel;
 }) {
-  const href = `/fi-admin/${tenantId}/patients/${row.patientId}`;
+  const href = buildCanonicalPatientProfileHref(tenantId, row.patientId);
   return (
     <tr className="border-t border-white/[0.06] hover:bg-white/[0.03]">
       <td className="px-3 py-2 text-sm">

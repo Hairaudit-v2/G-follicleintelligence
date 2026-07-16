@@ -1,6 +1,5 @@
 import "server-only";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { attachSearchPattern, parseCrmLeadListQuery } from "@/src/lib/crm/crmLeadListQuery";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
@@ -57,46 +56,32 @@ export async function loadConsultationLinkSearchResults(
     type: "patients",
     limit: MAX,
   });
-  const candidateIds: string[] = [];
-  for (const h of block.patients) {
-    if (h.warning?.includes("No foundation")) continue;
-    if (!uuidLike(h.id)) continue;
-    candidateIds.push(h.id);
-  }
-  const uniquePatientIds = Array.from(new Set(candidateIds)).slice(0, MAX);
+  const uniquePatientIds = Array.from(
+    new Set(block.patients.map((h) => h.patientId ?? h.id).filter((id) => uuidLike(id)))
+  ).slice(0, MAX);
 
   let patients: ConsultationLinkSearchPatientHit[] = [];
   if (uniquePatientIds.length > 0) {
-    const supabase = supabaseAdmin();
-    const { data, error } = await supabase
-      .from("v_fi_patient_resolution")
-      .select("foundation_patient_id, person_id, display_name, email, phone")
-      .eq("tenant_id", tid)
-      .in("foundation_patient_id", uniquePatientIds);
-    if (error) throw new Error(error.message);
-    const order = new Map(uniquePatientIds.map((id, i) => [id, i]));
-    patients = (data ?? [])
-      .map((raw) => {
-        const r = raw as {
-          foundation_patient_id: string | null;
-          person_id: string | null;
-          display_name: string | null;
-          email: string | null;
-          phone: string | null;
-        };
-        const fp = r.foundation_patient_id?.trim();
-        const per = r.person_id?.trim();
-        if (!fp || !per) return null;
+    const byId = new Map(block.patients.map((h) => [h.patientId ?? h.id, h]));
+    patients = uniquePatientIds
+      .map((id) => {
+        const hit = byId.get(id);
+        if (!hit?.personId?.trim()) return null;
+        const parts = (hit.subtitle ?? "")
+          .split(" · ")
+          .map((p) => p.trim())
+          .filter(Boolean);
+        const email = parts.find((p) => p.includes("@")) ?? null;
+        const phone = parts.find((p) => !p.includes("@")) ?? null;
         return {
-          id: fp,
-          person_id: per,
-          name: r.display_name?.trim() || "Patient",
-          email: r.email?.trim() || null,
-          phone: r.phone?.trim() || null,
+          id,
+          person_id: hit.personId.trim(),
+          name: hit.title?.trim() || "Patient",
+          email,
+          phone,
         } satisfies ConsultationLinkSearchPatientHit;
       })
       .filter((x): x is ConsultationLinkSearchPatientHit => x != null)
-      .sort((a, b) => (order.get(a.id) ?? 99) - (order.get(b.id) ?? 99))
       .slice(0, MAX);
   }
 

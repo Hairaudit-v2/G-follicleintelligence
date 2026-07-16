@@ -30,6 +30,7 @@ import {
 } from "./patientDirectoryMetrics";
 import { isActiveCaseStatus } from "./patientProfileSummary";
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
+import { isSmokeOrTestPatientIdentity } from "./patientSmokeIdentity";
 
 export type PatientDirectoryRow = {
   patientId: string;
@@ -403,7 +404,11 @@ export async function loadPatientDirectoryPage(
   let listQuery = supabase
     .from("fi_patients")
     .select("id, person_id, created_at, admin_note, patient_status, metadata", { count: "exact" })
-    .eq("tenant_id", tid);
+    .eq("tenant_id", tid)
+    // Deterministic smoke/demo exclusion (ordinary clinic directory).
+    .is("metadata->>smoketest_key", null)
+    .is("metadata->>smoketest_seed_tag", null)
+    .not("metadata->>enterprise_demo_patient", "eq", "true");
 
   if (query.patientStatus) {
     listQuery = listQuery.eq("patient_status", query.patientStatus);
@@ -585,7 +590,8 @@ export async function loadPatientDirectoryPage(
     supabase
   );
 
-  const rows: PatientDirectoryRow[] = (patRows ?? []).map((raw) => {
+  const rows: PatientDirectoryRow[] = (patRows ?? [])
+    .map((raw) => {
     const r = raw as {
       id: string;
       person_id: string;
@@ -598,6 +604,9 @@ export async function loadPatientDirectoryPage(
       r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
         ? (r.metadata as Record<string, unknown>)
         : {};
+    if (isSmokeOrTestPatientIdentity({ patientMetadata: patMeta, personMetadata: meta })) {
+      return null;
+    }
     const idc = derivePatientIdentityContact({ personMetadata: meta, patientMetadata: patMeta });
     const displayName = idc.fullName;
     const email = idc.primaryEmail;
@@ -640,7 +649,8 @@ export async function loadPatientDirectoryPage(
         ? deriveLegacyPatientBadges(legacyVisibility, legacyPolicy)
         : [],
     };
-  });
+  })
+    .filter((row): row is PatientDirectoryRow => row != null);
 
   return { rows, total: count ?? rows.length, query, summary, leadSourceOptions };
 }

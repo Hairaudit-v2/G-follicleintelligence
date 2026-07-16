@@ -28,6 +28,7 @@ import {
 } from "./patientLeadHistory";
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
 import { isActiveCaseStatus } from "./patientProfileSummary";
+import { resolvePatientProfile } from "./resolvePatientProfile.server";
 
 export type PatientSlideOverPayload = {
   patientId: string;
@@ -112,8 +113,10 @@ export async function loadPatientSlideOverPayload(
 ): Promise<PatientSlideOverPayload | null> {
   const supabase = client ?? supabaseAdmin();
   const tid = tenantId.trim();
-  const pid = patientId.trim();
-  if (!tid || !pid) return null;
+  const resolved = await resolvePatientProfile({ tenantId: tid, patientId }, supabase);
+  if (!resolved.ok) return null;
+  const pid = resolved.data.patientId;
+  const personId = resolved.data.personId;
 
   const { data: patRow, error: pe } = await supabase
     .from("fi_patients")
@@ -124,7 +127,6 @@ export async function loadPatientSlideOverPayload(
   if (pe) throw new Error(pe.message);
   if (!patRow) return null;
 
-  const personId = String((patRow as { person_id: string }).person_id);
   const nowIso = new Date().toISOString();
 
   const personLeadHistory = await loadPatientPersonLeadHistory(supabase, tid, personId, pid);
