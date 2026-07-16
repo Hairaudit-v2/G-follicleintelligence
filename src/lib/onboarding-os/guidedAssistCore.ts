@@ -24,6 +24,7 @@ import {
   getRuleBasedNextBestActions,
   inferGuidedAssistExperienceLevel,
 } from "./getTieredAndContextualTips";
+import { getClinicalQuickActions } from "./getClinicalQuickActions";
 import { emptyEngagementSnapshot, formatStreakMessage } from "./guidedAssistEngagementCore";
 import { buildGuidedAssistDebugInfo } from "./guidedAssistForceShow";
 import { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
@@ -40,6 +41,7 @@ import type {
   GuidedAssistEngagementSnapshot,
   GuidedAssistExperienceLevel,
   GuidedAssistNextActionView,
+  GuidedAssistQuickActionView,
   GuidedAssistResolvedPreferences,
   GuidedAssistRoleScope,
   GuidedAssistSessionPayload,
@@ -367,6 +369,16 @@ export function buildGuidedAssistSessionPayload(opts: {
   }
 
   const nextAction = guideVisible ? selectGuidedAssistNextAction(opts.ctx) : null;
+  const clinicalQuickActions: GuidedAssistQuickActionView[] = guideVisible
+    ? getClinicalQuickActions({
+        tenantId: opts.ctx.tenantId,
+        todayRole,
+        pageKey: opts.ctx.pageKey,
+        stats,
+        timeOfDay,
+        maxActions: 3,
+      })
+    : [];
   const tenantBase = `/fi-admin/${opts.ctx.tenantId.trim()}`;
   const settingsHref = `${tenantBase}/settings/clinic-guide`;
   const canManageTenantDefaults =
@@ -428,6 +440,7 @@ export function buildGuidedAssistSessionPayload(opts: {
     timeOfDay,
     experienceLevel,
     nextBestActions,
+    clinicalQuickActions,
     // Re-enable chrome when preference is off (even if force-show is temporarily on).
     showReenableChrome: !opts.resolved.assistEnabled && !forceShowActive,
     settingsHref,

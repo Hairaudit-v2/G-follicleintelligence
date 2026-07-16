@@ -7,6 +7,7 @@
 import type {
   GuidedAssistArea,
   GuidedAssistNextActionDefinition,
+  GuidedAssistQuickActionDefinition,
   GuidedAssistTipDefinition,
 } from "./guidedAssistTypes";
 
@@ -1594,6 +1595,138 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
   },
 ];
 
+/**
+ * Clinical Quick Actions — one-tap operational co-pilot links.
+ * Warm labels; strictly navigation / checklists (never clinical advice).
+ */
+export const GUIDED_ASSIST_QUICK_ACTIONS: readonly GuidedAssistQuickActionDefinition[] = [
+  {
+    code: "qa_imaging_flow",
+    area: "consultation_os",
+    label: "Let’s handle imaging",
+    description: "Open imaging upload & comparison — operational checklist only.",
+    hrefSuffix: "imaging",
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 1,
+    checklist: [
+      "Confirm the right patient before upload",
+      "Use consistent views (front / sides as your clinic prefers)",
+      "Save, then open comparison if reviewing progress",
+    ],
+  },
+  {
+    code: "qa_imaging_patient",
+    area: "consultation_os",
+    label: "Patient imaging folder",
+    description: "Jump to this patient’s imaging workspace.",
+    hrefSuffix: "patients/{{patientId}}/imaging",
+    requiresPatientContext: true,
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 1,
+    checklist: [
+      "Identity confirmed on the patient record",
+      "Upload new photos only when media is ready",
+      "Compare side-by-side — no diagnostic interpretation from the guide",
+    ],
+  },
+  {
+    code: "qa_scale_tool",
+    area: "consultation_os",
+    label: "Open scale fields",
+    description: "Find SGFHC / Green / ADFHL fields in consultation forms (forms only).",
+    hrefSuffix: "consultations",
+    roles: ["doctor", "nurse"],
+    priority: 2,
+    checklist: [
+      "Open the correct consultation form",
+      "Complete scale fields your clinic uses",
+      "The guide never scores or interprets results",
+    ],
+  },
+  {
+    code: "qa_prep_consult",
+    area: "consultation_os",
+    label: "Quick prep for consult",
+    description: "Doctor overview → list → patient history & forms.",
+    hrefSuffix: "doctor",
+    roles: ["doctor", "nurse"],
+    priority: 2,
+    checklist: [
+      "Open Doctor overview or Consultations",
+      "Review history and linked imaging before the visit",
+      "Open note templates if your clinic uses them",
+    ],
+  },
+  {
+    code: "qa_patient_timeline",
+    area: "consultation_os",
+    label: "View patient timeline",
+    description: "Notes and history in one place.",
+    hrefSuffix: "patients/{{patientId}}/timeline",
+    requiresPatientContext: true,
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 3,
+  },
+  {
+    code: "qa_patients_directory",
+    area: "consultation_os",
+    label: "Find a patient",
+    description: "Search the patient directory when you need a record fast.",
+    hrefSuffix: "patients",
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 4,
+  },
+  {
+    code: "qa_schedule_followup",
+    area: "reception_os",
+    label: "Smooth follow-up scheduling",
+    description: "Open Calendar to book the next visit (operational booking only).",
+    hrefSuffix: "calendar",
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 3,
+    checklist: [
+      "Pick an open slot on Calendar",
+      "Link the patient when booking",
+      "Add a Pipeline task if someone else needs a call",
+    ],
+  },
+  {
+    code: "qa_pipeline_consultant",
+    area: "reception_os",
+    label: "Work Pipeline enquiries",
+    description: "Call, note, stage — keep enquiries moving.",
+    hrefSuffix: "crm",
+    roles: ["consultant"],
+    priority: 1,
+  },
+  {
+    code: "qa_batch_photo_audit",
+    area: "consultation_os",
+    label: "Batch photo readiness",
+    description: "When volume is high, work Pipeline then attach media on each record.",
+    hrefSuffix: "crm",
+    roles: ["consultant", "nurse", "doctor"],
+    priority: 5,
+    contextTriggers: { condition: "high_open_leads" },
+    checklist: [
+      "Filter Pipeline for open enquiries",
+      "Open each patient for imaging when ready",
+      "Operational media workflow only — not clinical review",
+    ],
+  },
+  {
+    code: "qa_consultations_list",
+    area: "consultation_os",
+    label: "Open consultations list",
+    description: "Today’s consult forms and hand-offs.",
+    hrefSuffix: "consultations",
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 3,
+    pageKey: "doctor",
+    pageKeyPrefix: true,
+  },
+];
+
 export function listGuidedAssistTipsForArea(
   area: GuidedAssistArea
 ): readonly GuidedAssistTipDefinition[] {
@@ -1603,4 +1736,11 @@ export function listGuidedAssistTipsForArea(
 export function getGuidedAssistTipByCode(code: string): GuidedAssistTipDefinition | null {
   const c = code.trim();
   return GUIDED_ASSIST_TIPS.find((t) => t.code === c) ?? null;
+}
+
+export function getGuidedAssistQuickActionByCode(
+  code: string
+): GuidedAssistQuickActionDefinition | null {
+  const c = code.trim();
+  return GUIDED_ASSIST_QUICK_ACTIONS.find((a) => a.code === c) ?? null;
 }

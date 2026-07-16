@@ -322,6 +322,51 @@ export type GuidedAssistNextActionView = {
   href: string;
 };
 
+/**
+ * One-tap clinical co-pilot actions (operational navigation only).
+ * Catalog is the single source of truth; resolved to absolute hrefs at session build.
+ */
+export type GuidedAssistQuickActionDefinition = {
+  code: string;
+  area: GuidedAssistArea;
+  /** Warm button label, e.g. “Let’s handle imaging”. */
+  label: string;
+  /** Short helper line under the button. */
+  description: string;
+  /**
+   * Path after `/fi-admin/[tenantId]/`.
+   * Use `{{patientId}}` when a patient id is available from the route.
+   */
+  hrefSuffix: string;
+  /** When true, only show if a patient id was resolved from the page path. */
+  requiresPatientContext?: boolean;
+  /** Prefer these Today roles; omit / include all for any clinical role. */
+  roles?: readonly GuidedAssistTodayRoleKey[];
+  /** Lower = higher priority among matching actions. */
+  priority: number;
+  /**
+   * Optional page affinity — empty string = Today/home; prefix match when set.
+   * When omitted, action is eligible on any page for the role.
+   */
+  pageKey?: string;
+  pageKeyPrefix?: boolean;
+  /** Optional operational condition (stats). */
+  contextTriggers?: GuidedAssistContextTriggers;
+  /** Optional one-line operational checklist shown in the widget (not clinical advice). */
+  checklist?: readonly string[];
+};
+
+export type GuidedAssistQuickActionView = {
+  code: string;
+  area: GuidedAssistArea;
+  areaLabel: string;
+  label: string;
+  description: string;
+  href: string;
+  requiresPatientContext: boolean;
+  checklist: readonly string[] | null;
+};
+
 export type GuidedAssistEmptyStateTourView = {
   emptyStateKey: GuidedAssistEmptyStateKey;
   rootTipCode: string;
@@ -367,6 +412,11 @@ export type GuidedAssistSessionPayload = {
   experienceLevel: GuidedAssistExperienceLevel;
   /** 1–2 next-best-action tips (rule-based; future AI). */
   nextBestActions: GuidedAssistTipView[];
+  /**
+   * Clinical co-pilot quick actions (doctor / nurse / consultant).
+   * Empty for non-clinical roles or when guide is not visible.
+   */
+  clinicalQuickActions: GuidedAssistQuickActionView[];
   /**
    * Always show a dock affordance so users can re-enable from the UI
    * (even when assist is off and setup is complete).

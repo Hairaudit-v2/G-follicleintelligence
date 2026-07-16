@@ -31,6 +31,7 @@ import { isGuidedAssistDebugQueryActive } from "@/src/lib/onboarding-os/guidedAs
 import type {
   GuidedAssistDebugInfo,
   GuidedAssistEngagementSnapshot,
+  GuidedAssistQuickActionView,
   GuidedAssistSessionPayload,
   GuidedAssistTipView,
 } from "@/src/lib/onboarding-os/guidedAssistTypes";
@@ -73,6 +74,89 @@ function ProgressBar({ percent }: { percent: number }) {
   );
 }
 
+/** Collapsible one-tap clinical co-pilot actions (operational only). */
+function ClinicalQuickActionsSection({
+  actions,
+  onActionClick,
+}: {
+  actions: GuidedAssistQuickActionView[];
+  onActionClick: (action: GuidedAssistQuickActionView) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const [expandedCode, setExpandedCode] = useState<string | null>(null);
+
+  if (actions.length === 0) return null;
+
+  return (
+    <section
+      className="rounded-lg border border-cyan-500/25 bg-cyan-950/25 p-2.5"
+      data-testid="guided-assist-clinical-quick-actions"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={open}
+      >
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-cyan-300/90">
+            Quick actions for today
+          </p>
+          <p className="mt-0.5 text-[10px] text-slate-500">
+            Operational shortcuts — not clinical advice
+          </p>
+        </div>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+        )}
+      </button>
+      {open ? (
+        <ul className="mt-2 space-y-2">
+          {actions.map((action) => {
+            const showChecklist =
+              expandedCode === action.code && (action.checklist?.length ?? 0) > 0;
+            return (
+              <li key={action.code}>
+                <Link
+                  href={action.href}
+                  onClick={() => onActionClick(action)}
+                  className="flex min-h-11 w-full flex-col justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-3 py-2 text-left transition hover:bg-cyan-500/25"
+                  data-testid={`guided-assist-qa-${action.code}`}
+                >
+                  <span className="text-sm font-semibold text-cyan-50">{action.label}</span>
+                  <span className="text-[11px] leading-snug text-cyan-100/70">
+                    {action.description}
+                  </span>
+                </Link>
+                {action.checklist?.length ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedCode((c) => (c === action.code ? null : action.code))
+                    }
+                    className="mt-1 text-[10px] font-medium text-slate-500 hover:text-slate-300"
+                  >
+                    {showChecklist ? "Hide checklist" : "Show checklist"}
+                  </button>
+                ) : null}
+                {showChecklist ? (
+                  <ul className="mt-1 list-inside list-disc space-y-0.5 text-[10px] text-slate-400">
+                    {action.checklist!.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
 function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistSessionPayload {
   const tid = payload.settingsHref?.match(/\/fi-admin\/([^/]+)/)?.[1];
   const forceShowActive = Boolean(payload.forceShowActive);
@@ -80,6 +164,7 @@ function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistS
   return {
     ...payload,
     nextBestActions: payload.nextBestActions ?? [],
+    clinicalQuickActions: payload.clinicalQuickActions ?? [],
     experienceLevel: payload.experienceLevel ?? "intermediate",
     showReenableChrome:
       payload.showReenableChrome ?? (!payload.assistEnabled && !forceShowActive),
@@ -813,6 +898,24 @@ export function GuidedAssistWidget({
                 </p>
               ) : null}
             </div>
+          ) : null}
+
+          {guideVisible && (payload.clinicalQuickActions?.length ?? 0) > 0 ? (
+            <ClinicalQuickActionsSection
+              actions={payload.clinicalQuickActions}
+              onActionClick={(action) => {
+                void recordGuidedAssistClientEventAction(tenantId, {
+                  eventKind: "next_action_clicked",
+                  guidanceCode: action.code,
+                  guidanceArea: action.area,
+                  pageKey: payload.pageKey,
+                  detail: {
+                    kind: "clinical_quick_action",
+                    operationalOnly: true,
+                  },
+                });
+              }}
+            />
           ) : null}
 
           {!guideVisible ? (

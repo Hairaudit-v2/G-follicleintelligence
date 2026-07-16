@@ -38,6 +38,10 @@ import {
   resolveTeamHighlightFromCounts,
 } from "../src/lib/onboarding-os/guidedAssistEngagementCore";
 import {
+  extractPatientIdFromPageKey,
+  getClinicalQuickActions,
+} from "../src/lib/onboarding-os/getClinicalQuickActions";
+import {
   buildGuidedAssistRoleModeLabel,
   compareTipsByRoleGroupAndPriority,
   isClinicalTodayRole,
@@ -46,6 +50,7 @@ import {
   isGuidedAssistDebugQueryActive,
   isGuidedAssistForceShowCookieActive,
 } from "../src/lib/onboarding-os/guidedAssistForceShow";
+import { GUIDED_ASSIST_QUICK_ACTIONS } from "../src/lib/onboarding-os/guidedAssistCatalog";
 import {
   GUIDED_ASSIST_AREA_LABELS,
   GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD,
@@ -940,6 +945,95 @@ describe("Clinic guide — warm tone + clinical role prioritisation", () => {
       dismissedTipCodes: [],
     });
     assert.ok(tips.some((t) => t.code === "today_nurse_day_flow"));
+  });
+});
+
+describe("Clinic guide — clinical quick actions", () => {
+  it("extracts patient id from page keys", () => {
+    assert.equal(
+      extractPatientIdFromPageKey("patients/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee/imaging"),
+      "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+    );
+    assert.equal(extractPatientIdFromPageKey("patients/new"), null);
+    assert.equal(extractPatientIdFromPageKey("doctor"), null);
+  });
+
+  it("returns quick actions for doctor, nurse, consultant — not reception", () => {
+    const doctor = getClinicalQuickActions({
+      tenantId: BASE_CTX.tenantId,
+      todayRole: "doctor",
+      pageKey: "",
+      maxActions: 3,
+    });
+    assert.ok(doctor.length >= 1 && doctor.length <= 3);
+    assert.ok(doctor.some((a) => a.code === "qa_imaging_flow" || a.code === "qa_prep_consult"));
+    assert.ok(doctor.every((a) => a.href.includes(`/fi-admin/${BASE_CTX.tenantId}/`)));
+    assert.ok(!/diagnos|prescri/i.test(doctor.map((a) => a.label + a.description).join(" ")));
+
+    const nurse = getClinicalQuickActions({
+      tenantId: BASE_CTX.tenantId,
+      todayRole: "nurse",
+      pageKey: "",
+      maxActions: 3,
+    });
+    assert.ok(nurse.some((a) => a.code === "qa_imaging_flow"));
+
+    const consultant = getClinicalQuickActions({
+      tenantId: BASE_CTX.tenantId,
+      todayRole: "consultant",
+      pageKey: "",
+      maxActions: 3,
+    });
+    assert.ok(consultant.some((a) => a.code === "qa_pipeline_consultant" || a.code === "qa_imaging_flow"));
+
+    const reception = getClinicalQuickActions({
+      tenantId: BASE_CTX.tenantId,
+      todayRole: "reception",
+      pageKey: "",
+    });
+    assert.equal(reception.length, 0);
+  });
+
+  it("prefers patient-context links when on a patient route", () => {
+    const pid = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const actions = getClinicalQuickActions({
+      tenantId: BASE_CTX.tenantId,
+      todayRole: "doctor",
+      pageKey: `patients/${pid}`,
+      maxActions: 3,
+    });
+    assert.ok(actions.some((a) => a.href.includes(`/patients/${pid}`)));
+    assert.ok(actions.every((a) => !a.href.includes("{{patientId}}")));
+  });
+
+  it("catalog quick actions stay operational-only", () => {
+    assert.ok(GUIDED_ASSIST_QUICK_ACTIONS.length >= 6);
+    for (const a of GUIDED_ASSIST_QUICK_ACTIONS) {
+      assert.ok(a.label.length > 0);
+      assert.ok(a.hrefSuffix.length > 0);
+      assert.ok(!/\b(diagnos|prescri|dosage|treatment plan)\b/i.test(a.description + a.label));
+    }
+  });
+
+  it("session payload includes clinicalQuickActions for doctor", () => {
+    const userPreferences = prefs({ todayHomeViews: 10 });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "doctor",
+        tenantAdminRole: null,
+        pageKey: "",
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
+        userPreferences,
+      },
+      userPreferences,
+    });
+    assert.ok(payload.clinicalQuickActions.length >= 1);
+    assert.ok(payload.clinicalQuickActions.every((a) => a.href.startsWith("/fi-admin/")));
   });
 });
 
