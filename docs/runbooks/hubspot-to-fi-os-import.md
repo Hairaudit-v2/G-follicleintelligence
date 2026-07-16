@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E-P AMBER** (4 patient-review contacts deferred; 0 proposed links; awaiting explicit approval; next gate 1E-Q)  
+Current gate: **1E-Q GREEN** (110 quarantine/exclusion classified; 34 reclassified read-only unapplied; next gate 1E-FINAL)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -255,13 +255,26 @@ Hard rules for 1E (inherits 1D):
 - Remaining: 31 deferred + 1 duplicate-risk; four patient-review records remain out of scope
 - Evidence: `docs/audits/evidence-fi-hubspot-import-1e-controlled-new-leads.md`
 
+### 1E-Q quarantine/exclusion classification (2026-07-17)
+
+- Frozen cohort (110): 100 quarantined + 10 excluded from 1E-R IDs
+- Base inventory checksum (1E-R): `3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c`
+- Fixed 1E-Q inventory checksum: `fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6`
+- Review checksum: `d81b2249d4386b7df46cd7bb4d4ca73597932ba3eb13434de8d66c37f97c634c`
+- Final: retained 67 + excluded 9 + reclassified 34 + deferred 0 = 110
+- Reclassified unapplied: 26 existing-lead links + 8 patient review + 0 creates
+- Reconciliation: 4606 + 31 + 1 + 4 + 76 + 34 = 4752; unexplained 0; wrong tenant 0
+- Patients 829→829; mappings/watermarks/side effects unchanged; apply blocked
+- Workspace: `?tab=quarantine-review`
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-q-quarantine-review.md`
+
 ### Next gate
 
-`FI-HUBSPOT-IMPORT-1E-Q`
+`FI-HUBSPOT-IMPORT-1E-FINAL`
 
-1E-P interim patient-link review is complete and awaiting explicit human approval.
-Do not apply patient links, open a second create batch, or process quarantine cohorts
-without the approved 1E-Q gate.
+1E-Q classification is complete. Do not apply reclassified lead/patient/create
+candidates, the remaining 31 deferred creates, the duplicate-risk create, or the
+1E-P patient-review cohort without the approved 1E-FINAL gate.
 
 ### 1E-P patient-link interim review (2026-07-17)
 
@@ -302,3 +315,4 @@ without the approved 1E-Q gate.
 - [x] 1E-R: 21 interval contacts refreshed/revalidated; staging 4,752; unexplained=0; no FI/mapping/watermark mutations; gate open for 1E-C review only
 - [x] 1E-C: all 42 classified; first 10 create-only records applied; patients/watermarks/side effects unchanged; replay delta 0; stopped before second batch
 - [x] 1E-P: four patient-review contacts deferred; 0 proposed links; apply blocked pending explicit approval; next gate 1E-Q
+- [x] 1E-Q: 110 quarantine/exclusion classified; 34 reclassified read-only unapplied; replay delta 0; apply blocked; next gate 1E-FINAL
