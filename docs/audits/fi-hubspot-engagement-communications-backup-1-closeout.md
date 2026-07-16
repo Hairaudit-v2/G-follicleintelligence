@@ -5,7 +5,7 @@ Closed: not yet
 Environment: Production (`iqqvzgxoimxchhcnbzxl`), run `66f72f09-d333-4bb0-9c39-5da7b912e964`  
 Evidence classification: Privacy-safe operational metadata only  
 Submission reconciliation: `evidence-fi-hubspot-form-submissions-reconciliation-66f72f09.md` (**GREEN**)  
-Forms inventory: `evidence-fi-hubspot-forms-reconciliation.md` (**BLOCKED** — source xlsx missing)
+Forms inventory: `evidence-fi-hubspot-forms-reconciliation.md` (**GREEN** — 46 listable + 2 non-listable types explained)
 
 ## Delivery summary
 
@@ -27,7 +27,7 @@ Additive parallel milestone on the existing HubSpot connector:
 | Conversation threads | PASS | Complete — 1,918 staged | Exact vs 1,918 | Supported | 1,918 edges |
 | Conversation messages | PASS | Complete — 5,821 staged | Exact (no manual baseline) | N/A | 5,821 edges; 1,336 attachment refs |
 | Attachments / files | UNSUPPORTED listing (405); metadata inventory from refs | 903 inventory rows; `content_backed_up=0` | Exact vs discovered refs | N/A | file ↔ source |
-| Forms | PASS | Complete — 46 staged | **BLOCKED** ID reconcile vs claimed export 48 (workbook missing) | When API provides | definitions staged |
+| Forms | PASS | Complete — 46 staged | **GREEN** vs export 48 (2 = `captured` + `blog_comment`, not in default list APIs) | When API provides | definitions staged |
 | Form submissions | PASS | Complete — 5,311 staged | **GREEN** (+1,091 = coverage vs selected CSV; ≈ inventory 5,310) | N/A | 5,311→form; contact links 0 |
 
 ### Dataset / control verdicts
@@ -39,7 +39,7 @@ Additive parallel milestone on the existing HubSpot connector:
 | Submission uniqueness | GREEN |
 | Submission tenant integrity | GREEN |
 | Submission parent-form integrity | GREEN (5,311/5,311 → 46 definitions) |
-| Forms inventory | **BLOCKED / AMBER** — 48→46 unresolved without export workbook |
+| Forms inventory | **GREEN** — 48 export = 46 listable + `captured` + `blog_comment` |
 | Contact associations | AMBER — unavailable in Forms Submissions API payload (`contactId` absent) |
 | Files | GREEN for metadata inventory / `content_backed_up=0` (listing endpoint UNSUPPORTED 405) |
 | CLI completion status | AMBER — causes enumerated below |
@@ -54,7 +54,7 @@ Additive parallel milestone on the existing HubSpot connector:
 | CRM emails | Yes | Yes (5248) | 0 | 0 | Exact vs baseline | N/A | None |
 | Conversation threads | Yes | Yes (1918) | 0 | 0 | Exact vs baseline | N/A | None |
 | Conversation messages | Yes | Yes (5821) | 0 | 0 | Complete nested pagination | N/A | None |
-| Forms | Yes | Yes (46) | 0 | 0 | Finalize still saw forms recon as explained −2; export ID proof BLOCKED | Yes once workbook found | Locate xlsx; classify 2 IDs |
+| Forms | Yes | Yes (46 listable) | 2 non-listable types (`captured`, `blog_comment`) | 0 | Default Forms list APIs return 46; export listing-lib includes 2 extra types with 0 submissions | N/A | None for Phase O |
 | Form submissions | Yes | Yes (5311) | 0 | 0 | Engine marked `unexplained` vs selected baseline 4220 → **forced CLI partial** even though operator reconcile is GREEN | Yes (baseline semantics / counter logic) | Optionally reclassify baseline or accept documented coverage |
 | Files | Yes (metadata) | Yes (903 inventory) | Listing probe UNSUPPORTED 405 | 0 | Classified unsupported; content not downloaded | N/A | None for bodies |
 | Contact links on submissions | Implicit | 0 links | N/A | 0 | Source payload has no `contactId` | Future enrichment only | Deterministic source only |
@@ -97,8 +97,8 @@ No promotion of responses into patient records.
 | Deployment status | Production migration applied; live CLI run against production completed |
 | Live execution status | Run `66f72f09…` finished exit 0 / CLI `partial` |
 | Form-submissions +1091 | **GREEN** — see reconciliation evidence (selected-export vs all-forms; 0 missing baseline IDs) |
-| Forms inventory 48→46 | **BLOCKED** — `hubspot-listing-lib-exports-all-forms-2026-07-15.xlsx` not found locally |
-| Overall verdict | **AMBER** |
+| Forms inventory 48→46 | **GREEN** — see forms reconciliation evidence |
+| Overall verdict | **AMBER** (contact-link + CLI partial semantics remain) |
 
 ## Why not full GREEN
 
@@ -117,10 +117,10 @@ Items 1–4 and 8 remain pending operator action.
 
 ## Operator next steps
 
-1. **Locate** `hubspot-listing-lib-exports-all-forms-2026-07-15.xlsx` and place at `.local/hubspot-audit-inputs/forms-inventory.xlsx` (gitignored).
-2. Run `npx tsx scripts/audits/extract-hubspot-export-form-ids.ts --input .local/hubspot-audit-inputs/forms-inventory.xlsx` then finish forms ID reconciliation / classification.
-3. Do **not** rerun form_submissions for the +1,091 (already GREEN). Forms-only rerun only if export-only IDs prove active skipped forms.
-4. Keep contact-link control AMBER unless a deterministic HubSpot association source is backed up later.
+1. Forms inventory is **GREEN** — no forms-only rerun required for Phase O.
+2. Do **not** rerun form_submissions for the +1,091 (already GREEN).
+3. Keep contact-link control AMBER unless a deterministic HubSpot association source is backed up later.
+4. Optionally adjust finalize baseline semantics so CLI can exit `completed` when submissions coverage vs selected-export is documented GREEN.
 
 CLI alternatives (trusted service runner only):
 

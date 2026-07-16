@@ -1,21 +1,75 @@
 {
   "evidenceType": "hubspot_forms_inventory_reconciliation",
-  "status": "BLOCKED",
-  "blockedReason": "Export workbook hubspot-listing-lib-exports-all-forms-2026-07-15.xlsx not found on local machine or in FI-HUBSPOT-BACKUP-1 evidence directories.",
+  "status": "GREEN",
   "backupRunId": "66f72f09-d333-4bb0-9c39-5da7b912e964",
-  "exportUnique": null,
-  "backupUnique": 46,
-  "onlyInExport": null,
-  "onlyInBackup": null,
-  "duplicatesInExport": null,
-  "duplicatesInBackup": [],
-  "intersectionCount": null,
+  "exportEvidence": "docs/audits/evidence-fi-hubspot-export-form-ids.json",
   "backupFormIdsEvidence": "docs/audits/evidence-fi-hubspot-backup-form-ids.json",
-  "blockedEvidence": "docs/audits/evidence-fi-hubspot-forms-inventory-source-blocked.md",
+  "exportSourceFilename": "forms-inventory.xlsx",
+  "exportSourceSha256": "321fc5c887dd6d2e78e06b8480069ea41d89dd0b4f7c1d248d1bd9e4f8b28c72",
+  "exportSheet": "All forms",
+  "exportIdColumn": "Form ID",
+  "exportUnique": 48,
+  "backupUnique": 46,
+  "onlyInExport": [
+    "440386a7-7498-4245-890c-ab785d3c6f77",
+    "6e136ca0-40f7-48af-9216-64df6c9122ac"
+  ],
+  "onlyInBackup": [],
+  "duplicatesInExport": [],
+  "duplicatesInBackup": [],
+  "intersectionCount": 46,
   "parentFormIntegritySubmissions": {
     "submissionRows": 5311,
     "withParentFormAssociation": 5311,
     "orphanMissingParentFormDefinition": 0,
-    "note": "All staged submissions resolve to the 46 backed-up form definitions; does not classify the two export-only forms."
-  }
+    "note": "All staged submissions resolve to the 46 backed-up form definitions."
+  },
+  "exportOnlyClassifications": [
+    {
+      "canonicalFormId": "440386a7-7498-4245-890c-ab785d3c6f77",
+      "presentInExportInventory": true,
+      "presentInBackup": false,
+      "presentInCurrentApi": true,
+      "presentInDefaultFormsListApi": false,
+      "archivedOrDeleted": false,
+      "formType": "captured",
+      "formTypeV2": "CAPTURED",
+      "createdAt": "2022-09-01T11:57:33.240Z",
+      "backedUpSubmissionCount": 0,
+      "exportBaselineSubmissionCount": null,
+      "marketingV3ListCountObserved": 46,
+      "formsV2ListCountObserved": 46,
+      "directGet": {
+        "marketing_v3_status": 200,
+        "forms_v2_status": 200
+      },
+      "classification": "system_or_nonstandard_form_type_excluded_from_default_list_api",
+      "evidenceSource": "hubspot marketing/v3 + forms/v2 readonly probes; list endpoints omit formType captured/blog_comment while direct GET succeeds",
+      "requiredRemediation": "None for Phase O. Document exclusion. Optional future: request formTypes including captured and blog_comment if those definitions must be staged."
+    },
+    {
+      "canonicalFormId": "6e136ca0-40f7-48af-9216-64df6c9122ac",
+      "presentInExportInventory": true,
+      "presentInBackup": false,
+      "presentInCurrentApi": true,
+      "presentInDefaultFormsListApi": false,
+      "archivedOrDeleted": false,
+      "formType": "blog_comment",
+      "formTypeV2": "BLOG_COMMENT",
+      "createdAt": "2026-06-02T12:23:42.462Z",
+      "backedUpSubmissionCount": 0,
+      "exportBaselineSubmissionCount": null,
+      "marketingV3ListCountObserved": 46,
+      "formsV2ListCountObserved": 46,
+      "directGet": {
+        "marketing_v3_status": 200,
+        "forms_v2_status": 200
+      },
+      "classification": "system_or_nonstandard_form_type_excluded_from_default_list_api",
+      "evidenceSource": "hubspot marketing/v3 + forms/v2 readonly probes; list endpoints omit formType captured/blog_comment while direct GET succeeds",
+      "requiredRemediation": "None for Phase O. Document exclusion. Optional future: request formTypes including captured and blog_comment if those definitions must be staged."
+    }
+  ],
+  "formsInventoryVerdict": "GREEN",
+  "summary": "Export 48 = backup 46 hubspot-listable forms + 2 non-listable types (captured, blog_comment). No pagination defect. Zero submissions on excluded forms."
 }
