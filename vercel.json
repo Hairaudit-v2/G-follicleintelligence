@@ -62,7 +62,7 @@
     },
     {
       "path": "/api/cron/hubspot/incremental-notes-backup",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 16 * * *"
     }
   ]
 }
