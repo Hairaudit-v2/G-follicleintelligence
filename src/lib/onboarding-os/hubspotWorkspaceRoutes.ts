@@ -3,6 +3,7 @@ export const HUBSPOT_WORKSPACE_TABS = [
   "backup-sync",
   "import-review",
   "owner-resolution",
+  "lead-pilot",
   "activity-webhooks",
   "configuration",
   "audit-history",

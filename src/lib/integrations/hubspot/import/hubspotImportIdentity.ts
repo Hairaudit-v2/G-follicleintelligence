@@ -51,12 +51,26 @@ export function isTestOrSmokeContact(input: {
   emailNormalized: string | null;
   hubspotContactId: string;
   lifecycleStage?: string | null;
+  displayName?: string | null;
 }): boolean {
   if (isPlaceholderEmail(input.emailNormalized)) return true;
+  const email = (input.emailNormalized ?? "").toLowerCase();
+  if (
+    email.startsWith("test@") ||
+    email.startsWith("smoke@") ||
+    email.includes("+test@") ||
+    email.includes("test+") ||
+    email.endsWith("@example.com") ||
+    email.endsWith("@test.com")
+  ) {
+    return true;
+  }
   const id = input.hubspotContactId.toLowerCase();
   if (id.includes("test") || id.includes("smoke")) return true;
   const life = (input.lifecycleStage ?? "").toLowerCase();
   if (life.includes("fi os backup test") || life.includes("smoke")) return true;
+  const name = (input.displayName ?? "").trim().toLowerCase();
+  if (name === "test" || name.startsWith("test ") || name.includes(" smoke")) return true;
   return false;
 }
 

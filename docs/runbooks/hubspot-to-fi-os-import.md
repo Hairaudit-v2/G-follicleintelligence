@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1C** (owner-resolution workspace + controlled coverage)  
+Current gate: **1D** (contact→lead pilot with patient-protection)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -150,6 +150,35 @@ Hard rules for 1C:
 
 `FI-HUBSPOT-IMPORT-1D — Contact and lead migration pilot with patient-protection gate`
 
+## Contact→lead pilot (1D)
+
+UI: `/fi-admin/[tenantId]/settings/integrations/hubspot?tab=lead-pilot`  
+Decisions: `fi_hubspot_contact_lead_pilot_decisions`  
+Max: **25** contacts per batch. Patient creation remains forbidden.
+
+### Commands
+
+```bash
+npm run hubspot:lead-pilot:cohort
+npm run hubspot:lead-pilot:preview
+
+FI_HUBSPOT_CONTACT_LEAD_CONFIRM=<batchId> node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-contact-lead-pilot.ts \
+  --apply --approved-batch-id <batchId> --checksum <checksum>
+```
+
+Hard rules for 1D:
+
+- Never create `fi_patients` or auto-link patients via email alone
+- Prefer additive `fi_external_record_mappings` for existing-lead links
+- New leads only when deterministic policy allows (none in first production pilot)
+- No notifications, reminders, appointments, or watermark changes
+- Replay must be idempotent; rollback preview batch-scoped
+
+### Next gate (after 1D GREEN)
+
+`FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion`
+
 ## Safety checklist before any apply
 
 - [x] Preview JSON reviewed (1B)
@@ -159,4 +188,5 @@ Hard rules for 1C:
 - [x] Confirm token = batch id
 - [x] Backup watermark unchanged
 - [x] Rollback preview prepared (not executed — mappings correct)
-- [ ] 1C: preview checksum + batch id confirmed; mappings ≤ 10; operator-approved only
+- [x] 1C: preview checksum + batch id confirmed; mappings ≤ 10; operator-approved only
+- [ ] 1D: patient count unchanged; ≤25 contacts; confirm token = batch id
