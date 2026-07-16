@@ -28,7 +28,7 @@ Optional: `--tenant-id`, `--integration-id`, `--resume-run-id`
 - Upper bound **exclusive**: `updatedAt < cutoff_to`
 - Timestamps must include `Z` or a numeric offset; bare local datetimes are rejected
 - Values are normalized to UTC ISO-8601
-- Equal timestamps are ordered by HubSpot note ID (no skips)
+- Equal timestamps are ordered by HubSpot note ID locally (Search allows only one sort: `hs_lastmodifieddate ASC`)
 
 ## Resume
 

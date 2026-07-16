@@ -216,10 +216,9 @@ function buildNotesSearchBody(range: IncrementalRange, after: string | null): Re
     ],
     properties: NOTES_PROPERTIES,
     limit: 100,
-    sorts: [
-      { propertyName: "hs_lastmodifieddate", direction: "ASCENDING" },
-      { propertyName: "hs_object_id", direction: "ASCENDING" },
-    ],
+    // HubSpot CRM Search allows at most one sort. Equal-timestamp ordering by
+    // note ID is applied locally via applyTiebreakerCursor / filterNotesInRange.
+    sorts: [{ propertyName: "hs_lastmodifieddate", direction: "ASCENDING" }],
   };
   if (after) body.after = after;
   return body;
