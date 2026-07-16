@@ -1,0 +1,62 @@
+{
+  "evidenceType": "hubspot_incremental_production_gate",
+  "milestone": "FI-HUBSPOT-INCREMENTAL-BACKUP-1 production gate",
+  "closedAt": "2026-07-16",
+  "operatorVerdict": "green_to_proceed",
+  "claimsStageP2Green": false,
+  "stageP2Status": "pending",
+  "deployment": {
+    "id": "dpl_wPdpTJAMaAEFZcRRdtUSHvS24Jnf",
+    "readyState": "READY",
+    "sha": "34ca0374daced118d391937b6ae55f16a86679e4",
+    "aliases": [
+      "follicleintelligence.ai",
+      "www.follicleintelligence.ai"
+    ],
+    "inspectorUrl": "https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/wPdpTJAMaAEFZcRRdtUSHvS24Jnf",
+    "preDeployProductionSha": "687410c158018a545de3025b9c1093ce6212653d",
+    "source": "vercel_git_integration"
+  },
+  "commitStack": {
+    "feat": "24ece99b",
+    "test": "bba82044",
+    "audit": "34ca0374",
+    "includesAllThree": true
+  },
+  "migration": {
+    "localFile": "supabase/migrations/202610189001_hubspot_incremental_backup_watermarks.sql",
+    "projectRef": "iqqvzgxoimxchhcnbzxl",
+    "projectName": "Follicle Intelligence",
+    "path": "supabase_mcp_apply_migration",
+    "mcpLedgerVersion": "20260716024711",
+    "localVersionAlignment": "202610189001",
+    "success": true,
+    "additive": true
+  },
+  "schema": {
+    "watermarksTable": true,
+    "uniqueTenantSourceDataset": true,
+    "incrementalSyncRunColumns": 6,
+    "activeRunUniqueIndex": true,
+    "notesStagingUnique": true,
+    "watermarkRows": 0,
+    "incrementalRuns": 0
+  },
+  "p1Reobservation": {
+    "command": "npm run test:e2e:hubspot-production-smoke",
+    "timestampUtc": "2026-07-16T02:54:02.337Z",
+    "passed": 11,
+    "failed": 0,
+    "verdict": "GREEN",
+    "deployedCommitRecorded": "34ca0374daced118d391937b6ae55f16a86679e4"
+  },
+  "productionWrites": {
+    "hubspotObjects": 0,
+    "incrementalRuns": 0,
+    "testNotes": 0,
+    "schedulesAdded": 0
+  },
+  "scheduleState": "unchanged_no_hubspot_backup_cron",
+  "nextGate": "stage_p2_controlled_notes_proof",
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-incremental-production-gate.md"
+}
