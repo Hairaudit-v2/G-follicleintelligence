@@ -37,10 +37,13 @@ export function Header() {
   const productsActive = productsNavActive(pathname);
 
   return (
-    // Sticky shell must stay free of transform AND backdrop-filter — both create
-    // containing blocks that prevent position:sticky from pinning on scroll.
-    <header className="sticky top-0 z-50">
-      <div className="border-b border-border/60 bg-background/88 backdrop-blur-xl">
+    <>
+      {/*
+        Fixed (not sticky): sticky does not pin under document scroll on this root
+        marketing shell even after isolating transform/backdrop-filter. Fixed is
+        verified viewport-pinned; spacer preserves in-flow layout height.
+      */}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -201,7 +204,8 @@ export function Header() {
           </div>
         </div>
         </motion.div>
-      </div>
-    </header>
+      </header>
+      <div className="h-14 shrink-0 sm:h-16" aria-hidden />
+    </>
   );
 }
