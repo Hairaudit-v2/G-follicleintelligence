@@ -132,6 +132,17 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Permanent public redirects (edge-level Location headers for crawlers/clients).
+  // Nested HubSpot migration path is legacy; canonical is /migrate-from-hubspot.
+  async redirects() {
+    return [
+      {
+        source: "/platform/migrate-from-hubspot",
+        destination: "/migrate-from-hubspot",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       // --- Global security headers (all routes) ---

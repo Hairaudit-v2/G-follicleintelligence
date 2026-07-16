@@ -1,0 +1,1529 @@
+{
+  "generatedAt": "2026-07-16T09:53:05.621Z",
+  "routes": {
+    "home": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/",
+      "title": "Follicle Intelligence | Operating System for Hair Restoration Clinics",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Every Hair Restoration Clinic Runs On Systems Built For Everyone Else"
+      ],
+      "hierarchyOk": true,
+      "headingCount": 37,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "platform": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/platform",
+      "title": "Platform Architecture | The Complete Operating System For Hair Restoration | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "The Complete Operating System For Hair Restoration"
+      ],
+      "hierarchyOk": true,
+      "headingCount": 22,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "leadflow": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/platform/leadflow",
+      "title": "LeadFlow | Hair Restoration CRM and Patient Acquisition | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "From first enquiry to final outcome — one connected patient journey."
+      ],
+      "hierarchyOk": true,
+      "headingCount": 38,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "progress": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/platform/progress",
+      "title": "Platform Progress | Hair Restoration Operating System | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "How Follicle Intelligence is becoming the operating system for hair restoration clinics"
+      ],
+      "hierarchyOk": true,
+      "headingCount": 45,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "clinic": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/clinic-owners",
+      "title": "Hair Restoration Clinic Operating System for Owners | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Run the clinic as one connected operation."
+      ],
+      "hierarchyOk": true,
+      "headingCount": 42,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "demo": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/demo",
+      "title": "Request a Platform and Migration Review | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Plan the next stage of your clinic’s operating system."
+      ],
+      "hierarchyOk": true,
+      "headingCount": 27,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "demo-interest": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/demo?interest=hubspot-migration",
+      "title": "Request a Platform and Migration Review | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Plan the next stage of your clinic’s operating system."
+      ],
+      "hierarchyOk": true,
+      "headingCount": 27,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "migrate": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+      "title": "Migrate from HubSpot to a Hair Restoration Operating System | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Move beyond HubSpot without losing the history that built your clinic."
+      ],
+      "hierarchyOk": true,
+      "headingCount": 33,
+      "tables": 1,
+      "tableA11y": [
+        {
+          "hasCaption": true,
+          "thCount": 23,
+          "ariaLabel": null
+        }
+      ],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "investors": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/investors",
+      "title": "Investors | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Building Infrastructure For A Global Medical Industry"
+      ],
+      "hierarchyOk": true,
+      "headingCount": 35,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "privacy": {
+      "status": 200,
+      "finalUrl": "https://www.follicleintelligence.ai/privacy",
+      "title": "Privacy Policy | Follicle Intelligence",
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "h1": [
+        "Privacy policy"
+      ],
+      "hierarchyOk": true,
+      "headingCount": 6,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    }
+  },
+  "language": {
+    "home": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "platform": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": false,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "leadflow": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "progress": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "clinic": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "demo": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "demo-interest": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": true,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "migrate": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": false,
+      "platformReview": true,
+      "fiOs": true
+    },
+    "investors": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": false,
+      "platformReview": false,
+      "fiOs": true
+    },
+    "privacy": {
+      "bookEnterpriseDemo": false,
+      "leadFlowOS": false,
+      "worldsFirst": false,
+      "zeroRisk": false,
+      "oneClickMigration": false,
+      "guaranteedNoDataLoss": false,
+      "fullyReversible": false,
+      "intentionalArchitecture": false,
+      "comingNext": false,
+      "completionPctClaim": false,
+      "operationalPilot": false,
+      "platformReview": true,
+      "fiOs": true
+    }
+  },
+  "redirect": {
+    "http": {
+      "status": 308,
+      "location": null,
+      "contentType": "text/html; charset=utf-8",
+      "hasLocation": false
+    },
+    "browser": {
+      "finalUrl": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+      "title": "Migrate from HubSpot to a Hair Restoration Operating System | Follicle Intelligence",
+      "responses": [
+        {
+          "url": "https://www.follicleintelligence.ai/platform/migrate-from-hubspot",
+          "status": 308,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=4dihk",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=1blks",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=148gx",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot?_rsc=q2pec",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+          "status": 200,
+          "location": null
+        },
+        {
+          "url": "https://www.follicleintelligence.ai/_next/static/chunks/app/migrate-from-hubspot/page-71407846b856594f.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX",
+          "status": 200,
+          "location": null
+        }
+      ],
+      "landedOnCanonical": true
+    }
+  },
+  "demoPreselect": {
+    "url": "https://www.follicleintelligence.ai/demo?interest=hubspot-migration",
+    "interest": [
+      {
+        "id": "preferredContactMethod",
+        "name": "preferredContactMethod",
+        "value": "Either",
+        "text": "Either"
+      },
+      {
+        "id": "locations",
+        "name": "locations",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "staffCount",
+        "name": "staffCount",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "monthlyEnquiries",
+        "name": "monthlyEnquiries",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "monthlyConsultations",
+        "name": "monthlyConsultations",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "monthlyProcedures",
+        "name": "monthlyProcedures",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "crmSystem",
+        "name": "crmSystem",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "bookingSystem",
+        "name": "bookingSystem",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "patientRecordSystem",
+        "name": "patientRecordSystem",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "imagingSystem",
+        "name": "imagingSystem",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "trainingSystem",
+        "name": "trainingSystem",
+        "value": "",
+        "text": "Select…"
+      },
+      {
+        "id": "primaryInterest",
+        "name": "primaryInterest",
+        "value": "Transition away from HubSpot",
+        "text": "Transition away from HubSpot"
+      },
+      {
+        "id": "adoptionStage",
+        "name": "adoptionStage",
+        "value": "",
+        "text": "Select…"
+      }
+    ]
+  },
+  "enquiry": {
+    "emptySubmit": true,
+    "alertCount": 25,
+    "invalidCount": 23,
+    "validationVisible": true,
+    "liveSubmit": "not_sent_safe_validation_only",
+    "fieldIds": {
+      "name": false,
+      "email": true,
+      "clinic": true,
+      "fields": [
+        "companyWebsite",
+        "firstName",
+        "lastName",
+        "workEmail",
+        "phone",
+        "role",
+        "organisation",
+        "country",
+        "cityRegion",
+        "preferredTimezone",
+        "preferredContactMethod",
+        "locations",
+        "staffCount",
+        "monthlyEnquiries",
+        "monthlyConsultations",
+        "monthlyProcedures",
+        "crmSystem",
+        "bookingSystem",
+        "patientRecordSystem",
+        "imagingSystem",
+        "trainingSystem",
+        "otherSystems",
+        "primaryInterest",
+        "adoptionStage",
+        "mainProblems",
+        "priorityWorkflows",
+        "additionalContext",
+        "consentContact"
+      ]
+    }
+  },
+  "browsers": {
+    "chromium": {
+      "viewports": {
+        "desktop-large": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1440,
+              "clientWidth": 1440
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1440,
+              "clientWidth": 1440
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1440,
+              "clientWidth": 1440
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1440,
+              "clientWidth": 1440
+            }
+          }
+        },
+        "laptop": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1280,
+              "clientWidth": 1280
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1280,
+              "clientWidth": 1280
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1280,
+              "clientWidth": 1280
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1280,
+              "clientWidth": 1280
+            }
+          }
+        },
+        "tablet-portrait": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 768,
+              "clientWidth": 768
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 768,
+              "clientWidth": 768
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 768,
+              "clientWidth": 768
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 768,
+              "clientWidth": 768
+            }
+          }
+        },
+        "tablet-landscape": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1024,
+              "clientWidth": 1024
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1024,
+              "clientWidth": 1024
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1024,
+              "clientWidth": 1024
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 1024,
+              "clientWidth": 1024
+            }
+          }
+        },
+        "mobile": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 390,
+              "clientWidth": 390
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 390,
+              "clientWidth": 390
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 390,
+              "clientWidth": 390
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 390,
+              "clientWidth": 390
+            }
+          }
+        },
+        "mobile-narrow": {
+          "home": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 320,
+              "clientWidth": 320
+            }
+          },
+          "migrate": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 320,
+              "clientWidth": 320
+            }
+          },
+          "demo": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 320,
+              "clientWidth": 320
+            }
+          },
+          "leadflow": {
+            "banner": true,
+            "overflow": {
+              "hasHScroll": false,
+              "scrollWidth": 320,
+              "clientWidth": 320
+            }
+          }
+        }
+      }
+    },
+    "firefox": {
+      "ok": true,
+      "checks": {
+        "home": {
+          "status": 200,
+          "title": "Follicle Intelligence | Operating System for Hair Restoration Clinics",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "migrate": {
+          "status": 200,
+          "title": "Migrate from HubSpot to a Hair Restoration Operating System | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "demo": {
+          "status": 200,
+          "title": "Request a Platform and Migration Review | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "leadflow": {
+          "status": 200,
+          "title": "LeadFlow | Hair Restoration CRM and Patient Acquisition | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        }
+      }
+    },
+    "webkit": {
+      "ok": true,
+      "checks": {
+        "home": {
+          "status": 200,
+          "title": "Follicle Intelligence | Operating System for Hair Restoration Clinics",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "migrate": {
+          "status": 200,
+          "title": "Migrate from HubSpot to a Hair Restoration Operating System | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "demo": {
+          "status": 200,
+          "title": "Request a Platform and Migration Review | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        },
+        "leadflow": {
+          "status": 200,
+          "title": "LeadFlow | Hair Restoration CRM and Patient Acquisition | Follicle Intelligence",
+          "hasH1": true,
+          "bookEnterprise": false
+        }
+      }
+    },
+    "chromiumMobile": {
+      "ok": true,
+      "checks": {
+        "home": {
+          "status": 200,
+          "hasHScroll": false
+        },
+        "migrate": {
+          "status": 200,
+          "hasHScroll": false
+        },
+        "demo": {
+          "status": 200,
+          "hasHScroll": false
+        }
+      }
+    }
+  },
+  "a11y": {
+    "home": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "platform": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "leadflow": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "progress": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "clinic": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "demo": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "demo-interest": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "migrate": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 1,
+      "tableA11y": [
+        {
+          "hasCaption": true,
+          "thCount": 23,
+          "ariaLabel": null
+        }
+      ],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "investors": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "privacy": {
+      "landmarks": {
+        "banner": 1,
+        "main": 1,
+        "contentinfo": 1,
+        "navigation": 1
+      },
+      "hierarchyOk": true,
+      "h1Count": 1,
+      "tables": 0,
+      "tableA11y": [],
+      "focus": {
+        "tag": "A",
+        "outline": "rgb(16, 16, 16) auto 1px",
+        "outlineWidth": "1px",
+        "boxShadow": "none",
+        "text": "FI OSHair restoration"
+      }
+    },
+    "faqKeyboard": {
+      "ok": true,
+      "type": "summary"
+    }
+  },
+  "performance": {
+    "home": {
+      "lcp": null,
+      "cls": 0,
+      "fcp": 780,
+      "dcl": 76.89999999850988,
+      "load": 173.39999999850988,
+      "ttfb": 19.299999997019768,
+      "transferSize": 300,
+      "imgs": [
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 34,
+          "nh": 31,
+          "dw": 36,
+          "dh": 32,
+          "oversized": false,
+          "broken": false
+        },
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 3171,
+          "nh": 2841,
+          "dw": 208,
+          "dh": 186,
+          "oversized": true,
+          "broken": false
+        }
+      ]
+    },
+    "leadflow": {
+      "lcp": null,
+      "cls": 0,
+      "fcp": 172,
+      "dcl": 56.80000000447035,
+      "load": 83.39999999850988,
+      "ttfb": 19,
+      "transferSize": 300,
+      "imgs": [
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 34,
+          "nh": 31,
+          "dw": 36,
+          "dh": 32,
+          "oversized": false,
+          "broken": false
+        },
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 3171,
+          "nh": 2841,
+          "dw": 208,
+          "dh": 186,
+          "oversized": true,
+          "broken": false
+        }
+      ]
+    },
+    "demo": {
+      "lcp": null,
+      "cls": 0,
+      "fcp": 332,
+      "dcl": 206.29999999701977,
+      "load": 268.5,
+      "ttfb": 19.19999999552965,
+      "transferSize": 300,
+      "imgs": [
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 34,
+          "nh": 31,
+          "dw": 36,
+          "dh": 32,
+          "oversized": false,
+          "broken": false
+        },
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 3171,
+          "nh": 2841,
+          "dw": 208,
+          "dh": 186,
+          "oversized": true,
+          "broken": false
+        }
+      ]
+    },
+    "migrate": {
+      "lcp": null,
+      "cls": 0,
+      "fcp": 788,
+      "dcl": 58.69999999552965,
+      "load": 158.19999999552965,
+      "ttfb": 18.5,
+      "transferSize": 300,
+      "imgs": [
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 34,
+          "nh": 31,
+          "dw": 36,
+          "dh": 32,
+          "oversized": false,
+          "broken": false
+        },
+        {
+          "src": "https://www.follicleintelligence.ai/_next/image",
+          "nw": 3171,
+          "nh": 2841,
+          "dw": 208,
+          "dh": 186,
+          "oversized": true,
+          "broken": false
+        }
+      ]
+    }
+  },
+  "consoleErrors": [
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/contact. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/platform/ecosystem. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/technology. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/vision. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/academy. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/vision. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/platform/ecosystem. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/contact. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    },
+    {
+      "text": "Failed to fetch RSC payload for https://www.follicleintelligence.ai/technology. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:45969)\n    at https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59518\n    at Object.u [as task] (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32263)\n    at c.s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32968)\n    at c.enqueue (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:32393)\n    at s (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59481)\n    at i (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:59021)\n    at a (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:65846)\n    at f (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:1:75812)\n    at Object.action (https://www.follicleintelligence.ai/_next/static/chunks/3095-12411469c3a5e660.js?dpl=dpl_4c1Y4z3WK1mXaUPBR6wFxkQzeLDX:2:7105)",
+      "loc": "https://www.follicleintelligence.ai/platform/leadflow"
+    }
+  ],
+  "stickyHeader": {
+    "top": -65,
+    "position": "sticky",
+    "h": 65,
+    "visible": true
+  },
+  "zoom200": {
+    "hasHScroll": false,
+    "scrollWidth": 1280,
+    "clientWidth": 1280
+  },
+  "metadata": {
+    "/": {
+      "status": 200,
+      "title": "Follicle Intelligence | Operating System for Hair Restoration Clinics",
+      "desc": "Follicle Intelligence is a purpose-built operating system for hair restoration clinics — connecting consultations, surgery, patient intelligence, staff training",
+      "canonical": "https://www.follicleintelligence.ai",
+      "ogTitle": "The Operating System Built Specifically for Hair Restoration Clinics",
+      "jsonLdBlocks": 4,
+      "hasFaqPage": true
+    },
+    "/demo": {
+      "status": 200,
+      "title": "Request a Platform and Migration Review | Follicle Intelligence",
+      "desc": "Discuss your clinic’s CRM, patient, operational and migration requirements with Follicle Intelligence. Explore a staged pathway to connect, transition or replac",
+      "canonical": "https://www.follicleintelligence.ai/demo",
+      "ogTitle": "Plan the next stage of your clinic’s operating system",
+      "jsonLdBlocks": 2,
+      "hasFaqPage": false
+    },
+    "/migrate-from-hubspot": {
+      "status": 200,
+      "title": "Migrate from HubSpot to a Hair Restoration Operating System | Follicle Intelligence",
+      "desc": "Explore a controlled pathway to connect, coexist with or progressively replace HubSpot using Follicle Intelligence. Preserve clinic history while connecting CRM",
+      "canonical": "https://www.follicleintelligence.ai/migrate-from-hubspot",
+      "ogTitle": "Move beyond HubSpot without losing clinic history",
+      "jsonLdBlocks": 4,
+      "hasFaqPage": true
+    },
+    "/platform/leadflow": {
+      "status": 200,
+      "title": "LeadFlow | Hair Restoration CRM and Patient Acquisition | Follicle Intelligence",
+      "desc": "Manage hair restoration enquiries, pipeline, ownership and follow-up in one system connected to consultation, clinical, surgical and outcome records. Connect, t",
+      "canonical": "https://www.follicleintelligence.ai/platform/leadflow",
+      "ogTitle": "LeadFlow — Acquisition connected to the patient journey",
+      "jsonLdBlocks": 2,
+      "hasFaqPage": false
+    },
+    "/platform/progress": {
+      "status": 200,
+      "title": "Platform Progress | Hair Restoration Operating System | Follicle Intelligence",
+      "desc": "See where Follicle Intelligence stands today: operational and pilot systems, advanced builds, controlled HubSpot migration, and a progressive adoption pathway f",
+      "canonical": "https://www.follicleintelligence.ai/platform/progress",
+      "ogTitle": "Platform Progress | Hair Restoration Operating System | Follicle Intelligence",
+      "jsonLdBlocks": 2,
+      "hasFaqPage": false
+    }
+  }
+}
