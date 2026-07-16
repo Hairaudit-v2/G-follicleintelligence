@@ -63,7 +63,6 @@ import { inferGuidedAssistExperienceLevel } from "./getTieredAndContextualTips";
 import {
   GUIDED_ASSIST_WHATS_NEW_VERSION,
   parseWhatsNewSeenFromMetadata,
-  shouldShowGuidedAssistWhatsNew,
   withWhatsNewSeenMetadata,
 } from "./guidedAssistWhatsNew";
 import { getGuidedAssistQuickActionByCode, getGuidedAssistTipByCode } from "./guidedAssistCatalog";

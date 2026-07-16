@@ -724,7 +724,7 @@ export function summarizeGuidedAssistHealthMetrics(opts: {
     opts.tipPreview ??
     ((c: string) => previewText(GUIDED_ASSIST_TIPS.find((t) => t.code === c)?.body));
   const qaTitle = opts.quickActionTitle ?? ((c: string) => c);
-  const qaPreview = opts.quickActionPreview ?? ((c: string) => "");
+  const qaPreview = opts.quickActionPreview ?? ((_c: string) => "");
   const roleFilter = opts.roleFilter ?? "all";
   const topLimit = Math.max(1, Math.min(opts.topLimit ?? 5, 10));
 

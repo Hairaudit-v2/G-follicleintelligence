@@ -25,5 +25,11 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "e2e", "playwright.config.ts", "packages/medical-intelligence-core/src/__tests__/**"]
+  "exclude": [
+    "node_modules",
+    "e2e",
+    "playwright.config.ts",
+    "packages/medical-intelligence-core/src/__tests__/**",
+    "supabase/functions/**"
+  ]
 }

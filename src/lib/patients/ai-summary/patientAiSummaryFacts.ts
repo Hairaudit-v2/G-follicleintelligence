@@ -104,7 +104,7 @@ export function buildPatientAiSummaryFacts(
   }
 
   const openLeads = (data.leads ?? []).filter((l) => {
-    const stage = String(l.lead?.stage_key ?? l.stageLabel ?? "").toLowerCase();
+    const stage = String(l.stageLabel ?? "").toLowerCase();
     return !stage.includes("won") && !stage.includes("lost") && !stage.includes("closed");
   });
 

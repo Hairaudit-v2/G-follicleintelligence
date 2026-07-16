@@ -54,9 +54,10 @@ export function parsePatientAiSummaryLlmJson(
     const flagsRaw = Array.isArray(data.operationalFlags) ? data.operationalFlags : [];
     const operationalFlags: PatientAiSummaryOperationalFlag[] = flagsRaw
       .slice(0, 8)
-      .map((row) => {
+      .map((row): PatientAiSummaryOperationalFlag => {
         const r = row as Record<string, unknown>;
-        const severity = String(r.severity ?? "info") === "attention" ? "attention" : "info";
+        const severity: PatientAiSummaryOperationalFlag["severity"] =
+          String(r.severity ?? "info") === "attention" ? "attention" : "info";
         return {
           code: asString(r.code, 60) || "flag",
           label: asString(r.label, 200),
