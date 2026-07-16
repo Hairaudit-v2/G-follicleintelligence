@@ -1,0 +1,69 @@
+{
+  "evidenceType": "hubspot_stage_p1_post_release_observation",
+  "milestone": "FI-HUBSPOT-BACKUP-1 Stage P1",
+  "closedAt": "2026-07-16",
+  "operatorVerdict": "green",
+  "scope": "controlled_post_release_observation_non_mutating",
+  "noProductionWrite": true,
+  "noBackupExecuted": true,
+  "noTestObjectCreated": true,
+  "precondition": {
+    "stageP0": "docs/audits/evidence-fi-hubspot-stage-p0-operational-baseline.md",
+    "stageP0Commit": "6ba5b62361637a9f8444bc788813f089f8b14d55",
+    "stageP0Verdict": "amber"
+  },
+  "production": {
+    "url": "https://follicleintelligence.ai",
+    "deploymentId": "dpl_CqkWx7FXXGf7jwbpupKu1pSv3fuw",
+    "readyState": "READY",
+    "sha": "687410c158018a545de3025b9c1093ce6212653d",
+    "inspectorUrl": "https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/CqkWx7FXXGf7jwbpupKu1pSv3fuw",
+    "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a"
+  },
+  "smoke": {
+    "command": "npm run test:e2e:hubspot-production-smoke",
+    "suite": "FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1",
+    "timestampUtc": "2026-07-16T01:58:19.135Z",
+    "passed": 11,
+    "failed": 0,
+    "verdict": "GREEN",
+    "suiteCommit": "6ba5b62361637a9f8444bc788813f089f8b14d55",
+    "localSummaryPath": "test-results/hubspot-production-smoke-summary.json",
+    "axes": {
+      "platformAdmin": "PASS",
+      "ordinaryStaffLowRole": "PASS",
+      "invalidBatchId": "PASS",
+      "validBatchId": "PASS",
+      "legacyRedirects": "PASS",
+      "backupAndSync": "PASS",
+      "auditAndHistory": "PASS",
+      "configuration": "PASS",
+      "productionLogs": "PASS",
+      "browserConsole": "PASS",
+      "networkFailures": "PASS",
+      "crossTenant": "PASS",
+      "mutationGuard": "PASS"
+    }
+  },
+  "exitGate": {
+    "noNewUuidQueryFailures": "PASS",
+    "noRouteLoops": "PASS",
+    "noHiddenExecutionControls": "PASS",
+    "noTenantLeakage": "PASS",
+    "noRepeatedFrontendErrors": "PASS",
+    "noNewProductionRegression": "PASS"
+  },
+  "historicalUuidNoise": {
+    "message": "invalid input syntax for type uuid: smoke-safe-id",
+    "lastSeenUtc": "2026-07-15T10:00:42.000Z",
+    "affectsP1": false,
+    "note": "Pre-dates current production deploy; not observed during P1 smoke window"
+  },
+  "stageP2": {
+    "status": "blocked",
+    "reason": "incremental_entry_point_and_fixed_cutoff_missing_per_stage_p0",
+    "selectedTestObject": "notes",
+    "allowedToCreateTestObjectNow": false
+  },
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-stage-p1-post-release-observation.md"
+}
