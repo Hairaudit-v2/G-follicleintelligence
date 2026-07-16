@@ -210,6 +210,10 @@ test.describe("FI HubSpot authenticated production smoke @hubspot-production-smo
       await gotoHubspot(page, hubspotCanonicalPath("backup-sync"));
       assertCanonicalWorkspaceUrl(page, "backup-sync");
       await expect(page.getByText(/Staged-only backup evidence/i)).toBeVisible();
+      await expect(page.getByTestId("hubspot-backup-health")).toBeVisible();
+      await expect(page.getByTestId("hubspot-backup-health-status")).toBeVisible();
+      await expect(page.getByTestId("hubspot-backup-health-primary-evidence")).toBeVisible();
+      await expect(page.getByTestId("hubspot-backup-health-secondary-evidence")).toBeVisible();
       await expect(page.getByRole("heading", { name: /^Primary backup$/i })).toBeVisible();
       await expect(page.getByRole("heading", { name: /^Secondary backup$/i })).toBeVisible();
       await expect(page.getByText(/Status:\s*completed/i).first()).toBeVisible();
