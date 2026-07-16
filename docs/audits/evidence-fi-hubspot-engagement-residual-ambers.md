@@ -4,6 +4,8 @@
 **Date:** 2026-07-16  
 **Forms inventory / form submissions:** GREEN (not active blockers)
 
+> **Superseded for Phase O closeout (2026-07-16):** Authoritative verdict is now **GREEN WITH DOCUMENTED LIMITATIONS** in `evidence-fi-hubspot-phase-o-closeout.md`. Contact associations are an **ACCEPTED LIMITATION — NON-BLOCKING**. CLI `partial` is an **ACCEPTED OPERATOR OVERRIDE**. This file remains as interim residual analysis; do not treat its Overall Phase O AMBER row as current.
+
 Privacy-safe only: no emails, names, field values, or clinical content.
 
 ---
@@ -44,12 +46,13 @@ Those Conversion ID ↔ Contact ID pairs were **not** ingested into `fi_external
 | Path | Verdict |
 |------|---------|
 | API backup fidelity | Associations **unavailable in source API**; payload + `conversionId` preserved |
-| Overall contact-link control | **AMBER** — deterministic Contact IDs exist in selected CSV exports for 3,107/4,220 rows and have not yet been staged as associations |
+| Overall contact-link control (interim) | **AMBER** at time of writing — deterministic Contact IDs exist in selected CSV exports for 3,107/4,220 rows and have not yet been staged as associations |
+| Phase O closeout classification | **ACCEPTED LIMITATION** — not exposed by the live API and not staged from optional historical CSV enrichment (`evidence-fi-hubspot-phase-o-closeout.md`) |
 
 **Not RED:** API associations were not discarded or mis-mapped.  
-**Not full GREEN:** another authoritative export source has recoverable Contact IDs for the selected subset.
+**Not a backup defect for API-fidelity scope:** live submissions API did not expose `contactId`.
 
-**Follow-up (optional, separate milestone):** ingest CSV `Conversion ID` + `Contact ID` into association staging for the selected subset only — no email matching. Portal-wide API enrichment remains unavailable without a HubSpot product change or a different CRM association endpoint if one exists later.
+**Follow-up (optional, separate milestone):** `FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1` — ingest CSV `Conversion ID` + `Contact ID` into association staging for the selected subset only — no email matching. See `fi-hubspot-contact-association-enrichment-1-backlog.md`. Portal-wide API enrichment remains unavailable without a HubSpot product change or a different CRM association endpoint if one exists later.
 
 ---
 
@@ -109,8 +112,9 @@ Files listing 405 is therefore a **documented unsupported listing endpoint** wit
 | Submission parent-form integrity | GREEN |
 | Submission tenant integrity | GREEN |
 | Forms / form-submissions rerun | No |
-| Contact associations | **AMBER** — API limitation faithful; CSV Contact IDs not yet staged |
-| CLI partial semantics | **AMBER** — understood; sole `partial` driver = submissions baseline flag; files 405 documented unsupported listing |
+| Contact associations | Interim AMBER analysis → closeout **ACCEPTED LIMITATION** (non-blocking) |
+| CLI partial semantics | Understood; sole `partial` driver = submissions baseline flag → closeout **ACCEPTED OPERATOR OVERRIDE** (ENGINE PARTIAL / OPERATOR GREEN) |
 | Files metadata milestone | GREEN (listing unsupported; bodies not in scope) |
-| Overall Phase O | **AMBER** |
+| Overall Phase O (interim row) | **AMBER** at time of writing |
+| Overall Phase O (authoritative) | **GREEN WITH DOCUMENTED LIMITATIONS** — `evidence-fi-hubspot-phase-o-closeout.md` |
 | Production PASS | Not claimed |

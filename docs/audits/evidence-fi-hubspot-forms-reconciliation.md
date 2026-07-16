@@ -66,4 +66,4 @@ Unchanged and consistent: every staged submission associates to a parent among t
 
 ## CLI partial contribution
 
-The two-form delta is **explained** and does **not** require keeping forms inventory AMBER. Remaining CLI `partial` drivers (e.g. engine `unexplained` vs selected submission baseline 4220; files listing UNSUPPORTED) are separate — see closeout decomposition.
+The two-form delta is **explained** and does **not** require keeping forms inventory AMBER. Remaining CLI `partial` driver was engine `unexplained` vs selected submission baseline 4220 (operator reconcile GREEN); files listing UNSUPPORTED 405 did not set `partial`. Authoritative Phase O closeout: `evidence-fi-hubspot-phase-o-closeout.md` — **GREEN WITH DOCUMENTED LIMITATIONS**.

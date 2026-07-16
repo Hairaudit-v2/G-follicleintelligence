@@ -1,8 +1,11 @@
 # Forms inventory source — BLOCKED
 
-**Status:** BLOCKED (Phase A)  
+**Status:** BLOCKED (Phase A) — **HISTORICAL**  
 **Date:** 2026-07-16  
-**Reason:** Original HubSpot forms inventory workbook is not present on the local machine or in `FI-HUBSPOT-BACKUP-1` evidence directories. Canonical export form IDs cannot be extracted without fabricating data from the API or backup tables (explicitly forbidden).
+
+> **Superseded (2026-07-16):** Source workbook was later located and reconciled. Forms inventory is **GREEN** in `evidence-fi-hubspot-forms-reconciliation.md` (commit `1c4a3da1`). Authoritative Phase O closeout: `evidence-fi-hubspot-phase-o-closeout.md` — **GREEN WITH DOCUMENTED LIMITATIONS**. Preserve this file as the blocked-state evidence trail; do not treat Overall Phase O AMBER below as current.
+
+**Reason (at time of BLOCKED):** Original HubSpot forms inventory workbook is not present on the local machine or in `FI-HUBSPOT-BACKUP-1` evidence directories. Canonical export form IDs cannot be extracted without fabricating data from the API or backup tables (explicitly forbidden).
 
 ## Manifest reference
 

@@ -5,6 +5,8 @@
 **Canonical ID:** baseline CSV `Conversion ID` ↔ staging `hubspot_submission_id`  
 **No patient names, emails, answers, or clinical field values included.**
 
+> **Phase O supersession (2026-07-16):** Authoritative closeout is `evidence-fi-hubspot-phase-o-closeout.md` — **GREEN WITH DOCUMENTED LIMITATIONS**. Forms inventory is **GREEN** (`evidence-fi-hubspot-forms-reconciliation.md`). Contact associations are an **ACCEPTED LIMITATION** (not exposed by the live API and not staged from optional historical CSV enrichment). The +1,091 backup-only IDs remain **explained / GREEN**. Do not treat residual AMBER wording below as current Phase O blockers.
+
 ---
 
 ## Recommended closeout wording
@@ -95,11 +97,13 @@ Authoritative comparison for portal-wide completeness: **source inventory 5310 �
 - All 1091 backup-only IDs predate export cutoff (coverage, not growth).
 - Unique-ID checks pass; no missing baseline IDs; no duplicate canonical IDs; parent-form integrity passes.
 
-### Residual items → keep overall engagement closeout **AMBER** until accepted
+### Residual items (interim wording; superseded for Phase O)
 
-- Forms definitions 48 (inventory) vs 46 (staged).
-- Contact linkage not captured from submissions API payloads.
-- CLI run status remains `partial` for other engagement reasons (e.g. files listing capability / finalize semantics) — submissions count itself is explained.
+At freeze time these kept overall engagement closeout **AMBER** until accepted:
+
+- Forms definitions 48 (inventory) vs 46 (staged) — later classified **GREEN** in `evidence-fi-hubspot-forms-reconciliation.md`.
+- Contact linkage not captured from submissions API payloads — Phase O closeout: **ACCEPTED LIMITATION** (not exposed by live API; optional CSV enrichment deferred).
+- CLI run status remains `partial` — sole driver was submissions vs selected-export baseline; operator override **GREEN** in `evidence-fi-hubspot-phase-o-closeout.md`. Files listing 405 did not set `partial`.
 
 ### RED triggers checked — **none hit** for submissions
 

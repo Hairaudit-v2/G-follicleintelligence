@@ -1,0 +1,97 @@
+{
+  "evidenceType": "hubspot_phase_o_closeout",
+  "milestone": "FI-HUBSPOT-BACKUP-1 Phase O",
+  "backupRunId": "66f72f09-d333-4bb0-9c39-5da7b912e964",
+  "closedAt": "2026-07-16",
+  "engineStatus": "partial",
+  "operatorVerdict": "green_with_documented_limitations",
+  "minimumRecoveryScope": "api_fidelity",
+  "scopeDecision": "Phase O is complete on an API-fidelity basis. Contact associations were not exposed by the live HubSpot submissions API and therefore were not required for minimum recovery completion. Deterministic historical enrichment remains available for 3,107 rows through Conversion ID ↔ Contact ID and will be handled as a separate post-close enhancement. No email matching or probabilistic association is permitted.",
+  "supersedes": [
+    "docs/audits/fi-hubspot-engagement-communications-backup-1-closeout.md#overall-phase-o-amber",
+    "docs/audits/evidence-fi-hubspot-engagement-residual-ambers.md",
+    "docs/audits/evidence-fi-hubspot-form-submissions-reconciliation-66f72f09.md#residual-amber-blockers",
+    "docs/audits/evidence-fi-hubspot-forms-inventory-source-blocked.md"
+  ],
+  "evidenceReferences": {
+    "formsReconciliation": "docs/audits/evidence-fi-hubspot-forms-reconciliation.md",
+    "formsReconciliationJson": "docs/audits/evidence-fi-hubspot-forms-reconciliation.json",
+    "formSubmissionsReconciliation": "docs/audits/evidence-fi-hubspot-form-submissions-reconciliation-66f72f09.md",
+    "formSubmissionsReconciliationJson": "docs/audits/evidence-fi-hubspot-form-submissions-id-reconciliation.json",
+    "residualAmbers": "docs/audits/evidence-fi-hubspot-engagement-residual-ambers.md",
+    "engagementCloseoutMatrix": "docs/audits/fi-hubspot-engagement-communications-backup-1-closeout.md",
+    "contactAssociationBacklog": "docs/audits/fi-hubspot-contact-association-enrichment-1-backlog.md"
+  },
+  "partialReason": {
+    "dataset": "form_submissions",
+    "reason": "selected_export_baseline_excluded_valid_portal_submissions",
+    "operatorReconciliation": "green",
+    "filesListingCausedPartial": false
+  },
+  "forms": {
+    "verdict": "green",
+    "exportUnique": 48,
+    "backupListableUnique": 46,
+    "exportOnlyNonstandardZeroSubmissionForms": 2,
+    "exportOnlyFormIds": [
+      "440386a7-7498-4245-890c-ab785d3c6f77",
+      "6e136ca0-40f7-48af-9216-64df6c9122ac"
+    ],
+    "exportSourceSha256": "321fc5c887dd6d2e78e06b8480069ea41d89dd0b4f7c1d248d1bd9e4f8b28c72",
+    "rerunRequired": false
+  },
+  "formSubmissions": {
+    "verdict": "green",
+    "selectedExportUnique": 4220,
+    "backupUnique": 5311,
+    "missingBaselineIds": 0,
+    "backupOnlyIds": 1091,
+    "duplicateGroups": 0,
+    "parentIntegrity": "5311/5311",
+    "tenantIntegrity": "pass",
+    "rerunRequired": false
+  },
+  "messages": {
+    "verdict": "green"
+  },
+  "contactAssociations": {
+    "verdict": "accepted_limitation",
+    "liveApiExposedContactId": false,
+    "dataDiscarded": false,
+    "wording": "Not exposed by the live API and not staged from optional historical CSV enrichment.",
+    "deterministicCsvMappingsAvailable": 3107,
+    "followUpMilestone": "FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1",
+    "blocksPhaseO": false,
+    "emailMatchingAllowed": false,
+    "fuzzyMatchingAllowed": false,
+    "probabilisticMatchingAllowed": false
+  },
+  "files": {
+    "metadataVerdict": "green",
+    "metadataRowsStaged": 903,
+    "listingEndpoint": "unsupported",
+    "listingHttpStatus": 405,
+    "fileBodiesInScope": false,
+    "fileBodiesVerdict": "out_of_scope",
+    "contentBackedUp": 0,
+    "causedPartial": false
+  },
+  "cliEngineStatus": "partial",
+  "operatorReconciliation": "green",
+  "engineVersusOperator": "engine_partial_operator_green",
+  "engagementComplete": false,
+  "engagementCompleteReason": "files.granted=false for unsupported listing endpoint",
+  "unresolvedRedControls": 0,
+  "phaseOVerdict": "green_with_documented_limitations",
+  "productionDeploymentReady": false,
+  "authenticatedProductionSmokePassed": false,
+  "productionPassClaimed": false,
+  "nextGate": "Deploy the recovery commit stack to production through Vercel Git integration or CI, confirm READY and deployed SHA, then run authenticated production smoke.",
+  "commitReferences": {
+    "formsReconciliation": "1c4a3da1",
+    "residualAmbers": "d80ef45c",
+    "closeoutMatrixAlign": "d4b66607",
+    "workspaceRecovery": "c0f1c06a"
+  },
+  "phaseOCloseoutCommitMessage": "audit(hubspot): close Phase O with documented limitations"
+}

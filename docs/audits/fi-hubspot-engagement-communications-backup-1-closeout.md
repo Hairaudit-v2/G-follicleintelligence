@@ -1,11 +1,14 @@
 # FI-HUBSPOT-ENGAGEMENT-COMMUNICATIONS-BACKUP-1 - Closeout
 
-Status: LIVE RUN COMPLETE — PHASE O AMBER  
-Closed: not yet  
+Status: LIVE RUN COMPLETE — PHASE O GREEN WITH DOCUMENTED LIMITATIONS  
+Closed: 2026-07-16 (dataset / API-fidelity closeout)  
 Environment: Production (`iqqvzgxoimxchhcnbzxl`), run `66f72f09-d333-4bb0-9c39-5da7b912e964`  
 Evidence classification: Privacy-safe operational metadata only  
+
+**Authoritative Phase O closeout:** `evidence-fi-hubspot-phase-o-closeout.md` (+ JSON)  
 Submission reconciliation: `evidence-fi-hubspot-form-submissions-reconciliation-66f72f09.md` (**GREEN**)  
-Forms inventory: `evidence-fi-hubspot-forms-reconciliation.md` (**GREEN** — 46 listable + 2 non-listable types explained)
+Forms inventory: `evidence-fi-hubspot-forms-reconciliation.md` (**GREEN** — 46 listable + 2 non-listable types explained)  
+Contact-association follow-up: `fi-hubspot-contact-association-enrichment-1-backlog.md` (NON-BLOCKING)
 
 ## Delivery summary
 
@@ -28,24 +31,38 @@ Additive parallel milestone on the existing HubSpot connector:
 | Conversation messages | PASS | Complete — 5,821 staged | Exact (no manual baseline) | N/A | 5,821 edges; 1,336 attachment refs |
 | Attachments / files | UNSUPPORTED listing (405); metadata inventory from refs | 903 inventory rows; `content_backed_up=0` | Exact vs discovered refs | N/A | file ↔ source |
 | Forms | PASS | Complete — 46 staged | **GREEN** vs export 48 (2 = `captured` + `blog_comment`, not in default list APIs) | When API provides | definitions staged |
-| Form submissions | PASS | Complete — 5,311 staged | **GREEN** (+1,091 = coverage vs selected CSV; ≈ inventory 5,310) | N/A | 5,311→form; contact links 0 |
+| Form submissions | PASS | Complete — 5,311 staged | **GREEN** (+1,091 = coverage vs selected CSV; ≈ inventory 5,310) | N/A | 5,311→form; contact links not exposed by live API |
 
-### Dataset / control verdicts
+### Final control matrix (authoritative)
 
-| Dataset/control | Verdict |
+| Control | Final status |
 |---|---|
-| Messages | GREEN (manifest check pending optional hash refresh) |
+| Forms | GREEN |
 | Form submissions | GREEN |
 | Submission uniqueness | GREEN |
 | Submission tenant integrity | GREEN |
 | Submission parent-form integrity | GREEN (5,311/5,311 → 46 definitions) |
-| Forms inventory | **GREEN** — 48 export = 46 listable + `captured` + `blog_comment` |
-| Contact associations | **AMBER** — API has no `contactId` (faithful); selected CSVs have Contact ID on 3,107/4,220 rows not yet staged — `evidence-fi-hubspot-engagement-residual-ambers.md` |
-| Files | **GREEN** metadata inventory (903 staged, `content_backed_up=0`); listing `GET /files/v3/files` **UNSUPPORTED 405** (documented; did not cause `partial`) |
-| CLI completion status | **AMBER** — sole `partial` driver = engine submissions `unexplained` vs baseline 4220 (operator reconcile GREEN) |
-| Overall Phase O | **AMBER** |
-| RED controls | None |
-| Active blockers | Contact CSV enrichment (optional); CLI finalize baseline semantics — **forms removed** |
+| Messages | GREEN |
+| File metadata | GREEN |
+| File bodies | OUT OF SCOPE |
+| Contact associations | ACCEPTED LIMITATION — NON-BLOCKING |
+| CLI engine status | PARTIAL |
+| Operator reconciliation | GREEN |
+| CLI vs operator | ENGINE PARTIAL / OPERATOR GREEN |
+| RED controls | NONE |
+| Phase O | GREEN WITH DOCUMENTED LIMITATIONS |
+| Production deployment | NOT VERIFIED |
+| Authenticated production smoke | NOT RUN |
+| Production PASS | NOT CLAIMED |
+
+### Status-layer distinction
+
+| Layer | Status |
+|---|---|
+| Dataset correctness | Forms, submissions, messages, file metadata GREEN |
+| Machine / CLI status | `partial` (sole driver: submissions vs selected-export baseline 4220) |
+| Accepted scope limitations | Contact associations not exposed by live API; file bodies out of scope; files listing UNSUPPORTED 405 |
+| Production deployment readiness | Separate gate — not verified here |
 
 ### CLI `partial` decomposition (run `66f72f09`)
 
@@ -56,20 +73,20 @@ Additive parallel milestone on the existing HubSpot connector:
 | Conversation threads | Yes | Yes (1918) | 0 | 0 | Exact vs baseline | N/A | None |
 | Conversation messages | Yes | Yes (5821) | 0 | 0 | Complete nested pagination | N/A | None |
 | Forms | Yes | Yes (46 listable) | 2 non-listable types | 0 | `captured` + `blog_comment` outside default list APIs | N/A | None |
-| Form submissions | Yes | Yes (5311) | 0 | 0 | Engine `unexplained` vs baseline 4220 → **sole `partial` driver** | Yes | Optional finalize/baseline alignment |
+| Form submissions | Yes | Yes (5311) | 0 | 0 | Engine `unexplained` vs baseline 4220 → **sole `partial` driver**; operator reconcile **GREEN** | Operator override applied | Optional finalize/baseline alignment (non-blocking) |
 | Files listing | Yes (probe) | — | **UNSUPPORTED 405** | 0 | Documented unsupported list endpoint | N/A | None |
 | Files metadata | Yes | Yes (903) | Body download | 0 | Milestone metadata-only | N/A | None |
-| Contact links | Implicit | 0 from API | CSV Contact IDs not ingested | 0 | API keys: `conversionId,pageUrl,submittedAt,values` only | Selected CSV ingest | Optional |
+| Contact links | Implicit | 0 from API | CSV Contact IDs not ingested | 0 | Not exposed by live API; not staged from optional CSV enrichment | Selected CSV ingest | `FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1` |
 
-**`partial` root cause:** only `form_submissions.reconciliationStatus === "unexplained"`. Files 405 did **not** set `partial`. Forms inventory is GREEN and not a blocker.
+**`partial` root cause:** only `form_submissions.reconciliationStatus === "unexplained"`. Files 405 did **not** set `partial`. Forms inventory is GREEN and not a blocker. Operator reconciliation overrides machine `partial` for Phase O closeout.
 
 ### Attachments detail
 
 | Dimension | Status |
 |---|---|
-| Capability | Pending live probe |
-| Metadata backup | Implemented (inventory statuses classified) |
-| Content backup | Explicitly disabled this milestone (`content_backed_up = 0`) |
+| Capability | Listing UNSUPPORTED 405; metadata inventory completed |
+| Metadata backup | Implemented (inventory statuses classified); 903 staged |
+| Content backup | Explicitly disabled this milestone (`content_backed_up = 0`) — OUT OF SCOPE |
 | Validation status | `metadata_backed_up` / `access_denied` / `expired_reference` / `unsupported` / `failed_validation` |
 
 ### Form submissions clinical classification
@@ -85,44 +102,42 @@ No promotion of responses into patient records.
 
 | Item | Value |
 |---|---|
-| Existing app scopes sufficient | **PARTIAL** (awaiting live probe; partial scopes allowed to run) |
-| Missing read scopes | Unknown until operator runs **Check engagement backup access** |
+| Existing app scopes sufficient | Granted objects completed; files listing UNSUPPORTED 405 |
+| Missing read scopes | None driving Phase O blockers (`MISSING_SCOPE` kinds: none on this run) |
 | Production migration name | `hubspot_engagement_communications_backup` (file `20261017120003_hubspot_engagement_communications_backup.sql`) |
 | New tables | `fi_external_hubspot_note_staging`, `fi_external_hubspot_email_staging`, `fi_external_hubspot_conversation_thread_staging`, `fi_external_hubspot_conversation_message_staging`, `fi_external_hubspot_file_inventory`, `fi_external_hubspot_form_definition_staging`, `fi_external_hubspot_form_submission_staging` |
 | Sync-run columns | `engagement_checkpoints`, `engagement_counters`, `engagement_capabilities`, `engagement_complete` |
 | RLS status | Enabled on all new tables; `anon`/`authenticated` revoked; `service_role` CRUD only (verified in production) |
-| Commit hashes | Pushed implementation `ea6bc78f`; resume used uncommitted pagination/resume fixes (patched in evidence freeze) |
+| Commit hashes | Implementation `ea6bc78f`; residual docs `d80ef45c` / `d4b66607`; forms reconcile `1c4a3da1`; workspace recovery `c0f1c06a`; Phase O closeout see `evidence-fi-hubspot-phase-o-closeout.md` |
 | Tests | `hubspotEngagementBackupActionCore.test.ts`, `hubspotEngagementBackupEngine.test.ts`, `hubspotWorkspaceStatus.test.ts` — PASS |
 | Build | `npm run build` — PASS |
 | TypeScript | `tsc --noEmit` — PASS |
 | Migration validation | `npm run check:migrations` — PASS |
-| Deployment status | Production migration applied; live CLI run against production completed |
-| Live execution status | Run `66f72f09…` finished exit 0 / CLI `partial` |
+| Deployment status | Production migration applied; live CLI run against production completed; recovery-stack production READY **not verified** in Phase O closeout |
+| Live execution status | Run `66f72f09…` finished exit 0 / CLI `partial` / operator GREEN |
 | Form-submissions +1091 | **GREEN** — see reconciliation evidence (selected-export vs all-forms; 0 missing baseline IDs) |
 | Forms inventory 48→46 | **GREEN** — see forms reconciliation evidence |
-| Overall verdict | **AMBER** (contact-link + CLI partial semantics remain) |
+| Overall verdict | **GREEN WITH DOCUMENTED LIMITATIONS** |
 
-## Why not full GREEN
+## Scope decision (Phase O)
 
-GREEN requires:
+Phase O is complete on an API-fidelity basis. Contact associations were not exposed by the live HubSpot submissions API and therefore were not required for minimum recovery completion. Deterministic historical enrichment remains available for 3,107 rows through Conversion ID ↔ Contact ID and will be handled as a separate post-close enhancement (`FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1`). No email matching or probabilistic association is permitted.
 
-1. Live capabilities verified — yes for granted objects; files listing remains UNSUPPORTED 405
-2. All supported objects complete pagination — yes for this run
-3. Runs finalize correctly — CLI `partial` (finalize semantics / residuals)
-4. Reconciliation exact or fully explained — submissions + forms inventory GREEN; CLI still emits `partial` from stale baseline flag
-5. No communication content exposed — confirmed (`content_backed_up=0`; UI/logs counts only)
-6. No records promoted — confirmed
-7. Attachment handling classified — metadata-only confirmed; listing UNSUPPORTED 405 documented
-8. Contact associations — API limitation faithful; CSV Contact IDs not yet staged (AMBER)
+Documented limitations:
 
-Residual operator action: optional CSV contact ingest + optional finalize baseline alignment.
+1. Contact associations — ACCEPTED LIMITATION (not exposed by live API; not staged from optional historical CSV enrichment)
+2. CLI `partial` — ACCEPTED OPERATOR OVERRIDE (sole driver: selected-export baseline vs portal coverage)
+3. File bodies — OUT OF SCOPE (`content_backed_up = 0`)
+4. Files listing — unsupported 405; metadata inventory still GREEN; `engagement_complete = false` because `files.granted = false`
+5. Production deployment + authenticated smoke — separate gates; Production PASS NOT CLAIMED
 
 ## Operator next steps
 
 1. No forms / form-submissions rerun.
-2. Contact AMBER: optional separate ingest of selected-export CSV `Conversion ID` ↔ `Contact ID` (3,107 populated) — no email matching.
-3. CLI AMBER: optional finalize change so documented coverage GREEN does not leave `unexplained` / `partial`.
+2. Contact associations: optional separate milestone `FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1` — deterministic CSV Conversion ID ↔ Contact ID only (3,107 populated); no email/fuzzy matching.
+3. CLI finalize baseline semantics: optional non-blocking engine hygiene so documented coverage GREEN does not leave `unexplained` / `partial`.
 4. Files 405: accept as documented unsupported listing; metadata inventory already complete.
+5. **Next gate:** Deploy the recovery commit stack to production through Vercel Git integration or CI, confirm READY and deployed SHA, then run authenticated production smoke.
 
 CLI alternatives (trusted service runner only):
 
@@ -156,4 +171,4 @@ Requires `FI_HUBSPOT_RECOVERY_ACTOR_AUTH_USER_ID`.
 
 ## Closure decision
 
-Implementation for `FI-HUBSPOT-ENGAGEMENT-COMMUNICATIONS-BACKUP-1` is delivered and production schema is applied. Milestone remains **AMBER** until the authorised clinic operator completes live capability verification and the engagement backup run with exact or explained reconciliation.
+Implementation for `FI-HUBSPOT-ENGAGEMENT-COMMUNICATIONS-BACKUP-1` is delivered and the live engagement backup run is reconciled. **Phase O is closed as GREEN WITH DOCUMENTED LIMITATIONS** on an API-fidelity basis. Production deployment READY and authenticated production smoke remain separate gates; Production PASS is not claimed.
