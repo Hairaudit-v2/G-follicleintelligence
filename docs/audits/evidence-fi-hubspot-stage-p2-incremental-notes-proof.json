@@ -1,0 +1,179 @@
+{
+  "evidenceType": "hubspot_stage_p2_incremental_notes_proof",
+  "milestone": "FI-HUBSPOT-BACKUP-1 Stage P2",
+  "closedAt": "2026-07-16",
+  "operatorVerdict": "GREEN",
+  "claimsStagePComplete": false,
+  "implementsStageP3": false,
+  "preflightUtc": "2026-07-16T02:58:32.704Z",
+  "deployment": {
+    "id": "dpl_53PuKDdGR7N1asvrzuC8wKU1k6z2",
+    "readyState": "READY",
+    "sha": "ec9341ddede134f61d66c3994768096fd6249a5a",
+    "containsSha34ca0374": true,
+    "aliases": [
+      "follicleintelligence.ai",
+      "www.follicleintelligence.ai"
+    ],
+    "priorGateDeploymentId": "dpl_wPdpTJAMaAEFZcRRdtUSHvS24Jnf"
+  },
+  "tenant": {
+    "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+    "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+    "hubspotPortalId": "21009770"
+  },
+  "testNote": {
+    "label": "FI OS BACKUP TEST — STAGE P2 — 2026-07-16T03-01-30-158Z-f6e249",
+    "hubspotNoteId": "113007728535",
+    "createdAt": "2026-07-16T03:01:30.637Z",
+    "updatedAt": "2026-07-16T03:01:30.637Z",
+    "hsLastModifiedDate": "2026-07-16T03:01:30.637Z",
+    "archived": false,
+    "associations": null,
+    "createHttpStatus": 201,
+    "directReadHttpStatus": 200,
+    "exactIdMatch": true,
+    "disposition": "retained_labelled_test_note"
+  },
+  "cutoffs": {
+    "cutoffFrom": "2026-07-16T03:00:00.000Z",
+    "cutoffTo": "2026-07-16T03:20:00.000Z",
+    "semantics": "updatedAt >= cutoff_from AND updatedAt < cutoff_to",
+    "boundaryProof": "2026-07-16T03:00:00.000Z <= 2026-07-16T03:01:30.637Z < 2026-07-16T03:20:00.000Z",
+    "frozenForReplay": true
+  },
+  "preRunDestination": {
+    "stagingRows": 0,
+    "duplicateGroups": 0,
+    "crossTenantRows": 0,
+    "watermarkRows": 0,
+    "activeIncrementalNotesRuns": 0
+  },
+  "failedAttempt": {
+    "runId": "51054587-08d4-457f-8079-7a3351a25589",
+    "status": "failed",
+    "verificationState": "failed",
+    "watermarkAdvanced": false,
+    "error": "HubSpot Search 400 too many sorts (count: 2, max allowed: 1)",
+    "repair": "single hs_lastmodifieddate ASC sort; local ID tie-break retained",
+    "fixCommit": "d213ad51"
+  },
+  "firstSuccessfulRun": {
+    "runId": "df7b39ed-3429-4a0b-a3d6-37b399701ea8",
+    "startedAt": "2026-07-16T03:03:19.152Z",
+    "completedAt": "2026-07-16T03:03:22.003Z",
+    "exitCode": 0,
+    "status": "completed",
+    "verificationState": "passed",
+    "watermarkAdvanced": true,
+    "cutoffFrom": "2026-07-16T03:00:00.000Z",
+    "cutoffTo": "2026-07-16T03:20:00.000Z",
+    "counters": {
+      "discovered": 1,
+      "inRange": 1,
+      "inserted": 1,
+      "updated": 0,
+      "unchanged": 0,
+      "failed": 0,
+      "skippedOutOfRange": 0
+    },
+    "checkpoint": {
+      "phase": "complete",
+      "pagesCompleted": 1,
+      "lastId": "113007728535",
+      "lastUpdatedAt": "2026-07-16T03:01:31.691Z"
+    }
+  },
+  "firstDestinationVerification": {
+    "stagingRows": 1,
+    "stagingRowId": "d5191123-828c-48f6-b317-7b2740183158",
+    "tenantMatch": true,
+    "integrationMatch": true,
+    "canonicalIdMatch": true,
+    "duplicateGroups": 0,
+    "crossTenantRows": 0
+  },
+  "watermark": {
+    "beforeFirstSuccess": null,
+    "afterFirstSuccess": {
+      "timestamp": "2026-07-16T03:20:00.000Z",
+      "lastVerifiedRunId": "df7b39ed-3429-4a0b-a3d6-37b399701ea8",
+      "version": 1
+    },
+    "afterReplay": {
+      "timestamp": "2026-07-16T03:20:00.000Z",
+      "lastVerifiedRunId": "e54d457a-cef5-43ae-8e1e-dc326523a63c",
+      "version": 2
+    },
+    "advancedOnlyAfterVerification": true,
+    "exceedsCutoffTo": false,
+    "otherDatasets": 0
+  },
+  "replayRun": {
+    "runId": "e54d457a-cef5-43ae-8e1e-dc326523a63c",
+    "method": "identical_cutoff_cli_rerun",
+    "exitCode": 0,
+    "status": "completed",
+    "verificationState": "passed",
+    "cutoffFrom": "2026-07-16T03:00:00.000Z",
+    "cutoffTo": "2026-07-16T03:20:00.000Z",
+    "counters": {
+      "discovered": 1,
+      "inRange": 1,
+      "inserted": 0,
+      "updated": 0,
+      "unchanged": 1,
+      "failed": 0,
+      "skippedOutOfRange": 0
+    },
+    "postReplayDestinationRows": 1
+  },
+  "integrity": {
+    "matchingRows": 1,
+    "duplicateCanonicalGroups": 0,
+    "crossTenantRows": 0,
+    "activeNotesRuns": 0,
+    "unresolvedStartedRuns": 0,
+    "nonNotesWatermarks": 0
+  },
+  "verificationEvents": {
+    "firstSuccess": [
+      "run_created",
+      "run_started",
+      "page_checkpointed",
+      "finalisation_completed",
+      "verification_passed",
+      "watermark_advanced"
+    ],
+    "replay": [
+      "run_created",
+      "run_started",
+      "page_checkpointed",
+      "finalisation_completed",
+      "verification_passed",
+      "watermark_advanced"
+    ]
+  },
+  "productionLogReview": {
+    "deploymentId": "dpl_53PuKDdGR7N1asvrzuC8wKU1k6z2",
+    "window": "1h",
+    "query": "hubspot",
+    "levels": ["error", "fatal", "warning"],
+    "materialHits": 0
+  },
+  "safety": {
+    "notesCreated": 1,
+    "schedulesAdded": 0,
+    "fullHistoryBackupRun": false,
+    "otherDatasetsBackedUp": false,
+    "patientDataUsed": false,
+    "contactAssociationEnrichment": false
+  },
+  "remainingRisks": [
+    "deploy_single_sort_search_repair_before_p3_schedule",
+    "search_api_vs_list_property_lag",
+    "archived_notes_outside_search_path"
+  ],
+  "nextGate": "Implement Stage P3 scheduled incremental backup operations with concurrency protection, automatic verification, failure notification, operator runbook and one observed scheduled production run.",
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-stage-p2-incremental-notes-proof.md"
+}
