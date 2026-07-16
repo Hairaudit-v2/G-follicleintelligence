@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1A** (architecture + dry-run only)  
+Current gate: **1C** (owner-resolution workspace + controlled coverage)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -115,9 +115,40 @@ FI_HUBSPOT_OWNER_MAP_ROLLBACK_CONFIRM=<batchId> node scripts/run-with-system-ca.
 
 Never mutates `fi_staff` / `fi_users`. Expansion beyond 2 requires `--expand` (max 25) and still only deterministic matches.
 
-### Next gate
+### Next gate (after 1B)
 
 `FI-HUBSPOT-IMPORT-1C — Owner-resolution workspace and controlled mapping coverage expansion`
+
+## Owner-resolution workspace (1C)
+
+UI: `/fi-admin/[tenantId]/settings/integrations/hubspot?tab=owner-resolution`  
+Access: Configuration hub roles only (clinic admin / owner / platform admin with tenant scope).  
+Decisions table: `fi_hubspot_owner_resolution_decisions` (review persists without apply).
+
+### Commands
+
+```bash
+npm run hubspot:owner-resolution:summary
+npm run hubspot:owner-resolution:classify
+npm run hubspot:owner-resolution:preview
+
+# Apply only after explicit preview approval (max 10 mappings / batch; ≤25 new in 1C)
+FI_HUBSPOT_OWNER_MAP_CONFIRM=<batchId> node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-resolution-review.ts \
+  --apply --approved-batch-id <batchId> --checksum <checksum>
+```
+
+Hard rules for 1C:
+
+- Never auto-map from name-only or weak signals
+- Classifications (archived / historical / no match / excluded / conflict) do not create staff mappings
+- One HubSpot owner per FI staff retained; conflicts stay quarantined
+- No staff/user/lead/patient/workflow side effects; watermark unchanged
+- Success ≠ mapping all 29 remaining owners
+
+### Next gate (after 1C GREEN)
+
+`FI-HUBSPOT-IMPORT-1D — Contact and lead migration pilot with patient-protection gate`
 
 ## Safety checklist before any apply
 
@@ -128,3 +159,4 @@ Never mutates `fi_staff` / `fi_users`. Expansion beyond 2 requires `--expand` (m
 - [x] Confirm token = batch id
 - [x] Backup watermark unchanged
 - [x] Rollback preview prepared (not executed — mappings correct)
+- [ ] 1C: preview checksum + batch id confirmed; mappings ≤ 10; operator-approved only

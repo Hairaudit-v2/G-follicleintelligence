@@ -552,7 +552,11 @@ export async function previewRollbackHubspotOwnerStaffMapping(
     metadata: { mapping_row_ids?: string[]; integration_id?: string };
   };
   if (b.tenant_id !== opts.tenantId) throw new Error("ROLLBACK_PREVIEW: tenant mismatch");
-  if (b.kind !== HUBSPOT_OWNER_MAPPING_KIND) throw new Error("ROLLBACK_PREVIEW: wrong kind");
+  const allowedKinds = new Set([
+    HUBSPOT_OWNER_MAPPING_KIND,
+    "hubspot_owner_staff_mapping_1c",
+  ]);
+  if (!allowedKinds.has(b.kind)) throw new Error("ROLLBACK_PREVIEW: wrong kind");
 
   const { data: rows, error: rowErr } = await supabase
     .from("fi_staff_source_ids")
@@ -562,12 +566,20 @@ export async function previewRollbackHubspotOwnerStaffMapping(
     .contains("metadata", { import_batch_id: opts.batchId });
   if (rowErr) throw new Error(rowErr.message);
 
+  const allowedMilestones = new Set([
+    HUBSPOT_OWNER_MAPPING_MILESTONE,
+    "FI-HUBSPOT-IMPORT-1C",
+  ]);
+
   // Exclude mappings adopted/confirmed outside the batch.
   const removable = (rows ?? []).filter((row) => {
     const meta = (row as { metadata?: Record<string, unknown> }).metadata ?? {};
     if (meta.confirmed_outside_batch === true) return false;
     if (meta.adopted_outside_batch === true) return false;
-    return meta.import_batch_id === opts.batchId && meta.milestone === HUBSPOT_OWNER_MAPPING_MILESTONE;
+    return (
+      meta.import_batch_id === opts.batchId &&
+      allowedMilestones.has(String(meta.milestone ?? ""))
+    );
   });
 
   const proposals: HubspotOwnerMappingProposal[] = removable.map((row) => {
