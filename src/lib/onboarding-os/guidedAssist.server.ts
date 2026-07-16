@@ -42,6 +42,8 @@ export type GuidedAssistPreferencesRow = {
   dismissed_tip_codes: unknown;
   snoozed_tips: unknown;
   metadata: Record<string, unknown>;
+  /** Per-user Today role-first exposure count (migration 20261020120001). */
+  today_home_views?: number | null;
 };
 
 type ServerOpts = {
@@ -88,10 +90,12 @@ function rowToTenantDefaults(row: GuidedAssistPreferencesRow | null): GuidedAssi
 }
 
 function rowToUserPreferences(row: GuidedAssistPreferencesRow | null): GuidedAssistUserPreferences {
+  const views = Number(row?.today_home_views ?? 0);
   return {
     assistEnabled: row?.assist_enabled ?? null,
     dismissedTipCodes: parseDismissedTipCodes(row?.dismissed_tip_codes),
     snoozedTips: parseSnoozedTips(row?.snoozed_tips),
+    todayHomeViews: Number.isFinite(views) && views > 0 ? Math.floor(views) : 0,
   };
 }
 
@@ -250,6 +254,53 @@ export async function loadGuidedAssistSessionPayload(
   } catch (e) {
     logStructured("error", "guided_assist.load_session_error", { tenantId, error: String(e) });
     return { ok: false, error: e instanceof Error ? e.message : "Failed to load guided assist." };
+  }
+}
+
+/**
+ * Increment per-user Today home view counter (role-first window).
+ * Safe to call once per exposure from the client when `shouldIncrementTodayHomeViews` is true.
+ */
+export async function incrementGuidedAssistTodayHomeViews(
+  tenantId: string,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; todayHomeViews: number } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const row = await ensureUserPreferenceRow(supabase, tid, auth.fiUserId);
+    const current = Math.max(0, Math.floor(Number(row.today_home_views ?? 0) || 0));
+    const next = current + 1;
+
+    const { error } = await supabase
+      .from("fi_guided_assist_preferences")
+      .update({ today_home_views: next })
+      .eq("id", row.id)
+      .eq("tenant_id", tid)
+      .eq("fi_user_id", auth.fiUserId);
+    if (error) return { ok: false, error: error.message };
+
+    await recordGuidedAssistEvent(
+      tid,
+      {
+        fiUserId: auth.fiUserId,
+        eventKind: "tip_shown",
+        guidanceCode: "today_role_first_window",
+        pageKey: "",
+        detail: { today_home_views: next, kind: "role_first_increment" },
+      },
+      serverOpts
+    );
+
+    return { ok: true, todayHomeViews: next };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to increment Today guide views.",
+    };
   }
 }
 

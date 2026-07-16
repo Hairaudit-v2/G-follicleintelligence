@@ -38,6 +38,24 @@ export type GuidedAssistRoleScope = {
   anyRole?: boolean;
 };
 
+/**
+ * Simplified Today role tags for role-first tips (first N home visits).
+ * Mapped from workspace profile + tenant admin role at runtime.
+ */
+export const GUIDED_ASSIST_TODAY_ROLE_KEYS = [
+  "reception",
+  "consultant",
+  "finance",
+  "doctor",
+  "admin",
+  "all",
+] as const;
+
+export type GuidedAssistTodayRoleKey = (typeof GUIDED_ASSIST_TODAY_ROLE_KEYS)[number];
+
+/** Default number of Today page exposures that use role-first tip ordering. */
+export const GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT = 5;
+
 export type GuidedAssistTipDefinition = {
   code: string;
   area: GuidedAssistArea;
@@ -47,8 +65,17 @@ export type GuidedAssistTipDefinition = {
   pageKey: string;
   /** Optional prefix match — e.g. `consultations/` matches nested consultation routes. */
   pageKeyPrefix?: boolean;
+  /**
+   * Sort key: **lower number = shown first** (catalog convention).
+   * Role-first Today tips use the same convention.
+   */
   priority: number;
   roleScope: GuidedAssistRoleScope;
+  /**
+   * Optional Today role-first tags. When present on a Today (`pageKey === ""`) tip,
+   * the tip is eligible for the first-N-logins role-first window.
+   */
+  roles?: readonly GuidedAssistTodayRoleKey[];
   dismissible: boolean;
   snoozeHours?: number;
   /** Operational CTA — never patient-specific clinical recommendations. */
@@ -87,6 +114,8 @@ export type GuidedAssistUserPreferences = {
   assistEnabled: boolean | null;
   dismissedTipCodes: readonly string[];
   snoozedTips: GuidedAssistSnoozedTips;
+  /** Times role-first tips were shown on Today for this user (this tenant). */
+  todayHomeViews: number;
 };
 
 export type GuidedAssistResolvedPreferences = {
@@ -133,6 +162,16 @@ export type GuidedAssistSessionPayload = {
   tips: GuidedAssistTipView[];
   nextAction: GuidedAssistNextActionView | null;
   safetyNotice: string;
+  /** True when tips were selected via role-first Today window (first N home views). */
+  roleFirstActive: boolean;
+  /** Viewer simplified role used for role-first filtering. */
+  todayRole: GuidedAssistTodayRoleKey | null;
+  /** Current Today home view count before this exposure (0-based window check). */
+  todayHomeViews: number;
+  /** N for role-first window (default {@link GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT}). */
+  roleFirstViewLimit: number;
+  /** Client should call increment once when true and assist is enabled. */
+  shouldIncrementTodayHomeViews: boolean;
 };
 
 export type GuidedAssistAreaInsight = {

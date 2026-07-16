@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp, Compass, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   dismissGuidedAssistTipAction,
+  incrementGuidedAssistViewsAction,
   recordGuidedAssistClientEventAction,
   snoozeGuidedAssistTipAction,
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";
@@ -55,6 +56,22 @@ export function GuidedAssistWidget({
       });
     }
   }, [payload.assistEnabled, payload.pageKey, payload.tips, tenantId]);
+
+  /** Once per mount when role-first Today tips are active — advances the first-N window. */
+  const roleFirstIncrementedRef = useRef(false);
+  useEffect(() => {
+    if (!payload.shouldIncrementTodayHomeViews || roleFirstIncrementedRef.current) return;
+    roleFirstIncrementedRef.current = true;
+    void incrementGuidedAssistViewsAction(tenantId).then((res) => {
+      if (res.ok && typeof res.todayHomeViews === "number") {
+        setPayload((prev) => ({
+          ...prev,
+          todayHomeViews: res.todayHomeViews!,
+          shouldIncrementTodayHomeViews: false,
+        }));
+      }
+    });
+  }, [payload.shouldIncrementTodayHomeViews, tenantId]);
 
   const dismissTip = (tipCode: string) => {
     setMessage(null);
@@ -171,6 +188,13 @@ export function GuidedAssistWidget({
             <p className="text-sm text-slate-300">
               Turn the clinic guide on for short setup and day-of tips for your role and this page
               (Front desk, Pipeline, Money, Surgery, Team).
+            </p>
+          ) : null}
+
+          {payload.roleFirstActive ? (
+            <p className="text-[10px] font-medium uppercase tracking-wide text-cyan-400/90">
+              Getting started · visit {Math.min(payload.todayHomeViews + 1, payload.roleFirstViewLimit)} of{" "}
+              {payload.roleFirstViewLimit}
             </p>
           ) : null}
 

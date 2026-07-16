@@ -6,6 +6,7 @@ import { z } from "zod";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import {
   dismissGuidedAssistTip,
+  incrementGuidedAssistTodayHomeViews,
   loadGuidedAssistUsageSummary,
   recordGuidedAssistEvent,
   setGuidedAssistEnabledForUser,
@@ -101,6 +102,37 @@ export async function snoozeGuidedAssistTipAction(
     return { ok: false, error: e instanceof Error ? e.message : "Failed to snooze tip." };
   }
 }
+
+/**
+ * Increment Today home view counter for role-first tips (first N exposures).
+ * Call once when the clinic guide shows role-first tips on Today.
+ */
+export async function incrementGuidedAssistViewsAction(
+  tenantId: string
+): Promise<GuidedAssistActionResult & { todayHomeViews?: number }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await incrementGuidedAssistTodayHomeViews(tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    revalidateTenantAssistPaths(tid);
+    return { ok: true, todayHomeViews: result.todayHomeViews };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update guide views.",
+    };
+  }
+}
+
+/** Alias matching the product brief name. */
+export const incrementGuidedAssistViews = incrementGuidedAssistViewsAction;
 
 export async function recordGuidedAssistClientEventAction(
   tenantId: string,

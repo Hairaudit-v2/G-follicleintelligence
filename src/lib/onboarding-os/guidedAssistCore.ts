@@ -7,6 +7,12 @@ import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 import { GUIDED_ASSIST_NEXT_ACTIONS, GUIDED_ASSIST_TIPS } from "./guidedAssistCatalog";
+import {
+  getRoleFirstTips,
+  mapViewerToGuidedAssistTodayRole,
+  mergeRoleFirstTipsWithCatalog,
+  shouldUseRoleFirstTips,
+} from "./getRoleFirstTips";
 import type {
   GuidedAssistArea,
   GuidedAssistAreaInsight,
@@ -21,7 +27,11 @@ import type {
   GuidedAssistUserPreferences,
   GuidedAssistViewerContext,
 } from "./guidedAssistTypes";
-import { GUIDED_ASSIST_AREA_LABELS, GUIDED_ASSIST_SAFETY_NOTICE } from "./guidedAssistTypes";
+import {
+  GUIDED_ASSIST_AREA_LABELS,
+  GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
+  GUIDED_ASSIST_SAFETY_NOTICE,
+} from "./guidedAssistTypes";
 
 export function resolveGuidedAssistPageKey(pathname: string, tenantBase: string): string {
   return normalizeFiAdminTenantPathSuffix(pathname, tenantBase);
@@ -291,10 +301,45 @@ export function buildGuidedAssistSessionPayload(opts: {
   resolved: GuidedAssistResolvedPreferences;
   userPreferences: GuidedAssistUserPreferences;
   maxTips?: number;
+  roleFirstViewLimit?: number;
 }): GuidedAssistSessionPayload {
-  const tips = opts.resolved.assistEnabled
-    ? selectGuidedAssistTips(opts.ctx, opts.userPreferences, new Date(), opts.maxTips ?? 3)
-    : [];
+  const maxTips = opts.maxTips ?? 3;
+  const roleFirstViewLimit = opts.roleFirstViewLimit ?? GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT;
+  const todayHomeViews = Math.max(0, Math.floor(Number(opts.userPreferences.todayHomeViews) || 0));
+  const todayRole = mapViewerToGuidedAssistTodayRole({
+    workspaceProfileKey: opts.ctx.workspaceProfileKey,
+    tenantAdminRole: opts.ctx.tenantAdminRole,
+  });
+
+  const roleFirstActive =
+    opts.resolved.assistEnabled &&
+    shouldUseRoleFirstTips({
+      pageKey: opts.ctx.pageKey,
+      todayHomeViews,
+      viewLimit: roleFirstViewLimit,
+    });
+
+  let tips: GuidedAssistTipView[] = [];
+  if (opts.resolved.assistEnabled) {
+    const catalogTips = selectGuidedAssistTips(
+      opts.ctx,
+      opts.userPreferences,
+      new Date(),
+      maxTips
+    );
+    if (roleFirstActive) {
+      const roleTips = getRoleFirstTips({
+        todayRole,
+        tenantId: opts.ctx.tenantId,
+        dismissedTipCodes: opts.userPreferences.dismissedTipCodes,
+        maxTips,
+      });
+      tips = mergeRoleFirstTipsWithCatalog(roleTips, catalogTips, maxTips);
+    } else {
+      tips = catalogTips;
+    }
+  }
+
   const nextAction = opts.resolved.assistEnabled ? selectGuidedAssistNextAction(opts.ctx) : null;
 
   return {
@@ -304,6 +349,11 @@ export function buildGuidedAssistSessionPayload(opts: {
     tips,
     nextAction,
     safetyNotice: GUIDED_ASSIST_SAFETY_NOTICE,
+    roleFirstActive,
+    todayRole: roleFirstActive ? todayRole : null,
+    todayHomeViews,
+    roleFirstViewLimit,
+    shouldIncrementTodayHomeViews: roleFirstActive && tips.length > 0,
   };
 }
 

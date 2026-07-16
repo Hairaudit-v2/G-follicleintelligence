@@ -15,7 +15,13 @@ import {
   summarizeGuidedAssistUsageEvents,
 } from "../src/lib/onboarding-os/guidedAssistCore";
 import {
+  getRoleFirstTips,
+  mapViewerToGuidedAssistTodayRole,
+  shouldUseRoleFirstTips,
+} from "../src/lib/onboarding-os/getRoleFirstTips";
+import {
   GUIDED_ASSIST_AREA_LABELS,
+  GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
   GUIDED_ASSIST_SAFETY_NOTICE,
 } from "../src/lib/onboarding-os/guidedAssistTypes";
 
@@ -46,7 +52,12 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: { assistEnabled: false, dismissedTipCodes: [], snoozedTips: {} },
+        userPreferences: {
+          assistEnabled: false,
+          dismissedTipCodes: [],
+          snoozedTips: {},
+          todayHomeViews: 0,
+        },
         isOnboardingPhase: true,
       }),
       false
@@ -54,7 +65,12 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: { assistEnabled: null, dismissedTipCodes: [], snoozedTips: {} },
+        userPreferences: {
+          assistEnabled: null,
+          dismissedTipCodes: [],
+          snoozedTips: {},
+          todayHomeViews: 0,
+        },
         isOnboardingPhase: false,
       }),
       false
@@ -62,7 +78,12 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: { assistEnabled: null, dismissedTipCodes: [], snoozedTips: {} },
+        userPreferences: {
+          assistEnabled: null,
+          dismissedTipCodes: [],
+          snoozedTips: {},
+          todayHomeViews: 0,
+        },
         isOnboardingPhase: true,
       }),
       true
@@ -96,7 +117,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         ...BASE_CTX,
         pageKey: "configuration",
       },
-      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {} }
+      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {}, todayHomeViews: 0 }
     );
     assert.ok(tips.some((t) => t.code === "onboarding_configuration_hub"));
     assert.ok(tips.every((t) => !t.body.toLowerCase().includes("prescribe")));
@@ -121,11 +142,17 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
         userPreferences: { assistEnabled: false, dismissedTipCodes: [], snoozedTips: {} },
       },
-      userPreferences: { assistEnabled: false, dismissedTipCodes: [], snoozedTips: {} },
+      userPreferences: {
+        assistEnabled: false,
+        dismissedTipCodes: [],
+        snoozedTips: {},
+        todayHomeViews: 0,
+      },
     });
     assert.equal(payload.safetyNotice, GUIDED_ASSIST_SAFETY_NOTICE);
     assert.equal(payload.tips.length, 0);
     assert.equal(payload.nextAction, null);
+    assert.equal(payload.roleFirstActive, false);
   });
 
   it("summarizeGuidedAssistUsageEvents aggregates admin metrics", () => {
@@ -190,7 +217,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         tenantAdminRole: null,
         pageKey: "front-desk",
       },
-      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {} }
+      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {}, todayHomeViews: 0 }
     );
     assert.ok(tips.some((t) => t.code === "front_desk_today"));
     assert.ok(tips.every((t) => !/ReceptionOS/i.test(t.areaLabel)));
@@ -213,6 +240,95 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.ok(action);
     assert.equal(action?.code, "next_open_front_desk");
     assert.ok(action?.href.endsWith("/front-desk"));
+  });
+
+  it("role-first tips apply on Today for first N views only", () => {
+    assert.equal(shouldUseRoleFirstTips({ pageKey: "", todayHomeViews: 0 }), true);
+    assert.equal(
+      shouldUseRoleFirstTips({
+        pageKey: "",
+        todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT - 1,
+      }),
+      true
+    );
+    assert.equal(
+      shouldUseRoleFirstTips({ pageKey: "", todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT }),
+      false
+    );
+    assert.equal(shouldUseRoleFirstTips({ pageKey: "calendar", todayHomeViews: 0 }), false);
+    assert.equal(mapViewerToGuidedAssistTodayRole({ workspaceProfileKey: "reception" }), "reception");
+    assert.equal(
+      mapViewerToGuidedAssistTodayRole({
+        workspaceProfileKey: "default",
+        tenantAdminRole: "finance_admin",
+      }),
+      "finance"
+    );
+
+    const roleTips = getRoleFirstTips({
+      todayRole: "reception",
+      tenantId: BASE_CTX.tenantId,
+      dismissedTipCodes: [],
+    });
+    assert.ok(roleTips.some((t) => t.code === "today_reception_front_desk"));
+    assert.equal(roleTips[0]!.code, "today_reception_front_desk");
+
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+        pageKey: "",
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: true,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences: {
+          assistEnabled: true,
+          dismissedTipCodes: [],
+          snoozedTips: {},
+          todayHomeViews: 0,
+        },
+      },
+      userPreferences: {
+        assistEnabled: true,
+        dismissedTipCodes: [],
+        snoozedTips: {},
+        todayHomeViews: 0,
+      },
+    });
+    assert.equal(payload.roleFirstActive, true);
+    assert.equal(payload.shouldIncrementTodayHomeViews, true);
+    assert.ok(payload.tips.some((t) => t.code === "today_reception_front_desk"));
+
+    const afterWindow = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+        pageKey: "",
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
+        userPreferences: {
+          assistEnabled: true,
+          dismissedTipCodes: [],
+          snoozedTips: {},
+          todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
+        },
+      },
+      userPreferences: {
+        assistEnabled: true,
+        dismissedTipCodes: [],
+        snoozedTips: {},
+        todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
+      },
+    });
+    assert.equal(afterWindow.roleFirstActive, false);
+    assert.equal(afterWindow.shouldIncrementTodayHomeViews, false);
   });
 });
 
