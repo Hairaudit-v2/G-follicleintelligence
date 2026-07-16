@@ -244,8 +244,12 @@ export type GuidedAssistStreakState = {
 export type GuidedAssistProgressSummary = {
   completedCount: number;
   goalCount: number;
-  /** e.g. "3/5 clinic tips used this week" */
+  /** 0–100 progress toward weekly goal. */
+  percent: number;
+  /** e.g. "3 of 5 tips explored this week — nice work" */
   label: string;
+  /** e.g. "Onboarding progress: 60%" */
+  percentLabel: string;
   isComplete: boolean;
 };
 

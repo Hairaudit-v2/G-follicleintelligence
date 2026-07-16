@@ -1,6 +1,6 @@
 /**
  * Pure engagement helpers for Clinic guide (streak, weekly progress, copy).
- * Operational adoption only — no clinical language.
+ * Warm, supportive colleague tone — no clinical language, no over-gamification.
  */
 
 import { getGuidedAssistTipByCode } from "./guidedAssistCatalog";
@@ -63,11 +63,12 @@ export function computeEngagementStreakUpdate(input: {
   }
 
   if (last === today) {
+    const days = current > 0 ? current : 1;
     return {
-      streakDays: current > 0 ? current : 1,
+      streakDays: days,
       lastActiveDateYmd: last,
       updated: false,
-      message: formatStreakMessage(current > 0 ? current : 1),
+      message: formatStreakMessage(days),
     };
   }
 
@@ -82,7 +83,7 @@ export function computeEngagementStreakUpdate(input: {
     };
   }
 
-  // Missed a day (or clock skew) — restart at 1
+  // Missed a day (or clock skew) — restart at 1, still encouraging
   return {
     streakDays: 1,
     lastActiveDateYmd: today,
@@ -91,36 +92,58 @@ export function computeEngagementStreakUpdate(input: {
   };
 }
 
-/** Professional clinic-themed streak copy (no game-speak overload). */
+/**
+ * Warm streak copy — supportive colleague, not game points.
+ * Shown from day 1 so new staff still get encouragement.
+ */
 export function formatStreakMessage(streakDays: number): string | null {
   const n = Math.floor(streakDays);
-  if (n < 2) return null;
-  if (n === 2) return "2 days with the clinic guide";
-  if (n < 7) return `${n}-day clinic guide streak`;
-  if (n === 7) return "7-day clinic guide streak";
-  if (n % 7 === 0) return `${n}-day consistency with clinic tips`;
-  return `${n}-day clinic guide streak`;
+  if (n < 1) return null;
+  if (n === 1) return "Nice work opening the guide today — you've got this";
+  if (n === 2) return "2-day streak — keep building the habit";
+  if (n === 3) return "3-day streak — keep it going!";
+  if (n < 7) return `${n}-day streak — you're getting the hang of this`;
+  if (n === 7) return "7-day streak — lovely consistency";
+  if (n % 7 === 0) return `${n}-day streak — keep the momentum going`;
+  return `${n}-day streak — keep it going`;
 }
 
 export function buildWeeklyProgressSummary(input: {
   completedCount: number;
   goal?: number;
+  /** Prefer onboarding-style label while setup incomplete. */
+  isOnboardingPhase?: boolean;
 }): GuidedAssistProgressSummary {
   const goal = Math.max(1, Math.floor(input.goal ?? GUIDED_ASSIST_WEEKLY_PROGRESS_GOAL));
   const completed = Math.max(0, Math.floor(input.completedCount));
   const capped = Math.min(completed, goal);
+  const percent = Math.min(100, Math.round((capped / goal) * 100));
+  const isComplete = completed >= goal;
+
+  const label = isComplete
+    ? `All ${goal} weekly tips explored — nice work today`
+    : `${capped} of ${goal} tips explored this week`;
+
+  const percentLabel = input.isOnboardingPhase
+    ? `Onboarding progress: ${percent}%`
+    : `Weekly progress: ${percent}%`;
+
   return {
     completedCount: completed,
     goalCount: goal,
-    label: `${capped}/${goal} clinic tips used this week`,
-    isComplete: completed >= goal,
+    percent,
+    label,
+    percentLabel,
+    isComplete,
   };
 }
 
 export function resolveTeamHighlightFromCounts(
   counts: readonly { guidanceCode: string; count: number }[]
 ): GuidedAssistTeamHighlight | null {
-  const top = [...counts].sort((a, b) => b.count - a.count || a.guidanceCode.localeCompare(b.guidanceCode))[0];
+  const top = [...counts].sort(
+    (a, b) => b.count - a.count || a.guidanceCode.localeCompare(b.guidanceCode)
+  )[0];
   if (!top || top.count < 1) return null;
   const tip = getGuidedAssistTipByCode(top.guidanceCode);
   const title = tip?.title?.trim() || top.guidanceCode.replace(/_/g, " ");

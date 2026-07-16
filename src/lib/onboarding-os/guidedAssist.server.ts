@@ -635,6 +635,7 @@ export async function loadGuidedAssistEngagementSnapshot(
   opts: {
     includeTeamHighlight?: boolean;
     tipCodes?: readonly string[];
+    isOnboardingPhase?: boolean;
   } = {},
   serverOpts: ServerOpts = {}
 ): Promise<GuidedAssistEngagementSnapshot> {
@@ -692,6 +693,7 @@ export async function loadGuidedAssistEngagementSnapshot(
     snapshot.progress = buildWeeklyProgressSummary({
       completedCount: uniqueCodes.size,
       goal: GUIDED_ASSIST_WEEKLY_PROGRESS_GOAL,
+      isOnboardingPhase: opts.isOnboardingPhase,
     });
 
     const feedbackByTipCode: Record<string, boolean | null> = {};
@@ -785,13 +787,13 @@ export async function touchGuidedAssistEngagement(
   }
 }
 
-/** Upsert tip/tour-step helpfulness (thumbs). Touches engagement streak. */
+/** Upsert tip/tour-step helpfulness (thumbs + optional short comment). Touches engagement streak. */
 export async function recordGuidedAssistTipFeedback(
   tenantId: string,
   tipCode: string,
   helpful: boolean,
   pageKey?: string | null,
-  serverOpts: ServerOpts = {}
+  serverOpts: ServerOpts & { comment?: string | null } = {}
 ): Promise<{ ok: true; helpful: boolean } | { ok: false; error: string }> {
   try {
     const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
@@ -805,6 +807,9 @@ export async function recordGuidedAssistTipFeedback(
       // Still allow unknown operational codes (catalog grows); only reject empty.
     }
 
+    const commentRaw = serverOpts.comment != null ? String(serverOpts.comment).trim() : "";
+    const comment = commentRaw ? commentRaw.slice(0, 500) : null;
+
     const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
     const tid = tenantId.trim();
 
@@ -815,6 +820,7 @@ export async function recordGuidedAssistTipFeedback(
         tip_code: code,
         helpful: Boolean(helpful),
         page_key: pageKey?.trim() || null,
+        comment,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "tenant_id,fi_user_id,tip_code" }
@@ -829,7 +835,7 @@ export async function recordGuidedAssistTipFeedback(
         guidanceCode: code,
         guidanceArea: known?.area ?? null,
         pageKey: pageKey ?? null,
-        detail: { helpful: Boolean(helpful) },
+        detail: { helpful: Boolean(helpful), hasComment: Boolean(comment) },
       },
       serverOpts
     );
@@ -990,7 +996,11 @@ export async function loadGuidedAssistSessionPayload(
       tid,
       auth.fiUserId,
       userPreferences,
-      { includeTeamHighlight: canManage, tipCodes },
+      {
+        includeTeamHighlight: canManage,
+        tipCodes,
+        isOnboardingPhase,
+      },
       serverOpts
     );
 

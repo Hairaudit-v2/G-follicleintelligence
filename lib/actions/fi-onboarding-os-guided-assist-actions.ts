@@ -266,7 +266,8 @@ export async function recordGuidedAssistTipFeedbackAction(
   tenantId: string,
   tipCode: string,
   helpful: boolean,
-  pageKey?: string | null
+  pageKey?: string | null,
+  comment?: string | null
 ): Promise<GuidedAssistActionResult & { helpful?: boolean }> {
   try {
     const tid = tenantIdSchema.parse(tenantId);
@@ -277,6 +278,7 @@ export async function recordGuidedAssistTipFeedbackAction(
     const result = await recordGuidedAssistTipFeedback(tid, code, helpful, pageKey, {
       actorAuthUserId: authId,
       skipAuthCheck: true,
+      comment: comment ?? null,
     });
     if (!result.ok) return result;
     return { ok: true, helpful: result.helpful };

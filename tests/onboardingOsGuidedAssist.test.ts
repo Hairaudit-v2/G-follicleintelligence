@@ -764,19 +764,29 @@ describe("Clinic guide — engagement boosters", () => {
     assert.equal(gap.updated, true);
   });
 
-  it("formats professional streak copy without game overload", () => {
-    assert.equal(formatStreakMessage(1), null);
-    assert.equal(formatStreakMessage(2), "2 days with the clinic guide");
+  it("formats warm streak copy without game overload", () => {
+    assert.match(formatStreakMessage(1) ?? "", /you've got this|got this/i);
+    assert.match(formatStreakMessage(3) ?? "", /3-day streak/);
+    assert.match(formatStreakMessage(3) ?? "", /keep it going/i);
     assert.match(formatStreakMessage(7) ?? "", /7-day/);
   });
 
-  it("builds weekly progress summary labels", () => {
+  it("builds weekly progress summary labels with percent", () => {
     const p = buildWeeklyProgressSummary({ completedCount: 3, goal: 5 });
-    assert.equal(p.label, "3/5 clinic tips used this week");
+    assert.equal(p.label, "3 of 5 tips explored this week");
+    assert.equal(p.percent, 60);
+    assert.match(p.percentLabel, /60%/);
     assert.equal(p.isComplete, false);
+    const onboarding = buildWeeklyProgressSummary({
+      completedCount: 3,
+      goal: 5,
+      isOnboardingPhase: true,
+    });
+    assert.match(onboarding.percentLabel, /Onboarding progress/);
     const done = buildWeeklyProgressSummary({ completedCount: 8, goal: 5 });
     assert.equal(done.isComplete, true);
-    assert.match(done.label, /^5\/5/);
+    assert.equal(done.percent, 100);
+    assert.match(done.label, /nice work/i);
   });
 
   it("resolves anonymized team highlight from tip counts", () => {
@@ -806,7 +816,9 @@ describe("Clinic guide — engagement boosters", () => {
     });
     assert.ok(payload.engagement);
     assert.equal(payload.engagement.streakDays, 7);
-    assert.ok(payload.engagement.progress.label.includes("clinic tips"));
+    assert.match(payload.engagement.progress.label, /tips explored|nice work/i);
+    assert.ok(typeof payload.engagement.progress.percent === "number");
+    assert.match(payload.engagement.streakMessage ?? "", /7-day|streak/i);
     assert.equal(payload.showReenableChrome, false);
   });
 });

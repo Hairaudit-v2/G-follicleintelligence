@@ -44,12 +44,33 @@ function emptyEngagement(): GuidedAssistEngagementSnapshot {
     progress: {
       completedCount: 0,
       goalCount: 5,
-      label: "0/5 clinic tips used this week",
+      percent: 0,
+      label: "0 of 5 tips explored this week",
+      percentLabel: "Weekly progress: 0%",
       isComplete: false,
     },
     teamHighlight: null,
     feedbackByTipCode: {},
   };
+}
+
+function ProgressBar({ percent }: { percent: number }) {
+  const p = Math.max(0, Math.min(100, Math.floor(percent)));
+  return (
+    <div
+      className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+      role="progressbar"
+      aria-valuenow={p}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      data-testid="guided-assist-progress-bar"
+    >
+      <div
+        className="h-full rounded-full bg-cyan-400/70 transition-[width] duration-300"
+        style={{ width: `${p}%` }}
+      />
+    </div>
+  );
 }
 
 function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistSessionPayload {
@@ -140,47 +161,101 @@ function TipFeedbackButtons({
   tipCode: string;
   value: boolean | null | undefined;
   disabled?: boolean;
-  onFeedback: (tipCode: string, helpful: boolean) => void;
+  onFeedback: (tipCode: string, helpful: boolean, comment?: string | null) => void;
 }) {
+  const [showComment, setShowComment] = useState(false);
+  const [comment, setComment] = useState("");
+  const [thanks, setThanks] = useState(false);
+
+  const vote = (helpful: boolean) => {
+    if (helpful) {
+      setShowComment(false);
+      setThanks(true);
+      onFeedback(tipCode, true, null);
+      return;
+    }
+    setShowComment(true);
+    onFeedback(tipCode, false, null);
+  };
+
+  const sendComment = () => {
+    onFeedback(tipCode, false, comment.trim() || null);
+    setShowComment(false);
+    setThanks(true);
+  };
+
   return (
-    <div
-      className="mt-2 flex items-center gap-1"
-      data-testid="guided-assist-feedback"
-      data-tip-code={tipCode}
-    >
-      <span className="mr-1 text-[10px] text-slate-500">Helpful?</span>
-      <button
-        type="button"
-        disabled={disabled || value === true}
-        onClick={() => onFeedback(tipCode, true)}
-        className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
-          value === true
-            ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-100"
-            : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
-        )}
-        aria-label="Mark tip helpful"
-        aria-pressed={value === true}
-        data-testid="guided-assist-feedback-up"
-      >
-        <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
-      </button>
-      <button
-        type="button"
-        disabled={disabled || value === false}
-        onClick={() => onFeedback(tipCode, false)}
-        className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
-          value === false
-            ? "border-slate-400/40 bg-slate-700/40 text-slate-200"
-            : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
-        )}
-        aria-label="Mark tip not helpful"
-        aria-pressed={value === false}
-        data-testid="guided-assist-feedback-down"
-      >
-        <ThumbsDown className="h-3.5 w-3.5" aria-hidden />
-      </button>
+    <div className="mt-2" data-testid="guided-assist-feedback" data-tip-code={tipCode}>
+      <div className="flex items-center gap-1">
+        <span className="mr-1 text-[10px] text-slate-500">Was this helpful?</span>
+        <button
+          type="button"
+          disabled={disabled || value === true}
+          onClick={() => vote(true)}
+          className={cn(
+            "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
+            value === true
+              ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-100"
+              : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
+          )}
+          aria-label="Mark tip helpful"
+          aria-pressed={value === true}
+          data-testid="guided-assist-feedback-up"
+        >
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
+        </button>
+        <button
+          type="button"
+          disabled={disabled || value === false}
+          onClick={() => vote(false)}
+          className={cn(
+            "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
+            value === false
+              ? "border-slate-400/40 bg-slate-700/40 text-slate-200"
+              : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
+          )}
+          aria-label="Mark tip not helpful"
+          aria-pressed={value === false}
+          data-testid="guided-assist-feedback-down"
+        >
+          <ThumbsDown className="h-3.5 w-3.5" aria-hidden />
+        </button>
+        {thanks || value != null ? (
+          <span className="ml-1 text-[10px] text-cyan-300/80">Thanks — that helps the team</span>
+        ) : null}
+      </div>
+      {showComment ? (
+        <div className="mt-2 space-y-1.5">
+          <label className="block text-[10px] text-slate-500" htmlFor={`fb-${tipCode}`}>
+            Optional note (what would help more?)
+          </label>
+          <textarea
+            id={`fb-${tipCode}`}
+            value={comment}
+            onChange={(e) => setComment(e.target.value.slice(0, 500))}
+            rows={2}
+            className="w-full resize-none rounded-lg border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-cyan-400/40 focus:outline-none"
+            placeholder="A short note is enough…"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={sendComment}
+              className="rounded-md border border-cyan-400/30 bg-cyan-500/15 px-2 py-1 text-[10px] font-medium text-cyan-100 hover:bg-cyan-500/25"
+            >
+              Send note
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowComment(false)}
+              className="rounded-md px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -370,13 +445,14 @@ export function GuidedAssistWidget({
     router,
   ]);
 
-  const submitFeedback = (tipCode: string, helpful: boolean) => {
+  const submitFeedback = (tipCode: string, helpful: boolean, comment?: string | null) => {
     startTransition(async () => {
       const res = await recordGuidedAssistTipFeedbackAction(
         tenantId,
         tipCode,
         helpful,
-        payload.pageKey
+        payload.pageKey,
+        comment
       );
       if (!res.ok) {
         setMessage(res.error);
@@ -651,6 +727,7 @@ export function GuidedAssistWidget({
               data-testid="guided-assist-progress-collapsed"
             >
               {engagement.progress.label}
+              {engagement.streakDays >= 2 ? ` · ${engagement.streakDays}d` : ""}
             </p>
           ) : null}
           {!collapsed && guideVisible && engagement.streakMessage ? (
@@ -668,10 +745,11 @@ export function GuidedAssistWidget({
               type="button"
               disabled={pending}
               onClick={turnGuideOn}
-              className="rounded-full border border-cyan-400/40 bg-cyan-500/20 px-2.5 py-1 text-[11px] font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50"
+              className="max-w-[11rem] truncate rounded-full border border-cyan-400/40 bg-cyan-500/20 px-2.5 py-1 text-[11px] font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50"
               data-testid="guided-assist-collapsed-turn-on"
+              title="Clinic Guide is off — turn it back on anytime"
             >
-              Turn on Clinic Guide
+              Guide off — turn on?
             </button>
           ) : (
             <GuidedAssistToggle
@@ -715,18 +793,24 @@ export function GuidedAssistWidget({
 
           {guideVisible ? (
             <div
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500"
+              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5"
               data-testid="guided-assist-engagement-summary"
             >
-              <span data-testid="guided-assist-progress">{engagement.progress.label}</span>
+              <p className="text-[10px] text-slate-400" data-testid="guided-assist-progress">
+                {engagement.progress.label}
+              </p>
+              <p className="mt-0.5 text-[10px] font-medium text-cyan-300/80">
+                {engagement.progress.percentLabel}
+              </p>
+              <ProgressBar percent={engagement.progress.percent} />
               {engagement.teamHighlight ? (
-                <span
-                  className="text-slate-400"
+                <p
+                  className="mt-1.5 text-[10px] text-slate-500"
                   data-testid="guided-assist-team-highlight"
                   title="Anonymized clinic-wide usage this week"
                 >
                   {engagement.teamHighlight.label}
-                </span>
+                </p>
               ) : null}
             </div>
           ) : null}
@@ -736,11 +820,13 @@ export function GuidedAssistWidget({
               className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
               data-testid="guided-assist-reenable"
             >
-              <p className="text-sm font-medium text-slate-100">Clinic guide is off — that’s okay</p>
+              <p className="text-sm font-medium text-slate-100">
+                Clinic Guide is off — turn back on anytime
+              </p>
               <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                When you’re ready, turn it on for short, friendly tips and tours — Front desk,
-                Pipeline, Money, Surgery, Team, and clinical navigation for doctors, consultants,
-                and nurses. Operational only; never clinical advice.
+                No pressure. When you want a friendly hand with Front desk, Pipeline, Money,
+                Surgery, Team, or clinical navigation, we&apos;re right here. Operational only —
+                never clinical advice.
               </p>
               <button
                 type="button"
@@ -749,7 +835,7 @@ export function GuidedAssistWidget({
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-3 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50"
                 data-testid="guided-assist-turn-on"
               >
-                Turn on Clinic guide
+                Turn Clinic Guide back on
               </button>
               <Link
                 href={settingsHref}
