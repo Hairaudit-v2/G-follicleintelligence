@@ -59,6 +59,11 @@ export const HOME_PAGE_FAQS: readonly FaqItem[] = [
     answer:
       "Request a platform and migration review at https://www.follicleintelligence.ai/demo or contact the team at https://www.follicleintelligence.ai/contact.",
   },
+  {
+    question: "Can we adopt Follicle Intelligence without replacing everything at once?",
+    answer:
+      "Yes. Clinics can connect existing systems, coexist during a controlled adoption period, transition selected workflows in stages, or progressively replace fragmented tools when ready — at a pace designed to protect clinic continuity. Clinics using HubSpot can follow the same connect / coexist / transition / replace pathway.",
+  },
 ] as const;
 
 /** Pricing page FAQs for FAQPage JSON-LD. */

@@ -355,7 +355,14 @@ export function FiMarketingHomeView() {
                 </Link>
               </Button>
             </div>
-            <p className="mt-5 text-sm text-muted-foreground">
+            <p className="mt-5 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+              <Link
+                href={c.hero.systemsLink.href}
+                className="inline-flex items-center gap-1.5 font-semibold text-foreground/80 transition-colors hover:text-amber-50"
+              >
+                {c.hero.systemsLink.label}
+                <ChevronRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+              </Link>
               <Link
                 href={c.hero.tertiaryCta.href}
                 className="inline-flex items-center gap-1.5 font-semibold text-amber-200/85 transition-colors hover:text-amber-50"
@@ -442,7 +449,7 @@ export function FiMarketingHomeView() {
               <PlatformSystemCard key={system.name} system={system} index={index} />
             ))}
           </div>
-          <div className="mt-10 flex justify-center sm:mt-12">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4">
             <Button
               asChild
               variant="outline"
@@ -452,6 +459,17 @@ export function FiMarketingHomeView() {
               <Link href={c.platformSystems.architectureCta.href}>
                 {c.platformSystems.architectureCta.label}
                 <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.platformSystems.progressCta.href}>
+                {c.platformSystems.progressCta.label}
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
               </Link>
             </Button>
           </div>
@@ -560,6 +578,67 @@ export function FiMarketingHomeView() {
               <Link href={c.differentiation.architectureCta.href}>
                 {c.differentiation.architectureCta.label}
                 <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+          </div>
+        </FadeIn>
+      </Section>
+
+      {/* Section 5b — Progressive adoption */}
+      <Section
+        id={c.progressiveAdoption.id}
+        className="scroll-mt-24 border-b border-border/40 bg-muted/[0.04] py-24 sm:py-28 md:py-32"
+        aria-labelledby={`${c.progressiveAdoption.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.progressiveAdoption.id}-heading`}
+            eyebrow={c.progressiveAdoption.eyebrow}
+            title={c.progressiveAdoption.headline}
+            description={c.progressiveAdoption.intro}
+          />
+          <p className="mt-6 max-w-3xl font-display text-lg font-semibold tracking-tight text-amber-100/90 sm:text-xl">
+            {c.progressiveAdoption.clinicLine}
+          </p>
+          <p className="mt-4 max-w-3xl text-base leading-[1.75] text-muted-foreground sm:text-lg">
+            {c.progressiveAdoption.hubspotNote}
+          </p>
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {c.progressiveAdoption.modes.map((mode, index) => (
+              <FadeIn key={mode.title} delay={0.03 * index}>
+                <GlassCard
+                  variant="os"
+                  className="flex h-full flex-col border-white/[0.07] p-6 transition-[border-color] duration-300 hover:border-amber-400/20 sm:p-7"
+                >
+                  <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/45">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">
+                    {mode.title}
+                  </h3>
+                  <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">
+                    {mode.body}
+                  </p>
+                </GlassCard>
+              </FadeIn>
+            ))}
+          </div>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "min-w-[14rem]")}>
+              <Link href={c.progressiveAdoption.primaryCta.href}>
+                {c.progressiveAdoption.primaryCta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
+            >
+              <Link href={c.progressiveAdoption.secondaryCta.href}>
+                {c.progressiveAdoption.secondaryCta.label}
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
               </Link>
             </Button>
           </div>

@@ -13,15 +13,15 @@ import { buildFAQPageSchema, HOME_PAGE_FAQS, SITE_SEO_KEYWORDS } from "@/lib/str
 export const metadata = buildPageMetadata({
   title: "Follicle Intelligence | Operating System for Hair Restoration Clinics",
   description:
-    "Follicle Intelligence is a purpose-built operating system for hair restoration clinics, connecting consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinic operations in one platform.",
+    "Follicle Intelligence is a purpose-built operating system for hair restoration clinics — connecting consultations, surgery, patient intelligence, staff training, outcomes and operations, with progressive adoption that protects clinic continuity.",
   path: "/",
   keywords: [...SITE_SEO_KEYWORDS],
   ogTitle: "The Operating System Built Specifically for Hair Restoration Clinics",
   ogDescription:
-    "Replace disconnected clinic tools with one connected intelligence platform built exclusively for hair restoration medicine.",
+    "Replace disconnected clinic tools with one connected operating system — connect, transition or replace at a pace that protects clinic continuity.",
   twitterTitle: "Follicle Intelligence | Hair Restoration Clinic Operating System",
   twitterDescription:
-    "A connected intelligence platform for consultations, surgery, outcomes, workforce, analytics, and clinic operations.",
+    "A connected operating system for consultations, surgery, outcomes, workforce and clinic operations — with honest delivery status and progressive adoption.",
 });
 
 export default function HomePage() {

@@ -1,6 +1,9 @@
 /**
  * Public marketing homepage copy and structured lists.
  * Edit this file to update https://follicleintelligence.ai/ content in one place.
+ *
+ * Active homepage (`/`) uses `HOME_V5_CONTENT` via `FiMarketingHomeView`.
+ * `HOME_PAGE_CONTENT` is legacy and not mounted — see deprecation note below (FI-WEB-REFRESH-1E).
  */
 
 export type HomeOrbitModule = {
@@ -131,6 +134,12 @@ export type HomeMoonshotClosingBlock = {
   finalLine: string;
 };
 
+/**
+ * @deprecated Not mounted on `/`. Active homepage uses `HOME_V5_CONTENT`.
+ * FI-WEB-REFRESH-1E quarantined this object: do not remount without aligning to
+ * `docs/marketing/public-messaging-standard.md` (no public completion %, no
+ * unqualified “world’s first/largest”, no absolute “zero disruption” migration claims).
+ */
 export const HOME_PAGE_CONTENT = {
   hero: {
     eyebrow: "Enterprise hair restoration infrastructure",
@@ -333,7 +342,7 @@ export const HOME_PAGE_CONTENT = {
     subheadline:
       "Every consultation, treatment, surgery, and patient outcome helps improve the way clinics diagnose, treat, operate, and deliver better long-term patient results.",
     subheadline2:
-      "Over time, this creates the world's most valuable structured dataset in hair restoration medicine.",
+      "Over time, structured longitudinal data becomes a strategic advantage for the specialty — framed as trajectory, not a claim that the dataset is already complete.",
   },
 
   industrySoftwareGap: {
@@ -376,7 +385,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Connected ecosystem",
     headline: "A Connected Intelligence Ecosystem",
     subtext:
-      "Four independent systems continuously learn together, creating the world's first connected intelligence infrastructure for hair restoration medicine.",
+      "Four independent systems are designed to strengthen one another over time — forming connected intelligence infrastructure purpose-built for hair restoration medicine.",
     cards: [
       {
         name: "Follicle Intelligence",
@@ -477,8 +486,8 @@ export const HOME_PAGE_CONTENT = {
     ] as const,
     closingStatement: {
       line1:
-        "Over time, millions of patient journeys create the world's largest structured hair restoration dataset.",
-      line2: "This intelligence becomes more valuable than the software itself.",
+        "Over time, structured patient journeys build specialty intelligence that compounds with every procedure and outcome.",
+      line2: "That intelligence becomes increasingly valuable alongside the software itself.",
     },
   },
 
@@ -488,12 +497,12 @@ export const HOME_PAGE_CONTENT = {
     headline: "Works With Your Existing Software",
     body: "Follicle Intelligence is designed to integrate with the systems clinics already use.",
     principles: [
-      "No forced migration.",
-      "No operational disruption.",
-      "Connect first. Transition at your own pace.",
+      "Designed to protect clinic continuity.",
+      "Connect first. Transition in controlled stages.",
+      "Replace when your team is ready — not before.",
     ] as const,
     supportingCopy:
-      "Start by connecting your existing CRM, booking, payments, calendar, communication, and patient record systems. Follicle Intelligence creates an intelligence layer above your current infrastructure so clinics can unlock value immediately while keeping day-to-day workflows running.",
+      "Start by connecting your existing CRM, booking, payments, calendar, communication, and patient record systems. Follicle Intelligence creates an intelligence layer above your current infrastructure so clinics can unlock value while keeping day-to-day workflows running.",
     integrationCaption: "Designed to connect with common clinic systems",
     integrationSystems: [
       "HubSpot",
@@ -517,7 +526,7 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Reduce adoption risk",
-        copy: "Avoid painful go-lives, forced migrations, and operational downtime.",
+        copy: "Staged transition is designed to protect continuity — not an all-or-nothing cutover.",
       },
       {
         title: "Build toward full OS adoption",
@@ -531,8 +540,8 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Building global healthcare infrastructure",
     headline: "Built as living medical infrastructure",
     subtext:
-      "Follicle Intelligence is building the world's first specialised intelligence infrastructure for hair restoration—connecting clinic operations, workforce systems, surgical intelligence, patient intelligence, and global clinical accreditation.",
-    gridCaption: "Thirteen OS modules · live delivery status · single intelligence substrate",
+      "Follicle Intelligence is building specialised intelligence infrastructure for hair restoration — connecting clinic operations, workforce systems, surgical intelligence, patient intelligence, and global clinical accreditation.",
+    gridCaption: "Connected OS modules · honest delivery status · single intelligence substrate",
     cta: { label: "View full platform progress", href: "/platform/progress" as const },
   },
 
@@ -575,13 +584,11 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "Every module inside Follicle Intelligence is being developed as enterprise-grade healthcare infrastructure designed for global multi-clinic deployment.",
     metrics: [
-      { label: "Overall FI ecosystem completion", value: "~77%" },
-      { label: "FI OS core platform", value: "~77%" },
-      { label: "Production infrastructure modules", value: "8" },
-      { label: "Multi-tenant systems active", value: "11" },
-      { label: "Operational workflows deployed", value: "40+" },
-      { label: "Database migrations completed", value: "100+" },
-      { label: "Internal tests passing", value: "240+" },
+      { label: "Public maturity model", value: "Status categories" },
+      { label: "Operational pilot", value: "Underway" },
+      { label: "Core clinic systems (homepage subset)", value: "8" },
+      { label: "Intelligence layers (ecosystem)", value: "12" },
+      { label: "Delivery transparency", value: "Published" },
     ] as const,
     securityModel: [
       "Tenant isolated architecture",
@@ -1233,6 +1240,11 @@ export type HomeV5CredibilityCard = {
   description: string;
 };
 
+export type HomeV5AdoptionMode = {
+  title: string;
+  body: string;
+};
+
 export const HOME_V5_CONTENT = {
   hero: {
     id: "hero",
@@ -1242,16 +1254,23 @@ export const HOME_V5_CONTENT = {
     subheadline:
       "Most clinics operate across disconnected software never designed for hair restoration medicine.",
     subheadline2:
-      "Follicle Intelligence connects consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinical operations into one purpose-built operating system.",
+      "Follicle Intelligence connects consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinical operations into one purpose-built operating system — with progressive adoption so day-to-day clinic work is protected.",
     metrics: [
-      { value: "20", label: "Interconnected Systems" },
-      { value: "81%", label: "Platform Deployment" },
-      { value: "8+", label: "Replacing Disconnected Clinic Tools" },
+      { value: "8", label: "Core Clinic Systems Shown Below" },
+      { value: "12", label: "Intelligence Layers In The Architecture" },
+      { label: "Operational Pilot Underway" },
       { label: "Built Exclusively For Hair Restoration Medicine" },
     ] satisfies readonly HomeV5MetricCard[],
     primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
-    secondaryCta: { label: "See Connected Platform Systems", href: "/#platform-systems" as const },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     tertiaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
+    systemsLink: {
+      label: "See Connected Platform Systems",
+      href: "/#platform-systems" as const,
+    },
   },
 
   fragmentation: {
@@ -1326,10 +1345,14 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Connected infrastructure",
     headline: "One Connected Platform Managing The Entire Clinic",
     subtext:
-      "Eight core systems shown here — part of a twelve-layer intelligence architecture built for hair restoration medicine.",
+      "Eight core systems shown here — a curated subset of the twelve-layer intelligence architecture. Full delivery status by module is on Platform Progress.",
     architectureCta: {
       label: "View all 12 intelligence layers",
       href: "/platform/ecosystem" as const,
+    },
+    progressCta: {
+      label: "View platform progress",
+      href: "/platform/progress" as const,
     },
     systems: [
       {
@@ -1384,6 +1407,43 @@ export const HOME_V5_CONTENT = {
     },
   },
 
+  progressiveAdoption: {
+    id: "progressive-adoption",
+    eyebrow: "Progressive adoption",
+    headline: "Connect, Transition Or Replace — Without An All-Or-Nothing Cutover",
+    intro:
+      "Clinics can connect their existing systems, transition in controlled stages, or progressively move their operations into Follicle Intelligence.",
+    clinicLine: "Connect, transition or replace — at a pace that protects clinic continuity.",
+    hubspotNote:
+      "If your clinic uses HubSpot today, the same pathway applies: connect, coexist, transition selected history in verified stages, or replace when you are ready.",
+    modes: [
+      {
+        title: "Connect",
+        body: "Selected data or workflows continue to operate with your current systems connected to FI.",
+      },
+      {
+        title: "Coexist",
+        body: "FI and your existing tools operate alongside one another during a controlled adoption period.",
+      },
+      {
+        title: "Transition",
+        body: "Selected contacts, workflows and history move into FI through verified stages.",
+      },
+      {
+        title: "Replace",
+        body: "FI becomes the primary operating environment within the agreed deployment scope.",
+      },
+    ] satisfies readonly HomeV5AdoptionMode[],
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
+    secondaryCta: {
+      label: "See the HubSpot pathway in LeadFlow",
+      href: "/platform/leadflow#hubspot-pathway" as const,
+    },
+  },
+
   ecosystemArchitecture: {
     id: "ecosystem-architecture",
     eyebrow: "Strategic architecture",
@@ -1411,9 +1471,9 @@ export const HOME_V5_CONTENT = {
   surgeryIntelligence: {
     id: "surgery-intelligence",
     eyebrow: "Surgical intelligence",
-    headline: "The World's First Surgical Intelligence Engine Built For Hair Restoration Clinics",
+    headline: "Surgical Intelligence Purpose-Built For Hair Restoration Clinics",
     supportingCopy:
-      "For the first time clinics can objectively measure procedural quality at the level where outcomes are actually created.",
+      "Clinics can objectively measure procedural quality at the level where outcomes are actually created.",
     supportingPoints: [
       "Every extraction.",
       "Every graft.",
@@ -1493,9 +1553,9 @@ export const HOME_V5_CONTENT = {
         description: "Created around surgeons, nurses, consultants and technicians",
       },
       {
-        title: "Real Industry Expertise",
+        title: "Honest Delivery Status",
         description:
-          "Built specifically for one medical specialty rather than adapted generic healthcare software",
+          "Operational pilot underway for scoped modules — unfinished capability is not presented as fully deployed",
       },
     ] satisfies readonly HomeV5CredibilityCard[],
     closingStatement:
@@ -1526,9 +1586,12 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Enterprise infrastructure",
     headline: "This Is Not Clinic Software",
     subheadline: "This is infrastructure for an entire medical industry.",
-    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine.",
+    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine — adopted progressively, with delivery status you can review.",
     primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     tertiaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
   },
 } as const;
