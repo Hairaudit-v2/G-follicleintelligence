@@ -140,6 +140,10 @@
     "hubspot:import-last-500": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts --last",
     "hubspot:rollback-plan": "tsx scripts/hubspot-import-batch-rollback-plan.ts",
     "hubspot:rollback-execute": "tsx scripts/hubspot-import-batch-rollback-execute.ts",
+    "hubspot:backup:incremental": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-backup-incremental.ts",
+    "hubspot:backup:resume": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-backup-resume.ts",
+    "hubspot:backup:recover-stuck": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-backup-recover-stuck.ts",
+    "test:hubspot-incremental": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/onboarding-os/hubspotIncrementalBackupCore.test.ts src/lib/onboarding-os/hubspotIncrementalBackup.server.test.ts",
     "qr:arrival": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/generate-booking-arrival-qr.ts"
   },
   "dependencies": {

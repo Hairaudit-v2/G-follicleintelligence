@@ -2631,3 +2631,148 @@ export async function loadHubspotConnectorSnapshot(
   );
   return { ok: true, snapshot };
 }
+
+/** FI-HUBSPOT-INCREMENTAL-BACKUP-1 — fixed-cutoff notes incremental backup. */
+export async function runHubspotIncrementalNotesBackup(
+  integrationId: string,
+  tenantId: string,
+  input: {
+    cutoffFrom: string;
+    cutoffTo: string;
+    dataset?: string;
+    resumeRunId?: string | null;
+  },
+  opts: ServerOpts = {}
+): Promise<
+  | {
+      ok: true;
+      runId: string;
+      status: "completed" | "partial" | "failed";
+      verificationState: "passed" | "failed" | "pending";
+      watermarkAdvanced: boolean;
+      counters: Record<string, number>;
+      cutoffFrom: string;
+      cutoffTo: string;
+      emptyRange: boolean;
+    }
+  | { ok: false; error: string; exitHint?: "conflict" | "validation" | "failed" }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const integration = await loadIntegration(supabase, integrationId, tenantId);
+  if (!integration || integration.provider !== "hubspot") {
+    return { ok: false, error: "HubSpot connector not found." };
+  }
+  const token = await loadHubspotAccessToken(supabase, integrationId);
+  if (!token) {
+    return { ok: false, error: "Existing encrypted HubSpot credential could not be loaded." };
+  }
+  const { runIncrementalNotesBackup } = await import("./hubspotIncrementalBackup.server");
+  const result = await runIncrementalNotesBackup({
+    supabase,
+    accessToken: token,
+    tenantId,
+    integrationId,
+    portalId: String(integration.config?.portal_id ?? "").trim() || null,
+    auth: {
+      actorAuthUserId: auth.actorAuthUserId,
+      fiUserId: auth.fiUserId,
+      actorLabel: auth.actorLabel,
+    },
+    cutoffFrom: input.cutoffFrom,
+    cutoffTo: input.cutoffTo,
+    dataset: input.dataset,
+    resumeRunId: input.resumeRunId,
+  });
+  if (!result.ok) return result;
+  return {
+    ok: true,
+    runId: result.runId,
+    status: result.status,
+    verificationState: result.verificationState,
+    watermarkAdvanced: result.watermarkAdvanced,
+    counters: result.counters,
+    cutoffFrom: result.cutoffFrom,
+    cutoffTo: result.cutoffTo,
+    emptyRange: result.emptyRange,
+  };
+}
+
+/** Resume an incremental run by ID — reloads immutable cutoffs from the run row. */
+export async function resumeHubspotIncrementalBackup(
+  integrationId: string,
+  tenantId: string,
+  runId: string,
+  opts: ServerOpts = {}
+): Promise<
+  | {
+      ok: true;
+      runId: string;
+      status: "completed" | "partial" | "failed";
+      verificationState: "passed" | "failed" | "pending";
+      watermarkAdvanced: boolean;
+      counters: Record<string, number>;
+      cutoffFrom: string;
+      cutoffTo: string;
+      emptyRange: boolean;
+    }
+  | { ok: false; error: string; exitHint?: "conflict" | "validation" | "failed" }
+> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_external_hubspot_sync_runs")
+    .select(
+      "id, backup_run_type, incremental_dataset, incremental_cutoff_from, incremental_cutoff_to, status"
+    )
+    .eq("id", runId)
+    .eq("tenant_id", tenantId)
+    .eq("integration_id", integrationId)
+    .maybeSingle();
+  if (error || !data) return { ok: false, error: "Incremental run not found.", exitHint: "validation" };
+  if (data.backup_run_type !== "incremental") {
+    return { ok: false, error: "Run is not incremental.", exitHint: "validation" };
+  }
+  if (!data.incremental_cutoff_from || !data.incremental_cutoff_to) {
+    return { ok: false, error: "Run is missing immutable cutoff bounds.", exitHint: "validation" };
+  }
+  return runHubspotIncrementalNotesBackup(
+    integrationId,
+    tenantId,
+    {
+      cutoffFrom: new Date(String(data.incremental_cutoff_from)).toISOString(),
+      cutoffTo: new Date(String(data.incremental_cutoff_to)).toISOString(),
+      dataset: String(data.incremental_dataset ?? "notes"),
+      resumeRunId: runId,
+    },
+    opts
+  );
+}
+
+/** Narrow stuck-run recovery — never advances watermark. */
+export async function recoverStuckHubspotIncrementalRun(
+  integrationId: string,
+  tenantId: string,
+  input: { runId: string; reason: string; transitionTo?: "failed" | "started" },
+  opts: ServerOpts = {}
+): Promise<{ ok: true; previousStatus: string } | { ok: false; error: string }> {
+  const auth = await resolveWriteAuth(tenantId, opts);
+  if (!auth.ok) return auth;
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const { recoverStuckIncrementalRun } = await import("./hubspotIncrementalBackup.server");
+  return recoverStuckIncrementalRun({
+    supabase,
+    tenantId,
+    integrationId,
+    runId: input.runId,
+    reason: input.reason,
+    transitionTo: input.transitionTo ?? "failed",
+    auth: {
+      actorAuthUserId: auth.actorAuthUserId,
+      fiUserId: auth.fiUserId,
+      actorLabel: auth.actorLabel,
+    },
+  });
+}

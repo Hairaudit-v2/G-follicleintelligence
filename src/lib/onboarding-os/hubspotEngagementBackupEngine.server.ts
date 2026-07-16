@@ -558,6 +558,17 @@ async function persistEngagementCheckpoint(
   if (error) throw new Error("Unable to persist HubSpot engagement checkpoint.");
 }
 
+/** Public staging entry for incremental notes (reuses full-backup upsert path). */
+export async function stageHubspotNotesPage(
+  supabase: SupabaseClient,
+  objects: RawObject[],
+  tenantId: string,
+  integrationId: string,
+  syncRunId: string
+) {
+  return stageNotesOrEmails(supabase, "notes", objects, tenantId, integrationId, syncRunId);
+}
+
 async function stageNotesOrEmails(
   supabase: SupabaseClient,
   kind: "notes" | "emails",

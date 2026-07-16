@@ -108,6 +108,56 @@ export async function hubspotReadJson<T>(
   throw new HubspotReadError(0, "network", "HubSpot read request did not complete.");
 }
 
+/** POST JSON helper for HubSpot CRM Search (and similar read-style POSTs). */
+export async function hubspotPostJson<T>(
+  path: string,
+  accessToken: string,
+  body: Record<string, unknown>,
+  fetchImpl: typeof fetch = fetch
+): Promise<T> {
+  const url = `${API_BASE}${path}`;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    let response: Response;
+    try {
+      response = await fetchImpl(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      });
+    } catch {
+      if (attempt === MAX_RETRIES) {
+        throw new HubspotReadError(0, "network", "HubSpot post request failed after bounded retries.");
+      }
+      await wait(Math.min(8000, 250 * 2 ** attempt));
+      continue;
+    }
+
+    if (response.ok) return (await response.json()) as T;
+    if (response.status === 429 || response.status >= 500) {
+      const rawRetryAfter = response.headers.get("retry-after");
+      const retryAfter = rawRetryAfter ? Number.parseInt(rawRetryAfter, 10) : Number.NaN;
+      const seconds = Number.isFinite(retryAfter) ? Math.max(0, Math.min(retryAfter, 60)) : null;
+      if (attempt === MAX_RETRIES) {
+        throw new HubspotReadError(
+          response.status,
+          response.status === 429 ? "rate_limit" : "provider",
+          `HubSpot post request exhausted ${MAX_RETRIES + 1} attempts.`,
+          seconds
+        );
+      }
+      await wait((seconds ?? Math.min(8, 2 ** attempt)) * 1000);
+      continue;
+    }
+    throw safeProviderError(response.status);
+  }
+  throw new HubspotReadError(0, "network", "HubSpot post request did not complete.");
+}
+
 function checkpointFor(row: Record<string, unknown>, kind: ObjectKind): { phase: Phase; after: string | null } {
   const raw = (row[`${kind}_checkpoint`] ?? {}) as Record<string, unknown>;
   const phase = raw.phase === "archived" || raw.phase === "complete" ? raw.phase : "active";
