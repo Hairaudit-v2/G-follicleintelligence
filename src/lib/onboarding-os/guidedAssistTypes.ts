@@ -171,14 +171,15 @@ export type GuidedAssistUsageSummary = {
 };
 
 export const GUIDED_ASSIST_SAFETY_NOTICE =
-  "Guided Assist provides operational setup steps only. It does not generate clinical advice or patient-specific treatment recommendations.";
+  "Clinic guide shows operational setup and day-of steps only. It does not give clinical advice or patient-specific treatment recommendations.";
 
+/** Staff-facing area labels (no architecture “OS” names). */
 export const GUIDED_ASSIST_AREA_LABELS: Record<GuidedAssistArea, string> = {
-  reception_os: "ReceptionOS",
-  consultation_os: "ConsultationOS",
-  surgery_os: "SurgeryOS",
-  financial_os: "FinancialOS",
-  academy_os: "AcademyOS",
-  workforce_os: "WorkforceOS",
-  analytics_os: "AnalyticsOS",
+  reception_os: "Front desk",
+  consultation_os: "Consultations",
+  surgery_os: "Surgery",
+  financial_os: "Money",
+  academy_os: "Training",
+  workforce_os: "Team",
+  analytics_os: "Reports & setup",
 };

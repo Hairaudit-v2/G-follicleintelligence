@@ -120,7 +120,7 @@ export function GuidedAssistWidget({
           : "rounded-xl border border-cyan-500/20 bg-[#071018]/95 shadow-2xl backdrop-blur-md",
         className
       )}
-      aria-label="Guided Assist"
+      aria-label="Clinic guide"
       data-testid="guided-assist-widget"
       data-guided-assist-collapsed={collapsed ? "true" : "false"}
     >
@@ -132,18 +132,16 @@ export function GuidedAssistWidget({
       >
         <div className="min-w-0">
           {!collapsed ? (
-            <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>
-              OnboardingOS · Guided Assist
-            </p>
+            <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>Clinic guide</p>
           ) : null}
           <h2
             className={cn("truncate font-medium text-slate-100", collapsed ? "text-xs" : "text-sm")}
           >
             {collapsed
-              ? "Guided Assist"
+              ? "Help"
               : payload.assistEnabled
-                ? "Operational guidance"
-                : "Guided Assist is off"}
+                ? "What to do next"
+                : "Clinic guide is off"}
           </h2>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -171,8 +169,8 @@ export function GuidedAssistWidget({
 
           {!payload.assistEnabled ? (
             <p className="text-sm text-slate-300">
-              Turn Guided Assist on for deterministic setup steps tailored to your role and current
-              page.
+              Turn the clinic guide on for short setup and day-of tips for your role and this page
+              (Front desk, Pipeline, Money, Surgery, Team).
             </p>
           ) : null}
 
@@ -252,8 +250,8 @@ export function GuidedAssistWidget({
 
           {payload.assistEnabled && payload.tips.length === 0 && !payload.nextAction ? (
             <p className="text-sm text-slate-400">
-              No tips for this page right now. Navigate to another module or check back after setup
-              tasks progress.
+              No tips for this screen right now. Try Today, Front desk, Pipeline, or Settings — or
+              finish the next setup step above when shown.
             </p>
           ) : null}
 
@@ -261,7 +259,7 @@ export function GuidedAssistWidget({
 
           {payload.isOnboardingPhase ? (
             <p className="text-[10px] text-slate-500">
-              Guided Assist defaults to on during clinic onboarding. You can turn it off anytime.
+              The clinic guide defaults to on while setup is incomplete. You can turn it off anytime.
             </p>
           ) : null}
         </div>

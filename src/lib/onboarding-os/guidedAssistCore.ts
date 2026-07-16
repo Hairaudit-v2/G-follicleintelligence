@@ -77,12 +77,120 @@ function matchesRoleScope(
   return false;
 }
 
+/**
+ * Expand the current route suffix so tips fire on both new hubs and legacy aliases
+ * (e.g. Front desk ↔ reception/tomorrow, Surgery ↔ surgery-os/cases).
+ */
+export function expandGuidedAssistPageKeys(pageKey: string): string[] {
+  const p = pageKey.trim().replace(/\/+$/, "");
+  const keys = new Set<string>([p]);
+
+  if (p === "" || p === "dashboard") {
+    keys.add("");
+    keys.add("dashboard");
+  }
+
+  if (
+    p === "front-desk" ||
+    p.startsWith("front-desk/") ||
+    p === "reception" ||
+    p === "reception-board" ||
+    p === "reception-os" ||
+    p === "operations" ||
+    p === "tomorrow"
+  ) {
+    keys.add("front-desk");
+    if (p === "tomorrow" || p === "front-desk/tomorrow") {
+      keys.add("front-desk/tomorrow");
+      keys.add("tomorrow");
+    }
+  }
+
+  if (
+    p === "surgery" ||
+    p.startsWith("surgery/") ||
+    p === "surgery-os" ||
+    p.startsWith("surgery-os/") ||
+    p === "cases" ||
+    p.startsWith("cases/") ||
+    p === "surgery-readiness" ||
+    p.startsWith("surgery-readiness/") ||
+    p === "procedure-day" ||
+    p.startsWith("procedure-day/")
+  ) {
+    keys.add("surgery");
+    keys.add("surgery-os");
+    keys.add("cases");
+    keys.add("surgery-readiness");
+  }
+
+  if (p === "crm" || p.startsWith("crm/") || p === "leadflow" || p.startsWith("leadflow/")) {
+    keys.add("crm");
+    keys.add("leadflow");
+  }
+
+  if (
+    p === "team" ||
+    p.startsWith("team/") ||
+    p === "staff" ||
+    p.startsWith("staff/") ||
+    p.startsWith("workforce-os") ||
+    p.startsWith("hr-os")
+  ) {
+    keys.add("team");
+    keys.add("staff");
+  }
+
+  if (
+    p === "financial-os" ||
+    p.startsWith("financial-os/") ||
+    p === "financial" ||
+    p.startsWith("financial/") ||
+    p === "payments" ||
+    p.startsWith("payments/")
+  ) {
+    keys.add("financial-os");
+    keys.add("payments");
+    keys.add("financial");
+  }
+
+  if (
+    p === "reports" ||
+    p.startsWith("reports/") ||
+    p === "analytics" ||
+    p.startsWith("analytics/") ||
+    p === "operations"
+  ) {
+    keys.add("reports");
+    keys.add("analytics");
+  }
+
+  if (p === "doctor" || p.startsWith("doctor/")) {
+    keys.add("doctor");
+    keys.add("consultations");
+  }
+
+  return [...keys];
+}
+
 function matchesPageKey(pageKey: string, tipPageKey: string, prefix?: boolean): boolean {
-  const current = pageKey.trim();
   const target = tipPageKey.trim();
-  if (target === "" && (current === "" || current === "dashboard")) return true;
-  if (prefix) return current === target || current.startsWith(`${target}/`);
-  return current === target;
+  const expanded = expandGuidedAssistPageKeys(pageKey);
+
+  for (const current of expanded) {
+    if (target === "" && (current === "" || current === "dashboard")) return true;
+    if (prefix) {
+      if (current === target || current.startsWith(`${target}/`)) return true;
+    } else if (current === target) {
+      return true;
+    }
+  }
+
+  // Tip prefix match against the raw path (nested routes).
+  const raw = pageKey.trim();
+  if (prefix && (raw === target || raw.startsWith(`${target}/`))) return true;
+  if (!prefix && raw === target) return true;
+  return false;
 }
 
 function isTipSnoozed(code: string, snoozed: GuidedAssistSnoozedTips, nowMs: number): boolean {

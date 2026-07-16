@@ -38,10 +38,10 @@ export function GuidedAssistToggle({
       )}
     >
       <span className={compact ? "sr-only" : undefined}>
-        {compact ? "Guided Assist" : "Guided Assist mode"}
+        {compact ? "Clinic guide" : "Clinic guide"}
       </span>
       {!compact ? (
-        <span className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase D</span>
+        <span className={fiOsChromeClasses.sectionEyebrow}>Help for new staff</span>
       ) : null}
       <button
         type="button"
@@ -61,7 +61,7 @@ export function GuidedAssistToggle({
           )}
         />
         <span className="sr-only">
-          {assistEnabled ? "Disable guided assist" : "Enable guided assist"}
+          {assistEnabled ? "Disable clinic guide" : "Enable clinic guide"}
         </span>
       </button>
       {!compact ? (

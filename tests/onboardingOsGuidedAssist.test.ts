@@ -7,13 +7,17 @@ import { GUIDED_ASSIST_TIPS } from "../src/lib/onboarding-os/guidedAssistCatalog
 import {
   buildGuidedAssistSessionPayload,
   computeGuidedAssistOnboardingPhase,
+  expandGuidedAssistPageKeys,
   resolveEffectiveGuidedAssistEnabled,
   resolveGuidedAssistPageKey,
   selectGuidedAssistNextAction,
   selectGuidedAssistTips,
   summarizeGuidedAssistUsageEvents,
 } from "../src/lib/onboarding-os/guidedAssistCore";
-import { GUIDED_ASSIST_SAFETY_NOTICE } from "../src/lib/onboarding-os/guidedAssistTypes";
+import {
+  GUIDED_ASSIST_AREA_LABELS,
+  GUIDED_ASSIST_SAFETY_NOTICE,
+} from "../src/lib/onboarding-os/guidedAssistTypes";
 
 const BASE_CTX = {
   tenantId: "00000000-0000-4000-8000-000000000001",
@@ -155,7 +159,60 @@ describe("OnboardingOS Phase D — guided assist core", () => {
       assert.ok(tip.title.length > 0);
       assert.ok(tip.body.length > 0);
       assert.ok(!/\b(diagnos|prescri|dosage|treatment plan)\b/i.test(tip.body));
+      assert.ok(
+        !/\b(ReceptionOS|SurgeryOS|FinancialOS|LeadFlow|OnboardingOS|WorkforceOS|AcademyOS|AnalyticsOS)\b/.test(
+          tip.body
+        ),
+        tip.code
+      );
+      assert.ok(
+        !/\b(ReceptionOS|SurgeryOS|FinancialOS|LeadFlow|OnboardingOS)\b/.test(tip.title),
+        tip.code
+      );
     }
+    for (const label of Object.values(GUIDED_ASSIST_AREA_LABELS)) {
+      assert.ok(!/OS\b/.test(label), label);
+    }
+  });
+
+  it("expandGuidedAssistPageKeys maps legacy routes to new hubs", () => {
+    assert.ok(expandGuidedAssistPageKeys("tomorrow").includes("front-desk"));
+    assert.ok(expandGuidedAssistPageKeys("surgery-os").includes("surgery"));
+    assert.ok(expandGuidedAssistPageKeys("leadflow").includes("crm"));
+    assert.ok(expandGuidedAssistPageKeys("payments").includes("financial-os"));
+  });
+
+  it("front desk page surfaces front_desk tips for reception", () => {
+    const tips = selectGuidedAssistTips(
+      {
+        ...BASE_CTX,
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+        pageKey: "front-desk",
+      },
+      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {} }
+    );
+    assert.ok(tips.some((t) => t.code === "front_desk_today"));
+    assert.ok(tips.every((t) => !/ReceptionOS/i.test(t.areaLabel)));
+  });
+
+  it("post-setup next action for reception is Front desk", () => {
+    const action = selectGuidedAssistNextAction({
+      ...BASE_CTX,
+      workspaceProfileKey: "reception",
+      tenantAdminRole: null,
+      pageKey: "",
+      setupFlags: {
+        organisationCreated: true,
+        clinicCreated: true,
+        clinicSettingsComplete: true,
+        firstCaseCreated: true,
+      },
+      isOnboardingPhase: false,
+    });
+    assert.ok(action);
+    assert.equal(action?.code, "next_open_front_desk");
+    assert.ok(action?.href.endsWith("/front-desk"));
   });
 });
 
