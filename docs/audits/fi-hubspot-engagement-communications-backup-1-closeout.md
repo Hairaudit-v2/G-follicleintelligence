@@ -40,11 +40,12 @@ Additive parallel milestone on the existing HubSpot connector:
 | Submission tenant integrity | GREEN |
 | Submission parent-form integrity | GREEN (5,311/5,311 → 46 definitions) |
 | Forms inventory | **GREEN** — 48 export = 46 listable + `captured` + `blog_comment` |
-| Contact associations | AMBER — unavailable in Forms Submissions API payload (`contactId` absent) |
-| Files | GREEN for metadata inventory / `content_backed_up=0` (listing endpoint UNSUPPORTED 405) |
-| CLI completion status | AMBER — causes enumerated below |
+| Contact associations | **AMBER** — API has no `contactId` (faithful); selected CSVs have Contact ID on 3,107/4,220 rows not yet staged — `evidence-fi-hubspot-engagement-residual-ambers.md` |
+| Files | **GREEN** metadata inventory (903 staged, `content_backed_up=0`); listing `GET /files/v3/files` **UNSUPPORTED 405** (documented; did not cause `partial`) |
+| CLI completion status | **AMBER** — sole `partial` driver = engine submissions `unexplained` vs baseline 4220 (operator reconcile GREEN) |
 | Overall Phase O | **AMBER** |
-| RED controls | None currently identified |
+| RED controls | None |
+| Active blockers | Contact CSV enrichment (optional); CLI finalize baseline semantics — **forms removed** |
 
 ### CLI `partial` decomposition (run `66f72f09`)
 
@@ -54,12 +55,13 @@ Additive parallel milestone on the existing HubSpot connector:
 | CRM emails | Yes | Yes (5248) | 0 | 0 | Exact vs baseline | N/A | None |
 | Conversation threads | Yes | Yes (1918) | 0 | 0 | Exact vs baseline | N/A | None |
 | Conversation messages | Yes | Yes (5821) | 0 | 0 | Complete nested pagination | N/A | None |
-| Forms | Yes | Yes (46 listable) | 2 non-listable types (`captured`, `blog_comment`) | 0 | Default Forms list APIs return 46; export listing-lib includes 2 extra types with 0 submissions | N/A | None for Phase O |
-| Form submissions | Yes | Yes (5311) | 0 | 0 | Engine marked `unexplained` vs selected baseline 4220 → **forced CLI partial** even though operator reconcile is GREEN | Yes (baseline semantics / counter logic) | Optionally reclassify baseline or accept documented coverage |
-| Files | Yes (metadata) | Yes (903 inventory) | Listing probe UNSUPPORTED 405 | 0 | Classified unsupported; content not downloaded | N/A | None for bodies |
-| Contact links on submissions | Implicit | 0 links | N/A | 0 | Source payload has no `contactId` | Future enrichment only | Deterministic source only |
+| Forms | Yes | Yes (46 listable) | 2 non-listable types | 0 | `captured` + `blog_comment` outside default list APIs | N/A | None |
+| Form submissions | Yes | Yes (5311) | 0 | 0 | Engine `unexplained` vs baseline 4220 → **sole `partial` driver** | Yes | Optional finalize/baseline alignment |
+| Files listing | Yes (probe) | — | **UNSUPPORTED 405** | 0 | Documented unsupported list endpoint | N/A | None |
+| Files metadata | Yes | Yes (903) | Body download | 0 | Milestone metadata-only | N/A | None |
+| Contact links | Implicit | 0 from API | CSV Contact IDs not ingested | 0 | API keys: `conversionId,pageUrl,submittedAt,values` only | Selected CSV ingest | Optional |
 
-**Did the two-form delta alone cause `partial`?** Not proven as the sole cause. The finalize path sets `partial` when any supported kind has `reconciliationStatus === "unexplained"` (form_submissions vs 4220) **or** incomplete/missing-scope. Forms were `explained` (−2), not unexplained. Forms inventory BLOCKED remains a Phase O gate independent of that flag.
+**`partial` root cause:** only `form_submissions.reconciliationStatus === "unexplained"`. Files 405 did **not** set `partial`. Forms inventory is GREEN and not a blocker.
 
 ### Attachments detail
 
@@ -107,13 +109,13 @@ GREEN requires:
 1. Live capabilities verified — yes for granted objects; files listing remains UNSUPPORTED 405
 2. All supported objects complete pagination — yes for this run
 3. Runs finalize correctly — CLI `partial` (finalize semantics / residuals)
-4. Reconciliation exact or fully explained — submissions +1091 explained GREEN; forms −2 still residual
+4. Reconciliation exact or fully explained — submissions + forms inventory GREEN; CLI still emits `partial` from stale baseline flag
 5. No communication content exposed — confirmed (`content_backed_up=0`; UI/logs counts only)
 6. No records promoted — confirmed
-7. Attachment handling classified — metadata-only confirmed
-8. No required scope remains unresolved after operator probe — scopes granted; residual is API shape for contactId on submissions + forms inventory gap
+7. Attachment handling classified — metadata-only confirmed; listing UNSUPPORTED 405 documented
+8. Contact associations — API limitation faithful; CSV Contact IDs not yet staged (AMBER)
 
-Items 1–4 and 8 remain pending operator action.
+Residual operator action: optional CSV contact ingest + optional finalize baseline alignment.
 
 ## Operator next steps
 
