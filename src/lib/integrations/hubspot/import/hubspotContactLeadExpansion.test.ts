@@ -7,22 +7,29 @@ import {
   planPersonMetadataEnrichment,
 } from "./hubspotContactLeadFieldPolicy";
 import {
+  assertBackupWatermarkNotAllowlisted,
+  assertChangedContactIdentitySafe,
+  assertCoverageReconciled,
   assertExpansionBatchSize,
   assertExpansionMutationAllowlist,
   assertPriorBatchReconciled,
   assertReconciliationBalanced,
   buildBatchReconciliation,
   computeExpansionChecksum,
+  computeInventorySignature,
   detectDuplicateNewLeadRisk,
+  diffInventorySignatures,
   filterExpansionRows,
   isApplyableExpansionDecision,
   mapImportDecisionToExpansionState,
   plainLanguageExpansionDecision,
   primaryActionForBatchStatus,
   profileExpansionDataQuality,
+  reconcileContactCoverage,
   resolveExpansionBatchMax,
   selectNextExpansionBatch,
   summarizeExpansionInventory,
+  toInventorySignatureRow,
 } from "./hubspotContactLeadExpansionCore";
 import type { HubspotContactLeadExpansionRow } from "./hubspotContactLeadExpansionTypes";
 import {
@@ -448,5 +455,140 @@ describe("hubspotContactLeadExpansion 1E", () => {
     assert.ok(profile.duplicateEmails >= 1);
     assert.ok(profile.possibleTestOrSmoke >= 1);
     assert.ok(profile.malformedTimestamps >= 1);
+  });
+
+  it("blocks backup watermark updates via mutation allowlist", () => {
+    assert.throws(
+      () => assertExpansionMutationAllowlist("fi_external_hubspot_backup_watermarks", "update"),
+      /MUTATION_GUARD/
+    );
+    assert.throws(
+      () => assertExpansionMutationAllowlist("fi_external_hubspot_backup_watermarks", "insert"),
+      /MUTATION_GUARD/
+    );
+    assertBackupWatermarkNotAllowlisted();
+  });
+
+  it("inventory signature is deterministic for a fixed snapshot", () => {
+    const rows = [
+      toInventorySignatureRow(
+        row({
+          hubspotContactId: "2",
+          decision: "create_new_lead",
+          proposedLeadId: null,
+          reasonCode: "no_match",
+        })
+      ),
+      toInventorySignatureRow(
+        row({
+          hubspotContactId: "1",
+          decision: "already_applied",
+          proposedLeadId: "L1",
+          reasonCode: "person_source_id_single_lead",
+        })
+      ),
+    ];
+    const a = computeInventorySignature(rows);
+    const b = computeInventorySignature([...rows].reverse());
+    assert.equal(a, b);
+    assert.equal(a.length, 64);
+  });
+
+  it("classification delta identifies newly added and modified contacts", () => {
+    const before = [
+      {
+        ...toInventorySignatureRow(row({ hubspotContactId: "1", decision: "already_applied" })),
+      },
+      {
+        ...toInventorySignatureRow(
+          row({
+            hubspotContactId: "2",
+            decision: "link_existing_lead",
+            proposedLeadId: "L2",
+          })
+        ),
+        payloadChecksum: "aaa",
+      },
+    ];
+    const after = [
+      {
+        ...toInventorySignatureRow(row({ hubspotContactId: "1", decision: "already_applied" })),
+      },
+      {
+        ...toInventorySignatureRow(
+          row({
+            hubspotContactId: "2",
+            decision: "already_applied",
+            proposedLeadId: "L2",
+          })
+        ),
+        payloadChecksum: "bbb",
+      },
+      toInventorySignatureRow(
+        row({ hubspotContactId: "3", decision: "create_new_lead", proposedLeadId: null })
+      ),
+    ];
+    const delta = diffInventorySignatures(before, after);
+    assert.deepEqual(delta.newlyAppearingContactIds, ["3"]);
+    assert.deepEqual(delta.removedContactIds, []);
+    assert.deepEqual(delta.sourceFieldChangedContactIds, ["2"]);
+    assert.deepEqual(delta.decisionChangedContactIds, ["2"]);
+    assert.equal(delta.unexplainedChangeCount, 3);
+  });
+
+  it("coverage reconciliation rejects unexplained records", () => {
+    const rows = [
+      toInventorySignatureRow(row({ hubspotContactId: "1", decision: "already_applied" })),
+      toInventorySignatureRow(row({ hubspotContactId: "2", decision: "create_new_lead" })),
+      toInventorySignatureRow(
+        row({ hubspotContactId: "3", decision: "patient_link_review_required" })
+      ),
+      toInventorySignatureRow(
+        row({ hubspotContactId: "4", decision: "quarantine_test_or_smoke" })
+      ),
+    ];
+    const recon = reconcileContactCoverage(rows);
+    assert.equal(recon.totalSourceContacts, 4);
+    assert.equal(recon.mappedContacts, 1);
+    assert.equal(recon.createCandidates, 1);
+    assert.equal(recon.patientReview, 1);
+    assert.equal(recon.quarantined, 1);
+    assert.equal(recon.unexplained, 0);
+    assertCoverageReconciled(recon);
+    assert.throws(
+      () =>
+        reconcileContactCoverage([
+          ...rows,
+          toInventorySignatureRow(row({ hubspotContactId: "1", decision: "already_applied" })),
+        ]),
+      /duplicate source contact/
+    );
+  });
+
+  it("changed source contact identity revalidation fails closed", () => {
+    assertChangedContactIdentitySafe({
+      sameTenant: true,
+      sameSourceContactId: true,
+      uniqueLeadTarget: true,
+      newDuplicate: false,
+      newPatientWarning: false,
+      targetConflict: false,
+      wrongTenant: false,
+      existingMappingValid: true,
+    });
+    assert.throws(
+      () =>
+        assertChangedContactIdentitySafe({
+          sameTenant: true,
+          sameSourceContactId: true,
+          uniqueLeadTarget: false,
+          newDuplicate: true,
+          newPatientWarning: false,
+          targetConflict: false,
+          wrongTenant: false,
+          existingMappingValid: true,
+        }),
+      /REVALIDATE_FAIL/
+    );
   });
 });

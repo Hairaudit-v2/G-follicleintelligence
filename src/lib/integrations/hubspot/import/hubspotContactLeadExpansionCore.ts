@@ -515,3 +515,248 @@ export function detectDuplicateNewLeadRisk(
   }
   return false;
 }
+
+/** Privacy-safe inventory row used for deterministic signatures and deltas. */
+export type HubspotContactLeadInventorySignatureRow = {
+  hubspotContactId: string;
+  decision: HubspotContactLeadExpansionState;
+  reasonCode: string;
+  proposedLeadId: string | null;
+  patientProtectionWarning: string | null;
+  quarantineReason: string | null;
+  identityTier: string;
+  payloadChecksum?: string | null;
+  lastSourceActivityAt?: string | null;
+};
+
+export function toInventorySignatureRow(
+  row: HubspotContactLeadExpansionRow & { payloadChecksum?: string | null }
+): HubspotContactLeadInventorySignatureRow {
+  return {
+    hubspotContactId: row.hubspotContactId,
+    decision: row.decision,
+    reasonCode: row.reasonCode,
+    proposedLeadId: row.proposedLeadId,
+    patientProtectionWarning: row.patientProtectionWarning,
+    quarantineReason: row.quarantineReason,
+    identityTier: row.identityTier,
+    payloadChecksum: row.payloadChecksum ?? null,
+    lastSourceActivityAt: row.lastSourceActivityAt,
+  };
+}
+
+export function computeInventorySignature(
+  rows: HubspotContactLeadInventorySignatureRow[]
+): string {
+  const canonical = [...rows]
+    .map(
+      (r) =>
+        [
+          r.hubspotContactId,
+          r.decision,
+          r.reasonCode,
+          r.proposedLeadId ?? "",
+          r.patientProtectionWarning ?? "",
+          r.quarantineReason ?? "",
+          r.identityTier,
+          r.payloadChecksum ?? "",
+          r.lastSourceActivityAt ?? "",
+        ].join("|")
+    )
+    .sort()
+    .join("\n");
+  return createHash("sha256").update(canonical).digest("hex");
+}
+
+export type HubspotContactLeadClassificationDelta = {
+  newlyAppearingContactIds: string[];
+  removedContactIds: string[];
+  sourceFieldChangedContactIds: string[];
+  decisionChangedContactIds: string[];
+  targetLeadChangedContactIds: string[];
+  patientWarningChangedContactIds: string[];
+  quarantineReasonChangedContactIds: string[];
+  unexplainedChangeCount: number;
+};
+
+export function diffInventorySignatures(
+  before: HubspotContactLeadInventorySignatureRow[],
+  after: HubspotContactLeadInventorySignatureRow[]
+): HubspotContactLeadClassificationDelta {
+  const beforeById = new Map(before.map((r) => [r.hubspotContactId, r]));
+  const afterById = new Map(after.map((r) => [r.hubspotContactId, r]));
+  const newlyAppearingContactIds: string[] = [];
+  const removedContactIds: string[] = [];
+  const sourceFieldChangedContactIds: string[] = [];
+  const decisionChangedContactIds: string[] = [];
+  const targetLeadChangedContactIds: string[] = [];
+  const patientWarningChangedContactIds: string[] = [];
+  const quarantineReasonChangedContactIds: string[] = [];
+
+  for (const id of afterById.keys()) {
+    if (!beforeById.has(id)) newlyAppearingContactIds.push(id);
+  }
+  for (const id of beforeById.keys()) {
+    if (!afterById.has(id)) removedContactIds.push(id);
+  }
+  for (const [id, next] of afterById) {
+    const prev = beforeById.get(id);
+    if (!prev) continue;
+    if (
+      (prev.payloadChecksum ?? "") !== (next.payloadChecksum ?? "") ||
+      (prev.lastSourceActivityAt ?? "") !== (next.lastSourceActivityAt ?? "")
+    ) {
+      sourceFieldChangedContactIds.push(id);
+    }
+    if (prev.decision !== next.decision || prev.reasonCode !== next.reasonCode) {
+      decisionChangedContactIds.push(id);
+    }
+    if ((prev.proposedLeadId ?? "") !== (next.proposedLeadId ?? "")) {
+      targetLeadChangedContactIds.push(id);
+    }
+    if ((prev.patientProtectionWarning ?? "") !== (next.patientProtectionWarning ?? "")) {
+      patientWarningChangedContactIds.push(id);
+    }
+    if ((prev.quarantineReason ?? "") !== (next.quarantineReason ?? "")) {
+      quarantineReasonChangedContactIds.push(id);
+    }
+  }
+
+  newlyAppearingContactIds.sort();
+  removedContactIds.sort();
+  sourceFieldChangedContactIds.sort();
+  decisionChangedContactIds.sort();
+  targetLeadChangedContactIds.sort();
+  patientWarningChangedContactIds.sort();
+  quarantineReasonChangedContactIds.sort();
+
+  return {
+    newlyAppearingContactIds,
+    removedContactIds,
+    sourceFieldChangedContactIds,
+    decisionChangedContactIds,
+    targetLeadChangedContactIds,
+    patientWarningChangedContactIds,
+    quarantineReasonChangedContactIds,
+    unexplainedChangeCount:
+      newlyAppearingContactIds.length +
+      removedContactIds.length +
+      sourceFieldChangedContactIds.length +
+      decisionChangedContactIds.length +
+      targetLeadChangedContactIds.length +
+      patientWarningChangedContactIds.length +
+      quarantineReasonChangedContactIds.length,
+  };
+}
+
+export type HubspotContactLeadCoverageReconciliation = {
+  totalSourceContacts: number;
+  mappedContacts: number;
+  createCandidates: number;
+  patientReview: number;
+  quarantined: number;
+  excluded: number;
+  conflicts: number;
+  wrongTenant: number;
+  readyToLink: number;
+  accounted: number;
+  unexplained: number;
+  balanced: boolean;
+};
+
+export function reconcileContactCoverage(
+  rows: HubspotContactLeadInventorySignatureRow[]
+): HubspotContactLeadCoverageReconciliation {
+  const ids = new Set(rows.map((r) => r.hubspotContactId));
+  if (ids.size !== rows.length) {
+    throw new Error("COVERAGE_FAIL: duplicate source contact IDs in inventory");
+  }
+  let mappedContacts = 0;
+  let createCandidates = 0;
+  let patientReview = 0;
+  let quarantined = 0;
+  let excluded = 0;
+  let conflicts = 0;
+  let wrongTenant = 0;
+  let readyToLink = 0;
+  for (const r of rows) {
+    if (r.decision === "already_applied" || r.decision === "already_linked") mappedContacts += 1;
+    else if (r.decision === "create_new_lead") createCandidates += 1;
+    else if (r.decision === "patient_link_review_required") patientReview += 1;
+    else if (r.decision.startsWith("quarantine_")) quarantined += 1;
+    else if (r.decision === "excluded") excluded += 1;
+    else if (r.decision === "wrong_tenant") wrongTenant += 1;
+    else if (r.decision === "link_existing_lead") readyToLink += 1;
+    else {
+      throw new Error(`COVERAGE_FAIL: undefined decision status ${r.decision}`);
+    }
+    if (["quarantine_multi_target_conflict", "wrong_tenant"].includes(r.decision)) {
+      conflicts += 1;
+    }
+  }
+  const accounted =
+    mappedContacts + createCandidates + patientReview + quarantined + excluded + wrongTenant + readyToLink;
+  // wrongTenant is already counted in its branch; avoid double-count by using exclusive branches above.
+  const unexplained = rows.length - accounted;
+  return {
+    totalSourceContacts: rows.length,
+    mappedContacts,
+    createCandidates,
+    patientReview,
+    quarantined,
+    excluded,
+    conflicts,
+    wrongTenant,
+    readyToLink,
+    accounted,
+    unexplained,
+    balanced: unexplained === 0 && accounted === rows.length,
+  };
+}
+
+export function assertCoverageReconciled(recon: HubspotContactLeadCoverageReconciliation): void {
+  if (!recon.balanced || recon.unexplained !== 0) {
+    throw new Error(
+      `COVERAGE_FAIL: unexplained=${recon.unexplained} accounted=${recon.accounted} total=${recon.totalSourceContacts}`
+    );
+  }
+}
+
+export function assertChangedContactIdentitySafe(input: {
+  sameTenant: boolean;
+  sameSourceContactId: boolean;
+  uniqueLeadTarget: boolean;
+  newDuplicate: boolean;
+  newPatientWarning: boolean;
+  targetConflict: boolean;
+  wrongTenant: boolean;
+  existingMappingValid: boolean;
+}): void {
+  if (!input.sameTenant || input.wrongTenant) {
+    throw new Error("REVALIDATE_FAIL: wrong-tenant candidate");
+  }
+  if (!input.sameSourceContactId) {
+    throw new Error("REVALIDATE_FAIL: source contact ID changed");
+  }
+  if (!input.uniqueLeadTarget || input.targetConflict || input.newDuplicate) {
+    throw new Error("REVALIDATE_FAIL: lead target no longer unique");
+  }
+  if (input.newPatientWarning) {
+    throw new Error("REVALIDATE_FAIL: new patient warning");
+  }
+  if (!input.existingMappingValid) {
+    throw new Error("REVALIDATE_FAIL: existing mapping is not valid");
+  }
+}
+
+/** Watermark table must never appear on the 1E mutation allowlist. */
+export function assertBackupWatermarkNotAllowlisted(): void {
+  try {
+    assertExpansionMutationAllowlist("fi_external_hubspot_backup_watermarks", "update");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("MUTATION_GUARD")) return;
+    throw error;
+  }
+  throw new Error("WATERMARK_GUARD: watermark table unexpectedly allowlisted");
+}

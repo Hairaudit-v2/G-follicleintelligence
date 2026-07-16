@@ -6,6 +6,7 @@ import {
   canAdvanceIncrementalWatermark,
   classifyUpsertOutcome,
   compareNotesForIncremental,
+  decideMonotonicWatermarkAdvance,
   filterNotesInRange,
   hubspotSearchDatetimeMs,
   isHubspotIncrementalDataset,
@@ -164,6 +165,38 @@ describe("hubspotIncrementalBackupCore watermark rules", () => {
       watermark_timestamp: "2026-07-16T01:00:00.000Z",
       watermark_tiebreaker: null,
     });
+  });
+
+  it("rejects watermark rewind and treats equal cutoff as already_at_target", () => {
+    assert.equal(
+      decideMonotonicWatermarkAdvance({
+        currentWatermarkIso: null,
+        proposedWatermarkIso: "2026-07-16T01:00:00.000Z",
+      }),
+      "create_or_advance"
+    );
+    assert.equal(
+      decideMonotonicWatermarkAdvance({
+        currentWatermarkIso: "2026-07-16T01:00:00.000Z",
+        proposedWatermarkIso: "2026-07-16T02:00:00.000Z",
+      }),
+      "create_or_advance"
+    );
+    assert.equal(
+      decideMonotonicWatermarkAdvance({
+        currentWatermarkIso: "2026-07-16T01:00:00.000Z",
+        proposedWatermarkIso: "2026-07-16T01:00:00.000Z",
+      }),
+      "already_at_target"
+    );
+    assert.throws(
+      () =>
+        decideMonotonicWatermarkAdvance({
+          currentWatermarkIso: "2026-07-16T03:45:02.366Z",
+          proposedWatermarkIso: "2026-07-16T03:20:00.000Z",
+        }),
+      /WATERMARK_MONOTONIC/
+    );
   });
 });
 

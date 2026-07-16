@@ -214,6 +214,39 @@ export function nextWatermarkFromCutoffTo(cutoffToIso: string): {
   return { watermark_timestamp: cutoffToIso, watermark_tiebreaker: null };
 }
 
+export type MonotonicWatermarkDecision = "create_or_advance" | "already_at_target";
+
+/**
+ * Fail closed if a proposed advance would rewind the watermark.
+ * Same-range replay that is already at cutoff-to is a no-op (already_at_target).
+ */
+export function decideMonotonicWatermarkAdvance(input: {
+  currentWatermarkIso: string | null | undefined;
+  proposedWatermarkIso: string;
+}): MonotonicWatermarkDecision {
+  const proposed = parseStrictUtcTimestamp(input.proposedWatermarkIso, "proposed-watermark");
+  if (!input.currentWatermarkIso?.trim()) return "create_or_advance";
+  const current = parseStrictUtcTimestamp(
+    new Date(input.currentWatermarkIso).toISOString(),
+    "current-watermark"
+  );
+  if (proposed.epochMs < current.epochMs) {
+    throw new Error(
+      `WATERMARK_MONOTONIC: proposed ${proposed.iso} must not rewind current ${current.iso}`
+    );
+  }
+  if (proposed.epochMs === current.epochMs) return "already_at_target";
+  return "create_or_advance";
+}
+
+/** @deprecated Prefer decideMonotonicWatermarkAdvance; retained for call-site clarity. */
+export function assertMonotonicWatermarkAdvance(input: {
+  currentWatermarkIso: string | null | undefined;
+  proposedWatermarkIso: string;
+}): MonotonicWatermarkDecision {
+  return decideMonotonicWatermarkAdvance(input);
+}
+
 export function isIncrementalRunStuck(input: {
   status: string;
   startedAt: string | null;

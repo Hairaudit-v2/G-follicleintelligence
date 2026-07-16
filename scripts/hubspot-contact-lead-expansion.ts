@@ -102,13 +102,23 @@ async function main(): Promise<void> {
     for (const r of inventory.rows) {
       decisionCounts[r.decision] = (decisionCounts[r.decision] ?? 0) + 1;
     }
+    const expansionCore = await import(
+      "@/src/lib/integrations/hubspot/import/hubspotContactLeadExpansionCore"
+    );
+    const signatureRows = inventory.rows.map((r) => expansionCore.toInventorySignatureRow(r));
+    const inventorySignature = expansionCore.computeInventorySignature(signatureRows);
+    const coverage = expansionCore.reconcileContactCoverage(signatureRows);
+    expansionCore.assertCoverageReconciled(coverage);
     report = {
       ...report,
       mode: hasFlag("--profile") ? "profile" : "inventory",
+      generatedAt: new Date().toISOString(),
       summary: inventory.summary,
       dataQuality: inventory.dataQuality,
       deferredEnrichment: inventory.deferredEnrichment,
       decisionCounts,
+      inventorySignature,
+      coverage,
       sampleReady: inventory.rows
         .filter((r) => r.decision === "link_existing_lead" && r.approvedForApply)
         .slice(0, 20)
@@ -118,6 +128,11 @@ async function main(): Promise<void> {
           reasonCode: r.reasonCode,
           identityTier: r.identityTier,
         })),
+      ...(hasFlag("--full-signature")
+        ? {
+            signatureRows,
+          }
+        : {}),
     };
   } else if (hasFlag("--select-batch")) {
     const selected = await expansion.selectAndPersistExpansionBatch(client, {

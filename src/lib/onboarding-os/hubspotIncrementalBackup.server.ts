@@ -7,6 +7,7 @@ import { hubspotPostJson, HubspotReadError } from "./hubspotBackupEngine.server"
 import { stageHubspotNotesPage } from "./hubspotEngagementBackupEngine.server";
 import {
   applyTiebreakerCursor,
+  decideMonotonicWatermarkAdvance,
   canAdvanceIncrementalWatermark,
   emptyIncrementalCheckpoint,
   emptyIncrementalCounters,
@@ -570,41 +571,54 @@ export async function runIncrementalNotesBackup(
       const next = nextWatermarkFromCutoffTo(range.cutoffTo.iso);
       const { data: existingWm } = await supabase
         .from("fi_external_hubspot_backup_watermarks")
-        .select("id, version")
+        .select("id, version, watermark_timestamp")
         .eq("tenant_id", input.tenantId)
         .eq("source_system", HUBSPOT_INCREMENTAL_SOURCE_SYSTEM)
         .eq("dataset", dataset)
         .maybeSingle();
 
-      if (existingWm?.id) {
-        const { error: wmError } = await supabase
-          .from("fi_external_hubspot_backup_watermarks")
-          .update({
+      const watermarkDecision = decideMonotonicWatermarkAdvance({
+        currentWatermarkIso: existingWm?.watermark_timestamp
+          ? String(existingWm.watermark_timestamp)
+          : null,
+        proposedWatermarkIso: next.watermark_timestamp,
+      });
+
+      if (watermarkDecision === "create_or_advance") {
+        if (existingWm?.id) {
+          const { data: updatedRows, error: wmError } = await supabase
+            .from("fi_external_hubspot_backup_watermarks")
+            .update({
+              watermark_timestamp: next.watermark_timestamp,
+              watermark_tiebreaker: next.watermark_tiebreaker,
+              last_successful_run_id: runId,
+              last_verified_run_id: runId,
+              version: Number(existingWm.version ?? 1) + 1,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existingWm.id)
+            .eq("version", existingWm.version)
+            .select("id");
+          if (wmError) throw new Error("Unable to advance watermark.");
+          if (!updatedRows?.length) {
+            throw new Error("Unable to advance watermark: version conflict or zero-row update.");
+          }
+        } else {
+          const { error: wmError } = await supabase.from("fi_external_hubspot_backup_watermarks").insert({
+            tenant_id: input.tenantId,
+            integration_id: input.integrationId,
+            source_system: HUBSPOT_INCREMENTAL_SOURCE_SYSTEM,
+            dataset,
             watermark_timestamp: next.watermark_timestamp,
             watermark_tiebreaker: next.watermark_tiebreaker,
             last_successful_run_id: runId,
             last_verified_run_id: runId,
-            version: Number(existingWm.version ?? 1) + 1,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", existingWm.id)
-          .eq("version", existingWm.version);
-        if (wmError) throw new Error("Unable to advance watermark.");
-      } else {
-        const { error: wmError } = await supabase.from("fi_external_hubspot_backup_watermarks").insert({
-          tenant_id: input.tenantId,
-          integration_id: input.integrationId,
-          source_system: HUBSPOT_INCREMENTAL_SOURCE_SYSTEM,
-          dataset,
-          watermark_timestamp: next.watermark_timestamp,
-          watermark_tiebreaker: next.watermark_tiebreaker,
-          last_successful_run_id: runId,
-          last_verified_run_id: runId,
-          version: 1,
-        });
-        if (wmError) throw new Error("Unable to create watermark.");
+            version: 1,
+          });
+          if (wmError) throw new Error("Unable to create watermark.");
+        }
+        watermarkAdvanced = true;
       }
-      watermarkAdvanced = true;
       await supabase
         .from("fi_external_hubspot_sync_runs")
         .update({
@@ -617,23 +631,26 @@ export async function runIncrementalNotesBackup(
             cutoff_to: range.cutoffTo.iso,
             counters,
             empty_range: emptyRange,
-            watermark_advanced: true,
+            watermark_advanced: watermarkAdvanced,
+            watermark_decision: watermarkDecision,
           },
         })
         .eq("id", runId);
-      await recordIncrementalEvent(supabase, {
-        tenantId: input.tenantId,
-        integrationId: input.integrationId,
-        authSessionId,
-        auth: input.auth,
-        event: "watermark_advanced",
-        outcome: "success",
-        detail: {
-          run_id: runId,
-          dataset,
-          watermark_timestamp: next.watermark_timestamp,
-        },
-      });
+      if (watermarkAdvanced) {
+        await recordIncrementalEvent(supabase, {
+          tenantId: input.tenantId,
+          integrationId: input.integrationId,
+          authSessionId,
+          auth: input.auth,
+          event: "watermark_advanced",
+          outcome: "success",
+          detail: {
+            run_id: runId,
+            dataset,
+            watermark_timestamp: next.watermark_timestamp,
+          },
+        });
+      }
     }
 
     return {

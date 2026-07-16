@@ -58,10 +58,15 @@ function makeSupabaseMock(state: {
         },
         update: (patch: Row) => ({
           eq: () => ({
-            eq: async () => {
-              if (state.watermarks[0]) Object.assign(state.watermarks[0], patch);
-              return { error: null };
-            },
+            eq: () => ({
+              select: async () => {
+                if (state.watermarks[0]) Object.assign(state.watermarks[0], patch);
+                return {
+                  data: state.watermarks[0] ? [{ id: state.watermarks[0].id ?? "wm-1" }] : [],
+                  error: null,
+                };
+              },
+            }),
           }),
         }),
       };
@@ -441,6 +446,58 @@ describe("runIncrementalNotesBackup", () => {
     assert.equal(ok.cutoffFrom, "2026-07-16T00:00:00.000Z");
     assert.equal(ok.cutoffTo, "2026-07-16T01:00:00.000Z");
     assert.ok(state.events.some((e) => (e.detail as Row).event === "run_resumed"));
+  });
+
+  it("rejects watermark rewind while allowing same-range already_at_target", async () => {
+    const state = {
+      runs: [] as Row[],
+      notes: [] as Row[],
+      watermarks: [
+        {
+          id: "wm-1",
+          version: 3,
+          watermark_timestamp: "2026-07-16T03:45:02.366Z",
+        },
+      ] as Row[],
+      events: [] as Row[],
+    };
+    const supabase = makeSupabaseMock(state) as never;
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ results: [], paging: {} }), { status: 200 });
+
+    const rewind = await runIncrementalNotesBackup({
+      supabase,
+      accessToken: "token",
+      tenantId: "tenant-1",
+      integrationId: "integ-1",
+      portalId: "123",
+      auth,
+      cutoffFrom: "2026-07-16T03:00:00.000Z",
+      cutoffTo: "2026-07-16T03:20:00.000Z",
+      fetchImpl,
+      authSessionId: "auth-session-1",
+    });
+    assert.equal(rewind.ok, false);
+    assert.equal(state.watermarks[0]?.watermark_timestamp, "2026-07-16T03:45:02.366Z");
+
+    state.runs = [];
+    const sameRange = await runIncrementalNotesBackup({
+      supabase,
+      accessToken: "token",
+      tenantId: "tenant-1",
+      integrationId: "integ-1",
+      portalId: "123",
+      auth,
+      cutoffFrom: "2026-07-16T03:20:00.000Z",
+      cutoffTo: "2026-07-16T03:45:02.366Z",
+      fetchImpl,
+      authSessionId: "auth-session-1",
+    });
+    assert.equal(sameRange.ok, true);
+    if (!sameRange.ok) return;
+    assert.equal(sameRange.watermarkAdvanced, false);
+    assert.equal(state.watermarks[0]?.watermark_timestamp, "2026-07-16T03:45:02.366Z");
+    assert.ok(!state.events.some((e) => (e.detail as Row).event === "watermark_advanced"));
   });
 
   it("does not advance watermark when finalisation fails", async () => {
