@@ -1668,6 +1668,22 @@ export const GUIDED_ASSIST_QUICK_ACTIONS: readonly GuidedAssistQuickActionDefini
     priority: 3,
   },
   {
+    code: "qa_ai_patient_summary",
+    area: "consultation_os",
+    label: "Open AI Summary",
+    description:
+      "Operational overview of visits, photos, and open steps — never clinical advice. Use the AI Summary button on the patient profile.",
+    hrefSuffix: "patients/{{patientId}}",
+    requiresPatientContext: true,
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 2,
+    checklist: [
+      "Open the patient profile",
+      "Tap AI Summary for an operational snapshot",
+      "Verify clinically — the summary never diagnoses or treats",
+    ],
+  },
+  {
     code: "qa_patients_directory",
     area: "consultation_os",
     label: "Find a patient",

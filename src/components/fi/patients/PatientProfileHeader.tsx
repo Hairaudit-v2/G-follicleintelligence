@@ -1,6 +1,7 @@
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
+import { PatientAiSummaryTrigger } from "./PatientSummaryPanel";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 
 export function PatientProfileHeader({
@@ -34,6 +35,10 @@ export function PatientProfileHeader({
           ) : null}
         </div>
         <div className="flex max-w-full flex-shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+          <PatientAiSummaryTrigger
+            tenantId={tenantId}
+            patientId={data.foundationPatientId}
+          />
           <PatientTwinNavLink tenantId={tenantId} patientId={data.foundationPatientId} />
           <PatientStatusBadge status={data.patient.patient_status} />
         </div>

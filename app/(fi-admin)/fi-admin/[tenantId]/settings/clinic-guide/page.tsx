@@ -7,6 +7,7 @@ import { ClinicGuideSettingsSection } from "@/src/components/onboarding-os/Clini
 import { GuidedAssistHealthPanel } from "@/src/components/onboarding-os/GuidedAssistHealthPanel";
 import { GuidedAssistRolloutChecklist } from "@/src/components/onboarding-os/GuidedAssistRolloutChecklist";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
+import { PatientAiSummaryAdminToggle } from "@/src/components/onboarding-os/PatientAiSummaryAdminToggle";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
   canViewGuidedAssistUsageSummary,
@@ -116,6 +117,8 @@ export default async function ClinicGuideSettingsPage({
       </div>
 
       <ClinicGuideSettingsSection tenantId={tid} initialState={settingsResult.state} />
+
+      <PatientAiSummaryAdminToggle tenantId={tid} />
 
       {showUsage ? (
         <>
