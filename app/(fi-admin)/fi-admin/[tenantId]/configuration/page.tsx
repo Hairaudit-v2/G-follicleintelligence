@@ -8,6 +8,7 @@ import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { ConfigurationTabNav } from "@/src/components/fi/ConfigurationTabNav";
 import { TenantConfigurationPanel } from "@/src/components/fi/TenantConfigurationPanel";
 import { CalendarSettingsSection } from "@/src/components/fi-admin/settings/CalendarSettingsSection";
+import { ClinicGuideSettingsSection } from "@/src/components/onboarding-os/ClinicGuideSettingsSection";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
 import { TenantConnectExistingSystemsPanel } from "@/src/components/onboarding-os/TenantConnectExistingSystemsPanel";
 import { TenantDeploymentIntelligencePanel } from "@/src/components/onboarding-os/TenantDeploymentIntelligencePanel";
@@ -23,7 +24,10 @@ import { brandingDebugEnabled, logBrandingDebug } from "@/src/lib/fi/foundation/
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { canViewTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
-import { canViewGuidedAssistUsageSummary } from "@/src/lib/onboarding-os/guidedAssist.server";
+import {
+  canViewGuidedAssistUsageSummary,
+  loadGuidedAssistSettingsState,
+} from "@/src/lib/onboarding-os/guidedAssist.server";
 import { canViewTenantGoLiveReadiness } from "@/src/lib/onboarding-os/goLiveReadiness.server";
 import {
   canManageTenantBranding,
@@ -139,10 +143,14 @@ export default async function TenantConfigurationPage({
       : null;
 
   const showCascadePreview = Boolean(previewCtx.organisationId || previewCtx.clinicId);
-  const showGuidedAssistUsage = await canViewGuidedAssistUsageSummary(tenantId);
-  const showGoLiveReadiness = await canViewTenantGoLiveReadiness(tenantId);
-  const showDeploymentIntelligence = await canViewTenantDeploymentIntelligence(tenantId);
-  const showExternalConnectors = await canViewTenantExternalConnectors(tenantId);
+  const [showGuidedAssistUsage, clinicGuideSettings, showGoLiveReadiness, showDeploymentIntelligence, showExternalConnectors] =
+    await Promise.all([
+      canViewGuidedAssistUsageSummary(tenantId),
+      loadGuidedAssistSettingsState(tenantId),
+      canViewTenantGoLiveReadiness(tenantId),
+      canViewTenantDeploymentIntelligence(tenantId),
+      canViewTenantExternalConnectors(tenantId),
+    ]);
 
   return (
     <div className="space-y-4">
@@ -191,6 +199,12 @@ export default async function TenantConfigurationPage({
           {showGoLiveReadiness ? <TenantGoLiveReadinessPanel tenantId={tenantId} /> : null}
           {showExternalConnectors ? (
             <TenantConnectExistingSystemsPanel tenantId={tenantId} />
+          ) : null}
+          {clinicGuideSettings.ok ? (
+            <ClinicGuideSettingsSection
+              tenantId={tenantId}
+              initialState={clinicGuideSettings.state}
+            />
           ) : null}
           {showGuidedAssistUsage ? <GuidedAssistUsagePanel tenantId={tenantId} /> : null}
           <TenantConfigurationPanel

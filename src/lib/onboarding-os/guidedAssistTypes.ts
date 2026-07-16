@@ -27,9 +27,16 @@ export const GUIDED_ASSIST_EVENT_KINDS = [
   "next_action_clicked",
   "widget_collapsed",
   "widget_expanded",
+  "tip_feedback_helpful",
+  "tip_feedback_unhelpful",
+  "engagement_active",
+  "tour_completed",
 ] as const;
 
 export type GuidedAssistEventKind = (typeof GUIDED_ASSIST_EVENT_KINDS)[number];
+
+/** Weekly progress goal for “tips used this week” summary. */
+export const GUIDED_ASSIST_WEEKLY_PROGRESS_GOAL = 5;
 
 export type GuidedAssistRoleScope = {
   workspaceProfiles?: readonly FiWorkspaceProfileKey[];
@@ -47,14 +54,37 @@ export const GUIDED_ASSIST_TODAY_ROLE_KEYS = [
   "consultant",
   "finance",
   "doctor",
+  "nurse",
   "admin",
   "all",
 ] as const;
 
 export type GuidedAssistTodayRoleKey = (typeof GUIDED_ASSIST_TODAY_ROLE_KEYS)[number];
 
+/**
+ * Tip audience group for prioritisation.
+ * - `clinical` — doctors, consultants, nurses, surgeons (patient-flow workflows)
+ * - `support` — finance, reception desk depth, team admin helpers
+ * - `core` — whole-clinic operational tips (default when omitted)
+ */
+export const GUIDED_ASSIST_ROLE_GROUPS = ["core", "clinical", "support"] as const;
+export type GuidedAssistRoleGroup = (typeof GUIDED_ASSIST_ROLE_GROUPS)[number];
+
 /** Default number of Today page exposures that use role-first tip ordering. */
 export const GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT = 5;
+
+/** Experience tier for tip tone / depth (operational only). */
+export const GUIDED_ASSIST_EXPERIENCE_LEVELS = ["novice", "intermediate", "advanced"] as const;
+export type GuidedAssistExperienceLevel = (typeof GUIDED_ASSIST_EXPERIENCE_LEVELS)[number];
+
+/** Days since guide preference row created → still novice when under this (if not overridden). */
+export const GUIDED_ASSIST_NOVICE_MAX_DAYS = 30;
+
+/** today_home_views threshold: at/above → advanced when age allows (inferred). */
+export const GUIDED_ASSIST_ADVANCED_MIN_VIEWS = 40;
+
+/** today_home_views under this still novice when under novice max days. */
+export const GUIDED_ASSIST_NOVICE_MAX_VIEWS = 12;
 
 /** Empty-state tour keys (matched from route + clinic stats). */
 export const GUIDED_ASSIST_EMPTY_STATE_KEYS = [
@@ -77,12 +107,16 @@ export type GuidedAssistTimeOfDay = (typeof GUIDED_ASSIST_TIME_OF_DAY)[number];
 export const GUIDED_ASSIST_CONTEXT_CONDITIONS = [
   "zero_leads",
   "open_leads",
+  "high_open_leads",
   "zero_today_bookings",
   "today_bookings",
   "open_tasks",
   "zero_payment_records",
   "zero_open_surgery_cases",
 ] as const;
+
+/** openLeadCount at/above this qualifies as high volume for next-best-action tips. */
+export const GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD = 5;
 
 export type GuidedAssistContextCondition = (typeof GUIDED_ASSIST_CONTEXT_CONDITIONS)[number];
 
@@ -123,6 +157,11 @@ export type GuidedAssistTipDefinition = {
    */
   roles?: readonly GuidedAssistTodayRoleKey[];
   /**
+   * Audience group for prioritisation (clinical staff get clinical tips first).
+   * Omit = `core` (whole-clinic).
+   */
+  roleGroup?: GuidedAssistRoleGroup;
+  /**
    * When set, this tip is the **tour root** for an empty state (shows “Tour me”).
    * `tourSteps` lists tip codes for the sequenced walkthrough.
    */
@@ -131,6 +170,18 @@ export type GuidedAssistTipDefinition = {
   tourSteps?: readonly string[];
   /** Optional time-of-day / stats conditions (operational only). */
   contextTriggers?: GuidedAssistContextTriggers;
+  /**
+   * When set, tip only shows for these experience tiers.
+   * Omit = all tiers.
+   */
+  experienceLevel?: readonly GuidedAssistExperienceLevel[];
+  /**
+   * When set, tip is a **Next best action** candidate (rule-based NBA).
+   * Lower number = higher priority among NBA tips.
+   */
+  nextBestActionPriority?: number;
+  /** When true, tip is eligible for NBA selection (requires nextBestActionPriority). */
+  isNextBestAction?: boolean;
   dismissible: boolean;
   snoozeHours?: number;
   /** Operational CTA — never patient-specific clinical recommendations. */
@@ -171,6 +222,50 @@ export type GuidedAssistUserPreferences = {
   snoozedTips: GuidedAssistSnoozedTips;
   /** Times role-first tips were shown on Today for this user (this tenant). */
   todayHomeViews: number;
+  /** Explicit tier override from preferences (null = infer). */
+  experienceLevelOverride: GuidedAssistExperienceLevel | null;
+  /** ISO timestamp when the user preference row was created (guide age). */
+  guideStartedAtIso: string | null;
+  /** Consecutive engagement days (from preferences row). */
+  engagementStreakDays: number;
+  /** Last engagement calendar date YYYY-MM-DD (clinic-local). */
+  engagementLastActiveDateYmd: string | null;
+};
+
+/** Streak after a touch / for session display. */
+export type GuidedAssistStreakState = {
+  streakDays: number;
+  lastActiveDateYmd: string;
+  /** True when DB should be written. */
+  updated: boolean;
+  message: string | null;
+};
+
+export type GuidedAssistProgressSummary = {
+  completedCount: number;
+  goalCount: number;
+  /** e.g. "3/5 clinic tips used this week" */
+  label: string;
+  isComplete: boolean;
+};
+
+export type GuidedAssistTeamHighlight = {
+  tipCode: string;
+  tipTitle: string;
+  useCount: number;
+  /** Anonymized aggregate label for admins. */
+  label: string;
+};
+
+/** Session engagement block (lightweight adoption boosters). */
+export type GuidedAssistEngagementSnapshot = {
+  streakDays: number;
+  streakMessage: string | null;
+  progress: GuidedAssistProgressSummary;
+  /** Admin-only anonymized clinic highlight. */
+  teamHighlight: GuidedAssistTeamHighlight | null;
+  /** tip_code → last feedback from this user (null = none yet). */
+  feedbackByTipCode: Record<string, boolean | null>;
 };
 
 export type GuidedAssistResolvedPreferences = {
@@ -203,6 +298,15 @@ export type GuidedAssistTipView = {
   emptyStateKey?: GuidedAssistEmptyStateKey | null;
   /** Resolved tour step tip codes (tour root only). */
   tourStepCodes?: readonly string[] | null;
+  /** Rule-based or future AI next-best-action tip. */
+  isNextBestAction?: boolean;
+  /**
+   * Source of the tip for UI badges / audit.
+   * - `catalog` — standard guide
+   * - `rule_nba` — deterministic next-best-action
+   * - `ai_nba` — reserved for Edge Function suggestions (not used until enabled)
+   */
+  suggestionSource?: "catalog" | "rule_nba" | "ai_nba";
 };
 
 export type GuidedAssistNextActionView = {
@@ -224,6 +328,10 @@ export type GuidedAssistEmptyStateTourView = {
 };
 
 export type GuidedAssistSessionPayload = {
+  /**
+   * Effective Clinic guide on/off for this user (user override → onboarding default → post-setup default).
+   * Stored as `fi_guided_assist_preferences.assist_enabled` (null = inherit).
+   */
   assistEnabled: boolean;
   isOnboardingPhase: boolean;
   pageKey: string;
@@ -234,6 +342,11 @@ export type GuidedAssistSessionPayload = {
   roleFirstActive: boolean;
   /** Viewer simplified role used for role-first filtering. */
   todayRole: GuidedAssistTodayRoleKey | null;
+  /**
+   * Friendly, role-aware mode line (e.g. “Doctor Mode — here to help with patient flow today”).
+   * Always warm and operational — never clinical advice.
+   */
+  roleModeLabel: string | null;
   /** Current Today home view count before this exposure (0-based window check). */
   todayHomeViews: number;
   /** N for role-first window (default {@link GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT}). */
@@ -246,6 +359,35 @@ export type GuidedAssistSessionPayload = {
   clinicStats: GuidedAssistClinicStats | null;
   /** Local time band used for contextual tips. */
   timeOfDay: GuidedAssistTimeOfDay | null;
+  /** Inferred or overridden experience tier. */
+  experienceLevel: GuidedAssistExperienceLevel;
+  /** 1–2 next-best-action tips (rule-based; future AI). */
+  nextBestActions: GuidedAssistTipView[];
+  /**
+   * Always show a dock affordance so users can re-enable from the UI
+   * (even when assist is off and setup is complete).
+   */
+  showReenableChrome: boolean;
+  /** Settings → Clinic Guide path for this tenant. */
+  settingsHref: string;
+  /** Explicit per-user preference (null = inheriting tenant defaults). */
+  userAssistOverride: boolean | null;
+  /** Clinic admin / ops can change tenant defaults + enable-for-all. */
+  canManageTenantDefaults: boolean;
+  /** Streak, weekly progress, feedback map, optional team highlight. */
+  engagement: GuidedAssistEngagementSnapshot;
+};
+
+/** Settings page snapshot (per-user + optional admin controls). */
+export type GuidedAssistSettingsState = {
+  assistEnabled: boolean;
+  userAssistOverride: boolean | null;
+  isOnboardingPhase: boolean;
+  tenantDefaults: GuidedAssistTenantDefaults;
+  canManageTenantDefaults: boolean;
+  settingsHref: string;
+  staffWithExplicitOff: number;
+  staffWithExplicitOn: number;
 };
 
 export type GuidedAssistAreaInsight = {

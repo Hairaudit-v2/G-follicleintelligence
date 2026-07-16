@@ -135,6 +135,14 @@ export function FiOsClinicSettingsNav({
             Tax &amp; Localisation
           </Link>
         ) : null}
+        {/* Available to any staff who can open clinic settings strip — personal on/off. */}
+        <Link
+          href={`${base}/settings/clinic-guide`}
+          className={linkCls(`${base}/settings/clinic-guide`)}
+          title="Turn Clinic guide tips on or off for you; admins can enable for all staff."
+        >
+          Clinic guide
+        </Link>
         {showConfiguration ? (
           <Link
             href={`${base}/settings/integrations`}

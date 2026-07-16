@@ -7,6 +7,10 @@ import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 import { GUIDED_ASSIST_TIPS } from "./guidedAssistCatalog";
+import {
+  compareTipsByRoleGroupAndPriority,
+  isClinicalTodayRole,
+} from "./guidedAssistRoleMode";
 import type {
   GuidedAssistTipDefinition,
   GuidedAssistTodayRoleKey,
@@ -41,10 +45,10 @@ export function mapViewerToGuidedAssistTodayRole(input: {
   if (profile === "reception") return "reception";
   if (profile === "consultant") return "consultant";
   if (profile === "doctor" || profile === "surgeon") return "doctor";
+  if (profile === "nurse") return "nurse";
   if (profile === "director" || profile === "clinic_manager" || profile === "platform_admin") {
     return "admin";
   }
-  if (profile === "nurse") return "reception";
   if (profile === "academy_trainer") return "admin";
   if (profile === "auditor") return "admin";
   return "all";
@@ -90,12 +94,17 @@ export function getRoleFirstTips(input: {
   const tenantBase = `/fi-admin/${input.tenantId.trim()}`;
   const maxTips = input.maxTips ?? 3;
 
+  const preferClinical = isClinicalTodayRole(input.todayRole);
   const eligible = GUIDED_ASSIST_TIPS.filter((tip) => {
     if (!isTodayTip(tip)) return false;
+    if (tip.emptyStateKey) return false;
+    if (tip.contextTriggers) return false;
+    if (tip.isNextBestAction) return false;
+    if (tip.tourSteps?.length) return false;
     if (!tipMatchesTodayRole(tip, input.todayRole)) return false;
     if (dismissed.has(tip.code)) return false;
     return true;
-  }).sort((a, b) => a.priority - b.priority || a.code.localeCompare(b.code));
+  }).sort((a, b) => compareTipsByRoleGroupAndPriority(a, b, preferClinical));
 
   return eligible.slice(0, maxTips).map((tip) => ({
     code: tip.code,
@@ -109,6 +118,8 @@ export function getRoleFirstTips(input: {
     actionHref: tip.actionHrefSuffix
       ? `${tenantBase}/${tip.actionHrefSuffix.replace(/^\/+/, "")}`
       : null,
+    isNextBestAction: false,
+    suggestionSource: "catalog" as const,
   }));
 }
 

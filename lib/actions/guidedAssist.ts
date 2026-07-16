@@ -3,9 +3,14 @@
  */
 export {
   dismissGuidedAssistTipAction,
+  enableGuidedAssistForAllStaffAction,
   incrementGuidedAssistViews,
   incrementGuidedAssistViewsAction,
+  loadGuidedAssistSettingsStateAction,
   recordGuidedAssistClientEventAction,
+  recordGuidedAssistTipFeedbackAction,
   setGuidedAssistEnabledAction,
+  setGuidedAssistTenantDefaultsAction,
   snoozeGuidedAssistTipAction,
+  touchGuidedAssistEngagementAction,
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";

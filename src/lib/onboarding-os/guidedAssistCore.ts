@@ -19,11 +19,25 @@ import {
   mergeRoleFirstTipsWithCatalog,
   shouldUseRoleFirstTips,
 } from "./getRoleFirstTips";
+import {
+  filterTipsByExperienceLevel,
+  getRuleBasedNextBestActions,
+  inferGuidedAssistExperienceLevel,
+} from "./getTieredAndContextualTips";
+import { emptyEngagementSnapshot, formatStreakMessage } from "./guidedAssistEngagementCore";
 import { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
+import {
+  buildGuidedAssistRoleModeLabel,
+  compareTipsByRoleGroupAndPriority,
+  isClinicalTodayRole,
+  isClinicalWorkspaceProfile,
+} from "./guidedAssistRoleMode";
 import type {
   GuidedAssistArea,
   GuidedAssistAreaInsight,
   GuidedAssistClinicStats,
+  GuidedAssistEngagementSnapshot,
+  GuidedAssistExperienceLevel,
   GuidedAssistNextActionView,
   GuidedAssistResolvedPreferences,
   GuidedAssistRoleScope,
@@ -156,6 +170,15 @@ export function selectGuidedAssistTips(
     GUIDED_ASSIST_TIPS.flatMap((t) => (t.tourSteps?.length ? [...t.tourSteps] : []))
   );
 
+  const preferClinical =
+    isClinicalWorkspaceProfile(ctx.workspaceProfileKey) ||
+    isClinicalTodayRole(
+      mapViewerToGuidedAssistTodayRole({
+        workspaceProfileKey: ctx.workspaceProfileKey,
+        tenantAdminRole: ctx.tenantAdminRole,
+      })
+    );
+
   const eligible = GUIDED_ASSIST_TIPS.filter((tip) => {
     // Empty-state tour roots are offered via emptyStateTour (Tour me), not the tip list.
     if (tip.emptyStateKey) return false;
@@ -163,6 +186,8 @@ export function selectGuidedAssistTips(
     if (tourStepCodes.has(tip.code)) return false;
     // Contextual tips are selected separately (time/condition).
     if (tip.contextTriggers) return false;
+    // Next-best-action tips are selected via getRuleBasedNextBestActions.
+    if (tip.isNextBestAction) return false;
     if (!matchesRoleScope(tip.roleScope, ctx.workspaceProfileKey, ctx.tenantAdminRole))
       return false;
     if (!matchesPageKey(ctx.pageKey, tip.pageKey, tip.pageKeyPrefix)) return false;
@@ -170,7 +195,7 @@ export function selectGuidedAssistTips(
     if (isTipSnoozed(tip.code, prefs.snoozedTips, nowMs)) return false;
     return true;
   })
-    .sort((a, b) => a.priority - b.priority)
+    .sort((a, b) => compareTipsByRoleGroupAndPriority(a, b, preferClinical))
     .slice(0, maxTips);
 
   return eligible.map((tip) => toTipView(tip, tenantBase));
@@ -203,7 +228,8 @@ export function selectGuidedAssistNextAction(
 
 function toTipView(
   tip: (typeof GUIDED_ASSIST_TIPS)[number],
-  tenantBase: string
+  tenantBase: string,
+  suggestionSource: GuidedAssistTipView["suggestionSource"] = "catalog"
 ): GuidedAssistTipView {
   return {
     code: tip.code,
@@ -219,6 +245,8 @@ function toTipView(
       : null,
     emptyStateKey: tip.emptyStateKey ?? null,
     tourStepCodes: tip.tourSteps?.length ? [...tip.tourSteps] : null,
+    isNextBestAction: Boolean(tip.isNextBestAction),
+    suggestionSource,
   };
 }
 
@@ -241,6 +269,8 @@ export function buildGuidedAssistSessionPayload(opts: {
   roleFirstViewLimit?: number;
   clinicStats?: GuidedAssistClinicStats | null;
   now?: Date;
+  /** Optional preloaded engagement (streak, progress, feedback, team highlight). */
+  engagement?: GuidedAssistEngagementSnapshot | null;
 }): GuidedAssistSessionPayload {
   const maxTips = opts.maxTips ?? 3;
   const roleFirstViewLimit = opts.roleFirstViewLimit ?? GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT;
@@ -253,6 +283,13 @@ export function buildGuidedAssistSessionPayload(opts: {
   const now = opts.now ?? new Date();
   const timeOfDay = resolveTimeOfDay(stats.hourLocal);
 
+  const experienceLevel: GuidedAssistExperienceLevel = inferGuidedAssistExperienceLevel({
+    todayHomeViews,
+    guideStartedAtIso: opts.userPreferences.guideStartedAtIso,
+    experienceLevelOverride: opts.userPreferences.experienceLevelOverride,
+    now,
+  });
+
   const roleFirstActive =
     opts.resolved.assistEnabled &&
     shouldUseRoleFirstTips({
@@ -262,25 +299,27 @@ export function buildGuidedAssistSessionPayload(opts: {
     });
 
   let tips: GuidedAssistTipView[] = [];
+  let nextBestActions: GuidedAssistTipView[] = [];
   let emptyStateTour = null as GuidedAssistSessionPayload["emptyStateTour"];
 
   if (opts.resolved.assistEnabled) {
-    const catalogTips = selectGuidedAssistTips(
-      opts.ctx,
-      opts.userPreferences,
-      now,
-      maxTips
+    const catalogTips = filterTipsByExperienceLevel(
+      selectGuidedAssistTips(opts.ctx, opts.userPreferences, now, maxTips + 2),
+      experienceLevel
     );
     if (roleFirstActive) {
-      const roleTips = getRoleFirstTips({
-        todayRole,
-        tenantId: opts.ctx.tenantId,
-        dismissedTipCodes: opts.userPreferences.dismissedTipCodes,
-        maxTips,
-      });
+      const roleTips = filterTipsByExperienceLevel(
+        getRoleFirstTips({
+          todayRole,
+          tenantId: opts.ctx.tenantId,
+          dismissedTipCodes: opts.userPreferences.dismissedTipCodes,
+          maxTips: maxTips + 2,
+        }),
+        experienceLevel
+      );
       tips = mergeRoleFirstTipsWithCatalog(roleTips, catalogTips, maxTips);
     } else {
-      tips = catalogTips;
+      tips = catalogTips.slice(0, maxTips);
     }
 
     const contextual = getContextualTips({
@@ -290,8 +329,23 @@ export function buildGuidedAssistSessionPayload(opts: {
       timeOfDay,
       nowMs: now.getTime(),
       maxTips: 2,
+    }).filter((t) => {
+      const def = GUIDED_ASSIST_TIPS.find((d) => d.code === t.code);
+      if (!def) return true;
+      return !def.experienceLevel?.length || def.experienceLevel.includes(experienceLevel);
     });
     tips = mergeContextualTips(contextual, tips, maxTips);
+
+    nextBestActions = getRuleBasedNextBestActions({
+      tenantId: opts.ctx.tenantId,
+      pageKey: opts.ctx.pageKey,
+      todayRole,
+      experienceLevel,
+      stats,
+      timeOfDay,
+      dismissedTipCodes: opts.userPreferences.dismissedTipCodes,
+      maxActions: 2,
+    });
 
     emptyStateTour = getEmptyStateTour({
       pageKey: opts.ctx.pageKey,
@@ -302,6 +356,29 @@ export function buildGuidedAssistSessionPayload(opts: {
   }
 
   const nextAction = opts.resolved.assistEnabled ? selectGuidedAssistNextAction(opts.ctx) : null;
+  const tenantBase = `/fi-admin/${opts.ctx.tenantId.trim()}`;
+  const settingsHref = `${tenantBase}/settings/clinic-guide`;
+  const canManageTenantDefaults =
+    opts.ctx.tenantAdminRole === "clinic_admin" ||
+    opts.ctx.tenantAdminRole === "operations_admin";
+
+  const streakDays = Math.max(
+    0,
+    Math.floor(Number(opts.userPreferences.engagementStreakDays) || 0)
+  );
+  const engagement: GuidedAssistEngagementSnapshot = opts.engagement ?? {
+    ...emptyEngagementSnapshot(),
+    streakDays,
+    streakMessage: formatStreakMessage(streakDays),
+  };
+
+  // Always surface a warm role mode label (helps clinical staff feel supported).
+  const roleModeLabel = buildGuidedAssistRoleModeLabel({
+    todayRole,
+    workspaceProfileKey: opts.ctx.workspaceProfileKey,
+    tenantAdminRole: opts.ctx.tenantAdminRole,
+    assistEnabled: opts.resolved.assistEnabled,
+  });
 
   return {
     assistEnabled: opts.resolved.assistEnabled,
@@ -311,13 +388,22 @@ export function buildGuidedAssistSessionPayload(opts: {
     nextAction,
     safetyNotice: GUIDED_ASSIST_SAFETY_NOTICE,
     roleFirstActive,
-    todayRole: roleFirstActive ? todayRole : null,
+    todayRole,
+    roleModeLabel,
     todayHomeViews,
     roleFirstViewLimit,
     shouldIncrementTodayHomeViews: roleFirstActive && tips.length > 0,
     emptyStateTour,
     clinicStats: stats,
     timeOfDay,
+    experienceLevel,
+    nextBestActions,
+    // Always offer re-enable chrome when the guide is off (never disappear entirely).
+    showReenableChrome: !opts.resolved.assistEnabled,
+    settingsHref,
+    userAssistOverride: opts.userPreferences.assistEnabled,
+    canManageTenantDefaults,
+    engagement,
   };
 }
 

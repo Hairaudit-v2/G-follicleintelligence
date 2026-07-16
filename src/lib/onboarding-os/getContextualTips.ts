@@ -15,7 +15,14 @@ import type {
   GuidedAssistViewerContext,
   GuidedAssistUserPreferences,
 } from "./guidedAssistTypes";
-import { GUIDED_ASSIST_AREA_LABELS } from "./guidedAssistTypes";
+import {
+  compareTipsByRoleGroupAndPriority,
+  isClinicalWorkspaceProfile,
+} from "./guidedAssistRoleMode";
+import {
+  GUIDED_ASSIST_AREA_LABELS,
+  GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD,
+} from "./guidedAssistTypes";
 import { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
 
 export function resolveTimeOfDay(hourLocal: number | null | undefined): GuidedAssistTimeOfDay {
@@ -37,6 +44,8 @@ export function conditionMatches(
       return stats.openLeadCount <= 0;
     case "open_leads":
       return stats.openLeadCount > 0;
+    case "high_open_leads":
+      return stats.openLeadCount >= GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD;
     case "zero_today_bookings":
       return stats.todayBookingCount <= 0;
     case "today_bookings":
@@ -140,6 +149,8 @@ export function getContextualTips(input: {
 
   const eligible = GUIDED_ASSIST_TIPS.filter((tip) => {
     if (!tip.contextTriggers) return false;
+    // Next-best-action tips are selected via getRuleBasedNextBestActions only.
+    if (tip.isNextBestAction) return false;
     if (tip.emptyStateKey) return false;
     if (dismissed.has(tip.code)) return false;
     const snoozeUntil = input.prefs.snoozedTips[tip.code];
@@ -174,7 +185,13 @@ export function getContextualTips(input: {
     if (!timeOfDayMatches(tip.contextTriggers.timeOfDay, input.timeOfDay)) return false;
     if (!conditionMatches(tip.contextTriggers.condition, input.stats)) return false;
     return true;
-  }).sort((a, b) => a.priority - b.priority);
+  }).sort((a, b) =>
+    compareTipsByRoleGroupAndPriority(
+      a,
+      b,
+      isClinicalWorkspaceProfile(input.ctx.workspaceProfileKey)
+    )
+  );
 
   return eligible.slice(0, maxTips).map((tip) => {
     const view = tipToView(tip, tenantBase);

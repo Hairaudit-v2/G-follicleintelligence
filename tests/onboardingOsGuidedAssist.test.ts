@@ -26,9 +26,29 @@ import {
   shouldUseRoleFirstTips,
 } from "../src/lib/onboarding-os/getRoleFirstTips";
 import {
+  getRuleBasedNextBestActions,
+  inferGuidedAssistExperienceLevel,
+  tipBodyIsOperationallySafe,
+  tipMatchesExperienceLevel,
+} from "../src/lib/onboarding-os/getTieredAndContextualTips";
+import {
+  buildWeeklyProgressSummary,
+  computeEngagementStreakUpdate,
+  formatStreakMessage,
+  resolveTeamHighlightFromCounts,
+} from "../src/lib/onboarding-os/guidedAssistEngagementCore";
+import {
+  buildGuidedAssistRoleModeLabel,
+  compareTipsByRoleGroupAndPriority,
+  isClinicalTodayRole,
+} from "../src/lib/onboarding-os/guidedAssistRoleMode";
+import {
   GUIDED_ASSIST_AREA_LABELS,
+  GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD,
   GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
   GUIDED_ASSIST_SAFETY_NOTICE,
+  type GuidedAssistTipDefinition,
+  type GuidedAssistUserPreferences,
 } from "../src/lib/onboarding-os/guidedAssistTypes";
 
 const BASE_CTX = {
@@ -44,6 +64,22 @@ const BASE_CTX = {
   isOnboardingPhase: true,
 };
 
+function prefs(
+  partial: Partial<GuidedAssistUserPreferences> = {}
+): GuidedAssistUserPreferences {
+  return {
+    assistEnabled: true,
+    dismissedTipCodes: [],
+    snoozedTips: {},
+    todayHomeViews: 0,
+    experienceLevelOverride: null,
+    guideStartedAtIso: null,
+    engagementStreakDays: 0,
+    engagementLastActiveDateYmd: null,
+    ...partial,
+  };
+}
+
 describe("OnboardingOS Phase D — guided assist core", () => {
   it("resolveGuidedAssistPageKey strips tenant base and query", () => {
     const base = "/fi-admin/tenant-1";
@@ -58,12 +94,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: {
-          assistEnabled: false,
-          dismissedTipCodes: [],
-          snoozedTips: {},
-          todayHomeViews: 0,
-        },
+        userPreferences: prefs({ assistEnabled: false }),
         isOnboardingPhase: true,
       }),
       false
@@ -71,12 +102,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: {
-          assistEnabled: null,
-          dismissedTipCodes: [],
-          snoozedTips: {},
-          todayHomeViews: 0,
-        },
+        userPreferences: prefs({ assistEnabled: null }),
         isOnboardingPhase: false,
       }),
       false
@@ -84,12 +110,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(
       resolveEffectiveGuidedAssistEnabled({
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: {
-          assistEnabled: null,
-          dismissedTipCodes: [],
-          snoozedTips: {},
-          todayHomeViews: 0,
-        },
+        userPreferences: prefs({ assistEnabled: null }),
         isOnboardingPhase: true,
       }),
       true
@@ -123,7 +144,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         ...BASE_CTX,
         pageKey: "configuration",
       },
-      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {}, todayHomeViews: 0 }
+      prefs()
     );
     assert.ok(tips.some((t) => t.code === "onboarding_configuration_hub"));
     assert.ok(tips.every((t) => !t.body.toLowerCase().includes("prescribe")));
@@ -140,25 +161,46 @@ describe("OnboardingOS Phase D — guided assist core", () => {
   });
 
   it("buildGuidedAssistSessionPayload includes safety notice and respects disabled assist", () => {
+    const userPreferences = prefs({ assistEnabled: false });
     const payload = buildGuidedAssistSessionPayload({
       ctx: { ...BASE_CTX, pageKey: "calendar" },
       resolved: {
         assistEnabled: false,
         isOnboardingPhase: true,
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: { assistEnabled: false, dismissedTipCodes: [], snoozedTips: {} },
+        userPreferences,
       },
-      userPreferences: {
-        assistEnabled: false,
-        dismissedTipCodes: [],
-        snoozedTips: {},
-        todayHomeViews: 0,
-      },
+      userPreferences,
     });
     assert.equal(payload.safetyNotice, GUIDED_ASSIST_SAFETY_NOTICE);
     assert.equal(payload.tips.length, 0);
     assert.equal(payload.nextAction, null);
     assert.equal(payload.roleFirstActive, false);
+    assert.equal(payload.nextBestActions.length, 0);
+    assert.ok(payload.experienceLevel);
+    assert.equal(payload.showReenableChrome, true);
+    assert.match(payload.settingsHref, /settings\/clinic-guide$/);
+    assert.equal(payload.userAssistOverride, false);
+    assert.equal(payload.canManageTenantDefaults, true);
+  });
+
+  it("user override false forces assist off after setup; true forces on", () => {
+    assert.equal(
+      resolveEffectiveGuidedAssistEnabled({
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
+        userPreferences: prefs({ assistEnabled: false }),
+        isOnboardingPhase: false,
+      }),
+      false
+    );
+    assert.equal(
+      resolveEffectiveGuidedAssistEnabled({
+        tenantDefaults: { defaultEnabledDuringOnboarding: false, defaultAssistEnabled: false },
+        userPreferences: prefs({ assistEnabled: true }),
+        isOnboardingPhase: false,
+      }),
+      true
+    );
   });
 
   it("summarizeGuidedAssistUsageEvents aggregates admin metrics", () => {
@@ -223,7 +265,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         tenantAdminRole: null,
         pageKey: "front-desk",
       },
-      { assistEnabled: true, dismissedTipCodes: [], snoozedTips: {}, todayHomeViews: 0 }
+      prefs()
     );
     assert.ok(tips.some((t) => t.code === "front_desk_today"));
     assert.ok(tips.every((t) => !/ReceptionOS/i.test(t.areaLabel)));
@@ -279,6 +321,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.ok(roleTips.some((t) => t.code === "today_reception_front_desk"));
     assert.equal(roleTips[0]!.code, "today_reception_front_desk");
 
+    const userPreferences = prefs({ todayHomeViews: 0 });
     const payload = buildGuidedAssistSessionPayload({
       ctx: {
         ...BASE_CTX,
@@ -290,24 +333,15 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         assistEnabled: true,
         isOnboardingPhase: true,
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
-        userPreferences: {
-          assistEnabled: true,
-          dismissedTipCodes: [],
-          snoozedTips: {},
-          todayHomeViews: 0,
-        },
+        userPreferences,
       },
-      userPreferences: {
-        assistEnabled: true,
-        dismissedTipCodes: [],
-        snoozedTips: {},
-        todayHomeViews: 0,
-      },
+      userPreferences,
     });
     assert.equal(payload.roleFirstActive, true);
     assert.equal(payload.shouldIncrementTodayHomeViews, true);
     assert.ok(payload.tips.some((t) => t.code === "today_reception_front_desk"));
 
+    const afterPrefs = prefs({ todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT });
     const afterWindow = buildGuidedAssistSessionPayload({
       ctx: {
         ...BASE_CTX,
@@ -319,19 +353,9 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         assistEnabled: true,
         isOnboardingPhase: false,
         tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
-        userPreferences: {
-          assistEnabled: true,
-          dismissedTipCodes: [],
-          snoozedTips: {},
-          todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
-        },
+        userPreferences: afterPrefs,
       },
-      userPreferences: {
-        assistEnabled: true,
-        dismissedTipCodes: [],
-        snoozedTips: {},
-        todayHomeViews: GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
-      },
+      userPreferences: afterPrefs,
     });
     assert.equal(afterWindow.roleFirstActive, false);
     assert.equal(afterWindow.shouldIncrementTodayHomeViews, false);
@@ -369,7 +393,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         workspaceProfileKey: "reception",
         tenantAdminRole: null,
       },
-      prefs: { dismissedTipCodes: [], snoozedTips: {} },
+      prefs: prefs(),
       stats: {
         openLeadCount: 3,
         todayBookingCount: 2,
@@ -388,7 +412,7 @@ describe("OnboardingOS Phase D — guided assist core", () => {
         workspaceProfileKey: "reception",
         tenantAdminRole: null,
       },
-      prefs: { dismissedTipCodes: [], snoozedTips: {} },
+      prefs: prefs(),
       stats: {
         openLeadCount: 0,
         todayBookingCount: 5,
@@ -405,6 +429,254 @@ describe("OnboardingOS Phase D — guided assist core", () => {
   });
 });
 
+describe("Clinic guide — experience tiers + next best action", () => {
+  it("infers novice / intermediate / advanced from views + age", () => {
+    const now = new Date("2026-07-17T12:00:00.000Z");
+    assert.equal(
+      inferGuidedAssistExperienceLevel({
+        todayHomeViews: 2,
+        guideStartedAtIso: "2026-07-10T00:00:00.000Z",
+        experienceLevelOverride: null,
+        now,
+      }),
+      "novice"
+    );
+    assert.equal(
+      inferGuidedAssistExperienceLevel({
+        todayHomeViews: 20,
+        // ~107 days old, views between novice max and advanced min → intermediate
+        guideStartedAtIso: "2026-04-01T00:00:00.000Z",
+        experienceLevelOverride: null,
+        now,
+      }),
+      "intermediate"
+    );
+    assert.equal(
+      inferGuidedAssistExperienceLevel({
+        todayHomeViews: 50,
+        guideStartedAtIso: "2025-01-01T00:00:00.000Z",
+        experienceLevelOverride: null,
+        now,
+      }),
+      "advanced"
+    );
+    assert.equal(
+      inferGuidedAssistExperienceLevel({
+        todayHomeViews: 0,
+        guideStartedAtIso: null,
+        experienceLevelOverride: "advanced",
+        now,
+      }),
+      "advanced"
+    );
+  });
+
+  it("catalog experienceLevel filtering matches roles and tiers", () => {
+    const noviceTip = GUIDED_ASSIST_TIPS.find((t) => t.code === "novice_today_orientation");
+    const advancedTip = GUIDED_ASSIST_TIPS.find((t) => t.code === "advanced_search_shortcut");
+    assert.ok(noviceTip && advancedTip);
+    assert.equal(tipMatchesExperienceLevel(noviceTip!, "novice"), true);
+    assert.equal(tipMatchesExperienceLevel(noviceTip!, "advanced"), false);
+    assert.equal(tipMatchesExperienceLevel(advancedTip!, "advanced"), true);
+    assert.equal(tipMatchesExperienceLevel(advancedTip!, "novice"), false);
+
+    const doctorScales = GUIDED_ASSIST_TIPS.find((t) => t.code === "doctor_scales_shortcuts");
+    assert.ok(doctorScales?.roles?.includes("doctor"));
+    assert.ok(!/\b(diagnos|prescri|medical advice)\b/i.test(doctorScales!.body));
+  });
+
+  it("rule-based NBA: high leads → pipeline / batch photos by role", () => {
+    const stats = {
+      openLeadCount: GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD + 2,
+      todayBookingCount: 0,
+      openTaskCount: 0,
+      openSurgeryCaseCount: 0,
+      paymentRecordCount: 1,
+      hourLocal: 11,
+    };
+    const consultantNba = getRuleBasedNextBestActions({
+      tenantId: BASE_CTX.tenantId,
+      pageKey: "",
+      todayRole: "consultant",
+      experienceLevel: "advanced",
+      stats,
+      timeOfDay: "morning",
+      maxActions: 2,
+    });
+    assert.ok(consultantNba.length >= 1);
+    assert.ok(consultantNba.every((t) => t.isNextBestAction && t.suggestionSource === "rule_nba"));
+    assert.ok(
+      consultantNba.some(
+        (t) =>
+          t.code === "nba_high_leads_batch_photos" || t.code === "nba_high_leads_work_pipeline"
+      )
+    );
+    assert.match(consultantNba[0]!.body, new RegExp(String(stats.openLeadCount)));
+
+    const noviceNba = getRuleBasedNextBestActions({
+      tenantId: BASE_CTX.tenantId,
+      pageKey: "",
+      todayRole: "consultant",
+      experienceLevel: "novice",
+      stats,
+      timeOfDay: "morning",
+      maxActions: 2,
+    });
+    assert.ok(noviceNba.some((t) => t.code === "nba_high_leads_work_pipeline"));
+    assert.ok(!noviceNba.some((t) => t.code === "nba_high_leads_batch_photos"));
+  });
+
+  it("rule-based NBA: evening → close Money; open tasks → follow-ups", () => {
+    const evening = getRuleBasedNextBestActions({
+      tenantId: BASE_CTX.tenantId,
+      pageKey: "",
+      todayRole: "finance",
+      experienceLevel: "intermediate",
+      stats: {
+        openLeadCount: 0,
+        todayBookingCount: 0,
+        openTaskCount: 0,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 10,
+        hourLocal: 18,
+      },
+      timeOfDay: "evening",
+    });
+    assert.ok(evening.some((t) => t.code === "nba_evening_close_money"));
+
+    const tasks = getRuleBasedNextBestActions({
+      tenantId: BASE_CTX.tenantId,
+      pageKey: "",
+      todayRole: "reception",
+      experienceLevel: "intermediate",
+      stats: {
+        openLeadCount: 1,
+        todayBookingCount: 0,
+        openTaskCount: 4,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 1,
+        hourLocal: 14,
+      },
+      timeOfDay: "afternoon",
+    });
+    assert.ok(tasks.some((t) => t.code === "nba_open_tasks_followups"));
+    assert.match(tasks.find((t) => t.code === "nba_open_tasks_followups")!.body, /4/);
+  });
+
+  it("doctor NBA is operational prep only", () => {
+    const nba = getRuleBasedNextBestActions({
+      tenantId: BASE_CTX.tenantId,
+      pageKey: "",
+      todayRole: "doctor",
+      experienceLevel: "advanced",
+      stats: {
+        openLeadCount: 0,
+        todayBookingCount: 3,
+        openTaskCount: 0,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 1,
+        hourLocal: 9,
+      },
+      timeOfDay: "morning",
+    });
+    assert.ok(nba.some((t) => t.code === "nba_doctor_prep_list" || t.code === "nba_doctor_scales_ready"));
+    for (const tip of nba) {
+      assert.ok(tipBodyIsOperationallySafe(tip.body), tip.code);
+    }
+  });
+
+  it("session payload includes experienceLevel + nextBestActions for high load Today", () => {
+    const userPreferences = prefs({
+      experienceLevelOverride: "advanced",
+      todayHomeViews: 50,
+    });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "consultant",
+        tenantAdminRole: null,
+        pageKey: "",
+        setupFlags: {
+          organisationCreated: true,
+          clinicCreated: true,
+          clinicSettingsComplete: true,
+          firstCaseCreated: true,
+        },
+        isOnboardingPhase: false,
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
+        userPreferences,
+      },
+      userPreferences,
+      clinicStats: {
+        openLeadCount: 10,
+        todayBookingCount: 2,
+        openTaskCount: 1,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 5,
+        hourLocal: 10,
+      },
+    });
+    assert.equal(payload.experienceLevel, "advanced");
+    assert.ok(payload.nextBestActions.length >= 1);
+    assert.ok(payload.nextBestActions.every((t) => t.suggestionSource === "rule_nba"));
+    assert.ok(payload.tips.every((t) => tipBodyIsOperationallySafe(t.body)));
+  });
+
+  it("novice session prefers explanatory tips on Today", () => {
+    const userPreferences = prefs({
+      experienceLevelOverride: "novice",
+      todayHomeViews: 1,
+      guideStartedAtIso: new Date().toISOString(),
+    });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "reception",
+        tenantAdminRole: null,
+        pageKey: "",
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: true,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences,
+      },
+      userPreferences,
+      clinicStats: {
+        openLeadCount: 0,
+        todayBookingCount: 0,
+        openTaskCount: 0,
+        openSurgeryCaseCount: 0,
+        paymentRecordCount: 0,
+        hourLocal: 10,
+      },
+    });
+    assert.equal(payload.experienceLevel, "novice");
+    assert.ok(
+      payload.tips.some(
+        (t) =>
+          t.code === "novice_reception_workflow" ||
+          t.code === "novice_today_orientation" ||
+          t.code === "today_reception_front_desk"
+      )
+    );
+    assert.ok(!payload.tips.some((t) => t.code === "advanced_search_shortcut"));
+  });
+
+  it("all catalog tips remain operationally safe", () => {
+    for (const tip of GUIDED_ASSIST_TIPS) {
+      assert.ok(tipBodyIsOperationallySafe(tip.body), tip.code);
+      if (tip.isNextBestAction) {
+        assert.ok(typeof tip.nextBestActionPriority === "number", tip.code);
+      }
+    }
+  });
+});
+
 describe("OnboardingOS Phase D — migration", () => {
   it("defines fi_guided_assist_preferences and fi_guided_assist_events", () => {
     const migrationPath = path.join(
@@ -416,5 +688,241 @@ describe("OnboardingOS Phase D — migration", () => {
     assert.match(sql, /create table if not exists public\.fi_guided_assist_events/);
     assert.match(sql, /default_enabled_during_onboarding/);
     assert.match(sql, /tip_dismissed/);
+  });
+
+  it("adds experience_level override column", () => {
+    const migrationPath = path.join(
+      process.cwd(),
+      "supabase/migrations/20261021120001_guided_assist_experience_tier.sql"
+    );
+    const sql = fs.readFileSync(migrationPath, "utf8");
+    assert.match(sql, /experience_level/);
+    assert.match(sql, /novice/);
+    assert.match(sql, /advanced/);
+  });
+
+  it("documents assist_enabled as user-controlled Clinic guide on/off", () => {
+    const migrationPath = path.join(
+      process.cwd(),
+      "supabase/migrations/20261022120001_guided_assist_enabled_docs.sql"
+    );
+    const sql = fs.readFileSync(migrationPath, "utf8");
+    assert.match(sql, /assist_enabled/);
+    assert.match(sql, /Per-user Clinic guide/);
+  });
+
+  it("engagement migration defines feedback table and streak columns", () => {
+    const migrationPath = path.join(
+      process.cwd(),
+      "supabase/migrations/20261023120001_guided_assist_engagement.sql"
+    );
+    const sql = fs.readFileSync(migrationPath, "utf8");
+    assert.match(sql, /fi_guided_assist_feedback/);
+    assert.match(sql, /engagement_streak_days/);
+    assert.match(sql, /tip_feedback_helpful/);
+    assert.match(sql, /tour_completed/);
+  });
+});
+
+describe("Clinic guide — engagement boosters", () => {
+  it("computes streak: first day, same day, consecutive, gap restart", () => {
+    const first = computeEngagementStreakUpdate({
+      currentStreakDays: 0,
+      lastActiveDateYmd: null,
+      todayYmd: "2026-07-17",
+    });
+    assert.equal(first.streakDays, 1);
+    assert.equal(first.updated, true);
+
+    const same = computeEngagementStreakUpdate({
+      currentStreakDays: 3,
+      lastActiveDateYmd: "2026-07-17",
+      todayYmd: "2026-07-17",
+    });
+    assert.equal(same.streakDays, 3);
+    assert.equal(same.updated, false);
+
+    const next = computeEngagementStreakUpdate({
+      currentStreakDays: 3,
+      lastActiveDateYmd: "2026-07-16",
+      todayYmd: "2026-07-17",
+    });
+    assert.equal(next.streakDays, 4);
+    assert.equal(next.updated, true);
+    assert.ok(next.message);
+
+    const gap = computeEngagementStreakUpdate({
+      currentStreakDays: 10,
+      lastActiveDateYmd: "2026-07-10",
+      todayYmd: "2026-07-17",
+    });
+    assert.equal(gap.streakDays, 1);
+    assert.equal(gap.updated, true);
+  });
+
+  it("formats professional streak copy without game overload", () => {
+    assert.equal(formatStreakMessage(1), null);
+    assert.equal(formatStreakMessage(2), "2 days with the clinic guide");
+    assert.match(formatStreakMessage(7) ?? "", /7-day/);
+  });
+
+  it("builds weekly progress summary labels", () => {
+    const p = buildWeeklyProgressSummary({ completedCount: 3, goal: 5 });
+    assert.equal(p.label, "3/5 clinic tips used this week");
+    assert.equal(p.isComplete, false);
+    const done = buildWeeklyProgressSummary({ completedCount: 8, goal: 5 });
+    assert.equal(done.isComplete, true);
+    assert.match(done.label, /^5\/5/);
+  });
+
+  it("resolves anonymized team highlight from tip counts", () => {
+    const tip = GUIDED_ASSIST_TIPS.find((t) => t.code === "pipeline_enquiries");
+    assert.ok(tip);
+    const h = resolveTeamHighlightFromCounts([
+      { guidanceCode: "pipeline_enquiries", count: 12 },
+      { guidanceCode: "front_desk_today", count: 4 },
+    ]);
+    assert.ok(h);
+    assert.equal(h!.tipCode, "pipeline_enquiries");
+    assert.match(h!.label, /Most used tip this week/);
+    assert.ok(!/OnboardingOS/i.test(h!.label));
+  });
+
+  it("session payload includes engagement block defaults", () => {
+    const userPreferences = prefs({ engagementStreakDays: 7 });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: { ...BASE_CTX, pageKey: "" },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: true,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences,
+      },
+      userPreferences,
+    });
+    assert.ok(payload.engagement);
+    assert.equal(payload.engagement.streakDays, 7);
+    assert.ok(payload.engagement.progress.label.includes("clinic tips"));
+    assert.equal(payload.showReenableChrome, false);
+  });
+});
+
+describe("Clinic guide — warm tone + clinical role prioritisation", () => {
+  it("maps nurse profile to nurse today role (not reception)", () => {
+    assert.equal(mapViewerToGuidedAssistTodayRole({ workspaceProfileKey: "nurse" }), "nurse");
+    assert.equal(isClinicalTodayRole("nurse"), true);
+    assert.equal(isClinicalTodayRole("doctor"), true);
+    assert.equal(isClinicalTodayRole("reception"), false);
+  });
+
+  it("builds warm role mode labels for clinical staff", () => {
+    assert.match(buildGuidedAssistRoleModeLabel({ todayRole: "doctor" }), /Doctor Mode/);
+    assert.match(buildGuidedAssistRoleModeLabel({ todayRole: "nurse" }), /Nurse Mode/);
+    assert.match(buildGuidedAssistRoleModeLabel({ todayRole: "consultant" }), /Consultant Mode/);
+    assert.ok(!/OnboardingOS/i.test(buildGuidedAssistRoleModeLabel({ todayRole: "doctor" })));
+  });
+
+  it("prioritises clinical roleGroup tips for clinical viewers", () => {
+    const clinical: GuidedAssistTipDefinition = {
+      code: "c",
+      area: "consultation_os",
+      title: "Clinical",
+      body: "Nav only.",
+      pageKey: "",
+      priority: 10,
+      roleGroup: "clinical",
+      roleScope: { anyRole: true },
+      dismissible: true,
+    };
+    const core: GuidedAssistTipDefinition = {
+      code: "a",
+      area: "reception_os",
+      title: "Core",
+      body: "General.",
+      pageKey: "",
+      priority: 1,
+      roleGroup: "core",
+      roleScope: { anyRole: true },
+      dismissible: true,
+    };
+    assert.ok(compareTipsByRoleGroupAndPriority(clinical, core, true) < 0);
+    // Non-clinical: same band for core vs support; clinical sorts later
+    assert.ok(compareTipsByRoleGroupAndPriority(clinical, core, false) > 0);
+    const support: GuidedAssistTipDefinition = {
+      ...core,
+      code: "s",
+      roleGroup: "support",
+      priority: 1,
+    };
+    const coreLater: GuidedAssistTipDefinition = { ...core, priority: 5 };
+    assert.ok(compareTipsByRoleGroupAndPriority(support, coreLater, false) < 0);
+  });
+
+  it("catalog includes warm clinical tips with operational guardrails", () => {
+    const codes = [
+      "clinical_patient_profile_nav",
+      "clinical_imaging_upload_compare",
+      "clinical_scales_workflow",
+      "clinical_notes_timeline",
+      "clinical_consult_prep",
+      "clinical_followup_schedule",
+      "clinical_rx_admin_ops",
+      "today_nurse_day_flow",
+      "today_doctor_clinical",
+      "today_what_next",
+    ];
+    for (const code of codes) {
+      const tip = GUIDED_ASSIST_TIPS.find((t) => t.code === code);
+      assert.ok(tip, code);
+      assert.ok(tipBodyIsOperationallySafe(tip!.body), code);
+      assert.ok(!/OnboardingOS/i.test(tip!.body + tip!.title), code);
+      // Allow disclaimer phrases that mention diagnostic/prescribe only in the negative.
+      assert.ok(
+        !/\b(diagnose|prescribes?|prescription for)\b/i.test(tip!.body),
+        code
+      );
+    }
+    const scales = GUIDED_ASSIST_TIPS.find((t) => t.code === "clinical_scales_workflow");
+    assert.equal(scales?.roleGroup, "clinical");
+    assert.match(scales!.body, /never scores|does not interpret|never/i);
+  });
+
+  it("doctor session surfaces clinical tips and role mode label", () => {
+    const userPreferences = prefs({ todayHomeViews: 0 });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "doctor",
+        tenantAdminRole: null,
+        pageKey: "",
+      },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: true,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences,
+      },
+      userPreferences,
+    });
+    assert.equal(payload.todayRole, "doctor");
+    assert.match(payload.roleModeLabel ?? "", /Doctor Mode/);
+    assert.ok(
+      payload.tips.some(
+        (t) =>
+          t.code === "today_doctor_clinical" ||
+          t.code === "novice_doctor_day_list" ||
+          t.code === "clinical_consult_prep"
+      )
+    );
+    assert.ok(payload.tips.every((t) => tipBodyIsOperationallySafe(t.body)));
+  });
+
+  it("nurse role-first tips use nurse day flow", () => {
+    const tips = getRoleFirstTips({
+      todayRole: "nurse",
+      tenantId: BASE_CTX.tenantId,
+      dismissedTipCodes: [],
+    });
+    assert.ok(tips.some((t) => t.code === "today_nurse_day_flow"));
   });
 });

@@ -6,15 +6,20 @@ import { z } from "zod";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import {
   dismissGuidedAssistTip,
+  enableGuidedAssistForAllStaff,
   incrementGuidedAssistTodayHomeViews,
+  loadGuidedAssistSettingsState,
   loadGuidedAssistUsageSummary,
   recordGuidedAssistEvent,
+  recordGuidedAssistTipFeedback,
   setGuidedAssistEnabledForUser,
   setGuidedAssistTenantDefaults,
   snoozeGuidedAssistTip,
+  touchGuidedAssistEngagement,
 } from "@/src/lib/onboarding-os/guidedAssist.server";
 import type {
   GuidedAssistEventKind,
+  GuidedAssistSettingsState,
   GuidedAssistUsageSummary,
 } from "@/src/lib/onboarding-os/guidedAssistTypes";
 
@@ -25,6 +30,8 @@ const tipCodeSchema = z.string().min(1).max(120);
 
 function revalidateTenantAssistPaths(tenantId: string) {
   revalidatePath(`/fi-admin/${tenantId}`);
+  revalidatePath(`/fi-admin/${tenantId}/settings/clinic-guide`);
+  revalidatePath(`/fi-admin/${tenantId}/configuration`);
 }
 
 async function resolveActorAuthId(): Promise<string | null> {
@@ -199,6 +206,114 @@ export async function setGuidedAssistTenantDefaultsAction(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Failed to update tenant defaults.",
+    };
+  }
+}
+
+/** Admin: enable Clinic guide for all staff preference rows + tenant default on. */
+export async function enableGuidedAssistForAllStaffAction(
+  tenantId: string
+): Promise<GuidedAssistActionResult & { updatedUserRows?: number; assistEnabled?: boolean }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await enableGuidedAssistForAllStaff(tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    revalidateTenantAssistPaths(tid);
+    return {
+      ok: true,
+      updatedUserRows: result.updatedUserRows,
+      assistEnabled: true,
+    };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to enable Clinic guide for all staff.",
+    };
+  }
+}
+
+export async function loadGuidedAssistSettingsStateAction(
+  tenantId: string
+): Promise<{ ok: true; state: GuidedAssistSettingsState } | { ok: false; error: string }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    return loadGuidedAssistSettingsState(tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load Clinic guide settings.",
+    };
+  }
+}
+
+/** Thumbs up/down on a tip or tour step. */
+export async function recordGuidedAssistTipFeedbackAction(
+  tenantId: string,
+  tipCode: string,
+  helpful: boolean,
+  pageKey?: string | null
+): Promise<GuidedAssistActionResult & { helpful?: boolean }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const code = tipCodeSchema.parse(tipCode);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await recordGuidedAssistTipFeedback(tid, code, helpful, pageKey, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    return { ok: true, helpful: result.helpful };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid request." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to save feedback.",
+    };
+  }
+}
+
+/** Bump consecutive-day engagement streak (idempotent same day). */
+export async function touchGuidedAssistEngagementAction(
+  tenantId: string
+): Promise<
+  GuidedAssistActionResult & { streakDays?: number; streakMessage?: string | null }
+> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await touchGuidedAssistEngagement(tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    return {
+      ok: true,
+      streakDays: result.streakDays,
+      streakMessage: result.streakMessage,
+    };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update engagement.",
     };
   }
 }
