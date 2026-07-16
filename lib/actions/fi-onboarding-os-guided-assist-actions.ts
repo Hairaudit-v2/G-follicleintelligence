@@ -30,7 +30,6 @@ import type {
   GuidedAssistHealthWindowDays,
   GuidedAssistRolloutSnapshot,
   GuidedAssistSettingsState,
-  GuidedAssistTodayRoleKey,
   GuidedAssistUsageSummary,
 } from "@/src/lib/onboarding-os/guidedAssistTypes";
 

@@ -92,7 +92,6 @@ function RankCard({
   title,
   empty,
   items,
-  metaOf,
   accent = "cyan",
 }: {
   title: string;
@@ -104,10 +103,8 @@ function RankCard({
     meta: string;
     barPercent: number;
   }[];
-  metaOf?: never;
   accent?: "cyan" | "amber";
 }) {
-  void metaOf;
   const fill = accent === "amber" ? "bg-amber-400/65" : "bg-cyan-400/70";
   return (
     <div className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3.5 sm:p-4">
