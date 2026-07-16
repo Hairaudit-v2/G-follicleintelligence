@@ -1,0 +1,43 @@
+{
+  "evidenceType": "hubspot_incremental_backup_implementation",
+  "milestone": "FI-HUBSPOT-INCREMENTAL-BACKUP-1",
+  "closedAt": "2026-07-16",
+  "operatorVerdict": "green",
+  "claimsStageP2Green": false,
+  "noProductionWrite": true,
+  "noProductionBackup": true,
+  "noTestNoteCreated": true,
+  "noScheduleAdded": true,
+  "supportedDataset": "notes",
+  "commands": {
+    "incremental": "npm run hubspot:backup:incremental -- --dataset notes --cutoff-from <UTC> --cutoff-to <UTC>",
+    "resume": "npm run hubspot:backup:resume -- --run-id <uuid>",
+    "recoverStuck": "npm run hubspot:backup:recover-stuck -- --run-id <uuid> --reason <text>",
+    "tests": "npm run test:hubspot-incremental"
+  },
+  "cutoffSemantics": {
+    "lower": "inclusive",
+    "upper": "exclusive",
+    "field": "updatedAt",
+    "hubspotSearchProperty": "hs_lastmodifieddate",
+    "tiebreaker": "hubspot_record_id"
+  },
+  "watermark": {
+    "table": "fi_external_hubspot_backup_watermarks",
+    "unique": ["tenant_id", "source_system", "dataset"],
+    "advancesTo": "cutoff_to",
+    "requires": ["pagination_complete", "finalised_completed", "verification_passed", "no_unresolved_failures"]
+  },
+  "idempotencyKey": "tenant_id,integration_id,hubspot_record_id",
+  "concurrency": "uq_hubspot_incremental_active_run",
+  "migration": "202610189001_hubspot_incremental_backup_watermarks.sql",
+  "validation": {
+    "incrementalTests": "21/21",
+    "engagementRegression": "9/9",
+    "typecheck": "pass",
+    "migrations": "pass"
+  },
+  "nextGate": "deploy_then_p1_observation_then_stage_p2_notes_proof",
+  "runbook": "docs/runbooks/hubspot-incremental-backup.md",
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-incremental-backup-implementation.md"
+}
