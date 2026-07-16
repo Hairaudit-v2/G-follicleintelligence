@@ -1,0 +1,168 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-R",
+  "verdict": "GREEN",
+  "date": "2026-07-17",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "portal": {
+    "configuredId": "21009770",
+    "liveId": "21009770",
+    "matched": true
+  },
+  "cutoff": {
+    "from": "2026-07-16T03:45:02.366Z",
+    "to": "2026-07-16T16:00:34.530Z",
+    "immutable": true,
+    "dataset": "contacts",
+    "previewChecksum": "8f6030f5111e1dbf58d535010c8933513d3a6b8e6cdbc1c781e34512ee0407b5"
+  },
+  "staging": {
+    "previousCount": 4750,
+    "refreshedCount": 4752,
+    "initialRunId": "bad4e6d0-8ff3-4e72-bff8-4709f6799b93",
+    "initialRun": {
+      "approvedContacts": 21,
+      "staged": 21,
+      "existingRowsRefreshed": 19,
+      "missingRowsAdded": 2,
+      "skipped": 0,
+      "failed": 0
+    },
+    "idempotencyRunId": "74bde1bd-9ac3-4e98-9668-ac3421419a7c",
+    "idempotencyRun": {
+      "approvedContacts": 21,
+      "staged": 21,
+      "existingRowsRefreshed": 21,
+      "newRowsAdded": 0,
+      "skipped": 0,
+      "failed": 0,
+      "inventoryChanged": false
+    }
+  },
+  "missingContacts": [
+    {
+      "hubspotContactId": "229761370222",
+      "createdAt": "2026-07-16T04:15:52.321Z",
+      "modifiedAt": "2026-07-16T11:33:03.155Z",
+      "archived": false,
+      "sourceOwnerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "UNQUALIFIED",
+      "nameQuality": "present",
+      "emailQuality": "present",
+      "phoneQuality": "present",
+      "stagingBefore": false,
+      "stagingAfter": true,
+      "existingPersonSourceId": null,
+      "existingExternalMapping": null,
+      "uniqueFiLeadCandidate": null,
+      "possiblePatientOverlap": false,
+      "classification": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "omissionRootCause": "created after the 2026-07-15 contact staging snapshot"
+    },
+    {
+      "hubspotContactId": "235542182239",
+      "createdAt": "2026-07-16T03:21:41.141Z",
+      "modifiedAt": "2026-07-16T12:06:50.956Z",
+      "archived": false,
+      "sourceOwnerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": "present",
+      "emailQuality": "present",
+      "phoneQuality": "present",
+      "stagingBefore": false,
+      "stagingAfter": true,
+      "existingPersonSourceId": null,
+      "existingExternalMapping": null,
+      "uniqueFiLeadCandidate": null,
+      "possiblePatientOverlap": false,
+      "classification": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "omissionRootCause": "created after the 2026-07-15 contact staging snapshot"
+    }
+  ],
+  "intervalRevalidation": {
+    "contactCount": 21,
+    "sourceIdsStable": 21,
+    "tenantStable": 21,
+    "mappedContactsRevalidated": 11,
+    "mappedTargetsStable": 11,
+    "duplicateTargetsAppeared": 0,
+    "patientWarningsAppeared": 0,
+    "wrongTenantContacts": 0,
+    "existingClassificationChanges": 0,
+    "newlyClassifiedContacts": 2,
+    "newlyClassifiedAs": {
+      "create_new_lead": 2
+    },
+    "postRefreshReviewedCohort": {
+      "mapped": 11,
+      "createCandidates": 8,
+      "patientReview": 0,
+      "quarantined": 2,
+      "excluded": 0
+    }
+  },
+  "inventory": {
+    "totalSourceContacts": 4752,
+    "mapped": 4596,
+    "createCandidates": 42,
+    "patientReview": 4,
+    "quarantined": 100,
+    "excluded": 10,
+    "other": 0,
+    "accounted": 4752,
+    "unexplained": 0,
+    "balanced": true,
+    "checksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+    "classificationCorrection": "10 archived staging contacts are now classified as excluded; this reduced create candidates by 6 and quarantine by 4 before adding the 2 newly staged create candidates"
+  },
+  "watermarks": {
+    "contactBefore": null,
+    "contactAfter": null,
+    "notesBefore": "2026-07-16T16:00:34.530Z",
+    "notesAfter": "2026-07-16T16:00:34.530Z",
+    "isolated": true
+  },
+  "mutations": {
+    "stagingContactsAdded": 2,
+    "stagingContactsRefreshed": 19,
+    "patientsBefore": 829,
+    "patientsAfter": 829,
+    "leadsBefore": 4706,
+    "leadsAfter": 4706,
+    "staffBefore": 22,
+    "staffAfter": 22,
+    "usersBefore": 20,
+    "usersAfter": 20,
+    "contactLeadMappingsBefore": 4596,
+    "contactLeadMappingsAfter": 4596,
+    "notifications": 0,
+    "tasks": 0,
+    "appointments": 0
+  },
+  "tests": {
+    "typecheck": "passed",
+    "focused": {
+      "passed": 63,
+      "failed": 0
+    },
+    "productionIdempotency": "passed"
+  },
+  "codeCommit": "725a0a0f",
+  "evidenceSources": [
+    "docs/audits/.tmp-import-1e-r-preview.json",
+    "docs/audits/.tmp-import-1e-r-apply.json",
+    "docs/audits/.tmp-import-1e-r-retry.json",
+    "docs/audits/.tmp-import-1e-r-inventory.json"
+  ],
+  "remainingRisks": [
+    "The contact dataset has no advancing incremental watermark; this exact-ID refresh intentionally retained null rather than asserting full contact-dataset coverage beyond the fixed cohort.",
+    "The 42 create candidates remain unapproved and unprocessed.",
+    "Four patient-review and 100 quarantined contacts remain excluded from apply."
+  ],
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review",
+  "nextGateCreateCandidateCount": 42
+}

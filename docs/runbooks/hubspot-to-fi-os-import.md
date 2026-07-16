@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E-W** (watermark provenance AMBER — retain notes watermark; refresh contact staging before 1E-C; create/review/quarantine paused)  
+Current gate: **1E-R GREEN** (contact staging 4,752; unexplained 0; next gate 1E-C with 42 refreshed create candidates)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -227,10 +227,26 @@ Hard rules for 1E (inherits 1D):
 - Live HubSpot interval scan: 1 created / 21 modified; 2 contacts absent from staging
 - Evidence: `docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.md`
 
+### 1E-R contact staging refresh (2026-07-17)
+
+- Portal match: configured/live `21009770`
+- Fixed contact cutoff: `2026-07-16T16:00:34.530Z`
+- Refresh run `bad4e6d0-8ff3-4e72-bff8-4709f6799b93`: 21 staged, 19 refreshed, 2 added
+- Idempotency run `74bde1bd-9ac3-4e98-9668-ac3421419a7c`: 21 existing, 0 added
+- Missing IDs `229761370222` and `235542182239`: explained post-snapshot creates; both classify `create_new_lead`; neither processed
+- All 11 interval mappings retained their unique target; wrong-tenant 0; patient warnings 0
+- Corrected archived-state classification: 10 excluded
+- Coverage: 4,596 mapped + 42 create + 4 patient review + 100 quarantined + 10 excluded = 4,752; unexplained 0
+- Inventory checksum `3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c`
+- FI leads 4,706→4,706; patients 829→829; contact mappings 4,596→4,596
+- Notes watermark unchanged; contact watermark absent before/after
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.md`
+
 ### Next gate
 
-1. Refresh/reconcile HubSpot **contact** staging for missing live IDs `229761370222` and `235542182239`
-2. Then `FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review`
+`FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review`
+
+Use the refreshed create-candidate count of **42**.
 Do not process remaining create/patient-review/quarantine cohorts without separate approval.
 
 ## Safety checklist before any apply
@@ -256,3 +272,4 @@ Do not process remaining create/patient-review/quarantine cohorts without separa
 - [x] 1E E10: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E11
 - [x] 1E E11: patient count unchanged; 472 final link-only contacts; reconcile unexplained=0; ready-to-link exhausted
 - [x] 1E-W: owning cron run attributed; retain notes watermark; contact staging freshness follow-up documented; create candidates still paused
+- [x] 1E-R: 21 interval contacts refreshed/revalidated; staging 4,752; unexplained=0; no FI/mapping/watermark mutations; gate open for 1E-C review only

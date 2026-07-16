@@ -1,6 +1,6 @@
 # FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion evidence
 
-**Verdict:** AMBER — E1–E11 link-only batches GREEN; 1E-W watermark provenance AMBER; non-link cohorts remain excluded
+**Verdict:** GREEN — E1–E11 link-only batches complete; 1E-R staging coverage reconciled; non-link cohorts remain excluded
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
@@ -15,16 +15,17 @@ patient-protection gate held. E11 completed the deterministic link-only populati
 
 E10 audit commit `43ed89e3` was on `origin/main` before E11 apply.
 
-### Post-E11 inventory (write-free)
+### Post-1E-R inventory (write-free)
 
 | Metric | Value |
 |--------|------:|
-| Total source contacts | 4,750 |
+| Total source contacts | 4,752 |
 | Already linked / applied | 4,596 |
 | Ready to link | 0 |
-| Proposed new leads | 46 |
+| Proposed new leads | 42 |
 | Patient review | 4 |
-| Quarantined | 104 |
+| Quarantined | 100 |
+| Excluded (archived) | 10 |
 | Conflicts | 0 |
 | Wrong-tenant | 0 |
 | Migration completion | 99% |
@@ -118,16 +119,34 @@ Expansion-only mappings created: **4572** (E1–E11)
 Full evidence:
 `docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.md`
 
+### 1E-R contact staging refresh (2026-07-17)
+
+The fixed-cutoff contact-only refresh added the two explained post-snapshot
+contacts and refreshed all 19 existing interval rows. Staging moved 4,750→4,752.
+Both missing contacts classified as `create_new_lead`; no lead was created.
+
+All 21 contacts retained tenant/source identity, all 11 mapped targets remained
+stable, and no patient warning, duplicate target, wrong-tenant result, or mapping
+mutation appeared. Notes watermark remained `2026-07-16T16:00:34.53+00:00`;
+contacts watermark remained absent.
+
+The refreshed inventory also corrected archived-state handling for 10 staged
+contacts. Final coverage is 4,596 mapped + 42 create candidates + 4 patient review
++ 100 quarantined + 10 excluded = 4,752, unexplained 0.
+
+Full evidence:
+`docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.md`
+
 ### Exact next step
 
-**Stop link-only expansion.** Ready-to-link is zero. Do not process the 46
-create candidates, 4 patient-review records, or 104 quarantined records without
+**Stop link-only expansion.** Ready-to-link is zero. Do not process the 42
+create candidates, 4 patient-review records, or 100 quarantined records without
 separate approval.
 
-Before **FI-HUBSPOT-IMPORT-1E-C**, refresh/reconcile HubSpot contact staging for
-the two live contacts absent from the 4,750 staging inventory (and review the
-21-interval modified set). Notes watermark retention is approved; notes watermark
-must not be treated as contact coverage.
+Exact next gate:
+**FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review**
+
+Use the refreshed create-candidate count of **42**.
 
 Programme next gate after create/review closeout:
 **FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot**
