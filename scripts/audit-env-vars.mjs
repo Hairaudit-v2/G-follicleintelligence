@@ -92,6 +92,10 @@ const cronPaths = vercelJson.crons.map((c) => c.path);
 const CRON_ENV_MAP = {
   "/api/cron/fi-reminder-jobs": ["FI_REMINDER_CRON_SECRET", "CRON_SECRET"],
   "/api/cron/leadflow/process-hubspot-events": ["FI_LEADFLOW_CRON_SECRET", "CRON_SECRET"],
+  "/api/cron/hubspot/incremental-notes-backup": [
+    "FI_HUBSPOT_INCREMENTAL_BACKUP_CRON_SECRET",
+    "CRON_SECRET",
+  ],
   "/api/cron/iiohr-hr-perth-staff-sync": ["CRON_SECRET", "FI_HR_SYNC_CRON_SECRET"],
   "/api/cron/financial-os/automation": ["FINANCIAL_OS_CRON_SECRET", "CRON_SECRET"],
   "/api/cron/financial-os/pathway-task-escalation": ["FINANCIAL_OS_CRON_SECRET", "CRON_SECRET"],

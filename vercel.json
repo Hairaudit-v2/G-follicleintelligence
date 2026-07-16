@@ -59,6 +59,10 @@
     {
       "path": "/api/cron/reports/scheduled-runs",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/hubspot/incremental-notes-backup",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
