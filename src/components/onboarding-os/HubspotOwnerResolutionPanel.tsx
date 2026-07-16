@@ -115,7 +115,7 @@ export function HubspotOwnerResolutionPanel({ tenantId, canMutate }: Props) {
     if (!current) return;
     setSelectedStaffId(current.targetStaffId);
     setNote(current.operatorNote ?? "");
-  }, [current?.hubspotOwnerId]);
+  }, [current]);
 
   const primaryActionLabel = useMemo(() => {
     if (preview) return "Apply approved owner mappings";

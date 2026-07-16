@@ -64,7 +64,7 @@ function installMutationGuard(client: SupabaseClient): MutationGuard {
       const orig = builder[method]?.bind(builder);
       if (!orig) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (builder as any)[method] = (...args: unknown[]) => {
+      (builder as any)[method] = (..._args: unknown[]) => {
         guard[method === "insert" ? "inserts" : method === "update" ? "updates" : method === "delete" ? "deletes" : "upserts"] += 1;
         throw new Error(
           `DRY_RUN_WRITE_GUARD: refused ${method} on ${table} during HubSpot import dry-run`

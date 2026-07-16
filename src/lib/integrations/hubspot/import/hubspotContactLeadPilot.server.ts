@@ -450,7 +450,7 @@ export async function loadContactLeadPilotWorkspace(
       (d.operator_note ?? "").includes("1D auto-selected")
     );
   });
-  let pilotRows =
+  const pilotRows =
     !input.rebuildCohort && persistedCohort.length > 0
       ? persistedCohort
       : selectContactLeadPilotCohort(candidates, HUBSPOT_CONTACT_LEAD_PILOT_BATCH_MAX);
