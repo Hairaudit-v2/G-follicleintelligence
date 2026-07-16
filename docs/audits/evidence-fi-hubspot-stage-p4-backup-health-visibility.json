@@ -1,0 +1,89 @@
+{
+  "suite": "FI-HUBSPOT-BACKUP-1",
+  "stage": "P4",
+  "title": "backup-health visibility",
+  "verdict": "GREEN",
+  "date": "2026-07-16",
+  "claimsStagePComplete": false,
+  "implementsStageP5": false,
+  "deployment": {
+    "id": "dpl_B4LZy2s65UsXssVeGzVN458DYMwz",
+    "readyState": "READY",
+    "sha": "2aee523cb3ffff469f03a79aa8f99dc534c03fb0",
+    "alias": "follicleintelligence.ai"
+  },
+  "architecture": {
+    "core": "src/lib/onboarding-os/hubspotBackupHealthCore.ts",
+    "loader": "src/lib/onboarding-os/hubspotBackupHealth.server.ts",
+    "ui": "src/components/onboarding-os/HubspotBackupHealthSection.tsx",
+    "precedence": ["failed", "needs_review", "healthy"]
+  },
+  "primarySources": [
+    "fi_external_hubspot_sync_runs (incremental notes)",
+    "incremental_verification_state",
+    "fi_external_hubspot_backup_watermarks",
+    "FI_HUBSPOT_INCREMENTAL_BACKUP_ENABLED + Brisbane daily cadence"
+  ],
+  "secondarySources": [
+    "fi_admin_notifications source=hubspot_incremental_backup",
+    "existing primary/secondary Backup & Sync cards",
+    "Audit & History privacy-safe events"
+  ],
+  "freshness": {
+    "cadence": "daily",
+    "localTime": "02:00",
+    "timezone": "Australia/Brisbane",
+    "cronUtc": "0 16 * * *",
+    "graceMs": 7200000,
+    "stuckAgeMs": 1800000
+  },
+  "productionHealth": {
+    "status": "healthy",
+    "reasonCode": "empty_success",
+    "operatorActionRequired": false,
+    "lastVerifiedRunId": "3b0a231b-9a0c-4ab4-a6d9-81bca8b2c3b4",
+    "lastVerifiedAt": "2026-07-16T03:45:05.444Z",
+    "cutoffFrom": "2026-07-16T03:20:00.000Z",
+    "cutoffTo": "2026-07-16T03:45:02.366Z",
+    "watermark": "2026-07-16T03:45:02.366Z",
+    "watermarkMatchesLatestVerifiedCutoff": true,
+    "nextExpectedAt": "2026-07-16T16:00:00.000Z",
+    "activeStartedRunsAfterSmoke": 0
+  },
+  "roleBehaviour": {
+    "lowRole": "summary only; no runId/cutoffs/watermark/reason/alerts",
+    "adminMutate": "technical detail allowed; privacy-safe; no note bodies"
+  },
+  "executionControls": {
+    "p4WriteEndpointsAdded": false,
+    "incrementalResumeRecoverReplayControls": false,
+    "pageViewStartsBackup": false
+  },
+  "tests": {
+    "hubspotIncrementalIncludingP4": { "pass": 58, "fail": 0 },
+    "workspaceRegressions": { "pass": 6, "fail": 0 },
+    "typecheck": "pass"
+  },
+  "authenticatedSmoke": {
+    "backupSyncHealthy": "PASS",
+    "configurationNoSyncControls": "PASS",
+    "lowRoleOptional": "PASS",
+    "fullSuiteOverviewTotals": "FAIL_STALE_FIXTURE_NON_BLOCKING"
+  },
+  "logs": {
+    "hubspotErrorFatalOnDeploymentWindow": "none_found"
+  },
+  "commits": {
+    "feat": "e48dcff1",
+    "unitTests": "a039fd61",
+    "smokeAssert": "2aee523c"
+  },
+  "nextGate": "Stage P5 final closeout for FI-HUBSPOT-BACKUP-1 (do not perform in P4)",
+  "remainingRisks": [
+    "archived notes outside Search path",
+    "HubSpot Search indexing lag",
+    "admin notification integration_id FK remains calendar-specific",
+    "overview smoke expected totals fixture stale",
+    "status becomes needs_review after 16:00 UTC + grace without new verified success"
+  ]
+}
