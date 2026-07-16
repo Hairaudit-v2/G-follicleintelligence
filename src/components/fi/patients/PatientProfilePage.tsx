@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
+import { journeyViewFromProfileData } from "@/src/lib/patients/journey/patientJourneyFromProfile";
 import { PatientActivityCard } from "./PatientActivityCard";
 import { PatientAdminNotesCard } from "./PatientAdminNotesCard";
 import { PatientBookingsCard } from "./PatientBookingsCard";
@@ -9,6 +10,7 @@ import { PatientClinicalDetailsCard } from "./PatientClinicalDetailsCard";
 import { PatientLinkedLeadsCard } from "./PatientLinkedLeadsCard";
 import { PatientContactDetailsCard } from "./PatientContactDetailsCard";
 import { PatientImportedSourceSection } from "./PatientImportedSourceSection";
+import { PatientJourney } from "./PatientJourney";
 import { PatientPersonDetailsCard } from "./PatientPersonDetailsCard";
 import { PatientProfileHeader } from "./PatientProfileHeader";
 import { PatientProfileSummaryCards } from "./PatientProfileSummaryCards";
@@ -21,6 +23,8 @@ export function PatientProfilePage({
   tenantId: string;
   data: PatientProfileFoundationData;
 }) {
+  const journey = journeyViewFromProfileData(data);
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <p className="text-sm text-slate-400">
@@ -30,6 +34,13 @@ export function PatientProfilePage({
         <span className="mx-2 text-gray-300">·</span>
         <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-300 hover:underline">
           CRM
+        </Link>
+        <span className="mx-2 text-gray-300">·</span>
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${data.foundationPatientId}/timeline`}
+          className="text-blue-300 hover:underline"
+        >
+          Timeline
         </Link>
       </p>
 
@@ -44,6 +55,9 @@ export function PatientProfilePage({
       </p>
 
       <PatientProfileSummaryCards data={data} />
+
+      {/* Visual journey: photos, scales, milestones, AI compact, quick actions */}
+      <PatientJourney journey={journey} />
 
       <PatientClinicalDetailsCard tenantId={tenantId} data={data} />
 

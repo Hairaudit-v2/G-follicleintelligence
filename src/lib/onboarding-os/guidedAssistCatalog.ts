@@ -1684,6 +1684,22 @@ export const GUIDED_ASSIST_QUICK_ACTIONS: readonly GuidedAssistQuickActionDefini
     ],
   },
   {
+    code: "qa_patient_journey",
+    area: "consultation_os",
+    label: "Open visual journey",
+    description:
+      "Photos timeline, scale fields on file, and key milestones — operational view only.",
+    hrefSuffix: "patients/{{patientId}}/timeline",
+    requiresPatientContext: true,
+    roles: ["doctor", "nurse", "consultant"],
+    priority: 2,
+    checklist: [
+      "Open the patient’s visual journey",
+      "Compare photos side-by-side when helpful (layout only)",
+      "Never treat scale charts as clinical interpretation",
+    ],
+  },
+  {
     code: "qa_patients_directory",
     area: "consultation_os",
     label: "Find a patient",
