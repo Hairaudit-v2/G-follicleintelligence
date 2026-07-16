@@ -26,7 +26,7 @@ export const PLATFORM_PAGE_CONTENT = {
         title: "Acquisition & Operations",
         summary:
           "Demand, pipeline discipline, scheduling, services, and day-to-day clinic rhythm—wired into the same tenant policy and record spine.",
-        modules: ["LeadFlowOS", "ClinicOS"],
+        modules: ["LeadFlow", "ClinicOS"],
       },
       {
         title: "Clinical & Patient Intelligence",
@@ -58,13 +58,13 @@ export const PLATFORM_PAGE_CONTENT = {
     items: [
       {
         id: "leadflow-os",
-        name: "LeadFlowOS",
+        name: "LeadFlow",
         tagline: "CRM, lead capture, pipeline, tasks, follow-ups, patient acquisition.",
         description:
-          "LeadFlowOS is the acquisition control plane: enquiry capture, pipeline stages, ownership, tasks, and follow-up rhythm tied to real clinic capacity.",
+          "LeadFlow is the acquisition control plane: enquiry capture, pipeline stages, ownership, tasks, and follow-up rhythm tied to real clinic capacity.",
         connects:
           "ClinicOS availability, PatientOS identity, AnalyticsOS funnel and cohort reporting.",
-        why: "Growth without operational coupling creates leakage. LeadFlowOS keeps demand, accountability, and downstream clinical context aligned.",
+        why: "Growth without operational coupling creates leakage. LeadFlow keeps demand, accountability, and downstream clinical context aligned.",
         learnMoreHref: "/platform/leadflow",
         learnMoreLabel: "LeadFlow module",
       },
@@ -75,7 +75,7 @@ export const PLATFORM_PAGE_CONTENT = {
         description:
           "ClinicOS runs the operational heartbeat: calendars, services, rooms and roles, appointment lifecycle, and the constraints that consultation and surgery inherit.",
         connects:
-          "LeadFlowOS pipeline, PatientOS records, ConsultationOS bookings, AnalyticsOS operational KPIs.",
+          "LeadFlow pipeline, PatientOS records, ConsultationOS bookings, AnalyticsOS operational KPIs.",
         why: "When scheduling is disconnected from clinical workflow, capacity lies. ClinicOS makes operational truth portable across modules.",
         learnMoreHref: "/platform/clinic-os",
         learnMoreLabel: "ClinicOS module",
@@ -162,7 +162,7 @@ export const PLATFORM_PAGE_CONTENT = {
         tagline: "Revenue, conversion, productivity, operational KPIs, outcome intelligence.",
         description:
           "AnalyticsOS turns structured platform events into executive and clinical operations views: funnel integrity, utilisation, revenue integrity, and outcome-linked productivity.",
-        connects: "LeadFlowOS, ClinicOS, PatientOS, AuditOS, AcademyOS program completion.",
+        connects: "LeadFlow, ClinicOS, PatientOS, AuditOS, AcademyOS program completion.",
         why: "Dashboards built on fragmented extracts go stale. AnalyticsOS inherits semantics from modules so KPIs mean the same thing across sites.",
         learnMoreHref: "/platform/analytics-os",
         learnMoreLabel: "AnalyticsOS module",

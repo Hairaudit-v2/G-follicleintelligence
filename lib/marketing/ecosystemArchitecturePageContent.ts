@@ -78,7 +78,7 @@ export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
       {
         layer: 1,
         title: "Acquisition Intelligence",
-        module: "LeadFlow OS",
+        module: "LeadFlow",
         anchorId: "leadflow",
         features: [
           "Website enquiries",

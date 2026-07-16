@@ -39,7 +39,7 @@ export const MARKETING_PLACEHOLDER_COPY = {
     comingNext: [
       {
         title: "Commercial + clinical spine",
-        body: "How LeadFlowOS and ClinicOS keep acquisition, scheduling, and services coherent as volume grows.",
+        body: "How LeadFlow and ClinicOS keep acquisition, scheduling, and services coherent as volume grows.",
       },
       {
         title: "Quality you can govern",

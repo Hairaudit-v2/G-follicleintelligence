@@ -142,7 +142,7 @@ export const HOME_PAGE_CONTENT = {
     supportingLine:
       "Built for clinics today. Designed for the future of global hair restoration medicine.",
     orbitModules: [
-      { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
+      { label: "LeadFlow", subtitle: "Acquisition & pipeline" },
       { label: "ClinicOS", subtitle: "Operations spine" },
       { label: "HairIntel", subtitle: "Diagnostics & AI intake" },
       { label: "SurgeryOS", subtitle: "Planning & procedure day" },
@@ -705,7 +705,7 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         id: "leadflow-os",
-        name: "LeadFlowOS",
+        name: "LeadFlow",
         description:
           "Acquisition pipelines, tasks, follow-ups, and patient conversion intelligence.",
         shell: "crm-pipeline",
@@ -771,7 +771,7 @@ export const HOME_PAGE_CONTENT = {
         traditionalCrm: "Sales pipelines without restoration-specific clinical substrate.",
         genericClinic: "Enquiry logs and light CRM—weak linkage into medical truth.",
         follicleIntelligence:
-          "LeadFlowOS with pipeline intelligence tied to consultation and clinical spine.",
+          "LeadFlow with pipeline intelligence tied to consultation and clinical spine.",
       },
       {
         capability: "Scheduling",
@@ -1203,7 +1203,7 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
   networkDiagram: {
     heading: "How the ecosystem connects in production",
     description:
-      "LeadFlowOS through AnalyticsOS share one spine: structured patient intelligence, procedural evidence, and governance-ready reporting—so enterprise operators see the same truth across sites, teams, and time horizons.",
+      "LeadFlow through AnalyticsOS share one spine: structured patient intelligence, procedural evidence, and governance-ready reporting—so enterprise operators see the same truth across sites, teams, and time horizons.",
     networkTitle: "Networked modules, one operating system",
     networkFooterCaption: "FOLLICLE INTELLIGENCE · GLOBAL INTELLIGENCE NETWORK",
   },

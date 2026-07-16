@@ -61,7 +61,7 @@ export const CLINIC_OWNERS_PAGE_CONTENT = {
     diagramCaption: "Six modules · one operational spine",
     bands: [
       {
-        title: "LeadFlowOS",
+        title: "LeadFlow",
         tagline: "Lead capture, pipelines, tasks, follow-ups",
         summary:
           "Keep demand visible: enquiry capture, ownership, pipeline stages, tasks, and follow-up rhythm tied to clinic capacity—so growth does not outrun accountability.",

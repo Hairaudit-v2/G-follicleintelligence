@@ -98,7 +98,7 @@ export function ProductShowcaseShell({ variant }: { variant: HomeProductShowcase
     case "crm-pipeline":
       return (
         <ShellChrome>
-          <TopBar title="LeadFlowOS · Pipeline & tasks" />
+          <TopBar title="LeadFlow · Pipeline & tasks" />
           <div className="flex h-[calc(100%-1.75rem)] flex-col gap-1.5 p-2 sm:p-2.5">
             <div className="flex gap-1">
               {["Follow-up", "Call", "Email"].map((t, ti) => (

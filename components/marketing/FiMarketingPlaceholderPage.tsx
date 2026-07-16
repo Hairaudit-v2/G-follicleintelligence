@@ -22,7 +22,7 @@ const DEFAULT_COMING_NEXT: FiMarketingComingNextCard[] = [
   },
   {
     title: "Deeper module mapping",
-    body: "How this audience plugs into LeadFlowOS through AnalyticsOS with governance, training, and audit posture made explicit.",
+    body: "How this audience plugs into LeadFlow through AnalyticsOS with governance, training, and audit posture made explicit.",
   },
   {
     title: "Deployment & procurement guidance",

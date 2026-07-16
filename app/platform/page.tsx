@@ -8,7 +8,7 @@ const PAGE_TITLE =
   "Platform Architecture | The Complete Operating System For Hair Restoration | Follicle Intelligence";
 
 const PAGE_DESCRIPTION =
-  "Product architecture for Follicle Intelligence: LeadFlowOS, ClinicOS, PatientOS, ConsultationOS, HairIntel, SurgeryOS, AuditOS, AcademyOS, AnalyticsOS, and the Global Intelligence Network—one connected operating system for hair restoration enterprises.";
+  "Product architecture for Follicle Intelligence: LeadFlow, ClinicOS, PatientOS, ConsultationOS, HairIntel, SurgeryOS, AuditOS, AcademyOS, AnalyticsOS, and the Global Intelligence Network—one connected operating system for hair restoration enterprises.";
 
 export const metadata = buildPageMetadata({
   title: PAGE_TITLE,

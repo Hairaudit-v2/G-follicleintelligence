@@ -874,7 +874,7 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     summary:
       "Profile-scaled, idempotent IHRG demo seeding across the full FI operating system — LeadFlow, CRM, CalendarOS, SurgeryOS, ImagingOS, AcademyOS, PaymentsOS, ReceptionOS, and AnalyticsOS. Supports light, standard, alive (default), and enterprise profiles via scripts/seed-ihrg-demo-data.ts.",
     modules: [
-      "LeadFlowOS",
+      "LeadFlow",
       "PatientOS",
       "ConsultationOS",
       "SurgeryOS",
