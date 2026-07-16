@@ -10,6 +10,7 @@ export {
   recordGuidedAssistClientEventAction,
   recordGuidedAssistTipFeedbackAction,
   setGuidedAssistEnabledAction,
+  setGuidedAssistForceShowAction,
   setGuidedAssistTenantDefaultsAction,
   snoozeGuidedAssistTipAction,
   touchGuidedAssistEngagementAction,

@@ -376,6 +376,39 @@ export type GuidedAssistSessionPayload = {
   canManageTenantDefaults: boolean;
   /** Streak, weekly progress, feedback map, optional team highlight. */
   engagement: GuidedAssistEngagementSnapshot;
+  /**
+   * Admin session force-show (cookie) — tips render even when preference is off.
+   * Does not change stored `assist_enabled`.
+   */
+  forceShowActive: boolean;
+  /**
+   * Tips/tours should render (preference on **or** force-show).
+   * Preference `assistEnabled` may still be false under force-show.
+   */
+  guideVisible: boolean;
+  /** Structured debug fields for admins / `?debug=guide`. */
+  debugInfo: GuidedAssistDebugInfo | null;
+};
+
+/** Troubleshooting snapshot (Settings + optional widget debug panel). */
+export type GuidedAssistDebugInfo = {
+  enabled: boolean;
+  userAssistOverride: boolean | null;
+  forceShowActive: boolean;
+  guideVisible: boolean;
+  todayHomeViews: number;
+  role: GuidedAssistTodayRoleKey;
+  roleGroup: GuidedAssistRoleGroup;
+  roleMode: string | null;
+  experienceLevel: GuidedAssistExperienceLevel;
+  clinicSetupComplete: boolean;
+  isOnboardingPhase: boolean;
+  pageKey: string;
+  workspaceProfileKey: string;
+  tenantAdminRole: string | null;
+  roleFirstActive: boolean;
+  tipCount: number;
+  nextBestActionCount: number;
 };
 
 /** Settings page snapshot (per-user + optional admin controls). */
@@ -388,6 +421,10 @@ export type GuidedAssistSettingsState = {
   settingsHref: string;
   staffWithExplicitOff: number;
   staffWithExplicitOn: number;
+  /** Session force-show cookie active for this browser. */
+  forceShowActive: boolean;
+  /** Debug fields (always filled; UI shows to admins or debug query). */
+  debugInfo: GuidedAssistDebugInfo;
 };
 
 export type GuidedAssistAreaInsight = {

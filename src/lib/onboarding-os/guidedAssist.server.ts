@@ -1,15 +1,24 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  isFiOsPlatformAdminFullSessionBypass,
+  loadProxyFiUserRowForPlatformAdminTenant,
+  resolveAuthUserId,
+  resolveEffectiveTenantAuthUserId,
+} from "@/src/lib/crm/crmGate";
 import { loadFiHomeDashboardPayload } from "@/src/lib/fiOs/fiHomeDashboardLoader.server";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { logStructured } from "@/src/lib/server/structuredLog";
+import { attemptStaffTenantPortalRepair } from "@/src/lib/workforce/staffTenantLinkRepair.server";
+import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
 import { getGuidedAssistTipByCode } from "./guidedAssistCatalog";
 import {
@@ -32,6 +41,16 @@ import {
   formatStreakMessage,
   resolveTeamHighlightFromCounts,
 } from "./guidedAssistEngagementCore";
+import {
+  GUIDED_ASSIST_FORCE_SHOW_COOKIE,
+  GUIDED_ASSIST_FORCE_SHOW_MAX_AGE_SEC,
+  buildGuidedAssistDebugInfo,
+  isGuidedAssistDebugQueryActive,
+  isGuidedAssistForceShowCookieActive,
+} from "./guidedAssistForceShow";
+import { mapViewerToGuidedAssistTodayRole } from "./getRoleFirstTips";
+import { buildGuidedAssistRoleModeLabel } from "./guidedAssistRoleMode";
+import { inferGuidedAssistExperienceLevel } from "./getTieredAndContextualTips";
 import type {
   GuidedAssistClinicStats,
   GuidedAssistEngagementSnapshot,
@@ -77,33 +96,284 @@ type ServerOpts = {
 };
 
 type AuthResult =
-  | { ok: true; actorAuthUserId: string; fiUserId: string }
-  | { ok: false; error: string };
+  | {
+      ok: true;
+      actorAuthUserId: string;
+      fiUserId: string;
+      /** How membership was resolved (dev diagnostics). */
+      membershipSource:
+        | "direct"
+        | "impersonation"
+        | "repaired"
+        | "email_link"
+        | "platform_ensure"
+        | "platform_proxy";
+    }
+  | { ok: false; error: string; code?: "auth_required" | "membership_required" };
 
-async function resolveTenantMemberAuth(tenantId: string, opts: ServerOpts): Promise<AuthResult> {
-  const authId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
-  if (!authId) return { ok: false, error: "Authentication required." };
-  if (opts.skipAuthCheck && opts.actorAuthUserId) {
-    const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
-    const { data } = await supabase
-      .from("fi_users")
-      .select("id")
-      .eq("tenant_id", tenantId.trim())
-      .eq("auth_user_id", authId)
-      .maybeSingle();
-    if (!data) return { ok: false, error: "Tenant membership required." };
-    return { ok: true, actorAuthUserId: authId, fiUserId: String((data as { id: string }).id) };
-  }
+function logGuidedAssistMembershipDebug(
+  message: string,
+  detail: Record<string, unknown>
+): void {
+  if (process.env.NODE_ENV === "production") return;
+  logStructured("info", "guided_assist.membership_debug", { message, ...detail });
+}
 
-  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+async function lookupFiUserIdForAuth(
+  supabase: SupabaseClient,
+  tenantId: string,
+  authUserId: string
+): Promise<string | null> {
+  const tid = tenantId.trim();
+  const aid = authUserId.trim();
+  if (!tid || !aid) return null;
   const { data, error } = await supabase
     .from("fi_users")
     .select("id")
-    .eq("tenant_id", tenantId.trim())
-    .eq("auth_user_id", authId)
+    .eq("tenant_id", tid)
+    .eq("auth_user_id", aid)
     .maybeSingle();
-  if (error || !data) return { ok: false, error: "Tenant membership required." };
-  return { ok: true, actorAuthUserId: authId, fiUserId: String((data as { id: string }).id) };
+  if (error) {
+    logGuidedAssistMembershipDebug("fi_users lookup error", {
+      tenantId: tid,
+      authUserId: aid,
+      error: error.message,
+    });
+    return null;
+  }
+  return data ? String((data as { id: string }).id) : null;
+}
+
+/**
+ * Link an existing tenant `fi_users` row that matches the auth user's email but has a null/mismatched auth_user_id.
+ */
+async function tryLinkFiUserByEmail(
+  supabase: SupabaseClient,
+  tenantId: string,
+  authUserId: string
+): Promise<string | null> {
+  try {
+    const { data: authData, error: authErr } = await supabase.auth.admin.getUserById(authUserId);
+    if (authErr || !authData.user?.email) return null;
+    const email = authData.user.email.trim().toLowerCase();
+    if (!email) return null;
+
+    const { data: rows, error } = await supabase
+      .from("fi_users")
+      .select("id, auth_user_id")
+      .eq("tenant_id", tenantId.trim())
+      .ilike("email", email)
+      .limit(3);
+    if (error || !rows?.length) return null;
+
+    for (const row of rows as { id: string; auth_user_id: string | null }[]) {
+      const existingAuth = row.auth_user_id ? String(row.auth_user_id) : null;
+      if (existingAuth && existingAuth !== authUserId) continue;
+      if (!existingAuth) {
+        const { error: updErr } = await supabase
+          .from("fi_users")
+          .update({ auth_user_id: authUserId, updated_at: new Date().toISOString() })
+          .eq("id", row.id)
+          .eq("tenant_id", tenantId.trim());
+        if (updErr) {
+          logGuidedAssistMembershipDebug("email link update failed", {
+            tenantId,
+            fiUserId: row.id,
+            error: updErr.message,
+          });
+          continue;
+        }
+      }
+      return String(row.id);
+    }
+  } catch (e) {
+    logGuidedAssistMembershipDebug("email link exception", {
+      tenantId,
+      error: String(e),
+    });
+  }
+  return null;
+}
+
+/**
+ * Platform / cross-tenant admins: ensure a stable `fi_users` row for this tenant so preferences FKs work.
+ */
+async function ensurePlatformAdminFiUserForTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  authUserId: string
+): Promise<string | null> {
+  try {
+    const existing = await lookupFiUserIdForAuth(supabase, tenantId, authUserId);
+    if (existing) return existing;
+
+    let email: string | null = null;
+    const { data: authData } = await supabase.auth.admin.getUserById(authUserId);
+    email = authData.user?.email?.trim().toLowerCase() || null;
+
+    const { data, error } = await supabase
+      .from("fi_users")
+      .insert({
+        tenant_id: tenantId.trim(),
+        auth_user_id: authUserId.trim(),
+        email,
+        role: "fi_admin",
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      // Unique race: re-read
+      const again = await lookupFiUserIdForAuth(supabase, tenantId, authUserId);
+      if (again) return again;
+      logGuidedAssistMembershipDebug("platform ensure insert failed", {
+        tenantId,
+        error: error.message,
+      });
+      return null;
+    }
+    return data ? String((data as { id: string }).id) : null;
+  } catch (e) {
+    logGuidedAssistMembershipDebug("platform ensure exception", {
+      tenantId,
+      error: String(e),
+    });
+    return null;
+  }
+}
+
+/**
+ * Resolve tenant membership for Clinic guide (and related) server ops.
+ * Mirrors portal access: impersonation, staff link repair, email link, platform-admin ensure/proxy.
+ */
+async function resolveTenantMemberAuth(tenantId: string, opts: ServerOpts): Promise<AuthResult> {
+  const sessionAuthId = opts.actorAuthUserId ?? (await resolveAuthUserId(null));
+  if (!sessionAuthId) {
+    return { ok: false, error: "Authentication required.", code: "auth_required" };
+  }
+
+  const tid = tenantId.trim();
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+
+  // Impersonation-aware principal (platform admin acting as tenant user).
+  let principalAuthId = sessionAuthId;
+  try {
+    principalAuthId = await resolveEffectiveTenantAuthUserId(sessionAuthId);
+  } catch {
+    principalAuthId = sessionAuthId;
+  }
+
+  logGuidedAssistMembershipDebug("resolve start", {
+    tenantId: tid,
+    sessionAuthId,
+    principalAuthId,
+    skipAuthCheck: Boolean(opts.skipAuthCheck),
+  });
+
+  // 1) Direct membership for principal
+  let fiUserId = await lookupFiUserIdForAuth(supabase, tid, principalAuthId);
+  if (fiUserId) {
+    return {
+      ok: true,
+      actorAuthUserId: sessionAuthId,
+      fiUserId,
+      membershipSource: principalAuthId === sessionAuthId ? "direct" : "impersonation",
+    };
+  }
+
+  // 2) Direct membership for session auth (if different)
+  if (principalAuthId !== sessionAuthId) {
+    fiUserId = await lookupFiUserIdForAuth(supabase, tid, sessionAuthId);
+    if (fiUserId) {
+      return {
+        ok: true,
+        actorAuthUserId: sessionAuthId,
+        fiUserId,
+        membershipSource: "direct",
+      };
+    }
+  }
+
+  // 3) Staff invitation / portal link repair (same as tenant portal gate)
+  try {
+    const repaired = await attemptStaffTenantPortalRepair({
+      tenantId: tid,
+      authUserId: principalAuthId,
+      client: supabase,
+    });
+    if (repaired) {
+      fiUserId = await lookupFiUserIdForAuth(supabase, tid, principalAuthId);
+      if (fiUserId) {
+        logGuidedAssistMembershipDebug("repaired membership", { tenantId: tid, fiUserId });
+        return {
+          ok: true,
+          actorAuthUserId: sessionAuthId,
+          fiUserId,
+          membershipSource: "repaired",
+        };
+      }
+    }
+  } catch (e) {
+    logGuidedAssistMembershipDebug("repair failed", { tenantId: tid, error: String(e) });
+  }
+
+  // 4) Link existing row by email (common for clinic admins invited before auth bind)
+  fiUserId = await tryLinkFiUserByEmail(supabase, tid, principalAuthId);
+  if (fiUserId) {
+    logGuidedAssistMembershipDebug("email-linked membership", { tenantId: tid, fiUserId });
+    return {
+      ok: true,
+      actorAuthUserId: sessionAuthId,
+      fiUserId,
+      membershipSource: "email_link",
+    };
+  }
+
+  // 5) Platform / cross-tenant admin: ensure own fi_users row (preferred over proxy)
+  const os = await loadFiOsIdentity(sessionAuthId);
+  const isCrossTenant = Boolean(os && isFiOsCrossTenantDirectoryRole(os.osRole));
+  const isPlatformBypass = await isFiOsPlatformAdminFullSessionBypass(sessionAuthId);
+  if (isCrossTenant || isPlatformBypass) {
+    fiUserId = await ensurePlatformAdminFiUserForTenant(supabase, tid, sessionAuthId);
+    if (fiUserId) {
+      logGuidedAssistMembershipDebug("platform ensure membership", { tenantId: tid, fiUserId });
+      return {
+        ok: true,
+        actorAuthUserId: sessionAuthId,
+        fiUserId,
+        membershipSource: "platform_ensure",
+      };
+    }
+    // Last resort: proxy another tenant member (read path only; still better than hard fail)
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, sessionAuthId);
+    if (proxy?.id) {
+      logGuidedAssistMembershipDebug("platform proxy membership", {
+        tenantId: tid,
+        fiUserId: proxy.id,
+      });
+      return {
+        ok: true,
+        actorAuthUserId: sessionAuthId,
+        fiUserId: proxy.id,
+        membershipSource: "platform_proxy",
+      };
+    }
+  }
+
+  logGuidedAssistMembershipDebug("membership not found", {
+    tenantId: tid,
+    sessionAuthId,
+    principalAuthId,
+    isCrossTenant,
+    isPlatformBypass,
+  });
+
+  return {
+    ok: false,
+    error:
+      "Tenant membership required. Your login is not linked to this clinic in fi_users. An admin can invite you, or use Join / select tenant.",
+    code: "membership_required",
+  };
 }
 
 function rowToTenantDefaults(row: GuidedAssistPreferencesRow | null): GuidedAssistTenantDefaults {
@@ -576,10 +846,78 @@ export async function recordGuidedAssistTipFeedback(
   }
 }
 
+function readForceShowCookieActive(tenantId: string): boolean {
+  try {
+    const raw = cookies().get(GUIDED_ASSIST_FORCE_SHOW_COOKIE)?.value;
+    return isGuidedAssistForceShowCookieActive(raw, tenantId);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Admin-only: set or clear session force-show cookie so the guide appears
+ * with tips even when personal preference is off (this browser only).
+ */
+export async function setGuidedAssistForceShow(
+  tenantId: string,
+  forceShow: boolean,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; forceShowActive: boolean } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    if (!(await canManageGuidedAssistTenantDefaults(tenantId, serverOpts))) {
+      return {
+        ok: false,
+        error: "Clinic admin access is required to force-show the Clinic guide.",
+      };
+    }
+
+    const tid = tenantId.trim();
+    const store = cookies();
+    if (forceShow) {
+      store.set(GUIDED_ASSIST_FORCE_SHOW_COOKIE, tid, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: GUIDED_ASSIST_FORCE_SHOW_MAX_AGE_SEC,
+      });
+    } else {
+      store.set(GUIDED_ASSIST_FORCE_SHOW_COOKIE, "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+      });
+    }
+
+    await recordGuidedAssistEvent(
+      tid,
+      {
+        fiUserId: auth.fiUserId,
+        eventKind: forceShow ? "assist_enabled" : "assist_disabled",
+        detail: { source: "admin_force_show", forceShow: Boolean(forceShow) },
+      },
+      serverOpts
+    );
+
+    return { ok: true, forceShowActive: Boolean(forceShow) };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update force-show override.",
+    };
+  }
+}
+
 export async function loadGuidedAssistSessionPayload(
   tenantId: string,
   pathname: string,
-  serverOpts: ServerOpts = {}
+  serverOpts: ServerOpts & { forceShowActive?: boolean; search?: string | null } = {}
 ): Promise<
   { ok: true; payload: GuidedAssistSessionPayload | null } | { ok: false; error: string }
 > {
@@ -612,6 +950,16 @@ export async function loadGuidedAssistSessionPayload(
       isOnboardingPhase,
     });
 
+    const canManage =
+      adminProf?.adminRole === "clinic_admin" || adminProf?.adminRole === "operations_admin";
+    const forceFromCookie = readForceShowCookieActive(tid);
+    const debugQuery = isGuidedAssistDebugQueryActive(serverOpts.search);
+    // Force-show cookie only honored for admins (or explicit serverOpts override in tests).
+    const forceShowActive =
+      serverOpts.forceShowActive === true ||
+      (forceFromCookie && canManage) ||
+      (debugQuery && canManage);
+
     const ctx = {
       tenantId: tid,
       pageKey,
@@ -627,6 +975,8 @@ export async function loadGuidedAssistSessionPayload(
       resolved,
       userPreferences,
       clinicStats,
+      forceShowActive,
+      includeDebugInfo: canManage || forceShowActive || debugQuery,
     });
 
     const tipCodes = [
@@ -635,9 +985,6 @@ export async function loadGuidedAssistSessionPayload(
       ...(draft.emptyStateTour?.steps.map((s) => s.code) ?? []),
       draft.emptyStateTour?.rootTipCode,
     ].filter(Boolean) as string[];
-
-    const canManage =
-      adminProf?.adminRole === "clinic_admin" || adminProf?.adminRole === "operations_admin";
 
     const engagement = await loadGuidedAssistEngagementSnapshot(
       tid,
@@ -653,6 +1000,8 @@ export async function loadGuidedAssistSessionPayload(
       userPreferences,
       clinicStats,
       engagement,
+      forceShowActive,
+      includeDebugInfo: canManage || forceShowActive || debugQuery,
     });
 
     return { ok: true, payload };
@@ -865,12 +1214,15 @@ export async function loadGuidedAssistSettingsState(
     const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
     const tid = tenantId.trim();
 
-    const [tenantDefaultRow, userRow, homePayload, canManage] = await Promise.all([
-      ensureTenantDefaultRow(supabase, tid),
-      ensureUserPreferenceRow(supabase, tid, auth.fiUserId),
-      loadFiHomeDashboardPayload(tid, { showCrmShellChecklistItems: false }),
-      canManageGuidedAssistTenantDefaults(tid, serverOpts),
-    ]);
+    const [tenantDefaultRow, userRow, homePayload, canManage, workspaceProfileKey, adminProf] =
+      await Promise.all([
+        ensureTenantDefaultRow(supabase, tid),
+        ensureUserPreferenceRow(supabase, tid, auth.fiUserId),
+        loadFiHomeDashboardPayload(tid, { showCrmShellChecklistItems: false }),
+        canManageGuidedAssistTenantDefaults(tid, serverOpts),
+        loadWorkspaceProfileKeyForViewer(tid),
+        loadActiveTenantAdminProfileForSession(tid, auth.actorAuthUserId),
+      ]);
 
     const setupFlags = buildGuidedAssistSetupFlagsFromChecklist(homePayload.checklist);
     const isOnboardingPhase = computeGuidedAssistOnboardingPhase(setupFlags);
@@ -880,6 +1232,40 @@ export async function loadGuidedAssistSettingsState(
       tenantDefaults,
       userPreferences,
       isOnboardingPhase,
+    });
+
+    const forceShowActive = canManage && readForceShowCookieActive(tid);
+    const todayRole = mapViewerToGuidedAssistTodayRole({
+      workspaceProfileKey: workspaceProfileKey as FiWorkspaceProfileKey,
+      tenantAdminRole: (adminProf?.adminRole ?? null) as FiTenantAdminRole | null,
+    });
+    const experienceLevel = inferGuidedAssistExperienceLevel({
+      todayHomeViews: userPreferences.todayHomeViews,
+      guideStartedAtIso: userPreferences.guideStartedAtIso,
+      experienceLevelOverride: userPreferences.experienceLevelOverride,
+    });
+    const roleModeLabel = buildGuidedAssistRoleModeLabel({
+      todayRole,
+      workspaceProfileKey: workspaceProfileKey as FiWorkspaceProfileKey,
+      tenantAdminRole: (adminProf?.adminRole ?? null) as FiTenantAdminRole | null,
+      assistEnabled: assistEnabled || forceShowActive,
+    });
+
+    const debugInfo = buildGuidedAssistDebugInfo({
+      assistEnabled,
+      userAssistOverride: userPreferences.assistEnabled,
+      forceShowActive,
+      todayHomeViews: userPreferences.todayHomeViews,
+      todayRole,
+      roleModeLabel,
+      experienceLevel,
+      isOnboardingPhase,
+      pageKey: "settings/clinic-guide",
+      workspaceProfileKey: String(workspaceProfileKey ?? ""),
+      tenantAdminRole: adminProf?.adminRole ?? null,
+      roleFirstActive: false,
+      tipCount: 0,
+      nextBestActionCount: 0,
     });
 
     let staffWithExplicitOff = 0;
@@ -908,6 +1294,8 @@ export async function loadGuidedAssistSettingsState(
         settingsHref: `/fi-admin/${tid}/settings/clinic-guide`,
         staffWithExplicitOff,
         staffWithExplicitOn,
+        forceShowActive,
+        debugInfo,
       },
     };
   } catch (e) {

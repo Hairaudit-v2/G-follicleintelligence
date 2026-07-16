@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   ChevronDown,
@@ -21,12 +21,15 @@ import {
   recordGuidedAssistClientEventAction,
   recordGuidedAssistTipFeedbackAction,
   setGuidedAssistEnabledAction,
+  setGuidedAssistForceShowAction,
   snoozeGuidedAssistTipAction,
   touchGuidedAssistEngagementAction,
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
+import { isGuidedAssistDebugQueryActive } from "@/src/lib/onboarding-os/guidedAssistForceShow";
 import type {
+  GuidedAssistDebugInfo,
   GuidedAssistEngagementSnapshot,
   GuidedAssistSessionPayload,
   GuidedAssistTipView,
@@ -51,11 +54,14 @@ function emptyEngagement(): GuidedAssistEngagementSnapshot {
 
 function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistSessionPayload {
   const tid = payload.settingsHref?.match(/\/fi-admin\/([^/]+)/)?.[1];
+  const forceShowActive = Boolean(payload.forceShowActive);
+  const guideVisible = payload.guideVisible ?? (payload.assistEnabled || forceShowActive);
   return {
     ...payload,
     nextBestActions: payload.nextBestActions ?? [],
     experienceLevel: payload.experienceLevel ?? "intermediate",
-    showReenableChrome: payload.showReenableChrome ?? !payload.assistEnabled,
+    showReenableChrome:
+      payload.showReenableChrome ?? (!payload.assistEnabled && !forceShowActive),
     settingsHref:
       payload.settingsHref ??
       (tid ? `/fi-admin/${tid}/settings/clinic-guide` : "/fi-admin"),
@@ -64,7 +70,65 @@ function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistS
     engagement: payload.engagement ?? emptyEngagement(),
     roleModeLabel: payload.roleModeLabel ?? null,
     todayRole: payload.todayRole ?? null,
+    forceShowActive,
+    guideVisible,
+    debugInfo: payload.debugInfo ?? null,
   };
+}
+
+function GuideDebugPanel({
+  debugInfo,
+  forceShowActive,
+}: {
+  debugInfo: GuidedAssistDebugInfo;
+  forceShowActive: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const rows: { label: string; value: string }[] = [
+    { label: "enabled", value: String(debugInfo.enabled) },
+    { label: "forceShow", value: String(forceShowActive || debugInfo.forceShowActive) },
+    { label: "guideVisible", value: String(debugInfo.guideVisible) },
+    { label: "userOverride", value: String(debugInfo.userAssistOverride) },
+    { label: "today_home_views", value: String(debugInfo.todayHomeViews) },
+    { label: "role", value: debugInfo.role },
+    { label: "roleGroup", value: debugInfo.roleGroup },
+    { label: "roleMode", value: debugInfo.roleMode ?? "—" },
+    { label: "experienceLevel", value: debugInfo.experienceLevel },
+    { label: "clinicSetupComplete", value: String(debugInfo.clinicSetupComplete) },
+    { label: "isOnboardingPhase", value: String(debugInfo.isOnboardingPhase) },
+    { label: "pageKey", value: debugInfo.pageKey || "(today)" },
+    { label: "workspaceProfile", value: debugInfo.workspaceProfileKey || "—" },
+    { label: "tenantAdminRole", value: debugInfo.tenantAdminRole ?? "—" },
+    { label: "roleFirstActive", value: String(debugInfo.roleFirstActive) },
+    { label: "tipCount", value: String(debugInfo.tipCount) },
+    { label: "nbaCount", value: String(debugInfo.nextBestActionCount) },
+  ];
+  return (
+    <section
+      className="rounded-lg border border-white/10 bg-black/30 p-2"
+      data-testid="guided-assist-debug-panel"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-300"
+        aria-expanded={open}
+      >
+        Debug info
+        {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+      </button>
+      {open ? (
+        <dl className="mt-2 max-h-40 space-y-1 overflow-y-auto font-mono text-[10px] text-slate-400">
+          {rows.map((row) => (
+            <div key={row.label} className="flex justify-between gap-2">
+              <dt className="shrink-0 text-slate-500">{row.label}</dt>
+              <dd className="truncate text-right text-slate-300">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </section>
+  );
 }
 
 function TipFeedbackButtons({
@@ -175,9 +239,14 @@ export function GuidedAssistWidget({
   className?: string;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [payload, setPayload] = useState(() => withSessionDefaults(initialPayload));
   const pathname = usePathname() ?? "";
   const onCalendarSurface = isFiOsTenantCalendarPath(pathname);
+  const debugQueryActive = isGuidedAssistDebugQueryActive(searchParams?.toString() ?? "");
+  const showDebugPanel =
+    Boolean(payload.debugInfo) &&
+    (payload.canManageTenantDefaults || debugQueryActive || payload.forceShowActive);
   const prefersCollapsedDefault = usePrefersCollapsedAssistDefault();
   const [collapsed, setCollapsed] = useState(true);
   const [pending, startTransition] = useTransition();
@@ -210,8 +279,11 @@ export function GuidedAssistWidget({
     if (onCalendarSurface) setCollapsed(true);
   }, [onCalendarSurface, pathname]);
 
+  const guideVisible =
+    payload.guideVisible ?? (payload.assistEnabled || Boolean(payload.forceShowActive));
+
   useEffect(() => {
-    if (!payload.assistEnabled) return;
+    if (!guideVisible) return;
     const shownTips = [
       ...payload.tips,
       ...(payload.nextBestActions ?? []),
@@ -230,15 +302,17 @@ export function GuidedAssistWidget({
           isNextBestAction: Boolean(tip.isNextBestAction),
           experienceLevel: payload.experienceLevel,
           operationalOnly: true,
+          forceShow: Boolean(payload.forceShowActive),
         },
       });
     }
   }, [
-    payload.assistEnabled,
+    guideVisible,
     payload.pageKey,
     payload.tips,
     payload.nextBestActions,
     payload.experienceLevel,
+    payload.forceShowActive,
     tenantId,
   ]);
 
@@ -278,6 +352,23 @@ export function GuidedAssistWidget({
       }));
     });
   }, [payload.assistEnabled, tenantId]);
+
+  /** Admin + `?debug=guide`: enable session force-show so tips load for troubleshooting. */
+  const debugForceAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!debugQueryActive || !payload.canManageTenantDefaults) return;
+    if (payload.forceShowActive || debugForceAppliedRef.current) return;
+    debugForceAppliedRef.current = true;
+    void setGuidedAssistForceShowAction(tenantId, true).then((res) => {
+      if (res.ok) router.refresh();
+    });
+  }, [
+    debugQueryActive,
+    payload.canManageTenantDefaults,
+    payload.forceShowActive,
+    tenantId,
+    router,
+  ]);
 
   const submitFeedback = (tipCode: string, helpful: boolean) => {
     startTransition(async () => {
@@ -512,7 +603,8 @@ export function GuidedAssistWidget({
       aria-label="Clinic guide"
       data-testid="guided-assist-widget"
       data-guided-assist-collapsed={collapsed ? "true" : "false"}
-      data-guided-assist-enabled={payload.assistEnabled ? "true" : "false"}
+      data-guided-assist-enabled={guideVisible ? "true" : "false"}
+      data-guided-assist-force={payload.forceShowActive ? "true" : "false"}
       data-guided-assist-surface={onCalendarSurface ? "calendar" : "default"}
     >
       <div
@@ -523,18 +615,25 @@ export function GuidedAssistWidget({
       >
         <div className="min-w-0">
           {!collapsed ? (
-            <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>Clinic guide</p>
+            <p className={cn(fiOsChromeClasses.sectionEyebrow, "text-cyan-300/90")}>
+              Clinic guide
+              {payload.forceShowActive ? (
+                <span className="ml-1.5 rounded bg-amber-500/20 px-1 py-0.5 text-[9px] font-semibold text-amber-100">
+                  Force show
+                </span>
+              ) : null}
+            </p>
           ) : null}
           <h2
             className={cn("truncate font-medium text-slate-100", collapsed ? "text-xs" : "text-sm")}
           >
             {collapsed
-              ? payload.assistEnabled
+              ? guideVisible
                 ? "Help"
                 : "Guide"
               : tourActive
                 ? "Tour — one step at a time"
-                : payload.assistEnabled
+                : guideVisible
                   ? "Here to help next"
                   : "Clinic guide is off"}
           </h2>
@@ -546,7 +645,7 @@ export function GuidedAssistWidget({
               {payload.roleModeLabel}
             </p>
           ) : null}
-          {collapsed && payload.assistEnabled && engagement.progress ? (
+          {collapsed && guideVisible && engagement.progress ? (
             <p
               className="truncate text-[10px] text-slate-500"
               data-testid="guided-assist-progress-collapsed"
@@ -554,7 +653,7 @@ export function GuidedAssistWidget({
               {engagement.progress.label}
             </p>
           ) : null}
-          {!collapsed && payload.assistEnabled && engagement.streakMessage ? (
+          {!collapsed && guideVisible && engagement.streakMessage ? (
             <p
               className="mt-0.5 text-[10px] font-medium text-cyan-300/80"
               data-testid="guided-assist-streak"
@@ -564,7 +663,7 @@ export function GuidedAssistWidget({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {collapsed && !payload.assistEnabled ? (
+          {collapsed && !guideVisible ? (
             <button
               type="button"
               disabled={pending}
@@ -583,7 +682,8 @@ export function GuidedAssistWidget({
                 setPayload((prev) => ({
                   ...prev,
                   assistEnabled: enabled,
-                  showReenableChrome: !enabled,
+                  guideVisible: enabled || Boolean(prev.forceShowActive),
+                  showReenableChrome: !enabled && !prev.forceShowActive,
                   userAssistOverride: enabled,
                 }))
               }
@@ -605,7 +705,7 @@ export function GuidedAssistWidget({
         <div className={fiOsChromeClasses.guidedAssistBodyScroll}>
           <p className="text-xs leading-relaxed text-slate-400">{payload.safetyNotice}</p>
 
-          {payload.assistEnabled ? (
+          {guideVisible ? (
             <p className="text-[11px] leading-relaxed text-slate-400" data-testid="guided-assist-warm-intro">
               {payload.isOnboardingPhase
                 ? "No worries if this is new — we’ll point you to the next operational step only."
@@ -613,7 +713,7 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
 
-          {payload.assistEnabled ? (
+          {guideVisible ? (
             <div
               className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500"
               data-testid="guided-assist-engagement-summary"
@@ -631,7 +731,7 @@ export function GuidedAssistWidget({
             </div>
           ) : null}
 
-          {!payload.assistEnabled ? (
+          {!guideVisible ? (
             <section
               className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
               data-testid="guided-assist-reenable"
@@ -670,7 +770,7 @@ export function GuidedAssistWidget({
           ) : null}
 
           {/* Empty-state tour offer */}
-          {payload.assistEnabled && payload.emptyStateTour && !tourActive ? (
+          {guideVisible && payload.emptyStateTour && !tourActive ? (
             <section
               className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
               data-testid="guided-assist-tour-offer"
@@ -758,7 +858,7 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive && payload.assistEnabled && payload.nextAction ? (
+          {!tourActive && guideVisible && payload.nextAction ? (
             <section className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3">
               <div className="mb-2 flex items-center gap-2 text-cyan-200">
                 <Compass className="h-4 w-4 shrink-0" aria-hidden />
@@ -780,9 +880,7 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive &&
-          payload.assistEnabled &&
-          (payload.nextBestActions?.length ?? 0) > 0 ? (
+          {!tourActive && (payload.nextBestActions?.length ?? 0) > 0 && guideVisible ? (
             <section data-testid="guided-assist-next-best-actions">
               <div className="mb-1.5 flex items-center gap-1.5 text-amber-100/90">
                 <Zap className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -801,14 +899,14 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive && payload.assistEnabled && payload.tips.length > 0 ? (
+          {!tourActive && guideVisible && payload.tips.length > 0 ? (
             <ul className="space-y-2" data-testid="guided-assist-tips">
               {payload.tips.map((tip) => renderTipCard(tip))}
             </ul>
           ) : null}
 
           {!tourActive &&
-          payload.assistEnabled &&
+          guideVisible &&
           payload.tips.length === 0 &&
           (payload.nextBestActions?.length ?? 0) === 0 &&
           !payload.nextAction &&
@@ -819,16 +917,25 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
 
+          {showDebugPanel && payload.debugInfo ? (
+            <GuideDebugPanel
+              debugInfo={payload.debugInfo}
+              forceShowActive={Boolean(payload.forceShowActive)}
+            />
+          ) : null}
+
           {message ? <p className="text-xs text-amber-300">{message}</p> : null}
 
-          {payload.assistEnabled ? (
+          {guideVisible ? (
             <p className="text-[10px] text-slate-500">
               <Link href={settingsHref} className="text-cyan-400/80 hover:text-cyan-300">
                 Clinic guide settings
               </Link>
-              {payload.isOnboardingPhase
-                ? " · defaults to on while setup is incomplete"
-                : " · turn off anytime"}
+              {payload.forceShowActive
+                ? " · force show is on (admin session)"
+                : payload.isOnboardingPhase
+                  ? " · defaults to on while setup is incomplete"
+                  : " · turn off anytime"}
             </p>
           ) : null}
 

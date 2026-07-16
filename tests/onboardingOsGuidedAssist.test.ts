@@ -43,6 +43,10 @@ import {
   isClinicalTodayRole,
 } from "../src/lib/onboarding-os/guidedAssistRoleMode";
 import {
+  isGuidedAssistDebugQueryActive,
+  isGuidedAssistForceShowCookieActive,
+} from "../src/lib/onboarding-os/guidedAssistForceShow";
+import {
   GUIDED_ASSIST_AREA_LABELS,
   GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD,
   GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
@@ -924,5 +928,81 @@ describe("Clinic guide — warm tone + clinical role prioritisation", () => {
       dismissedTipCodes: [],
     });
     assert.ok(tips.some((t) => t.code === "today_nurse_day_flow"));
+  });
+});
+
+describe("Clinic guide — admin force-show and debug", () => {
+  it("parses force-show cookie and debug=guide query", () => {
+    const tid = BASE_CTX.tenantId;
+    assert.equal(isGuidedAssistForceShowCookieActive(tid, tid), true);
+    assert.equal(isGuidedAssistForceShowCookieActive("other", tid), false);
+    assert.equal(isGuidedAssistDebugQueryActive("debug=guide"), true);
+    assert.equal(isGuidedAssistDebugQueryActive("?tab=1&debug=guide"), true);
+    assert.equal(isGuidedAssistDebugQueryActive("debug=other"), false);
+  });
+
+  it("forceShow loads tips even when preference is off", () => {
+    const userPreferences = prefs({ assistEnabled: false, todayHomeViews: 20 });
+    const off = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "nurse",
+        tenantAdminRole: null,
+        pageKey: "",
+        setupFlags: {
+          organisationCreated: true,
+          clinicCreated: true,
+          clinicSettingsComplete: true,
+          firstCaseCreated: true,
+        },
+        isOnboardingPhase: false,
+      },
+      resolved: {
+        assistEnabled: false,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences,
+      },
+      userPreferences,
+      forceShowActive: false,
+    });
+    assert.equal(off.assistEnabled, false);
+    assert.equal(off.guideVisible, false);
+    assert.equal(off.tips.length, 0);
+
+    const forced = buildGuidedAssistSessionPayload({
+      ctx: {
+        ...BASE_CTX,
+        workspaceProfileKey: "nurse",
+        tenantAdminRole: null,
+        pageKey: "",
+        setupFlags: {
+          organisationCreated: true,
+          clinicCreated: true,
+          clinicSettingsComplete: true,
+          firstCaseCreated: true,
+        },
+        isOnboardingPhase: false,
+      },
+      resolved: {
+        assistEnabled: false,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: false },
+        userPreferences,
+      },
+      userPreferences,
+      forceShowActive: true,
+      includeDebugInfo: true,
+    });
+    assert.equal(forced.assistEnabled, false);
+    assert.equal(forced.forceShowActive, true);
+    assert.equal(forced.guideVisible, true);
+    assert.ok(forced.tips.length > 0);
+    assert.ok(forced.debugInfo);
+    assert.equal(forced.debugInfo!.forceShowActive, true);
+    assert.equal(forced.debugInfo!.role, "nurse");
+    assert.equal(forced.debugInfo!.clinicSetupComplete, true);
+    // Preference counters must not advance under force-only
+    assert.equal(forced.shouldIncrementTodayHomeViews, false);
   });
 });

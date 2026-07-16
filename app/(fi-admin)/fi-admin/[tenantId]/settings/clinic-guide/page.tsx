@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
@@ -50,10 +51,51 @@ export default async function ClinicGuideSettingsPage({
   ]);
 
   if (!settingsResult.ok) {
+    const membershipIssue = /membership|tenant/i.test(settingsResult.error);
     return (
-      <div className="mx-auto max-w-[960px] px-3 pb-10 pt-2 sm:px-4">
-        <InfoNotice variant="danger" title="Could not load Clinic guide settings">
-          <p className="text-sm">{settingsResult.error}</p>
+      <div className="mx-auto max-w-[960px] space-y-4 px-3 pb-10 pt-2 sm:px-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+            Clinic guide
+          </h1>
+        </div>
+        <InfoNotice
+          variant="danger"
+          title={
+            membershipIssue
+              ? "Clinic membership not linked to this login"
+              : "Could not load Clinic guide settings"
+          }
+        >
+          <p className="text-sm leading-relaxed">{settingsResult.error}</p>
+          {membershipIssue ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href="/fi-admin"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-4 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30"
+              >
+                Join or select tenant
+              </Link>
+              <Link
+                href={`/fi-admin/${tid}/settings/admin-users`}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/15 px-4 text-sm font-medium text-slate-200 hover:bg-white/5"
+              >
+                Admin users
+              </Link>
+              <Link
+                href={`/fi-admin/${tid}/configuration`}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-sm text-slate-400 hover:text-slate-200"
+              >
+                Configuration
+              </Link>
+            </div>
+          ) : null}
+          <p className="mt-3 text-xs text-slate-500">
+            Your session can open this clinic, but Clinic guide needs a{" "}
+            <code className="rounded bg-white/5 px-1">fi_users</code> row for this tenant linked to
+            your auth user. Ask a clinic admin to invite you, or re-select the tenant from the
+            directory.
+          </p>
         </InfoNotice>
       </div>
     );

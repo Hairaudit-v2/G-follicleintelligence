@@ -25,6 +25,7 @@ import {
   inferGuidedAssistExperienceLevel,
 } from "./getTieredAndContextualTips";
 import { emptyEngagementSnapshot, formatStreakMessage } from "./guidedAssistEngagementCore";
+import { buildGuidedAssistDebugInfo } from "./guidedAssistForceShow";
 import { expandGuidedAssistPageKeys } from "./guidedAssistPageKeys";
 import {
   buildGuidedAssistRoleModeLabel,
@@ -271,6 +272,13 @@ export function buildGuidedAssistSessionPayload(opts: {
   now?: Date;
   /** Optional preloaded engagement (streak, progress, feedback, team highlight). */
   engagement?: GuidedAssistEngagementSnapshot | null;
+  /**
+   * Admin session force-show — loads tips even when preference is off.
+   * Does not mutate stored assist_enabled.
+   */
+  forceShowActive?: boolean;
+  /** Include debugInfo on payload (admins or debug query). */
+  includeDebugInfo?: boolean;
 }): GuidedAssistSessionPayload {
   const maxTips = opts.maxTips ?? 3;
   const roleFirstViewLimit = opts.roleFirstViewLimit ?? GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT;
@@ -282,6 +290,9 @@ export function buildGuidedAssistSessionPayload(opts: {
   const stats = opts.clinicStats ?? emptyGuidedAssistClinicStats();
   const now = opts.now ?? new Date();
   const timeOfDay = resolveTimeOfDay(stats.hourLocal);
+  const forceShowActive = Boolean(opts.forceShowActive);
+  /** Preference on, or admin force-show for troubleshooting. */
+  const guideVisible = opts.resolved.assistEnabled || forceShowActive;
 
   const experienceLevel: GuidedAssistExperienceLevel = inferGuidedAssistExperienceLevel({
     todayHomeViews,
@@ -291,7 +302,7 @@ export function buildGuidedAssistSessionPayload(opts: {
   });
 
   const roleFirstActive =
-    opts.resolved.assistEnabled &&
+    guideVisible &&
     shouldUseRoleFirstTips({
       pageKey: opts.ctx.pageKey,
       todayHomeViews,
@@ -302,7 +313,7 @@ export function buildGuidedAssistSessionPayload(opts: {
   let nextBestActions: GuidedAssistTipView[] = [];
   let emptyStateTour = null as GuidedAssistSessionPayload["emptyStateTour"];
 
-  if (opts.resolved.assistEnabled) {
+  if (guideVisible) {
     const catalogTips = filterTipsByExperienceLevel(
       selectGuidedAssistTips(opts.ctx, opts.userPreferences, now, maxTips + 2),
       experienceLevel
@@ -355,7 +366,7 @@ export function buildGuidedAssistSessionPayload(opts: {
     });
   }
 
-  const nextAction = opts.resolved.assistEnabled ? selectGuidedAssistNextAction(opts.ctx) : null;
+  const nextAction = guideVisible ? selectGuidedAssistNextAction(opts.ctx) : null;
   const tenantBase = `/fi-admin/${opts.ctx.tenantId.trim()}`;
   const settingsHref = `${tenantBase}/settings/clinic-guide`;
   const canManageTenantDefaults =
@@ -377,7 +388,24 @@ export function buildGuidedAssistSessionPayload(opts: {
     todayRole,
     workspaceProfileKey: opts.ctx.workspaceProfileKey,
     tenantAdminRole: opts.ctx.tenantAdminRole,
+    assistEnabled: opts.resolved.assistEnabled || forceShowActive,
+  });
+
+  const debugInfo = buildGuidedAssistDebugInfo({
     assistEnabled: opts.resolved.assistEnabled,
+    userAssistOverride: opts.userPreferences.assistEnabled,
+    forceShowActive,
+    todayHomeViews,
+    todayRole,
+    roleModeLabel,
+    experienceLevel,
+    isOnboardingPhase: opts.resolved.isOnboardingPhase,
+    pageKey: opts.ctx.pageKey,
+    workspaceProfileKey: opts.ctx.workspaceProfileKey,
+    tenantAdminRole: opts.ctx.tenantAdminRole,
+    roleFirstActive,
+    tipCount: tips.length,
+    nextBestActionCount: nextBestActions.length,
   });
 
   return {
@@ -392,18 +420,23 @@ export function buildGuidedAssistSessionPayload(opts: {
     roleModeLabel,
     todayHomeViews,
     roleFirstViewLimit,
-    shouldIncrementTodayHomeViews: roleFirstActive && tips.length > 0,
+    // Only advance real preference counters when genuinely enabled (not force-show alone).
+    shouldIncrementTodayHomeViews:
+      opts.resolved.assistEnabled && roleFirstActive && tips.length > 0,
     emptyStateTour,
     clinicStats: stats,
     timeOfDay,
     experienceLevel,
     nextBestActions,
-    // Always offer re-enable chrome when the guide is off (never disappear entirely).
-    showReenableChrome: !opts.resolved.assistEnabled,
+    // Re-enable chrome when preference is off (even if force-show is temporarily on).
+    showReenableChrome: !opts.resolved.assistEnabled && !forceShowActive,
     settingsHref,
     userAssistOverride: opts.userPreferences.assistEnabled,
     canManageTenantDefaults,
     engagement,
+    forceShowActive,
+    guideVisible,
+    debugInfo: opts.includeDebugInfo || canManageTenantDefaults || forceShowActive ? debugInfo : null,
   };
 }
 

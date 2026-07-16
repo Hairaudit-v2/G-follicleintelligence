@@ -13,6 +13,7 @@ import {
   recordGuidedAssistEvent,
   recordGuidedAssistTipFeedback,
   setGuidedAssistEnabledForUser,
+  setGuidedAssistForceShow,
   setGuidedAssistTenantDefaults,
   snoozeGuidedAssistTip,
   touchGuidedAssistEngagement,
@@ -314,6 +315,32 @@ export async function touchGuidedAssistEngagementAction(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Failed to update engagement.",
+    };
+  }
+}
+
+/** Admin: force-show Clinic guide in this browser session (cookie). */
+export async function setGuidedAssistForceShowAction(
+  tenantId: string,
+  forceShow: boolean
+): Promise<GuidedAssistActionResult & { forceShowActive?: boolean }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await setGuidedAssistForceShow(tid, forceShow, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    revalidateTenantAssistPaths(tid);
+    return { ok: true, forceShowActive: result.forceShowActive };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to update force-show override.",
     };
   }
 }

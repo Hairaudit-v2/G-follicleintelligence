@@ -2,21 +2,61 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import {
   enableGuidedAssistForAllStaffAction,
   setGuidedAssistEnabledAction,
+  setGuidedAssistForceShowAction,
   setGuidedAssistTenantDefaultsAction,
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";
 import { cn } from "@/lib/utils";
 import { GuidedAssistToggle } from "@/src/components/onboarding-os/GuidedAssistToggle";
-import type { GuidedAssistSettingsState } from "@/src/lib/onboarding-os/guidedAssistTypes";
+import type {
+  GuidedAssistDebugInfo,
+  GuidedAssistSettingsState,
+} from "@/src/lib/onboarding-os/guidedAssistTypes";
 
 const sectionClass =
   "rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5";
 
+function DebugInfoTable({ info }: { info: GuidedAssistDebugInfo }) {
+  const rows: { k: string; v: string }[] = [
+    { k: "enabled", v: String(info.enabled) },
+    { k: "forceShowActive", v: String(info.forceShowActive) },
+    { k: "guideVisible", v: String(info.guideVisible) },
+    { k: "userAssistOverride", v: String(info.userAssistOverride) },
+    { k: "today_home_views", v: String(info.todayHomeViews) },
+    { k: "role", v: info.role },
+    { k: "roleGroup", v: info.roleGroup },
+    { k: "roleMode", v: info.roleMode ?? "—" },
+    { k: "experienceLevel", v: info.experienceLevel },
+    { k: "clinicSetupComplete", v: String(info.clinicSetupComplete) },
+    { k: "isOnboardingPhase", v: String(info.isOnboardingPhase) },
+    { k: "pageKey", v: info.pageKey || "(today)" },
+    { k: "workspaceProfileKey", v: info.workspaceProfileKey || "—" },
+    { k: "tenantAdminRole", v: info.tenantAdminRole ?? "—" },
+    { k: "roleFirstActive", v: String(info.roleFirstActive) },
+    { k: "tipCount", v: String(info.tipCount) },
+    { k: "nextBestActionCount", v: String(info.nextBestActionCount) },
+  ];
+  return (
+    <dl className="mt-2 space-y-1.5 font-mono text-[11px]" data-testid="clinic-guide-debug-rows">
+      {rows.map((row) => (
+        <div
+          key={row.k}
+          className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-white/[0.04] pb-1 last:border-0"
+        >
+          <dt className="text-slate-500">{row.k}</dt>
+          <dd className="text-right text-slate-200">{row.v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /**
- * Settings → Clinic Guide: personal on/off + optional admin enable-for-all.
+ * Settings → Clinic Guide: personal on/off, status, admin force-show, debug info.
  * Operational help only — no clinical features.
  */
 export function ClinicGuideSettingsSection({
@@ -32,12 +72,21 @@ export function ClinicGuideSettingsSection({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmAll, setConfirmAll] = useState(false);
+  const [debugOpen, setDebugOpen] = useState(false);
+
+  const statusOn = state.assistEnabled || state.forceShowActive;
 
   const onPersonalChanged = (enabled: boolean) => {
     setState((prev) => ({
       ...prev,
       assistEnabled: enabled,
       userAssistOverride: enabled,
+      debugInfo: {
+        ...prev.debugInfo,
+        enabled,
+        userAssistOverride: enabled,
+        guideVisible: enabled || prev.forceShowActive,
+      },
     }));
     setMessage(enabled ? "Clinic guide is on for you." : "Clinic guide is off for you.");
     setError(null);
@@ -54,6 +103,33 @@ export function ClinicGuideSettingsSection({
         return;
       }
       onPersonalChanged(enabled);
+    });
+  };
+
+  const setForceShow = (force: boolean) => {
+    setMessage(null);
+    setError(null);
+    startTransition(async () => {
+      const res = await setGuidedAssistForceShowAction(tenantId, force);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setState((prev) => ({
+        ...prev,
+        forceShowActive: force,
+        debugInfo: {
+          ...prev.debugInfo,
+          forceShowActive: force,
+          guideVisible: prev.assistEnabled || force,
+        },
+      }));
+      setMessage(
+        force
+          ? "Force show is on for this browser session (up to 8 hours). Tips load even if preference is off."
+          : "Force show cleared."
+      );
+      router.refresh();
     });
   };
 
@@ -109,6 +185,12 @@ export function ClinicGuideSettingsSection({
         },
         staffWithExplicitOff: 0,
         staffWithExplicitOn: Math.max(prev.staffWithExplicitOn, res.updatedUserRows ?? 0),
+        debugInfo: {
+          ...prev.debugInfo,
+          enabled: true,
+          userAssistOverride: true,
+          guideVisible: true,
+        },
       }));
       setMessage(
         `Clinic guide enabled for all staff (${res.updatedUserRows ?? 0} preference row(s) updated).`
@@ -133,12 +215,17 @@ export function ClinicGuideSettingsSection({
         <div
           className={cn(
             "rounded-full px-2.5 py-1 text-xs font-semibold",
-            state.assistEnabled
+            statusOn
               ? "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-400/30"
               : "bg-slate-800/80 text-slate-400 ring-1 ring-white/10"
           )}
+          data-testid="clinic-guide-status-badge"
         >
-          {state.assistEnabled ? "On for you" : "Off for you"}
+          {state.forceShowActive
+            ? "Force show ON"
+            : state.assistEnabled
+              ? "Currently ON for you"
+              : "Currently OFF for you"}
         </div>
       </div>
 
@@ -182,6 +269,39 @@ export function ClinicGuideSettingsSection({
         )}
       </div>
 
+      {/* Status summary for troubleshooting (all staff) */}
+      <div
+        className="mt-4 rounded-xl border border-white/[0.08] bg-[#081020]/40 p-4"
+        data-testid="clinic-guide-status-summary"
+      >
+        <p className="text-sm font-medium text-slate-100">Guide status</p>
+        <ul className="mt-2 space-y-1 text-xs text-slate-400">
+          <li>
+            Preference:{" "}
+            <span className="text-slate-200">
+              {state.assistEnabled ? "ON" : "OFF"}
+              {state.userAssistOverride === null ? " (clinic default)" : " (personal override)"}
+            </span>
+          </li>
+          <li>
+            Role:{" "}
+            <span className="text-slate-200">
+              {state.debugInfo.role} · {state.debugInfo.roleGroup}
+            </span>
+          </li>
+          <li>
+            Setup complete:{" "}
+            <span className="text-slate-200">
+              {state.debugInfo.clinicSetupComplete ? "yes" : "no (onboarding phase)"}
+            </span>
+          </li>
+          <li>
+            Today home views:{" "}
+            <span className="text-slate-200">{state.debugInfo.todayHomeViews}</span>
+          </li>
+        </ul>
+      </div>
+
       {state.canManageTenantDefaults ? (
         <div className="mt-4 space-y-4 rounded-xl border border-amber-400/20 bg-amber-950/20 p-4">
           <div>
@@ -191,6 +311,32 @@ export function ClinicGuideSettingsSection({
               all. Staff on defaults: {state.staffWithExplicitOn} explicit on ·{" "}
               {state.staffWithExplicitOff} explicit off.
             </p>
+          </div>
+
+          <div className="rounded-lg border border-white/[0.08] bg-black/20 p-3">
+            <p className="text-sm font-medium text-slate-100">Force show for this user</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-400">
+              Temporary browser session override (up to 8 hours). Loads tips even if preference is
+              off. Does not change stored preferences. Also: append{" "}
+              <code className="rounded bg-white/5 px-1 text-[10px] text-cyan-200">
+                ?debug=guide
+              </code>{" "}
+              to any FI URL to enable force show while testing.
+            </p>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setForceShow(!state.forceShowActive)}
+              className={cn(
+                "mt-3 min-h-11 rounded-xl border px-4 text-sm font-semibold disabled:opacity-50",
+                state.forceShowActive
+                  ? "border-amber-400/50 bg-amber-500/20 text-amber-50 hover:bg-amber-500/30"
+                  : "border-white/15 text-slate-100 hover:bg-white/5"
+              )}
+              data-testid="clinic-guide-force-show"
+            >
+              {state.forceShowActive ? "Turn off force show" : "Force show for this user"}
+            </button>
           </div>
 
           <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2.5">
@@ -263,6 +409,24 @@ export function ClinicGuideSettingsSection({
                 Enable for all staff…
               </button>
             )}
+          </div>
+
+          <div className="rounded-lg border border-white/[0.08] bg-black/25 p-3">
+            <button
+              type="button"
+              onClick={() => setDebugOpen((o) => !o)}
+              className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium text-slate-100"
+              aria-expanded={debugOpen}
+              data-testid="clinic-guide-debug-toggle"
+            >
+              Debug info
+              {debugOpen ? (
+                <ChevronUp className="h-4 w-4 text-slate-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              )}
+            </button>
+            {debugOpen ? <DebugInfoTable info={state.debugInfo} /> : null}
           </div>
         </div>
       ) : null}
