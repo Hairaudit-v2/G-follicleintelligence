@@ -41,6 +41,15 @@ function HeroCtas() {
         {c.hero.tertiaryCta.label}
         <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
       </Link>
+      {"migrationCta" in c.hero && c.hero.migrationCta ? (
+        <Link
+          href={c.hero.migrationCta.href}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-200/85 transition-colors hover:text-cyan-50 sm:ml-1"
+        >
+          {c.hero.migrationCta.label}
+          <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+        </Link>
+      ) : null}
     </div>
   );
 }

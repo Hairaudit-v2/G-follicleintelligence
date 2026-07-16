@@ -18,7 +18,10 @@ export const AUDIT_NETWORK_PAGE_CONTENT = {
     subtext:
       "AuditOS connects clinical evidence, surgical records, patient images, outcome review, quality scoring, and benchmarking into one accountability layer powered by HairAudit.",
     primaryCta: { label: "Explore Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Explore the Platform",
+      href: "/platform" as const,
+    },
   },
 
   problem: {
@@ -176,6 +179,9 @@ export const AUDIT_NETWORK_PAGE_CONTENT = {
     eyebrow: "Next step",
     headline: "Build quality control into the system.",
     primaryCta: { label: "Explore Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Explore the Platform",
+      href: "/platform" as const,
+    },
   },
 } as const;

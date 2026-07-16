@@ -136,7 +136,7 @@ export function FiMarketingPlaceholderPage({
                     className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
                   >
                     <Link href="/demo">
-                      Book Enterprise Demo
+                      Request a Platform and Migration Review
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                     </Link>
                   </Button>
@@ -205,7 +205,7 @@ export function FiMarketingPlaceholderPage({
                   className={MARKETING_CTA_SECONDARY_CLASS}
                 >
                   <Link href="/demo">
-                    Book Enterprise Demo
+                    Request a Platform and Migration Review
                     <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                   </Link>
                 </Button>

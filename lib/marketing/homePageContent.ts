@@ -1439,8 +1439,8 @@ export const HOME_V5_CONTENT = {
       href: "/demo" as const,
     },
     secondaryCta: {
-      label: "See the HubSpot pathway in LeadFlow",
-      href: "/platform/leadflow#hubspot-pathway" as const,
+      label: "View the HubSpot migration pathway",
+      href: "/migrate-from-hubspot" as const,
     },
   },
 

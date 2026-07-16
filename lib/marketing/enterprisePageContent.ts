@@ -10,7 +10,10 @@ export const ENTERPRISE_PAGE_CONTENT = {
     headline: "Scale Globally Without Losing Quality",
     subtext:
       "Follicle Intelligence gives multi-clinic groups the operating system to standardise workflows, monitor teams, govern outcomes, train staff, and scale hair restoration operations across locations.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     secondaryCta: { label: "Explore Platform", href: "/platform" as const },
   },
 
@@ -210,7 +213,10 @@ export const ENTERPRISE_PAGE_CONTENT = {
     id: "enterprise-final-cta",
     eyebrow: "Next step",
     headline: "Build the network before the network outgrows you.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
   },
 } as const;

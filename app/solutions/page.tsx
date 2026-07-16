@@ -486,7 +486,7 @@ export default function SolutionsPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="rounded-xl">
-                <Link href="/contact?intent=demo">Book enterprise demo</Link>
+                <Link href="/demo">Request a Platform and Migration Review</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href="/contact?intent=white-label">White-label discussion</Link>

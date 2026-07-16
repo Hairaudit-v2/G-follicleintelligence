@@ -43,26 +43,26 @@ export function Header() {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl"
     >
-      <div className="mx-auto flex min-h-20 max-w-6xl items-center justify-between gap-4 px-4 py-6 sm:gap-5 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:gap-4 sm:px-6">
         <Link
           href="/"
-          className="flex min-w-0 shrink-0 items-center gap-4 font-semibold tracking-tight"
+          className="flex min-w-0 shrink-0 items-center gap-2.5 font-semibold tracking-tight sm:gap-3"
+          aria-label="Follicle Intelligence home"
         >
-          <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
-            <Image
-              src={PUBLIC_IMAGES.favicon32}
-              alt="Follicle Intelligence"
-              width={30}
-              height={30}
-              className="size-[30px] rounded-[8px]"
-              priority
-            />
-          </div>
+          <Image
+            src={PUBLIC_IMAGES.follicleLogoHeaderWhite}
+            alt="Follicle Intelligence"
+            width={36}
+            height={26}
+            className="h-6 w-auto sm:h-7"
+            sizes="(max-width: 640px) 24px, 28px"
+            priority
+          />
           <div className="min-w-0 leading-none">
-            <span className="block text-sm text-foreground md:text-base">
+            <span className="block text-[13px] text-foreground sm:text-sm">
               Follicle Intelligence
             </span>
-            <span className="mt-1 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground md:text-[11px]">
+            <span className="mt-0.5 hidden text-[9px] uppercase tracking-[0.28em] text-muted-foreground sm:mt-1 sm:block sm:text-[10px]">
               Hair restoration operating system
             </span>
           </div>

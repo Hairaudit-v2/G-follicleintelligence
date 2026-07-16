@@ -17,7 +17,10 @@ export const INTELLIGENCE_PAGE_CONTENT = {
     subtext:
       "Follicle Intelligence connects patient history, clinical assessment, imaging, blood markers, treatment response, surgical data, audit evidence, and long-term outcomes into one structured intelligence layer for hair restoration.",
     primaryCta: { label: "Explore Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Explore the Platform",
+      href: "/platform" as const,
+    },
   },
 
   problem: {
@@ -199,6 +202,9 @@ export const INTELLIGENCE_PAGE_CONTENT = {
     eyebrow: "Enterprise",
     headline: "Build your clinic on intelligence that compounds.",
     primaryCta: { label: "Explore Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Explore the Platform",
+      href: "/platform" as const,
+    },
   },
 } as const;

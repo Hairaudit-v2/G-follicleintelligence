@@ -6,12 +6,15 @@ import favicon32 from "@/public/icons/favicon-32x32.png";
 import evolvedLogo from "@/public/evolved-logo.png";
 import follicleLogoBlack from "@/public/brand/follicle-intelligence-logo-black.svg";
 import follicleLogoWhite from "@/public/brand/follicle-intelligence-logo-white.svg";
+import follicleLogoHeaderWhite from "@/public/brand/follicle-intelligence-logo-header-white.png";
 
 /** Known static assets under `/public` — import for Next.js `Image` (avoids CORB-prone string paths). */
 export const PUBLIC_IMAGES = {
   evolvedLogo,
   follicleLogoWhite,
   follicleLogoBlack,
+  /** Compact header mark (white, transparent) — cropped from approved PNG logo pack. */
+  follicleLogoHeaderWhite,
   favicon32,
   appleTouchIcon,
   androidChrome196,
@@ -22,6 +25,7 @@ export const PUBLIC_IMAGE_BY_PATH: Record<string, StaticImageData> = {
   "/evolved-logo.png": PUBLIC_IMAGES.evolvedLogo,
   "/brand/follicle-intelligence-logo-white.svg": PUBLIC_IMAGES.follicleLogoWhite,
   "/brand/follicle-intelligence-logo-black.svg": PUBLIC_IMAGES.follicleLogoBlack,
+  "/brand/follicle-intelligence-logo-header-white.png": PUBLIC_IMAGES.follicleLogoHeaderWhite,
   "/icons/favicon-32x32.png": PUBLIC_IMAGES.favicon32,
   "/icons/apple-touch-icon.png": PUBLIC_IMAGES.appleTouchIcon,
   "/icons/android-chrome-196x196.png": PUBLIC_IMAGES.androidChrome196,
@@ -32,6 +36,7 @@ export const PUBLIC_IMAGE_PATHS = {
   evolvedLogo: "/evolved-logo.png",
   follicleLogoWhite: "/brand/follicle-intelligence-logo-white.svg",
   follicleLogoBlack: "/brand/follicle-intelligence-logo-black.svg",
+  follicleLogoHeaderWhite: "/brand/follicle-intelligence-logo-header-white.png",
   favicon32: "/icons/favicon-32x32.png",
   appleTouchIcon: "/icons/apple-touch-icon.png",
   androidChrome196: "/icons/android-chrome-196x196.png",

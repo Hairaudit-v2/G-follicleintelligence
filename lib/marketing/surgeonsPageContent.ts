@@ -11,7 +11,10 @@ export const SURGEONS_PAGE_CONTENT = {
     subtext:
       "Follicle Intelligence connects training, consultation workflows, surgical planning, procedure tracking, outcome review, and continuous performance feedback into one operating system built for modern hair restoration doctors.",
     primaryCta: { label: "Explore Training", href: "/academy" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
   },
 
   problem: {
@@ -211,6 +214,9 @@ export const SURGEONS_PAGE_CONTENT = {
     eyebrow: "Next step",
     headline: "Build your surgical practice on intelligence, not isolation.",
     primaryCta: { label: "Explore Training", href: "/academy" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
   },
 } as const;

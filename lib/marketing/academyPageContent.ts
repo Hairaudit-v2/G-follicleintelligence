@@ -16,7 +16,10 @@ export const ACADEMY_PAGE_CONTENT = {
     headline: "Training Infrastructure For The Modern Hair Restoration Workforce",
     subtext:
       "AcademyOS connects doctor education, nurse training, consultant development, technician competency, clinical assessment, and performance feedback into one structured training layer for hair restoration organisations.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    primaryCta: {
+      label: "Discuss a Strategic Partnership",
+      href: "/contact" as const,
+    },
     secondaryCta: { label: "Explore Platform", href: "/platform" as const },
   },
 
@@ -211,7 +214,10 @@ export const ACADEMY_PAGE_CONTENT = {
     id: "academy-final-cta",
     eyebrow: "Next step",
     headline: "Build the workforce before you scale the network.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
+    primaryCta: {
+      label: "Discuss a Strategic Partnership",
+      href: "/contact" as const,
+    },
     secondaryCta: { label: "Explore Platform", href: "/platform" as const },
   },
 } as const;

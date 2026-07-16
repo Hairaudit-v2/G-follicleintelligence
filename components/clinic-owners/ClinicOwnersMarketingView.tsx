@@ -324,6 +324,15 @@ export function ClinicOwnersMarketingView() {
           <p className="mt-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             {c.adoption.hubspotNote}
           </p>
+          {"migrationCta" in c.adoption && c.adoption.migrationCta ? (
+            <Link
+              href={c.adoption.migrationCta.href}
+              className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/90 transition-colors hover:text-amber-50"
+            >
+              {c.adoption.migrationCta.label}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          ) : null}
         </FadeIn>
       </Section>
 

@@ -215,6 +215,10 @@ export const CLINIC_OWNERS_PAGE_CONTENT = {
     ] as const,
     hubspotNote:
       "Clinics using HubSpot can begin by connecting selected workflows, transition active contacts and leads in stages, or progressively move CRM activity into LeadFlow. The same progressive principle applies to booking, calendar and operational tools where supported.",
+    migrationCta: {
+      label: "See how controlled transition works",
+      href: "/migrate-from-hubspot" as const,
+    },
   },
 
   migration: {

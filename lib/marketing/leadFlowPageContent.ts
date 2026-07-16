@@ -48,6 +48,10 @@ export const LEADFLOW_PAGE_CONTENT = {
     },
     secondaryCta: { label: "Explore the Platform", href: "/platform" as const },
     tertiaryCta: { label: "See Platform Progress", href: "/platform/progress" as const },
+    migrationCta: {
+      label: "View the HubSpot migration pathway",
+      href: "/migrate-from-hubspot" as const,
+    },
   },
 
   problem: {

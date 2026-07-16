@@ -372,7 +372,10 @@ export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
     subheadline: "This is infrastructure for an entire medical industry.",
     body: "Follicle Intelligence is being built to become the global operating system for hair restoration medicine — for clinics, educators, auditors, and industry leaders who want to raise the standard globally.",
     primaryCta: { label: "View live platform progress", href: "/platform/progress" },
-    secondaryCta: { label: "Book enterprise demo", href: "/demo" },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo",
+    },
   },
 } as const;
 

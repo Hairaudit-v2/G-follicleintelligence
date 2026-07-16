@@ -36,6 +36,10 @@ export const PLATFORM_REVIEW_PAGE_CONTENT = {
     },
     secondaryCta: { label: "Explore the Platform", href: "/platform" as const },
     tertiaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
+    migrationCta: {
+      label: "Explore migration from HubSpot",
+      href: "/migrate-from-hubspot" as const,
+    },
   },
 
   positioning: {

@@ -62,3 +62,50 @@ Still present on some non-home marketing pages (surgeons, enterprise, intelligen
 - Dedicated HubSpot migration page
 - Deeper object-level migration detail
 - Full remaining CTA cleanup across all marketing pages
+
+---
+
+## Addendum — Homepage header logo sizing
+
+### Previous logo asset
+
+| Field | Value |
+| --- | --- |
+| Asset | `/icons/favicon-32x32.png` via `PUBLIC_IMAGES.favicon32` |
+| Rendered | 30×30 CSS px inside a 48×48 (`h-12 w-12`) panel |
+| Header chrome | `min-h-20` + `py-6` (oversized vertical rhythm) |
+
+### Selected replacement
+
+| Field | Value |
+| --- | --- |
+| Source | `Logo Files/png/White logo - no background.png` |
+| Reason | Correct FI brand mark on dark UI; transparent background; white mark for header contrast; crop to chevron mark for compact nav (full stack logo is too tall for the bar) |
+| Repo path | `/public/brand/follicle-intelligence-logo-header-white.png` |
+| Source dimensions | 131×96 px (cropped + resized from 3172×2842 master) |
+| Runtime | Served from repo via Next `Image` + `PUBLIC_IMAGES.follicleLogoHeaderWhite` |
+
+### New rendered dimensions
+
+| Viewport | Image CSS | Header bar |
+| --- | --- | --- |
+| Mobile | `h-6` (24px) auto width | `h-14` (56px) |
+| Desktop (`sm+`) | `h-7` (28px) auto width | `h-16` (64px) |
+| Intrinsic width/height attrs | 36×26 | Prevents CLS |
+
+Aspect ratio preserved (`w-auto`). No stretch/crop in CSS.
+
+### Shared header impact
+
+`components/layout/header.tsx` is shared across public marketing pages (sticky header). Change applies site-wide to that component only.
+
+**Not changed:** footer wordmark (`follicleLogoWhite` SVG), Open Graph / favicon metadata assets.
+
+### Screenshots
+
+`docs/marketing/screenshots/fi-web-refresh-1f-logo/`
+
+- `desktop-header.png`
+- `desktop-header-narrow.png`
+- `mobile-header.png`
+- `desktop-header-scrolled.png` (sticky state)

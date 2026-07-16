@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { DEMO_INTEREST_QUERY_MAP } from "@/lib/marketing/hubspotMigrationPageContent";
 import {
   emptyPlatformReviewFormValues,
   PLATFORM_REVIEW_ADOPTION_OPTIONS,
@@ -215,6 +216,14 @@ export function PlatformReviewEnquiryForm() {
   const [serverMessage, setServerMessage] = useState<string>("");
 
   useEffect(() => {
+    const interestParam = readUtm("interest").toLowerCase();
+    const mappedInterest = DEMO_INTEREST_QUERY_MAP[interestParam];
+    const interestFromQuery =
+      mappedInterest &&
+      (PLATFORM_REVIEW_INTEREST_OPTIONS as readonly string[]).includes(mappedInterest)
+        ? mappedInterest
+        : "";
+
     setValues((prev) => ({
       ...prev,
       submissionKey: prev.submissionKey || crypto.randomUUID(),
@@ -225,6 +234,7 @@ export function PlatformReviewEnquiryForm() {
       utmCampaign: readUtm("utm_campaign"),
       utmContent: readUtm("utm_content"),
       utmTerm: readUtm("utm_term"),
+      primaryInterest: interestFromQuery || prev.primaryInterest,
     }));
   }, []);
 

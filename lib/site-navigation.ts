@@ -39,6 +39,7 @@ export const FOOTER_PLATFORM: FooterNavLink[] = [
   { label: "Audit network", href: "/audit-network" },
   { label: "Intelligence", href: "/intelligence" },
   { label: "Platform review", href: "/demo" },
+  { label: "HubSpot migration", href: "/migrate-from-hubspot" },
 ];
 
 /** Public footer — product modules (deep links) */

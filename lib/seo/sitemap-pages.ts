@@ -29,6 +29,7 @@ export const PUBLIC_SITEMAP_PAGES: readonly SitemapPage[] = [
   { path: "/audit-network", priority: 0.85, changeFrequency: "monthly" },
   { path: "/intelligence", priority: 0.85, changeFrequency: "monthly" },
   { path: "/demo", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/migrate-from-hubspot", priority: 0.88, changeFrequency: "monthly" },
   { path: "/pricing", priority: 0.88, changeFrequency: "monthly" },
   { path: "/solutions", priority: 0.9, changeFrequency: "monthly" },
   { path: "/hair-intelligence", priority: 0.9, changeFrequency: "monthly" },

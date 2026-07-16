@@ -267,7 +267,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     },
     tertiary: {
       label: "View the HubSpot Migration Pathway",
-      href: "/platform/leadflow" as const,
+      href: "/migrate-from-hubspot" as const,
     },
   },
 
