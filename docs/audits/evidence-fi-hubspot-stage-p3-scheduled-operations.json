@@ -97,7 +97,7 @@
     "test": "910a0b2d",
     "alertFix": "b48098e3",
     "dailyCadenceLock": "4008088a",
-    "audit": "pending"
+    "audit": "8e157041"
   },
   "remainingRisks": [
     "enablement_used_temporary_15m_cadence_then_locked_daily",
