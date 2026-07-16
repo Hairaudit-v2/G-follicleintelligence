@@ -1,16 +1,60 @@
 # FI-HUBSPOT-IMPORT-1D — Contact and lead migration pilot evidence
 
-**Verdict:** GREEN
+**Verdict:** GREEN — COMPLETE
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
 **Integration:** `ade8a7d0-ad45-4fd7-8d53-61d4806b95f6`
 
-## Closeout summary
+## Closeout
 
-Bounded production pilot applied with patient-protection gate held. Additive contact→lead mappings only. No new leads required. No patients created or linked.
+**FI-HUBSPOT-IMPORT-1D: GREEN — COMPLETE**
 
-## Production outcome
+A bounded 25-contact production pilot was applied with the
+patient-protection gate held.
+
+Production outcome:
+- 25 contacts evaluated
+- 24 existing FI leads linked
+- 0 new leads created
+- 0 patients created or linked
+- 0 patient-link-review cases in the selected cohort
+- 1 test/smoke contact quarantined
+- 0 conflicts
+- 0 wrong-tenant decisions
+
+Production batch:
+`46c77f5f-866d-4363-a012-b8f0c960f966`
+
+Identity method:
+`person_source_id_single_lead`
+
+Counts:
+- FI leads: 4,706 → 4,706
+- FI patients: 829 → 829
+- contact-to-lead mappings: 0 → 24
+
+Controls verified:
+- bounded maximum of 25 contacts
+- immutable preview checksum
+- additive source mappings only
+- automatic patient creation blocked
+- no new or duplicate leads
+- no unsafe FI field overwrite
+- idempotent replay: already_applied ×24, mutation delta 0
+- rollback preview isolates all 24 mappings
+- no notifications, tasks, appointments or other side effects
+- HubSpot backup watermark unchanged
+
+Documented limitations:
+- no valid new-lead or patient-review cases existed in this pilot pool
+- owner and stage enrichment remain limited because current staging
+  contact payloads lack owner and stage properties
+
+Exact next gate:
+**FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion**
+
+## Production outcome (detail)
 
 | Metric | Value |
 |--------|------:|

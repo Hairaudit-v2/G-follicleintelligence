@@ -1,0 +1,53 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1D",
+  "verdict": "GREEN — COMPLETE",
+  "status": "COMPLETE",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "pilotSize": 25,
+  "existingLeadsLinked": 24,
+  "newLeadsCreated": 0,
+  "alreadyLinked": 0,
+  "patientLinkReviewCount": 0,
+  "quarantinedByReason": {
+    "quarantine_test_or_smoke": 1
+  },
+  "conflicts": 0,
+  "wrongTenantCount": 0,
+  "batchId": "46c77f5f-866d-4363-a012-b8f0c960f966",
+  "checksum": "2bc68b260f24d8b9a25d0a83d4c12bf81914ca83d3b0ca28998dd49f2e0b7069",
+  "newLeadIds": [],
+  "leadCountBefore": 4706,
+  "leadCountAfter": 4706,
+  "patientCountBefore": 829,
+  "patientCountAfter": 829,
+  "mappingCountBefore": 0,
+  "mappingCountAfter": 24,
+  "watermarkBefore": "2026-07-16T03:45:02.366Z",
+  "watermarkAfter": "2026-07-16T03:45:02.366Z",
+  "idempotentReplay": {
+    "linked": 0,
+    "created": 0,
+    "alreadyApplied": 24,
+    "delta": 0
+  },
+  "rollbackPreview": {
+    "ok": true,
+    "removableMappings": 24,
+    "executed": false
+  },
+  "sideEffects": {
+    "notifications": 0,
+    "tasks": 0,
+    "appointments": 0,
+    "messages": 0
+  },
+  "patientCreationForbidden": true,
+  "testResults": {
+    "tsc": "pass",
+    "test:hubspot-import": "69 pass",
+    "test:hubspot-incremental": "58 pass"
+  },
+  "nextGate": "FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion",
+  "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=lead-pilot"
+}
