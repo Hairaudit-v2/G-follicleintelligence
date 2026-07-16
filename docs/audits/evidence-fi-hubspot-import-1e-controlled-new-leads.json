@@ -1,0 +1,96 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-C",
+  "verdict": "GREEN",
+  "status": "FIRST_CREATE_BATCH_RECONCILED_STOPPED",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "sourceBoundary": {
+    "cutoff": "2026-07-16T16:00:34.530Z",
+    "inventoryChecksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+    "candidateChecksum": "8b0b22f9d30deff76672ba58e963976c579fb2fb7f835fe111f85d519ce63abd",
+    "totalSourceContacts": 4752,
+    "candidateCount": 42
+  },
+  "classification": {
+    "approved_create_new_lead": 10,
+    "link_existing_lead": 0,
+    "patient_link_review_required": 0,
+    "quarantine_missing_identity": 0,
+    "quarantine_duplicate_risk": 1,
+    "quarantine_test_or_smoke": 0,
+    "quarantine_spam_or_invalid": 0,
+    "excluded": 0,
+    "deferred_manual_review": 31,
+    "already_applied": 0,
+    "total": 42,
+    "persisted": true
+  },
+  "firstBatch": {
+    "batchId": "32d02f20-9852-4be2-b237-45c115f43c2b",
+    "checksum": "6ee2b1f4408bd9f66f3a7f346dc57bb9ac6fe85e19db28125048ce82b6814d2c",
+    "max": 10,
+    "approvedCreates": 10,
+    "links": 0,
+    "created": 10,
+    "leadCountBefore": 4706,
+    "leadCountAfter": 4716,
+    "personCountDelta": 10,
+    "personSourceIdDelta": 10,
+    "mappingDelta": 10,
+    "patientCountBefore": 829,
+    "patientCountAfter": 829,
+    "watermarkBefore": "2026-07-16T16:00:34.53+00:00",
+    "watermarkAfter": "2026-07-16T16:00:34.53+00:00",
+    "sideEffects": []
+  },
+  "reconciliation": {
+    "balanced": true,
+    "unexplained": 0,
+    "patientMutationCount": 0
+  },
+  "replay": {
+    "created": 0,
+    "alreadyApplied": 10,
+    "leadDelta": 0,
+    "personDelta": 0,
+    "personSourceIdDelta": 0,
+    "mappingDelta": 0,
+    "unexplained": 0
+  },
+  "rollbackPreview": {
+    "executed": false,
+    "removableMappings": 10,
+    "newLeadsEligible": 10,
+    "blockedLeads": 0
+  },
+  "unchanged": {
+    "patients": true,
+    "staff": true,
+    "users": true,
+    "tasks": true,
+    "notifications": true,
+    "messages": true,
+    "bookings": true,
+    "watermarks": true
+  },
+  "remaining": {
+    "mappedOrApplied": 4606,
+    "createCandidates": 32,
+    "deferredManualReview": 31,
+    "duplicateRiskQuarantine": 1,
+    "patientReviewOutOfScope": 4,
+    "preExistingQuarantined": 100,
+    "excluded": 10,
+    "unexplained": 0,
+    "wrongTenant": 0
+  },
+  "verification": {
+    "fullHubspotImportTestsPassed": 98,
+    "focusedTestsPassed": 59,
+    "changedFileLintErrors": 0,
+    "typecheck": "blocked_by_unrelated_existing_tests/onboardingOsGuidedAssist.test.ts:143_missing_todayHomeViews"
+  },
+  "workspace": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration",
+  "secondBatchStarted": false,
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-P"
+}

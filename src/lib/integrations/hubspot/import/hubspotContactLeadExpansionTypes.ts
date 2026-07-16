@@ -76,6 +76,7 @@ export type HubspotContactLeadExpansionRow = {
   approvedForApply: boolean;
   identityTier: string;
   applyEligible: boolean;
+  reviewState?: string | null;
 };
 
 export type HubspotContactLeadExpansionSummary = {

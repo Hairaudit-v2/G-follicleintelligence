@@ -56,6 +56,7 @@ import {
   type HubspotContactLeadExpansionSummary,
 } from "./hubspotContactLeadExpansionTypes";
 import { HUBSPOT_CONTACT_LEAD_PILOT_MILESTONE } from "./hubspotContactLeadPilotTypes";
+import { HUBSPOT_LEAD_CANDIDATE_BATCH_MAX } from "./hubspotLeadCandidateReviewCore";
 
 function prop(raw: Record<string, unknown> | null | undefined, ...keys: string[]): string | null {
   if (!raw) return null;
@@ -410,7 +411,7 @@ function buildInventoryRows(
       decision_state: HubspotContactLeadExpansionRow["decision"];
       target_lead_id: string | null;
       approved_for_apply: boolean;
-      match_evidence: { reason_code?: string; milestone?: string };
+      match_evidence: { reason_code?: string; milestone?: string; review_state?: string };
       applied_at: string | null;
     }
   >,
@@ -455,7 +456,10 @@ function buildInventoryRows(
 
     if (saved?.decision_state === "already_applied" || applied) {
       decision = hasExternalLead || applied ? "already_applied" : decision;
-    } else if (saved?.decision_state && saved.match_evidence?.milestone === HUBSPOT_CONTACT_LEAD_EXPANSION_MILESTONE) {
+    } else if (
+      saved?.decision_state &&
+      saved.match_evidence?.milestone === HUBSPOT_CONTACT_LEAD_EXPANSION_MILESTONE
+    ) {
       decision = saved.decision_state;
     }
 
@@ -507,6 +511,7 @@ function buildInventoryRows(
         : applyEligible && decision === "link_existing_lead",
       identityTier: resolved.identityTier,
       applyEligible,
+      reviewState: saved?.match_evidence?.review_state ?? null,
     });
   }
   return rows;
@@ -557,7 +562,7 @@ export async function buildContactLeadExpansionInventory(
         decision_state: HubspotContactLeadExpansionRow["decision"];
         target_lead_id: string | null;
         approved_for_apply: boolean;
-        match_evidence: { reason_code?: string; milestone?: string };
+        match_evidence: { reason_code?: string; milestone?: string; review_state?: string };
         applied_at: string | null;
       },
     ])
@@ -659,7 +664,10 @@ export async function loadContactLeadExpansionWorkspace(
     filter,
     dataQuality: inventory.dataQuality,
     batchPolicy,
-    batchMax: resolveExpansionBatchMax(batchPolicy),
+    batchMax:
+      inventory.summary.readyToLink === 0 && inventory.summary.proposedNewLeads > 0
+        ? HUBSPOT_LEAD_CANDIDATE_BATCH_MAX
+        : resolveExpansionBatchMax(batchPolicy),
     priorGate,
     patientCreationForbidden: true,
   };
@@ -1195,6 +1203,45 @@ export async function applyContactLeadExpansionBatch(
       }
 
       if (item.decision === "create_new_lead") {
+        const { data: existingMapping } = await supabase
+          .from("fi_external_record_mappings")
+          .select("id,fi_entity_id,detail")
+          .eq("tenant_id", input.tenantId)
+          .eq("integration_id", input.integrationId)
+          .eq("source_provider", "hubspot")
+          .eq("source_entity_type", "contact")
+          .eq("external_id", item.hubspotContactId)
+          .eq("fi_entity_type", "lead")
+          .maybeSingle();
+        if (existingMapping) {
+          const existing = existingMapping as {
+            id: string;
+            fi_entity_id: string;
+            detail?: { import_batch_id?: string };
+          };
+          if (existing.detail?.import_batch_id !== b.id) {
+            throw new Error(
+              `APPLY_GUARD: contact ${item.hubspotContactId} already maps outside this batch`
+            );
+          }
+          alreadyApplied += 1;
+          mappingIds.push(String(existing.id));
+          newLeadIds.push(String(existing.fi_entity_id));
+          await supabase
+            .from("fi_hubspot_contact_lead_pilot_decisions")
+            .update({
+              decision_state: "already_applied",
+              applied_at: new Date().toISOString(),
+              import_batch_id: b.id,
+              target_lead_id: String(existing.fi_entity_id),
+            })
+            .eq("tenant_id", input.tenantId)
+            .eq("integration_id", input.integrationId)
+            .eq("hubspot_contact_id", item.hubspotContactId)
+            .is("superseded_at", null);
+          continue;
+        }
+
         const { data: existingPersonSrc } = await supabase
           .from("fi_person_source_ids")
           .select("person_id")
@@ -1344,12 +1391,14 @@ export async function applyContactLeadExpansionBatch(
       throw new Error("WATERMARK_GUARD: backup watermark changed during 1E apply");
     }
 
+    const replayOnly =
+      linked === 0 && created === 0 && alreadyApplied === approved.length;
     await supabase
       .from("fi_import_batches")
       .update({
         status: "import_completed",
         imported_at: new Date().toISOString(),
-        imported_row_count: linked + created,
+        imported_row_count: replayOnly ? b.imported_row_count : linked + created,
         metadata: {
           ...b.metadata,
           linked,
@@ -1366,6 +1415,7 @@ export async function applyContactLeadExpansionBatch(
           patient_count_before: patientCountBefore,
           patient_count_after: patientCountAfterInner,
           batch_status: "applied" satisfies HubspotContactLeadExpansionBatchStatus,
+          replay_verified: replayOnly,
         },
       })
       .eq("id", b.id);

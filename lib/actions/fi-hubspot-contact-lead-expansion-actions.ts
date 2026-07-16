@@ -10,9 +10,7 @@ import {
   tryResolveFiUserIdForTenant,
 } from "@/src/lib/crm/crmGate";
 import {
-  applyContactLeadExpansionBatch,
   loadContactLeadExpansionWorkspace,
-  previewContactLeadExpansionBatch,
   reconcileContactLeadExpansionBatch,
   saveContactLeadExpansionDecision,
   selectAndPersistExpansionBatch,
@@ -21,9 +19,17 @@ import type {
   HubspotContactLeadExpansionDecisionInput,
   HubspotContactLeadExpansionFilter,
 } from "@/src/lib/integrations/hubspot/import/hubspotContactLeadExpansionTypes";
+import {
+  applyLeadCandidateBatch,
+  previewLeadCandidateBatch,
+} from "@/src/lib/integrations/hubspot/import/hubspotLeadCandidateReview.server";
 import { loadHubspotIntegrationForTenant } from "@/src/lib/onboarding-os/hubspotImport.server";
 import { hubspotWorkspaceHref } from "@/src/lib/onboarding-os/hubspotWorkspaceRoutes";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+
+const ONE_E_C_INVENTORY =
+  "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c";
+const ONE_E_C_CUTOFF = "2026-07-16T16:00:34.530Z";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -111,7 +117,7 @@ export async function selectHubspotContactMigrationBatchAction(
     const result = await selectAndPersistExpansionBatch(supabaseAdmin(), {
       tenantId,
       integrationId: integration.data.integrationId,
-      maxSize,
+      maxSize: Math.min(maxSize ?? 10, 10),
       operatorLabel: "workspace-select",
     });
     revalidatePath(hubspotWorkspaceHref(tenantId, "contact-migration"));
@@ -128,11 +134,11 @@ export async function previewHubspotContactMigrationBatchAction(tenantId: string
     if (!integration.ok || !integration.data) {
       return { ok: false as const, error: "HubSpot is not configured for this clinic." };
     }
-    const preview = await previewContactLeadExpansionBatch(supabaseAdmin(), {
+    const preview = await previewLeadCandidateBatch(supabaseAdmin(), {
       tenantId,
       integrationId: integration.data.integrationId,
-      operatorLabel: "workspace-preview",
-      maxSize: 100,
+      fixedInventoryChecksum: ONE_E_C_INVENTORY,
+      sourceCutoff: ONE_E_C_CUTOFF,
     });
     revalidatePath(hubspotWorkspaceHref(tenantId, "contact-migration"));
     return { ok: true as const, preview };
@@ -159,12 +165,14 @@ export async function applyHubspotContactMigrationBatchAction(
         error: "Confirmation did not match the approved batch. Nothing was applied.",
       };
     }
-    const result = await applyContactLeadExpansionBatch(supabaseAdmin(), {
+    const result = await applyLeadCandidateBatch(supabaseAdmin(), {
       tenantId,
       integrationId: integration.data.integrationId,
-      approvedBatchId,
+      batchId: approvedBatchId,
+      checksum: expectedChecksum,
       confirmToken: confirmBatchId,
-      expectedChecksum,
+      fixedInventoryChecksum: ONE_E_C_INVENTORY,
+      sourceCutoff: ONE_E_C_CUTOFF,
       actorLabel: "workspace-apply",
     });
     revalidatePath(hubspotWorkspaceHref(tenantId, "contact-migration"));

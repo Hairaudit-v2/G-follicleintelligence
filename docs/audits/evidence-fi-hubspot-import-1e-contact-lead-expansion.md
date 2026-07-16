@@ -1,6 +1,6 @@
 # FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion evidence
 
-**Verdict:** GREEN — E1–E11 link-only batches complete; 1E-R staging coverage reconciled; non-link cohorts remain excluded
+**Verdict:** GREEN — E1–E11 link-only batches complete; 1E-C first 10-record create batch reconciled; second batch stopped
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
@@ -15,14 +15,14 @@ patient-protection gate held. E11 completed the deterministic link-only populati
 
 E10 audit commit `43ed89e3` was on `origin/main` before E11 apply.
 
-### Post-1E-R inventory (write-free)
+### Post-1E-C first-batch inventory
 
 | Metric | Value |
 |--------|------:|
 | Total source contacts | 4,752 |
-| Already linked / applied | 4,596 |
+| Already linked / applied | 4,606 |
 | Ready to link | 0 |
-| Proposed new leads | 42 |
+| Proposed new leads | 32 |
 | Patient review | 4 |
 | Quarantined | 100 |
 | Excluded (archived) | 10 |
@@ -137,16 +137,36 @@ contacts. Final coverage is 4,596 mapped + 42 create candidates + 4 patient revi
 Full evidence:
 `docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.md`
 
+### 1E-C controlled new-lead review (2026-07-17)
+
+All 42 fixed candidates were classified and persisted: 10
+`approved_create_new_lead`, 31 `deferred_manual_review`, and 1
+`quarantine_duplicate_risk`. The candidate checksum is
+`8b0b22f9d30deff76672ba58e963976c579fb2fb7f835fe111f85d519ce63abd`.
+
+Create-only batch `32d02f20-9852-4be2-b237-45c115f43c2b` froze 10 records
+under checksum
+`6ee2b1f4408bd9f66f3a7f346dc57bb9ac6fe85e19db28125048ce82b6814d2c`.
+Apply created exactly 10 leads, 10 persons, 10 person source IDs, and 10
+contact→lead mappings. Patients remained 829; staff, users, tasks,
+notifications, messages, bookings, and all watermarks were unchanged.
+
+Reconciliation balanced with unexplained 0. Replay returned already-applied
+×10 with zero entity or mapping delta. Rollback preview isolated exactly 10
+mappings and 10 eligible batch-owned leads with zero blocked records; rollback
+was not executed.
+
+Full evidence:
+`docs/audits/evidence-fi-hubspot-import-1e-controlled-new-leads.md`
+
 ### Exact next step
 
-**Stop link-only expansion.** Ready-to-link is zero. Do not process the 42
-create candidates, 4 patient-review records, or 100 quarantined records without
-separate approval.
+**Stop before a second creation batch.** Remaining create candidates are 31
+deferred manual review plus 1 duplicate-risk quarantine. The 4 patient-review
+records and 100 pre-existing quarantined records remain out of scope.
 
 Exact next gate:
-**FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review**
-
-Use the refreshed create-candidate count of **42**.
+**FI-HUBSPOT-IMPORT-1E-P**
 
 Programme next gate after create/review closeout:
 **FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot**

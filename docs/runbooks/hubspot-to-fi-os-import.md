@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E-R GREEN** (contact staging 4,752; unexplained 0; next gate 1E-C with 42 refreshed create candidates)  
+Current gate: **1E-C GREEN** (42 candidates classified; first 10 creates reconciled; second batch stopped; next gate 1E-P)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -242,12 +242,25 @@ Hard rules for 1E (inherits 1D):
 - Notes watermark unchanged; contact watermark absent before/after
 - Evidence: `docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.md`
 
+### 1E-C controlled new-lead review (2026-07-17)
+
+- Fixed inventory checksum: `3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c`
+- Candidate checksum: `8b0b22f9d30deff76672ba58e963976c579fb2fb7f835fe111f85d519ce63abd`
+- All 42 persisted: 10 approved creates, 31 deferred manual review, 1 duplicate-risk quarantine
+- First batch `32d02f20-9852-4be2-b237-45c115f43c2b`, max 10, preview checksum `6ee2b1f4408bd9f66f3a7f346dc57bb9ac6fe85e19db28125048ce82b6814d2c`
+- Apply: leads +10, persons +10, person source IDs +10, mappings +10
+- Patients 829→829; staff/users/tasks/messages/notifications/bookings/watermarks unchanged
+- Reconcile unexplained 0; replay already-applied ×10 with zero delta
+- Rollback preview: 10 mappings and 10 batch-owned leads, 0 blocked; not executed
+- Remaining: 31 deferred + 1 duplicate-risk; four patient-review records remain out of scope
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-controlled-new-leads.md`
+
 ### Next gate
 
-`FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review`
+`FI-HUBSPOT-IMPORT-1E-P`
 
-Use the refreshed create-candidate count of **42**.
-Do not process remaining create/patient-review/quarantine cohorts without separate approval.
+Stop before any second creation batch. Do not process the remaining
+create/patient-review/quarantine cohorts without the 1E-P gate.
 
 ## Safety checklist before any apply
 
@@ -273,3 +286,4 @@ Do not process remaining create/patient-review/quarantine cohorts without separa
 - [x] 1E E11: patient count unchanged; 472 final link-only contacts; reconcile unexplained=0; ready-to-link exhausted
 - [x] 1E-W: owning cron run attributed; retain notes watermark; contact staging freshness follow-up documented; create candidates still paused
 - [x] 1E-R: 21 interval contacts refreshed/revalidated; staging 4,752; unexplained=0; no FI/mapping/watermark mutations; gate open for 1E-C review only
+- [x] 1E-C: all 42 classified; first 10 create-only records applied; patients/watermarks/side effects unchanged; replay delta 0; stopped before second batch

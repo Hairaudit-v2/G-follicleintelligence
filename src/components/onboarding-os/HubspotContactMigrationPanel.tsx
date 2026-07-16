@@ -8,7 +8,6 @@ import {
   previewHubspotContactMigrationBatchAction,
   reconcileHubspotContactMigrationBatchAction,
   saveHubspotContactMigrationDecisionAction,
-  selectHubspotContactMigrationBatchAction,
 } from "@/lib/actions/fi-hubspot-contact-lead-expansion-actions";
 import type {
   HubspotContactLeadDataQualityProfile,
@@ -51,12 +50,12 @@ function actionLabel(decision: HubspotContactLeadExpansionRow["decision"]): stri
 }
 
 export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
-  const [filter, setFilter] = useState<HubspotContactLeadExpansionFilter>("ready");
+  const [filter, setFilter] = useState<HubspotContactLeadExpansionFilter>("new_lead");
   const [search, setSearch] = useState("");
   const [summary, setSummary] = useState<HubspotContactLeadExpansionSummary | null>(null);
   const [dataQuality, setDataQuality] = useState<HubspotContactLeadDataQualityProfile | null>(null);
   const [rows, setRows] = useState<HubspotContactLeadExpansionRow[]>([]);
-  const [batchMax, setBatchMax] = useState(100);
+  const [batchMax, setBatchMax] = useState(10);
   const [priorGate, setPriorGate] = useState<{
     priorBatchId: string | null;
     reconciled: boolean;
@@ -69,7 +68,7 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
   const [showAudit, setShowAudit] = useState(false);
   const [stage, setStage] = useState<
     "draft" | "ready_for_review" | "approved" | "applied" | "reconciled"
-  >("draft");
+  >("ready_for_review");
   const [preview, setPreview] = useState<{
     batchId: string;
     checksum: string;
@@ -132,23 +131,6 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
         return;
       }
       setMessage("Decision saved.");
-      reload();
-    });
-  }
-
-  function runSelectBatch() {
-    if (!canMutate) return;
-    startTransition(async () => {
-      setError(null);
-      const res = await selectHubspotContactMigrationBatchAction(tenantId, batchMax);
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      setStage("ready_for_review");
-      setMessage(
-        `Batch E${res.result.batchSequence} selected: ${res.result.selected.length} contact(s) (max ${res.result.batchMax}).`
-      );
       reload();
     });
   }
@@ -220,7 +202,7 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
 
   const primaryLabel =
     stage === "draft"
-      ? "Select next batch"
+      ? "Candidate gate paused"
       : stage === "ready_for_review"
         ? "Preview batch"
         : stage === "approved"
@@ -232,9 +214,9 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
   return (
     <section className="space-y-4" aria-label="HubSpot contact migration expansion">
       <div className="rounded border border-cyan-500/30 bg-cyan-500/5 p-3 text-sm text-cyan-100">
-        Migrate HubSpot contacts into FI lead mappings in bounded batches. Patients are never created
-        or linked automatically. First batch max {batchMax}. Prior batch must reconcile before the
-        next apply.
+        1E-C new-lead candidate review. Every candidate must have an explicit review state and pass
+        fresh tenant, source, duplicate, patient, email, and phone checks. Patients are never created
+        or linked automatically. The first creation batch is capped at {batchMax}.
       </div>
 
       {priorGate && priorGate.priorBatchId && !priorGate.reconciled ? (
@@ -337,6 +319,7 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
                 }`}
               >
                 {actionLabel(current.decision)}
+                {current.reviewState ? ` · ${current.reviewState.replace(/_/g, " ")}` : ""}
               </p>
             </div>
             <div className="flex gap-2">
@@ -458,14 +441,9 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
             change. Only one primary action is shown for the current stage.
           </p>
           {stage === "draft" ? (
-            <button
-              type="button"
-              className="rounded bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-40"
-              disabled={pending || Boolean(priorGate?.priorBatchId && !priorGate.reconciled)}
-              onClick={runSelectBatch}
-            >
-              {primaryLabel}
-            </button>
+            <p className="text-sm text-amber-200">
+              Candidate creation is paused. A separately approved gate is required for another batch.
+            </p>
           ) : null}
           {stage === "ready_for_review" ? (
             <button
@@ -518,18 +496,9 @@ export function HubspotContactMigrationPanel({ tenantId, canMutate }: Props) {
             </button>
           ) : null}
           {stage === "reconciled" ? (
-            <button
-              type="button"
-              className="rounded bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-40"
-              disabled={pending}
-              onClick={() => {
-                setStage("draft");
-                setLastAppliedBatchId(null);
-                setMessage("Ready to prepare the next batch.");
-              }}
-            >
-              Prepare next batch
-            </button>
+            <p className="text-sm text-emerald-200">
+              First batch reconciled. Stop here; the next creation batch is not open.
+            </p>
           ) : null}
         </div>
       ) : null}

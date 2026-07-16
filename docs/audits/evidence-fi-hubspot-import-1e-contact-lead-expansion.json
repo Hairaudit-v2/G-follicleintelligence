@@ -1,7 +1,7 @@
 {
   "milestone": "FI-HUBSPOT-IMPORT-1E",
-  "verdict": "GREEN — E1–E11 link-only batches complete; 1E-R staging coverage reconciled; non-link cohorts remain excluded",
-  "status": "E11_COMPLETE_1E_R_GREEN",
+  "verdict": "GREEN — E1–E11 links complete; 1E-C first 10-record create batch reconciled; second batch stopped",
+  "status": "E11_COMPLETE_1E_C_FIRST_BATCH_GREEN",
   "watermarkProvenance": {
     "gate": "FI-HUBSPOT-IMPORT-1E-W",
     "verdict": "AMBER",
@@ -23,6 +23,28 @@
     "inventoryChecksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
     "evidence": "docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.md"
   },
+  "controlledNewLeadReview": {
+    "gate": "FI-HUBSPOT-IMPORT-1E-C",
+    "verdict": "GREEN",
+    "candidateCount": 42,
+    "candidateChecksum": "8b0b22f9d30deff76672ba58e963976c579fb2fb7f835fe111f85d519ce63abd",
+    "classification": {
+      "approved_create_new_lead": 10,
+      "deferred_manual_review": 31,
+      "quarantine_duplicate_risk": 1
+    },
+    "batchId": "32d02f20-9852-4be2-b237-45c115f43c2b",
+    "batchChecksum": "6ee2b1f4408bd9f66f3a7f346dc57bb9ac6fe85e19db28125048ce82b6814d2c",
+    "created": 10,
+    "reconciled": true,
+    "unexplained": 0,
+    "replayAlreadyApplied": 10,
+    "replayDelta": 0,
+    "rollbackPreviewMappings": 10,
+    "patientMutationCount": 0,
+    "secondBatchStarted": false,
+    "evidence": "docs/audits/evidence-fi-hubspot-import-1e-controlled-new-leads.md"
+  },
   "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
   "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
   "checkpointBeforeE11": {
@@ -32,9 +54,9 @@
   },
   "inventory": {
     "totalSourceContacts": 4752,
-    "alreadyLinked": 4596,
+    "alreadyLinked": 4606,
     "readyToLink": 0,
-    "proposedNewLeads": 42,
+    "proposedNewLeads": 32,
     "patientReview": 4,
     "quarantined": 100,
     "excluded": 10,
@@ -42,8 +64,8 @@
     "wrongTenantCount": 0,
     "migrationCompletionPercent": 99,
     "decisionCounts": {
-      "already_applied": 4596,
-      "create_new_lead": 42,
+      "already_applied": 4606,
+      "create_new_lead": 32,
       "quarantine_test_or_smoke": 94,
       "quarantine_duplicate_source": 4,
       "quarantine_ambiguous_identity": 2,
@@ -249,20 +271,21 @@
     }
   ],
   "cumulative": {
-    "contactsInProductionBatches": 4572,
-    "numberOfBatches": 11,
-    "consecutiveReconciledStreak": 11,
-    "expansionMappingsCreated": 4572,
+    "contactsInProductionBatches": 4582,
+    "numberOfBatches": 12,
+    "consecutiveReconciledStreak": 12,
+    "expansionMappingsCreated": 4582,
     "existingLeadsLinked": 4572,
-    "newLeadsCreated": 0,
+    "newLeadsCreated": 10,
     "mappingsBefore1E": 24,
     "mappingsAfterE11": 4596,
+    "mappingsAfter1ECFirstBatch": 4606,
     "leadCountBefore": 4706,
-    "leadCountAfter": 4706,
+    "leadCountAfter": 4716,
     "patientCountBefore": 829,
     "patientCountAfter": 829,
     "remainingReadyToLink": 0,
-    "remainingSourcePopulation": 42,
+    "remainingSourcePopulation": 32,
     "linkOnlyPopulationComplete": true
   },
   "watermarkBefore": "2026-07-16T16:00:34.53+00:00",
@@ -292,16 +315,17 @@
     "reconciled": true,
     "nextBatchAllowed": false,
     "nextBatchMax": 0,
-    "note": "Link-only population complete; create/review/quarantine cohorts require separate approval"
+    "note": "First create batch reconciled; second creation batch stopped pending FI-HUBSPOT-IMPORT-1E-P"
   },
   "remainingRisks": [
-    "42 create_new_lead candidates require separate review before create cohort",
+    "31 deferred create candidates require FI-HUBSPOT-IMPORT-1E-P",
+    "1 candidate remains quarantined for duplicate risk",
     "4 patient_link_review_required contacts remain excluded",
     "100 quarantined contacts remain excluded",
     "Exact-ID contact refresh does not establish a complete contacts incremental watermark",
     "Scheduler cutoff_from discrepancy (03:20 vs E10-observed 03:45) remains incompletely explained"
   ],
-  "nextGate": "FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review (42 refreshed candidates)",
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-P",
   "programmeNextGateAfterFull1E": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
   "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration"
 }
