@@ -1,28 +1,27 @@
 {
   "milestone": "FI-HUBSPOT-IMPORT-1E",
-  "verdict": "AMBER — E1–E10 GREEN; expansion paused for E11 approval",
-  "status": "E10_COMPLETE",
+  "verdict": "AMBER — E1–E11 link-only batches GREEN; non-link cohorts remain excluded",
+  "status": "E11_COMPLETE",
   "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
   "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
-  "checkpointBeforeE10": {
-    "e9AuditCommit": "74638e0e",
-    "message": "audit(hubspot-import): record E9 production evidence",
+  "checkpointBeforeE11": {
+    "e10AuditCommit": "43ed89e3",
+    "message": "audit(hubspot-import): record E10 production evidence",
     "onOriginMain": true
   },
   "inventory": {
     "totalSourceContacts": 4750,
-    "alreadyLinked": 4124,
-    "readyToLink": 472,
+    "alreadyLinked": 4596,
+    "readyToLink": 0,
     "proposedNewLeads": 46,
     "patientReview": 4,
     "quarantined": 104,
     "excluded": 0,
     "conflicts": 0,
     "wrongTenantCount": 0,
-    "migrationCompletionPercent": 89.1,
+    "migrationCompletionPercent": 99,
     "decisionCounts": {
-      "already_applied": 4124,
-      "link_existing_lead": 472,
+      "already_applied": 4596,
       "create_new_lead": 46,
       "quarantine_test_or_smoke": 94,
       "quarantine_duplicate_source": 4,
@@ -178,6 +177,22 @@
       "size": 500,
       "existingLeadsLinked": 500,
       "newLeadsCreated": 0,
+      "scope": "link_existing_lead_only",
+      "identityMethod": "person_source_id_single_lead",
+      "expandedBatchPolicy": true,
+      "priorBatchId": "bba7d442-d39d-4b26-a279-fba6fefe1605",
+      "reconciled": true,
+      "unexplained": 0,
+      "replay": { "alreadyApplied": 500, "delta": 0 },
+      "rollbackPreview": { "ok": true, "removableMappings": 500, "blockedRows": 0, "executed": false }
+    },
+    {
+      "sequence": "E11",
+      "batchId": "fe956ad8-1728-4648-bb6c-85b499286a08",
+      "checksum": "44021eb7759318f98b1b5ea32a425f1fea70836250f780e79b5b9f3cf5e26a10",
+      "size": 472,
+      "existingLeadsLinked": 472,
+      "newLeadsCreated": 0,
       "newLeadIds": [],
       "alreadyApplied": 0,
       "createsInPreview": 0,
@@ -186,41 +201,58 @@
       "expandedBatchPolicy": true,
       "conflicts": 0,
       "wrongTenantCount": 0,
-      "priorBatchId": "bba7d442-d39d-4b26-a279-fba6fefe1605",
+      "priorBatchId": "8cf33768-ffb3-46a4-a481-4aadbb1cfd43",
       "reconciled": true,
       "unexplained": 0,
       "replay": {
         "linked": 0,
         "created": 0,
-        "alreadyApplied": 500,
+        "alreadyApplied": 472,
         "delta": 0
       },
       "rollbackPreview": {
         "ok": true,
-        "removableMappings": 500,
+        "removableMappings": 472,
         "blockedRows": 0,
         "executed": false
+      },
+      "watermark": {
+        "applyBefore": "2026-07-16T16:00:34.53+00:00",
+        "applyAfter": "2026-07-16T16:00:34.53+00:00",
+        "applyUnchanged": true,
+        "priorProgrammeBaseline": "2026-07-16T03:45:02.366+00:00",
+        "preE11BaselineAdvanced": true,
+        "note": "Watermark advanced before E11 selection; E11 apply did not mutate it"
       }
     }
   ],
   "cumulative": {
-    "contactsInProductionBatches": 4100,
-    "numberOfBatches": 10,
-    "consecutiveReconciledStreak": 10,
-    "expansionMappingsCreated": 4100,
-    "existingLeadsLinked": 4100,
+    "contactsInProductionBatches": 4572,
+    "numberOfBatches": 11,
+    "consecutiveReconciledStreak": 11,
+    "expansionMappingsCreated": 4572,
+    "existingLeadsLinked": 4572,
     "newLeadsCreated": 0,
     "mappingsBefore1E": 24,
-    "mappingsAfterE10": 4124,
+    "mappingsAfterE11": 4596,
     "leadCountBefore": 4706,
     "leadCountAfter": 4706,
     "patientCountBefore": 829,
     "patientCountAfter": 829,
-    "remainingReadyToLink": 472,
-    "remainingSourcePopulation": 518
+    "remainingReadyToLink": 0,
+    "remainingSourcePopulation": 46,
+    "linkOnlyPopulationComplete": true
   },
-  "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
-  "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
+  "watermarkBefore": "2026-07-16T16:00:34.53+00:00",
+  "watermarkAfter": "2026-07-16T16:00:34.53+00:00",
+  "watermarkExceptions": [
+    {
+      "type": "pre_e11_baseline_advance",
+      "from": "2026-07-16T03:45:02.366+00:00",
+      "to": "2026-07-16T16:00:34.53+00:00",
+      "causedByE11": false
+    }
+  ],
   "sideEffects": {
     "notifications": 0,
     "tasks": 0,
@@ -229,18 +261,20 @@
   },
   "patientCreationForbidden": true,
   "gateStatus": {
-    "priorBatchId": "8cf33768-ffb3-46a4-a481-4aadbb1cfd43",
+    "priorBatchId": "fe956ad8-1728-4648-bb6c-85b499286a08",
     "reconciled": true,
-    "nextBatchAllowed": true,
-    "nextBatchMax": 500,
-    "note": "Ten consecutive reconciled batches complete; E11 requires approval; ≤472 ready-to-link remain"
+    "nextBatchAllowed": false,
+    "nextBatchMax": 0,
+    "note": "Link-only population complete; create/review/quarantine cohorts require separate approval"
   },
   "remainingRisks": [
     "Owner/stage enrichment deferred — staging payloads lack properties",
     "46 create_new_lead candidates require separate review before create cohort",
-    "472 link_existing_lead contacts remain — E11 may be a smaller final link-only batch"
+    "4 patient_link_review_required contacts remain excluded",
+    "104 quarantined contacts remain excluded",
+    "HubSpot watermark advanced before E11 selection and must be acknowledged before full closeout"
   ],
-  "nextGate": "Approve Batch E11 (≤500, likely ≤472 remaining, link_existing_lead only)",
+  "nextGate": "Stop before create/patient-review/quarantine processing; acknowledge watermark advance before full 1E closeout",
   "programmeNextGateAfterFull1E": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
   "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration"
 }

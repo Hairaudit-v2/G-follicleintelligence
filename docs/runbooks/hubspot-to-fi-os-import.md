@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E** (controlled contact→lead expansion; E1–E10 GREEN; E11 pending approval)  
+Current gate: **1E** (controlled contact→lead expansion; E1–E11 link-only GREEN; create/review/quarantine paused)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -210,16 +210,19 @@ Hard rules for 1E (inherits 1D):
 - Replay must be idempotent; rollback preview batch-scoped
 - Unreconciled prior expansion batch blocks the next apply
 
-### E10 production position (2026-07-16)
+### E11 production position (2026-07-16)
 
-- Batch `8cf33768-ffb3-46a4-a481-4aadbb1cfd43`: 500 links, 0 creates, patients 829→829
-- Mappings 3624→4124; replay already_applied ×500; rollback preview 500 mappings
-- Ten consecutive reconciled batches (E1–E10); gate open for E11 (≤472 remaining ready-to-link)
-- E9 audit commit `74638e0e` was on origin/main before E10 apply
+- Batch `fe956ad8-1728-4648-bb6c-85b499286a08`: 472 links, 0 creates, patients 829→829
+- Mappings 4124→4596; replay already_applied ×472; rollback preview 472 mappings
+- Eleven consecutive reconciled batches (E1–E11); ready-to-link population exhausted
+- E10 audit commit `43ed89e3` was on origin/main before E11 apply
+- Apply-time watermark unchanged at `2026-07-16T16:00:34.53+00:00`
+- Checkpoint exception: watermark advanced from E10 baseline `2026-07-16T03:45:02.366+00:00` before E11 selection
 
 ### Next gate (after full 1E GREEN)
 
 `FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot`
+Do not process remaining create/patient-review/quarantine cohorts without separate approval.
 
 ## Safety checklist before any apply
 
@@ -242,3 +245,4 @@ Hard rules for 1E (inherits 1D):
 - [x] 1E E8: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E9
 - [x] 1E E9: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E10
 - [x] 1E E10: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E11
+- [x] 1E E11: patient count unchanged; 472 final link-only contacts; reconcile unexplained=0; ready-to-link exhausted
