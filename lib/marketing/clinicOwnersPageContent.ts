@@ -62,9 +62,9 @@ export const CLINIC_OWNERS_PAGE_CONTENT = {
     bands: [
       {
         title: "LeadFlow",
-        tagline: "Lead capture, pipelines, tasks, follow-ups",
+        tagline: "Enquiry, pipeline, ownership, follow-up — connected to the patient journey",
         summary:
-          "Keep demand visible: enquiry capture, ownership, pipeline stages, tasks, and follow-up rhythm tied to clinic capacity—so growth does not outrun accountability.",
+          "Keep demand visible: enquiry capture, ownership, pipeline stages, tasks, and follow-up rhythm tied to clinic capacity—with progressive HubSpot connect, coexistence or staged transition when clinics are ready.",
       },
       {
         title: "ClinicOS",

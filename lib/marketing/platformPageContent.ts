@@ -59,11 +59,11 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         id: "leadflow-os",
         name: "LeadFlow",
-        tagline: "CRM, lead capture, pipeline, tasks, follow-ups, patient acquisition.",
+        tagline: "Enquiry, pipeline, ownership, follow-up — connected to the patient journey.",
         description:
-          "LeadFlow is the acquisition control plane: enquiry capture, pipeline stages, ownership, tasks, and follow-up rhythm tied to real clinic capacity.",
+          "LeadFlow is the acquisition and relationship layer of FI: native enquiry, pipeline, assignment and follow-up, with controlled HubSpot connect, coexistence and staged transition.",
         connects:
-          "ClinicOS availability, PatientOS identity, AnalyticsOS funnel and cohort reporting.",
+          "ClinicOS availability, PatientOS identity, ConsultationOS handoff, AnalyticsOS funnel views.",
         why: "Growth without operational coupling creates leakage. LeadFlow keeps demand, accountability, and downstream clinical context aligned.",
         learnMoreHref: "/platform/leadflow",
         learnMoreLabel: "LeadFlow module",

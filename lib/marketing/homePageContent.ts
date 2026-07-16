@@ -1332,7 +1332,10 @@ export const HOME_V5_CONTENT = {
       href: "/platform/ecosystem" as const,
     },
     systems: [
-      { name: "LeadFlow", description: "Never lose another enquiry." },
+      {
+        name: "LeadFlow",
+        description: "Enquiry, pipeline and follow-up connected to the patient journey.",
+      },
       { name: "PatientOS", description: "Complete patient intelligence tracking." },
       { name: "ConsultationOS", description: "Standardised clinical consultation workflows." },
       { name: "SurgeryOS", description: "Track every procedure with surgical precision." },
