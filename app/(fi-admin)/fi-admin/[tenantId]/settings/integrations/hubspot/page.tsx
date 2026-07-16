@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { HubspotCrmImportCentre } from "@/src/components/fi-admin/settings/HubspotCrmImportCentre";
+import { HubspotBackupHealthSection } from "@/src/components/onboarding-os/HubspotBackupHealthSection";
 import { HubSpotConnectorPanel } from "@/src/components/onboarding-os/HubSpotConnectorPanel";
 import { ImportReviewPanel } from "@/src/components/onboarding-os/ImportReviewPanel";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
 import { loadHubspotImportBatch } from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadLeadFlowQueueHealth } from "@/src/lib/leadFlow/leadFlowQueueHealth.server";
+import { loadHubspotBackupHealthSummary } from "@/src/lib/onboarding-os/hubspotBackupHealth.server";
 import { loadHubspotAuditEvidence, loadHubspotConnectorSnapshot } from "@/src/lib/onboarding-os/hubspotConnector.server";
 import { loadHubspotIntegrationForTenant } from "@/src/lib/onboarding-os/hubspotImport.server";
 import { canMutateHubspotWorkspace } from "@/src/lib/onboarding-os/hubspotWorkspaceAccess.server";
@@ -62,6 +64,12 @@ export default async function HubspotWorkspacePage({ params, searchParams }: {
   if (!snapshotResult.ok) notFound();
   const snapshot = snapshotResult.snapshot;
   const auditEvidence = tab === "audit-history" ? await loadHubspotAuditEvidence(integrationId, tenantId) : null;
+  const backupHealth =
+    tab === "backup-sync"
+      ? await loadHubspotBackupHealthSummary(tenantId, integrationId, {
+          includeTechnicalDetail: canMutate,
+        })
+      : null;
   const status = {
     ...snapshot.workspaceStatus,
     webhook: {
@@ -98,7 +106,10 @@ export default async function HubspotWorkspacePage({ params, searchParams }: {
     </section> : null}
 
     {tab === "backup-sync" ? <section className="space-y-4">
-      <div className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-200">Staged-only backup evidence. Backups and imports are separate operations; no promotion occurs here.</div>
+      <div className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-200">Staged-only backup evidence. Backups and imports are separate operations; no promotion occurs here. Incremental notes health below is read-only and does not start or resume a backup.</div>
+      {backupHealth ? (
+        <HubspotBackupHealthSection health={backupHealth} showTechnicalDetail={canMutate} />
+      ) : null}
       <div className="grid gap-3 lg:grid-cols-2">
         <BackupCard title="Primary backup" status={status.primary.status} startedAt={snapshot.recentSyncRuns.find((run) => {
           const milestone = String(run.detail.milestone ?? "").toUpperCase();
