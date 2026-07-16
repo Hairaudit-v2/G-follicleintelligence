@@ -325,7 +325,7 @@
     "Exact-ID contact refresh does not establish a complete contacts incremental watermark",
     "Scheduler cutoff_from discrepancy (03:20 vs E10-observed 03:45) remains incompletely explained"
   ],
-  "nextGate": "FI-HUBSPOT-IMPORT-1E-P",
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-Q",
   "programmeNextGateAfterFull1E": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
   "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration"
 }

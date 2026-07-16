@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E-C GREEN** (42 candidates classified; first 10 creates reconciled; second batch stopped; next gate 1E-P)  
+Current gate: **1E-P AMBER** (4 patient-review contacts deferred; 0 proposed links; awaiting explicit approval; next gate 1E-Q)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -257,10 +257,24 @@ Hard rules for 1E (inherits 1D):
 
 ### Next gate
 
-`FI-HUBSPOT-IMPORT-1E-P`
+`FI-HUBSPOT-IMPORT-1E-Q`
 
-Stop before any second creation batch. Do not process the remaining
-create/patient-review/quarantine cohorts without the 1E-P gate.
+1E-P interim patient-link review is complete and awaiting explicit human approval.
+Do not apply patient links, open a second create batch, or process quarantine cohorts
+without the approved 1E-Q gate.
+
+### 1E-P patient-link interim review (2026-07-17)
+
+- Frozen cohort (4): `229708595090`, `233738855995`, `234062240678`, `234339716176`
+- Base inventory checksum (1E-R): `3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c`
+- Post-1E-C live inventory checksum: `93823b3d3a322ca23abd85bea8439a0188ac71fdc1c5f8420965a34e16b10451`
+- Review checksum: `9328b13004682436b9575c7fd2f5f514b12f4d4b932a4fe329ea3871ec74518f`
+- All 4 classified `deferred_clinical_identity_review` (email-only never approves)
+- Proposed production links: 0 (batch max 2)
+- Patients 829→829; mappings/watermarks/side effects unchanged
+- Apply blocked until explicit approval
+- Workspace: `?tab=patient-review`
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-p-patient-link-review.md`
 
 ## Safety checklist before any apply
 
@@ -287,3 +301,4 @@ create/patient-review/quarantine cohorts without the 1E-P gate.
 - [x] 1E-W: owning cron run attributed; retain notes watermark; contact staging freshness follow-up documented; create candidates still paused
 - [x] 1E-R: 21 interval contacts refreshed/revalidated; staging 4,752; unexplained=0; no FI/mapping/watermark mutations; gate open for 1E-C review only
 - [x] 1E-C: all 42 classified; first 10 create-only records applied; patients/watermarks/side effects unchanged; replay delta 0; stopped before second batch
+- [x] 1E-P: four patient-review contacts deferred; 0 proposed links; apply blocked pending explicit approval; next gate 1E-Q

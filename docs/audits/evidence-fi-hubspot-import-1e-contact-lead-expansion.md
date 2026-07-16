@@ -1,6 +1,6 @@
 # FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion evidence
 
-**Verdict:** GREEN — E1–E11 link-only batches complete; 1E-C first 10-record create batch reconciled; second batch stopped
+**Verdict:** GREEN — E1–E11 link-only batches complete; 1E-C first 10-record create batch reconciled; 1E-P patient-review interim deferred (awaiting approval)
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
@@ -161,14 +161,15 @@ Full evidence:
 
 ### Exact next step
 
-**Stop before a second creation batch.** Remaining create candidates are 31
-deferred manual review plus 1 duplicate-risk quarantine. The 4 patient-review
-records and 100 pre-existing quarantined records remain out of scope.
+**1E-P interim complete — awaiting explicit human approval.** All four
+patient-review contacts were deferred (email-only never approves). Zero
+production links proposed. Do not apply patient links and do not open a
+second create batch.
 
 Exact next gate:
-**FI-HUBSPOT-IMPORT-1E-P**
+**FI-HUBSPOT-IMPORT-1E-Q**
 
-Programme next gate after create/review closeout:
+Programme next gate after patient-review closeout:
 **FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot**
 
 ## Artifacts

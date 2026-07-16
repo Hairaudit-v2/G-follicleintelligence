@@ -1,0 +1,370 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-P",
+  "mode": "classify",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "fixedInventoryChecksum": "93823b3d3a322ca23abd85bea8439a0188ac71fdc1c5f8420965a34e16b10451",
+  "baseInventoryChecksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+  "sourceCutoff": "2026-07-16T16:00:34.530Z",
+  "before": {
+    "counts": {
+      "fi_crm_leads": 4716,
+      "fi_persons": 4871,
+      "fi_person_source_ids": 4700,
+      "fi_patients": 829,
+      "fi_patient_source_ids": 208,
+      "fi_staff": 22,
+      "fi_users": 20,
+      "fi_crm_tasks": 1,
+      "fi_crm_messages": 0,
+      "fi_reception_tasks": 0,
+      "fi_admin_notifications": 1,
+      "fi_bookings": 18
+    },
+    "mappings": 4606,
+    "patientMappings": 0,
+    "watermarks": [
+      {
+        "source_system": "hubspot",
+        "dataset": "notes",
+        "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+        "version": 4
+      }
+    ]
+  },
+  "after": {
+    "counts": {
+      "fi_crm_leads": 4716,
+      "fi_persons": 4871,
+      "fi_person_source_ids": 4700,
+      "fi_patients": 829,
+      "fi_patient_source_ids": 208,
+      "fi_staff": 22,
+      "fi_users": 20,
+      "fi_crm_tasks": 1,
+      "fi_crm_messages": 0,
+      "fi_reception_tasks": 0,
+      "fi_admin_notifications": 1,
+      "fi_bookings": 18
+    },
+    "mappings": 4606,
+    "patientMappings": 0,
+    "watermarks": [
+      {
+        "source_system": "hubspot",
+        "dataset": "notes",
+        "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+        "version": 4
+      }
+    ]
+  },
+  "delta": {
+    "patients": 0,
+    "leads": 0,
+    "mappings": 0,
+    "patientMappings": 0
+  },
+  "result": {
+    "inventoryChecksum": "93823b3d3a322ca23abd85bea8439a0188ac71fdc1c5f8420965a34e16b10451",
+    "reviewChecksum": "9328b13004682436b9575c7fd2f5f514b12f4d4b932a4fe329ea3871ec74518f",
+    "stateCounts": {
+      "deferred_clinical_identity_review": 4
+    },
+    "frozenContactIds": [
+      "229708595090",
+      "233738855995",
+      "234062240678",
+      "234339716176"
+    ],
+    "mutationPlan": {
+      "proposedProductionLinks": 0,
+      "proposedMappings": [
+        {
+          "hubspotContactId": "229708595090",
+          "state": "deferred_clinical_identity_review",
+          "possiblePatientTargetId": "49b0db10-539a-49c4-9379-1f09a6b3681b",
+          "relatedLeadId": null
+        },
+        {
+          "hubspotContactId": "233738855995",
+          "state": "deferred_clinical_identity_review",
+          "possiblePatientTargetId": "8cf53e2a-e5fa-41f7-9018-e808a5df1425",
+          "relatedLeadId": null
+        },
+        {
+          "hubspotContactId": "234062240678",
+          "state": "deferred_clinical_identity_review",
+          "possiblePatientTargetId": "1b8ccda6-4570-4bc0-9f03-400bc6c98d81",
+          "relatedLeadId": null
+        },
+        {
+          "hubspotContactId": "234339716176",
+          "state": "deferred_clinical_identity_review",
+          "possiblePatientTargetId": "f6facf54-dcb1-460f-affd-5d6bebcc72ce",
+          "relatedLeadId": null
+        }
+      ],
+      "expectedMutationsIfApprovedLater": [],
+      "patientProtection": {
+        "createPatientForbidden": true,
+        "mergePatientForbidden": true,
+        "modifyPatientForbidden": true,
+        "relationshipWriteForbiddenUntilApproval": true
+      }
+    },
+    "applyEnabled": false,
+    "nextGate": "FI-HUBSPOT-IMPORT-1E-Q",
+    "rows": [
+      {
+        "hubspotContactId": "229708595090",
+        "displayNameMasked": "J*** O***",
+        "emailPresent": true,
+        "phonePresent": true,
+        "state": "deferred_clinical_identity_review",
+        "reasonCode": "email_only_never_approves_patient_link",
+        "confidence": "low",
+        "approvedForApply": false,
+        "possiblePatientTargetId": "49b0db10-539a-49c4-9379-1f09a6b3681b",
+        "relatedLeadId": null,
+        "plainLanguageEvidence": [
+          "Only an email overlap with a patient was found — email alone never approves a patient link."
+        ],
+        "warnings": [
+          "Defaulting to deferred clinical identity review.",
+          "Clinical notes and sensitive content are not shown on the primary screen."
+        ],
+        "sourceUpdatedAt": "2026-07-14T16:43:16.224+00:00",
+        "sourcePayloadChecksum": "66f3120dfd639abb2316170446060c48a85e8384b0d41d80be23486de76b7f52",
+        "inventoryReasonCode": "email_matches_patient_without_stronger_evidence",
+        "operatorLabel": "1e-p-interim-operator",
+        "reviewedAt": "2026-07-16T22:46:18.989Z",
+        "checks": {
+          "sameTenant": true,
+          "sourceFresh": true,
+          "archived": false,
+          "existingContactLeadMappingId": null,
+          "existingContactPatientMappingId": null,
+          "existingPatientSourceId": null,
+          "existingPersonSourceId": null,
+          "proposedOrMappedLeadId": null,
+          "trustedLeadPatientId": null,
+          "exactEmailPatientIds": [
+            "49b0db10-539a-49c4-9379-1f09a6b3681b"
+          ],
+          "exactPhonePatientIds": [],
+          "exactEmailPersonIds": [
+            "9407742a-37a6-437d-a142-e1c40979e8ee"
+          ],
+          "exactPhonePersonIds": [],
+          "appointmentAssociationPatientIds": [],
+          "clinicalAssociationPatientIds": [],
+          "matchedReliableIdentifiers": [
+            "exact_email"
+          ],
+          "missingReliableIdentifiers": [
+            "hubspot_patient_source_id",
+            "hubspot_person_source_id",
+            "exact_phone",
+            "trusted_lead_patient_relationship"
+          ],
+          "weakOnlySignals": [
+            "exact_email"
+          ],
+          "conflicts": [],
+          "possiblePatientTargets": [
+            "49b0db10-539a-49c4-9379-1f09a6b3681b"
+          ],
+          "hasClinicalNotesExposureRisk": false
+        }
+      },
+      {
+        "hubspotContactId": "233738855995",
+        "displayNameMasked": "M*** A***",
+        "emailPresent": true,
+        "phonePresent": true,
+        "state": "deferred_clinical_identity_review",
+        "reasonCode": "email_only_never_approves_patient_link",
+        "confidence": "low",
+        "approvedForApply": false,
+        "possiblePatientTargetId": "8cf53e2a-e5fa-41f7-9018-e808a5df1425",
+        "relatedLeadId": null,
+        "plainLanguageEvidence": [
+          "Only an email overlap with a patient was found — email alone never approves a patient link."
+        ],
+        "warnings": [
+          "Defaulting to deferred clinical identity review.",
+          "Clinical notes and sensitive content are not shown on the primary screen."
+        ],
+        "sourceUpdatedAt": "2026-07-14T05:24:20.381+00:00",
+        "sourcePayloadChecksum": "0040f812e202cd2df9044e7f70c4e5d9e0a50bde0b76974907bae56b586438a9",
+        "inventoryReasonCode": "email_matches_patient_without_stronger_evidence",
+        "operatorLabel": "1e-p-interim-operator",
+        "reviewedAt": "2026-07-16T22:46:18.989Z",
+        "checks": {
+          "sameTenant": true,
+          "sourceFresh": true,
+          "archived": false,
+          "existingContactLeadMappingId": null,
+          "existingContactPatientMappingId": null,
+          "existingPatientSourceId": null,
+          "existingPersonSourceId": null,
+          "proposedOrMappedLeadId": null,
+          "trustedLeadPatientId": null,
+          "exactEmailPatientIds": [
+            "8cf53e2a-e5fa-41f7-9018-e808a5df1425"
+          ],
+          "exactPhonePatientIds": [],
+          "exactEmailPersonIds": [
+            "745e3b5a-4cdd-442a-97f4-c1bc781405e8"
+          ],
+          "exactPhonePersonIds": [],
+          "appointmentAssociationPatientIds": [],
+          "clinicalAssociationPatientIds": [],
+          "matchedReliableIdentifiers": [
+            "exact_email"
+          ],
+          "missingReliableIdentifiers": [
+            "hubspot_patient_source_id",
+            "hubspot_person_source_id",
+            "exact_phone",
+            "trusted_lead_patient_relationship"
+          ],
+          "weakOnlySignals": [
+            "exact_email"
+          ],
+          "conflicts": [],
+          "possiblePatientTargets": [
+            "8cf53e2a-e5fa-41f7-9018-e808a5df1425"
+          ],
+          "hasClinicalNotesExposureRisk": false
+        }
+      },
+      {
+        "hubspotContactId": "234062240678",
+        "displayNameMasked": "A*** A***",
+        "emailPresent": true,
+        "phonePresent": true,
+        "state": "deferred_clinical_identity_review",
+        "reasonCode": "email_only_never_approves_patient_link",
+        "confidence": "low",
+        "approvedForApply": false,
+        "possiblePatientTargetId": "1b8ccda6-4570-4bc0-9f03-400bc6c98d81",
+        "relatedLeadId": null,
+        "plainLanguageEvidence": [
+          "Only an email overlap with a patient was found — email alone never approves a patient link."
+        ],
+        "warnings": [
+          "Defaulting to deferred clinical identity review.",
+          "Clinical notes and sensitive content are not shown on the primary screen."
+        ],
+        "sourceUpdatedAt": "2026-07-10T06:34:14.013+00:00",
+        "sourcePayloadChecksum": "020dab05f4f340411275465b489218c843650fed963deb4d97ce53c636a52a69",
+        "inventoryReasonCode": "email_matches_patient_without_stronger_evidence",
+        "operatorLabel": "1e-p-interim-operator",
+        "reviewedAt": "2026-07-16T22:46:18.989Z",
+        "checks": {
+          "sameTenant": true,
+          "sourceFresh": true,
+          "archived": false,
+          "existingContactLeadMappingId": null,
+          "existingContactPatientMappingId": null,
+          "existingPatientSourceId": null,
+          "existingPersonSourceId": null,
+          "proposedOrMappedLeadId": null,
+          "trustedLeadPatientId": null,
+          "exactEmailPatientIds": [
+            "1b8ccda6-4570-4bc0-9f03-400bc6c98d81"
+          ],
+          "exactPhonePatientIds": [],
+          "exactEmailPersonIds": [
+            "87f166ad-4802-46c1-b0cb-0e8e1e19c06f"
+          ],
+          "exactPhonePersonIds": [],
+          "appointmentAssociationPatientIds": [],
+          "clinicalAssociationPatientIds": [],
+          "matchedReliableIdentifiers": [
+            "exact_email"
+          ],
+          "missingReliableIdentifiers": [
+            "hubspot_patient_source_id",
+            "hubspot_person_source_id",
+            "exact_phone",
+            "trusted_lead_patient_relationship"
+          ],
+          "weakOnlySignals": [
+            "exact_email"
+          ],
+          "conflicts": [],
+          "possiblePatientTargets": [
+            "1b8ccda6-4570-4bc0-9f03-400bc6c98d81"
+          ],
+          "hasClinicalNotesExposureRisk": false
+        }
+      },
+      {
+        "hubspotContactId": "234339716176",
+        "displayNameMasked": "T***",
+        "emailPresent": true,
+        "phonePresent": true,
+        "state": "deferred_clinical_identity_review",
+        "reasonCode": "email_only_never_approves_patient_link",
+        "confidence": "low",
+        "approvedForApply": false,
+        "possiblePatientTargetId": "f6facf54-dcb1-460f-affd-5d6bebcc72ce",
+        "relatedLeadId": null,
+        "plainLanguageEvidence": [
+          "Only an email overlap with a patient was found — email alone never approves a patient link."
+        ],
+        "warnings": [
+          "Defaulting to deferred clinical identity review.",
+          "Clinical notes and sensitive content are not shown on the primary screen."
+        ],
+        "sourceUpdatedAt": "2026-07-10T08:39:58.834+00:00",
+        "sourcePayloadChecksum": "e4f2ab7c588bf1d158babdda4044a6c5be1804359c66085d9df0cc97bfd8c4cc",
+        "inventoryReasonCode": "email_matches_patient_without_stronger_evidence",
+        "operatorLabel": "1e-p-interim-operator",
+        "reviewedAt": "2026-07-16T22:46:18.989Z",
+        "checks": {
+          "sameTenant": true,
+          "sourceFresh": true,
+          "archived": false,
+          "existingContactLeadMappingId": null,
+          "existingContactPatientMappingId": null,
+          "existingPatientSourceId": null,
+          "existingPersonSourceId": null,
+          "proposedOrMappedLeadId": null,
+          "trustedLeadPatientId": null,
+          "exactEmailPatientIds": [
+            "f6facf54-dcb1-460f-affd-5d6bebcc72ce"
+          ],
+          "exactPhonePatientIds": [],
+          "exactEmailPersonIds": [
+            "78a7f26e-1c61-40b3-9174-426e5957701b"
+          ],
+          "exactPhonePersonIds": [],
+          "appointmentAssociationPatientIds": [],
+          "clinicalAssociationPatientIds": [],
+          "matchedReliableIdentifiers": [
+            "exact_email"
+          ],
+          "missingReliableIdentifiers": [
+            "hubspot_patient_source_id",
+            "hubspot_person_source_id",
+            "exact_phone",
+            "trusted_lead_patient_relationship"
+          ],
+          "weakOnlySignals": [
+            "exact_email"
+          ],
+          "conflicts": [],
+          "possiblePatientTargets": [
+            "f6facf54-dcb1-460f-affd-5d6bebcc72ce"
+          ],
+          "hasClinicalNotesExposureRisk": false
+        }
+      }
+    ]
+  },
+  "approvalRequired": true,
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-Q"
+}

@@ -8,6 +8,7 @@ import { HubSpotConnectorPanel } from "@/src/components/onboarding-os/HubSpotCon
 import { HubspotContactLeadPilotPanel } from "@/src/components/onboarding-os/HubspotContactLeadPilotPanel";
 import { HubspotContactMigrationPanel } from "@/src/components/onboarding-os/HubspotContactMigrationPanel";
 import { HubspotOwnerResolutionPanel } from "@/src/components/onboarding-os/HubspotOwnerResolutionPanel";
+import { HubspotPatientReviewPanel } from "@/src/components/onboarding-os/HubspotPatientReviewPanel";
 import { ImportReviewPanel } from "@/src/components/onboarding-os/ImportReviewPanel";
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
 import { loadHubspotImportBatch } from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
@@ -36,6 +37,7 @@ const LABELS = {
   "owner-resolution": "Owner resolution",
   "lead-pilot": "Lead pilot",
   "contact-migration": "Contact migration",
+  "patient-review": "Patient review",
   "activity-webhooks": "Activity & Webhooks",
   configuration: "Configuration",
   "audit-history": "Audit & History",
@@ -158,6 +160,9 @@ export default async function HubspotWorkspacePage({ params, searchParams }: {
     ) : null}
     {tab === "contact-migration" ? (
       <HubspotContactMigrationPanel tenantId={tenantId} canMutate={canMutate} />
+    ) : null}
+    {tab === "patient-review" ? (
+      <HubspotPatientReviewPanel tenantId={tenantId} canMutate={canMutate} />
     ) : null}
     {tab === "activity-webhooks" ? <section className="grid gap-3 md:grid-cols-2"><Card title="Queue health" value={status.webhook.status} detail={`${status.webhook.pending} pending · ${status.webhook.retrying} retrying · ${status.webhook.failed} failed`} /><Card title="Route & signature" value={process.env.HUBSPOT_CLIENT_SECRET?.trim() ? "Signature verification configured" : "Signature verification not configured"} detail={`Last webhook: ${dt(status.webhook.lastWebhookAt)}`} /></section> : null}
     {tab === "configuration" ? <section className="space-y-4"><Card title="Connected portal" value={label} detail="HubSpot portal identity" /><Card title="Credential storage" value={status.credential.verified ? "Stored and verified" : "Verification required"} detail="Credential values are never rendered" /><Card title="Authentication" value="Private App / server-side credential" detail="Scope and verification evidence is shown below" /><div className="rounded-xl border border-white/10 bg-slate-950/50 p-4 text-sm text-slate-300"><p className="font-medium text-slate-100">Verification evidence</p><p className="mt-2">Live API verification: {snapshot.secondaryEvidence.liveCapabilityProbe?.outcome ?? "No live verification recorded"}</p><p>Test/configuration verification: {snapshot.secondaryEvidence.configurationVerification?.outcome ?? "No test verification recorded"}</p><p className="mt-2 text-xs text-slate-400">Required and granted scopes are retained in connector evidence. Credential values are never rendered.</p></div><HubSpotConnectorPanel tenantId={tenantId} integrationId={integrationId} integrationLabel={label} initialSnapshot={snapshot} section="configuration" canMutate={canMutate} /><Link className="text-cyan-300" href={`/fi-admin/${tenantId}/configuration`}>Reconnect, revoke, and pipeline configuration →</Link></section> : null}

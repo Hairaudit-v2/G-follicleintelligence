@@ -1,0 +1,114 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-P",
+  "verdict": "AMBER",
+  "status": "INTERIM_READ_ONLY_AWAITING_EXPLICIT_APPROVAL",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "approvalRequired": true,
+  "applyExecuted": false,
+  "sourceBoundary": {
+    "cutoff": "2026-07-16T16:00:34.530Z",
+    "baseInventoryChecksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+    "fixedInventoryChecksum": "93823b3d3a322ca23abd85bea8439a0188ac71fdc1c5f8420965a34e16b10451",
+    "totalSourceContacts": 4752,
+    "patientReviewCohort": 4,
+    "reviewChecksum": "9328b13004682436b9575c7fd2f5f514b12f4d4b932a4fe329ea3871ec74518f"
+  },
+  "frozenContactIds": [
+    "229708595090",
+    "233738855995",
+    "234062240678",
+    "234339716176"
+  ],
+  "proposedDecisions": {
+    "229708595090": {
+      "state": "deferred_clinical_identity_review",
+      "reasonCode": "email_only_never_approves_patient_link",
+      "possiblePatientTargetId": "49b0db10-539a-49c4-9379-1f09a6b3681b",
+      "relatedLeadId": null,
+      "confidence": "low",
+      "approvedForApply": false
+    },
+    "233738855995": {
+      "state": "deferred_clinical_identity_review",
+      "reasonCode": "email_only_never_approves_patient_link",
+      "possiblePatientTargetId": "8cf53e2a-e5fa-41f7-9018-e808a5df1425",
+      "relatedLeadId": null,
+      "confidence": "low",
+      "approvedForApply": false
+    },
+    "234062240678": {
+      "state": "deferred_clinical_identity_review",
+      "reasonCode": "email_only_never_approves_patient_link",
+      "possiblePatientTargetId": "1b8ccda6-4570-4bc0-9f03-400bc6c98d81",
+      "relatedLeadId": null,
+      "confidence": "low",
+      "approvedForApply": false
+    },
+    "234339716176": {
+      "state": "deferred_clinical_identity_review",
+      "reasonCode": "email_only_never_approves_patient_link",
+      "possiblePatientTargetId": "f6facf54-dcb1-460f-affd-5d6bebcc72ce",
+      "relatedLeadId": null,
+      "confidence": "low",
+      "approvedForApply": false
+    }
+  },
+  "stateCounts": {
+    "deferred_clinical_identity_review": 4
+  },
+  "productionLinkCount": 0,
+  "batchMax": 2,
+  "proposedMappings": [
+    {
+      "hubspotContactId": "229708595090",
+      "state": "deferred_clinical_identity_review",
+      "possiblePatientTargetId": "49b0db10-539a-49c4-9379-1f09a6b3681b",
+      "relatedLeadId": null
+    },
+    {
+      "hubspotContactId": "233738855995",
+      "state": "deferred_clinical_identity_review",
+      "possiblePatientTargetId": "8cf53e2a-e5fa-41f7-9018-e808a5df1425",
+      "relatedLeadId": null
+    },
+    {
+      "hubspotContactId": "234062240678",
+      "state": "deferred_clinical_identity_review",
+      "possiblePatientTargetId": "1b8ccda6-4570-4bc0-9f03-400bc6c98d81",
+      "relatedLeadId": null
+    },
+    {
+      "hubspotContactId": "234339716176",
+      "state": "deferred_clinical_identity_review",
+      "possiblePatientTargetId": "f6facf54-dcb1-460f-affd-5d6bebcc72ce",
+      "relatedLeadId": null
+    }
+  ],
+  "expectedMutationPlan": {
+    "expectedMutationsIfApprovedLater": [],
+    "patientProtection": {
+      "createPatientForbidden": true,
+      "mergePatientForbidden": true,
+      "modifyPatientForbidden": true,
+      "relationshipWriteForbiddenUntilApproval": true
+    }
+  },
+  "patientProtectionResult": {
+    "patientsBefore": 829,
+    "patientsAfter": 829,
+    "patientDelta": 0,
+    "patientMappingsBefore": 0,
+    "patientMappingsAfter": 0,
+    "leadsUnchanged": true,
+    "watermarksUnchanged": true,
+    "sideEffects": []
+  },
+  "risks": [
+    "Email-only patient overlap must remain deferred until a second reliable identifier or trusted lead-to-patient relationship is proven.",
+    "Further inventory drift from the post-1E-C checksum fails closed.",
+    "Zero proposed links is an acceptable interim outcome."
+  ],
+  "workspace": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=patient-review",
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-Q"
+}

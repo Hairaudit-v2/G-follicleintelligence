@@ -92,5 +92,5 @@
   },
   "workspace": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration",
   "secondBatchStarted": false,
-  "nextGate": "FI-HUBSPOT-IMPORT-1E-P"
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-Q"
 }

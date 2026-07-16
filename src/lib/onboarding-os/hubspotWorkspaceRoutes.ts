@@ -5,6 +5,7 @@ export const HUBSPOT_WORKSPACE_TABS = [
   "owner-resolution",
   "lead-pilot",
   "contact-migration",
+  "patient-review",
   "activity-webhooks",
   "configuration",
   "audit-history",
