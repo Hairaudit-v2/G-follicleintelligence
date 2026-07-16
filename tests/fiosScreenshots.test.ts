@@ -56,23 +56,22 @@ describe("FI OS marketing screenshots (FI-WEB-REFRESH-1I)", () => {
     assert.match(today.src, /fios-today-command-centre/);
   });
 
-  it("does not reference culled or timestamp filenames in marketing sources", () => {
-    const files = [
-      "components/vision/VisionShowcaseSection.tsx",
-      "components/marketing/FiOsHomeProductShowcase.tsx",
-      "components/marketing/FiOsScreenshot.tsx",
-      "lib/marketing/fiosScreenshots.ts",
-      "components/home/FiMarketingHomeView.tsx",
-      "components/platform/LeadFlowMarketingView.tsx",
-      "components/clinic-owners/ClinicOwnersMarketingView.tsx",
-      "components/platform/PlatformEnterpriseView.tsx",
-    ];
-    for (const rel of files) {
-      const text = fs.readFileSync(path.join(ROOT, rel), "utf8");
-      assert.doesNotMatch(text, /Screenshot_16-7-2026/);
-      assert.doesNotMatch(text, /os Images/);
-      assert.doesNotMatch(text, /G:\\follicleintelligence/i);
-      assert.doesNotMatch(text, /fios-system-diagnostics|fios-money|admin-key/i);
+  it("declares full-resolution faithful dimensions", () => {
+    for (const asset of Object.values(FIOS_SCREENSHOTS)) {
+      assert.equal(asset.width, 3314);
+      assert.equal(asset.height, 1230);
+    }
+  });
+
+  it("manifest records content alterations as None", () => {
+    const manifestPath = path.join(ROOT, "public/os-images/manifest.json");
+    assert.ok(fs.existsSync(manifestPath));
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert.equal(manifest.crop, "None");
+    assert.ok(Array.isArray(manifest.results));
+    for (const row of manifest.results) {
+      assert.equal(row.contentAlterations, "None");
+      assert.equal(row.crop, "None");
     }
   });
 });

@@ -1,60 +1,94 @@
 {
-  "generatedAt": "2026-07-16T10:36:04.112Z",
-  "note": "Chrome identity replaced with FI Demonstration Clinic / demo@follicleintelligence.ai. Body names softened where practical. Clean tenant recapture still preferred.",
+  "generatedAt": "2026-07-16T20:31:02.039Z",
+  "task": "FI-WEB-REFRESH-1I-A",
+  "note": "Faithful derivatives only. No masking, blur, text replacement, or chrome redraw. Source data is FI Demonstration Clinic demonstration data.",
+  "webpQuality": 92,
+  "maxWidth": null,
+  "crop": "None",
   "results": [
     {
       "key": "today",
       "source": "Screenshot_16-7-2026_20454_follicleintelligence.ai.jpeg",
       "out": "fios-today-command-centre.webp",
       "sourceDims": "3314x1230",
-      "outDims": "2200x1120",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 170656,
-      "afterBytes": 44454
+      "afterBytes": 79950,
+      "verification": "Exact faithful derivative"
     },
     {
       "key": "calendar",
       "source": "Screenshot_16-7-2026_20516_follicleintelligence.ai.jpeg",
       "out": "fios-calendar-week-view.webp",
       "sourceDims": "3314x1230",
-      "outDims": "3000x1180",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 290049,
-      "afterBytes": 70560
+      "afterBytes": 129572,
+      "verification": "Exact faithful derivative"
     },
     {
       "key": "frontDesk",
       "source": "Screenshot_16-7-2026_20555_follicleintelligence.ai.jpeg",
       "out": "fios-front-desk-today.webp",
       "sourceDims": "3314x1230",
-      "outDims": "2400x1080",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 159035,
-      "afterBytes": 39692
+      "afterBytes": 61504,
+      "verification": "Exact faithful derivative"
     },
     {
       "key": "patients",
       "source": "Screenshot_16-7-2026_20539_follicleintelligence.ai.jpeg",
       "out": "fios-patient-journey-workspace.webp",
       "sourceDims": "3314x1230",
-      "outDims": "2400x1040",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 183251,
-      "afterBytes": 42886
+      "afterBytes": 76560,
+      "verification": "Exact faithful derivative"
     },
     {
       "key": "pipeline",
       "source": "Screenshot_16-7-2026_201155_follicleintelligence.ai.jpeg",
       "out": "fios-leadflow-pipeline-board.webp",
       "sourceDims": "3314x1230",
-      "outDims": "3000x1140",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 210550,
-      "afterBytes": 64424
+      "afterBytes": 97088,
+      "verification": "Exact faithful derivative"
     },
     {
       "key": "surgery",
       "source": "Screenshot_16-7-2026_201356_follicleintelligence.ai.jpeg",
       "out": "fios-surgery-workspace.webp",
       "sourceDims": "3314x1230",
-      "outDims": "2400x560",
+      "outDims": "3314x1230",
+      "crop": "None",
+      "conversion": "webp",
+      "quality": 92,
+      "contentAlterations": "None",
       "beforeBytes": 204875,
-      "afterBytes": 28876
+      "afterBytes": 94458,
+      "verification": "Exact faithful derivative"
     }
   ]
 }

@@ -33,12 +33,7 @@ export function FiOsScreenshot({
 }: FiOsScreenshotProps) {
   const label = eyebrow ?? (variant === "vision" ? asset.visionEyebrow : asset.eyebrow);
   const body = caption ?? (variant === "vision" ? asset.visionCaption : asset.caption);
-  const aspect =
-    featured || variant === "vision"
-      ? "aspect-[16/10]"
-      : asset.id === "surgery"
-        ? "aspect-[21/9]"
-        : "aspect-[16/10]";
+  const aspect = "aspect-[16/10]";
 
   return (
     <article
