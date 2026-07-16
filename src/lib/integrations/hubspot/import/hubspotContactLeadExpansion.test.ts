@@ -20,6 +20,7 @@ import {
   detectDuplicateNewLeadRisk,
   diffInventorySignatures,
   filterExpansionRows,
+  isArchivedHubspotStagingContact,
   isApplyableExpansionDecision,
   mapImportDecisionToExpansionState,
   plainLanguageExpansionDecision,
@@ -492,6 +493,23 @@ describe("hubspotContactLeadExpansion 1E", () => {
     const b = computeInventorySignature([...rows].reverse());
     assert.equal(a, b);
     assert.equal(a.length, 64);
+  });
+
+  it("uses the staging archived state even when raw properties omit it", () => {
+    assert.equal(
+      isArchivedHubspotStagingContact({
+        archivedColumn: true,
+        rawPayload: { properties: { email: "archived@example.org" } },
+      }),
+      true
+    );
+    assert.equal(
+      isArchivedHubspotStagingContact({
+        archivedColumn: false,
+        rawPayload: { archived: true, properties: {} },
+      }),
+      true
+    );
   });
 
   it("classification delta identifies newly added and modified contacts", () => {

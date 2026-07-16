@@ -31,6 +31,7 @@ import {
   computeExpansionChecksum,
   detectDuplicateNewLeadRisk,
   filterExpansionRows,
+  isArchivedHubspotStagingContact,
   isApplyableExpansionDecision,
   mapImportDecisionToExpansionState,
   plainLanguageExpansionDecision,
@@ -96,6 +97,7 @@ function mapStagingContactRow(row: Record<string, unknown>): HubspotContactDryRu
     integration_id: string;
     created_at: string;
     updated_at: string;
+    archived: boolean | null;
   };
   const emailNormalized = normalizeEmail(r.email ?? prop(r.raw_payload, "email"));
   const phoneRaw = r.phone ?? prop(r.raw_payload, "phone", "mobilephone");
@@ -119,7 +121,10 @@ function mapStagingContactRow(row: Record<string, unknown>): HubspotContactDryRu
     lifecycleStage,
     leadStatus: prop(r.raw_payload, "hs_lead_status", "lead_status"),
     dealStageLabel: null,
-    archived: String(prop(r.raw_payload, "archived") ?? "false").toLowerCase() === "true",
+    archived: isArchivedHubspotStagingContact({
+      archivedColumn: r.archived,
+      rawPayload: r.raw_payload,
+    }),
     isTestOrSmoke: isTestOrSmokeContact({
       emailNormalized,
       hubspotContactId: contactId,
@@ -146,7 +151,7 @@ async function loadAllStagingContacts(
     const { data, error } = await supabase
       .from("fi_external_hubspot_contact_staging")
       .select(
-        "hubspot_contact_id, email, phone, import_status, raw_payload, tenant_id, integration_id, created_at, updated_at"
+        "hubspot_contact_id, email, phone, import_status, raw_payload, tenant_id, integration_id, created_at, updated_at, archived"
       )
       .eq("tenant_id", tenantId)
       .eq("integration_id", integrationId)

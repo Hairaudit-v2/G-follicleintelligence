@@ -568,6 +568,17 @@ export function computeInventorySignature(
   return createHash("sha256").update(canonical).digest("hex");
 }
 
+export function isArchivedHubspotStagingContact(input: {
+  archivedColumn: boolean | null | undefined;
+  rawPayload: Record<string, unknown> | null | undefined;
+}): boolean {
+  if (input.archivedColumn === true) return true;
+  const rawArchived = input.rawPayload?.archived;
+  if (rawArchived != null) return String(rawArchived).toLowerCase() === "true";
+  const properties = input.rawPayload?.properties as Record<string, unknown> | undefined;
+  return properties?.archived != null && String(properties.archived).toLowerCase() === "true";
+}
+
 export type HubspotContactLeadClassificationDelta = {
   newlyAppearingContactIds: string[];
   removedContactIds: string[];

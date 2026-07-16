@@ -335,6 +335,40 @@ async function stagePage(params: {
   };
 }
 
+/**
+ * Narrow approved staging path for a fixed, operator-reviewed contact refresh.
+ * Reuses the normal contact normalization, checksum, association, and upsert
+ * provenance path; it never writes FI entities, mappings, or watermarks.
+ */
+export async function stageHubspotContactRefreshBatch(params: {
+  supabase: SupabaseClient;
+  contacts: HubspotApiContact[];
+  tenantId: string;
+  integrationId: string;
+  syncRunId: string;
+}): Promise<{
+  staged: number;
+  duplicates: number;
+  skipped: number;
+  failed: number;
+  archived: number;
+  associations: number;
+}> {
+  const ids = params.contacts.map((contact) => contact.id?.trim()).filter(Boolean) as string[];
+  if (new Set(ids).size !== ids.length) {
+    throw new Error("Unable to stage HubSpot contacts page: duplicate source contact ID.");
+  }
+  return stagePage({
+    supabase: params.supabase,
+    kind: "contacts",
+    objects: params.contacts,
+    tenantId: params.tenantId,
+    integrationId: params.integrationId,
+    syncRunId: params.syncRunId,
+    pipelineNames: {},
+  });
+}
+
 export async function runHubspotObjectBackup(params: {
   supabase: SupabaseClient;
   accessToken: string;
