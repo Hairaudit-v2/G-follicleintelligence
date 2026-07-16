@@ -147,8 +147,11 @@
     "hubspot:import:dry-run": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-dry-run.ts",
     "hubspot:import:dry-run:contacts": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-dry-run.ts --dataset contacts --mapping-version v1 --limit 100 --strict",
     "hubspot:import:dry-run:owners": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-dry-run.ts --dataset owners --mapping-version v1 --strict",
+    "hubspot:owner-mapping:preview": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts --preview --max-records 2",
+    "hubspot:owner-mapping:apply": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts --apply",
+    "hubspot:owner-mapping:rollback-preview": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts --rollback-preview",
     "test:hubspot-incremental": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/onboarding-os/hubspotIncrementalBackupCore.test.ts src/lib/onboarding-os/hubspotIncrementalBackup.server.test.ts src/lib/onboarding-os/hubspotScheduledIncrementalBackupCore.test.ts src/lib/onboarding-os/hubspotScheduledIncrementalBackup.server.test.ts src/lib/onboarding-os/hubspotBackupHealthCore.test.ts src/lib/onboarding-os/hubspotBackupHealth.server.test.ts src/lib/onboarding-os/hubspotBackupHealthSection.model.test.ts",
-    "test:hubspot-import": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/integrations/hubspot/import/hubspotImportDryRun.test.ts",
+    "test:hubspot-import": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/integrations/hubspot/import/hubspotImportDryRun.test.ts src/lib/integrations/hubspot/import/hubspotOwnerMapping.test.ts",
     "qr:arrival": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/generate-booking-arrival-qr.ts"
   },
   "dependencies": {
