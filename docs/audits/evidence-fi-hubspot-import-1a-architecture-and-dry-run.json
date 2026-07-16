@@ -1,0 +1,169 @@
+{
+  "evidenceType": "hubspot_import_1a_architecture_and_dry_run",
+  "milestone": "FI-HUBSPOT-IMPORT-1A",
+  "closedAt": "2026-07-16",
+  "verdict": "AMBER",
+  "claimsProgrammeComplete": false,
+  "productionEntityWritesPerformed": false,
+  "backupWatermarkChanged": false,
+  "schedulerChanged": false,
+  "hubspotSourceRecordsChanged": false,
+  "mappingVersion": "v1",
+  "backupPrerequisite": {
+    "milestone": "FI-HUBSPOT-BACKUP-1",
+    "verdict": "green_complete",
+    "closeoutCommit": "c359392ce60b349d0bfeb5aec7455136d3d8e091",
+    "notesWatermarkUnchanged": "2026-07-16T03:45:02.366Z"
+  },
+  "tenant": {
+    "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+    "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+    "hubspotPortalId": "21009770"
+  },
+  "sourceInventory": {
+    "contacts_staging": 4750,
+    "owners_inventory": 31,
+    "forms_staging": 46,
+    "form_submissions_staging": 5311,
+    "conversation_threads": 1918,
+    "conversation_messages": 5821,
+    "notes_staging_historical": 244,
+    "calls": 2093,
+    "meetings": 17,
+    "tasks": 1680,
+    "deals": 4958,
+    "file_metadata": 903,
+    "file_bodies": "out_of_scope",
+    "conversion_id_contact_enrichment_rows": 3107,
+    "authoritativeSource": "verified_hubspot_backup_staging"
+  },
+  "fiOsCoverageAtDryRun": {
+    "fi_person_source_ids_hubspot": 4690,
+    "fi_patient_source_ids_hubspot": 0,
+    "fi_crm_leads": 4706,
+    "fi_staff_source_ids_hubspot": 0
+  },
+  "externalIdentityModel": {
+    "reusedTables": [
+      "fi_external_record_mappings",
+      "fi_person_source_ids",
+      "fi_patient_source_ids",
+      "fi_crm_lead_source_ids",
+      "fi_staff_source_ids"
+    ],
+    "preferredUniqueKey": [
+      "tenant_id",
+      "source_system",
+      "integration_id",
+      "source_object_type",
+      "source_record_id"
+    ],
+    "additiveMigrationApplied": false,
+    "hubspotIdsAsFiPrimaryKeys": false
+  },
+  "policies": {
+    "createPatientFromHubspotContact": false,
+    "fuzzyNameMatching": false,
+    "probabilisticMatching": false,
+    "crossTenantMatching": false,
+    "emailAloneMayLinkPatient": false,
+    "phoneAloneMayLinkLead": false,
+    "createStaffFromHubspotOwner": false,
+    "assignInactiveStaff": false
+  },
+  "pipelineMapping": {
+    "hubspotPipeline": "Sales Pipeline",
+    "stageCount": 11,
+    "mappedExactOrClosest": 10,
+    "historyOnly": 1,
+    "historyOnlyStages": ["Surgery Unqualified"],
+    "regressionOnExistingLeads": "forbidden"
+  },
+  "productionDryRun": {
+    "dataset": "contacts",
+    "cohortSize": 100,
+    "stagingPoolSampled": 1000,
+    "stagingTotal": 4750,
+    "generatedAt": "2026-07-16T05:24:38.321Z",
+    "mutationGuard": {
+      "inserts": 0,
+      "updates": 0,
+      "deletes": 0,
+      "upserts": 0
+    },
+    "decisionCounts": {
+      "create_new_lead": 0,
+      "link_existing_lead": 96,
+      "link_existing_patient": 0,
+      "quarantine_test_or_smoke": 4,
+      "quarantine_ambiguous_identity": 0,
+      "quarantine_missing_identity": 0,
+      "quarantine_patient_link_requires_stronger_evidence": 0,
+      "conflict_multiple_targets": 0,
+      "skip_already_imported": 0,
+      "skip_out_of_scope": 0
+    },
+    "identityResolution": {
+      "exactExistingExternalMatch": 96,
+      "exactLeadMatch": 96,
+      "exactPatientMatch": 0,
+      "proposedCreate": 0,
+      "ambiguous": 0,
+      "multipleTargetConflict": 0
+    },
+    "wrongTenantCandidates": 0,
+    "ownerDryRun": {
+      "ownersAssessed": 31,
+      "linked_active_staff": 2,
+      "linked_inactive_staff": 0,
+      "unknown_owner": 29,
+      "ambiguous_owner": 0,
+      "system_owner": 0
+    }
+  },
+  "sideEffectAnalysis": {
+    "notifications": "none_in_dry_run",
+    "automations": "none_in_dry_run",
+    "patientCommunications": "forbidden_on_import",
+    "appointmentCreation": "forbidden_on_import",
+    "pipelineRegression": 0,
+    "analyticsRiskOnLink": "present_for_linked_records_flagged_only"
+  },
+  "recommendedFirstPilot": {
+    "option": "A_owner_mapping",
+    "nextGate": "FI-HUBSPOT-IMPORT-1B — Owner-to-staff mapping pilot",
+    "maxRecords": 25,
+    "rationale": "Only 2/31 owners map to active staff; zero fi_staff_source_ids hubspot rows exist; owner mapping has no patient/lead duplication risk and unblocks safe assignee provenance for later lead work."
+  },
+  "rollbackModel": {
+    "previewRequired": true,
+    "hardDelete": false,
+    "batchScoped": true,
+    "nativeEntityPreservation": true
+  },
+  "permissions": {
+    "ordinaryStaffImportControls": false,
+    "configurationSurfaceImportWrites": false,
+    "separationOfDuties": ["operator_dry_run", "approver", "system_apply", "verifier"]
+  },
+  "validation": {
+    "unitTests": "npm run test:hubspot-import",
+    "unitTestsPassed": 30,
+    "dryRunWriteGuard": true,
+    "watermarkUnchangedAfterDryRun": true,
+    "privacySafeEvidence": true
+  },
+  "amberReasons": [
+    "Owner mappings incomplete (29/31 unknown; 0 hubspot staff_source_ids).",
+    "Pipeline stage Surgery Unqualified is history-only pending business decision.",
+    "Preferred external-identity schema partially covered; additive migration proposed not applied."
+  ],
+  "redControls": "none",
+  "artifacts": [
+    "docs/audits/evidence-fi-hubspot-import-1a-architecture-and-dry-run.md",
+    "docs/audits/evidence-fi-hubspot-import-1a-architecture-and-dry-run.json",
+    "docs/runbooks/hubspot-to-fi-os-import.md",
+    "docs/migrations/hubspot-to-fi-os-mapping-v1.md",
+    "src/lib/integrations/hubspot/import/"
+  ]
+}
