@@ -961,7 +961,7 @@ export function GuidedAssistWidget({
             </p>
           ) : null}
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {collapsed && !guideVisible ? (
             <button
               type="button"
@@ -976,7 +976,7 @@ export function GuidedAssistWidget({
           ) : (
             <GuidedAssistToggle
               tenantId={tenantId}
-              assistEnabled={payload.assistEnabled}
+              assistEnabled={Boolean(payload.assistEnabled)}
               compact
               onChanged={(enabled) =>
                 setPayload((prev) => ({
@@ -992,7 +992,7 @@ export function GuidedAssistWidget({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="min-h-10 min-w-10 rounded-md p-1 text-slate-400 hover:bg-white/5 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
+            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
             aria-expanded={!collapsed}
             aria-label={collapsed ? "Expand clinic guide" : "Collapse clinic guide"}
           >
