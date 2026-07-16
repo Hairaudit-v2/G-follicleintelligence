@@ -68,7 +68,8 @@ export async function createHubspotIncrementalBackupAlertIfNeeded(
   const { error } = await supabase.from("fi_admin_notifications").insert({
     id: alertId,
     tenant_id: input.tenantId.trim(),
-    integration_id: input.integrationId,
+    // integration_id FK targets calendar connector rows; keep HubSpot ID in metadata.
+    integration_id: null,
     source: HUBSPOT_INCREMENTAL_ALERT_SOURCE,
     event_type: input.eventType,
     severity: input.severity ?? "warning",
@@ -79,6 +80,7 @@ export async function createHubspotIncrementalBackupAlertIfNeeded(
     metadata: {
       runbook: "docs/runbooks/hubspot-incremental-backup.md",
       note_bodies_included: false,
+      hubspot_integration_id: input.integrationId,
       ...(input.metadata ?? {}),
     },
     created_at: now,
