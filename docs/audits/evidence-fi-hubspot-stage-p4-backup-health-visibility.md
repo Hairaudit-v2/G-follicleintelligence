@@ -197,7 +197,8 @@ Loader uses bounded queries only (latest terminal run, latest active run, waterm
 | `e48dcff1` | feat(hubspot): add backup health visibility |
 | `a039fd61` | test(hubspot): verify backup health states |
 | `2aee523c` | test(hubspot): assert backup health on production smoke |
-| *(follow-up)* | smoke Healthy assertion + audit evidence |
+| `45a78d4e` | test(hubspot): assert Healthy backup health in production smoke |
+| `8398135e` | audit(hubspot): document Stage P4 production gate |
 
 ---
 

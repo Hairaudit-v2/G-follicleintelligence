@@ -76,7 +76,9 @@
   "commits": {
     "feat": "e48dcff1",
     "unitTests": "a039fd61",
-    "smokeAssert": "2aee523c"
+    "smokeAssert": "2aee523c",
+    "smokeHealthy": "45a78d4e",
+    "audit": "8398135e"
   },
   "nextGate": "Stage P5 final closeout for FI-HUBSPOT-BACKUP-1 (do not perform in P4)",
   "remainingRisks": [
