@@ -1,0 +1,80 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 4596
+  },
+  "mode": "inventory",
+  "generatedAt": "2026-07-16T21:37:57.466Z",
+  "summary": {
+    "totalSourceContacts": 4752,
+    "alreadyLinked": 4596,
+    "readyToLink": 0,
+    "proposedNewLeads": 42,
+    "patientReview": 4,
+    "quarantined": 100,
+    "excluded": 10,
+    "conflicts": 0,
+    "appliedThisBatch": 4596,
+    "remaining": 42,
+    "migrationCompletionPercent": 99.1
+  },
+  "dataQuality": {
+    "missingNames": 151,
+    "missingEmails": 92,
+    "missingPhones": 609,
+    "invalidEmails": 0,
+    "invalidPhoneFormats": 7,
+    "duplicateHubspotIds": 0,
+    "duplicateEmails": 2,
+    "duplicatePhones": 73,
+    "multipleFiLeadTargets": 0,
+    "sourceIdsAlreadyMapped": 4596,
+    "crossTenantCandidates": 0,
+    "possibleTestOrSmoke": 94,
+    "possiblePatientOverlap": 4,
+    "missingStages": 4752,
+    "missingOwners": 4737,
+    "malformedTimestamps": 0
+  },
+  "deferredEnrichment": {
+    "missingOwner": 4737,
+    "missingStage": 4752
+  },
+  "decisionCounts": {
+    "already_applied": 4596,
+    "quarantine_test_or_smoke": 94,
+    "excluded": 10,
+    "create_new_lead": 42,
+    "quarantine_ambiguous_identity": 6,
+    "patient_link_review_required": 4
+  },
+  "inventorySignature": "c78e312f9dcf85eb0cf741f3523930913a479b807f97552df6925ad0686492af",
+  "coverage": {
+    "totalSourceContacts": 4752,
+    "mappedContacts": 4596,
+    "createCandidates": 42,
+    "patientReview": 4,
+    "quarantined": 100,
+    "excluded": 10,
+    "conflicts": 0,
+    "wrongTenant": 0,
+    "readyToLink": 0,
+    "accounted": 4752,
+    "unexplained": 0,
+    "balanced": true
+  },
+  "sampleReady": [],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 4596
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

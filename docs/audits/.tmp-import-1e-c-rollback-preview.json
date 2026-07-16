@@ -1,0 +1,151 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-C",
+  "mode": "rollback-preview",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "fixedInventoryChecksum": "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+  "sourceCutoff": "2026-07-16T16:00:34.530Z",
+  "before": {
+    "counts": {
+      "fi_crm_leads": 4716,
+      "fi_persons": 4871,
+      "fi_person_source_ids": 4700,
+      "fi_patients": 829,
+      "fi_staff": 22,
+      "fi_users": 20,
+      "fi_crm_tasks": 1,
+      "fi_crm_messages": 0,
+      "fi_reception_tasks": 0,
+      "fi_admin_notifications": 1,
+      "fi_bookings": 18
+    },
+    "mappings": 4606,
+    "watermarks": [
+      {
+        "source_system": "hubspot",
+        "dataset": "notes",
+        "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+        "version": 4
+      }
+    ]
+  },
+  "after": {
+    "counts": {
+      "fi_crm_leads": 4716,
+      "fi_persons": 4871,
+      "fi_person_source_ids": 4700,
+      "fi_patients": 829,
+      "fi_staff": 22,
+      "fi_users": 20,
+      "fi_crm_tasks": 1,
+      "fi_crm_messages": 0,
+      "fi_reception_tasks": 0,
+      "fi_admin_notifications": 1,
+      "fi_bookings": 18
+    },
+    "mappings": 4606,
+    "watermarks": [
+      {
+        "source_system": "hubspot",
+        "dataset": "notes",
+        "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+        "version": 4
+      }
+    ]
+  },
+  "delta": {
+    "leads": 0,
+    "persons": 0,
+    "personSourceIds": 0,
+    "mappings": 0
+  },
+  "result": {
+    "ok": true,
+    "removableMappings": [
+      {
+        "id": "b36cfe58-8341-4be5-af8e-e5ec6f4df3e8",
+        "hubspotContactId": "227930895245",
+        "leadId": "424651ce-d596-4b79-8293-136437805b42"
+      },
+      {
+        "id": "20b27fed-027c-4cb5-b4d3-a7c9617b43a8",
+        "hubspotContactId": "227992826919",
+        "leadId": "e55eea51-6845-47cf-957d-7bc908153722"
+      },
+      {
+        "id": "631edf05-5257-4762-a61c-f538e502a774",
+        "hubspotContactId": "228160101761",
+        "leadId": "86e9f0de-5433-402a-a85b-54224475dfa1"
+      },
+      {
+        "id": "79789f34-da10-4ac5-8e11-97b258b108f9",
+        "hubspotContactId": "228399343189",
+        "leadId": "588d25de-0719-4e18-bb0b-8c0590b1ec46"
+      },
+      {
+        "id": "ff84583a-b1c9-4c3a-acad-96459d73c574",
+        "hubspotContactId": "228399488827",
+        "leadId": "f4f86c9c-4a22-4b6f-9cb1-4ea7ab9a5c22"
+      },
+      {
+        "id": "402a781f-a213-42f0-a010-a09b8c534f8d",
+        "hubspotContactId": "228432997498",
+        "leadId": "dbc35531-d89d-4e2e-aadf-3798675f6579"
+      },
+      {
+        "id": "2f62ac1a-9589-415a-91a3-cd7b8a274a7b",
+        "hubspotContactId": "228749663251",
+        "leadId": "c9e61e19-3006-4a8a-a043-8ae434d146c1"
+      },
+      {
+        "id": "693befdf-8d93-4d4f-a6ce-7413323959e3",
+        "hubspotContactId": "228997655105",
+        "leadId": "05e99d7a-e7ec-413b-b640-bd34b3242add"
+      },
+      {
+        "id": "250e6a61-49d5-4304-ac4d-579212093033",
+        "hubspotContactId": "229037454111",
+        "leadId": "21ebd746-645d-44ae-92f4-1c66afbb4365"
+      },
+      {
+        "id": "e570b04a-9f3c-4bb0-9b8d-a661664fa4e2",
+        "hubspotContactId": "229084352668",
+        "leadId": "68f144dc-8b6e-487a-be1b-06832ab76436"
+      }
+    ],
+    "newLeadsEligible": [
+      {
+        "leadId": "424651ce-d596-4b79-8293-136437805b42"
+      },
+      {
+        "leadId": "e55eea51-6845-47cf-957d-7bc908153722"
+      },
+      {
+        "leadId": "86e9f0de-5433-402a-a85b-54224475dfa1"
+      },
+      {
+        "leadId": "588d25de-0719-4e18-bb0b-8c0590b1ec46"
+      },
+      {
+        "leadId": "f4f86c9c-4a22-4b6f-9cb1-4ea7ab9a5c22"
+      },
+      {
+        "leadId": "dbc35531-d89d-4e2e-aadf-3798675f6579"
+      },
+      {
+        "leadId": "c9e61e19-3006-4a8a-a043-8ae434d146c1"
+      },
+      {
+        "leadId": "05e99d7a-e7ec-413b-b640-bd34b3242add"
+      },
+      {
+        "leadId": "21ebd746-645d-44ae-92f4-1c66afbb4365"
+      },
+      {
+        "leadId": "68f144dc-8b6e-487a-be1b-06832ab76436"
+      }
+    ],
+    "blockedLeads": [],
+    "watermark": "2026-07-16T16:00:34.53+00:00"
+  }
+}
