@@ -1,10 +1,54 @@
 # FI-HUBSPOT-IMPORT-1C — Owner-resolution workspace evidence
 
-**Verdict:** GREEN (with residual operator UI smoke / screenshots)
+**Verdict:** GREEN — COMPLETE
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
 **Integration:** `ade8a7d0-ad45-4fd7-8d53-61d4806b95f6`
+
+## Closeout
+
+**FI-HUBSPOT-IMPORT-1C: GREEN — COMPLETE**
+
+The authorised owner-resolution workspace is shipped and production
+classification is complete.
+
+Production outcome:
+- 31 owners reviewed
+- 2 previously mapped owners retained
+- 24 classified as archived source owners
+- 5 classified as no matching FI staff
+- 0 unresolved
+- 0 conflicts
+- 0 wrong-tenant
+- 0 new owner-to-staff mappings
+
+1C batch:
+`3ad9738f-8d8d-4f7e-80d0-665fc4708e71`
+
+Controls verified:
+- decisions persist independently from apply
+- review, preview and apply are separated
+- empty apply and replay are idempotent
+- no weak or name-only matching
+- no staff, user, lead or patient mutations
+- rollback remains isolated to the two 1B mappings
+- HubSpot watermark unchanged
+- focused and incremental tests green
+- typecheck clean
+
+Documented limitation:
+Contact and deal backup payloads currently lack owner properties, so
+owned-record usage counts may remain incomplete until source backup
+coverage is expanded.
+
+Recommended post-close evidence:
+Capture a human operator smoke and screenshots of the owner-resolution
+journey. This is follow-up evidence and does not block the GREEN verdict.
+
+Exact next gate:
+**FI-HUBSPOT-IMPORT-1D — Contact and lead migration pilot with
+patient-protection gate**
 
 ## Objective
 

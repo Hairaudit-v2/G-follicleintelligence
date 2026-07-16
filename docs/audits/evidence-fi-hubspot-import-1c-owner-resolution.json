@@ -1,0 +1,73 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1C",
+  "verdict": "GREEN — COMPLETE",
+  "status": "COMPLETE",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "ownersReviewed": 31,
+  "mappingsProposed": 0,
+  "mappingsApplied": 0,
+  "alreadyApplied": 2,
+  "archivedSourceCount": 24,
+  "historicalOnlyCount": 0,
+  "noMatchCount": 5,
+  "unresolvedCount": 0,
+  "conflictCount": 0,
+  "wrongTenantCount": 0,
+  "exactMappings": [
+    {
+      "hubspotOwnerId": "120371232",
+      "staffId": "f9e0bfdf-535a-4f0c-ab2f-3930b5ffc6c1",
+      "originBatchId": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+      "milestone": "FI-HUBSPOT-IMPORT-1B"
+    },
+    {
+      "hubspotOwnerId": "121916721",
+      "staffId": "be01f2b8-5bd0-4e09-9c4d-5454f9cbc162",
+      "originBatchId": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+      "milestone": "FI-HUBSPOT-IMPORT-1B"
+    }
+  ],
+  "batchIds": {
+    "oneB": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+    "oneCEmptyApply": "3ad9738f-8d8d-4f7e-80d0-665fc4708e71"
+  },
+  "oneCPreviewChecksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "productionMutationSummary": {
+    "fi_hubspot_owner_resolution_decisions": {
+      "archived_source_owner": 24,
+      "no_matching_staff": 5
+    },
+    "fi_staff_source_ids_delta": 0,
+    "fi_staff_mutated": false,
+    "fi_users_mutated": false,
+    "leads_mutated": false,
+    "patients_mutated": false
+  },
+  "watermarkBefore": "2026-07-16T03:45:02.366Z",
+  "watermarkAfter": "2026-07-16T03:45:02.366Z",
+  "idempotentReplay": {
+    "batchId": "3ad9738f-8d8d-4f7e-80d0-665fc4708e71",
+    "applied": 0,
+    "alreadyApplied": 0,
+    "delta": 0
+  },
+  "rollbackReadiness": {
+    "oneBRollbackPreviewOk": true,
+    "removableMappingRowIds": [
+      "4adc41a0-bbdd-4311-9551-7e453632d9df",
+      "1fd3863e-ed9a-4aca-97ed-58c121c2fbec"
+    ],
+    "executed": false
+  },
+  "permissionResult": "config_hub_gated",
+  "usabilityResult": "workspace_shipped_screenshots_pending",
+  "testResults": {
+    "tsc": "pass",
+    "test:hubspot-import": "56 pass",
+    "test:hubspot-incremental": "58 pass"
+  },
+  "oneOwnerPerStaffPolicyRetained": true,
+  "nextGate": "FI-HUBSPOT-IMPORT-1D — Contact and lead migration pilot with patient-protection gate",
+  "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=owner-resolution"
+}
