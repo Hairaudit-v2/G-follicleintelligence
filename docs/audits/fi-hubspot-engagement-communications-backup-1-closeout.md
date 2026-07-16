@@ -117,10 +117,10 @@ Items 1–4 and 8 remain pending operator action.
 
 ## Operator next steps
 
-1. Forms inventory is **GREEN** — no forms-only rerun required for Phase O.
-2. Do **not** rerun form_submissions for the +1,091 (already GREEN).
-3. Keep contact-link control AMBER unless a deterministic HubSpot association source is backed up later.
-4. Optionally adjust finalize baseline semantics so CLI can exit `completed` when submissions coverage vs selected-export is documented GREEN.
+1. No forms / form-submissions rerun.
+2. Contact AMBER: optional separate ingest of selected-export CSV `Conversion ID` ↔ `Contact ID` (3,107 populated) — no email matching.
+3. CLI AMBER: optional finalize change so documented coverage GREEN does not leave `unexplained` / `partial`.
+4. Files 405: accept as documented unsupported listing; metadata inventory already complete.
 
 CLI alternatives (trusted service runner only):
 
