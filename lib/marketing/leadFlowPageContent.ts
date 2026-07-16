@@ -42,7 +42,10 @@ export const LEADFLOW_PAGE_CONTENT = {
     maturityLabel: "Operational Pilot",
     maturityBody:
       "Native enquiry, pipeline, assignment and follow-up workflows are active within FI. Controlled HubSpot migration and coexistence pathways are operational, while wider communication automation and reporting depth continue to expand.",
-    primaryCta: { label: "Discuss Your Clinic’s Transition", href: "/contact" as const },
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     secondaryCta: { label: "Explore the Platform", href: "/platform" as const },
     tertiaryCta: { label: "See Platform Progress", href: "/platform/progress" as const },
   },
@@ -282,7 +285,10 @@ export const LEADFLOW_PAGE_CONTENT = {
     eyebrow: "Next step",
     headline: "Start with the workflow your clinic needs most.",
     body: "Keep selected systems connected, transition active workflows in stages, or plan a wider move into the Follicle Intelligence operating system.",
-    primaryCta: { label: "Discuss Your Clinic’s Transition", href: "/contact" as const },
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     secondaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
   },
 } as const;

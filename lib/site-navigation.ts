@@ -38,7 +38,7 @@ export const FOOTER_PLATFORM: FooterNavLink[] = [
   { label: "Academy", href: "/academy" },
   { label: "Audit network", href: "/audit-network" },
   { label: "Intelligence", href: "/intelligence" },
-  { label: "Book demo", href: "/demo" },
+  { label: "Platform review", href: "/demo" },
 ];
 
 /** Public footer — product modules (deep links) */

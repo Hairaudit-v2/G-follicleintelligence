@@ -10,7 +10,10 @@ export const PLATFORM_PAGE_CONTENT = {
     subtext:
       "Follicle Intelligence connects acquisition, consultation, clinical intelligence, surgical planning, auditing, training, analytics, and long-term patient intelligence into one integrated platform.",
     primaryCta: { label: "Explore Modules", href: "#modules" },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" },
+    secondaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo",
+    },
   },
 
   architecture: {
@@ -253,7 +256,10 @@ export const PLATFORM_PAGE_CONTENT = {
     id: "platform-final-cta",
     eyebrow: "Next step",
     headline: "Build on the operating system designed for hair restoration.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" },
+    primaryCta: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo",
+    },
     secondaryCta: { label: "Return Home", href: "/" },
   },
 } as const;

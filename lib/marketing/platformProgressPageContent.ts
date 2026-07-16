@@ -261,7 +261,10 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   ctas: {
     primary: { label: "Explore the Platform", href: "/platform" as const },
-    secondary: { label: "Discuss Your Clinic’s Transition", href: "/contact" as const },
+    secondary: {
+      label: "Request a Platform and Migration Review",
+      href: "/demo" as const,
+    },
     tertiary: {
       label: "View the HubSpot Migration Pathway",
       href: "/platform/leadflow" as const,

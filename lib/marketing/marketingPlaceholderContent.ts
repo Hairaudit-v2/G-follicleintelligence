@@ -114,25 +114,13 @@ export const MARKETING_PLACEHOLDER_COPY = {
       },
     ] satisfies MarketingPlaceholderComingNext[],
   },
+  /** @deprecated /demo is now the Platform and Migration Review page (FI-WEB-REFRESH-1D). */
   demo: {
     path: "/demo",
-    title: "Book Enterprise Demo | Follicle Intelligence",
+    title: "Request a Platform and Migration Review | Follicle Intelligence",
     description:
-      "Tell us about your organisation, regions, and deployment stage. We will route you to the right conversation—demo, procurement, or partnership.",
-    headline: "Book Enterprise Demo",
-    comingNext: [
-      {
-        title: "Deployment scoping",
-        body: "Private tenancy, integrations, data boundaries, and governance expectations—aligned to how enterprise buyers actually contract.",
-      },
-      {
-        title: "Clinical workflow depth",
-        body: "Surgery, diagnostics, training, and audit surfaces—so procurement sees the full operating loop, not a feature list.",
-      },
-      {
-        title: "Partnership & procurement paths",
-        body: "Education networks, multi-site groups, and strategic partners routed to the right conversation without generic noise.",
-      },
-    ] satisfies MarketingPlaceholderComingNext[],
+      "Discuss your clinic’s CRM, patient, operational and migration requirements with Follicle Intelligence.",
+    headline: "Request a Platform and Migration Review",
+    comingNext: [] as MarketingPlaceholderComingNext[],
   },
 } as const;

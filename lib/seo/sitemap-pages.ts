@@ -48,6 +48,7 @@ export const PUBLIC_SITEMAP_PAGES: readonly SitemapPage[] = [
   { path: "/modules", priority: 0.7, changeFrequency: "monthly" },
   { path: "/integration", priority: 0.7, changeFrequency: "monthly" },
   { path: "/security", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/privacy", priority: 0.5, changeFrequency: "yearly" },
   { path: "/licensing", priority: 0.7, changeFrequency: "monthly" },
   { path: "/use-cases", priority: 0.8, changeFrequency: "monthly" },
 ] as const;

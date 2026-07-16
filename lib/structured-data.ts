@@ -57,7 +57,7 @@ export const HOME_PAGE_FAQS: readonly FaqItem[] = [
   {
     question: "How do I request a demo or pricing?",
     answer:
-      "Book an enterprise demo at https://www.follicleintelligence.ai/demo or contact the team at https://www.follicleintelligence.ai/contact.",
+      "Request a platform and migration review at https://www.follicleintelligence.ai/demo or contact the team at https://www.follicleintelligence.ai/contact.",
   },
 ] as const;
 
@@ -81,7 +81,7 @@ export const PRICING_PAGE_FAQS: readonly FaqItem[] = [
   {
     question: "How do I request pricing or a demo?",
     answer:
-      "Email sales@follicleintelligence.ai with your clinic profile and module interests, or book a demo at https://www.follicleintelligence.ai/demo.",
+      "Email sales@follicleintelligence.ai with your clinic profile and module interests, or request a platform and migration review at https://www.follicleintelligence.ai/demo.",
   },
 ] as const;
 

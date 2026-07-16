@@ -97,14 +97,23 @@ const PRIMARY_PATHS = [
   },
 ];
 
-const INTENT_PATHS = [
+const INTENT_PATHS: {
+  icon: typeof Building2;
+  title: string;
+  value: string;
+  copy: string;
+  href?: string;
+  cta?: string;
+  email?: string;
+}[] = [
   {
     icon: Building2,
-    title: "Enterprise demo",
+    title: "Platform and migration review",
     value:
-      "See how benchmarks, governance queues, and tenant configuration behave at a scale that matches your organization—not a scripted walkthrough.",
-    copy: "Walk through the platform: benchmarks, governance queues, and deployment options for your scale.",
-    email: "sales@follicleintelligence.ai?subject=Enterprise%20Demo%20Request",
+      "Share your clinic systems, priorities and adoption stage so the conversation is tailored — not a generic feature tour.",
+    copy: "Structured review of CRM, operations and staged FI adoption pathways.",
+    href: "/demo",
+    cta: "Request a Platform and Migration Review",
   },
   {
     icon: ShieldCheck,
@@ -197,7 +206,7 @@ export default function ContactPage() {
           <SectionIntro
             eyebrow="Intent"
             title="Topic-specific routes."
-            description="Each option opens email with a subject line that helps us respond in kind. Use the one closest to your decision—overlap is fine; we will consolidate."
+            description="Use the structured platform review form for clinic adoption conversations, or open email with a prefilled subject for other topics."
           />
         </FadeIn>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -217,7 +226,13 @@ export default function ContactPage() {
                     variant="ghost"
                     className="mt-4 h-auto px-0 py-2 text-primary hover:text-primary"
                   >
-                    <a href={`mailto:${item.email}`}>Open email — subject prefilled for routing</a>
+                    {item.href ? (
+                      <Link href={item.href}>{item.cta ?? "Continue"}</Link>
+                    ) : (
+                      <a href={`mailto:${item.email}`}>
+                        Open email — subject prefilled for routing
+                      </a>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
