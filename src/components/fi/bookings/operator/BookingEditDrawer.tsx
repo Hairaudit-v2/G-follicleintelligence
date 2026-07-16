@@ -9,8 +9,10 @@ import {
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
 import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
 import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
+import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedulingAssistant";
 import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
 import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
+import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
 import { BOOKING_TYPES, isBookingCancelled } from "@/src/lib/bookings";
 import {
   defaultProcedureDurationMinutes,
@@ -286,12 +288,45 @@ export function BookingEditDrawer({
     startLocal,
   ]);
 
-  const onApplySuggestedSlot = (slot: NextAvailableBookingSlot) => {
+  const onApplySuggestedSlot = (slot: NextAvailableBookingSlot | SmartSuggestedSlot) => {
     setStartLocal(toDatetimeLocalValue(slot.startAt, datetimeTz));
     setEndLocal(toDatetimeLocalValue(slot.endAt, datetimeTz));
-    setDraftRoomId(slot.roomId);
+    if (slot.roomId) setDraftRoomId(slot.roomId);
     if (slot.staffId) setAssignedStaffId(slot.staffId);
   };
+
+  const smartSchedulingRequest = useMemo(() => {
+    if (!booking || cancelled || completed) return null;
+    const startIso = fromDatetimeLocalValue(startLocal, datetimeTz);
+    const endIso = fromDatetimeLocalValue(endLocal, datetimeTz);
+    if (!startIso || !endIso) return null;
+    const staffOpt = clinicalStaffOptions.find((s) => s.id === assignedStaffId.trim());
+    return {
+      clinicId: clinicId.trim() || null,
+      bookingType: bookingType.trim() || null,
+      roomId: draftRoomId.trim() || booking.room_id,
+      roomRequired: booking.room_required,
+      staffId: assignedStaffId.trim() || null,
+      staffLabel: staffOpt?.full_name?.trim() || staffOpt?.email?.trim() || null,
+      patientId: booking.patient_id,
+      bookingId: booking.id,
+      startAt: startIso,
+      endAt: endIso,
+      includeSuggestions: true,
+    };
+  }, [
+    assignedStaffId,
+    booking,
+    bookingType,
+    cancelled,
+    clinicId,
+    clinicalStaffOptions,
+    completed,
+    datetimeTz,
+    draftRoomId,
+    endLocal,
+    startLocal,
+  ]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -583,6 +618,13 @@ export function BookingEditDrawer({
                   </select>
                 </div>
               </div>
+              <SmartSchedulingAssistant
+                tenantId={tenantId}
+                request={smartSchedulingRequest}
+                calendarTimezone={displayTz}
+                onApplySlot={onApplySuggestedSlot}
+                variant="light"
+              />
               <BookingConflictPreview
                 preview={conflictPreview}
                 loading={conflictLoading && !conflictPreview}

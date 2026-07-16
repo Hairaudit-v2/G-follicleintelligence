@@ -14,8 +14,10 @@ import { loadRoomPickerOptionsAction } from "@/lib/actions/fi-rooms-actions";
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
 import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
 import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
+import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedulingAssistant";
 import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
 import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
+import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
 import { BOOKING_CONFLICT_PREVIEW_CALM_INCOMPLETE_MESSAGE } from "@/src/lib/calendar/bookingConflictPreviewConstants";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
@@ -640,7 +642,7 @@ export function CalendarQuickCreateDrawer({
   }, [open, tenantId, debouncedConflictKey]);
 
   const onApplySuggestedSlot = useCallback(
-    (slot: NextAvailableBookingSlot) => {
+    (slot: NextAvailableBookingSlot | SmartSuggestedSlot) => {
       setManualEndOverride(false);
       skipOneEndSyncRef.current = true;
       const startWall = toDatetimeLocalValueInTimezone(slot.startAt, tz);
@@ -653,11 +655,29 @@ export function CalendarQuickCreateDrawer({
         ? toDatetimeLocalValueInTimezone(slot.endAt, tz)
         : deriveQuickBookEndLocal({ startLocal: startWall, durationMinutes: dur, timeZone: tz });
       setEndLocal(endWall ?? "");
-      setRoomId(slot.roomId);
+      if (slot.roomId) setRoomId(slot.roomId);
       if (slot.staffId) setAssignedStaffId(slot.staffId);
     },
     [services, tplForRooms, tz]
   );
+
+  const smartSchedulingRequest = useMemo(() => {
+    if (!tplForRooms) return null;
+    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+    const endIso = fromDatetimeLocalValueInTimezone(endLocal, tz);
+    if (!startIso || !endIso) return null;
+    return {
+      clinicId: clinicId.trim() || null,
+      bookingType: tplForRooms.bookingType,
+      roomId: roomId.trim() || null,
+      staffId: assignedStaffId.trim() || null,
+      staffLabel: null as string | null,
+      patientId: null as string | null,
+      startAt: startIso,
+      endAt: endIso,
+      includeSuggestions: true,
+    };
+  }, [assignedStaffId, clinicId, endLocal, roomId, startLocal, tplForRooms, tz]);
 
   const nextSlotsRequest = useMemo(() => {
     if (!tplForRooms || !clinicId.trim()) return null;
@@ -1551,6 +1571,14 @@ export function CalendarQuickCreateDrawer({
                   ) : null}
                 </div>
               </details>
+
+              <SmartSchedulingAssistant
+                tenantId={tenantId}
+                request={smartSchedulingRequest}
+                calendarTimezone={tz}
+                onApplySlot={onApplySuggestedSlot}
+                variant="dark"
+              />
 
               <BookingConflictPreview
                 preview={conflictPreviewBody ? conflictPreview : calmIncompleteConflictPreview}
