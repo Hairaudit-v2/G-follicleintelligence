@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E** (controlled contact→lead expansion; E1–E8 GREEN; E9 pending approval)  
+Current gate: **1E** (controlled contact→lead expansion; E1–E9 GREEN; E10 pending approval)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -210,11 +210,12 @@ Hard rules for 1E (inherits 1D):
 - Replay must be idempotent; rollback preview batch-scoped
 - Unreconciled prior expansion batch blocks the next apply
 
-### E8 production position (2026-07-16)
+### E9 production position (2026-07-16)
 
-- Batch `a0e2bdc3-1e7b-4681-a685-5ccb6fefdfad`: 500 links, 0 creates, patients 829→829
-- Mappings 2624→3124; replay already_applied ×500; rollback preview 500 mappings
-- Eight consecutive reconciled batches (E1–E8); gate open for E9 (≤500, requires approval)
+- Batch `bba7d442-d39d-4b26-a279-fba6fefe1605`: 500 links, 0 creates, patients 829→829
+- Mappings 3124→3624; replay already_applied ×500; rollback preview 500 mappings
+- Nine consecutive reconciled batches (E1–E9); gate open for E10 (≤500, requires approval)
+- E1–E8 checkpoint `ec4541d3` was committed and pushed before E9 apply
 
 ### Next gate (after full 1E GREEN)
 
@@ -239,3 +240,4 @@ Hard rules for 1E (inherits 1D):
 - [x] 1E E6: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E7
 - [x] 1E E7: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E8
 - [x] 1E E8: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E9
+- [x] 1E E9: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E10

@@ -1,23 +1,28 @@
 {
   "milestone": "FI-HUBSPOT-IMPORT-1E",
-  "verdict": "AMBER — E1–E8 GREEN; expansion paused for E9 approval",
-  "status": "E8_COMPLETE",
+  "verdict": "AMBER — E1–E9 GREEN; expansion paused for E10 approval",
+  "status": "E9_COMPLETE",
   "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
   "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "checkpointBeforeE9": {
+    "commit": "ec4541d3",
+    "message": "audit(hubspot-import): record E1 to E8 production evidence",
+    "pushed": true
+  },
   "inventory": {
     "totalSourceContacts": 4750,
-    "alreadyLinked": 3124,
-    "readyToLink": 1472,
+    "alreadyLinked": 3624,
+    "readyToLink": 972,
     "proposedNewLeads": 46,
     "patientReview": 4,
     "quarantined": 104,
     "excluded": 0,
     "conflicts": 0,
     "wrongTenantCount": 0,
-    "migrationCompletionPercent": 68,
+    "migrationCompletionPercent": 78.6,
     "decisionCounts": {
-      "already_applied": 3124,
-      "link_existing_lead": 1472,
+      "already_applied": 3624,
+      "link_existing_lead": 972,
       "create_new_lead": 46,
       "quarantine_test_or_smoke": 94,
       "quarantine_duplicate_source": 4,
@@ -141,6 +146,22 @@
       "size": 500,
       "existingLeadsLinked": 500,
       "newLeadsCreated": 0,
+      "scope": "link_existing_lead_only",
+      "identityMethod": "person_source_id_single_lead",
+      "expandedBatchPolicy": true,
+      "priorBatchId": "5ed8a08d-70a1-4fa3-ad11-2383c79551a1",
+      "reconciled": true,
+      "unexplained": 0,
+      "replay": { "alreadyApplied": 500, "delta": 0 },
+      "rollbackPreview": { "ok": true, "removableMappings": 500, "blockedRows": 0, "executed": false }
+    },
+    {
+      "sequence": "E9",
+      "batchId": "bba7d442-d39d-4b26-a279-fba6fefe1605",
+      "checksum": "b646685805d32c11730c8d3d7a54e190d80621ebf2d106092a79b0f06239fe68",
+      "size": 500,
+      "existingLeadsLinked": 500,
+      "newLeadsCreated": 0,
       "newLeadIds": [],
       "alreadyApplied": 0,
       "createsInPreview": 0,
@@ -149,7 +170,7 @@
       "expandedBatchPolicy": true,
       "conflicts": 0,
       "wrongTenantCount": 0,
-      "priorBatchId": "5ed8a08d-70a1-4fa3-ad11-2383c79551a1",
+      "priorBatchId": "a0e2bdc3-1e7b-4681-a685-5ccb6fefdfad",
       "reconciled": true,
       "unexplained": 0,
       "replay": {
@@ -167,20 +188,20 @@
     }
   ],
   "cumulative": {
-    "contactsInProductionBatches": 3100,
-    "numberOfBatches": 8,
-    "consecutiveReconciledStreak": 8,
-    "expansionMappingsCreated": 3100,
-    "existingLeadsLinked": 3100,
+    "contactsInProductionBatches": 3600,
+    "numberOfBatches": 9,
+    "consecutiveReconciledStreak": 9,
+    "expansionMappingsCreated": 3600,
+    "existingLeadsLinked": 3600,
     "newLeadsCreated": 0,
     "mappingsBefore1E": 24,
-    "mappingsAfterE8": 3124,
+    "mappingsAfterE9": 3624,
     "leadCountBefore": 4706,
     "leadCountAfter": 4706,
     "patientCountBefore": 829,
     "patientCountAfter": 829,
-    "remainingReadyToLink": 1472,
-    "remainingSourcePopulation": 1518
+    "remainingReadyToLink": 972,
+    "remainingSourcePopulation": 1018
   },
   "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
   "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
@@ -192,18 +213,18 @@
   },
   "patientCreationForbidden": true,
   "gateStatus": {
-    "priorBatchId": "a0e2bdc3-1e7b-4681-a685-5ccb6fefdfad",
+    "priorBatchId": "bba7d442-d39d-4b26-a279-fba6fefe1605",
     "reconciled": true,
     "nextBatchAllowed": true,
     "nextBatchMax": 500,
-    "note": "Eight consecutive reconciled batches complete; E9 requires explicit operator approval"
+    "note": "Nine consecutive reconciled batches complete; E10 requires explicit operator approval"
   },
   "remainingRisks": [
     "Owner/stage enrichment deferred — staging payloads lack properties",
     "46 create_new_lead candidates require separate review before create cohort",
-    "1,472 link_existing_lead contacts remain for subsequent batches"
+    "972 link_existing_lead contacts remain for subsequent batches"
   ],
-  "nextGate": "Approve Batch E9 (≤500, link_existing_lead only)",
+  "nextGate": "Approve Batch E10 (≤500, link_existing_lead only)",
   "programmeNextGateAfterFull1E": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
   "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration"
 }
