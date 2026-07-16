@@ -78,24 +78,53 @@ Dry-run guarantees:
 - Linked existing entities: remove imported links/evidence only.
 - Rollback is tenant-scoped and previewable (`rollback_preview` mode).
 
-## Recommended first pilot (1B)
+## Owner→staff mapping pilot (1B) — COMPLETE GREEN
 
-**Option A — Owner-to-staff mapping pilot** (≤ 25 owners)
+Batch: `c73c5fb8-4df2-42b4-93ac-ddefe25d4574`  
+Evidence: `docs/audits/evidence-fi-hubspot-import-1b-owner-staff-mapping.md`
 
-- Write only `fi_staff_source_ids` (and optional `fi_external_record_mappings`) for deterministic exact matches.
-- Do not create staff.
-- Do not assign leads in the same batch.
+### Commands
 
-Next gate title:
+```bash
+# Preview (max 2 by default; creates fi_import_batches dry_run_passed)
+node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts --preview --max-records 2
 
-`FI-HUBSPOT-IMPORT-1B — Owner-to-staff mapping pilot`
+# Apply (confirm env must equal batch id)
+FI_HUBSPOT_OWNER_MAP_CONFIRM=<batchId> node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts \
+  --apply --approved-batch-id <batchId>
+
+# Idempotent replay: same apply command again → already_applied
+
+# Rollback preview (production-safe)
+node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts \
+  --rollback-preview --batch-id <batchId>
+
+# Rollback apply (only if mappings incorrect)
+FI_HUBSPOT_OWNER_MAP_ROLLBACK_CONFIRM=<batchId> node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs \
+  ./node_modules/tsx/dist/cli.mjs scripts/hubspot-owner-mapping.ts \
+  --rollback-apply --batch-id <batchId> --reason "<text>"
+```
+
+### Allowlisted mutations
+
+- `fi_import_batches` insert/update
+- `fi_staff_source_ids` insert/delete (batch-scoped metadata only)
+
+Never mutates `fi_staff` / `fi_users`. Expansion beyond 2 requires `--expand` (max 25) and still only deterministic matches.
+
+### Next gate
+
+`FI-HUBSPOT-IMPORT-1C — Owner-resolution workspace and controlled mapping coverage expansion`
 
 ## Safety checklist before any apply
 
-- [ ] Dry-run JSON reviewed
-- [ ] Wrong-tenant count = 0
-- [ ] Conflict count = 0
-- [ ] Pilot ≤ 25 records
-- [ ] Approver recorded
-- [ ] Backup watermark unchanged after dry-run
-- [ ] Rollback preview prepared
+- [x] Preview JSON reviewed (1B)
+- [x] Wrong-tenant count = 0
+- [x] Conflict count = 0
+- [x] Pilot ≤ 2 records (Phase 1)
+- [x] Confirm token = batch id
+- [x] Backup watermark unchanged
+- [x] Rollback preview prepared (not executed — mappings correct)

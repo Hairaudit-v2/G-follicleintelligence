@@ -1,0 +1,80 @@
+{
+  "evidenceType": "hubspot_owner_staff_mapping_1b",
+  "milestone": "FI-HUBSPOT-IMPORT-1B",
+  "closedAt": "2026-07-16",
+  "verdict": "GREEN",
+  "claimsProgrammeComplete": false,
+  "batchId": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+  "tenant": {
+    "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+    "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6"
+  },
+  "ownersEvaluated": 31,
+  "mappingsProposed": 2,
+  "mappingsApplied": 2,
+  "alreadyAppliedOnReplay": 2,
+  "quarantined": 29,
+  "quarantineReasons": {
+    "no_deterministic_active_staff_match": "majority",
+    "archived_hubspot_owner": "present",
+    "name_only": 0,
+    "ambiguous": 0,
+    "inactive_staff": 0
+  },
+  "conflicts": 0,
+  "wrongTenant": 0,
+  "exactMappings": [
+    {
+      "hubspotOwnerId": "120371232",
+      "hubspotOwnerIdHash": "b66a993fe22d0b5f",
+      "staffId": "f9e0bfdf-535a-4f0c-ab2f-3930b5ffc6c1",
+      "matchMethod": "exact_staff_email_within_tenant",
+      "mappingRowId": "4adc41a0-bbdd-4311-9551-7e453632d9df"
+    },
+    {
+      "hubspotOwnerId": "121916721",
+      "hubspotOwnerIdHash": "9a1cb2df05e29c5d",
+      "staffId": "be01f2b8-5bd0-4e09-9c4d-5454f9cbc162",
+      "matchMethod": "exact_staff_email_within_tenant",
+      "mappingRowId": "1fd3863e-ed9a-4aca-97ed-58c121c2fbec"
+    }
+  ],
+  "productionMutationSummary": {
+    "allowlistedTables": ["fi_import_batches", "fi_staff_source_ids"],
+    "fi_staff_mutated": false,
+    "fi_users_mutated": false,
+    "leadsCreated": false,
+    "patientsCreated": false,
+    "notificationsEmitted": false,
+    "hubspotStaffSourceIdsBefore": 0,
+    "hubspotStaffSourceIdsAfter": 2,
+    "crmLeadsUnchanged": 4706
+  },
+  "idempotentReplay": {
+    "mode": "replay",
+    "alreadyApplied": 2,
+    "applied": 0,
+    "deltaSourceIds": 0,
+    "ok": true
+  },
+  "rollback": {
+    "previewOk": true,
+    "previewRemovableMappings": 2,
+    "productionRollbackApplied": false,
+    "reason": "mappings_correct_rollback_preview_only",
+    "safeEnvRollbackIsolationTest": true
+  },
+  "watermark": {
+    "before": "2026-07-16T03:45:02.366Z",
+    "after": "2026-07-16T03:45:02.366Z",
+    "changed": false,
+    "version": 3
+  },
+  "validation": {
+    "tsc": true,
+    "testHubspotImport": "44/44",
+    "testHubspotIncremental": "58/58"
+  },
+  "nextGate": "FI-HUBSPOT-IMPORT-1C — Owner-resolution workspace and controlled mapping coverage expansion",
+  "redControls": "none"
+}
