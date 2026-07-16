@@ -41,3 +41,35 @@ test("webhook degradation does not degrade either backup", () => {
   assert.equal(status.primary.status, "completed");
   assert.equal(status.primary.warning, null);
 });
+
+test("engagement runs stay out of primary and secondary aggregates", () => {
+  const status = aggregateHubspotWorkspaceStatus({
+    authVerified: true,
+    runs: [
+      run({
+        id: "engagement",
+        status: "partial",
+        detail: { milestone: "FI-HUBSPOT-ENGAGEMENT-COMMUNICATIONS-BACKUP-1" },
+        engagementCapabilities: {
+          notes: { granted: true, result: "PASS" },
+          emails: { granted: false, result: "MISSING_SCOPE", requiredScope: "crm.objects.emails.read" },
+        },
+        engagementCounters: {
+          notes: { active: 244, archived: 0, discovered: 244, complete: true },
+          emails: { active: 0, archived: 0, discovered: 0, complete: false },
+          conversation_threads: { active: 0, archived: 0, discovered: 0, complete: false },
+          conversation_messages: { active: 0, archived: 0, discovered: 0, complete: false },
+          files: { active: 0, archived: 0, discovered: 0, complete: false },
+          forms: { active: 0, archived: 0, discovered: 0, complete: false },
+          form_submissions: { active: 0, archived: 0, discovered: 0, complete: false },
+        },
+      }),
+      run({ id: "primary", contactsDiscovered: 4750, dealsDiscovered: 4958 }),
+    ],
+  });
+  assert.equal(status.primary.counts.contacts, 4750);
+  assert.equal(status.secondary.status, null);
+  assert.equal(status.engagement.status, "partial");
+  assert.equal(status.engagement.counts.notes.total, 244);
+  assert.ok(status.engagement.missingScopeWarnings.some((item) => /emails/i.test(item)));
+});

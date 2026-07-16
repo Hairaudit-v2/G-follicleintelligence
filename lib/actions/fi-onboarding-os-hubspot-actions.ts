@@ -18,7 +18,9 @@ import {
   rejectHubspotLead,
   runHubspotSync,
   runHubspotSecondaryObjectBackup,
+  runHubspotEngagementCommunicationsBackup,
   verifyHubspotSecondaryCapabilitiesLive,
+  verifyHubspotEngagementCapabilitiesLive,
 } from "@/src/lib/onboarding-os/hubspotConnector.server";
 import type { HubspotConnectorSnapshot } from "@/src/lib/onboarding-os/hubspotConnectorTypes";
 
@@ -30,6 +32,14 @@ export type HubspotActionResult =
         allGranted: boolean;
         missingScopes: readonly string[];
         capabilities: Record<string, { granted: boolean; status: number | null }>;
+      };
+      engagementProbe?: {
+        anyGranted: boolean;
+        missingScopes: readonly string[];
+        capabilities: Record<
+          string,
+          { granted: boolean; status: number | null; result: string }
+        >;
       };
     }
   | { ok: false; error: string };
@@ -106,6 +116,74 @@ export async function verifyHubspotSecondaryCapabilitiesAction(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "HubSpot live capability check failed.",
+    };
+  }
+}
+
+export async function runHubspotEngagementBackupAction(
+  tenantId: string,
+  integrationId: string,
+  sessionId?: string | null
+): Promise<HubspotActionResult> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const iid = integrationIdSchema.parse(integrationId);
+    const authId = await resolveAuthUserId(null);
+    if (!authId) return { ok: false, error: "Authentication required." };
+    const os = await loadFiOsIdentity(authId);
+    const isPlatform = isFiOsRoleAllowedForPlatformTenantProvisioning(os?.osRole);
+    const result = await runHubspotEngagementCommunicationsBackup(iid, tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: isPlatform,
+    });
+    if (!result.ok) return result;
+    revalidateHubspotPaths(tid, sessionId);
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "HubSpot engagement backup failed.",
+    };
+  }
+}
+
+export async function verifyHubspotEngagementCapabilitiesAction(
+  tenantId: string,
+  integrationId: string
+): Promise<HubspotActionResult> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const iid = integrationIdSchema.parse(integrationId);
+    const authId = await resolveAuthUserId(null);
+    if (!authId) return { ok: false, error: "Authentication required." };
+    const os = await loadFiOsIdentity(authId);
+    const isPlatform = isFiOsRoleAllowedForPlatformTenantProvisioning(os?.osRole);
+    const result = await verifyHubspotEngagementCapabilitiesLive(iid, tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: isPlatform,
+    });
+    if (!result.ok) return result;
+    const snapshot = await loadSnapshotForIntegration(iid, tid, authId, isPlatform);
+    return {
+      ok: true,
+      snapshot,
+      engagementProbe: {
+        anyGranted: result.anyGranted,
+        missingScopes: result.missingScopes,
+        capabilities: Object.fromEntries(
+          Object.entries(result.capabilities).map(([kind, cap]) => [
+            kind,
+            { granted: cap.granted, status: cap.status, result: cap.result },
+          ])
+        ),
+      },
+    };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid input." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "HubSpot engagement capability check failed.",
     };
   }
 }

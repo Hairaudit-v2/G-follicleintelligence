@@ -236,6 +236,16 @@ export type HubspotConnectorSnapshot = {
     } | null;
     latestBackup: { status: HubspotSyncRunStatus; completedAt: string | null } | null;
   };
+  engagementBackupAction: import("./hubspotEngagementBackupActionCore").HubspotEngagementBackupActionState;
+  engagementEvidence: {
+    liveCapabilityProbe: {
+      outcome: string;
+      occurredAt: string;
+      anyGranted: boolean;
+      missingScopes: readonly string[];
+    } | null;
+    latestBackup: { status: HubspotSyncRunStatus; completedAt: string | null } | null;
+  };
   workspaceStatus: import("./hubspotWorkspaceStatus").HubspotWorkspaceStatus;
   calculatedAt: string;
 };

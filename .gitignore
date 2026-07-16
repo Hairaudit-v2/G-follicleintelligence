@@ -55,6 +55,9 @@ supabase/.branches/
 # Local disaster-recovery drill evidence (do not commit)
 /docs/security/restore-drill-evidence/
 
+# Local HubSpot audit inputs (raw XLSX / private exports — do not commit)
+/.local/
+
 # Temporary Storage drill binaries (never commit)
 /.tmp-restore-drill-storage/
 

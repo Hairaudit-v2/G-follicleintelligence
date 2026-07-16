@@ -33,7 +33,7 @@ const HUBSPOT_WORKSPACE_URL_RE =
 
 /** Explicit HubSpot mutation API / action fingerprints (never allowed). */
 const HUBSPOT_MUTATION_FINGERPRINT_RE =
-  /runHubspotSync|runHubspotSecondary|approveHubspot|rejectHubspot|cancelHubspotImport|commitHubspot|verifyHubspotSecondary|Verify credentials|Import Now|Import first/i;
+  /runHubspotSync|runHubspotSecondary|runHubspotEngagement|approveHubspot|rejectHubspot|cancelHubspotImport|commitHubspot|verifyHubspotSecondary|verifyHubspotEngagement|Verify credentials|Import Now|Import first|Back up engagements/i;
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
