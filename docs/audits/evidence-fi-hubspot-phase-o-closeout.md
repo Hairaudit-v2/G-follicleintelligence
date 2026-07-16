@@ -7,7 +7,7 @@
 **Evidence classification:** Privacy-safe operational metadata only  
 
 **Final Phase O verdict:** GREEN WITH DOCUMENTED LIMITATIONS  
-**Production PASS:** NOT CLAIMED
+**Production PASS:** CLAIMED — see `evidence-fi-hubspot-phase-o-production-gate.md` (smoke GREEN `2026-07-16T01:37:47.958Z`; deploy READY `3bf43f22`)
 
 This file supersedes interim Phase O AMBER / residual-AMBER operator verdicts in:
 
@@ -57,9 +57,9 @@ Out of this closeout (separate gates):
 | Operator reconciliation | GREEN |
 | RED controls | NONE |
 | Phase O | GREEN WITH DOCUMENTED LIMITATIONS |
-| Production deployment | NOT VERIFIED |
-| Authenticated production smoke | NOT RUN |
-| Production PASS | NOT CLAIMED |
+| Production deployment | READY (`3bf43f22`) |
+| Authenticated production smoke | GREEN |
+| Production PASS | CLAIMED |
 
 ### Distinction of status layers
 
@@ -208,13 +208,11 @@ Unresolved RED controls: **0**
 |------|--------|
 | Recovery implementation commit | `c0f1c06a` — `fix(hubspot): complete workspace recovery` |
 | Type check (recovery work) | PASS (prior) |
-| Production deployment READY | **Not verified** (not in this task) |
-| Authenticated production smoke | **Not run** (not in this task) |
-| Production PASS claimed | **false** |
+| Production deployment READY | **Yes** — `dpl_6UF8GSzt4catsmfz1PqLmw7YoRgt` SHA `3bf43f22` |
+| Authenticated production smoke | **GREEN** — 11/11 (`2026-07-16T01:37:47.958Z`) |
+| Production PASS claimed | **true** — `evidence-fi-hubspot-phase-o-production-gate.md` |
 
-Exact next gate (outside this closeout):
-
-> Deploy the recovery commit stack to production through Vercel Git integration or CI, confirm READY and deployed SHA, then run authenticated production smoke.
+Production gate completed after this closeout record; authoritative deploy/smoke evidence lives in the production-gate files.
 
 ---
 
@@ -259,4 +257,4 @@ git revert <this-closeout-commit-sha>
 - CLI `partial`: **ACCEPTED OPERATOR OVERRIDE**
 - Unresolved RED controls: **0**
 - Forms / form-submissions rerun: **not required**
-- Production PASS: **NOT CLAIMED**
+- Production PASS: **CLAIMED** (production-gate evidence)

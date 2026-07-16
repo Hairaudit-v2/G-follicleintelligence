@@ -51,9 +51,9 @@ Additive parallel milestone on the existing HubSpot connector:
 | CLI vs operator | ENGINE PARTIAL / OPERATOR GREEN |
 | RED controls | NONE |
 | Phase O | GREEN WITH DOCUMENTED LIMITATIONS |
-| Production deployment | NOT VERIFIED |
-| Authenticated production smoke | NOT RUN |
-| Production PASS | NOT CLAIMED |
+| Production deployment | READY (`3bf43f22`) |
+| Authenticated production smoke | GREEN |
+| Production PASS | CLAIMED — `evidence-fi-hubspot-phase-o-production-gate.md` |
 
 ### Status-layer distinction
 

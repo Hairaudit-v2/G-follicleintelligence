@@ -2,49 +2,57 @@
   "evidenceType": "hubspot_phase_o_production_gate",
   "milestone": "FI-HUBSPOT-BACKUP-1 Phase O production gate",
   "recordedAt": "2026-07-16",
-  "productionPassClaimed": false,
+  "productionPassClaimed": true,
   "push": {
     "featureBranch": "codex/fi-hubspot-live-sync-recovery",
     "featureTipSha": "cfdf08c4067c1f3a80c95c4398efc9c42b9a7ce6",
     "mergedToMain": true,
-    "mainHeadSha": "8fe2a3924e644b78295017e07b304fc67f931a26",
+    "mainHeadSha": "3bf43f22d5828089ba48c086e21e60d62de51b8b",
     "featureTipIsAncestorOfMainHead": true
   },
   "deployment": {
     "mechanism": "vercel_git_integration_main",
-    "deploymentId": "dpl_BqzrpkMs8UPac5L9vELaitzJBHMc",
+    "deploymentId": "dpl_6UF8GSzt4catsmfz1PqLmw7YoRgt",
     "target": "production",
     "readyState": "READY",
-    "deployedSha": "8fe2a3924e644b78295017e07b304fc67f931a26",
+    "deployedSha": "3bf43f22d5828089ba48c086e21e60d62de51b8b",
     "matchesOriginMainHead": true,
     "aliases": [
       "follicleintelligence.ai",
       "www.follicleintelligence.ai"
     ],
-    "inspectorUrl": "https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/BqzrpkMs8UPac5L9vELaitzJBHMc"
+    "inspectorUrl": "https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/6UF8GSzt4catsmfz1PqLmw7YoRgt"
   },
   "authenticatedSmoke": {
     "suite": "FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1",
     "baseUrl": "https://follicleintelligence.ai",
-    "suiteCommit": "8fe2a3924e644b78295017e07b304fc67f931a26",
-    "verdict": "red",
-    "blocker": "FI_E2E_PRODUCTION_ADMIN_* unavailable locally; DEMO admin alias lacks Configuration hub access so overview/configuration return notFound",
-    "demoAliasDiagnostic": {
-      "overview": { "hubspotHeading": 0, "notFound": 1 },
-      "importReview": { "hubspotHeading": 1, "notFound": 0 },
-      "configuration": { "hubspotHeading": 0, "notFound": 1 }
+    "suiteCommit": "3bf43f22d5828089ba48c086e21e60d62de51b8b",
+    "timestampUtc": "2026-07-16T01:37:47.958Z",
+    "verdict": "green",
+    "playwrightPassed": 11,
+    "playwrightFailed": 0,
+    "axes": {
+      "mutationGuard": "PASS",
+      "canonicalTabs": "PASS",
+      "redirects": "PASS",
+      "validBatchId": "PASS",
+      "invalidBatchId": "PASS",
+      "tenantIsolation": "PASS",
+      "lowRole": "PASS"
     },
-    "githubWorkflowDispatchAttempted": false,
-    "githubCliAuthenticated": false,
-    "summaryPathLocal": "test-results/hubspot-production-smoke-summary.json"
+    "summaryPathLocal": "test-results/hubspot-production-smoke-summary.json",
+    "githubCliAuthenticated": false
   },
   "gates": {
     "recoveryStackPushed": true,
     "mergedToMain": true,
     "productionDeploymentReady": true,
     "deployedShaMatchesMainHead": true,
-    "authenticatedSmokePassed": false,
-    "productionPassClaimed": false
+    "authenticatedSmokePassed": true,
+    "productionPassClaimed": true
   },
-  "nextAction": "Provide FI_E2E_PRODUCTION_ADMIN_* with Configuration hub access, or gh auth login + workflow_dispatch HubSpot Production Smoke; re-run smoke; claim Production PASS only on GREEN."
+  "phaseODatasetVerdict": "green_with_documented_limitations",
+  "supersedes": [
+    "docs/audits/evidence-fi-hubspot-phase-o-production-gate.md#prior-not-claimed"
+  ]
 }

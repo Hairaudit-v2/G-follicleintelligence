@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-16  
 **Evidence classification:** Privacy-safe operational metadata only  
-**Production PASS:** NOT CLAIMED
+**Production PASS:** CLAIMED
 
 ---
 
@@ -11,13 +11,10 @@
 | Field | Value |
 |-------|-------|
 | Feature branch | `codex/fi-hubspot-live-sync-recovery` |
-| Feature tip pushed | `cfdf08c4067c1f3a80c95c4398efc9c42b9a7ce6` (`audit(hubspot): close Phase O with documented limitations`) |
-| Production lineage | Merged to `main` via Git |
-| Main head (intended production) | `8fe2a3924e644b78295017e07b304fc67f931a26` |
-| Merge message | `Merge HubSpot recovery stack for Phase O production gate.` |
-| `cfdf08c4` ancestor of main head | **Yes** |
-
-Recovery commits included on main (non-exhaustive): engagement backup `ea6bc78f`, resume fix `18eab689`, Phase O closeout `cfdf08c4`, plus prior workspace recovery `c0f1c06a` already on lineage.
+| Feature tip | `cfdf08c4067c1f3a80c95c4398efc9c42b9a7ce6` |
+| Merged to `main` | `8fe2a3924e644b78295017e07b304fc67f931a26` |
+| Current `main` / suite commit | `3bf43f22d5828089ba48c086e21e60d62de51b8b` |
+| `cfdf08c4` ancestor of production SHA | **Yes** |
 
 ---
 
@@ -25,17 +22,16 @@ Recovery commits included on main (non-exhaustive): engagement backup `ea6bc78f`
 
 | Field | Value |
 |-------|-------|
-| Mechanism | Vercel Git integration on push to `main` (not CLI promote; local Vercel CLI unauthenticated) |
-| Deployment ID | `dpl_BqzrpkMs8UPac5L9vELaitzJBHMc` |
+| Mechanism | Vercel Git integration on `main` |
+| Deployment ID | `dpl_6UF8GSzt4catsmfz1PqLmw7YoRgt` |
 | Target | `production` |
 | readyState | **READY** |
-| Deployed SHA | `8fe2a3924e644b78295017e07b304fc67f931a26` |
+| Deployed SHA | `3bf43f22d5828089ba48c086e21e60d62de51b8b` |
 | Matches `origin/main` HEAD | **Yes** |
-| Contains recovery tip `cfdf08c4` | **Yes** (ancestor) |
 | Production aliases | `follicleintelligence.ai`, `www.follicleintelligence.ai` |
-| Inspector | https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/BqzrpkMs8UPac5L9vELaitzJBHMc |
+| Inspector | https://vercel.com/fi-ai-ef8ee84f/g-follicleintelligence/6UF8GSzt4catsmfz1PqLmw7YoRgt |
 
-Preview for feature tip (not production traffic): `dpl_BTDTFG7gDso8xUr94kFKtboTrJa1` READY at `cfdf08c4`.
+Recovery-stack merge deploy (also READY, prior): `dpl_BqzrpkMs8UPac5L9vELaitzJBHMc` at `8fe2a392`.
 
 ---
 
@@ -46,27 +42,33 @@ Preview for feature tip (not production traffic): `dpl_BTDTFG7gDso8xUr94kFKtboTr
 | Suite | `FI-HUBSPOT-AUTHENTICATED-PRODUCTION-SMOKE-1` |
 | Command | `npm run test:e2e:hubspot-production-smoke` |
 | Target URL | `https://follicleintelligence.ai` |
-| Suite commit (local HEAD) | `8fe2a3924e644b78295017e07b304fc67f931a26` |
-| Summary artifact | `test-results/hubspot-production-smoke-summary.json` (local, not committed) |
-| Machine verdict | **RED** |
+| Auth | Configuration-hub admin via `FI_E2E_PRODUCTION_ADMIN_*` (local `.env.local`; not committed) |
+| Suite commit | `3bf43f22d5828089ba48c086e21e60d62de51b8b` |
+| Smoke timestamp (UTC) | `2026-07-16T01:37:47.958Z` |
+| Playwright | **11 passed** |
+| Summary verdict | **GREEN** |
+| Summary artifact (local, not committed) | `test-results/hubspot-production-smoke-summary.json` |
+| Screenshots (local, not committed) | `test-results/hubspot-production-smoke-screenshots/` |
+| Traces | Disabled |
 
-### Why smoke is RED (not a deploy defect)
+### Axis results
 
-`FI_E2E_PRODUCTION_ADMIN_*` secrets are **not** present in local `.env.local`. Smoke was attempted by aliasing `FI_E2E_DEMO_ADMIN_*` → production-admin env vars.
+| Axis | Result |
+|------|--------|
+| A. Canonical workspace | PASS |
+| B. Overview | PASS |
+| C. Backup & Sync | PASS |
+| D. Import Review | PASS |
+| E. Activity & Webhooks | PASS |
+| F. Configuration | PASS |
+| G. Audit & History | PASS |
+| H. Legacy redirects | PASS |
+| I. Valid / invalid batchId | PASS |
+| J. Tenant isolation | PASS |
+| K. Low-role gating | PASS (fail-closed denial) |
+| Mutation guard | PASS |
 
-Diagnostic (privacy-safe):
-
-| Tab | Heading `HubSpot management` | Next.js not-found |
-|-----|------------------------------|-------------------|
-| `overview` | 0 | 1 |
-| `import-review` | 1 | 0 |
-| `configuration` | 0 | 1 |
-
-This matches workspace capability gating: CRM-read sessions without Configuration hub access may only open Import Review; Overview/Configuration call `notFound()`. The authenticated suite starts on Overview and therefore fails with the DEMO admin role.
-
-GitHub Actions workflow `HubSpot Production Smoke` has the correct secrets but could not be dispatched: `gh` is not authenticated in this environment.
-
-**Blocker for Production PASS:** supply `FI_E2E_PRODUCTION_ADMIN_EMAIL` / `FI_E2E_PRODUCTION_ADMIN_PASSWORD` for a Configuration-hub-capable admin, **or** authenticate `gh` and `workflow_dispatch` `.github/workflows/hubspot-production-smoke.yml`.
+Notes from summary: low-role user denied HubSpot Import Review deep link (fail-closed). Deployed commit SHA unset in local harness env (`NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA`); production deploy SHA confirmed independently via Vercel as `3bf43f22`.
 
 ---
 
@@ -79,19 +81,12 @@ GitHub Actions workflow `HubSpot Production Smoke` has the correct secrets but c
 | Vercel production READY | PASS |
 | Deployed SHA = `origin/main` HEAD | PASS |
 | Deployed SHA contains Phase O closeout tip | PASS |
-| Authenticated HubSpot production smoke | **FAIL / BLOCKED** (admin secrets / role) |
-| Production PASS | **NOT CLAIMED** |
+| Authenticated HubSpot production smoke | **PASS (GREEN)** |
+| Production PASS | **CLAIMED** |
 
 ---
 
-## 5. Exact next action
+## 5. Relationship to Phase O closeout
 
-1. Provide Configuration-hub-capable `FI_E2E_PRODUCTION_ADMIN_*` locally, **or** run:
-
-```bash
-gh auth login
-gh workflow run "HubSpot Production Smoke" --ref main
-```
-
-2. Re-run `npm run test:e2e:hubspot-production-smoke` against `https://follicleintelligence.ai`.
-3. Only if the suite summary verdict is GREEN, update this evidence and declare Production PASS.
+Dataset Phase O remains **GREEN WITH DOCUMENTED LIMITATIONS** (`evidence-fi-hubspot-phase-o-closeout.md`).  
+This production gate claims **Production PASS** for deploy readiness + authenticated workspace smoke only. It does not reopen forms/submissions reruns or contact-association enrichment.
