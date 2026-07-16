@@ -12,10 +12,10 @@
 
 The website refresh (1A–1G + 1H-A) is live on production at commit `4364ded1` with full local typecheck and production build green. Live primary routes, migration pathway, demo interest preselect, language claims, metadata, cross-browser smoke, and enquiry validation all meet acceptance criteria for the public refresh.
 
-Two production defects found during 1H verification and corrected in this closeout:
+Production defects found during 1H verification and corrected in this closeout:
 
-1. **Nested `/platform/migrate-from-hubspot` returned HTTP 308 without a `Location` header** (Next.js `permanentRedirect` page-only). Browsers still landed on the canonical route via App Router behaviour; pure HTTP clients/crawlers did not get a standards-compliant permanent redirect. Fixed with `next.config.mjs` `redirects()` permanent entry.
-2. **Sticky header did not stick after scroll** because Framer Motion applied `transform` on the sticky element. Fixed by moving animation to an inner wrapper.
+1. **Nested `/platform/migrate-from-hubspot` returned HTTP 308 without a `Location` header** (Next.js `permanentRedirect` page-only). Browsers still landed on the canonical route via App Router behaviour; pure HTTP clients/crawlers did not get a standards-compliant permanent redirect. Fixed with `next.config.mjs` `redirects()` permanent entry — **verified live: `308` + `Location: /migrate-from-hubspot`**.
+2. **Header did not remain pinned on scroll.** Framer Motion `transform` on the sticky element, then `backdrop-filter` isolation attempts, still failed under root document scroll on the marketing shell. Final fix: **`position: fixed`** header with matching height spacer — **verified live: `top: 0`, `position: fixed` after scroll**.
 
 Live enquiry form submission was intentionally **not** fired to production email (safe validation-only path) to avoid inbox noise; validation, labels, and error announcements were verified.
 
@@ -36,7 +36,7 @@ Live enquiry form submission was intentionally **not** fired to production email
 | Fix | File | Change |
 |-----|------|--------|
 | Permanent nested migration redirect with `Location` | `next.config.mjs` | `redirects()` → `/platform/migrate-from-hubspot` → `/migrate-from-hubspot` permanent |
-| Sticky header | `components/layout/header.tsx` | Outer native `<header className="sticky…">`; motion animation on inner wrapper only |
+| Pinned marketing header | `components/layout/header.tsx` | `position: fixed` + in-flow height spacer; motion animation on inner content only |
 | Release evidence | `docs/marketing/fi-web-refresh-1h-release.md` + screenshots | This document + verification artefacts |
 
 Page-level `app/platform/migrate-from-hubspot/page.tsx` (`permanentRedirect`) retained as defence in depth; config-level redirect is authoritative for HTTP clients.
@@ -153,8 +153,8 @@ No public language corrections required beyond already-shipped 1A–1G cleanup.
 | WebKit | PASS — home, migrate, demo, leadflow |
 | Viewports (large, laptop, tablet port/land, mobile, narrow) | PASS — banner present; no material H-scroll on key routes |
 | 200% zoom (CSS zoom approximation) | PASS — no H-scroll on home |
-| Sticky header (pre-fix) | FAIL — motion transform broke sticky |
-| Sticky header (post-fix) | Expected PASS after deploy |
+| Header pin (pre-fix) | FAIL — scrolled off-screen |
+| Header pin (post-fix) | **PASS** — `fixed`, `top: 0` after scroll (desktop + re-check path) |
 
 Screenshots: `docs/marketing/screenshots/fi-web-refresh-1h/`
 
@@ -218,7 +218,7 @@ Prior series evidence retained under `fi-web-refresh-1{b–g,1h-a-header}/`.
 4. Placeholder marketing component copy still contains “Coming next / intentional architecture” if remounted later.
 5. Historical completion estimates may still exist in admin/data layers; public UI retired percentages (1B).
 6. Unrelated HubSpot import expansion remains uncommitted local WIP — must not be mixed into website releases.
-7. Sticky header fix requires post-deploy confirmation on production after 1H hotfix push.
+7. Header uses `position: fixed` rather than sticky (root marketing shell sticky pin unreliable under document scroll).
 
 ---
 
@@ -237,8 +237,10 @@ Prior release commits (already on main): 1A–1G content, 1H-A header lockup (`4
 
 | Role | Hash |
 |------|------|
-| Marketing refresh + 1H-A baseline (production Ready) | `4364ded1dc53e1198e75fb7ca398811f720467e4` |
-| 1H closeout hotfix (redirect Location + sticky) | `6ccca32f6b465772d1d681493f7e65ea540f06cd` |
+| Marketing refresh + 1H-A baseline | `4364ded1dc53e1198e75fb7ca398811f720467e4` |
+| 1H closeout (redirect Location + evidence) | `6ccca32f6b465772d1d681493f7e65ea540f06cd` |
+| Header sticky isolation attempt | `d0b527cafdcc7b7861cc55da4adf62aee33e7eeb` |
+| **Header pin final (`position: fixed`)** | **`3959ced4bd47a639e66d0cfe35fddd22b46e4d24`** |
 
 ---
 
@@ -267,7 +269,7 @@ No database migrations in this website release. Content is static/marketing only
 | Website refresh deployed | **PASS** |
 | All primary routes work on production domain | **PASS** |
 | Canonical migration route works | **PASS** |
-| Nested route redirects permanently | **PASS** (browser); **PASS after config hotfix** for HTTP `Location` |
+| Nested route redirects permanently | **PASS** — HTTP `308` + `Location: /migrate-from-hubspot` |
 | `/demo` preselection from migration page | **PASS** |
 | Enquiry pathway verified safely | **PASS** (validation; submit intentionally not fired) |
 | No contradictory completion % publicly visible | **PASS** |
