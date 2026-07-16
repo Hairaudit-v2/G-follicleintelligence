@@ -1,6 +1,6 @@
 # FI-HUBSPOT-IMPORT-1E — Controlled contact and lead migration expansion evidence
 
-**Verdict:** AMBER — E1–E11 link-only batches GREEN; non-link cohorts remain excluded
+**Verdict:** AMBER — E1–E11 link-only batches GREEN; 1E-W watermark provenance AMBER; non-link cohorts remain excluded
 
 **Date:** 2026-07-16  
 **Tenant:** `c2615b95-b707-4485-aa5f-be8f78ec868a`  
@@ -100,14 +100,36 @@ Expansion-only mappings created: **4572** (E1–E11)
 - checkpoint exception: watermark advanced from E10's
   `2026-07-16T03:45:02.366+00:00` before E11 selection; no E11 mutation caused it
 
+### 1E-W watermark provenance (2026-07-16)
+
+| Field | Value |
+|-------|-------|
+| Verdict | AMBER |
+| Owning run | `916c3102-548d-4758-9339-7f1e24d4d1d0` |
+| Trigger | Vercel Cron notes incremental (`empty_success`) |
+| Previous watermark | `2026-07-16T03:45:02.366+00:00` |
+| Current watermark | `2026-07-16T16:00:34.53+00:00` |
+| Recommendation | `retain_current_watermark` |
+| Migration ownership | none |
+| Live contacts created in interval | 1 |
+| Live contacts modified in interval | 21 |
+| Missing from staging inventory | 2 (`229761370222`, `235542182239`) |
+
+Full evidence:
+`docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.md`
+
 ### Exact next step
 
 **Stop link-only expansion.** Ready-to-link is zero. Do not process the 46
 create candidates, 4 patient-review records, or 104 quarantined records without
-separate approval. Investigate/acknowledge the pre-E11 watermark advance before
-declaring full programme closeout.
+separate approval.
 
-Programme next gate after full 1E closeout:
+Before **FI-HUBSPOT-IMPORT-1E-C**, refresh/reconcile HubSpot contact staging for
+the two live contacts absent from the 4,750 staging inventory (and review the
+21-interval modified set). Notes watermark retention is approved; notes watermark
+must not be treated as contact coverage.
+
+Programme next gate after create/review closeout:
 **FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot**
 
 ## Artifacts

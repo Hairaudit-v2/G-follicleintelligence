@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E** (controlled contact→lead expansion; E1–E11 link-only GREEN; create/review/quarantine paused)  
+Current gate: **1E-W** (watermark provenance AMBER — retain notes watermark; refresh contact staging before 1E-C; create/review/quarantine paused)  
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -219,9 +219,18 @@ Hard rules for 1E (inherits 1D):
 - Apply-time watermark unchanged at `2026-07-16T16:00:34.53+00:00`
 - Checkpoint exception: watermark advanced from E10 baseline `2026-07-16T03:45:02.366+00:00` before E11 selection
 
-### Next gate (after full 1E GREEN)
+### 1E-W watermark provenance (2026-07-16)
 
-`FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot`
+- Owning run `916c3102-548d-4758-9339-7f1e24d4d1d0` — Vercel Cron notes `empty_success`
+- Recommendation: `retain_current_watermark`
+- Migration did not own the advance
+- Live HubSpot interval scan: 1 created / 21 modified; 2 contacts absent from staging
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.md`
+
+### Next gate
+
+1. Refresh/reconcile HubSpot **contact** staging for missing live IDs `229761370222` and `235542182239`
+2. Then `FI-HUBSPOT-IMPORT-1E-C — Controlled new-lead candidate review`
 Do not process remaining create/patient-review/quarantine cohorts without separate approval.
 
 ## Safety checklist before any apply
@@ -246,3 +255,4 @@ Do not process remaining create/patient-review/quarantine cohorts without separa
 - [x] 1E E9: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E10
 - [x] 1E E10: patient count unchanged; ≤500 link-only contacts; reconcile unexplained=0; gate open for E11
 - [x] 1E E11: patient count unchanged; 472 final link-only contacts; reconcile unexplained=0; ready-to-link exhausted
+- [x] 1E-W: owning cron run attributed; retain notes watermark; contact staging freshness follow-up documented; create candidates still paused

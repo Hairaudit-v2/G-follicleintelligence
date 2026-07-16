@@ -1,7 +1,17 @@
 {
   "milestone": "FI-HUBSPOT-IMPORT-1E",
-  "verdict": "AMBER — E1–E11 link-only batches GREEN; non-link cohorts remain excluded",
-  "status": "E11_COMPLETE",
+  "verdict": "AMBER — E1–E11 link-only batches GREEN; 1E-W watermark provenance AMBER; non-link cohorts remain excluded",
+  "status": "E11_COMPLETE_1E_W_AMBER",
+  "watermarkProvenance": {
+    "gate": "FI-HUBSPOT-IMPORT-1E-W",
+    "verdict": "AMBER",
+    "recommendation": "retain_current_watermark",
+    "owningRunId": "916c3102-548d-4758-9339-7f1e24d4d1d0",
+    "previousWatermark": "2026-07-16T03:45:02.366+00:00",
+    "currentWatermark": "2026-07-16T16:00:34.53+00:00",
+    "evidence": "docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.md",
+    "missingFromStagingContactIds": ["229761370222", "235542182239"]
+  },
   "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
   "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
   "checkpointBeforeE11": {
@@ -250,7 +260,12 @@
       "type": "pre_e11_baseline_advance",
       "from": "2026-07-16T03:45:02.366+00:00",
       "to": "2026-07-16T16:00:34.53+00:00",
-      "causedByE11": false
+      "causedByE11": false,
+      "owningRunId": "916c3102-548d-4758-9339-7f1e24d4d1d0",
+      "trigger": "vercel_cron_notes_empty_success",
+      "recommendation": "retain_current_watermark",
+      "gate": "FI-HUBSPOT-IMPORT-1E-W",
+      "gateVerdict": "AMBER"
     }
   ],
   "sideEffects": {
@@ -272,9 +287,10 @@
     "46 create_new_lead candidates require separate review before create cohort",
     "4 patient_link_review_required contacts remain excluded",
     "104 quarantined contacts remain excluded",
-    "HubSpot watermark advanced before E11 selection and must be acknowledged before full closeout"
+    "Notes watermark retained, but contact staging is stale vs live HubSpot for 2 IDs",
+    "Scheduler cutoff_from discrepancy (03:20 vs E10-observed 03:45) remains incompletely explained"
   ],
-  "nextGate": "Stop before create/patient-review/quarantine processing; acknowledge watermark advance before full 1E closeout",
+  "nextGate": "Refresh contact staging for missing live IDs, then FI-HUBSPOT-IMPORT-1E-C",
   "programmeNextGateAfterFull1E": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
   "workspacePath": "/fi-admin/[tenantId]/settings/integrations/hubspot?tab=contact-migration"
 }
