@@ -1,0 +1,21 @@
+{
+  "evidenceType": "hubspot_forms_inventory_reconciliation",
+  "status": "BLOCKED",
+  "blockedReason": "Export workbook hubspot-listing-lib-exports-all-forms-2026-07-15.xlsx not found on local machine or in FI-HUBSPOT-BACKUP-1 evidence directories.",
+  "backupRunId": "66f72f09-d333-4bb0-9c39-5da7b912e964",
+  "exportUnique": null,
+  "backupUnique": 46,
+  "onlyInExport": null,
+  "onlyInBackup": null,
+  "duplicatesInExport": null,
+  "duplicatesInBackup": [],
+  "intersectionCount": null,
+  "backupFormIdsEvidence": "docs/audits/evidence-fi-hubspot-backup-form-ids.json",
+  "blockedEvidence": "docs/audits/evidence-fi-hubspot-forms-inventory-source-blocked.md",
+  "parentFormIntegritySubmissions": {
+    "submissionRows": 5311,
+    "withParentFormAssociation": 5311,
+    "orphanMissingParentFormDefinition": 0,
+    "note": "All staged submissions resolve to the 46 backed-up form definitions; does not classify the two export-only forms."
+  }
+}
