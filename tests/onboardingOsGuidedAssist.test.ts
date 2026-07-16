@@ -12,8 +12,15 @@ import {
   resolveGuidedAssistPageKey,
   selectGuidedAssistNextAction,
   selectGuidedAssistTips,
+  summarizeGuidedAssistHealthMetrics,
   summarizeGuidedAssistUsageEvents,
 } from "../src/lib/onboarding-os/guidedAssistCore";
+import {
+  GUIDED_ASSIST_WHATS_NEW_VERSION,
+  shouldShowGuidedAssistWhatsNew,
+  withWhatsNewSeenMetadata,
+} from "../src/lib/onboarding-os/guidedAssistWhatsNew";
+import { GUIDED_ASSIST_LOG_ALIASES } from "../src/lib/onboarding-os/guidedAssistLog";
 import {
   getEmptyStateTour,
   getContextualTips,
@@ -52,6 +59,7 @@ import {
 } from "../src/lib/onboarding-os/guidedAssistForceShow";
 import { GUIDED_ASSIST_QUICK_ACTIONS } from "../src/lib/onboarding-os/guidedAssistCatalog";
 import {
+  GUIDED_ASSIST_EVENT_KINDS,
   GUIDED_ASSIST_AREA_LABELS,
   GUIDED_ASSIST_HIGH_OPEN_LEADS_THRESHOLD,
   GUIDED_ASSIST_ROLE_FIRST_VIEW_LIMIT,
@@ -85,6 +93,7 @@ function prefs(
     guideStartedAtIso: null,
     engagementStreakDays: 0,
     engagementLastActiveDateYmd: null,
+    whatsNewSeenVersion: null,
     ...partial,
   };
 }
@@ -191,6 +200,9 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.match(payload.settingsHref, /settings\/clinic-guide$/);
     assert.equal(payload.userAssistOverride, false);
     assert.equal(payload.canManageTenantDefaults, true);
+    // Guide off → no What’s new card
+    assert.equal(payload.showWhatsNew, false);
+    assert.ok(payload.whatsNewVersion);
   });
 
   it("user override false forces assist off after setup; true forces on", () => {
@@ -1034,6 +1046,89 @@ describe("Clinic guide — clinical quick actions", () => {
     });
     assert.ok(payload.clinicalQuickActions.length >= 1);
     assert.ok(payload.clinicalQuickActions.every((a) => a.href.startsWith("/fi-admin/")));
+    assert.equal(payload.showWhatsNew, true);
+    assert.equal(payload.whatsNewVersion, GUIDED_ASSIST_WHATS_NEW_VERSION);
+  });
+
+  it("showWhatsNew is false after user has seen current version", () => {
+    const userPreferences = prefs({
+      todayHomeViews: 5,
+      whatsNewSeenVersion: GUIDED_ASSIST_WHATS_NEW_VERSION,
+    });
+    const payload = buildGuidedAssistSessionPayload({
+      ctx: { ...BASE_CTX, pageKey: "" },
+      resolved: {
+        assistEnabled: true,
+        isOnboardingPhase: false,
+        tenantDefaults: { defaultEnabledDuringOnboarding: true, defaultAssistEnabled: true },
+        userPreferences,
+      },
+      userPreferences,
+    });
+    assert.equal(payload.showWhatsNew, false);
+  });
+});
+
+describe("Clinic guide — polish monitoring & what’s new", () => {
+  it("event kinds include polish telemetry + log aliases map tip_viewed", () => {
+    for (const k of [
+      "tour_step_completed",
+      "quick_action_clicked",
+      "feedback_submitted",
+      "streak_advanced",
+      "whats_new_dismissed",
+    ] as const) {
+      assert.ok(GUIDED_ASSIST_EVENT_KINDS.includes(k));
+    }
+    assert.equal(GUIDED_ASSIST_LOG_ALIASES.tip_viewed, "tip_shown");
+    assert.equal(GUIDED_ASSIST_LOG_ALIASES.tour_step_completed, "tour_step_completed");
+  });
+
+  it("shouldShowGuidedAssistWhatsNew respects seen version", () => {
+    assert.equal(shouldShowGuidedAssistWhatsNew(null), true);
+    assert.equal(shouldShowGuidedAssistWhatsNew(""), true);
+    assert.equal(shouldShowGuidedAssistWhatsNew("old-version"), true);
+    assert.equal(shouldShowGuidedAssistWhatsNew(GUIDED_ASSIST_WHATS_NEW_VERSION), false);
+    const meta = withWhatsNewSeenMetadata({});
+    assert.equal(meta.whats_new_seen_version, GUIDED_ASSIST_WHATS_NEW_VERSION);
+  });
+
+  it("summarizeGuidedAssistHealthMetrics computes adoption, feedback, pain points", () => {
+    const health = summarizeGuidedAssistHealthMetrics({
+      tenantId: BASE_CTX.tenantId,
+      windowDays: 30,
+      usersWithGuideOn: 3,
+      usersWithPreferenceRow: 10,
+      events: [
+        { event_kind: "tip_shown", guidance_code: "pipeline_enquiries" },
+        { event_kind: "tip_shown", guidance_code: "pipeline_enquiries" },
+        { event_kind: "tip_shown", guidance_code: "doctor_scales_shortcuts" },
+        { event_kind: "quick_action_clicked", guidance_code: "qa_start_imaging" },
+        { event_kind: "quick_action_clicked", guidance_code: "qa_start_imaging" },
+        { event_kind: "tour_completed", guidance_code: "tour_pipeline_empty" },
+      ],
+      feedback: [
+        { tip_code: "pipeline_enquiries", helpful: true },
+        { tip_code: "pipeline_enquiries", helpful: true },
+        { tip_code: "doctor_scales_shortcuts", helpful: false },
+        { tip_code: "doctor_scales_shortcuts", helpful: false },
+        { tip_code: "doctor_scales_shortcuts", helpful: true },
+      ],
+      tipTitle: (c) => `Title:${c}`,
+      quickActionTitle: (c) => `QA:${c}`,
+    });
+
+    assert.equal(health.adoptionRate, 0.3);
+    assert.equal(health.tipsShown, 3);
+    assert.equal(health.quickActionsClicked, 2);
+    assert.equal(health.toursCompleted, 1);
+    assert.equal(health.thumbsUp, 3);
+    assert.equal(health.thumbsDown, 2);
+    assert.equal(health.thumbsUpRate, 0.6);
+    assert.equal(health.topTips[0]?.code, "pipeline_enquiries");
+    assert.equal(health.topTips[0]?.title, "Title:pipeline_enquiries");
+    assert.equal(health.topQuickActions[0]?.code, "qa_start_imaging");
+    assert.ok(health.painPoints.some((p) => p.code === "doctor_scales_shortcuts" && p.thumbsDown === 2));
   });
 });
 

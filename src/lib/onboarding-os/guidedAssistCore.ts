@@ -34,12 +34,17 @@ import {
   isClinicalTodayRole,
   isClinicalWorkspaceProfile,
 } from "./guidedAssistRoleMode";
+import {
+  GUIDED_ASSIST_WHATS_NEW_VERSION,
+  shouldShowGuidedAssistWhatsNew,
+} from "./guidedAssistWhatsNew";
 import type {
   GuidedAssistArea,
   GuidedAssistAreaInsight,
   GuidedAssistClinicStats,
   GuidedAssistEngagementSnapshot,
   GuidedAssistExperienceLevel,
+  GuidedAssistHealthSnapshot,
   GuidedAssistNextActionView,
   GuidedAssistQuickActionView,
   GuidedAssistResolvedPreferences,
@@ -450,6 +455,9 @@ export function buildGuidedAssistSessionPayload(opts: {
     forceShowActive,
     guideVisible,
     debugInfo: opts.includeDebugInfo || canManageTenantDefaults || forceShowActive ? debugInfo : null,
+    showWhatsNew:
+      guideVisible && shouldShowGuidedAssistWhatsNew(opts.userPreferences.whatsNewSeenVersion),
+    whatsNewVersion: GUIDED_ASSIST_WHATS_NEW_VERSION,
   };
 }
 
@@ -634,6 +642,112 @@ export function summarizeGuidedAssistUsageEvents(
     areaInsights,
     modulesNeedingGuidanceReview,
     reliantUsers,
+  };
+}
+
+/**
+ * Pure “Guide Health” aggregation for admin Settings (tenant-scoped inputs only).
+ * Resolves tip/action titles via optional label lookups (catalog SSOT).
+ */
+export function summarizeGuidedAssistHealthMetrics(opts: {
+  tenantId: string;
+  windowDays: number;
+  usersWithGuideOn: number;
+  usersWithPreferenceRow: number;
+  events: readonly {
+    event_kind: string;
+    guidance_code: string | null;
+    detail?: Record<string, unknown> | null;
+  }[];
+  feedback: readonly { tip_code: string; helpful: boolean }[];
+  tipTitle?: (code: string) => string;
+  quickActionTitle?: (code: string) => string;
+}): Omit<GuidedAssistHealthSnapshot, never> {
+  const tipTitle = opts.tipTitle ?? ((c: string) => c);
+  const qaTitle = opts.quickActionTitle ?? ((c: string) => c);
+
+  const tipShown = new Map<string, number>();
+  const qaClicked = new Map<string, number>();
+  let tipsShown = 0;
+  let quickActionsClicked = 0;
+  let toursCompleted = 0;
+
+  for (const ev of opts.events) {
+    const kind = String(ev.event_kind ?? "");
+    const code = ev.guidance_code ? String(ev.guidance_code).trim() : "";
+    if (kind === "tip_shown") {
+      tipsShown += 1;
+      if (code) tipShown.set(code, (tipShown.get(code) ?? 0) + 1);
+    }
+    if (kind === "quick_action_clicked" || (kind === "next_action_clicked" && code.startsWith("qa_"))) {
+      quickActionsClicked += 1;
+      const qaCode =
+        code ||
+        (ev.detail && typeof ev.detail === "object" && typeof ev.detail.code === "string"
+          ? String(ev.detail.code)
+          : "");
+      if (qaCode) qaClicked.set(qaCode, (qaClicked.get(qaCode) ?? 0) + 1);
+    }
+    if (kind === "tour_completed") toursCompleted += 1;
+  }
+
+  let thumbsUp = 0;
+  let thumbsDown = 0;
+  const downByTip = new Map<string, number>();
+  const upByTip = new Map<string, number>();
+  for (const row of opts.feedback) {
+    const code = String(row.tip_code ?? "").trim();
+    if (!code) continue;
+    if (row.helpful) {
+      thumbsUp += 1;
+      upByTip.set(code, (upByTip.get(code) ?? 0) + 1);
+    } else {
+      thumbsDown += 1;
+      downByTip.set(code, (downByTip.get(code) ?? 0) + 1);
+    }
+  }
+
+  const totalVotes = thumbsUp + thumbsDown;
+  const usersWithPreferenceRow = Math.max(0, opts.usersWithPreferenceRow);
+  const usersWithGuideOn = Math.max(0, opts.usersWithGuideOn);
+  const adoptionRate =
+    usersWithPreferenceRow > 0 ? Math.min(1, usersWithGuideOn / usersWithPreferenceRow) : 0;
+
+  const topTips = [...tipShown.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([code, count]) => ({ code, title: tipTitle(code), count }));
+
+  const topQuickActions = [...qaClicked.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([code, count]) => ({ code, title: qaTitle(code), count }));
+
+  const painPoints = [...downByTip.entries()]
+    .sort((a, b) => b[1] - a[1] || (upByTip.get(a[0]) ?? 0) - (upByTip.get(b[0]) ?? 0))
+    .slice(0, 8)
+    .map(([code, thumbsDownCount]) => ({
+      code,
+      title: tipTitle(code),
+      thumbsDown: thumbsDownCount,
+      thumbsUp: upByTip.get(code) ?? 0,
+    }));
+
+  return {
+    tenantId: opts.tenantId.trim(),
+    windowDays: opts.windowDays,
+    adoptionRate,
+    usersWithGuideOn,
+    usersWithPreferenceRow,
+    tipsShown,
+    thumbsUp,
+    thumbsDown,
+    thumbsUpRate: totalVotes > 0 ? thumbsUp / totalVotes : 0,
+    quickActionsClicked,
+    toursCompleted,
+    topTips,
+    topQuickActions,
+    painPoints,
   };
 }
 

@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import {
   dismissGuidedAssistTipAction,
   incrementGuidedAssistViewsAction,
+  markGuidedAssistWhatsNewSeenAction,
   recordGuidedAssistClientEventAction,
   recordGuidedAssistTipFeedbackAction,
   setGuidedAssistEnabledAction,
@@ -28,6 +29,11 @@ import {
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { isGuidedAssistDebugQueryActive } from "@/src/lib/onboarding-os/guidedAssistForceShow";
+import { guidedAssistDevLog } from "@/src/lib/onboarding-os/guidedAssistLog";
+import {
+  GUIDED_ASSIST_WHATS_NEW_ITEMS,
+  GUIDED_ASSIST_WHATS_NEW_VERSION,
+} from "@/src/lib/onboarding-os/guidedAssistWhatsNew";
 import type {
   GuidedAssistDebugInfo,
   GuidedAssistEngagementSnapshot,
@@ -55,21 +61,37 @@ function emptyEngagement(): GuidedAssistEngagementSnapshot {
   };
 }
 
-function ProgressBar({ percent }: { percent: number }) {
+function ProgressBar({ percent, label }: { percent: number; label?: string }) {
   const p = Math.max(0, Math.min(100, Math.floor(percent)));
   return (
     <div
-      className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+      className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10"
       role="progressbar"
       aria-valuenow={p}
       aria-valuemin={0}
       aria-valuemax={100}
+      aria-label={label ?? `Weekly guide progress ${p} percent`}
       data-testid="guided-assist-progress-bar"
     >
       <div
-        className="h-full rounded-full bg-cyan-400/70 transition-[width] duration-300"
+        className="h-full rounded-full bg-cyan-400/70 transition-[width] duration-500 ease-out"
         style={{ width: `${p}%` }}
       />
+    </div>
+  );
+}
+
+function QuickActionsSkeleton() {
+  return (
+    <div
+      className="space-y-2 rounded-lg border border-cyan-500/20 bg-cyan-950/20 p-2.5"
+      aria-busy="true"
+      aria-label="Loading quick actions"
+      data-testid="guided-assist-qa-skeleton"
+    >
+      <div className="h-3 w-28 animate-pulse rounded bg-cyan-400/20" />
+      <div className="h-11 animate-pulse rounded-xl bg-cyan-400/10" />
+      <div className="h-11 animate-pulse rounded-xl bg-cyan-400/10" />
     </div>
   );
 }
@@ -78,25 +100,31 @@ function ProgressBar({ percent }: { percent: number }) {
 function ClinicalQuickActionsSection({
   actions,
   onActionClick,
+  loading,
 }: {
   actions: GuidedAssistQuickActionView[];
   onActionClick: (action: GuidedAssistQuickActionView) => void;
+  loading?: boolean;
 }) {
   const [open, setOpen] = useState(true);
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const listId = "guided-assist-qa-list";
 
+  if (loading) return <QuickActionsSkeleton />;
   if (actions.length === 0) return null;
 
   return (
     <section
-      className="rounded-lg border border-cyan-500/25 bg-cyan-950/25 p-2.5"
+      className="rounded-lg border border-cyan-500/25 bg-cyan-950/25 p-2.5 sm:p-3"
       data-testid="guided-assist-clinical-quick-actions"
+      aria-label="Quick actions for today"
     >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 text-left"
+        className="flex min-h-10 w-full items-center justify-between gap-2 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
         aria-expanded={open}
+        aria-controls={listId}
       >
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-cyan-300/90">
@@ -113,7 +141,7 @@ function ClinicalQuickActionsSection({
         )}
       </button>
       {open ? (
-        <ul className="mt-2 space-y-2">
+        <ul id={listId} className="mt-2.5 space-y-2" role="list">
           {actions.map((action) => {
             const showChecklist =
               expandedCode === action.code && (action.checklist?.length ?? 0) > 0;
@@ -122,8 +150,9 @@ function ClinicalQuickActionsSection({
                 <Link
                   href={action.href}
                   onClick={() => onActionClick(action)}
-                  className="flex min-h-11 w-full flex-col justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-3 py-2 text-left transition hover:bg-cyan-500/25"
+                  className="flex min-h-11 w-full flex-col justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-3 py-2.5 text-left transition hover:bg-cyan-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 active:scale-[0.99]"
                   data-testid={`guided-assist-qa-${action.code}`}
+                  aria-label={`${action.label}. ${action.description}`}
                 >
                   <span className="text-sm font-semibold text-cyan-50">{action.label}</span>
                   <span className="text-[11px] leading-snug text-cyan-100/70">
@@ -136,7 +165,8 @@ function ClinicalQuickActionsSection({
                     onClick={() =>
                       setExpandedCode((c) => (c === action.code ? null : action.code))
                     }
-                    className="mt-1 text-[10px] font-medium text-slate-500 hover:text-slate-300"
+                    className="mt-1 min-h-9 rounded-md px-1 text-[10px] font-medium text-slate-500 hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40"
+                    aria-expanded={showChecklist}
                   >
                     {showChecklist ? "Hide checklist" : "Show checklist"}
                   </button>
@@ -153,6 +183,45 @@ function ClinicalQuickActionsSection({
           })}
         </ul>
       ) : null}
+    </section>
+  );
+}
+
+function WhatsNewCard({
+  onDismiss,
+  pending,
+}: {
+  onDismiss: () => void;
+  pending?: boolean;
+}) {
+  return (
+    <section
+      className="rounded-lg border border-amber-400/30 bg-amber-950/30 p-3"
+      data-testid="guided-assist-whats-new"
+      aria-label="What’s new in Clinic guide"
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-200/90">
+        What’s new
+      </p>
+      <p className="mt-1 text-xs leading-relaxed text-slate-300">
+        A few gentle upgrades to keep the guide helpful on busy clinic days:
+      </p>
+      <ul className="mt-2 space-y-1.5">
+        {GUIDED_ASSIST_WHATS_NEW_ITEMS.map((item) => (
+          <li key={item.title} className="text-xs leading-snug text-slate-400">
+            <span className="font-medium text-slate-200">{item.title}.</span> {item.body}
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={onDismiss}
+        className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-400/35 bg-amber-500/15 px-3 text-sm font-semibold text-amber-50 transition hover:bg-amber-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 disabled:opacity-50"
+        data-testid="guided-assist-whats-new-dismiss"
+      >
+        Got it — thanks
+      </button>
     </section>
   );
 }
@@ -179,6 +248,8 @@ function withSessionDefaults(payload: GuidedAssistSessionPayload): GuidedAssistS
     forceShowActive,
     guideVisible,
     debugInfo: payload.debugInfo ?? null,
+    showWhatsNew: Boolean(payload.showWhatsNew),
+    whatsNewVersion: payload.whatsNewVersion ?? GUIDED_ASSIST_WHATS_NEW_VERSION,
   };
 }
 
@@ -278,7 +349,7 @@ function TipFeedbackButtons({
           disabled={disabled || value === true}
           onClick={() => vote(true)}
           className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
+            "inline-flex h-9 w-9 items-center justify-center rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
             value === true
               ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-100"
               : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
@@ -294,7 +365,7 @@ function TipFeedbackButtons({
           disabled={disabled || value === false}
           onClick={() => vote(false)}
           className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md border transition",
+            "inline-flex h-9 w-9 items-center justify-center rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
             value === false
               ? "border-slate-400/40 bg-slate-700/40 text-slate-200"
               : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
@@ -689,6 +760,10 @@ export function GuidedAssistWidget({
     if (!payload.emptyStateTour?.steps.length) return;
     setCollapsed(false);
     setTourStepIndex(0);
+    guidedAssistDevLog("tour", "start", {
+      emptyStateKey: payload.emptyStateTour.emptyStateKey,
+      steps: payload.emptyStateTour.steps.length,
+    });
     void recordGuidedAssistClientEventAction(tenantId, {
       eventKind: "next_action_clicked",
       guidanceCode: payload.emptyStateTour.rootTipCode,
@@ -696,6 +771,33 @@ export function GuidedAssistWidget({
       pageKey: payload.pageKey,
       detail: { kind: "tour_start", emptyStateKey: payload.emptyStateTour.emptyStateKey },
     });
+  };
+
+  const advanceTour = (direction: "next" | "back") => {
+    const steps = payload.emptyStateTour?.steps ?? [];
+    if (!steps.length || tourStepIndex == null) return;
+    const from = tourStepIndex;
+    const to =
+      direction === "next"
+        ? Math.min(steps.length - 1, from + 1)
+        : Math.max(0, from - 1);
+    if (to === from) return;
+    setTourStepIndex(to);
+    if (direction === "next") {
+      const completed = steps[from];
+      guidedAssistDevLog("tour", "step_completed", { code: completed?.code, step: from + 1 });
+      void recordGuidedAssistClientEventAction(tenantId, {
+        eventKind: "tour_step_completed",
+        guidanceCode: completed?.code ?? `tour_step_${from + 1}`,
+        pageKey: payload.pageKey,
+        detail: {
+          stepIndex: from,
+          stepNumber: from + 1,
+          nextStepIndex: to,
+          totalSteps: steps.length,
+        },
+      });
+    }
   };
 
   const skipTour = () => {
@@ -708,6 +810,21 @@ export function GuidedAssistWidget({
 
   const completeTour = () => {
     const root = payload.emptyStateTour?.rootTipCode;
+    const steps = payload.emptyStateTour?.steps ?? [];
+    const last = tourStepIndex != null ? steps[tourStepIndex] : null;
+    if (last) {
+      void recordGuidedAssistClientEventAction(tenantId, {
+        eventKind: "tour_step_completed",
+        guidanceCode: last.code,
+        pageKey: payload.pageKey,
+        detail: {
+          stepIndex: tourStepIndex,
+          stepNumber: (tourStepIndex ?? 0) + 1,
+          totalSteps: steps.length,
+          final: true,
+        },
+      });
+    }
     setTourStepIndex(null);
     if (root) {
       void dismissTip(root);
@@ -719,6 +836,18 @@ export function GuidedAssistWidget({
       detail: { kind: "tour_complete" },
     });
     void touchGuidedAssistEngagementAction(tenantId);
+  };
+
+  const dismissWhatsNew = () => {
+    startTransition(async () => {
+      const res = await markGuidedAssistWhatsNewSeenAction(tenantId);
+      if (!res.ok) {
+        setMessage(res.error);
+        return;
+      }
+      setPayload((prev) => ({ ...prev, showWhatsNew: false }));
+      guidedAssistDevLog("whats-new", "dismissed", { version: res.version });
+    });
   };
 
   const turnGuideOn = () => {
@@ -810,6 +939,11 @@ export function GuidedAssistWidget({
             <p
               className="truncate text-[10px] text-slate-500"
               data-testid="guided-assist-progress-collapsed"
+              aria-label={`${engagement.progress.label}${
+                engagement.streakDays >= 2
+                  ? `. ${engagement.streakDays} day guide streak`
+                  : ""
+              }`}
             >
               {engagement.progress.label}
               {engagement.streakDays >= 2 ? ` · ${engagement.streakDays}d` : ""}
@@ -819,6 +953,8 @@ export function GuidedAssistWidget({
             <p
               className="mt-0.5 text-[10px] font-medium text-cyan-300/80"
               data-testid="guided-assist-streak"
+              role="status"
+              aria-live="polite"
             >
               {engagement.streakMessage}
             </p>
@@ -855,7 +991,7 @@ export function GuidedAssistWidget({
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="rounded-md p-1 text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            className="min-h-10 min-w-10 rounded-md p-1 text-slate-400 hover:bg-white/5 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
             aria-expanded={!collapsed}
             aria-label={collapsed ? "Expand clinic guide" : "Collapse clinic guide"}
           >
@@ -878,16 +1014,23 @@ export function GuidedAssistWidget({
 
           {guideVisible ? (
             <div
-              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5"
+              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 sm:p-3"
               data-testid="guided-assist-engagement-summary"
             >
-              <p className="text-[10px] text-slate-400" data-testid="guided-assist-progress">
+              <p
+                className="text-[10px] text-slate-400"
+                data-testid="guided-assist-progress"
+                role="status"
+              >
                 {engagement.progress.label}
               </p>
               <p className="mt-0.5 text-[10px] font-medium text-cyan-300/80">
                 {engagement.progress.percentLabel}
               </p>
-              <ProgressBar percent={engagement.progress.percent} />
+              <ProgressBar
+                percent={engagement.progress.percent}
+                label={engagement.progress.percentLabel}
+              />
               {engagement.teamHighlight ? (
                 <p
                   className="mt-1.5 text-[10px] text-slate-500"
@@ -900,18 +1043,24 @@ export function GuidedAssistWidget({
             </div>
           ) : null}
 
+          {guideVisible && payload.showWhatsNew ? (
+            <WhatsNewCard onDismiss={dismissWhatsNew} pending={pending} />
+          ) : null}
+
           {guideVisible && (payload.clinicalQuickActions?.length ?? 0) > 0 ? (
             <ClinicalQuickActionsSection
               actions={payload.clinicalQuickActions}
               onActionClick={(action) => {
+                guidedAssistDevLog("quick-action", "clicked", { code: action.code });
                 void recordGuidedAssistClientEventAction(tenantId, {
-                  eventKind: "next_action_clicked",
+                  eventKind: "quick_action_clicked",
                   guidanceCode: action.code,
                   guidanceArea: action.area,
                   pageKey: payload.pageKey,
                   detail: {
                     kind: "clinical_quick_action",
                     operationalOnly: true,
+                    label: action.label,
                   },
                 });
               }}
@@ -986,19 +1135,23 @@ export function GuidedAssistWidget({
           {/* Active tour steps (collapses other tips) */}
           {tourActive && tourStep ? (
             <section
-              className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3"
+              className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3 transition-opacity duration-300 ease-out"
               data-testid="guided-assist-tour-step"
               aria-live="polite"
+              aria-atomic="true"
+              aria-label={`Tour step ${tourStepIndex! + 1} of ${tourTotal}: ${tourStep.title}`}
             >
               <p className="text-[10px] font-semibold uppercase tracking-wide text-cyan-300/90">
                 Step {tourStepIndex! + 1} of {tourTotal} — you’re doing great
               </p>
-              <h3 className="mt-1 text-sm font-medium text-slate-100">{tourStep.title}</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400">{tourStep.body}</p>
+              <div key={tourStep.code} className="mt-1 transition-opacity duration-300 ease-out">
+                <h3 className="text-sm font-medium text-slate-100">{tourStep.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-400">{tourStep.body}</p>
+              </div>
               {tourStep.actionHref && tourStep.actionLabel ? (
                 <Link
                   href={tourStep.actionHref}
-                  className="mt-2 inline-flex text-xs font-medium text-cyan-300 hover:text-cyan-200"
+                  className="mt-2 inline-flex min-h-10 items-center text-xs font-medium text-cyan-300 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
                 >
                   {tourStep.actionLabel} →
                 </Link>
@@ -1009,12 +1162,12 @@ export function GuidedAssistWidget({
                 disabled={pending}
                 onFeedback={submitFeedback}
               />
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Tour controls">
                 {tourStepIndex! > 0 ? (
                   <button
                     type="button"
-                    onClick={() => setTourStepIndex((i) => Math.max(0, (i ?? 0) - 1))}
-                    className="min-h-11 rounded-lg border border-white/15 px-3 text-xs font-medium text-slate-200 hover:bg-white/5"
+                    onClick={() => advanceTour("back")}
+                    className="min-h-11 min-w-[4.5rem] rounded-xl border border-white/15 px-3 text-xs font-medium text-slate-200 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
                   >
                     Back
                   </button>
@@ -1022,8 +1175,8 @@ export function GuidedAssistWidget({
                 {tourStepIndex! < tourTotal - 1 ? (
                   <button
                     type="button"
-                    onClick={() => setTourStepIndex((i) => (i ?? 0) + 1)}
-                    className="min-h-11 flex-1 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30"
+                    onClick={() => advanceTour("next")}
+                    className="min-h-11 min-w-[5.5rem] flex-1 rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
                   >
                     Next
                   </button>
@@ -1031,7 +1184,7 @@ export function GuidedAssistWidget({
                   <button
                     type="button"
                     onClick={completeTour}
-                    className="min-h-11 flex-1 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30"
+                    className="min-h-11 min-w-[5.5rem] flex-1 rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-3 text-xs font-semibold text-cyan-50 hover:bg-cyan-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
                   >
                     Mark complete
                   </button>
@@ -1039,7 +1192,7 @@ export function GuidedAssistWidget({
                 <button
                   type="button"
                   onClick={skipTour}
-                  className="min-h-11 rounded-lg px-3 text-xs text-slate-400 hover:text-slate-200"
+                  className="min-h-11 rounded-xl px-3 text-xs text-slate-400 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40"
                 >
                   Skip tour
                 </button>

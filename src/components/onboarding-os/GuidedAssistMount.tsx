@@ -25,7 +25,14 @@ export async function GuidedAssistMount({ tenantId }: { tenantId: string }) {
   if (!result.ok || !result.payload) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <div
+          className="pointer-events-none fixed bottom-4 right-4 z-40 h-12 w-28 animate-pulse rounded-full bg-cyan-950/40"
+          aria-hidden
+        />
+      }
+    >
       <GuidedAssistWidget tenantId={tenantId} initialPayload={result.payload} />
     </Suspense>
   );

@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { ClinicGuideSettingsSection } from "@/src/components/onboarding-os/ClinicGuideSettingsSection";
+import { GuidedAssistHealthPanel } from "@/src/components/onboarding-os/GuidedAssistHealthPanel";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
@@ -116,15 +117,20 @@ export default async function ClinicGuideSettingsPage({
       <ClinicGuideSettingsSection tenantId={tid} initialState={settingsResult.state} />
 
       {showUsage ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
-          <h2 className="text-sm font-semibold text-slate-100">Guide usage (admins)</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            How often tips are shown, dismissed, or acted on in this clinic.
-          </p>
-          <div className="mt-3">
-            <GuidedAssistUsagePanel tenantId={tid} />
+        <>
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
+            <GuidedAssistHealthPanel tenantId={tid} />
           </div>
-        </div>
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
+            <h2 className="text-sm font-semibold text-slate-100">Guide usage (detail)</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              How often tips are shown, dismissed, or acted on in this clinic.
+            </p>
+            <div className="mt-3">
+              <GuidedAssistUsagePanel tenantId={tid} />
+            </div>
+          </div>
+        </>
       ) : null}
     </div>
   );

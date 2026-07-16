@@ -31,6 +31,11 @@ export const GUIDED_ASSIST_EVENT_KINDS = [
   "tip_feedback_unhelpful",
   "engagement_active",
   "tour_completed",
+  "tour_step_completed",
+  "quick_action_clicked",
+  "feedback_submitted",
+  "streak_advanced",
+  "whats_new_dismissed",
 ] as const;
 
 export type GuidedAssistEventKind = (typeof GUIDED_ASSIST_EVENT_KINDS)[number];
@@ -230,6 +235,8 @@ export type GuidedAssistUserPreferences = {
   engagementStreakDays: number;
   /** Last engagement calendar date YYYY-MM-DD (clinic-local). */
   engagementLastActiveDateYmd: string | null;
+  /** Last seen “What’s new” version from preferences.metadata. */
+  whatsNewSeenVersion: string | null;
 };
 
 /** Streak after a touch / for session display. */
@@ -442,6 +449,13 @@ export type GuidedAssistSessionPayload = {
   guideVisible: boolean;
   /** Structured debug fields for admins / `?debug=guide`. */
   debugInfo: GuidedAssistDebugInfo | null;
+  /**
+   * Show one-time “What’s new” card after major guide releases
+   * (tours, clinical quick actions, engagement).
+   */
+  showWhatsNew: boolean;
+  /** Current product what’s-new version string. */
+  whatsNewVersion: string;
 };
 
 /** Troubleshooting snapshot (Settings + optional widget debug panel). */
@@ -514,6 +528,26 @@ export type GuidedAssistUsageSummary = {
   areaInsights: readonly GuidedAssistAreaInsight[];
   modulesNeedingGuidanceReview: readonly GuidedAssistArea[];
   reliantUsers: readonly GuidedAssistReliantUser[];
+};
+
+/** Admin “Guide Health” snapshot (tenant-scoped, operational UX metrics only). */
+export type GuidedAssistHealthSnapshot = {
+  tenantId: string;
+  windowDays: number;
+  /** Users with assist_enabled true / known preference rows with fi_user_id. */
+  adoptionRate: number;
+  usersWithGuideOn: number;
+  usersWithPreferenceRow: number;
+  tipsShown: number;
+  thumbsUp: number;
+  thumbsDown: number;
+  /** thumbsUp / (thumbsUp + thumbsDown), 0 if no votes. */
+  thumbsUpRate: number;
+  quickActionsClicked: number;
+  toursCompleted: number;
+  topTips: readonly { code: string; title: string; count: number }[];
+  topQuickActions: readonly { code: string; title: string; count: number }[];
+  painPoints: readonly { code: string; title: string; thumbsDown: number; thumbsUp: number }[];
 };
 
 export const GUIDED_ASSIST_SAFETY_NOTICE =

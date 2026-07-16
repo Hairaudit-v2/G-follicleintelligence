@@ -46,21 +46,34 @@ export function GuidedAssistUsagePanel({
   }
 
   if (!summary) {
-    return <p className="text-sm text-slate-400">Loading guided assist usage…</p>;
+    return (
+      <div
+        className="space-y-3"
+        aria-busy="true"
+        aria-label="Loading guide usage"
+        data-testid="guided-assist-usage-skeleton"
+      >
+        <div className="h-4 w-36 animate-pulse rounded bg-white/10" />
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-14 animate-pulse rounded-xl bg-white/[0.06]" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const hasActivity = summary.totalEvents > 0;
 
   return (
-    <section className="rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 p-4 shadow-lg shadow-black/25 backdrop-blur-md sm:p-5">
-      <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase D</p>
+    <section className="space-y-1" data-testid="guided-assist-usage-panel">
+      <p className={fiOsChromeClasses.sectionEyebrow}>Clinic guide · Detail</p>
       <h3 className="mt-1 text-base font-semibold tracking-tight text-[#F8FAFC]">
-        Guided Assist usage ({summary.windowDays} days)
+        Guide usage ({summary.windowDays} days)
       </h3>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-        See where team members rely on operational tips, which guidance they dismiss, and which FI
-        OS modules may need clearer onboarding paths. All metrics are deterministic — no clinical
-        advice is generated or tracked.
+        See where the team leans on operational tips, what they dismiss, and which screens may need
+        a clearer path. Metrics only — never clinical advice.
       </p>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">

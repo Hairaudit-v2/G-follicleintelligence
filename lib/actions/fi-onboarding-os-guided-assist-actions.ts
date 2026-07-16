@@ -8,8 +8,10 @@ import {
   dismissGuidedAssistTip,
   enableGuidedAssistForAllStaff,
   incrementGuidedAssistTodayHomeViews,
+  loadGuidedAssistHealthSnapshot,
   loadGuidedAssistSettingsState,
   loadGuidedAssistUsageSummary,
+  markGuidedAssistWhatsNewSeen,
   recordGuidedAssistEvent,
   recordGuidedAssistTipFeedback,
   setGuidedAssistEnabledForUser,
@@ -20,6 +22,7 @@ import {
 } from "@/src/lib/onboarding-os/guidedAssist.server";
 import type {
   GuidedAssistEventKind,
+  GuidedAssistHealthSnapshot,
   GuidedAssistSettingsState,
   GuidedAssistUsageSummary,
 } from "@/src/lib/onboarding-os/guidedAssistTypes";
@@ -364,5 +367,49 @@ export async function loadGuidedAssistUsageSummaryAction(
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
     return { ok: false, error: e instanceof Error ? e.message : "Failed to load usage summary." };
+  }
+}
+
+/** Admin: Guide Health adoption + feedback snapshot (tenant-scoped). */
+export async function loadGuidedAssistHealthSnapshotAction(
+  tenantId: string,
+  windowDays = 30
+): Promise<{ ok: true; health: GuidedAssistHealthSnapshot } | { ok: false; error: string }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    return loadGuidedAssistHealthSnapshot(tid, windowDays, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return { ok: false, error: e instanceof Error ? e.message : "Failed to load Guide Health." };
+  }
+}
+
+/** Dismiss one-time “What’s new” highlight after a major guide release. */
+export async function markGuidedAssistWhatsNewSeenAction(
+  tenantId: string
+): Promise<GuidedAssistActionResult & { version?: string }> {
+  try {
+    const tid = tenantIdSchema.parse(tenantId);
+    const authId = await resolveActorAuthId();
+    if (!authId) return { ok: false, error: "Authentication required." };
+
+    const result = await markGuidedAssistWhatsNewSeen(tid, {
+      actorAuthUserId: authId,
+      skipAuthCheck: true,
+    });
+    if (!result.ok) return result;
+    return { ok: true, version: result.version };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: "Invalid tenant." };
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to dismiss What’s new.",
+    };
   }
 }

@@ -20,7 +20,6 @@ import { attemptStaffTenantPortalRepair } from "@/src/lib/workforce/staffTenantL
 import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
-import { getGuidedAssistTipByCode } from "./guidedAssistCatalog";
 import {
   buildGuidedAssistResolvedPreferences,
   buildGuidedAssistSessionPayload,
@@ -31,6 +30,7 @@ import {
   parseSnoozedTips,
   resolveEffectiveGuidedAssistEnabled,
   resolveGuidedAssistPageKey,
+  summarizeGuidedAssistHealthMetrics,
   summarizeGuidedAssistUsageEvents,
   validateGuidedAssistSnoozeHours,
 } from "./guidedAssistCore";
@@ -49,13 +49,22 @@ import {
   isGuidedAssistForceShowCookieActive,
 } from "./guidedAssistForceShow";
 import { mapViewerToGuidedAssistTodayRole } from "./getRoleFirstTips";
+import { guidedAssistDevLog } from "./guidedAssistLog";
 import { buildGuidedAssistRoleModeLabel } from "./guidedAssistRoleMode";
 import { inferGuidedAssistExperienceLevel } from "./getTieredAndContextualTips";
+import {
+  GUIDED_ASSIST_WHATS_NEW_VERSION,
+  parseWhatsNewSeenFromMetadata,
+  shouldShowGuidedAssistWhatsNew,
+  withWhatsNewSeenMetadata,
+} from "./guidedAssistWhatsNew";
+import { getGuidedAssistQuickActionByCode, getGuidedAssistTipByCode } from "./guidedAssistCatalog";
 import type {
   GuidedAssistClinicStats,
   GuidedAssistEngagementSnapshot,
   GuidedAssistEventKind,
   GuidedAssistExperienceLevel,
+  GuidedAssistHealthSnapshot,
   GuidedAssistSessionPayload,
   GuidedAssistTenantDefaults,
   GuidedAssistUsageSummary,
@@ -400,6 +409,10 @@ function rowToUserPreferences(row: GuidedAssistPreferencesRow | null): GuidedAss
   const lastActive = row?.engagement_last_active_date
     ? String(row.engagement_last_active_date).slice(0, 10)
     : "";
+  const meta =
+    row?.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+      ? (row.metadata as Record<string, unknown>)
+      : {};
   return {
     assistEnabled: row?.assist_enabled ?? null,
     dismissedTipCodes: parseDismissedTipCodes(row?.dismissed_tip_codes),
@@ -410,6 +423,7 @@ function rowToUserPreferences(row: GuidedAssistPreferencesRow | null): GuidedAss
     engagementStreakDays: Number.isFinite(streak) && streak > 0 ? Math.floor(streak) : 0,
     engagementLastActiveDateYmd:
       lastActive && /^\d{4}-\d{2}-\d{2}$/.test(lastActive) ? lastActive : null,
+    whatsNewSeenVersion: parseWhatsNewSeenFromMetadata(meta),
   };
 }
 
@@ -497,6 +511,12 @@ export async function recordGuidedAssistEvent(
   serverOpts: ServerOpts = {}
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
+    guidedAssistDevLog("event", opts.eventKind, {
+      tenantId: tenantId.trim(),
+      guidanceCode: opts.guidanceCode ?? null,
+      pageKey: opts.pageKey ?? null,
+      ...((opts.detail ?? {}) as Record<string, unknown>),
+    });
     const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
     const { error } = await supabase.from("fi_guided_assist_events").insert({
       tenant_id: tenantId.trim(),
@@ -772,6 +792,23 @@ export async function touchGuidedAssistEngagement(
         },
         serverOpts
       );
+
+      // Semantic product event when the streak number advances (not same-day re-touch).
+      if (next.streakDays > prefs.engagementStreakDays) {
+        await recordGuidedAssistEvent(
+          tid,
+          {
+            fiUserId: auth.fiUserId,
+            eventKind: "streak_advanced",
+            detail: {
+              streakDays: next.streakDays,
+              previousStreakDays: prefs.engagementStreakDays,
+              lastActiveDateYmd: next.lastActiveDateYmd,
+            },
+          },
+          serverOpts
+        );
+      }
     }
 
     return {
@@ -832,6 +869,20 @@ export async function recordGuidedAssistTipFeedback(
       {
         fiUserId: auth.fiUserId,
         eventKind: helpful ? "tip_feedback_helpful" : "tip_feedback_unhelpful",
+        guidanceCode: code,
+        guidanceArea: known?.area ?? null,
+        pageKey: pageKey ?? null,
+        detail: { helpful: Boolean(helpful), hasComment: Boolean(comment) },
+      },
+      serverOpts
+    );
+
+    // Aggregate-friendly product event (pairs with tip_feedback_* for analytics).
+    await recordGuidedAssistEvent(
+      tid,
+      {
+        fiUserId: auth.fiUserId,
+        eventKind: "feedback_submitted",
         guidanceCode: code,
         guidanceArea: known?.area ?? null,
         pageKey: pageKey ?? null,
@@ -1014,10 +1065,147 @@ export async function loadGuidedAssistSessionPayload(
       includeDebugInfo: canManage || forceShowActive || debugQuery,
     });
 
+    guidedAssistDevLog("session", "loaded", {
+      tenantId: tid,
+      pageKey,
+      guideVisible: payload.guideVisible,
+      tipCount: payload.tips.length,
+      showWhatsNew: payload.showWhatsNew,
+      experienceLevel: payload.experienceLevel,
+    });
+
     return { ok: true, payload };
   } catch (e) {
     logStructured("error", "guided_assist.load_session_error", { tenantId, error: String(e) });
     return { ok: false, error: e instanceof Error ? e.message : "Failed to load guided assist." };
+  }
+}
+
+/**
+ * Persist “What’s new” dismissal for the current user (metadata.whats_new_seen_version).
+ */
+export async function markGuidedAssistWhatsNewSeen(
+  tenantId: string,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; version: string } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const row = await ensureUserPreferenceRow(supabase, tid, auth.fiUserId);
+    const existingMeta =
+      row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, unknown>)
+        : {};
+    const nextMeta = withWhatsNewSeenMetadata(existingMeta, GUIDED_ASSIST_WHATS_NEW_VERSION);
+
+    const { error } = await supabase
+      .from("fi_guided_assist_preferences")
+      .update({ metadata: nextMeta })
+      .eq("id", row.id)
+      .eq("tenant_id", tid)
+      .eq("fi_user_id", auth.fiUserId);
+    if (error) return { ok: false, error: error.message };
+
+    await recordGuidedAssistEvent(
+      tid,
+      {
+        fiUserId: auth.fiUserId,
+        eventKind: "whats_new_dismissed",
+        detail: { version: GUIDED_ASSIST_WHATS_NEW_VERSION },
+      },
+      serverOpts
+    );
+
+    return { ok: true, version: GUIDED_ASSIST_WHATS_NEW_VERSION };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to dismiss What’s new.",
+    };
+  }
+}
+
+/**
+ * Admin “Guide Health” snapshot — adoption, feedback, tips & quick actions (tenant-scoped).
+ */
+export async function loadGuidedAssistHealthSnapshot(
+  tenantId: string,
+  windowDays = 30,
+  serverOpts: ServerOpts = {}
+): Promise<{ ok: true; health: GuidedAssistHealthSnapshot } | { ok: false; error: string }> {
+  try {
+    const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+    if (!auth.ok) return auth;
+
+    if (!(await canViewGuidedAssistUsageSummary(tenantId, serverOpts))) {
+      return { ok: false, error: "Admin access is required to view Guide Health." };
+    }
+
+    const supabase = serverOpts.supabaseClientForTests ?? supabaseAdmin();
+    const tid = tenantId.trim();
+    const days = Math.max(1, Math.min(Math.floor(windowDays) || 30, 90));
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+    const [prefsRes, eventsRes, feedbackRes] = await Promise.all([
+      supabase
+        .from("fi_guided_assist_preferences")
+        .select("fi_user_id, assist_enabled")
+        .eq("tenant_id", tid)
+        .not("fi_user_id", "is", null),
+      supabase
+        .from("fi_guided_assist_events")
+        .select("event_kind, guidance_code, detail")
+        .eq("tenant_id", tid)
+        .gte("occurred_at", since),
+      supabase
+        .from("fi_guided_assist_feedback")
+        .select("tip_code, helpful")
+        .eq("tenant_id", tid)
+        .gte("updated_at", since),
+    ]);
+
+    if (prefsRes.error) return { ok: false, error: prefsRes.error.message };
+    if (eventsRes.error) return { ok: false, error: eventsRes.error.message };
+    if (feedbackRes.error) return { ok: false, error: feedbackRes.error.message };
+
+    const prefRows = (prefsRes.data ?? []) as {
+      fi_user_id: string | null;
+      assist_enabled: boolean | null;
+    }[];
+    const usersWithPreferenceRow = prefRows.length;
+    const usersWithGuideOn = prefRows.filter((r) => r.assist_enabled === true).length;
+
+    const health = summarizeGuidedAssistHealthMetrics({
+      tenantId: tid,
+      windowDays: days,
+      usersWithGuideOn,
+      usersWithPreferenceRow,
+      events: (eventsRes.data ?? []) as {
+        event_kind: string;
+        guidance_code: string | null;
+        detail?: Record<string, unknown> | null;
+      }[],
+      feedback: (feedbackRes.data ?? []) as { tip_code: string; helpful: boolean }[],
+      tipTitle: (code) => getGuidedAssistTipByCode(code)?.title ?? code,
+      quickActionTitle: (code) => getGuidedAssistQuickActionByCode(code)?.label ?? code,
+    });
+
+    guidedAssistDevLog("health", "snapshot", {
+      tenantId: tid,
+      adoptionRate: health.adoptionRate,
+      tipsShown: health.tipsShown,
+      thumbsUpRate: health.thumbsUpRate,
+    });
+
+    return { ok: true, health };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Failed to load Guide Health.",
+    };
   }
 }
 
