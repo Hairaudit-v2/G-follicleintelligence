@@ -518,6 +518,27 @@ function checkpointFor(
   return { phase, after: typeof cursor === "string" && cursor ? cursor : null };
 }
 
+/** Advance or end a paging phase. Stalled/repeated cursors must never loop forever. */
+export function resolvePagingPhase(input: {
+  currentPhase: Phase;
+  currentAfter: string | null;
+  nextAfter: string | null;
+  archivedSupported: boolean;
+}): { phase: Phase; after: string | null } {
+  const next =
+    typeof input.nextAfter === "string" && input.nextAfter.trim()
+      ? input.nextAfter.trim()
+      : null;
+  const stalled = Boolean(next && input.currentAfter && next === input.currentAfter);
+  if (next && !stalled) {
+    return { phase: input.currentPhase, after: next };
+  }
+  if (input.currentPhase === "active" && input.archivedSupported) {
+    return { phase: "archived", after: null };
+  }
+  return { phase: "complete", after: null };
+}
+
 async function persistEngagementCheckpoint(
   supabase: SupabaseClient,
   syncRunId: string,
@@ -1199,23 +1220,25 @@ async function runCrmObjectKind(
       counter.associations += staged.associations;
       counter.attachmentReferences += staged.attachmentReferences;
       params.fileRefs.push(...staged.fileRefs);
-      const next = page.paging?.next?.after ?? null;
-      const nextPhase: Phase = next
-        ? checkpoint.phase
-        : archived || !capability.archivedSupported
-          ? "complete"
-          : "archived";
+      const advanced = resolvePagingPhase({
+        currentPhase: checkpoint.phase,
+        currentAfter: checkpoint.after,
+        nextAfter: page.paging?.next?.after ?? null,
+        archivedSupported: capability.archivedSupported,
+      });
       params.checkpoints[kind] = {
         active:
           checkpoint.phase === "active"
-            ? next
+            ? advanced.phase === "active"
+              ? advanced.after
+              : null
             : ((params.checkpoints[kind] as Record<string, unknown>)?.active ?? null),
-        archived: checkpoint.phase === "archived" ? next : null,
-        phase: nextPhase,
+        archived: advanced.phase === "archived" ? advanced.after : null,
+        phase: advanced.phase,
       };
-      counter.complete = nextPhase === "complete";
-      counter.checkpointStatus = nextPhase === "complete" ? "complete" : "in_progress";
-      checkpoint = { phase: nextPhase, after: next };
+      counter.complete = advanced.phase === "complete";
+      counter.checkpointStatus = advanced.phase === "complete" ? "complete" : "in_progress";
+      checkpoint = { phase: advanced.phase, after: advanced.after };
     }
     counter.distinctIds = counter.staged;
     Object.assign(counter, reconcileCounter(counter));
@@ -1317,27 +1340,32 @@ export async function runHubspotEngagementBackup(params: {
           counter.archived += staged.archived;
           counter.active += objects.length - staged.archived;
           counter.associations += staged.associations;
-          const next = page.paging?.next?.after ?? null;
-          const nextPhase: Phase = next
-            ? checkpoint.phase
-            : archived || !capabilities[kind].archivedSupported
-              ? "complete"
-              : "archived";
+          const advanced = resolvePagingPhase({
+            currentPhase: checkpoint.phase,
+            currentAfter: checkpoint.after,
+            nextAfter: page.paging?.next?.after ?? null,
+            archivedSupported: capabilities[kind].archivedSupported,
+          });
+          const priorIds = new Set(
+            (((checkpoints[kind] as Record<string, unknown>)?.thread_ids as string[]) ?? []).filter(
+              Boolean
+            )
+          );
+          for (const id of staged.threadIds) priorIds.add(id);
           checkpoints[kind] = {
             active:
               checkpoint.phase === "active"
-                ? next
+                ? advanced.phase === "active"
+                  ? advanced.after
+                  : null
                 : ((checkpoints[kind] as Record<string, unknown>)?.active ?? null),
-            archived: checkpoint.phase === "archived" ? next : null,
-            phase: nextPhase,
-            thread_ids: [
-              ...(((checkpoints[kind] as Record<string, unknown>)?.thread_ids as string[]) ?? []),
-              ...staged.threadIds,
-            ],
+            archived: advanced.phase === "archived" ? advanced.after : null,
+            phase: advanced.phase,
+            thread_ids: [...priorIds],
           };
-          counter.complete = nextPhase === "complete";
-          counter.checkpointStatus = nextPhase === "complete" ? "complete" : "in_progress";
-          checkpoint = { phase: nextPhase, after: next };
+          counter.complete = advanced.phase === "complete";
+          counter.checkpointStatus = advanced.phase === "complete" ? "complete" : "in_progress";
+          checkpoint = { phase: advanced.phase, after: advanced.after };
         }
         counter.distinctIds = counter.staged;
         Object.assign(counter, reconcileCounter(counter));

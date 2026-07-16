@@ -8,6 +8,7 @@ import {
   HUBSPOT_ENGAGEMENT_MILESTONE,
   isEngagementHubspotMilestone,
   probeHubspotEngagementCapabilities,
+  resolvePagingPhase,
   runHubspotEngagementBackup,
 } from "./hubspotEngagementBackupEngine.server";
 
@@ -229,6 +230,23 @@ describe("HubSpot engagement backup engine", () => {
     } finally {
       globalThis.fetch = originalFetch;
     }
+  });
+
+  it("ends paging when HubSpot repeats the same cursor", () => {
+    const stalled = resolvePagingPhase({
+      currentPhase: "active",
+      currentAfter: "cursor-a",
+      nextAfter: "cursor-a",
+      archivedSupported: true,
+    });
+    assert.deepEqual(stalled, { phase: "archived", after: null });
+    const complete = resolvePagingPhase({
+      currentPhase: "archived",
+      currentAfter: "cursor-b",
+      nextAfter: "cursor-b",
+      archivedSupported: true,
+    });
+    assert.deepEqual(complete, { phase: "complete", after: null });
   });
 
   it("honours Retry-After via shared hubspotReadJson retries", async () => {

@@ -1439,7 +1439,7 @@ export async function runHubspotEngagementCommunicationsBackup(
       .eq("granted", true),
     supabase
       .from("fi_external_hubspot_sync_runs")
-      .select("id, detail, engagement_capabilities")
+      .select("*")
       .eq("integration_id", integrationId)
       .eq("tenant_id", tenantId)
       .eq("status", "started"),
@@ -1451,28 +1451,27 @@ export async function runHubspotEngagementCommunicationsBackup(
       .order("occurred_at", { ascending: false })
       .limit(25),
   ]);
-  const activeEngagementRun = ((activeRows ?? []) as Record<string, unknown>[]).some((row) => {
+  const resumableEngagementRun = ((activeRows ?? []) as Record<string, unknown>[]).find((row) => {
     const detail = (row.detail ?? {}) as Record<string, unknown>;
     const capabilities = (row.engagement_capabilities ?? {}) as Record<string, unknown>;
     return (
       isEngagementHubspotMilestone(detail.milestone) || Object.keys(capabilities).length > 0
     );
   });
+  // Resume is allowed for started engagement runs; the gate must not hide the action.
   const actionState = resolveHubspotEngagementBackupActionState({
     credentialConfigured: Boolean(credentialRow),
     connectorStatus: integration.status as ExternalConnectorStatus,
     grantedScopes: ((scopeRows ?? []) as { scope_key: string; granted: boolean }[]).map(
       (row) => row.scope_key
     ),
-    activeRun: activeEngagementRun,
+    activeRun: false,
     liveCapabilitiesVerified: liveEngagementCapabilitiesVerified(
       ((verificationRows ?? []) as VerificationEvidenceRow[]).find(isLiveEngagementProbe)
     ),
     operatorAuthorized: true,
   });
-  if (!actionState.visible)
-    return { ok: false, error: "An engagement-communications backup is already running." };
-  if (actionState.disabled)
+  if (actionState.disabled && !resumableEngagementRun)
     return {
       ok: false,
       error: actionState.disabledReason ?? "Engagement-communications backup is unavailable.",
@@ -1545,27 +1544,57 @@ export async function runHubspotEngagementCommunicationsBackup(
       response_bodies_retained: false,
     },
   });
-  const { data: run, error: runError } = await supabase
-    .from("fi_external_hubspot_sync_runs")
-    .insert({
-      tenant_id: tenantId,
-      integration_id: integrationId,
-      status: "started",
-      started_at: now,
-      detail: {
-        milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
-        read_only: true,
-        resumable: true,
-        promotion_enabled: false,
-        response_bodies_retained: false,
-        restricted_staging_only: true,
-      },
-      engagement_capabilities: capabilities,
-    })
-    .select("*")
-    .single();
-  if (runError || !run)
-    return { ok: false, error: "Unable to start HubSpot engagement backup run." };
+  let run = resumableEngagementRun ?? null;
+  if (!run) {
+    const { data: inserted, error: runError } = await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .insert({
+        tenant_id: tenantId,
+        integration_id: integrationId,
+        status: "started",
+        started_at: now,
+        detail: {
+          milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          response_bodies_retained: false,
+          restricted_staging_only: true,
+        },
+        engagement_capabilities: capabilities,
+      })
+      .select("*")
+      .single();
+    if (runError || !inserted)
+      return { ok: false, error: "Unable to start HubSpot engagement backup run." };
+    run = inserted as Record<string, unknown>;
+  } else {
+    await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .update({
+        engagement_capabilities: capabilities,
+        detail: {
+          ...((run.detail as Record<string, unknown>) ?? {}),
+          milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
+          read_only: true,
+          resumable: true,
+          promotion_enabled: false,
+          response_bodies_retained: false,
+          restricted_staging_only: true,
+          resumed_at: now,
+        },
+      })
+      .eq("id", run.id)
+      .eq("status", "started");
+    // Reload checkpoints/counters after resume marker so we never continue from a stale in-memory row.
+    const { data: refreshed } = await supabase
+      .from("fi_external_hubspot_sync_runs")
+      .select("*")
+      .eq("id", run.id)
+      .eq("status", "started")
+      .single();
+    if (refreshed) run = refreshed as Record<string, unknown>;
+  }
   try {
     const counters = await runHubspotEngagementBackup({
       supabase,
@@ -1582,7 +1611,12 @@ export async function runHubspotEngagementCommunicationsBackup(
     const unexplained = supported.some(
       (kind) => counters[kind].reconciliationStatus === "unexplained"
     );
-    const status = incomplete || missing.length || unexplained ? "partial" : "completed";
+    // UNSUPPORTED endpoints (e.g. files 405) are classified, not missing-scope failures.
+    const missingScopeKinds = missing.filter(
+      (kind) => capabilities[kind].result === "MISSING_SCOPE"
+    );
+    const status =
+      incomplete || missingScopeKinds.length || unexplained ? "partial" : "completed";
     const { error } = await supabase
       .from("fi_external_hubspot_sync_runs")
       .update({
