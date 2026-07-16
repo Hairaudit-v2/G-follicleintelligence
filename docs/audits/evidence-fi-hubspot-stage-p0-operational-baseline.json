@@ -1,0 +1,140 @@
+{
+  "evidenceType": "hubspot_stage_p0_operational_baseline",
+  "milestone": "FI-HUBSPOT-BACKUP-1 Stage P0",
+  "closedAt": "2026-07-16",
+  "operatorVerdict": "amber",
+  "scope": "repository_review_and_planning_only",
+  "noProductionWrite": true,
+  "phaseOPrecondition": {
+    "datasetVerdict": "green_with_documented_limitations",
+    "productionDeployment": "ready",
+    "authenticatedProductionSmoke": "11/11_green",
+    "productionPass": "claimed",
+    "productionGateEvidence": "docs/audits/evidence-fi-hubspot-phase-o-production-gate.md",
+    "phaseOCloseout": "docs/audits/evidence-fi-hubspot-phase-o-closeout.md",
+    "productionEvidenceCommit": "062d7d12",
+    "phaseOCloseoutCommit": "cfdf08c4067c1f3a80c95c4398efc9c42b9a7ce6",
+    "recoveryImplementationCommit": "c0f1c06a",
+    "optionalFollowUp": "FI-HUBSPOT-CONTACT-ASSOCIATION-ENRICHMENT-1"
+  },
+  "architecture": {
+    "model": "full_history_resumable_pagination_into_restricted_staging",
+    "incrementalImplemented": false,
+    "watermarkImplemented": false,
+    "fixedCutoffSupported": false,
+    "promotionEnabled": false,
+    "historicalOperatorCutoffUtc": "2026-07-15T08:42:00.000Z",
+    "evolvedTenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+    "evolvedIntegrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6"
+  },
+  "entryPoints": {
+    "primaryCli": "scripts/hubspot-live-credential-and-sync-recovery.ts",
+    "secondaryCli": "scripts/hubspot-secondary-object-backup.ts",
+    "engagementCli": "scripts/hubspot-engagement-communications-backup.ts",
+    "incrementalCli": null,
+    "authenticatedSmoke": "npm run test:e2e:hubspot-production-smoke",
+    "leadflowCronNotBackup": "/api/cron/leadflow/process-hubspot-events",
+    "cleanupCli": null
+  },
+  "watermark": {
+    "exists": false,
+    "closestMechanism": "page_cursor_checkpoints",
+    "storage": [
+      "fi_external_hubspot_sync_runs.contacts_checkpoint",
+      "fi_external_hubspot_sync_runs.deals_checkpoint",
+      "fi_external_hubspot_sync_runs.secondary_checkpoints",
+      "fi_external_hubspot_sync_runs.engagement_checkpoints"
+    ],
+    "sourceTimestampsStoredNotFiltered": [
+      "hubspot_created_at",
+      "hubspot_updated_at",
+      "activity_timestamp"
+    ],
+    "advanceBeforeVerification": "not_applicable"
+  },
+  "idempotencyKeys": {
+    "contacts": "tenant_id,integration_id,hubspot_contact_id",
+    "deals": "tenant_id,integration_id,hubspot_deal_id",
+    "notes": "tenant_id,integration_id,hubspot_record_id",
+    "emails": "tenant_id,integration_id,hubspot_record_id",
+    "threads": "tenant_id,integration_id,hubspot_thread_id",
+    "messages": "tenant_id,integration_id,hubspot_thread_id,hubspot_message_id",
+    "forms": "tenant_id,integration_id,hubspot_form_id",
+    "formSubmissions": "tenant_id,integration_id,hubspot_form_id,hubspot_submission_id",
+    "filesMetadata": "tenant_id,integration_id,hubspot_file_id",
+    "secondaryCrmObjects": "tenant_id,integration_id,hubspot_record_id",
+    "owners": "tenant_id,integration_id,hubspot_owner_id",
+    "rerunSafe": true
+  },
+  "checkpointResume": {
+    "granularity": "page_cursor_per_kind",
+    "runStatuses": ["started", "completed", "partial", "failed"],
+    "primaryResumesAnyStarted": true,
+    "engagementResumesSameRun": true,
+    "secondaryResumes": false,
+    "preservesCutoffOnResume": "not_applicable_no_cutoff",
+    "staleCheckpointContaminationRisk": "amber"
+  },
+  "schedulerState": {
+    "hubspotBackupSchedule": "none_manual_only",
+    "vercelLeadflowHubspotCron": "*/5 * * * *",
+    "githubHubspotSmoke": "workflow_dispatch_optional_after_ci",
+    "supabaseBackupCron": null,
+    "backupAlerting": null
+  },
+  "verificationCoverage": {
+    "primaryTables": [
+      "fi_external_hubspot_sync_runs",
+      "fi_external_hubspot_import_audit",
+      "staging_tables"
+    ],
+    "verificationEventsTable": "fi_external_connector_verification_events",
+    "recordsCutoff": false,
+    "recordsWatermark": false,
+    "recordsStartCompletePartialCountsOperator": true,
+    "engagementCompleteFalseOnFiles405": true,
+    "contentBackedUpAlwaysZero": true
+  },
+  "proposedP2TestObject": {
+    "dataset": "notes",
+    "canonicalId": "hubspot_record_id",
+    "labelPrefix": "[FI-HUBSPOT-STAGE-P2-TEST]",
+    "runnerUp": "tasks"
+  },
+  "plan": {
+    "P1": "incremental_engine_fixed_cutoff_post_verify_watermark_resume_hardening",
+    "P2": "controlled_production_notes_incremental_proof",
+    "P3": "schedule_concurrency_alerting",
+    "P4": "runbook_and_monitoring_ui",
+    "P5": "stage_p_closeout"
+  },
+  "risks": {
+    "noIncrementalOrFixedCutoff": "red",
+    "watermarkAdvancesBeforeVerification": "green_na",
+    "updatedHistoricalRecordsMissed": "amber",
+    "timestampCollisions": "amber",
+    "duplicateUpserts": "green",
+    "secondaryPartialCannotRecover": "amber",
+    "primaryResumeContamination": "amber",
+    "schedulerOverlap": "amber",
+    "noAlerting": "amber",
+    "secretsInScheduler": "amber",
+    "localTlsDependency": "amber",
+    "excessiveFileDeployment": "green",
+    "unsafeTestRecord": "amber",
+    "hardcodedTenantCli": "amber",
+    "fullRerunAsFakeIncremental": "red_if_attempted",
+    "crossTenantOverwrite": "green_for_evolved_scoped"
+  },
+  "requiredBeforeP2": [
+    "implement_incremental_with_fixed_utc_cutoff",
+    "advance_watermark_only_after_verification",
+    "resume_preserves_cutoff",
+    "primary_resume_milestone_filter",
+    "secondary_stuck_run_recovery",
+    "document_inclusive_exclusive_and_update_rules",
+    "approved_test_note_creation_procedure",
+    "do_not_use_full_history_as_p2_substitute"
+  ],
+  "markdownEvidence": "docs/audits/evidence-fi-hubspot-stage-p0-operational-baseline.md"
+}
