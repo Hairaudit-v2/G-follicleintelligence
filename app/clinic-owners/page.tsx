@@ -1,16 +1,24 @@
 import { ClinicOwnersMarketingView } from "@/components/clinic-owners/ClinicOwnersMarketingView";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { CLINIC_OWNERS_PAGE_CONTENT } from "@/lib/marketing/clinicOwnersPageContent";
+import { SITE_SEO_KEYWORDS } from "@/lib/structured-data";
 
-const PAGE_TITLE =
-  "Build And Scale A High-Performance Hair Restoration Clinic | Follicle Intelligence";
-
-const PAGE_DESCRIPTION =
-  "Follicle Intelligence is the operating system for hair restoration clinic owners: LeadFlow, ClinicOS, ConsultationOS, SurgeryOS, AcademyOS, and AnalyticsOS—pipeline to outcomes, staff accountability, and clinic KPIs without generic practice software.";
+const seo = CLINIC_OWNERS_PAGE_CONTENT.seo;
 
 export const metadata = buildPageMetadata({
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
-  path: "/clinic-owners",
+  title: seo.title,
+  description: seo.description,
+  path: seo.path,
+  keywords: [
+    ...SITE_SEO_KEYWORDS,
+    "hair restoration clinic operating system",
+    "clinic owner software",
+    "hair transplant clinic management",
+  ],
+  ogTitle: seo.ogTitle,
+  ogDescription: seo.ogDescription,
+  twitterTitle: seo.ogTitle,
+  twitterDescription: seo.ogDescription,
   imageAlt: "Follicle Intelligence — operating system for hair restoration clinic owners",
 });
 

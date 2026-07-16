@@ -32,24 +32,11 @@ export const MARKETING_PLACEHOLDER_COPY = {
   },
   clinicOwners: {
     path: "/clinic-owners",
-    title: "Build And Scale A High-Performance Hair Restoration Clinic | Follicle Intelligence",
+    title: "Hair Restoration Clinic Operating System for Owners | Follicle Intelligence",
     description:
-      "Operating rhythm, intelligence layers, and governance built for hair restoration enterprises—not generic practice tooling.",
-    headline: "Build And Scale A High-Performance Hair Restoration Clinic",
-    comingNext: [
-      {
-        title: "Commercial + clinical spine",
-        body: "How LeadFlow and ClinicOS keep acquisition, scheduling, and services coherent as volume grows.",
-      },
-      {
-        title: "Quality you can govern",
-        body: "Operational dashboards that stay honest about what is comparable—and what still needs better capture.",
-      },
-      {
-        title: "Enterprise-ready rollout patterns",
-        body: "What multi-site groups ask for first: separation of duties, reporting envelopes, and audit traceability.",
-      },
-    ] satisfies MarketingPlaceholderComingNext[],
+      "Connect enquiries, patients, clinic operations, surgery, workforce and outcomes in one hair-restoration-specific operating system.",
+    headline: "Run the clinic as one connected operation.",
+    comingNext: [] as MarketingPlaceholderComingNext[],
   },
   academy: {
     path: "/academy",

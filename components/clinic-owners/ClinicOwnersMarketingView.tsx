@@ -1,136 +1,105 @@
 "use client";
 
-import { Fragment } from "react";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import { CLINIC_OWNERS_PAGE_CONTENT } from "@/lib/marketing/clinicOwnersPageContent";
+import {
+  CLINIC_OWNERS_PAGE_CONTENT,
+  type ClinicOwnerVisibilityMaturity,
+} from "@/lib/marketing/clinicOwnersPageContent";
 import {
   MARKETING_CTA_PRIMARY_CLASS,
   MARKETING_CTA_SECONDARY_CLASS,
 } from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowRight, ChevronRight, Shield } from "lucide-react";
 
 const c = CLINIC_OWNERS_PAGE_CONTENT;
 
-function ClinicOsBands() {
+const MATURITY_STYLES: Record<ClinicOwnerVisibilityMaturity, { badge: string; dot: string }> = {
+  "Operational Pilot": {
+    badge: "border-sky-400/30 bg-sky-950/35 text-sky-100/95",
+    dot: "bg-sky-400",
+  },
+  Expanding: {
+    badge: "border-amber-400/30 bg-amber-950/30 text-amber-100/95",
+    dot: "bg-amber-300",
+  },
+  Future: {
+    badge: "border-violet-400/30 bg-violet-950/30 text-violet-100/95",
+    dot: "bg-violet-400",
+  },
+};
+
+function MaturityBadge({ maturity }: { maturity: ClinicOwnerVisibilityMaturity }) {
+  const styles = MATURITY_STYLES[maturity];
   return (
-    <div className="relative mt-12 overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.1),transparent_48%),linear-gradient(180deg,rgb(255_255_255_/0.04),transparent),rgb(6_10_18_/0.35)] p-5 shadow-[0_24px_80px_rgb(0_0_0_/0.42),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:mt-14 sm:rounded-[2rem] sm:p-8 md:p-10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-amber-400/22 via-amber-400/8 to-transparent"
-        style={{ transform: "translateX(-50%)" }}
-      />
-      <p className="relative text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/65">
-        {c.operatingSystem.diagramCaption}
-      </p>
-      <div className="relative mt-10 space-y-10">
-        {c.operatingSystem.bands.map((band, bandIdx) => (
-          <div key={band.title}>
-            <div className="relative flex flex-col items-center">
-              <span className="max-w-[min(100%,28rem)] text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground sm:max-w-none sm:text-xs">
-                {band.title}
-              </span>
-              <span className="mt-2 max-w-xl text-center text-[10px] font-medium uppercase leading-relaxed tracking-[0.2em] text-muted-foreground/90 sm:text-[11px]">
-                {band.tagline}
-              </span>
-              <p className="mt-3 max-w-3xl text-center text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
-                {band.summary}
-              </p>
-            </div>
-            {bandIdx < c.operatingSystem.bands.length - 1 ? (
-              <div
-                className="mx-auto mt-10 flex h-10 w-px flex-col items-center justify-center bg-gradient-to-b from-amber-400/28 via-amber-400/10 to-transparent"
-                aria-hidden
-              />
-            ) : null}
-          </div>
-        ))}
-      </div>
-    </div>
+    <span
+      role="status"
+      aria-label={`Status: ${maturity}`}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] sm:text-[10px]",
+        styles.badge
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", styles.dot)} aria-hidden />
+      {maturity}
+    </span>
   );
 }
 
-function ClinicWorkflowTimeline({ steps }: { steps: readonly string[] }) {
+function HeroCtas() {
   return (
-    <>
-      <div className="relative mt-12 hidden lg:block">
-        <div
-          className="pointer-events-none absolute left-0 right-0 top-[42%] h-px bg-gradient-to-r from-transparent via-amber-400/22 to-transparent"
-          aria-hidden
-        />
-        <div className="overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-400/22">
-          <ol className="flex min-w-min items-stretch gap-0 px-1">
-            {steps.map((step, index) => (
-              <Fragment key={step}>
-                <li className="flex w-[6.85rem] shrink-0 flex-col xl:w-[7.25rem]">
-                  <GlassCard
-                    variant="default"
-                    className="h-full border-white/[0.08] !p-3.5 !shadow-[0_12px_40px_rgb(0_0_0_/0.32)] sm:!p-4"
-                  >
-                    <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/50">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <p className="mt-2 text-[0.72rem] font-medium leading-snug text-foreground xl:text-[0.8125rem]">
-                      {step}
-                    </p>
-                  </GlassCard>
-                </li>
-                {index < steps.length - 1 ? (
-                  <li
-                    className="flex w-5 shrink-0 items-center justify-center self-center pt-6 xl:w-6"
-                    aria-hidden
-                  >
-                    <ChevronRight className="h-3 w-3 text-amber-400/40" strokeWidth={2} />
-                  </li>
-                ) : null}
-              </Fragment>
-            ))}
-          </ol>
-        </div>
-      </div>
-
-      <ol className="relative mx-auto mt-10 max-w-3xl space-y-0 border-l border-white/15 pl-6 sm:mt-12 sm:pl-8 md:max-w-4xl lg:hidden">
-        {steps.map((step, index) => (
-          <li key={step} className="relative pb-7 last:pb-0 sm:pb-9">
-            <span
-              aria-hidden
-              className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-white/25 bg-gradient-to-br from-white/30 to-amber-900/40 shadow-[0_0_14px_rgb(212_175_55_/0.25)] sm:-left-[21px]"
-            />
-            <GlassCard
-              variant="default"
-              className="border-white/[0.08] !shadow-[0_12px_40px_rgb(0_0_0_/0.3)]"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
-                Step {String(index + 1).padStart(2, "0")}
-              </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">
-                {step}
-              </p>
-            </GlassCard>
-          </li>
-        ))}
-      </ol>
-    </>
+    <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+      <Button
+        asChild
+        size="lg"
+        className={cn(
+          MARKETING_CTA_PRIMARY_CLASS,
+          "min-w-[12rem] shadow-[0_18px_52px_rgb(212_175_55_/0.16),inset_0_1px_0_rgb(255_255_255_/0.12)]"
+        )}
+      >
+        <Link href={c.hero.primaryCta.href}>
+          {c.hero.primaryCta.label}
+          <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+        </Link>
+      </Button>
+      <Button
+        asChild
+        variant="outline"
+        size="lg"
+        className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
+      >
+        <Link href={c.hero.secondaryCta.href}>
+          {c.hero.secondaryCta.label}
+          <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+        </Link>
+      </Button>
+      <Link
+        href={c.hero.tertiaryCta.href}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/85 transition-colors hover:text-amber-50 sm:ml-1"
+      >
+        {c.hero.tertiaryCta.label}
+        <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+      </Link>
+    </div>
   );
 }
 
 export function ClinicOwnersMarketingView() {
   return (
     <>
+      {/* Hero */}
       <section
         id={c.hero.id}
         aria-labelledby={`${c.hero.id}-heading`}
         className="fi-grid relative overflow-hidden border-b border-border/50 bg-[rgb(3_5_12_/0.55)]"
       >
-        <div className="pointer-events-none absolute inset-0 opacity-[0.4] [mask-image:radial-gradient(ellipse_at_50%_35%,black_18%,transparent_70%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_8%_0%,rgb(212_175_55_/0.18),transparent_38%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_92%_12%,hsl(var(--primary)/0.14),transparent_44%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgb(0_0_0_/0.65),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/[0.12] to-background" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
@@ -144,46 +113,26 @@ export function ClinicOwnersMarketingView() {
             />
             <h1
               id={`${c.hero.id}-heading`}
-              className="mt-5 max-w-4xl font-display text-[2.05rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance drop-shadow-[0_2px_36px_rgb(0_0_0_/0.5)] sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
+              className="mt-5 max-w-4xl font-display text-[2.05rem] font-semibold leading-[1.08] tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl md:leading-[1.06] lg:max-w-5xl"
             >
               {c.hero.headline}
             </h1>
             <p className="mt-6 max-w-3xl text-base font-medium leading-relaxed text-foreground/85 sm:text-lg md:text-xl md:leading-relaxed">
               {c.hero.subtext}
             </p>
-            <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-              <Button
-                asChild
-                size="lg"
-                className={cn(
-                  MARKETING_CTA_PRIMARY_CLASS,
-                  "min-w-[12rem] shadow-[0_18px_52px_rgb(212_175_55_/0.16),inset_0_1px_0_rgb(255_255_255_/0.12)]"
-                )}
-              >
-                <Link href={c.hero.primaryCta.href}>
-                  {c.hero.primaryCta.label}
-                  <ChevronRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}
-              >
-                <Link href={c.hero.secondaryCta.href}>
-                  {c.hero.secondaryCta.label}
-                  <ArrowRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-                </Link>
-              </Button>
-            </div>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {c.hero.supporting}
+            </p>
+            <p className="mt-6 text-sm font-medium text-amber-100/80">{c.hero.trustLine}</p>
+            <HeroCtas />
           </FadeIn>
         </div>
       </section>
 
+      {/* Problem */}
       <Section
         id={c.problem.id}
-        className="border-b border-border/50 bg-gradient-to-b from-background via-muted/[0.05] to-background py-20 sm:py-24 md:py-28"
+        className="scroll-mt-28 border-b border-border/50 bg-gradient-to-b from-background via-muted/[0.05] to-background py-20 sm:py-24 md:py-28"
         aria-labelledby={`${c.problem.id}-heading`}
       >
         <FadeIn>
@@ -191,11 +140,12 @@ export function ClinicOwnersMarketingView() {
             id={`${c.problem.id}-heading`}
             eyebrow={c.problem.eyebrow}
             title={c.problem.headline}
+            description={c.problem.intro}
           />
-          <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+          <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {c.problem.cards.map((card, i) => (
               <li key={card.title}>
-                <FadeIn delay={0.04 * (i % 4)}>
+                <FadeIn delay={0.04 * (i % 5)}>
                   <GlassCard
                     variant="problem"
                     className="flex h-full flex-col border-amber-400/[0.07]"
@@ -214,68 +164,37 @@ export function ClinicOwnersMarketingView() {
         </FadeIn>
       </Section>
 
+      {/* Owner outcomes */}
       <Section
-        id={c.operatingSystem.id}
-        className="border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.operatingSystem.id}-heading`}
+        id={c.outcomes.id}
+        className="scroll-mt-28 border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.outcomes.id}-heading`}
       >
         <FadeIn>
           <SectionHeading
-            id={`${c.operatingSystem.id}-heading`}
-            eyebrow={c.operatingSystem.eyebrow}
-            title={c.operatingSystem.headline}
+            id={`${c.outcomes.id}-heading`}
+            eyebrow={c.outcomes.eyebrow}
+            title={c.outcomes.headline}
+            description={c.outcomes.intro}
           />
-          <ClinicOsBands />
-        </FadeIn>
-      </Section>
-
-      <Section
-        id={c.workflow.id}
-        className="border-b border-border/50 py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.workflow.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.workflow.id}-heading`}
-            eyebrow={c.workflow.eyebrow}
-            title={c.workflow.headline}
-          />
-          <ClinicWorkflowTimeline steps={c.workflow.steps} />
-        </FadeIn>
-      </Section>
-
-      <Section
-        id={c.dashboard.id}
-        className="border-b border-border/50 bg-gradient-to-b from-muted/[0.04] to-background py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.dashboard.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.dashboard.id}-heading`}
-            eyebrow={c.dashboard.eyebrow}
-            title={c.dashboard.headline}
-          />
-          <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2 xl:grid-cols-5">
-            {c.dashboard.cards.map((card, i) => (
-              <li key={card.title}>
-                <FadeIn delay={0.03 * (i % 5)}>
-                  <GlassCard
-                    variant="default"
-                    className="flex h-full min-h-[9.5rem] flex-col border-white/[0.07] bg-gradient-to-br from-white/[0.05] to-transparent sm:min-h-[10rem]"
-                  >
-                    <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2.5">
-                      <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.16em] text-amber-200/45">
-                        {String(i + 1).padStart(2, "0")}
+          <ul className="mt-12 grid list-none gap-5 p-0 md:grid-cols-2">
+            {c.outcomes.items.map((item, i) => (
+              <li key={item.title}>
+                <FadeIn delay={0.04 * (i % 6)}>
+                  <GlassCard variant="os" className="h-full border-white/[0.07] !p-6 sm:!p-7">
+                    <div className="flex items-start gap-4">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-400/25 bg-amber-950/30 font-mono text-sm font-semibold text-amber-100">
+                        {item.letter}
                       </span>
-                      <span
-                        className="h-px flex-1 bg-gradient-to-r from-amber-400/25 to-transparent"
-                        aria-hidden
-                      />
+                      <div>
+                        <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                          {item.title}
+                        </h3>
+                        <p className="mt-3 text-sm leading-[1.7] text-muted-foreground">
+                          {item.body}
+                        </p>
+                      </div>
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-foreground">{card.title}</p>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {card.body}
-                    </p>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -284,60 +203,208 @@ export function ClinicOwnersMarketingView() {
         </FadeIn>
       </Section>
 
+      {/* Connected systems (no fixed count) */}
       <Section
-        id={c.accountability.id}
-        className="border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.accountability.id}-heading`}
+        id={c.systems.id}
+        className="scroll-mt-28 border-b border-border/50 bg-background py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.systems.id}-heading`}
       >
         <FadeIn>
           <SectionHeading
-            id={`${c.accountability.id}-heading`}
-            eyebrow={c.accountability.eyebrow}
-            title={c.accountability.headline}
+            id={`${c.systems.id}-heading`}
+            eyebrow={c.systems.eyebrow}
+            title={c.systems.headline}
+            description={c.systems.intro}
           />
-          <GlassCard className="mt-10 max-w-3xl border-white/[0.08]">
-            <div className="space-y-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              {c.accountability.paragraphs.map((p, idx) => (
-                <p key={idx}>{p}</p>
-              ))}
-            </div>
-            <ul className="mt-8 grid list-none gap-3 border-t border-white/[0.06] p-0 pt-8 sm:grid-cols-2">
-              {c.accountability.signals.map((signal) => (
-                <li key={signal} className="flex gap-3 text-sm leading-snug text-foreground/90">
-                  <span
-                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/55"
-                    aria-hidden
-                  />
-                  <span>{signal}</span>
-                </li>
-              ))}
-            </ul>
-          </GlassCard>
+          <div className="mt-12 space-y-8">
+            {c.systems.groups.map((group, gi) => (
+              <FadeIn key={group.title} delay={0.03 * gi}>
+                <div>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/70">
+                    {group.title}
+                  </h3>
+                  <ul className="mt-4 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.systems.map((sys) => (
+                      <li key={sys.name}>
+                        <GlassCard className="h-full border-white/[0.07] !p-5">
+                          <p className="font-display text-lg font-semibold tracking-tight text-foreground">
+                            {sys.name}
+                          </p>
+                          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                            {sys.body}
+                          </p>
+                        </GlassCard>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </FadeIn>
       </Section>
 
+      {/* Journey */}
       <Section
-        id={c.audiences.id}
-        className="border-b border-border/50 py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.audiences.id}-heading`}
+        id={c.journey.id}
+        className="scroll-mt-28 border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.journey.id}-heading`}
       >
         <FadeIn>
           <SectionHeading
-            id={`${c.audiences.id}-heading`}
-            eyebrow={c.audiences.eyebrow}
-            title={c.audiences.headline}
+            id={`${c.journey.id}-heading`}
+            eyebrow={c.journey.eyebrow}
+            title={c.journey.headline}
+            tone="audit"
           />
-          <ul className="mt-12 grid list-none gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
-            {c.audiences.cards.map((card, i) => (
-              <li key={card.title}>
-                <FadeIn delay={0.05 * (i % 3)}>
-                  <GlassCard className="group flex h-full flex-col border-white/[0.07] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-amber-400/18">
-                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                      {card.title}
+          <ol className="mt-12 flex list-none flex-col gap-3 p-0 md:flex-row md:items-stretch">
+            {c.journey.steps.map((step, index) => (
+              <li key={step.label} className="relative flex flex-1 flex-col md:min-w-0">
+                <FadeIn delay={0.04 * index}>
+                  <div className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent px-5 py-6">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200/60">
+                      {String(index + 1).padStart(2, "0")}
+                    </p>
+                    <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">
+                      {step.label}
                     </h3>
-                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground md:text-base">
-                      {card.body}
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {step.detail}
                     </p>
+                  </div>
+                </FadeIn>
+                {index < c.journey.steps.length - 1 ? (
+                  <div
+                    className="flex justify-center py-1 text-amber-300/45 md:absolute md:right-0 md:top-1/2 md:z-10 md:-translate-y-1/2 md:translate-x-1/2 md:py-0"
+                    aria-hidden
+                  >
+                    <ArrowDown className="h-5 w-5 md:hidden" />
+                    <ArrowRight className="hidden h-5 w-5 md:block" />
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </FadeIn>
+      </Section>
+
+      {/* Progressive adoption */}
+      <Section
+        id={c.adoption.id}
+        className="scroll-mt-28 border-b border-border/50 bg-background py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.adoption.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.adoption.id}-heading`}
+            eyebrow={c.adoption.eyebrow}
+            title={c.adoption.headline}
+            description={c.adoption.intro}
+          />
+          <p className="mt-6 max-w-3xl font-display text-xl font-semibold tracking-tight text-amber-100/90 sm:text-2xl">
+            {c.adoption.clinicLine}
+          </p>
+          <ul className="mt-12 grid list-none gap-4 p-0 sm:grid-cols-2">
+            {c.adoption.modes.map((mode, index) => (
+              <li key={mode.title}>
+                <FadeIn delay={0.04 * index}>
+                  <GlassCard className="h-full border-white/[0.07] !p-6">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200/65">
+                      {String(index + 1).padStart(2, "0")} · Mode
+                    </p>
+                    <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground">
+                      {mode.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-[1.7] text-muted-foreground">{mode.body}</p>
+                  </GlassCard>
+                </FadeIn>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {c.adoption.hubspotNote}
+          </p>
+        </FadeIn>
+      </Section>
+
+      {/* Migration risk */}
+      <Section
+        id={c.migration.id}
+        className="scroll-mt-28 border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.migration.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.migration.id}-heading`}
+            eyebrow={c.migration.eyebrow}
+            title={c.migration.headline}
+            description={c.migration.intro}
+            tone="audit"
+          />
+          <ul className="mt-12 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {c.migration.safeguards.map((item, index) => (
+              <li key={item}>
+                <FadeIn delay={0.02 * (index % 9)}>
+                  <div className="flex h-full items-start gap-3 rounded-2xl border border-white/[0.07] bg-black/15 px-4 py-4">
+                    <Shield className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300/80" aria-hidden />
+                    <span className="text-sm leading-relaxed text-foreground/90">{item}</span>
+                  </div>
+                </FadeIn>
+              </li>
+            ))}
+          </ul>
+        </FadeIn>
+      </Section>
+
+      {/* Owner visibility */}
+      <Section
+        id={c.visibility.id}
+        className="scroll-mt-28 border-b border-border/50 bg-background py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.visibility.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.visibility.id}-heading`}
+            eyebrow={c.visibility.eyebrow}
+            title={c.visibility.headline}
+            description={c.visibility.intro}
+          />
+          <div className="mt-8 flex flex-wrap gap-3">
+            {c.visibility.legend.map((item) => (
+              <div
+                key={item.label}
+                className="max-w-xs rounded-xl border border-white/[0.07] bg-black/20 px-4 py-3"
+              >
+                <MaturityBadge maturity={item.label} />
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.meaning}</p>
+              </div>
+            ))}
+          </div>
+          <ul className="mt-12 grid list-none gap-5 p-0 lg:grid-cols-2 xl:grid-cols-3">
+            {c.visibility.categories.map((cat, i) => (
+              <li key={cat.title}>
+                <FadeIn delay={0.03 * i}>
+                  <GlassCard className="flex h-full flex-col border-white/[0.07] !p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">
+                        {cat.title}
+                      </h3>
+                      <MaturityBadge maturity={cat.maturity} />
+                    </div>
+                    <ul className="mt-5 space-y-2">
+                      {cat.items.map((item) => (
+                        <li
+                          key={item}
+                          className="flex gap-2 text-sm leading-snug text-muted-foreground"
+                        >
+                          <span
+                            className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber-400/55"
+                            aria-hidden
+                          />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </GlassCard>
                 </FadeIn>
               </li>
@@ -346,6 +413,91 @@ export function ClinicOwnersMarketingView() {
         </FadeIn>
       </Section>
 
+      {/* Multi-site */}
+      <Section
+        id={c.multiSite.id}
+        className="scroll-mt-28 border-b border-border/50 bg-muted/[0.03] py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.multiSite.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.multiSite.id}-heading`}
+            eyebrow={c.multiSite.eyebrow}
+            title={c.multiSite.headline}
+            description={c.multiSite.intro}
+          />
+          <ul className="mt-10 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {c.multiSite.benefits.map((benefit) => (
+              <li
+                key={benefit}
+                className="rounded-xl border border-white/[0.07] bg-black/15 px-4 py-3 text-sm text-foreground/90"
+              >
+                {benefit}
+              </li>
+            ))}
+          </ul>
+        </FadeIn>
+      </Section>
+
+      {/* Compound value */}
+      <Section
+        id={c.compoundValue.id}
+        className="scroll-mt-28 border-b border-border/50 bg-background py-20 sm:py-24 md:py-28"
+        aria-labelledby={`${c.compoundValue.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.compoundValue.id}-heading`}
+            eyebrow={c.compoundValue.eyebrow}
+            title={c.compoundValue.headline}
+            description={c.compoundValue.intro}
+            tone="intelligence"
+          />
+          <ul className="mt-10 grid list-none gap-3 p-0 sm:grid-cols-2">
+            {c.compoundValue.points.map((point) => (
+              <li
+                key={point}
+                className="rounded-xl border border-violet-400/12 bg-violet-950/15 px-4 py-3 text-sm text-foreground/90"
+              >
+                {point}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-10 max-w-3xl font-display text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl">
+            {c.compoundValue.closing}
+          </p>
+        </FadeIn>
+      </Section>
+
+      {/* Maturity honesty */}
+      <Section
+        id={c.maturity.id}
+        className="scroll-mt-28 border-b border-border/50 bg-muted/[0.03] py-16 sm:py-20"
+        aria-labelledby={`${c.maturity.id}-heading`}
+      >
+        <FadeIn>
+          <SectionHeading
+            id={`${c.maturity.id}-heading`}
+            eyebrow={c.maturity.eyebrow}
+            title={c.maturity.headline}
+          />
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {c.maturity.body}
+          </p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            {c.maturity.statuses.join(" · ")}
+          </p>
+          <Link
+            href={c.maturity.cta.href}
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/90 transition-colors hover:text-amber-50"
+          >
+            {c.maturity.cta.label}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </FadeIn>
+      </Section>
+
+      {/* Closing CTA */}
       <section
         id={c.finalCta.id}
         className="border-t border-border/50 bg-gradient-to-b from-background to-muted/[0.1] pb-20 pt-14 sm:pb-24 sm:pt-16 md:pt-20"
@@ -354,7 +506,7 @@ export function ClinicOwnersMarketingView() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <FadeIn>
             <div className="rounded-[1.75rem] border border-white/[0.1] bg-gradient-to-br from-white/[0.05] via-white/[0.015] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.05)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
-              <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/80">
                     {c.finalCta.eyebrow}
@@ -365,10 +517,13 @@ export function ClinicOwnersMarketingView() {
                   />
                   <h2
                     id={`${c.finalCta.id}-heading`}
-                    className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl lg:text-5xl"
+                    className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-4xl"
                   >
                     {c.finalCta.headline}
                   </h2>
+                  <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    {c.finalCta.body}
+                  </p>
                 </div>
                 <div className="flex w-full max-w-md flex-col gap-3 lg:max-w-none lg:justify-self-end">
                   <Button asChild size="lg" className={MARKETING_CTA_PRIMARY_CLASS}>
@@ -388,6 +543,13 @@ export function ClinicOwnersMarketingView() {
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                     </Link>
                   </Button>
+                  <Link
+                    href={c.finalCta.tertiaryCta.href}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/85 transition-colors hover:text-amber-50"
+                  >
+                    {c.finalCta.tertiaryCta.label}
+                    <ArrowRight className="h-3.5 w-3.5 opacity-80" aria-hidden />
+                  </Link>
                 </div>
               </div>
             </div>
