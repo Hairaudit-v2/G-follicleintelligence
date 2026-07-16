@@ -238,7 +238,7 @@ Prior release commits (already on main): 1A–1G content, 1H-A header lockup (`4
 | Role | Hash |
 |------|------|
 | Marketing refresh + 1H-A baseline (production Ready) | `4364ded1dc53e1198e75fb7ca398811f720467e4` |
-| 1H closeout hotfix (redirect Location + sticky) | *set at commit time* |
+| 1H closeout hotfix (redirect Location + sticky) | `6ccca32f6b465772d1d681493f7e65ea540f06cd` |
 
 ---
 

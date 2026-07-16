@@ -37,15 +37,16 @@ export function Header() {
   const productsActive = productsNavActive(pathname);
 
   return (
-    // Sticky shell must not receive Framer Motion transforms — CSS sticky breaks
-    // when the sticky element itself has a transform (including after animation).
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl">
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:gap-4 sm:px-6"
-      >
+    // Sticky shell must stay free of transform AND backdrop-filter — both create
+    // containing blocks that prevent position:sticky from pinning on scroll.
+    <header className="sticky top-0 z-50">
+      <div className="border-b border-border/60 bg-background/88 backdrop-blur-xl">
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:gap-4 sm:px-6"
+        >
         <Link
           href="/"
           className="group flex min-w-0 shrink-0 items-center gap-2.5 tracking-tight sm:gap-3"
@@ -199,7 +200,8 @@ export function Header() {
             </DropdownMenu>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </header>
   );
 }
