@@ -40,6 +40,9 @@
       "tenantIsolation": "PASS",
       "lowRole": "PASS"
     },
+    "lowRoleExecutedWithSecrets": true,
+    "lowRoleReverifiedAtUtc": "2026-07-16T01:43:14.939Z",
+    "lowRoleResult": "fail_closed_denied_configuration_and_import_review",
     "summaryPathLocal": "test-results/hubspot-production-smoke-summary.json",
     "githubCliAuthenticated": false
   },

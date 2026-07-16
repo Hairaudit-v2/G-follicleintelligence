@@ -65,10 +65,10 @@ Recovery-stack merge deploy (also READY, prior): `dpl_BqzrpkMs8UPac5L9vELaitzJBH
 | H. Legacy redirects | PASS |
 | I. Valid / invalid batchId | PASS |
 | J. Tenant isolation | PASS |
-| K. Low-role gating | PASS (fail-closed denial) |
+| K. Low-role gating | PASS (executed with `FI_E2E_LOW_ROLE_*`; fail-closed denial) |
 | Mutation guard | PASS |
 
-Notes from summary: low-role user denied HubSpot Import Review deep link (fail-closed). Deployed commit SHA unset in local harness env (`NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA`); production deploy SHA confirmed independently via Vercel as `3bf43f22`.
+Notes from summary: low-role user denied HubSpot Configuration and Import Review deep links (fail-closed). Re-verified `2026-07-16T01:43:14.939Z` with low-role secrets present (not AMBER skip). Deployed commit SHA unset in local harness env (`NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA`); production deploy SHA confirmed independently via Vercel as `3bf43f22`.
 
 ---
 
