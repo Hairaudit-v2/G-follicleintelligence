@@ -50,8 +50,11 @@ function destination(
 
 /**
  * FI-UX-STRUCTURE-2C.1B — six-group mounted Settings information architecture.
+ * FI-UX-STRUCTURE-2C.2 — HubSpot entry via Integrations hub (Config) or canonical
+ * HubSpot workspace (CRM-read); temporary HubSpot import peer removed.
  *
- * Groups existing destinations only. Does not change route guards, permissions, or page behaviour.
+ * Groups existing destinations only. Does not change route guards, permissions, or page behaviour
+ * beyond session-default tab landing documented in hubspotWorkspaceRoutes.
  */
 export function buildFiOsClinicSettingsGroups(
   tenantBase: string,
@@ -90,6 +93,8 @@ export function buildFiOsClinicSettingsGroups(
 
   const integrations: FiOsSettingsDestination[] = [];
   if (options.showConfiguration) {
+    // Configuration-hub sessions enter HubSpot through Integrations → Manage (all surfaces).
+    // Temporary peer "HubSpot import" removed after FI-UX-STRUCTURE-2C.2 parity proof.
     integrations.push(
       destination(base, "integrations", "Integrations", "settings/integrations"),
       destination(
@@ -99,11 +104,12 @@ export function buildFiOsClinicSettingsGroups(
         "settings/hairaudit-discovery"
       )
     );
-  }
-  if (options.showHubspotImport) {
+  } else if (options.showHubspotImport) {
+    // CRM-read sessions without Configuration hub: single Integrations entry into the
+    // canonical HubSpot workspace (session default = import-review).
     integrations.push({
-      id: "integrations-hubspot-import",
-      label: "HubSpot import",
+      id: "integrations-hubspot",
+      label: "HubSpot",
       href: `${base}/settings/integrations/hubspot?tab=import-review`,
     });
   }

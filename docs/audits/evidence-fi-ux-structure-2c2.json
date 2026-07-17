@@ -1,0 +1,72 @@
+{
+  "milestone": "FI-UX-STRUCTURE-2C.2",
+  "verdict": "GREEN",
+  "asOf": "2026-07-17",
+  "baseCommit": "2968dcfe",
+  "baseMilestone": "FI-UX-STRUCTURE-2C.1B",
+  "canonicalWorkspace": "/fi-admin/[tenantId]/settings/integrations/hubspot",
+  "surfaces": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "entryTab": "overview",
+      "configurationHub": true,
+      "crmRead": false
+    },
+    {
+      "id": "connection-sync",
+      "label": "Connection and sync",
+      "entryTab": "backup-sync",
+      "tabs": ["backup-sync", "configuration", "activity-webhooks"],
+      "configurationHub": true,
+      "crmRead": false
+    },
+    {
+      "id": "migration-import-review",
+      "label": "Migration/import review",
+      "entryTab": "import-review",
+      "tabs": ["import-review", "lead-pilot", "contact-migration", "quarantine-review"],
+      "configurationHub": true,
+      "crmRead": true,
+      "crmReadTabs": ["import-review"]
+    },
+    {
+      "id": "identity-resolution",
+      "label": "Identity resolution",
+      "entryTab": "owner-resolution",
+      "tabs": ["owner-resolution", "patient-review", "quarantine-review"],
+      "configurationHub": true,
+      "crmRead": false
+    },
+    {
+      "id": "health-history",
+      "label": "Health and history",
+      "entryTab": "audit-history",
+      "tabs": ["backup-sync", "activity-webhooks", "audit-history"],
+      "configurationHub": true,
+      "crmRead": false
+    }
+  ],
+  "temporaryHubspotImportPeerRemoved": true,
+  "configurationHubEntry": "Settings → Integrations → surface deep links / Manage",
+  "crmReadEntry": "Settings → Integrations → /settings/integrations/hubspot?tab=import-review",
+  "sessionDefaultTab": {
+    "configurationHub": "overview",
+    "crmRead": "import-review"
+  },
+  "permissionsExpanded": false,
+  "mutationsChanged": false,
+  "legacyRedirectsUntouched": true,
+  "holdRoutesUntouched": ["/staff", "/audit", "/workforce-os/staff-access"],
+  "outOfScope": [
+    "CRM-read expansion beyond import-review",
+    "HubSpot mutation permission redesign",
+    "Academy routing",
+    "Team Access permission parity",
+    "Admin Users identity redesign",
+    "Deployment Centre"
+  ],
+  "recommendedNextMilestone": "FI-UX-STRUCTURE-2C.3",
+  "productionBehaviourChanged": true,
+  "productionBehaviourNotes": "Bare HubSpot workspace URL now lands CRM-read on import-review instead of Overview notFound; Settings dropdown no longer shows HubSpot import peer for Configuration-hub sessions."
+}

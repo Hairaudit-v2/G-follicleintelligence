@@ -90,7 +90,7 @@ type FiOsAppShellProps = {
   showAuditOsNav?: boolean;
   /** `/configuration` hub link in primary sidebar. */
   showConfigurationHubNav?: boolean;
-  /** HubSpot import review without requiring Configuration hub caps (CRM-read). */
+  /** CRM-read Integrations → HubSpot workspace without Configuration hub caps. */
   showHubspotImportNav?: boolean;
   /** Payments payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
   showFiPaymentsInboxNav?: boolean;
