@@ -1,7 +1,7 @@
 # HubSpot → FI OS import (controlled migration)
 
 Programme: **FI-HUBSPOT-IMPORT-1**  
-Current gate: **1E-Q GREEN** (110 quarantine/exclusion classified; 34 reclassified read-only unapplied; next gate 1E-FINAL)  
+Current gate: **1E-FINAL GREEN** (4,752 contacts reconciled; contact-and-lead migration closed; next gate 1F)
 Related: `docs/runbooks/hubspot-incremental-backup.md` (must remain unchanged)  
 Mapping: `docs/migrations/hubspot-to-fi-os-mapping-v1.md`
 
@@ -268,13 +268,9 @@ Hard rules for 1E (inherits 1D):
 - Workspace: `?tab=quarantine-review`
 - Evidence: `docs/audits/evidence-fi-hubspot-import-1e-q-quarantine-review.md`
 
-### Next gate
-
-`FI-HUBSPOT-IMPORT-1E-FINAL`
-
 1E-Q classification is complete. Do not apply reclassified lead/patient/create
 candidates, the remaining 31 deferred creates, the duplicate-risk create, or the
-1E-P patient-review cohort without the approved 1E-FINAL gate.
+1E-P patient-review cohort without a separate future bounded apply approval.
 
 ### 1E-P patient-link interim review (2026-07-17)
 
@@ -288,6 +284,36 @@ candidates, the remaining 31 deferred creates, the duplicate-risk create, or the
 - Apply blocked until explicit approval
 - Workspace: `?tab=patient-review`
 - Evidence: `docs/audits/evidence-fi-hubspot-import-1e-p-patient-link-review.md`
+
+### 1E-D checksum drift reconciliation (2026-07-17)
+
+- Historical expected v1 checksum: `fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6`
+- Historical live v1 checksum: `b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a`
+- Frozen v2 checksum: `1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b`
+- Contract: `fi-hubspot-contact-inventory-v2`
+- Root cause: unordered implicit single-page v1 decision loading
+- Affected contact `22136828309`: reason-code-only delta; classification, target and patient review unchanged
+- Snapshot A equals Snapshot B under v2
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-d-checksum-freeze.md`
+
+### 1E-FINAL closeout (2026-07-17)
+
+- Primary equation: 4,596 existing-lead mappings + 10 created-and-mapped + 31 deferred creates + 1 duplicate risk + 4 original patient review + 67 retained quarantine + 9 retained exclusion + 34 reclassified unapplied = 4,752
+- Secondary patient-review view: 4 original + 8 within reclassified = 12; not double-counted
+- Contact mappings: 4,606 unique sources and 4,606 unique FI lead targets
+- FI leads: 4,706→4,716; FI patients remain 829
+- Unexplained, wrong tenant, duplicate mappings, duplicate leads, patient mutations and prohibited side effects: 0
+- All deferred cohorts remain unapproved and unapplied
+- Evidence: `docs/audits/evidence-fi-hubspot-import-1e-final.md`
+
+### Next gate
+
+`FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot`
+
+Begin with a bounded deal cohort. Preserve existing FI lead stages, import
+pipeline history additively, prevent stage regression, suppress CRM automation,
+preserve historical owner identity, retain patient-protection boundaries, and
+reconcile plus replay before expansion.
 
 ## Safety checklist before any apply
 
@@ -316,3 +342,5 @@ candidates, the remaining 31 deferred creates, the duplicate-risk create, or the
 - [x] 1E-C: all 42 classified; first 10 create-only records applied; patients/watermarks/side effects unchanged; replay delta 0; stopped before second batch
 - [x] 1E-P: four patient-review contacts deferred; 0 proposed links; apply blocked pending explicit approval; next gate 1E-Q
 - [x] 1E-Q: 110 quarantine/exclusion classified; 34 reclassified read-only unapplied; replay delta 0; apply blocked; next gate 1E-FINAL
+- [x] 1E-D: v1 drift explained; v2 contract frozen; Snapshot A equals Snapshot B; official checksum reproduced
+- [x] 1E-FINAL: 4,752 contacts mutually exclusive; unexplained/wrong tenant 0; 4,606 mappings unique; patients 829; deferred cohorts preserved; next gate 1F

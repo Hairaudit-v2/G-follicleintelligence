@@ -1,0 +1,633 @@
+{
+  "schemaVersion": 1,
+  "milestone": "FI-HUBSPOT-IMPORT-1E-FINAL",
+  "verdict": "GREEN",
+  "status": "CONTACT_AND_LEAD_MIGRATION_CLOSED",
+  "generatedAt": "2026-07-17T12:00:00+10:00",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "sourceCutoff": "2026-07-16T16:00:34.530Z",
+  "repository": {
+    "preCloseoutCommit": "da8c1abd2d1834bad2a30eddc09a4264ead41422",
+    "preCloseoutOriginMain": "da8c1abd2d1834bad2a30eddc09a4264ead41422",
+    "unrelatedWorkingTreeChangesExcluded": true,
+    "closeoutFiles": [
+      "docs/audits/evidence-fi-hubspot-import-1e-final.md",
+      "docs/audits/evidence-fi-hubspot-import-1e-final.json",
+      "docs/runbooks/hubspot-to-fi-os-import.md"
+    ]
+  },
+  "executiveSummary": {
+    "sourceContacts": 4752,
+    "mappedToPreExistingLeads": 4596,
+    "createdAndMappedLeads": 10,
+    "totalContactLeadMappings": 4606,
+    "fiLeadsBeforeCreationBatch": 4706,
+    "fiLeadsAfterMigration": 4716,
+    "fiPatients": 829,
+    "unexplained": 0,
+    "wrongTenant": 0,
+    "productionSafety": "verified",
+    "deferredCohortsRequiredForCloseout": false
+  },
+  "checksumCloseout": {
+    "historicalExpectedV1": "fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6",
+    "historicalLiveV1": "b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a",
+    "frozenV2": "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b",
+    "contractVersion": "fi-hubspot-contact-inventory-v2",
+    "rootCause": "The v1 checksum loaded one unordered implicit page of active decision rows. Persisting richer 1E-Q evidence changed which equivalent decision row appeared, causing a reasonCode-only drift.",
+    "affectedHubspotContactId": "22136828309",
+    "fieldDelta": {
+      "field": "reasonCode",
+      "before": "person_source_id_single_lead",
+      "after": "existing_external_lead_or_source_id"
+    },
+    "classificationChanged": false,
+    "mappingTargetChanged": false,
+    "patientReviewChanged": false,
+    "sourceIdChanged": false,
+    "sourceTimestampChanged": false,
+    "snapshotAEqualsSnapshotBUnderV2": true,
+    "officialInventoryReproducedFrozenChecksum": true
+  },
+  "finalInventory": {
+    "mutuallyExclusivePrimaryStates": {
+      "mapped_to_pre_existing_fi_lead": 4596,
+      "created_as_new_fi_lead_and_mapped": 10,
+      "deferred_create_candidate": 31,
+      "duplicate_risk_create_candidate": 1,
+      "deferred_original_patient_review": 4,
+      "retained_quarantine": 67,
+      "retained_exclusion": 9,
+      "reclassified_but_unapplied": 34,
+      "other": 0,
+      "total": 4752
+    },
+    "equation": "4596 + 10 + 31 + 1 + 4 + 67 + 9 + 34 + 0 = 4752",
+    "unexplained": 0,
+    "wrongTenant": 0,
+    "duplicateSourceIds": 0,
+    "secondaryAuditFlags": {
+      "patientReviewTotal": 12,
+      "patientReviewComposition": {
+        "originalPrimaryPatientReview": 4,
+        "withinReclassifiedButUnapplied": 8
+      },
+      "oneEQReclassifiedTotal": 34,
+      "oneEQReclassifiedComposition": {
+        "existingLeadLink": 26,
+        "patientReview": 8
+      },
+      "oneEQReviewedTotal": 110,
+      "oneEQRetainedTestOrSmoke": 59,
+      "oneEQRetainedAmbiguous": 8,
+      "oneEQExcludedArchived": 9
+    },
+    "overlapPolicy": "Secondary audit flags do not add to the mutually exclusive primary total."
+  },
+  "mappingReconciliation": {
+    "total": 4606,
+    "existingLeadMappings": 4596,
+    "newLeadMappings": 10,
+    "equation": "4596 + 10 = 4606",
+    "uniqueSourceIds": 4606,
+    "uniqueFiLeadTargets": 4606,
+    "duplicateSourceMappingGroups": 0,
+    "sourceContactsMappedToMultipleLeads": 0,
+    "conflictingContactIdentitiesPerLead": 0,
+    "wrongTenantMappings": 0,
+    "missingSourceIds": 0,
+    "missingBatchProvenance": 0,
+    "distinctAppliedBatchIds": 13,
+    "replaySafe": true,
+    "rollbackEligibilityRecorded": true
+  },
+  "leadReconciliation": {
+    "beforeCreationBatch": 4706,
+    "created": 10,
+    "afterMigration": 4716,
+    "equation": "4706 + 10 = 4716",
+    "duplicateLeadCreation": 0,
+    "secondNonEmptyCreationBatch": false,
+    "createdLeadSourceMappings": 10,
+    "createdLeadPersonSourceIds": 10,
+    "createdLeadDistinctPersons": 10,
+    "createdLeadMissingTargets": 0,
+    "patientRelationshipCreatedByMigration": 0,
+    "prohibitedSideEffects": 0
+  },
+  "patientReconciliation": {
+    "patientsBefore": 829,
+    "patientsAfter": 829,
+    "patientCreationDelta": 0,
+    "automaticPatientLinkDelta": 0,
+    "patientDemographicMutationDelta": 0,
+    "hubspotPatientSourceLinks": 0,
+    "patientReviewTotal": 12,
+    "patientReviewApplied": 0,
+    "clinicalIdentitySeparatedFromCrmIdentity": true
+  },
+  "ownerReconciliation": {
+    "ownersReviewed": 31,
+    "ownerToStaffMappingsRetained": 2,
+    "archivedSourceOwners": 24,
+    "noMatchingFiStaff": 5,
+    "unresolved": 0,
+    "conflicts": 0,
+    "wrongTenant": 0,
+    "fiStaffMutation": 0,
+    "fiUserMutation": 0,
+    "activeDecisionRows": 29,
+    "note": "The two mapped owners are represented by retained staff source mappings; the remaining 29 owners have explicit archived or no-match decisions."
+  },
+  "watermarkReconciliation": {
+    "notes": {
+      "timestamp": "2026-07-16T16:00:34.53+00:00",
+      "version": 4,
+      "owner": "scheduled Vercel Cron notes backup run 916c3102-548d-4758-9339-7f1e24d4d1d0",
+      "migrationOwned": false,
+      "contactInventoryCoverage": false
+    },
+    "contacts": {
+      "watermark": null,
+      "model": "fixed-cutoff exact-ID staging refresh"
+    },
+    "migrationWatermarkMutations": 0,
+    "sourceContactsLostThroughWatermarkConfusion": 0
+  },
+  "batchHistory": [
+    {
+      "sequence": "1D pilot",
+      "batchId": "46c77f5f-866d-4363-a012-b8f0c960f966",
+      "reviewedSize": 25,
+      "approvedSize": 24,
+      "appliedSize": 24,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 24,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_24_delta_0",
+      "rollbackPreview": "24_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "45b1b04ebf0538f46f0f390fc667b882fe7903b7"
+    },
+    {
+      "sequence": "E1",
+      "batchId": "544bf53d-c0fa-40c8-a67b-dcc2f26e83ea",
+      "approvedSize": 100,
+      "appliedSize": 100,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 100,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_100_delta_0",
+      "rollbackPreview": "100_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E2",
+      "batchId": "7025f783-a688-473e-8723-bc5db692998c",
+      "approvedSize": 250,
+      "appliedSize": 250,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 250,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_250_delta_0",
+      "rollbackPreview": "250_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E3",
+      "batchId": "d0b9258b-81ec-4503-a449-a39eb9371463",
+      "approvedSize": 250,
+      "appliedSize": 250,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 250,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_250_delta_0",
+      "rollbackPreview": "250_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E4",
+      "batchId": "57c26884-8d75-4e6e-98b6-aba4ab3ccf45",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E5",
+      "batchId": "5102a4bf-6648-4b36-9733-3b2176b4762e",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E6",
+      "batchId": "6cc5a10f-c4a2-411a-9b11-3ae24ec758fa",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E7",
+      "batchId": "5ed8a08d-70a1-4fa3-ad11-2383c79551a1",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E8",
+      "batchId": "a0e2bdc3-1e7b-4681-a685-5ccb6fefdfad",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "ec4541d345161e5a5cdfc8c6c02bf236a9318f23"
+    },
+    {
+      "sequence": "E9",
+      "batchId": "bba7d442-d39d-4b26-a279-fba6fefe1605",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "74638e0eb355ff08a1360dadc14389e3a5bf0fc2"
+    },
+    {
+      "sequence": "E10",
+      "batchId": "8cf33768-ffb3-46a4-a481-4aadbb1cfd43",
+      "approvedSize": 500,
+      "appliedSize": 500,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 500,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_500_delta_0",
+      "rollbackPreview": "500_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "43ed89e38338e96dbb6b73fc74df363ed13155d8"
+    },
+    {
+      "sequence": "E11",
+      "batchId": "fe956ad8-1728-4648-bb6c-85b499286a08",
+      "approvedSize": 472,
+      "appliedSize": 472,
+      "operationType": "link_existing_lead_only",
+      "mappingsCreated": 472,
+      "leadsCreated": 0,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_472_delta_0",
+      "rollbackPreview": "472_mappings_batch_scoped_not_executed",
+      "evidenceCommit": "4fc4fcbc264944b7496eb8a92f34e758b20eb840"
+    },
+    {
+      "sequence": "1E-C first creation batch",
+      "batchId": "32d02f20-9852-4be2-b237-45c115f43c2b",
+      "approvedSize": 10,
+      "appliedSize": 10,
+      "operationType": "create_new_lead_and_map",
+      "mappingsCreated": 10,
+      "leadsCreated": 10,
+      "personsCreated": 10,
+      "personSourceIdsCreated": 10,
+      "reconciliation": "balanced_unexplained_0",
+      "replay": "already_applied_10_delta_0",
+      "rollbackPreview": "10_mappings_and_10_batch_owned_leads_eligible_not_executed",
+      "evidenceCommit": "0be78ef8fda8c1cc5c24adf783e95c0a0c0ea4c3"
+    }
+  ],
+  "zeroRowRolledBackArtifact": {
+    "batchId": "21a696e4-343f-476f-b2cf-9c5b035048c8",
+    "status": "rolled_back",
+    "rowCount": 0,
+    "importedRowCount": 0,
+    "countedAsProductionApply": false,
+    "countedAsCreationBatch": false,
+    "evidenceCommit": "0be78ef8fda8c1cc5c24adf783e95c0a0c0ea4c3"
+  },
+  "cumulativeControls": {
+    "appliedProductionBatches": 13,
+    "nonEmptyCreationBatches": 1,
+    "reconciliationUnexplained": 0,
+    "replayMutationDelta": 0,
+    "wrongTenantMutations": 0,
+    "duplicateLeadsCreated": 0,
+    "duplicateMappingsCreated": 0,
+    "patientCreations": 0,
+    "patientMutations": 0,
+    "staffMutations": 0,
+    "userMutations": 0,
+    "prohibitedSideEffects": 0,
+    "migrationWatermarkMutations": 0,
+    "rollbackPreviewsBatchScoped": true
+  },
+  "sideEffectReconciliation": {
+    "outboundEmails": 0,
+    "smsMessages": 0,
+    "notifications": 0,
+    "appointments": 0,
+    "followUpTasks": 0,
+    "leadSequences": 0,
+    "patientPortalAccess": 0,
+    "surgeryRecords": 0,
+    "paymentRecords": 0,
+    "clinicalRecords": 0,
+    "outboundIntegrationEvents": 0,
+    "basis": "Mutation allowlists excluded these tables and every batch reconciliation reported an empty side-effect set."
+  },
+  "deferredCohorts": [
+    {
+      "name": "deferred_create_candidate",
+      "count": 31,
+      "hubspotContactIds": [
+        "229252386883",
+        "229644207192",
+        "229761370222",
+        "229822585441",
+        "230078018219",
+        "230112067154",
+        "230639040339",
+        "230642313879",
+        "230788271393",
+        "231262105982",
+        "231355584806",
+        "231630699833",
+        "231796981035",
+        "231957445934",
+        "232370476663",
+        "233062229892",
+        "233062467082",
+        "233293885725",
+        "233577836575",
+        "233592359265",
+        "233654568578",
+        "233932666667",
+        "233948727898",
+        "234192383323",
+        "234237072023",
+        "234612688197",
+        "234759477176",
+        "234773951030",
+        "234847453591",
+        "234960886018",
+        "235542182239"
+      ],
+      "reason": "Safe candidate deferred beyond the first bounded creation batch, or existing-person evidence requires a non-duplicating lead path.",
+      "currentState": "create_new_lead with deferred_manual_review",
+      "sourceProvenance": "Frozen v2 source row with HubSpot contact ID, payload checksum and source timestamp.",
+      "reviewEvidence": "FI-HUBSPOT-IMPORT-1E-C candidate review",
+      "reopeningCondition": "Explicit bounded approval after fresh identity, duplicate, patient, cutoff and payload validation.",
+      "automaticApply": false
+    },
+    {
+      "name": "duplicate_risk_create_candidate",
+      "count": 1,
+      "hubspotContactIds": ["234166255473"],
+      "reason": "duplicate_identity_signal",
+      "currentState": "quarantine_duplicate_source with quarantine_duplicate_risk review",
+      "sourceProvenance": "Frozen v2 source row with HubSpot contact ID, payload checksum and source timestamp.",
+      "reviewEvidence": "FI-HUBSPOT-IMPORT-1E-C candidate review",
+      "reopeningCondition": "Resolve duplicate identity risk and obtain explicit bounded approval.",
+      "automaticApply": false
+    },
+    {
+      "name": "original_patient_review_unapplied",
+      "count": 4,
+      "hubspotContactIds": [
+        "229708595090",
+        "233738855995",
+        "234062240678",
+        "234339716176"
+      ],
+      "reason": "email_only_never_approves_patient_link",
+      "currentState": "patient_link_review_required with deferred_clinical_identity_review",
+      "sourceProvenance": "Frozen v2 source row with HubSpot contact ID, payload checksum and source timestamp.",
+      "reviewEvidence": "FI-HUBSPOT-IMPORT-1E-P patient-link review",
+      "reopeningCondition": "A second reliable identifier or trusted lead-to-patient relationship plus clinical approval.",
+      "automaticApply": false
+    },
+    {
+      "name": "reclassified_existing_lead_unapplied",
+      "count": 26,
+      "hubspotContactIds": [
+        "150450600528",
+        "1939253",
+        "225728757851",
+        "79937771043",
+        "79937800582",
+        "79937855002",
+        "79941467568",
+        "79943989859",
+        "79944728184",
+        "79944924182",
+        "79944957972",
+        "79944957976",
+        "79945774437",
+        "79947255323",
+        "82403224498",
+        "82404694172",
+        "82405221734",
+        "82412704052",
+        "82412949557",
+        "82416191883",
+        "82416373824",
+        "82417941556",
+        "82420678517",
+        "82423699231",
+        "82427020898",
+        "82427023222"
+      ],
+      "reason": "Unique same-tenant lead evidence was identified during quarantine review.",
+      "currentState": "Operational quarantine or exclusion remains primary; reclassify_existing_lead_link is a secondary unapplied review flag.",
+      "sourceProvenance": "Frozen v2 source row with HubSpot contact ID, payload checksum and source timestamp.",
+      "reviewEvidence": "FI-HUBSPOT-IMPORT-1E-Q quarantine/exclusion review",
+      "reopeningCondition": "Separate bounded apply gate with fresh mapping, source, tenant and target validation.",
+      "automaticApply": false
+    },
+    {
+      "name": "reclassified_patient_review_unapplied",
+      "count": 8,
+      "hubspotContactIds": [
+        "228149575980",
+        "228157036818",
+        "230741985397",
+        "231956151096",
+        "233032948147",
+        "233915878521",
+        "82410538778",
+        "82431051267"
+      ],
+      "reason": "Deterministic patient identity signal requires clinical review rather than CRM apply.",
+      "currentState": "Operational quarantine remains primary; reclassify_patient_review is a secondary unapplied review flag.",
+      "sourceProvenance": "Frozen v2 source row with HubSpot contact ID, payload checksum and source timestamp.",
+      "reviewEvidence": "FI-HUBSPOT-IMPORT-1E-Q quarantine/exclusion review",
+      "reopeningCondition": "Stronger clinical identity evidence and explicit clinical approval; never email-only.",
+      "automaticApply": false
+    }
+  ],
+  "quarantineAndExclusionAssurance": {
+    "reviewed": 110,
+    "explicitReasonPresent": 110,
+    "retainedQuarantine": 67,
+    "retainedExclusion": 9,
+    "reclassifiedUnapplied": 34,
+    "genericOrMissingDecision": 0,
+    "deterministicLegitimateLeadHiddenWithoutReviewFlag": 0,
+    "sourceRowsDeleted": 0,
+    "applyExecuted": false
+  },
+  "operatorWorkflows": [
+    "owner resolution",
+    "contact migration",
+    "lead pilot",
+    "candidate review",
+    "patient review",
+    "quarantine review",
+    "preview",
+    "immutable approval checksum",
+    "bounded apply",
+    "reconciliation",
+    "replay",
+    "rollback preview",
+    "audit details"
+  ],
+  "documentedLimitations": [
+    {
+      "limitation": "The requested interim approval checkpoint was missed before the first 10-lead creation batch.",
+      "blocking": false,
+      "safetyBasis": "The batch remained bounded to 10, reconciled to unexplained 0, replayed with delta 0, created no patients and produced no prohibited side effects."
+    },
+    {
+      "limitation": "The first candidate-review implementation did not retain complete per-candidate human-readable evidence.",
+      "blocking": false,
+      "safetyBasis": "Production rows retain source IDs, payload checksums, decision evidence and batch provenance; the cohort remains frozen after the first batch."
+    },
+    {
+      "limitation": "Candidate-review filters and summary counters were partial in the first implementation.",
+      "blocking": false,
+      "safetyBasis": "All 42 candidates received explicit persisted classifications and the second batch was not started."
+    },
+    {
+      "limitation": "Complete screenshots and full human smoke evidence are not retained for every operator workflow.",
+      "blocking": false,
+      "safetyBasis": "Production safety was independently verified through counts, mappings, checksums, reconciliation, replay and rollback previews."
+    },
+    {
+      "limitation": "The contact dataset intentionally has no incremental watermark and the historical scheduler cutoff_from discrepancy remains incompletely explained.",
+      "blocking": false,
+      "safetyBasis": "The discrepancy represented overlap rather than a gap; the exact-ID refresh restored 4,752 contacts and v2 snapshots reconcile with unexplained 0."
+    }
+  ],
+  "validation": {
+    "officialV2InventoryCommand": "passed",
+    "frozenChecksumMatch": true,
+    "contactReconciliation": "passed",
+    "mappingUniqueness": "passed",
+    "leadCount": "passed",
+    "patientCount": "passed",
+    "ownerMapping": "passed",
+    "deferredCohorts": "passed",
+    "batchHistory": "passed",
+    "replayEvidence": "passed",
+    "rollbackPreview": "passed",
+    "sideEffectAudit": "passed",
+    "watermarkOwnership": "passed",
+    "hubspotImportTests": "120_pass_0_fail",
+    "quarantineAndPatientProtectionTests": "22_pass_0_fail",
+    "typecheck": "passed"
+  },
+  "evidenceIndex": [
+    {
+      "milestone": "1A",
+      "path": "docs/audits/evidence-fi-hubspot-import-1a-architecture-and-dry-run.json"
+    },
+    {
+      "milestone": "1B",
+      "path": "docs/audits/evidence-fi-hubspot-import-1b-owner-staff-mapping.json"
+    },
+    {
+      "milestone": "1C",
+      "path": "docs/audits/evidence-fi-hubspot-import-1c-owner-resolution.json"
+    },
+    {
+      "milestone": "1D",
+      "path": "docs/audits/evidence-fi-hubspot-import-1d-contact-lead-pilot.json"
+    },
+    {
+      "milestone": "1E E1-E11",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-contact-lead-expansion.json"
+    },
+    {
+      "milestone": "1E-W",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-watermark-provenance.json"
+    },
+    {
+      "milestone": "1E-R",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-contact-staging-refresh.json"
+    },
+    {
+      "milestone": "1E-C",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-controlled-new-leads.json"
+    },
+    {
+      "milestone": "1E-P",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-p-patient-link-review.json"
+    },
+    {
+      "milestone": "1E-Q",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-q-quarantine-review.json"
+    },
+    {
+      "milestone": "1E-D",
+      "path": "docs/audits/evidence-fi-hubspot-import-1e-d-checksum-freeze.json",
+      "commit": "da8c1abd2d1834bad2a30eddc09a4264ead41422"
+    }
+  ],
+  "nextGateReadiness": {
+    "ready": true,
+    "nextGate": "FI-HUBSPOT-IMPORT-1F — Deal and pipeline-history migration pilot",
+    "constraints": [
+      "Begin with a bounded deal cohort.",
+      "Preserve existing FI lead stages.",
+      "Import source pipeline history additively.",
+      "Prevent stage regression.",
+      "Suppress CRM automation.",
+      "Preserve historical owner identity.",
+      "Maintain patient-protection boundaries.",
+      "Reconcile and replay before expansion."
+    ]
+  }
+}
