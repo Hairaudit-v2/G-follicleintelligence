@@ -15,13 +15,19 @@ export const HUBSPOT_QUARANTINE_EXPECTED_TOTAL_CONTACTS = 4752;
 export const HUBSPOT_QUARANTINE_BASE_INVENTORY_CHECKSUM =
   "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c";
 
-/**
- * Post-1E-Q live inventory signature after classification evidence persistence.
- * Programme position remains 4,752 contacts; 1E-C duplicate-risk row resolves live
- * as create_new_lead (saved 1E-C milestone does not override expansion inventory).
- */
-export const HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM =
+/** Historical v1 checksum frozen before 1E-Q evidence persistence. */
+export const HUBSPOT_QUARANTINE_ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM =
   "fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6";
+
+/** Historical live v1 checksum that triggered FI-HUBSPOT-IMPORT-1E-D. */
+export const HUBSPOT_QUARANTINE_PRIOR_LIVE_V1_INVENTORY_CHECKSUM =
+  "b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a";
+
+/** Explicitly approved by FI-HUBSPOT-IMPORT-1E-D on 2026-07-17. */
+export const HUBSPOT_QUARANTINE_INVENTORY_CHECKSUM_CONTRACT_VERSION =
+  "fi-hubspot-contact-inventory-v2";
+export const HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM =
+  "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b";
 
 /** Historical post-1E-C checksum retained for provenance (1E-P boundary). */
 export const HUBSPOT_QUARANTINE_POST_1EC_INVENTORY_CHECKSUM =
@@ -184,14 +190,10 @@ export const HUBSPOT_EXCLUSION_FINAL_STATES = [
 ] as const;
 
 export const HUBSPOT_QUARANTINE_REVIEW_STATES = [
-  ...new Set([
-    ...HUBSPOT_QUARANTINE_FINAL_STATES,
-    ...HUBSPOT_EXCLUSION_FINAL_STATES,
-  ]),
+  ...new Set([...HUBSPOT_QUARANTINE_FINAL_STATES, ...HUBSPOT_EXCLUSION_FINAL_STATES]),
 ] as const;
 
-export type HubspotQuarantineReviewState =
-  (typeof HUBSPOT_QUARANTINE_REVIEW_STATES)[number];
+export type HubspotQuarantineReviewState = (typeof HUBSPOT_QUARANTINE_REVIEW_STATES)[number];
 
 export type HubspotQuarantineOriginalBucket = "quarantined" | "excluded";
 
@@ -202,8 +204,7 @@ export const HUBSPOT_QUARANTINE_AUTHORIZED_ROLES = [
   "platform_admin",
 ] as const;
 
-export type HubspotQuarantineAuthorizedRole =
-  (typeof HUBSPOT_QUARANTINE_AUTHORIZED_ROLES)[number];
+export type HubspotQuarantineAuthorizedRole = (typeof HUBSPOT_QUARANTINE_AUTHORIZED_ROLES)[number];
 
 export type HubspotQuarantineEvidenceChecks = {
   sameTenant: boolean;
@@ -280,24 +281,17 @@ export function emptyQuarantineChecks(): HubspotQuarantineEvidenceChecks {
   };
 }
 
-export function isAuthorizedQuarantineReviewRole(
-  role: string | null | undefined
-): boolean {
+export function isAuthorizedQuarantineReviewRole(role: string | null | undefined): boolean {
   const normalized = String(role ?? "")
     .trim()
     .toLowerCase();
-  return (HUBSPOT_QUARANTINE_AUTHORIZED_ROLES as readonly string[]).includes(
-    normalized
-  );
+  return (HUBSPOT_QUARANTINE_AUTHORIZED_ROLES as readonly string[]).includes(normalized);
 }
 
 export function assertQuarantineCohortIds(ids: string[]): void {
   const expected = [...HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS].sort();
   const actual = [...ids].sort();
-  if (
-    actual.length !== expected.length ||
-    actual.some((id, i) => id !== expected[i])
-  ) {
+  if (actual.length !== expected.length || actual.some((id, i) => id !== expected[i])) {
     throw new Error(
       `1E_Q_GUARD: quarantine/exclusion cohort drift — expected ${expected.length} frozen IDs, found ${actual.length}`
     );
@@ -318,9 +312,7 @@ export function assertQuarantineBucketIds(input: {
     eActual.length !== eExpected.length ||
     eActual.some((id, i) => id !== eExpected[i])
   ) {
-    throw new Error(
-      "1E_Q_GUARD: quarantined/excluded bucket drift from frozen 1E-R cohort"
-    );
+    throw new Error("1E_Q_GUARD: quarantined/excluded bucket drift from frozen 1E-R cohort");
   }
 }
 
@@ -330,15 +322,10 @@ export function maskDisplayName(name: string | null | undefined): string {
     .split(/\s+/)
     .filter(Boolean);
   if (!parts.length) return "(unnamed)";
-  return parts
-    .map((part) => (part.length <= 1 ? "*" : `${part[0]}***`))
-    .join(" ");
+  return parts.map((part) => (part.length <= 1 ? "*" : `${part[0]}***`)).join(" ");
 }
 
-export function assertNoProductionMutationAllowlist(
-  table: string,
-  operation: string
-): void {
+export function assertNoProductionMutationAllowlist(table: string, operation: string): void {
   const forbidden = new Set([
     "fi_patients",
     "fi_patient_source_ids",
@@ -363,10 +350,7 @@ export function assertNoProductionMutationAllowlist(
   }
 }
 
-export function assertQuarantineReviewChecksum(
-  actual: string,
-  expected: string
-): void {
+export function assertQuarantineReviewChecksum(actual: string, expected: string): void {
   if (actual !== expected) {
     throw new Error("1E_Q_GUARD: stale or mutated quarantine review checksum");
   }
@@ -445,9 +429,7 @@ export function classifyQuarantineReview(input: {
 
   if (!checks.sameTenant) {
     return finish(
-      originalBucket === "excluded"
-        ? "excluded_out_of_scope_source"
-        : "excluded_with_reason",
+      originalBucket === "excluded" ? "excluded_out_of_scope_source" : "excluded_with_reason",
       "wrong_tenant_fail_closed",
       ["Contact is outside the authorised tenant scope."]
     );
@@ -486,11 +468,9 @@ export function classifyQuarantineReview(input: {
         }
       );
     }
-    return finish(
-      "deferred_manual_review",
-      "patient_signal_on_excluded_requires_manual_review",
-      ["Excluded contact shows patient identity signals — deferred."]
-    );
+    return finish("deferred_manual_review", "patient_signal_on_excluded_requires_manual_review", [
+      "Excluded contact shows patient identity signals — deferred.",
+    ]);
   }
 
   if (checks.existingContactLeadMappingId) {
@@ -541,17 +521,13 @@ export function classifyQuarantineReview(input: {
     checks.exactPhonePersonIds.length > 1
   ) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_ambiguous_identity",
-        "multi_person_or_multi_lead_ambiguity",
-        ["Multiple same-tenant identity targets remain — retained as ambiguous."]
-      );
+      return finish("retained_ambiguous_identity", "multi_person_or_multi_lead_ambiguity", [
+        "Multiple same-tenant identity targets remain — retained as ambiguous.",
+      ]);
     }
-    return finish(
-      "deferred_manual_review",
-      "ambiguous_identity_on_excluded_cohort",
-      ["Excluded contact has ambiguous identity signals — deferred."]
-    );
+    return finish("deferred_manual_review", "ambiguous_identity_on_excluded_cohort", [
+      "Excluded contact has ambiguous identity signals — deferred.",
+    ]);
   }
 
   if (checks.duplicateSourceEmail || checks.duplicateSourcePhone) {
@@ -568,67 +544,51 @@ export function classifyQuarantineReview(input: {
     }
     if (originalBucket === "quarantined") {
       return finish(
-        checks.exactEmailPersonIds.length === 1 ||
-          checks.exactPhonePersonIds.length === 1
+        checks.exactEmailPersonIds.length === 1 || checks.exactPhonePersonIds.length === 1
           ? "retained_duplicate_target_risk"
           : "retained_duplicate_source",
-        checks.exactEmailPersonIds.length === 1 ||
-          checks.exactPhonePersonIds.length === 1
+        checks.exactEmailPersonIds.length === 1 || checks.exactPhonePersonIds.length === 1
           ? "duplicate_target_identity_risk"
           : "duplicate_source_identity_signal",
         ["Duplicate source identity signals require retention without apply."]
       );
     }
-    return finish(
-      "excluded_duplicate_source",
-      "duplicate_source_on_excluded_cohort",
-      ["Excluded contact retains duplicate-source exclusion."]
-    );
+    return finish("excluded_duplicate_source", "duplicate_source_on_excluded_cohort", [
+      "Excluded contact retains duplicate-source exclusion.",
+    ]);
   }
 
   if (checks.testOrSmoke) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_test_or_smoke",
-        "test_or_smoke_identity_retained",
-        ["Test/smoke identity signals confirm retention in quarantine."]
-      );
+      return finish("retained_test_or_smoke", "test_or_smoke_identity_retained", [
+        "Test/smoke identity signals confirm retention in quarantine.",
+      ]);
     }
-    return finish(
-      "excluded_test_or_demo",
-      "test_or_demo_identity_excluded",
-      ["Test/demo identity confirms exclusion."]
-    );
+    return finish("excluded_test_or_demo", "test_or_demo_identity_excluded", [
+      "Test/demo identity confirms exclusion.",
+    ]);
   }
 
   if (checks.systemOrIntegration) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_system_or_integration_record",
-        "system_or_integration_identity",
-        ["System/integration record pattern — retained."]
-      );
+      return finish("retained_system_or_integration_record", "system_or_integration_identity", [
+        "System/integration record pattern — retained.",
+      ]);
     }
-    return finish(
-      "excluded_system_record",
-      "system_or_integration_excluded",
-      ["System/integration record — excluded."]
-    );
+    return finish("excluded_system_record", "system_or_integration_excluded", [
+      "System/integration record — excluded.",
+    ]);
   }
 
   if (checks.spamOrJunk) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_spam_or_junk",
-        "spam_or_junk_identity_retained",
-        ["Spam/junk identity signals — retained in quarantine."]
-      );
+      return finish("retained_spam_or_junk", "spam_or_junk_identity_retained", [
+        "Spam/junk identity signals — retained in quarantine.",
+      ]);
     }
-    return finish(
-      "excluded_by_documented_business_rule",
-      "spam_or_junk_excluded_by_policy",
-      ["Spam/junk identity — excluded by documented policy."]
-    );
+    return finish("excluded_by_documented_business_rule", "spam_or_junk_excluded_by_policy", [
+      "Spam/junk identity — excluded by documented policy.",
+    ]);
   }
 
   if (checks.archived || checks.convertedLead) {
@@ -636,46 +596,34 @@ export function classifyQuarantineReview(input: {
       return finish(
         "excluded_archived_without_business_value",
         "archived_hubspot_contact_policy_skip",
-        [
-          "Archived/historical HubSpot contact remains excluded without business value.",
-        ]
+        ["Archived/historical HubSpot contact remains excluded without business value."]
       );
     }
-    return finish(
-      "retained_archived_or_historical",
-      "archived_or_converted_retained",
-      ["Archived or converted historical contact — retained."]
-    );
+    return finish("retained_archived_or_historical", "archived_or_converted_retained", [
+      "Archived or converted historical contact — retained.",
+    ]);
   }
 
   if (checks.missingIdentity) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_missing_identity",
-        "minimum_identity_missing",
-        ["Minimum identity fields are missing — retained."]
-      );
+      return finish("retained_missing_identity", "minimum_identity_missing", [
+        "Minimum identity fields are missing — retained.",
+      ]);
     }
-    return finish(
-      "excluded_non_person_entity",
-      "missing_identity_non_person",
-      ["Missing identity on excluded cohort — treated as non-person."]
-    );
+    return finish("excluded_non_person_entity", "missing_identity_non_person", [
+      "Missing identity on excluded cohort — treated as non-person.",
+    ]);
   }
 
   if (checks.invalidContact) {
     if (originalBucket === "quarantined") {
-      return finish(
-        "retained_invalid_contact",
-        "invalid_contact_identity",
-        ["Invalid contact identity — retained."]
-      );
+      return finish("retained_invalid_contact", "invalid_contact_identity", [
+        "Invalid contact identity — retained.",
+      ]);
     }
-    return finish(
-      "excluded_by_documented_business_rule",
-      "invalid_contact_excluded",
-      ["Invalid contact — excluded by documented rule."]
-    );
+    return finish("excluded_by_documented_business_rule", "invalid_contact_excluded", [
+      "Invalid contact — excluded by documented rule.",
+    ]);
   }
 
   // Deterministic create candidate: clean identity, no conflicts, not test/spam.
@@ -744,9 +692,7 @@ export function classifyQuarantineReview(input: {
   );
 }
 
-export function computeQuarantineReviewChecksum(
-  rows: HubspotQuarantineReviewRow[]
-): string {
+export function computeQuarantineReviewChecksum(rows: HubspotQuarantineReviewRow[]): string {
   const canonical = [...rows]
     .sort((a, b) => a.hubspotContactId.localeCompare(b.hubspotContactId))
     .map((row) =>
@@ -811,9 +757,7 @@ export function summarizeQuarantineReview(rows: HubspotQuarantineReviewRow[]): {
     else if (row.state.startsWith("excluded_")) excludedCount += 1;
   }
 
-  for (const key of Object.keys(reclassifiedCohorts) as Array<
-    keyof typeof reclassifiedCohorts
-  >) {
+  for (const key of Object.keys(reclassifiedCohorts) as Array<keyof typeof reclassifiedCohorts>) {
     reclassifiedCohorts[key].sort();
   }
 
@@ -848,8 +792,7 @@ export function buildQuarantineReconciliation(input: {
   balanced: boolean;
 } {
   const summary = summarizeQuarantineReview(input.rows);
-  const retainedQuarantineOrExclusion =
-    summary.retainedCount + summary.excludedCount;
+  const retainedQuarantineOrExclusion = summary.retainedCount + summary.excludedCount;
   const reclassifiedReadOnly = summary.reclassifiedCount;
   const deferredManualReview = summary.deferredCount;
   const total =

@@ -1,0 +1,362 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-D",
+  "status": "FREEZE_APPROVED",
+  "verdict": "GREEN",
+  "generatedAt": "2026-07-17T01:48:07.624Z",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "sourceCutoff": "2026-07-16T16:00:34.530Z",
+  "rootCauseCategories": [
+    "expected_classification_evidence_enrichment",
+    "inventory_scope_change",
+    "serialization_or_ordering_change"
+  ],
+  "rootCause": "The v1 inventory loaded only one implicit PostgREST page of active decision rows without deterministic ordering. Persisting 1E-Q review evidence superseded and inserted decision rows, changing which rows appeared in that capped page. One applied contact therefore fell back from its saved reason_code to the equivalent derived reason_code. Complete deterministic decision pagination makes Snapshot A and B identical.",
+  "affectedHubspotContactId": "22136828309",
+  "contracts": {
+    "original": {
+      "version": "fi-hubspot-contact-inventory-v1",
+      "entityType": "hubspot_contact",
+      "hashAlgorithm": "sha256",
+      "serialization": "pipe-delimited fields, newline-delimited rows",
+      "contactOrdering": "lexicographic sort of complete canonical row strings",
+      "fieldOrdering": [
+        "hubspotContactId",
+        "decision",
+        "reasonCode",
+        "proposedLeadId",
+        "patientProtectionWarning",
+        "quarantineReason",
+        "identityTier",
+        "payloadChecksum",
+        "lastSourceActivityAt"
+      ],
+      "nullHandling": "null and undefined serialize as an empty string",
+      "blankHandling": "blank strings serialize as an empty string",
+      "timestampFormatting": "no transformation; source string is serialized verbatim",
+      "directEmailField": false,
+      "directPhoneField": false,
+      "upstreamNormalization": "email uses normalizeEmail and phone uses normalizePhoneDigits before identity classification; normalized values are not serialized directly",
+      "sourceCutoffInHash": false,
+      "tenantInHash": false,
+      "integrationInHash": false,
+      "versionInHash": false
+    },
+    "frozen": {
+      "version": "fi-hubspot-contact-inventory-v2",
+      "entityType": "hubspot_contact",
+      "hashAlgorithm": "sha256",
+      "serialization": "JSON arrays with fixed field positions",
+      "contactOrdering": "hubspotContactId ascending",
+      "fieldOrdering": [
+        "hubspotContactId",
+        "decision",
+        "reasonCode",
+        "proposedLeadId",
+        "patientProtectionWarning",
+        "quarantineReason",
+        "identityTier",
+        "payloadChecksum",
+        "lastSourceActivityAt"
+      ],
+      "nullHandling": "null and undefined serialize as an empty string",
+      "blankHandling": "blank strings serialize as an empty string",
+      "timestampFormatting": "valid timestamps canonicalized with Date.toISOString()",
+      "directEmailField": false,
+      "directPhoneField": false,
+      "upstreamNormalization": "email uses normalizeEmail and phone uses normalizePhoneDigits before identity classification; normalized values are not serialized directly",
+      "sourceCutoffInHash": true,
+      "tenantInHash": true,
+      "integrationInHash": true,
+      "versionInHash": true,
+      "payloadChecksumInHash": true
+    },
+    "implementationIntroducedBy": "0a49dc3079bd22c11924b2ce3aa4e52cb6090288",
+    "expectedArtifactCommit": "aeea60d805ee24640c50119b44c1007bb6ad5f66",
+    "reconciliationCodeVersion": "uncommitted-fi-hubspot-import-1e-d-based-on-aeea60d805ee24640c50119b44c1007bb6ad5f66"
+  },
+  "legacy": {
+    "expectedChecksum": "fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6",
+    "liveChecksum": "b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a",
+    "snapshotAContactCount": 4752,
+    "snapshotBContactCount": 4752,
+    "delta": {
+      "addedContactIds": [],
+      "removedContactIds": [],
+      "changedRecords": [
+        {
+          "hubspotContactId": "22136828309",
+          "changedFields": [
+            "reasonCode"
+          ],
+          "oldValues": {
+            "hubspotContactId": "22136828309",
+            "decision": "already_applied",
+            "reasonCode": "person_source_id_single_lead",
+            "proposedLeadId": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+            "patientProtectionWarning": null,
+            "quarantineReason": null,
+            "identityTier": "tier1_external_identity",
+            "payloadChecksum": null,
+            "lastSourceActivityAt": "2026-02-11T06:17:57.524Z"
+          },
+          "newValues": {
+            "hubspotContactId": "22136828309",
+            "decision": "already_applied",
+            "reasonCode": "existing_external_lead_or_source_id",
+            "proposedLeadId": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+            "patientProtectionWarning": null,
+            "quarantineReason": null,
+            "identityTier": "tier1_external_identity",
+            "payloadChecksum": null,
+            "lastSourceActivityAt": "2026-02-11T06:17:57.524Z"
+          },
+          "classificationChanged": false,
+          "reasonCodeChanged": true,
+          "mappingTargetChanged": false,
+          "patientReviewChanged": false,
+          "sourceFieldChanged": false,
+          "quarantineReasonChanged": false
+        }
+      ],
+      "classificationChangeCount": 0,
+      "reasonCodeChangeCount": 1,
+      "mappingTargetChangeCount": 0,
+      "patientReviewChangeCount": 0,
+      "sourceFieldChangeCount": 0,
+      "quarantineReasonChangeCount": 0,
+      "checksumOnlyOrderingOrSerializationDifferences": 0
+    },
+    "explainedChanges": [
+      {
+        "hubspotContactId": "22136828309",
+        "changedFields": [
+          "reasonCode"
+        ],
+        "oldClassification": "already_applied",
+        "newClassification": "already_applied",
+        "oldReasonCode": "person_source_id_single_lead",
+        "newReasonCode": "existing_external_lead_or_source_id",
+        "oldTarget": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+        "newTarget": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+        "sourceModifiedTimestamp": "2026-02-11T06:17:57.524Z",
+        "explanation": "The unordered v1 single-page decision query omitted the saved decision row after 1E-Q evidence persistence changed active-row physical/index ordering. The inventory therefore used the equivalent derived reason code.",
+        "followUpRequired": false
+      }
+    ]
+  },
+  "canonical": {
+    "snapshotAChecksum": "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b",
+    "snapshotBChecksum": "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b",
+    "newlyFrozenChecksum": "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b",
+    "snapshotAContactCount": 4752,
+    "snapshotBContactCount": 4752,
+    "snapshotAEqualsSnapshotB": true,
+    "delta": {
+      "addedContactIds": [],
+      "removedContactIds": [],
+      "changedRecords": [],
+      "classificationChangeCount": 0,
+      "reasonCodeChangeCount": 0,
+      "mappingTargetChangeCount": 0,
+      "patientReviewChangeCount": 0,
+      "sourceFieldChangeCount": 0,
+      "quarantineReasonChangeCount": 0,
+      "checksumOnlyOrderingOrSerializationDifferences": 0
+    }
+  },
+  "sourceSet": {
+    "total": 4752,
+    "unique": 4752,
+    "duplicateSourceIds": [],
+    "addedContactIds": [],
+    "removedContactIds": [],
+    "wrongTenant": 0,
+    "unexplained": 0,
+    "archivedContacts": 10,
+    "stagingUpdatedAfterExpected": 0,
+    "crossTenantStagingRows": 0,
+    "pagination": {
+      "pageSize": 1000,
+      "contactsLoaded": 4752,
+      "complete": true
+    }
+  },
+  "classifications": {
+    "inventoryDerivedCounts": {
+      "already_applied": 4606,
+      "quarantine_test_or_smoke": 94,
+      "excluded": 10,
+      "quarantine_ambiguous_identity": 6,
+      "create_new_lead": 32,
+      "patient_link_review_required": 4
+    },
+    "mutuallyExclusiveProgrammePrimaryCounts": {
+      "mapped": 4606,
+      "deferred_create_candidate": 31,
+      "deferred_duplicate_risk_create": 1,
+      "deferred_original_patient_identity_review": 4,
+      "retained_test_or_smoke": 59,
+      "retained_ambiguous_identity": 8,
+      "excluded_archived_without_business_value": 9,
+      "deferred_existing_lead_link_reclassification": 26,
+      "deferred_patient_identity_reclassification": 8
+    },
+    "mutuallyExclusiveProgrammePrimaryTotal": 4752,
+    "secondaryOneEQReviewStates": {
+      "retained_ambiguous_identity": 8,
+      "retained_test_or_smoke": 59,
+      "reclassify_existing_lead_link": 26,
+      "excluded_archived_without_business_value": 9,
+      "reclassify_patient_review": 8
+    },
+    "secondaryFlagsDoNotReplacePrimaryState": true
+  },
+  "oneEQ": {
+    "reviewed": 110,
+    "missingOperatorOrTimestampOrReasonEvidence": 0,
+    "approved": 0,
+    "applied": 0
+  },
+  "oneEC": {
+    "batches": [
+      {
+        "id": "21a696e4-343f-476f-b2cf-9c5b035048c8",
+        "status": "rolled_back",
+        "rowCount": 0,
+        "importedRowCount": 0
+      },
+      {
+        "id": "32d02f20-9852-4be2-b237-45c115f43c2b",
+        "status": "import_completed",
+        "rowCount": 10,
+        "importedRowCount": 10
+      }
+    ],
+    "accounting": {
+      "completedNonEmpty": 1,
+      "zeroRowRolledBack": 1,
+      "createdRows": 10
+    },
+    "currentRows": {
+      "externalMappings": 10,
+      "personSourceIds": 10,
+      "distinctPersons": 10,
+      "leads": 10,
+      "leadPersons": 10
+    },
+    "replay": {
+      "idempotent": true,
+      "delta": 0,
+      "source": "committed 1E-C evidence"
+    },
+    "rollbackPreview": {
+      "isolated": true,
+      "removableMappings": 10,
+      "executed": false,
+      "source": "committed 1E-C evidence"
+    }
+  },
+  "changedMappingValidation": {
+    "changedContactIds": [
+      "22136828309"
+    ],
+    "mappings": [
+      {
+        "external_id": "22136828309",
+        "tenant_id": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+        "integration_id": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+        "fi_entity_type": "lead",
+        "fi_entity_id": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821"
+      }
+    ],
+    "duplicateMappings": 0,
+    "conflictingMappings": 0,
+    "wrongTenantMappings": 0
+  },
+  "production": {
+    "before": {
+      "leads": 4716,
+      "persons": 4871,
+      "personSourceIds": 4700,
+      "patients": 829,
+      "patientSourceIds": 208,
+      "staff": 22,
+      "users": 21,
+      "tasks": 1,
+      "messages": 0,
+      "notifications": 1,
+      "bookings": 18,
+      "contactLeadMappings": 4606,
+      "hubspotPatientSourceLinks": 0,
+      "archivedSourceContacts": 10,
+      "stagingUpdatedAfterExpected": 0,
+      "crossTenantStagingRows": 0,
+      "watermarks": [
+        {
+          "source_system": "hubspot",
+          "dataset": "notes",
+          "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+          "version": 4
+        }
+      ]
+    },
+    "after": {
+      "leads": 4716,
+      "persons": 4871,
+      "personSourceIds": 4700,
+      "patients": 829,
+      "patientSourceIds": 208,
+      "staff": 22,
+      "users": 21,
+      "tasks": 1,
+      "messages": 0,
+      "notifications": 1,
+      "bookings": 18,
+      "contactLeadMappings": 4606,
+      "hubspotPatientSourceLinks": 0,
+      "archivedSourceContacts": 10,
+      "stagingUpdatedAfterExpected": 0,
+      "crossTenantStagingRows": 0,
+      "watermarks": [
+        {
+          "source_system": "hubspot",
+          "dataset": "notes",
+          "watermark_timestamp": "2026-07-16T16:00:34.53+00:00",
+          "version": 4
+        }
+      ]
+    },
+    "mutationDetected": false
+  },
+  "evidencePaths": [
+    "docs/audits/.tmp-import-1e-d-snapshot-a-expected.json",
+    "docs/audits/.tmp-import-1e-d-snapshot-b-live.json",
+    "docs/audits/.tmp-import-1e-d-record-delta.json",
+    "docs/audits/evidence-fi-hubspot-import-1e-d-checksum-drift-interim.json",
+    "docs/audits/evidence-fi-hubspot-import-1e-d-checksum-freeze.json",
+    "docs/audits/evidence-fi-hubspot-import-1e-d-checksum-freeze.md",
+    "docs/audits/.tmp-import-1e-d-official-inventory-v2.json",
+    "docs/audits/evidence-fi-hubspot-import-1e-d-checksum-drift-interim.md"
+  ],
+  "replacementFrozen": true,
+  "explicitApprovalRequired": false,
+  "nextGate": "FI-HUBSPOT-IMPORT-1E-FINAL",
+  "officialInventory": {
+    "inventoryChecksum": "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b",
+    "checksumContractVersion": "fi-hubspot-contact-inventory-v2",
+    "unexplained": 0,
+    "wrongTenant": 0,
+    "total": 4752,
+    "leads": 4716,
+    "patients": 829,
+    "mappings": 4606,
+    "matchesFrozen": true
+  },
+  "verification": {
+    "hubspotImportTests": "120 passed",
+    "quarantineReviewTests": "12 passed",
+    "typecheck": "passed",
+    "officialInventory": "passed"
+  }
+}

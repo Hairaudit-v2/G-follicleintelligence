@@ -87,6 +87,7 @@ async function readNotesWatermark(
 function mapStagingContactRow(row: Record<string, unknown>): HubspotContactDryRunInput & {
   displayName: string;
   phoneDisplay: string | null;
+  payloadChecksum: string | null;
 } {
   const r = row as {
     hubspot_contact_id: string;
@@ -99,6 +100,7 @@ function mapStagingContactRow(row: Record<string, unknown>): HubspotContactDryRu
     created_at: string;
     updated_at: string;
     archived: boolean | null;
+    payload_checksum: string | null;
   };
   const emailNormalized = normalizeEmail(r.email ?? prop(r.raw_payload, "email"));
   const phoneRaw = r.phone ?? prop(r.raw_payload, "phone", "mobilephone");
@@ -137,6 +139,7 @@ function mapStagingContactRow(row: Record<string, unknown>): HubspotContactDryRu
     importStatus: r.import_status,
     displayName,
     phoneDisplay: phoneCorrupted ? null : phoneRaw?.trim() || null,
+    payloadChecksum: r.payload_checksum ?? null,
   };
 }
 
@@ -152,7 +155,7 @@ async function loadAllStagingContacts(
     const { data, error } = await supabase
       .from("fi_external_hubspot_contact_staging")
       .select(
-        "hubspot_contact_id, email, phone, import_status, raw_payload, tenant_id, integration_id, created_at, updated_at, archived"
+        "hubspot_contact_id, email, phone, import_status, raw_payload, tenant_id, integration_id, created_at, updated_at, archived, payload_checksum"
       )
       .eq("tenant_id", tenantId)
       .eq("integration_id", integrationId)
@@ -179,7 +182,7 @@ async function loadContactIdentitySnapshot(
 ): Promise<{ snapshot: FiIdentitySnapshot; appliedContacts: Set<string> }> {
   const snapshot = emptyFiIdentitySnapshot();
   const appliedContacts = new Set<string>();
-  const chunk = <T,>(arr: T[], size: number): T[][] => {
+  const chunk = <T>(arr: T[], size: number): T[][] => {
     const out: T[][] = [];
     for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
     return out;
@@ -351,9 +354,7 @@ async function loadExpansionBatchPolicy(
   for (const b of batches) {
     const recon = b.dry_run_report?.reconciliation ?? b.metadata?.reconciliation;
     const ok =
-      b.status === "import_completed" &&
-      recon?.balanced === true &&
-      (recon.unexplained ?? 1) === 0;
+      b.status === "import_completed" && recon?.balanced === true && (recon.unexplained ?? 1) === 0;
     if (ok) streak += 1;
     else break;
   }
@@ -363,8 +364,7 @@ async function loadExpansionBatchPolicy(
   return {
     batchSequence: appliedCount + 1,
     consecutiveReconciledStreak: streak,
-    allowExpandedBatchSize:
-      streak >= HUBSPOT_CONTACT_LEAD_EXPANSION_EXPANDED_MIN_STREAK,
+    allowExpandedBatchSize: streak >= HUBSPOT_CONTACT_LEAD_EXPANSION_EXPANDED_MIN_STREAK,
   };
 }
 
@@ -395,9 +395,7 @@ export async function getPriorExpansionBatchGate(
   };
   const recon = b.dry_run_report?.reconciliation ?? b.metadata?.reconciliation;
   const reconciled =
-    b.status === "import_completed" &&
-    recon?.balanced === true &&
-    (recon.unexplained ?? 1) === 0;
+    b.status === "import_completed" && recon?.balanced === true && (recon.unexplained ?? 1) === 0;
   return { priorBatchId: b.id, reconciled, status: b.status };
 }
 
@@ -478,8 +476,7 @@ function buildInventoryRows(
         : null;
 
     const applyEligible =
-      isApplyableExpansionDecision(decision) &&
-      decision !== "patient_link_review_required";
+      isApplyableExpansionDecision(decision) && decision !== "patient_link_review_required";
 
     rows.push({
       hubspotContactId: c.hubspotContactId,
@@ -490,9 +487,7 @@ function buildInventoryRows(
       reasonCode: saved?.match_evidence?.reason_code ?? resolved.reasonCode,
       matchEvidence: resolved.reasonCode,
       proposedLeadId,
-      proposedLeadLabel: proposedLeadId
-        ? leadLabels.get(proposedLeadId) ?? null
-        : null,
+      proposedLeadLabel: proposedLeadId ? (leadLabels.get(proposedLeadId) ?? null) : null,
       hubspotOwnerId: c.hubspotOwnerId,
       ownerResolutionStatus: ownerMapped
         ? "mapped_staff"
@@ -506,6 +501,7 @@ function buildInventoryRows(
         ? plainLanguageExpansionDecision(decision)
         : null,
       lastSourceActivityAt: c.sourceUpdatedAt,
+      payloadChecksum: c.payloadChecksum,
       approvedForApply: saved
         ? Boolean(saved.approved_for_apply)
         : applyEligible && decision === "link_existing_lead",
@@ -517,9 +513,66 @@ function buildInventoryRows(
   return rows;
 }
 
+type ContactLeadDecisionSnapshotRow = {
+  hubspot_contact_id: string;
+  decision_state: HubspotContactLeadExpansionRow["decision"];
+  target_lead_id: string | null;
+  approved_for_apply: boolean;
+  match_evidence: { reason_code?: string; milestone?: string; review_state?: string };
+  applied_at: string | null;
+};
+
+async function loadContactLeadDecisionSnapshot(
+  supabase: SupabaseClient,
+  input: {
+    tenantId: string;
+    integrationId: string;
+    decisionAsOf?: string;
+    decisionLoadMode?: "complete-paginated" | "legacy-single-page";
+  }
+): Promise<ContactLeadDecisionSnapshotRow[]> {
+  const select =
+    "hubspot_contact_id, decision_state, target_lead_id, approved_for_apply, match_evidence, applied_at";
+  const baseQuery = () => {
+    const query = supabase
+      .from("fi_hubspot_contact_lead_pilot_decisions")
+      .select(select)
+      .eq("tenant_id", input.tenantId)
+      .eq("integration_id", input.integrationId);
+    return input.decisionAsOf
+      ? query
+          .lte("created_at", input.decisionAsOf)
+          .or(`superseded_at.is.null,superseded_at.gt.${input.decisionAsOf}`)
+      : query.is("superseded_at", null);
+  };
+
+  if (input.decisionLoadMode === "legacy-single-page") {
+    const { data, error } = await baseQuery();
+    if (error) throw new Error(`decisions: ${error.message}`);
+    return (data ?? []) as ContactLeadDecisionSnapshotRow[];
+  }
+
+  const rows: ContactLeadDecisionSnapshotRow[] = [];
+  const pageSize = 1000;
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await baseQuery()
+      .order("hubspot_contact_id", { ascending: true })
+      .range(offset, offset + pageSize - 1);
+    if (error) throw new Error(`decisions: ${error.message}`);
+    rows.push(...((data ?? []) as ContactLeadDecisionSnapshotRow[]));
+    if ((data ?? []).length < pageSize) break;
+  }
+  return rows;
+}
+
 export async function buildContactLeadExpansionInventory(
   supabase: SupabaseClient,
-  input: { tenantId: string; integrationId: string }
+  input: {
+    tenantId: string;
+    integrationId: string;
+    decisionAsOf?: string;
+    decisionLoadMode?: "complete-paginated" | "legacy-single-page";
+  }
 ): Promise<{
   summary: HubspotContactLeadExpansionSummary;
   rows: HubspotContactLeadExpansionRow[];
@@ -531,11 +584,7 @@ export async function buildContactLeadExpansionInventory(
     throw new Error("PATIENT_GUARD: createPatientFromHubspotContact must be false");
   }
 
-  const contacts = await loadAllStagingContacts(
-    supabase,
-    input.tenantId,
-    input.integrationId
-  );
+  const contacts = await loadAllStagingContacts(supabase, input.tenantId, input.integrationId);
   const contactIds = contacts.map((c) => c.hubspotContactId);
   const emails = contacts.map((c) => c.emailNormalized).filter(Boolean) as string[];
   const { snapshot, appliedContacts } = await loadContactIdentitySnapshot(
@@ -546,14 +595,7 @@ export async function buildContactLeadExpansionInventory(
     emails
   );
 
-  const { data: decisions } = await supabase
-    .from("fi_hubspot_contact_lead_pilot_decisions")
-    .select(
-      "hubspot_contact_id, decision_state, target_lead_id, approved_for_apply, match_evidence, applied_at"
-    )
-    .eq("tenant_id", input.tenantId)
-    .eq("integration_id", input.integrationId)
-    .is("superseded_at", null);
+  const decisions = await loadContactLeadDecisionSnapshot(supabase, input);
 
   const decisionByContact = new Map(
     (decisions ?? []).map((d) => [
@@ -573,9 +615,7 @@ export async function buildContactLeadExpansionInventory(
     if (!c.emailNormalized) continue;
     emailCounts.set(c.emailNormalized, (emailCounts.get(c.emailNormalized) ?? 0) + 1);
   }
-  const emailDupes = new Set(
-    [...emailCounts.entries()].filter(([, n]) => n > 1).map(([e]) => e)
-  );
+  const emailDupes = new Set([...emailCounts.entries()].filter(([, n]) => n > 1).map(([e]) => e));
 
   const leadIds = new Set<string>();
   for (const c of contacts) {
@@ -595,10 +635,7 @@ export async function buildContactLeadExpansionInventory(
       .in("id", slice);
     for (const l of leadRows ?? []) {
       const r = l as { id: string; summary: string | null };
-      leadLabels.set(
-        String(r.id),
-        r.summary?.trim() || `Lead ${String(r.id).slice(0, 8)}`
-      );
+      leadLabels.set(String(r.id), r.summary?.trim() || `Lead ${String(r.id).slice(0, 8)}`);
     }
   }
 
@@ -1391,8 +1428,7 @@ export async function applyContactLeadExpansionBatch(
       throw new Error("WATERMARK_GUARD: backup watermark changed during 1E apply");
     }
 
-    const replayOnly =
-      linked === 0 && created === 0 && alreadyApplied === approved.length;
+    const replayOnly = linked === 0 && created === 0 && alreadyApplied === approved.length;
     await supabase
       .from("fi_import_batches")
       .update({

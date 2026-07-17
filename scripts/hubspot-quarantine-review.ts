@@ -7,19 +7,24 @@ import { dirname, resolve } from "node:path";
 
 const TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 const INTEGRATION_ID = "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6";
-const FIXED_INVENTORY_CHECKSUM =
+const ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM =
   "fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6";
+const PRIOR_LIVE_V1_INVENTORY_CHECKSUM =
+  "b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a";
+const FIXED_INVENTORY_CHECKSUM = "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b";
+const CHECKSUM_CONTRACT_VERSION = "fi-hubspot-contact-inventory-v2";
 const POST_1EC_INVENTORY_CHECKSUM =
   "93823b3d3a322ca23abd85bea8439a0188ac71fdc1c5f8420965a34e16b10451";
-const BASE_INVENTORY_CHECKSUM =
-  "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c";
+const BASE_INVENTORY_CHECKSUM = "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c";
 const SOURCE_CUTOFF = "2026-07-16T16:00:34.530Z";
 
 function loadEnv(): void {
   for (const name of [".env.local", ".env"]) {
     const path = resolve(process.cwd(), name);
     if (!existsSync(path)) continue;
-    for (const line of readFileSync(path, "utf8").replace(/^\uFEFF/, "").split(/\r?\n/)) {
+    for (const line of readFileSync(path, "utf8")
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/)) {
       const match = line.match(/^\s*([^#=\s]+)\s*=\s*(.*)\s*$/);
       if (!match || process.env[match[1]] !== undefined) continue;
       process.env[match[1]] = match[2].replace(/^(['"])(.*)\1$/, "$2");
@@ -50,9 +55,7 @@ async function main(): Promise<void> {
     has(`--${candidate}`)
   );
   if (!mode) {
-    throw new Error(
-      "Choose a 1E-Q mode: --inventory | --classify | --replay | --apply"
-    );
+    throw new Error("Choose a 1E-Q mode: --inventory | --classify | --replay | --apply");
   }
 
   const count = async (table: string): Promise<number> => {
@@ -125,6 +128,7 @@ async function main(): Promise<void> {
     tenantId: TENANT_ID,
     integrationId: INTEGRATION_ID,
     fixedInventoryChecksum: FIXED_INVENTORY_CHECKSUM,
+    checksumContractVersion: CHECKSUM_CONTRACT_VERSION,
     sourceCutoff: SOURCE_CUTOFF,
     operatorLabel: "1e-q-operator",
     actorRole: "clinic_admin",
@@ -196,30 +200,29 @@ async function main(): Promise<void> {
         idempotent: boolean;
       };
       const sanitize = (workspace: Record<string, unknown>) => {
-        const rows = ((workspace.rows as Array<Record<string, unknown>>) ?? []).map(
-          (row) => ({
-            hubspotContactId: row.hubspotContactId,
-            displayNameMasked: row.displayNameMasked,
-            emailPresent: row.emailPresent,
-            phonePresent: row.phonePresent,
-            originalBucket: row.originalBucket,
-            originalDecision: row.originalDecision,
-            originalReasonCode: row.originalReasonCode,
-            state: row.state,
-            reasonCode: row.reasonCode,
-            approvedForApply: row.approvedForApply,
-            possibleLegitimateContact: row.possibleLegitimateContact,
-            plainLanguageEvidence: row.plainLanguageEvidence,
-            warnings: row.warnings,
-            sourceUpdatedAt: row.sourceUpdatedAt,
-            sourcePayloadChecksum: row.sourcePayloadChecksum,
-            operatorLabel: row.operatorLabel,
-            reviewedAt: row.reviewedAt,
-            checks: row.checks,
-          })
-        );
+        const rows = ((workspace.rows as Array<Record<string, unknown>>) ?? []).map((row) => ({
+          hubspotContactId: row.hubspotContactId,
+          displayNameMasked: row.displayNameMasked,
+          emailPresent: row.emailPresent,
+          phonePresent: row.phonePresent,
+          originalBucket: row.originalBucket,
+          originalDecision: row.originalDecision,
+          originalReasonCode: row.originalReasonCode,
+          state: row.state,
+          reasonCode: row.reasonCode,
+          approvedForApply: row.approvedForApply,
+          possibleLegitimateContact: row.possibleLegitimateContact,
+          plainLanguageEvidence: row.plainLanguageEvidence,
+          warnings: row.warnings,
+          sourceUpdatedAt: row.sourceUpdatedAt,
+          sourcePayloadChecksum: row.sourcePayloadChecksum,
+          operatorLabel: row.operatorLabel,
+          reviewedAt: row.reviewedAt,
+          checks: row.checks,
+        }));
         return {
           inventoryChecksum: workspace.inventoryChecksum,
+          checksumContractVersion: workspace.checksumContractVersion,
           reviewChecksum: workspace.reviewChecksum,
           stateCounts: workspace.stateCounts,
           frozenContactIds: workspace.frozenContactIds,
@@ -241,6 +244,7 @@ async function main(): Promise<void> {
     }
     const workspace = result as {
       inventoryChecksum?: string;
+      checksumContractVersion?: string;
       reviewChecksum?: string;
       stateCounts?: Record<string, number>;
       frozenContactIds?: string[];
@@ -274,6 +278,7 @@ async function main(): Promise<void> {
     }));
     return {
       inventoryChecksum: workspace.inventoryChecksum,
+      checksumContractVersion: workspace.checksumContractVersion,
       reviewChecksum: workspace.reviewChecksum,
       stateCounts: workspace.stateCounts,
       frozenContactIds: workspace.frozenContactIds,
@@ -293,6 +298,9 @@ async function main(): Promise<void> {
     tenantId: TENANT_ID,
     integrationId: INTEGRATION_ID,
     fixedInventoryChecksum: FIXED_INVENTORY_CHECKSUM,
+    checksumContractVersion: CHECKSUM_CONTRACT_VERSION,
+    originalExpectedV1InventoryChecksum: ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM,
+    priorLiveV1InventoryChecksum: PRIOR_LIVE_V1_INVENTORY_CHECKSUM,
     post1ecInventoryChecksum: POST_1EC_INVENTORY_CHECKSUM,
     baseInventoryChecksum: BASE_INVENTORY_CHECKSUM,
     sourceCutoff: SOURCE_CUTOFF,

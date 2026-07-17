@@ -3,9 +3,13 @@ import { describe, it } from "node:test";
 
 import {
   HUBSPOT_QUARANTINE_EXPECTED_COHORT_SIZE,
+  HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM,
   HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS,
   HUBSPOT_QUARANTINE_FROZEN_EXCLUDED_IDS,
   HUBSPOT_QUARANTINE_FROZEN_QUARANTINED_IDS,
+  HUBSPOT_QUARANTINE_INVENTORY_CHECKSUM_CONTRACT_VERSION,
+  HUBSPOT_QUARANTINE_ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM,
+  HUBSPOT_QUARANTINE_PRIOR_LIVE_V1_INVENTORY_CHECKSUM,
   assertNoProductionMutationAllowlist,
   assertQuarantineBucketIds,
   assertQuarantineCohortIds,
@@ -47,8 +51,7 @@ function classified(
       phonePresent: overrides.phonePresent ?? false,
       originalBucket: overrides.originalBucket ?? "quarantined",
       originalDecision: overrides.originalDecision ?? "quarantine_test_or_smoke",
-      originalReasonCode:
-        overrides.originalReasonCode ?? "excluded_test_or_smoke_identity",
+      originalReasonCode: overrides.originalReasonCode ?? "excluded_test_or_smoke_identity",
       checks: checks(partialChecks),
     }),
     sourceUpdatedAt: "2026-07-14T12:00:00.000Z",
@@ -57,6 +60,29 @@ function classified(
 }
 
 describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
+  it("freezes the approved v2 inventory checksum and preserves v1 history", () => {
+    assert.equal(
+      HUBSPOT_QUARANTINE_INVENTORY_CHECKSUM_CONTRACT_VERSION,
+      "fi-hubspot-contact-inventory-v2"
+    );
+    assert.equal(
+      HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM,
+      "1bf1b16f4db0ce750bfd90556554b4c65205d1abc07bfb0e348c112008b5602b"
+    );
+    assert.equal(
+      HUBSPOT_QUARANTINE_ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM,
+      "fcf3aaddd2c6f6b2107640798980d3429e08c450a81d66d430da8964e0805de6"
+    );
+    assert.equal(
+      HUBSPOT_QUARANTINE_PRIOR_LIVE_V1_INVENTORY_CHECKSUM,
+      "b12aacbc38ce43f524e9867bdbb1efae0e8a555f1e05836f9e95319dae2a696a"
+    );
+    assert.notEqual(
+      HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM,
+      HUBSPOT_QUARANTINE_ORIGINAL_EXPECTED_V1_INVENTORY_CHECKSUM
+    );
+  });
+
   it("freezes exact 110 IDs and rejects cohort drift", () => {
     assert.equal(HUBSPOT_QUARANTINE_FROZEN_QUARANTINED_IDS.length, 100);
     assert.equal(HUBSPOT_QUARANTINE_FROZEN_EXCLUDED_IDS.length, 10);
@@ -67,10 +93,7 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
     assert.doesNotThrow(() =>
       assertQuarantineCohortIds([...HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS])
     );
-    assert.throws(
-      () => assertQuarantineCohortIds(["1", "2"]),
-      /cohort drift/
-    );
+    assert.throws(() => assertQuarantineCohortIds(["1", "2"]), /cohort drift/);
     assert.throws(
       () =>
         assertQuarantineBucketIds({
@@ -94,10 +117,7 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
   });
 
   it("retains test/smoke and ambiguous identity with explicit reasons", () => {
-    assert.equal(
-      classified({ testOrSmoke: true }).state,
-      "retained_test_or_smoke"
-    );
+    assert.equal(classified({ testOrSmoke: true }).state, "retained_test_or_smoke");
     assert.equal(
       classified(
         { exactEmailPersonIds: ["p1", "p2"] },
@@ -154,27 +174,14 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
   });
 
   it("fail-closes wrong tenant and forbids production mutation tables", () => {
-    assert.equal(
-      classified({ sameTenant: false }).state,
-      "excluded_with_reason"
-    );
+    assert.equal(classified({ sameTenant: false }).state, "excluded_with_reason");
+    assert.throws(() => assertNoProductionMutationAllowlist("fi_crm_leads", "insert"), /forbidden/);
     assert.throws(
-      () => assertNoProductionMutationAllowlist("fi_crm_leads", "insert"),
-      /forbidden/
-    );
-    assert.throws(
-      () =>
-        assertNoProductionMutationAllowlist(
-          "fi_external_record_mappings",
-          "insert"
-        ),
+      () => assertNoProductionMutationAllowlist("fi_external_record_mappings", "insert"),
       /forbidden/
     );
     assert.doesNotThrow(() =>
-      assertNoProductionMutationAllowlist(
-        "fi_hubspot_contact_lead_pilot_decisions",
-        "insert"
-      )
+      assertNoProductionMutationAllowlist("fi_hubspot_contact_lead_pilot_decisions", "insert")
     );
   });
 
@@ -190,10 +197,7 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
           originalReasonCode: "archived_hubspot_contact_policy_skip",
         }
       ),
-      classified(
-        { uniqueLeadCandidateId: "lead-9" },
-        { id: "100040617619" }
-      ),
+      classified({ uniqueLeadCandidateId: "lead-9" }, { id: "100040617619" }),
     ];
     // Pad with retained rows to prove math (not full cohort).
     const summary = summarizeQuarantineReview(rows);
@@ -206,10 +210,7 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
       duplicateRiskCreate: 1,
       deferredPatientReview: 4,
       rows: Array.from({ length: 110 }, (_, i) =>
-        classified(
-          { testOrSmoke: true },
-          { id: String(HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS[i]) }
-        )
+        classified({ testOrSmoke: true }, { id: String(HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS[i]) })
       ),
     });
     assert.equal(recon.total, 4752);
@@ -226,10 +227,7 @@ describe("FI-HUBSPOT-IMPORT-1E-Q quarantine classification", () => {
     const a = computeQuarantineReviewChecksum(rows);
     const b = computeQuarantineReviewChecksum([...rows].reverse());
     assert.equal(a, b);
-    assert.throws(
-      () => assertQuarantineReviewChecksum(a, "deadbeef"),
-      /stale or mutated/
-    );
+    assert.throws(() => assertQuarantineReviewChecksum(a, "deadbeef"), /stale or mutated/);
   });
 
   it("rejects vague generic outcomes by requiring explicit reason codes", () => {

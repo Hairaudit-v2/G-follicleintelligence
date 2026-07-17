@@ -1,0 +1,59 @@
+{
+  "legacyDelta": {
+    "addedContactIds": [],
+    "removedContactIds": [],
+    "changedRecords": [
+      {
+        "hubspotContactId": "22136828309",
+        "changedFields": ["reasonCode"],
+        "oldValues": {
+          "hubspotContactId": "22136828309",
+          "decision": "already_applied",
+          "reasonCode": "person_source_id_single_lead",
+          "proposedLeadId": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+          "patientProtectionWarning": null,
+          "quarantineReason": null,
+          "identityTier": "tier1_external_identity",
+          "payloadChecksum": null,
+          "lastSourceActivityAt": "2026-02-11T06:17:57.524Z"
+        },
+        "newValues": {
+          "hubspotContactId": "22136828309",
+          "decision": "already_applied",
+          "reasonCode": "existing_external_lead_or_source_id",
+          "proposedLeadId": "dc3fe85f-1f69-4c51-b3b5-b811e08e1821",
+          "patientProtectionWarning": null,
+          "quarantineReason": null,
+          "identityTier": "tier1_external_identity",
+          "payloadChecksum": null,
+          "lastSourceActivityAt": "2026-02-11T06:17:57.524Z"
+        },
+        "classificationChanged": false,
+        "reasonCodeChanged": true,
+        "mappingTargetChanged": false,
+        "patientReviewChanged": false,
+        "sourceFieldChanged": false,
+        "quarantineReasonChanged": false
+      }
+    ],
+    "classificationChangeCount": 0,
+    "reasonCodeChangeCount": 1,
+    "mappingTargetChangeCount": 0,
+    "patientReviewChangeCount": 0,
+    "sourceFieldChangeCount": 0,
+    "quarantineReasonChangeCount": 0,
+    "checksumOnlyOrderingOrSerializationDifferences": 0
+  },
+  "canonicalDelta": {
+    "addedContactIds": [],
+    "removedContactIds": [],
+    "changedRecords": [],
+    "classificationChangeCount": 0,
+    "reasonCodeChangeCount": 0,
+    "mappingTargetChangeCount": 0,
+    "patientReviewChangeCount": 0,
+    "sourceFieldChangeCount": 0,
+    "quarantineReasonChangeCount": 0,
+    "checksumOnlyOrderingOrSerializationDifferences": 0
+  }
+}

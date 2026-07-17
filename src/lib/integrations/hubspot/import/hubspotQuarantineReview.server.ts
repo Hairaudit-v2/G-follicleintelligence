@@ -3,18 +3,16 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { normalizeEmail } from "@/src/lib/fi/foundation/normalize";
-import {
-  isTestOrSmokeContact,
-  normalizePhoneDigits,
-} from "./hubspotImportIdentity";
+import { isTestOrSmokeContact, normalizePhoneDigits } from "./hubspotImportIdentity";
 import {
   buildContactLeadExpansionInventory,
   saveContactLeadExpansionDecision,
 } from "./hubspotContactLeadExpansion.server";
+import { toInventorySignatureRow } from "./hubspotContactLeadExpansionCore";
 import {
-  computeInventorySignature,
-  toInventorySignatureRow,
-} from "./hubspotContactLeadExpansionCore";
+  HUBSPOT_INVENTORY_CHECKSUM_CONTRACT_VERSION_V2,
+  computeHubspotInventoryChecksumV2,
+} from "./hubspotInventoryDriftReconciliation";
 import {
   HUBSPOT_QUARANTINE_EXPECTED_COHORT_SIZE,
   HUBSPOT_QUARANTINE_EXPECTED_EXCLUDED,
@@ -24,6 +22,7 @@ import {
   HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS,
   HUBSPOT_QUARANTINE_FROZEN_EXCLUDED_IDS,
   HUBSPOT_QUARANTINE_FROZEN_QUARANTINED_IDS,
+  HUBSPOT_QUARANTINE_INVENTORY_CHECKSUM_CONTRACT_VERSION,
   HUBSPOT_QUARANTINE_REVIEW_MILESTONE,
   HUBSPOT_QUARANTINE_SOURCE_CUTOFF,
   assertNoProductionMutationAllowlist,
@@ -53,10 +52,7 @@ type StagingRow = {
   raw_payload: Record<string, unknown> | null;
 };
 
-function prop(
-  raw: Record<string, unknown> | null | undefined,
-  ...keys: string[]
-): string | null {
+function prop(raw: Record<string, unknown> | null | undefined, ...keys: string[]): string | null {
   if (!raw) return null;
   for (const key of keys) {
     const value = raw[key];
@@ -69,10 +65,7 @@ function uniqueSorted(ids: string[]): string[] {
   return [...new Set(ids.filter(Boolean))].sort();
 }
 
-function looksLikeSpamOrJunk(input: {
-  email: string | null;
-  displayName: string;
-}): boolean {
+function looksLikeSpamOrJunk(input: { email: string | null; displayName: string }): boolean {
   const text = `${input.displayName} ${input.email ?? ""}`.toLowerCase();
   return /\b(spam|asdf|qwerty|noreply|no-reply|junk|bot\d*)\b/.test(text);
 }
@@ -85,9 +78,8 @@ function looksLikeSystemOrIntegration(input: {
   const text =
     `${input.displayName} ${input.email ?? ""} ${input.lifecycleStage ?? ""}`.toLowerCase();
   return (
-    /\b(integration|system|api|webhook|hubspot|zapier|noreply|no-reply)\b/.test(
-      text
-    ) || Boolean(input.email?.endsWith("@hubspot.com"))
+    /\b(integration|system|api|webhook|hubspot|zapier|noreply|no-reply)\b/.test(text) ||
+    Boolean(input.email?.endsWith("@hubspot.com"))
   );
 }
 
@@ -122,8 +114,10 @@ async function loadPersonsByEmailsAndPhones(
     for (const row of data ?? []) {
       const id = String((row as { id: string }).id);
       collectedPersonIds.add(id);
-      const metadata = ((row as { metadata?: Record<string, unknown> }).metadata ??
-        {}) as Record<string, unknown>;
+      const metadata = ((row as { metadata?: Record<string, unknown> }).metadata ?? {}) as Record<
+        string,
+        unknown
+      >;
       const email = normalizeEmail(
         typeof metadata.email_normalized === "string"
           ? metadata.email_normalized
@@ -132,10 +126,7 @@ async function loadPersonsByEmailsAndPhones(
             : null
       );
       if (email) {
-        personIdsByEmail.set(email, [
-          ...(personIdsByEmail.get(email) ?? []),
-          id,
-        ]);
+        personIdsByEmail.set(email, [...(personIdsByEmail.get(email) ?? []), id]);
       }
       const phoneRaw =
         typeof metadata.phone === "string"
@@ -145,10 +136,7 @@ async function loadPersonsByEmailsAndPhones(
             : null;
       const phone = normalizePhoneDigits(phoneRaw);
       if (phone && phoneSet.has(phone)) {
-        personIdsByPhone.set(phone, [
-          ...(personIdsByPhone.get(phone) ?? []),
-          id,
-        ]);
+        personIdsByPhone.set(phone, [...(personIdsByPhone.get(phone) ?? []), id]);
       }
     }
   }
@@ -159,17 +147,13 @@ async function loadPersonsByEmailsAndPhones(
         .from("fi_persons")
         .select("id, metadata")
         .eq("tenant_id", tenantId)
-        .or(
-          `metadata->>phone.eq.${phone},metadata->>phone_normalized.eq.${phone}`
-        )
+        .or(`metadata->>phone.eq.${phone},metadata->>phone_normalized.eq.${phone}`)
         .limit(50);
       if (error) break;
       for (const row of data ?? []) {
         const id = String((row as { id: string }).id);
         collectedPersonIds.add(id);
-        personIdsByPhone.set(phone, [
-          ...new Set([...(personIdsByPhone.get(phone) ?? []), id]),
-        ]);
+        personIdsByPhone.set(phone, [...new Set([...(personIdsByPhone.get(phone) ?? []), id])]);
       }
     }
   }
@@ -198,10 +182,7 @@ async function loadPersonsByEmailsAndPhones(
       const r = row as { id: string; person_id: string | null };
       if (!r.person_id) continue;
       const pid = String(r.person_id);
-      personToLeadIds.set(pid, [
-        ...(personToLeadIds.get(pid) ?? []),
-        String(r.id),
-      ]);
+      personToLeadIds.set(pid, [...(personToLeadIds.get(pid) ?? []), String(r.id)]);
     }
   }
 
@@ -219,12 +200,14 @@ export async function buildQuarantineReviewWorkspace(
     tenantId: string;
     integrationId: string;
     fixedInventoryChecksum?: string;
+    checksumContractVersion?: string;
     sourceCutoff?: string;
     operatorLabel?: string;
     actorRole?: string | null;
   }
 ): Promise<{
   inventoryChecksum: string;
+  checksumContractVersion: string;
   reviewChecksum: string;
   rows: HubspotQuarantineReviewRow[];
   stateCounts: Record<string, number>;
@@ -241,17 +224,17 @@ export async function buildQuarantineReviewWorkspace(
   applyEnabled: false;
   nextGate: "FI-HUBSPOT-IMPORT-1E-FINAL";
 }> {
-  if (
-    input.actorRole != null &&
-    !isAuthorizedQuarantineReviewRole(input.actorRole)
-  ) {
-    throw new Error(
-      "ACCESS_GUARD: role is not authorised for quarantine classification review"
-    );
+  if (input.actorRole != null && !isAuthorizedQuarantineReviewRole(input.actorRole)) {
+    throw new Error("ACCESS_GUARD: role is not authorised for quarantine classification review");
   }
 
   const fixedInventoryChecksum =
     input.fixedInventoryChecksum ?? HUBSPOT_QUARANTINE_FIXED_INVENTORY_CHECKSUM;
+  const checksumContractVersion =
+    input.checksumContractVersion ?? HUBSPOT_QUARANTINE_INVENTORY_CHECKSUM_CONTRACT_VERSION;
+  if (checksumContractVersion !== HUBSPOT_INVENTORY_CHECKSUM_CONTRACT_VERSION_V2) {
+    throw new Error("1E_Q_GUARD: checksum contract version changed");
+  }
   const sourceCutoff = input.sourceCutoff ?? HUBSPOT_QUARANTINE_SOURCE_CUTOFF;
   const cutoffMs = Date.parse(sourceCutoff);
 
@@ -259,9 +242,12 @@ export async function buildQuarantineReviewWorkspace(
     tenantId: input.tenantId,
     integrationId: input.integrationId,
   });
-  const inventoryChecksum = computeInventorySignature(
-    inventory.rows.map(toInventorySignatureRow)
-  );
+  const inventoryChecksum = computeHubspotInventoryChecksumV2({
+    tenantId: input.tenantId,
+    integrationId: input.integrationId,
+    sourceCutoff,
+    rows: inventory.rows.map(toInventorySignatureRow),
+  });
   if (inventoryChecksum !== fixedInventoryChecksum) {
     throw new Error("1E_Q_GUARD: source inventory checksum changed");
   }
@@ -271,13 +257,9 @@ export async function buildQuarantineReviewWorkspace(
     );
   }
 
-  const frozenSet = new Set<string>([
-    ...HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS,
-  ]);
+  const frozenSet = new Set<string>([...HUBSPOT_QUARANTINE_FROZEN_CONTACT_IDS]);
 
-  const cohortFromInventory = inventory.rows.filter((row) =>
-    frozenSet.has(row.hubspotContactId)
-  );
+  const cohortFromInventory = inventory.rows.filter((row) => frozenSet.has(row.hubspotContactId));
   if (cohortFromInventory.length !== HUBSPOT_QUARANTINE_EXPECTED_COHORT_SIZE) {
     throw new Error(
       `1E_Q_GUARD: expected ${HUBSPOT_QUARANTINE_EXPECTED_COHORT_SIZE} frozen contacts in inventory, found ${cohortFromInventory.length}`
@@ -287,9 +269,7 @@ export async function buildQuarantineReviewWorkspace(
   const quarantined = cohortFromInventory.filter((row) =>
     String(row.decision).startsWith("quarantine_")
   );
-  const excluded = cohortFromInventory.filter(
-    (row) => row.decision === "excluded"
-  );
+  const excluded = cohortFromInventory.filter((row) => row.decision === "excluded");
   if (quarantined.length !== HUBSPOT_QUARANTINE_EXPECTED_QUARANTINED) {
     throw new Error(
       `1E_Q_GUARD: expected ${HUBSPOT_QUARANTINE_EXPECTED_QUARANTINED} quarantined contacts in frozen cohort, found ${quarantined.length}`
@@ -315,13 +295,9 @@ export async function buildQuarantineReviewWorkspace(
   assertQuarantineCohortIds(frozenContactIds);
 
   // Do not reopen deferred create / duplicate-risk / patient-review cohorts.
-  const deferredCreate = inventory.rows.filter(
-    (row) => row.decision === "create_new_lead"
-  );
+  const deferredCreate = inventory.rows.filter((row) => row.decision === "create_new_lead");
   const duplicateRisk = inventory.rows.filter(
-    (row) =>
-      row.decision === "quarantine_duplicate_source" &&
-      !frozenSet.has(row.hubspotContactId)
+    (row) => row.decision === "quarantine_duplicate_source" && !frozenSet.has(row.hubspotContactId)
   );
   for (const row of [...deferredCreate, ...duplicateRisk]) {
     if (frozenSet.has(row.hubspotContactId)) {
@@ -351,21 +327,13 @@ export async function buildQuarantineReviewWorkspace(
     .in("hubspot_contact_id", frozenContactIds);
   if (stagingError) throw new Error(stagingError.message);
   const staging = new Map(
-    ((stagingData ?? []) as StagingRow[]).map((row) => [
-      row.hubspot_contact_id,
-      row,
-    ])
+    ((stagingData ?? []) as StagingRow[]).map((row) => [row.hubspot_contact_id, row])
   );
   if (staging.size !== frozenContactIds.length) {
     throw new Error("1E_Q_GUARD: quarantine/exclusion staging set is incomplete");
   }
 
-  const [
-    personSources,
-    patientSources,
-    leadMappings,
-    patientMappings,
-  ] = await Promise.all([
+  const [personSources, patientSources, leadMappings, patientMappings] = await Promise.all([
     supabase
       .from("fi_person_source_ids")
       .select("source_person_id,person_id")
@@ -397,12 +365,7 @@ export async function buildQuarantineReviewWorkspace(
       .eq("fi_entity_type", "patient")
       .in("external_id", frozenContactIds),
   ]);
-  for (const result of [
-    personSources,
-    patientSources,
-    leadMappings,
-    patientMappings,
-  ]) {
+  for (const result of [personSources, patientSources, leadMappings, patientMappings]) {
     if (result.error) throw new Error(result.error.message);
   }
 
@@ -443,31 +406,16 @@ export async function buildQuarantineReviewWorkspace(
     const phone = normalizePhoneDigits(source.phone ?? row.phone);
     if (email) {
       emails.push(email);
-      emailOwners.set(email, [
-        ...(emailOwners.get(email) ?? []),
-        row.hubspotContactId,
-      ]);
+      emailOwners.set(email, [...(emailOwners.get(email) ?? []), row.hubspotContactId]);
     }
     if (phone) {
       phones.push(phone);
-      phoneOwners.set(phone, [
-        ...(phoneOwners.get(phone) ?? []),
-        row.hubspotContactId,
-      ]);
+      phoneOwners.set(phone, [...(phoneOwners.get(phone) ?? []), row.hubspotContactId]);
     }
   }
 
-  const {
-    personIdsByEmail,
-    personIdsByPhone,
-    personToPatientId,
-    personToLeadIds,
-  } = await loadPersonsByEmailsAndPhones(
-    supabase,
-    input.tenantId,
-    emails,
-    phones
-  );
+  const { personIdsByEmail, personIdsByPhone, personToPatientId, personToLeadIds } =
+    await loadPersonsByEmailsAndPhones(supabase, input.tenantId, emails, phones);
 
   const reviewedAt = new Date().toISOString();
   const rows: HubspotQuarantineReviewRow[] = cohortRows.map((row) => {
@@ -486,29 +434,23 @@ export async function buildQuarantineReviewWorkspace(
       row.decision === "excluded" ? "excluded" : "quarantined";
     const updatedAt = source.hubspot_updated_at;
     const updatedMs = updatedAt ? Date.parse(String(updatedAt)) : NaN;
-    const sourceFresh =
-      Boolean(updatedAt) && Number.isFinite(updatedMs) && updatedMs < cutoffMs;
-    const sourceAfterCutoff =
-      Number.isFinite(updatedMs) && updatedMs >= cutoffMs;
+    const sourceFresh = Boolean(updatedAt) && Number.isFinite(updatedMs) && updatedMs < cutoffMs;
+    const sourceAfterCutoff = Number.isFinite(updatedMs) && updatedMs >= cutoffMs;
 
     const emailPersons = uniqueSorted(personIdsByEmail.get(email ?? "") ?? []);
     const phonePersons = uniqueSorted(personIdsByPhone.get(phone ?? "") ?? []);
     const emailPatients = uniqueSorted(
-      emailPersons
-        .map((id) => personToPatientId.get(id))
-        .filter((id): id is string => Boolean(id))
+      emailPersons.map((id) => personToPatientId.get(id)).filter((id): id is string => Boolean(id))
     );
     const phonePatients = uniqueSorted(
-      phonePersons
-        .map((id) => personToPatientId.get(id))
-        .filter((id): id is string => Boolean(id))
+      phonePersons.map((id) => personToPatientId.get(id)).filter((id): id is string => Boolean(id))
     );
 
     const personSourceId = personSourceByContact.get(row.hubspotContactId) ?? null;
     const leadIdsFromPersons = uniqueSorted([
       ...emailPersons.flatMap((id) => personToLeadIds.get(id) ?? []),
       ...phonePersons.flatMap((id) => personToLeadIds.get(id) ?? []),
-      ...(personSourceId ? personToLeadIds.get(personSourceId) ?? [] : []),
+      ...(personSourceId ? (personToLeadIds.get(personSourceId) ?? []) : []),
     ]);
 
     const lifecycle = prop(raw, "lifecyclestage", "lifecycle_stage");
@@ -522,27 +464,18 @@ export async function buildQuarantineReviewWorkspace(
       sourceFresh,
       archived: Boolean(source.archived),
       convertedLead,
-      existingContactLeadMappingId:
-        leadMappingByContact.get(row.hubspotContactId) ?? null,
-      existingContactPatientMappingId:
-        patientMappingByContact.get(row.hubspotContactId) ?? null,
-      existingPatientSourceId:
-        patientSourceByContact.get(row.hubspotContactId) ?? null,
+      existingContactLeadMappingId: leadMappingByContact.get(row.hubspotContactId) ?? null,
+      existingContactPatientMappingId: patientMappingByContact.get(row.hubspotContactId) ?? null,
+      existingPatientSourceId: patientSourceByContact.get(row.hubspotContactId) ?? null,
       existingPersonSourceId: personSourceId,
       exactEmailPersonIds: emailPersons,
       exactPhonePersonIds: phonePersons,
       exactEmailPatientIds: emailPatients,
       exactPhonePatientIds: phonePatients,
-      uniqueLeadCandidateId:
-        leadIdsFromPersons.length === 1 ? leadIdsFromPersons[0]! : null,
-      multiLeadCandidateIds:
-        leadIdsFromPersons.length > 1 ? leadIdsFromPersons : [],
-      duplicateSourceEmail: Boolean(
-        email && (emailOwners.get(email)?.length ?? 0) > 1
-      ),
-      duplicateSourcePhone: Boolean(
-        phone && (phoneOwners.get(phone)?.length ?? 0) > 1
-      ),
+      uniqueLeadCandidateId: leadIdsFromPersons.length === 1 ? leadIdsFromPersons[0]! : null,
+      multiLeadCandidateIds: leadIdsFromPersons.length > 1 ? leadIdsFromPersons : [],
+      duplicateSourceEmail: Boolean(email && (emailOwners.get(email)?.length ?? 0) > 1),
+      duplicateSourcePhone: Boolean(phone && (phoneOwners.get(phone)?.length ?? 0) > 1),
       testOrSmoke: isTestOrSmokeContact({
         emailNormalized: email,
         hubspotContactId: row.hubspotContactId,
@@ -585,8 +518,7 @@ export async function buildQuarantineReviewWorkspace(
 
   // Authoritative post-1E-C position (frozen outside this gate).
   const mappedCount = inventory.rows.filter(
-    (row) =>
-      row.decision === "already_applied" || row.decision === "already_linked"
+    (row) => row.decision === "already_applied" || row.decision === "already_linked"
   ).length;
   const deferredCreateCount = deferredCreate.length;
   const duplicateRiskCreateCount = duplicateRisk.length;
@@ -620,10 +552,9 @@ export async function buildQuarantineReviewWorkspace(
 
   return {
     inventoryChecksum,
+    checksumContractVersion,
     reviewChecksum: computeQuarantineReviewChecksum(rows),
-    rows: [...rows].sort((a, b) =>
-      a.hubspotContactId.localeCompare(b.hubspotContactId)
-    ),
+    rows: [...rows].sort((a, b) => a.hubspotContactId.localeCompare(b.hubspotContactId)),
     stateCounts: summary.stateCounts,
     frozenContactIds: [...frozenContactIds].sort(),
     frozenQuarantinedIds: [...frozenQuarantinedIds].sort(),
@@ -631,9 +562,7 @@ export async function buildQuarantineReviewWorkspace(
     summary,
     reconciliation,
     access: {
-      roleAuthorized: input.actorRole
-        ? isAuthorizedQuarantineReviewRole(input.actorRole)
-        : true,
+      roleAuthorized: input.actorRole ? isAuthorizedQuarantineReviewRole(input.actorRole) : true,
       actorRole: input.actorRole ?? null,
       audited: true,
     },
@@ -655,10 +584,7 @@ export async function persistQuarantineReview(
 ) {
   const workspace = await buildQuarantineReviewWorkspace(supabase, input);
   for (const row of workspace.rows) {
-    const decision = inventoryDecisionForOriginal(
-      row.originalBucket,
-      row.originalDecision
-    ) as
+    const decision = inventoryDecisionForOriginal(row.originalBucket, row.originalDecision) as
       | "excluded"
       | "quarantine_test_or_smoke"
       | "quarantine_ambiguous_identity"
@@ -689,8 +615,8 @@ export async function persistQuarantineReview(
         review_reason_code: row.reasonCode,
         review_checksum: workspace.reviewChecksum,
         fixed_source_inventory_checksum: workspace.inventoryChecksum,
-        base_inventory_checksum:
-          "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
+        fixed_source_inventory_checksum_contract: workspace.checksumContractVersion,
+        base_inventory_checksum: "3d380a980ad1a0a2ba246742c9ccee5ba7f37a39c3f29e15e572fb175365079c",
         source_cutoff: input.sourceCutoff ?? HUBSPOT_QUARANTINE_SOURCE_CUTOFF,
         source_updated_at: row.sourceUpdatedAt,
         source_payload_checksum: row.sourcePayloadChecksum,
@@ -722,10 +648,7 @@ export async function replayQuarantineReview(
   }
 ) {
   const first = await persistQuarantineReview(supabase, input);
-  assertQuarantineReviewChecksum(
-    first.reviewChecksum,
-    input.expectedReviewChecksum
-  );
+  assertQuarantineReviewChecksum(first.reviewChecksum, input.expectedReviewChecksum);
   const second = await persistQuarantineReview(supabase, {
     ...input,
     operatorLabel: `${input.operatorLabel}-replay`,

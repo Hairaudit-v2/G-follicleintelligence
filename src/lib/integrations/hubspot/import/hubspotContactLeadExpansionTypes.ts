@@ -73,6 +73,7 @@ export type HubspotContactLeadExpansionRow = {
   patientProtectionWarning: string | null;
   quarantineReason: string | null;
   lastSourceActivityAt: string | null;
+  payloadChecksum?: string | null;
   approvedForApply: boolean;
   identityTier: string;
   applyEligible: boolean;
