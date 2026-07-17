@@ -416,10 +416,10 @@ Current totals:
 | -------- | ----: |
 | KEEP     |    25 |
 | MERGE    |     0 |
-| REDIRECT |    16 |
+| REDIRECT |    14 |
 | LINK     |     7 |
 | RETIRE   |     2 |
-| HOLD     |     8 |
+| HOLD     |    10 |
 
 `MERGE` is zero intentionally: Part 2B freezes ownership but does not merge screens. Discovery
 merge candidates become REDIRECT where implementations are already equivalent, LINK where
@@ -427,30 +427,30 @@ specialised functions remain, or HOLD where parity is not proven.
 
 ### Team and access
 
-| Current location                | Decision | Canonical destination / rationale                               |
-| ------------------------------- | -------- | --------------------------------------------------------------- |
-| `/team/staff`                   | KEEP     | Team People                                                     |
-| `/staff`                        | REDIRECT | Same component, loader and workforce read gate; forward filters |
-| Settings strip Staff            | RETIRE   | Directory is not Settings                                       |
-| `/workforce-os/directory`       | HOLD     | Parity/gate proof required                                      |
-| `/workforce-os/staff/[staffId]` | KEEP     | Entity route; Team-owned                                        |
-| `/staff/[staffId]/twin`         | LINK     | Keep until unique content is assessed                           |
-| `/team/identity`                | KEEP     | Team Access                                                     |
-| `/workforce-os/staff-access`    | HOLD     | Same component, different route gate                            |
-| `/staff/link-users`             | LINK     | Authorised repair tool from Team Access                         |
-| `/settings/staff-access`        | KEEP     | Settings Roles & permissions                                    |
-| `/settings/admin-users`         | KEEP     | Settings Security, with employee-overlap exception              |
-| `/team/roster`                  | KEEP     | Team Roster                                                     |
-| `/workforce-os/roster`          | HOLD     | Nested/date/action parity unproven                              |
-| `/hr-os/roster`                 | REDIRECT | Existing redirect to workforce roster                           |
-| `/team/onboarding`              | KEEP     | Team Onboarding                                                 |
-| `/hr-os/onboarding`             | HOLD     | Parity/gate proof required                                      |
-| `/team/compliance`              | KEEP     | Team Competencies                                               |
-| `/hr-os/compliance`             | HOLD     | Parity/gate proof required                                      |
-| `/hr-os/certifications`         | LINK     | Specialised deep links                                          |
-| `/hr-os/credentials`            | LINK     | Specialised deep links                                          |
-| `/team/training`                | KEEP     | Team training readiness                                         |
-| configured `/academy`           | RETIRE   | No tenant page; reference scan first                            |
+| Current location                | Decision | Canonical destination / rationale                       |
+| ------------------------------- | -------- | ------------------------------------------------------- |
+| `/team/staff`                   | KEEP     | Team People                                             |
+| `/staff`                        | HOLD     | Same component/loader, but PIN-prefix behaviour differs |
+| Settings strip Staff            | RETIRE   | Directory is not Settings                               |
+| `/workforce-os/directory`       | HOLD     | Parity/gate proof required                              |
+| `/workforce-os/staff/[staffId]` | KEEP     | Entity route; Team-owned                                |
+| `/staff/[staffId]/twin`         | LINK     | Keep until unique content is assessed                   |
+| `/team/identity`                | KEEP     | Team Access                                             |
+| `/workforce-os/staff-access`    | HOLD     | Same component, different route gate                    |
+| `/staff/link-users`             | LINK     | Authorised repair tool from Team Access                 |
+| `/settings/staff-access`        | KEEP     | Settings Roles & permissions                            |
+| `/settings/admin-users`         | KEEP     | Settings Security, with employee-overlap exception      |
+| `/team/roster`                  | KEEP     | Team Roster                                             |
+| `/workforce-os/roster`          | HOLD     | Nested/date/action parity unproven                      |
+| `/hr-os/roster`                 | REDIRECT | Existing redirect to workforce roster                   |
+| `/team/onboarding`              | KEEP     | Team Onboarding                                         |
+| `/hr-os/onboarding`             | HOLD     | Parity/gate proof required                              |
+| `/team/compliance`              | KEEP     | Team Competencies                                       |
+| `/hr-os/compliance`             | HOLD     | Parity/gate proof required                              |
+| `/hr-os/certifications`         | LINK     | Specialised deep links                                  |
+| `/hr-os/credentials`            | LINK     | Specialised deep links                                  |
+| `/team/training`                | KEEP     | Team training readiness                                 |
+| configured `/academy`           | RETIRE   | No tenant page; reference scan first                    |
 
 ### Settings, Integrations and Deployment
 
@@ -495,18 +495,18 @@ specialised functions remain, or HOLD where parity is not proven.
 
 ### Pipeline, Reports and Money
 
-| Current location           | Decision | Notes                                         |
-| -------------------------- | -------- | --------------------------------------------- |
-| `/crm`                     | KEEP     | Canonical Pipeline                            |
-| `/leadflow`                | REDIRECT | Existing redirect                             |
-| `/consultation-conversion` | REDIRECT | Existing redirect                             |
-| `/reports/analytics`       | KEEP     | Canonical Reports tab                         |
-| `/analytics`               | REDIRECT | Same component/loaders/gate; preserve filters |
-| `/reports/quality`         | KEEP     | Canonical Reports tab                         |
-| exact `/audit`             | REDIRECT | Same component; do not catch entity route     |
-| `/audit/[reportId]`        | KEEP     | Entity deep link                              |
-| `/financial-os`            | KEEP     | Canonical Money                               |
-| `/financial/*`             | LINK     | Detailed workflows, not blanket duplicates    |
+| Current location           | Decision | Notes                                                               |
+| -------------------------- | -------- | ------------------------------------------------------------------- |
+| `/crm`                     | KEEP     | Canonical Pipeline                                                  |
+| `/leadflow`                | REDIRECT | Existing redirect                                                   |
+| `/consultation-conversion` | REDIRECT | Existing redirect                                                   |
+| `/reports/analytics`       | KEEP     | Canonical Reports tab                                               |
+| `/analytics`               | REDIRECT | Same component/loaders/gate; preserve filters                       |
+| `/reports/quality`         | KEEP     | Canonical Reports tab                                               |
+| exact `/audit`             | HOLD     | Same component, but PIN-friendly Reports layout creates bypass risk |
+| `/audit/[reportId]`        | KEEP     | Entity deep link                                                    |
+| `/financial-os`            | KEEP     | Canonical Money                                                     |
+| `/financial/*`             | LINK     | Detailed workflows, not blanket duplicates                          |
 
 ## Navigation-system ownership
 
@@ -556,9 +556,15 @@ Key evidence:
 
 1. **Person access gate drift:** Team Access and legacy Staff Access Centre cannot be redirected
    until access equivalence is explicit.
-2. **Admin identity overlap:** employee/non-staff classification is not enforced.
-3. **Live legacy workspaces:** reception, workforce/HR and surgery parity is incomplete.
-4. **Tenant Deployment destination:** role and lifecycle-aware tenant route is not implemented.
+2. **PIN parity:** `/staff` vs `/team/staff` and `/audit` vs `/reports/quality` share views but
+   diverge under PIN-session rules; both redirect pairs stay HOLD.
+3. **Admin identity overlap:** employee/non-staff classification is not enforced.
+4. **Connector editor duplication:** Configuration and Platform Onboarding still mount
+   `ConnectExistingSystemsPanel` against the same records/actions.
+5. **Google Calendar reachability mismatch:** page entry uses Configuration-hub capability, while
+   Google mutation APIs allow `operations_admin` and reject finance-only viewers.
+6. **Live legacy workspaces:** reception, workforce/HR and surgery parity is incomplete.
+7. **Tenant Deployment destination:** role and lifecycle-aware tenant route is not implemented.
 
 ### Non-blocking ownership exceptions
 
@@ -566,7 +572,8 @@ Key evidence:
 - Security policy is Settings-owned without a complete standalone policy workspace.
 - Locations is Settings-owned, but the actual subsection coverage requires validation.
 - Existing Team-owned entity/admin tools retain non-Team-prefixed routes to avoid churn.
-- Pipeline redirect aliases do not currently prove arbitrary query forwarding.
+- Existing Front Desk redirects preserve only `bookingId` and `date`.
+- Pipeline redirect aliases intentionally drop all query parameters.
 
 ## Part 2C implementation sequence
 
@@ -577,13 +584,13 @@ Key evidence:
    - remove Academy from approved active navigation after a reference scan
 3. **Retain universal rail.** Do not add Pipeline globally. Use existing profile-based More order
    and permission filtering.
-4. **Implement proven redirects only.**
-   - `/staff` → `/team/staff`, forwarding filters
+4. **Implement only proven redirects.**
    - `/analytics` → `/reports/analytics`, forwarding filters
-   - exact `/audit` → `/reports/quality`, excluding `/audit/[reportId]`
    - retain existing Front Desk, Pipeline, reminder and HubSpot aliases
+   - keep `/staff` and exact `/audit` on HOLD until PIN parity is proven
 5. **Run permission/deep-link parity work before gated redirects.**
    - Team Access vs workforce Staff Access
+   - PIN gates for staff directory and quality review
    - workforce roster/onboarding/compliance
    - `reception-os`
    - procedure-day/surgery-os
@@ -592,7 +599,8 @@ Key evidence:
 7. **Retire unmounted nav code only after dependency proof.** Replace
    `clinicOsShellConfig` active-id compatibility and migrate tests before deletion.
 8. **Do not activate tenant Deployment yet.** The unified Deployment/Integration rebuild defines a
-   real tenant route, role/lifecycle gate and post-go-live history behaviour.
+   real tenant route, role/lifecycle gate and post-go-live history behaviour, and must replace
+   duplicated connector editors with summary/link cards.
 9. **Validate every role.** Reception, Nurse, Consultant, Doctor, Manager, Clinic owner, Finance and
    Platform admin must locate each permitted function once.
 

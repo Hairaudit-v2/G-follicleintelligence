@@ -6,10 +6,10 @@
   "routeDecisionCounts": {
     "KEEP": 25,
     "MERGE": 0,
-    "REDIRECT": 16,
+    "REDIRECT": 14,
     "LINK": 7,
     "RETIRE": 2,
-    "HOLD": 8
+    "HOLD": 10
   },
   "governingRules": [
     "Manage the individual in Team.",
@@ -203,7 +203,7 @@
       "capability": "Google Calendar OAuth, scope, health and backfill",
       "owner": "Integrations",
       "canonicalRoute": "/fi-admin/[tenantId]/settings/integrations",
-      "status": "FROZEN"
+      "status": "FROZEN_WITH_REACHABILITY_EXCEPTION"
     },
     {
       "id": "hubspot-connection",
@@ -383,13 +383,13 @@
       "primaryUsers": ["Manager", "Clinic owner", "HR operations"],
       "canonicalOwner": "Team",
       "canonicalRoute": "/fi-admin/[tenantId]/team/staff",
-      "decision": "REDIRECT",
-      "reason": "Both pages load StaffDirectoryClient through the same loader and workforce_os read gate.",
-      "permissionRisk": "LOW but re-run route parity tests.",
+      "decision": "HOLD",
+      "reason": "Same StaffDirectoryClient and workforce_os read gate, but PIN-prefix restriction behaviour differs from /team/staff.",
+      "permissionRisk": "HIGH: redirect could widen or narrow PIN-session access.",
       "deepLinkRisk": "MEDIUM",
-      "queryContextPreservation": "Forward staff_role, payroll and active query parameters.",
-      "part2cAction": "Add preserving redirect after reference inventory.",
-      "rollbackPath": "Restore current page; it remains implementation-compatible."
+      "queryContextPreservation": "Forward staff_role, payroll and active query parameters once PIN parity is proven.",
+      "part2cAction": "Prove PIN and portal gate equivalence, then add preserving redirect.",
+      "rollbackPath": "Keep live duplicate until parity proof."
     },
     {
       "capability": "Staff directory",
@@ -835,10 +835,10 @@
       "canonicalRoute": "/fi-admin/[tenantId]/crm",
       "decision": "REDIRECT",
       "reason": "Existing redirect.",
-      "permissionRisk": "LOW",
+      "permissionRisk": "MEDIUM: consultations feature mapping can block the conversion alias before CRM access is evaluated.",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "No query forwarding currently proven; add before relying on filtered deep links.",
-      "part2cAction": "Retain redirect; test query preservation requirement.",
+      "queryContextPreservation": "Existing redirect intentionally drops all query parameters.",
+      "part2cAction": "Retain redirect; restore query forwarding only if live references require it.",
       "rollbackPath": "Restore alias target."
     },
     {
@@ -852,8 +852,8 @@
       "reason": "Existing redirect.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "No query forwarding currently proven.",
-      "part2cAction": "Retain redirect; test query preservation requirement.",
+      "queryContextPreservation": "Existing redirect intentionally drops all query parameters.",
+      "part2cAction": "Retain redirect; restore query forwarding only if live references require it.",
       "rollbackPath": "Restore alias target."
     },
     {
@@ -882,8 +882,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -897,8 +897,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -912,8 +912,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -927,8 +927,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -942,8 +942,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -957,8 +957,8 @@
       "reason": "Existing redirect helper.",
       "permissionRisk": "LOW",
       "deepLinkRisk": "LOW",
-      "queryContextPreservation": "Existing helper forwards supported search parameters.",
-      "part2cAction": "Retain redirect.",
+      "queryContextPreservation": "Helper currently preserves only bookingId and date; patientId and demo are dropped.",
+      "part2cAction": "Retain redirect; close query-contract drift before relying on patient/demo deep links.",
       "rollbackPath": "Restore prior target."
     },
     {
@@ -1118,13 +1118,13 @@
       "primaryUsers": ["Clinical lead", "Auditor"],
       "canonicalOwner": "Reports",
       "canonicalRoute": "/fi-admin/[tenantId]/reports/quality",
-      "decision": "REDIRECT",
-      "reason": "Both pages render AuditOsDashboard with the same diagnostics decision.",
-      "permissionRisk": "MEDIUM: verify inherited layout/feature parity.",
+      "decision": "HOLD",
+      "reason": "Same AuditOsDashboard, but /audit is PIN-restricted while /reports/quality is reachable under PIN-friendly Reports layout, creating a likely access-bypass risk.",
+      "permissionRisk": "HIGH: redirecting before PIN parity could widen PIN-session access.",
       "deepLinkRisk": "HIGH: /audit/[reportId] must remain.",
       "queryContextPreservation": "Forward list filters; do not catch entity route.",
-      "part2cAction": "Redirect only exact /audit; keep /audit/[reportId].",
-      "rollbackPath": "Restore identical page implementation."
+      "part2cAction": "Equalise PIN/portal gates first; then redirect only exact /audit.",
+      "rollbackPath": "Keep both live until PIN parity is proven."
     },
     {
       "capability": "Quality report entity",
@@ -1363,9 +1363,33 @@
       "requiredResolution": "Prove or deliberately reconcile gate equivalence before redirect."
     },
     {
+      "id": "pin-parity-staff-and-quality",
+      "severity": "HIGH",
+      "finding": "/staff versus /team/staff and /audit versus /reports/quality share views but differ in PIN-prefix or PIN-friendly layout behaviour.",
+      "requiredResolution": "Equalise PIN/portal gates before any redirect; keep both pairs HOLD until proven."
+    },
+    {
+      "id": "connector-editor-duplication",
+      "severity": "HIGH",
+      "finding": "ConnectExistingSystemsPanel is mounted in tenant Configuration and platform Onboarding against the same records/actions; HubSpot connector controls also appear in the provider workspace.",
+      "requiredResolution": "Deployment rebuild must convert Configuration/Onboarding to summary/link behaviour; Integrations remains the sole native editor owner."
+    },
+    {
+      "id": "google-calendar-reachability-mismatch",
+      "severity": "HIGH",
+      "finding": "Integrations page reachability uses Configuration-hub capability, while Google mutation APIs allow operations_admin. Finance can open the page but fail Google mutations; operations_admin can mutate but cannot reach the page.",
+      "requiredResolution": "Reconcile page reachability and API authorisation before changing Google UI ownership or controls."
+    },
+    {
+      "id": "front-desk-query-contract-drift",
+      "severity": "MEDIUM",
+      "finding": "Active Front Desk redirects preserve only bookingId and date, while older plans expected patientId and demo as well.",
+      "requiredResolution": "Document actual preserved keys and restore patientId/demo only if live deep links require them."
+    },
+    {
       "id": "academy-dead-target",
       "severity": "MEDIUM",
-      "finding": "Team legacy catalog points to tenant /academy, but no tenant page exists.",
+      "finding": "Team legacy catalog and Team Training page link to tenant /academy, but no tenant page exists.",
       "requiredResolution": "Remove from active approved navigation in 2C after reference scan; keep Team training."
     },
     {
@@ -1383,13 +1407,16 @@
     {
       "id": "pipeline-query-forwarding",
       "severity": "LOW",
-      "finding": "LeadFlow and consultation-conversion redirects do not prove arbitrary query forwarding.",
-      "requiredResolution": "Add explicit query/context preservation only if references require it."
+      "finding": "LeadFlow and consultation-conversion redirects intentionally drop all query parameters; stale guides and revalidation paths still mention the aliases.",
+      "requiredResolution": "Inventory remaining references and restore query forwarding only if required."
     }
   ],
   "blockers": [
     "Permission parity blocks redirecting /workforce-os/staff-access to /team/identity.",
+    "PIN-prefix or PIN-friendly layout parity blocks redirecting /staff and /audit.",
     "Admin Users permits non-fi_staff operational identities and lacks a no-employee-duplication invariant.",
+    "Connector editing is duplicated across Configuration, Platform Onboarding and provider workspaces.",
+    "Google Calendar page reachability and mutation authorisation disagree by role.",
     "Tenant Deployment destination and lifecycle visibility are not implemented, so it cannot yet be an active More link.",
     "Live legacy workspace parity is incomplete for reception-os, workforce/hr, procedure-day and some surgery routes."
   ],
@@ -1398,8 +1425,9 @@
     "Remove Staff from the Settings secondary strip while preserving /staff.",
     "Remove or hold the dead Academy destination from active navigation.",
     "Retain the six-slot universal rail and use existing role-aware More ordering for Pipeline.",
-    "Add only query-preserving redirects whose permission and component parity are proven.",
+    "Redirect only routes with proven PIN, portal and query parity; keep /staff and /audit on HOLD.",
     "Keep entity routes and permission-divergent routes live; expose them through canonical owners by links.",
-    "Do not add tenant Deployment navigation until a real authorised route exists."
+    "Do not add tenant Deployment navigation until a real authorised route exists.",
+    "Treat connector-editor de-duplication and Google reachability reconciliation as Deployment/Integrations prerequisites."
   ]
 }
