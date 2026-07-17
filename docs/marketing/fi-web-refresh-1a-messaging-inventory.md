@@ -221,6 +221,8 @@ See [public-messaging-standard.md](./public-messaging-standard.md) §§1–5, 9,
 - Retire or quarantine legacy `HOME_PAGE_CONTENT` superlatives.  
 - Credibility without overstating Deployed scope.
 
+**Status (2026-07-16):** Complete — see `fi-web-refresh-1e-homepage.md`.
+
 ### FI-WEB-REFRESH-1F — Clinic Owners page alignment
 
 - LeadFlow (done naming) + continuity narrative.  

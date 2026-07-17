@@ -82,7 +82,7 @@ No separate `/migrate-from-hubspot` in this task (1G).
 | Contact intent card | structured form link |
 | Structured data FAQs | wording |
 
-Wider homepage CTA cleanup deferred to **1E**.
+Wider homepage CTA cleanup completed in **1E**.
 
 ---
 
@@ -91,5 +91,4 @@ Wider homepage CTA cleanup deferred to **1E**.
 - HubSpot form dual-path if marketing ops requires CRM objects
 - Native FI public lead intake with governance tenant
 - Multi-step wizard form
-- Full site CTA sweep (1E)
 - Dedicated migration page (1G)
