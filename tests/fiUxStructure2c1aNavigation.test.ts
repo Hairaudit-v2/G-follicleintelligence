@@ -57,7 +57,12 @@ test("Staff is absent from mounted Settings navigation while Roles & permissions
   assert.ok(
     groups
       .find((group) => group.id === "integrations")
-      ?.destinations.some((item) => item.label === "HubSpot import")
+      ?.destinations.some((item) => item.id === "integrations")
+  );
+  assert.ok(
+    !groups
+      .find((group) => group.id === "integrations")
+      ?.destinations.some((item) => item.id === "integrations-hubspot-import")
   );
 });
 
@@ -100,7 +105,7 @@ test("Reports emits Surgery insights and Graft count review only once for admin 
   assert.equal(graftCount.length, 1);
 });
 
-test("HOLD routes remain untouched and HubSpot import remains in Settings source", () => {
+test("HOLD routes remain untouched and HubSpot uses Integrations hub without temporary peer", () => {
   const settingsSource = readFileSync(settingsNavPath, "utf8");
   assert.match(settingsSource, /showHubspotImport/);
   assert.match(settingsSource, /buildFiOsClinicSettingsGroups/);
@@ -114,10 +119,14 @@ test("HOLD routes remain untouched and HubSpot import remains in Settings source
     showSecurity: false,
     showHubspotImport: true,
   });
-  const hubspot = groups
-    .find((group) => group.id === "integrations")
-    ?.destinations.find((item) => item.id === "integrations-hubspot-import");
-  assert.equal(hubspot?.href, "/fi-admin/t-2c1a/settings/integrations/hubspot?tab=import-review");
+  const integrations = groups.find((group) => group.id === "integrations");
+  assert.equal(
+    integrations?.destinations.find((item) => item.id === "integrations")?.href,
+    "/fi-admin/t-2c1a/settings/integrations"
+  );
+  assert.ok(
+    !integrations?.destinations.some((item) => item.id === "integrations-hubspot-import")
+  );
 
   for (const relativePage of [
     path.join("staff", "page.tsx"),

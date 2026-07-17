@@ -53,7 +53,7 @@ test("Clinic group maps configuration destinations and keeps Clinic guide contex
   assert.ok(!primaryFiOsSettingsDestinations(clinic).some((item) => item.id === "clinic-guide"));
 });
 
-test("Integrations owns HubSpot import and HairAudit discovery without top-level peers", () => {
+test("Integrations owns HairAudit discovery without temporary HubSpot import peer", () => {
   const groups = fullGroups();
   assert.ok(!groups.some((group) => group.label === "HubSpot import"));
   assert.ok(!groups.some((group) => group.label === "HairAudit discovery"));
@@ -62,11 +62,10 @@ test("Integrations owns HubSpot import and HairAudit discovery without top-level
   const integrations = groups.find((group) => group.id === "integrations")!;
   assert.deepEqual(
     integrations.destinations.map((item) => item.label),
-    ["Integrations", "HairAudit discovery", "HubSpot import"]
+    ["Integrations", "HairAudit discovery"]
   );
-  assert.equal(
-    integrations.destinations.find((item) => item.id === "integrations-hubspot-import")?.href,
-    `${base}/settings/integrations/hubspot?tab=import-review`
+  assert.ok(
+    !integrations.destinations.some((item) => item.id === "integrations-hubspot-import")
   );
 });
 
@@ -90,7 +89,7 @@ test("Roles, Templates, Billing and Security retain existing destinations and ga
   );
 });
 
-test("CRM-read HubSpot import can form Integrations without Configuration destinations", () => {
+test("CRM-read HubSpot reaches canonical workspace via Integrations without Configuration destinations", () => {
   const groups = buildFiOsClinicSettingsGroups(base, {
     showConfiguration: false,
     showClinicOperations: false,
@@ -104,10 +103,12 @@ test("CRM-read HubSpot import can form Integrations without Configuration destin
     groups.map((group) => group.id),
     ["integrations"]
   );
+  assert.equal(groups[0]!.destinations[0]?.id, "integrations-hubspot");
   assert.equal(
     groups[0]!.destinations[0]?.href,
     `${base}/settings/integrations/hubspot?tab=import-review`
   );
+  assert.ok(!groups[0]!.destinations.some((item) => item.id === "integrations-hubspot-import"));
 });
 
 test("nested Settings routes mark their group active", () => {

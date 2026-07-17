@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
+import {
+  HUBSPOT_CANONICAL_SURFACES,
+  hubspotSurfaceHref,
+} from "@/src/lib/onboarding-os/hubspotWorkspaceRoutes";
+
 function CopyBlock({ label, text, hint }: { label: string; text: string; hint?: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -150,6 +155,18 @@ export function OtherIntegrationsSection({
             Credentials, backups, staged imports, webhooks, configuration, and audit evidence are
             managed in one tenant-scoped workspace.
           </p>
+          <ul className="space-y-2 text-sm text-[#94A3B8]">
+            {HUBSPOT_CANONICAL_SURFACES.map((surface) => (
+              <li key={surface.id}>
+                <Link
+                  href={hubspotSurfaceHref(tenantId, surface)}
+                  className="text-[#22C1FF] hover:underline"
+                >
+                  {surface.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
           <Link
             href={`${base}/settings/integrations/hubspot`}
             className="inline-flex rounded-md bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-500"

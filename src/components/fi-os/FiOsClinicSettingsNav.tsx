@@ -30,7 +30,8 @@ function featureOn(access: ReadonlyMap<FiFeatureKey, boolean> | null, key: FiFea
 
 /**
  * Six-group Settings information architecture for mounted clinic settings routes.
- * FI-UX-STRUCTURE-2C.1B — groups existing destinations; does not change page behaviour.
+ * FI-UX-STRUCTURE-2C.1B groups; FI-UX-STRUCTURE-2C.2 removes temporary HubSpot import peer
+ * once Configuration-hub sessions reach all HubSpot surfaces via Integrations → Manage.
  */
 export function FiOsClinicSettingsNav({
   tenantId,
@@ -46,7 +47,10 @@ export function FiOsClinicSettingsNav({
   showStaffAndServicesNav: boolean;
   showAdminUsersNav: boolean;
   showConfigurationHubNav?: boolean;
-  /** CRM-read members may open Import Review without Configuration hub access. */
+  /**
+   * CRM-read members without Configuration hub: expose Integrations → canonical HubSpot
+   * workspace (import-review). Configuration-hub sessions use Integrations hub instead.
+   */
   showHubspotImportNav?: boolean;
   showTaxLocalisationSettingsNav?: boolean;
   showRemindersSettingsNav?: boolean;

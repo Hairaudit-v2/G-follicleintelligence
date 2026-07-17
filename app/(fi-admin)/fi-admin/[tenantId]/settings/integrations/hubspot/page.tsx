@@ -22,8 +22,7 @@ import { canMutateHubspotWorkspace } from "@/src/lib/onboarding-os/hubspotWorksp
 import {
   hubspotTabsForSession,
   hubspotWorkspaceHref,
-  isHubspotTabAllowedForSession,
-  resolveHubspotWorkspaceTab,
+  resolveHubspotWorkspaceTabForSession,
 } from "@/src/lib/onboarding-os/hubspotWorkspaceRoutes";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import { isUuid } from "@/src/lib/validation/uuid";
@@ -59,8 +58,9 @@ export default async function HubspotWorkspacePage({ params, searchParams }: {
   await assertCrmTenantReadAllowed({ tenantId, request: undefined });
 
   const canManage = await canViewTenantConfigurationHub(tenantId);
-  const tab = resolveHubspotWorkspaceTab(sp.tab);
-  if (!isHubspotTabAllowedForSession(tab, canManage)) notFound();
+  const resolved = resolveHubspotWorkspaceTabForSession(sp.tab, canManage);
+  if ("forbidden" in resolved) notFound();
+  const tab = resolved.tab;
 
   const canMutate = canManage ? await canMutateHubspotWorkspace(tenantId) : false;
   const visibleTabs = hubspotTabsForSession(canManage);
