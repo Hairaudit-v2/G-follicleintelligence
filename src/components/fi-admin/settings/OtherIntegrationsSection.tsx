@@ -114,43 +114,45 @@ export function OtherIntegrationsSection({
               label={hubSpotConnected ? "Connector registered" : "Not connected"}
             />
           </div>
-          {false ? <>
-          <ul className="space-y-2 text-sm text-[#94A3B8]">
-            <li>
-              <Link href={`${base}/configuration`} className="text-[#22C1FF] hover:underline">
-                Configuration → Connect Existing Systems
-              </Link>
-              — register HubSpot, store Private App token, run read-only sync into staging.
-            </li>
-            <li>
-              <Link
-                href={`${base}/settings/imports/hubspot`}
-                className="text-[#22C1FF] hover:underline"
-              >
-                HubSpot CRM import
-              </Link>
-              — one-time contacts CSV upload (Stage 1).
-            </li>
-            <li>
-              <Link
-                href={`${base}/onboarding-os/import-review`}
-                className="text-[#22C1FF] hover:underline"
-              >
-                OnboardingOS import review
-              </Link>
-              — approve staged HubSpot contacts and deals after connector sync.
-            </li>
-          </ul>
-          <CopyBlock
-            label="LeadFlow webhook (live CRM events)"
-            text={`POST ${hubSpotLeadFlowWebhook}`}
-            hint={
-              hubSpotWebhookSecretConfigured
-                ? "HubSpot native app webhooks use signature v3 (HUBSPOT_CLIENT_SECRET). Internal/Zapier POSTs may use Authorization: Bearer FI_HUBSPOT_WEBHOOK_SECRET."
-                : "Set FI_HUBSPOT_WEBHOOK_SECRET (Bearer) and/or HUBSPOT_CLIENT_SECRET (signature v3) on the server before go-live."
-            }
-          />
-          </> : null}
+          {false ? (
+            <>
+              <ul className="space-y-2 text-sm text-[#94A3B8]">
+                <li>
+                  <Link href={`${base}/configuration`} className="text-[#22C1FF] hover:underline">
+                    Configuration → Connect Existing Systems
+                  </Link>
+                  — register HubSpot, store Private App token, run read-only sync into staging.
+                </li>
+                <li>
+                  <Link
+                    href={`${base}/settings/imports/hubspot`}
+                    className="text-[#22C1FF] hover:underline"
+                  >
+                    HubSpot CRM import
+                  </Link>
+                  — one-time contacts CSV upload (Stage 1).
+                </li>
+                <li>
+                  <Link
+                    href={`${base}/onboarding-os/import-review`}
+                    className="text-[#22C1FF] hover:underline"
+                  >
+                    OnboardingOS import review
+                  </Link>
+                  — approve staged HubSpot contacts and deals after connector sync.
+                </li>
+              </ul>
+              <CopyBlock
+                label="LeadFlow webhook (live CRM events)"
+                text={`POST ${hubSpotLeadFlowWebhook}`}
+                hint={
+                  hubSpotWebhookSecretConfigured
+                    ? "HubSpot native app webhooks use signature v3 (HUBSPOT_CLIENT_SECRET). Internal/Zapier POSTs may use Authorization: Bearer FI_HUBSPOT_WEBHOOK_SECRET."
+                    : "Set FI_HUBSPOT_WEBHOOK_SECRET (Bearer) and/or HUBSPOT_CLIENT_SECRET (signature v3) on the server before go-live."
+                }
+              />
+            </>
+          ) : null}
           <p className="text-sm text-[#94A3B8]">
             Credentials, backups, staged imports, webhooks, configuration, and audit evidence are
             managed in one tenant-scoped workspace.

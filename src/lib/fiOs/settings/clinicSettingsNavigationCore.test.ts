@@ -64,9 +64,7 @@ test("Integrations owns HairAudit discovery without temporary HubSpot import pee
     integrations.destinations.map((item) => item.label),
     ["Integrations", "HairAudit discovery"]
   );
-  assert.ok(
-    !integrations.destinations.some((item) => item.id === "integrations-hubspot-import")
-  );
+  assert.ok(!integrations.destinations.some((item) => item.id === "integrations-hubspot-import"));
 });
 
 test("Roles, Templates, Billing and Security retain existing destinations and gates inputs", () => {

@@ -15,7 +15,9 @@ export const HUBSPOT_WORKSPACE_TABS = [
 export type HubspotWorkspaceTab = (typeof HUBSPOT_WORKSPACE_TABS)[number];
 
 /** CRM-read members without Configuration hub caps may only open Import Review. */
-export const HUBSPOT_CRM_READ_TABS = ["import-review"] as const satisfies readonly HubspotWorkspaceTab[];
+export const HUBSPOT_CRM_READ_TABS = [
+  "import-review",
+] as const satisfies readonly HubspotWorkspaceTab[];
 
 /**
  * FI-UX-STRUCTURE-2C.2 — canonical HubSpot surface families owned by Integrations.
@@ -87,7 +89,9 @@ export function resolveHubspotWorkspaceTab(value: string | undefined): HubspotWo
 }
 
 /** Default landing tab inside the canonical HubSpot workspace for the session. */
-export function hubspotDefaultTabForSession(canManageConfigurationHub: boolean): HubspotWorkspaceTab {
+export function hubspotDefaultTabForSession(
+  canManageConfigurationHub: boolean
+): HubspotWorkspaceTab {
   return canManageConfigurationHub ? "overview" : "import-review";
 }
 
@@ -128,7 +132,9 @@ export function hubspotSurfacesForSession(
 }
 
 /** Tabs visible for the current session capability set. */
-export function hubspotTabsForSession(canManageConfigurationHub: boolean): readonly HubspotWorkspaceTab[] {
+export function hubspotTabsForSession(
+  canManageConfigurationHub: boolean
+): readonly HubspotWorkspaceTab[] {
   return canManageConfigurationHub ? HUBSPOT_WORKSPACE_TABS : HUBSPOT_CRM_READ_TABS;
 }
 
