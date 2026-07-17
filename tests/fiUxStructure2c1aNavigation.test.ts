@@ -8,6 +8,7 @@ import {
   FI_OS_REPORTS_LEGACY_ROUTES,
   buildReportsSidebarSubItems,
 } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
+import { buildFiOsClinicSettingsGroups } from "@/src/lib/fiOs/settings/clinicSettingsNavigationCore";
 import {
   FI_OS_TEAM_LEGACY_ROUTES,
   buildTeamSidebarSubItems,
@@ -38,11 +39,26 @@ test("Staff is absent from mounted Settings navigation while Roles & permissions
   assert.doesNotMatch(source, /showStaffLink/);
   assert.match(source, /showStaffAndServicesNav/);
   assert.doesNotMatch(source, />\s*Staff entitlements\s*</);
-  assert.match(source, /Roles &amp; permissions/);
-  assert.match(source, /href=\{\`\$\{base\}\/settings\/staff-access\`\}/);
-  assert.match(source, /showAdminUsers \? \(/);
-  assert.match(source, /HubSpot import/);
-  assert.match(source, /showHubspot/);
+  assert.match(source, /showAdminUsersNav/);
+  assert.match(source, /showHubspotImport/);
+
+  const groups = buildFiOsClinicSettingsGroups("/fi-admin/t-2c1a", {
+    showConfiguration: true,
+    showClinicOperations: true,
+    showTemplates: true,
+    showTaxLocalisation: true,
+    showBilling: true,
+    showSecurity: true,
+    showHubspotImport: true,
+  });
+  const roles = groups.find((group) => group.id === "roles-permissions");
+  assert.equal(roles?.label, "Roles & permissions");
+  assert.equal(roles?.destinations[0]?.href, "/fi-admin/t-2c1a/settings/staff-access");
+  assert.ok(
+    groups
+      .find((group) => group.id === "integrations")
+      ?.destinations.some((item) => item.label === "HubSpot import")
+  );
 });
 
 test("academyos is absent from Team legacy catalogue while Training page Academy link remains", () => {
@@ -86,11 +102,22 @@ test("Reports emits Surgery insights and Graft count review only once for admin 
 
 test("HOLD routes remain untouched and HubSpot import remains in Settings source", () => {
   const settingsSource = readFileSync(settingsNavPath, "utf8");
-  assert.match(settingsSource, /HubSpot import/);
-  assert.match(
-    settingsSource,
-    /href=\{\`\$\{base\}\/settings\/integrations\/hubspot\?tab=import-review\`\}/
-  );
+  assert.match(settingsSource, /showHubspotImport/);
+  assert.match(settingsSource, /buildFiOsClinicSettingsGroups/);
+
+  const groups = buildFiOsClinicSettingsGroups("/fi-admin/t-2c1a", {
+    showConfiguration: true,
+    showClinicOperations: false,
+    showTemplates: false,
+    showTaxLocalisation: false,
+    showBilling: false,
+    showSecurity: false,
+    showHubspotImport: true,
+  });
+  const hubspot = groups
+    .find((group) => group.id === "integrations")
+    ?.destinations.find((item) => item.id === "integrations-hubspot-import");
+  assert.equal(hubspot?.href, "/fi-admin/t-2c1a/settings/integrations/hubspot?tab=import-review");
 
   for (const relativePage of [
     path.join("staff", "page.tsx"),
