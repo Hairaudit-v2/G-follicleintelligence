@@ -1,0 +1,62 @@
+{
+  "milestone": "FI-UX-STRUCTURE-2C.1B",
+  "verdict": "GREEN",
+  "asOf": "2026-07-17",
+  "baseCommit": "22a603c3",
+  "baseMilestone": "FI-UX-STRUCTURE-2C.1A",
+  "navigationAuthority": "FiOsAppShell",
+  "settingsBefore": [
+    "Configuration",
+    "Services",
+    "Rooms",
+    "Clinic setup",
+    "Templates",
+    "Tax & Localisation",
+    "Clinic guide",
+    "Integrations",
+    "HairAudit discovery",
+    "Payments",
+    "Admin Users",
+    "Roles & permissions",
+    "HubSpot import"
+  ],
+  "settingsAfter": [
+    "Clinic",
+    "Roles & permissions",
+    "Templates",
+    "Integrations",
+    "Billing",
+    "Security"
+  ],
+  "groupMapping": {
+    "Clinic": [
+      "Configuration",
+      "Services",
+      "Rooms",
+      "Clinic setup",
+      "Tax & localisation",
+      "Clinic guide (contextual)"
+    ],
+    "Roles & permissions": ["Roles & permissions"],
+    "Templates": ["Templates"],
+    "Integrations": ["Integrations", "HairAudit discovery", "HubSpot import"],
+    "Billing": ["Billing (/settings/payments)"],
+    "Security": ["Security (/settings/admin-users)"]
+  },
+  "routesPreserved": true,
+  "permissionsChanged": false,
+  "mutationsChanged": false,
+  "hubspotImportRemainsReachable": true,
+  "clinicGuidePrimaryNav": false,
+  "holdRoutesUntouched": ["/staff", "/audit", "/workforce-os/staff-access"],
+  "outOfScope": [
+    "Team Access permission parity",
+    "Admin Users identity redesign",
+    "Academy routing",
+    "Deployment Centre",
+    "Google Calendar permission alignment",
+    "HubSpot migration permission changes"
+  ],
+  "recommendedNextMilestone": "FI-UX-STRUCTURE-2C.2",
+  "productionBehaviourChanged": false
+}

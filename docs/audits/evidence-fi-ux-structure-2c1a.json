@@ -1,0 +1,115 @@
+{
+  "milestone": "FI-UX-STRUCTURE-2C.1A",
+  "verdict": "AMBER",
+  "asOf": "2026-07-17",
+  "baseOwnershipCommit": "5b042e07",
+  "navigationAuthority": "FiOsAppShell",
+  "settingsBefore": [
+    "Configuration",
+    "Staff",
+    "Services",
+    "Rooms",
+    "Clinic setup",
+    "Templates",
+    "Tax & Localisation",
+    "Clinic guide",
+    "Integrations",
+    "HairAudit discovery",
+    "Payments",
+    "Admin Users",
+    "Staff entitlements",
+    "HubSpot import"
+  ],
+  "settingsAfter": [
+    "Configuration",
+    "Services",
+    "Rooms",
+    "Clinic setup",
+    "Templates",
+    "Tax & Localisation",
+    "Clinic guide",
+    "Integrations",
+    "HairAudit discovery",
+    "Payments",
+    "Admin Users",
+    "Roles & permissions",
+    "HubSpot import"
+  ],
+  "removedVisibleEntries": [
+    {
+      "label": "Staff",
+      "surface": "FiOsClinicSettingsNav",
+      "routePreserved": true,
+      "route": "/staff"
+    }
+  ],
+  "renamedEntries": [
+    {
+      "from": "Staff entitlements",
+      "to": "Roles & permissions",
+      "route": "/settings/staff-access",
+      "permissionGateChanged": false,
+      "featureGateChanged": false,
+      "activeRouteBehaviourChanged": false
+    }
+  ],
+  "hiddenDeadLinks": [
+    {
+      "label": "Training (direct) / academyos",
+      "removedFrom": "FI_OS_TEAM_LEGACY_ROUTES",
+      "route": "/academy",
+      "teamTrainingHardCodedLinkRetained": true
+    }
+  ],
+  "moreMenuChanges": [
+    {
+      "change": "dedupe_reports_admin_catalog_emission",
+      "ids": ["surgery-intelligence-dashboard", "graft-counting-legacy"],
+      "routesPreserved": true
+    }
+  ],
+  "hubspotImportNavigationChanged": false,
+  "redirectsAdded": [],
+  "redirectsVerifiedExisting": [
+    {
+      "source": "/settings/imports/hubspot",
+      "target": "/settings/integrations/hubspot",
+      "semantics": ["tab=import-review", "valid batchId preserved"]
+    },
+    {
+      "source": "/onboarding-os/import-review",
+      "target": "/settings/integrations/hubspot",
+      "semantics": ["tab=import-review", "valid batchId preserved"]
+    }
+  ],
+  "holdRoutesUntouched": ["/staff", "/audit", "/workforce-os/staff-access"],
+  "tests": [
+    {
+      "name": "2C.1A focused navigation contracts, HubSpot redirect semantics, consolidation and 2B ownership",
+      "result": "PASS",
+      "tests": 70
+    },
+    {
+      "name": "TypeScript",
+      "result": "PASS",
+      "command": "npx tsc --noEmit --pretty false"
+    }
+  ],
+  "blockers": [
+    "HubSpot canonical navigation parity",
+    "Hard-coded Team Training Academy link",
+    "Team Access permission parity",
+    "Admin Users identity duplication",
+    "Settings six-group IA",
+    "Authorised tenant Deployment route"
+  ],
+  "exceptions": [
+    "Team Training page still contains a hard-coded Academy (direct) link by explicit 2C.1A scope.",
+    "Broader Settings six-group restructuring and More-menu alias cleanup remain out of scope."
+  ],
+  "productionBehaviourChanged": false,
+  "permissionsChanged": false,
+  "mutationsChanged": false,
+  "routesDeleted": false,
+  "recommendedNextMilestone": "FI-UX-STRUCTURE-2C.1B or Settings six-group IA"
+}

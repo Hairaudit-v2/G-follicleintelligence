@@ -82,12 +82,6 @@ export const FI_OS_REPORTS_LEGACY_ROUTES = [
   { id: "auditos-legacy", label: "Quality review", suffix: "audit" },
   { id: "financial-os-legacy", label: "Revenue & billing", suffix: "financial-os" },
   { id: "payments-inbox-legacy", label: "Payments", suffix: "payments" },
-  {
-    id: "surgery-intelligence-dashboard",
-    label: "Surgery insights",
-    suffix: "surgery-os/intelligence",
-  },
-  { id: "graft-counting-legacy", label: "Graft count review", suffix: "surgery-os/graft-counting" },
 ] as const;
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
@@ -169,12 +163,6 @@ export function buildReportsSidebarSubItems(
 
   const legacy = FI_OS_REPORTS_LEGACY_ROUTES.filter((route) => {
     if (route.id === "auditos-legacy" && !showAudit) return false;
-    if (
-      (route.id === "surgery-intelligence-dashboard" || route.id === "graft-counting-legacy") &&
-      !showAdmin
-    ) {
-      return false;
-    }
     return true;
   }).map((route) => ({
     id: route.id,
@@ -185,9 +173,7 @@ export function buildReportsSidebarSubItems(
         ? ("audit" as const)
         : route.id === "financial-os-legacy" || route.id === "payments-inbox-legacy"
           ? ("settings" as const)
-          : route.id === "surgery-intelligence-dashboard" || route.id === "graft-counting-legacy"
-            ? ("surgery_pipeline" as const)
-            : ("analytics" as const),
+          : ("analytics" as const),
   }));
 
   const adminLegacy = showAdmin
