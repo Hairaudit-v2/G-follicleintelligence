@@ -17,7 +17,8 @@ function featureOn(access: ReadonlyMap<FiFeatureKey, boolean> | null, key: FiFea
 }
 
 /**
- * Secondary strip for clinic settings routes (Configuration, Staff, Services, Reminders, Tax & localisation, Admin Users).
+ * Secondary strip for clinic settings routes (Configuration, Services, Reminders, Tax & localisation, Admin Users).
+ * FI-UX-STRUCTURE-2C.1A: Staff directory entry removed; Staff entitlements labeled Roles & permissions.
  */
 export function FiOsClinicSettingsNav({
   tenantId,
@@ -64,7 +65,6 @@ export function FiOsClinicSettingsNav({
     );
 
   const showConfiguration = showConfigurationHubNav && featureOn(featureAccess, "settings");
-  const showStaffLink = showStaffAndServicesNav && featureOn(featureAccess, "staff");
   const showServicesBlock = showStaffAndServicesNav && featureOn(featureAccess, "settings");
   const showReminders = showRemindersSettingsNav && featureOn(featureAccess, "settings");
   const showTax = showTaxLocalisationSettingsNav && featureOn(featureAccess, "settings");
@@ -77,7 +77,6 @@ export function FiOsClinicSettingsNav({
 
   if (
     !showConfiguration &&
-    !showStaffLink &&
     !showServicesBlock &&
     !showReminders &&
     !showTax &&
@@ -96,11 +95,6 @@ export function FiOsClinicSettingsNav({
         {showConfiguration ? (
           <Link href={`${base}/configuration`} className={linkCls(`${base}/configuration`)}>
             Configuration
-          </Link>
-        ) : null}
-        {showStaffLink ? (
-          <Link href={`${base}/staff`} className={linkCls(`${base}/staff`)}>
-            Staff
           </Link>
         ) : null}
         {showServicesBlock ? (
@@ -179,7 +173,7 @@ export function FiOsClinicSettingsNav({
             className={linkCls(`${base}/settings/staff-access`)}
             title="Module and field grants by role — separate from login, invite, and PIN provisioning."
           >
-            Staff entitlements
+            Roles &amp; permissions
           </Link>
         ) : null}
         {showHubspot ? (

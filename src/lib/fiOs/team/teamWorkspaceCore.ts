@@ -85,7 +85,6 @@ export const FI_OS_TEAM_LEGACY_ROUTES = [
   { id: "compliance-legacy", label: "Compliance", suffix: "hr-os/compliance" },
   { id: "certifications-legacy", label: "Certifications", suffix: "hr-os/certifications" },
   { id: "credentials-legacy", label: "Credentials", suffix: "hr-os/credentials" },
-  { id: "academyos", label: "Training", suffix: "academy" },
 ] as const;
 
 /** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
@@ -220,7 +219,7 @@ export function buildTeamSidebarSubItems(
     id: route.id,
     label: `${route.label} (direct)`,
     href: buildFiOsTeamLegacyHref(tid, route.suffix),
-    featureKey: (route.id === "academyos" ? "academy" : "staff") as FiFeatureKey,
+    featureKey: "staff" as FiFeatureKey,
   }));
 
   const adminLegacy = showAdmin
