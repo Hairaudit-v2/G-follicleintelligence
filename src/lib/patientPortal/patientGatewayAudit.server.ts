@@ -11,7 +11,7 @@ export type PatientGatewayAuditInput = {
   authUserId?: string | null;
   patientId?: string | null;
   tenantId?: string | null;
-  resourceKind?: "patient" | "image" | "appointment" | "billing" | "document" | "me";
+  resourceKind?: "patient" | "image" | "appointment" | "billing" | "document" | "me" | "journey";
   resourceId?: string | null;
 };
 

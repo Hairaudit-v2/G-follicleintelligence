@@ -20,8 +20,14 @@ function withOwnershipAudit(
   resourceId?: string | null
 ): PatientGatewayDeny | null {
   if (!deny) return null;
+  const action =
+    resourceKind === "appointment"
+      ? ("appointment_ownership_denied" as const)
+      : deny.code === "wrong_tenant"
+        ? ("wrong_tenant" as const)
+        : ("ownership_denied" as const);
   writePatientGatewayAudit({
-    action: deny.code === "wrong_tenant" ? "wrong_tenant" : "ownership_denied",
+    action,
     outcome: "deny",
     code: deny.code,
     authUserId: ctx.authUserId,

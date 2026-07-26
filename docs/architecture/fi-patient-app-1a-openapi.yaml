@@ -1,13 +1,14 @@
 openapi: 3.1.0
 info:
   title: Follicle Intelligence Patient Gateway API
-  version: 1.0.2
-  summary: FI Patient Gateway API — 1B auth + 1C imaging implemented; remaining domains proposed
+  version: 1.0.3
+  summary: FI Patient Gateway API — 1B auth + 1C imaging + 1D journey/appointments implemented; remaining domains proposed
   description: |
     `/api/patient/v1` surface for an external patient mobile client.
 
     **1B implemented:** authentication foundation + `GET /api/patient/v1/me`.
     **1C implemented:** secure imaging list + signed upload intent + complete.
+    **1D implemented:** patient-safe journey + appointments (read-only).
     Remaining domain paths below remain proposed until later tickets.
 
     **Identity model:** Supabase Auth user (`auth.users.id`) linked via
@@ -25,15 +26,19 @@ info:
     wrong-tenant claims, and foreign patient-id claims are denied.
 
     **Tenant isolation:** resolved from the portal patient row; ownership guards
-    require `tenant_id` + `patient_id` match for future domain routes.
-x-fi-ticket: FI-PATIENT-APP-1C
-x-fi-status: imaging-implemented
+    require `tenant_id` + `patient_id` match for domain routes. Journey and
+    appointment reads re-derive identity server-side on every request.
+x-fi-ticket: FI-PATIENT-APP-1D
+x-fi-status: journey-appointments-implemented
 x-fi-constraints:
-  - no_mobile_app_implementation_in_1c
-  - no_patient_data_migration_in_1c
-  - no_schema_changes_in_1c
-  - no_messaging_in_1c
+  - no_mobile_app_implementation_in_1d
+  - no_patient_data_migration_in_1d
+  - no_schema_changes_in_1d
+  - no_messaging_in_1d
+  - no_billing_in_1d
+  - no_appointment_mutation_in_1d
   - no_raw_storage_paths_in_responses
+  - no_staff_notes_in_patient_responses
 
 servers:
   - url: https://{host}
@@ -48,8 +53,10 @@ tags:
     description: Patient-safe profile / clinic context
   - name: Imaging
     description: Clinical photography upload and patient-safe viewing
+  - name: Journey
+    description: Patient-safe FiOS journey stage and next action
   - name: Appointments
-    description: Patient appointment visibility and limited intents
+    description: Patient appointment visibility (read-only in 1D)
   - name: Medications
     description: Prescription lines and reorder requests
   - name: Account
@@ -302,6 +309,152 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
 
+  /api/patient/v1/journey:
+    get:
+      tags: [Journey]
+      operationId: getPatientJourney
+      summary: Patient-safe journey stage and next action
+      description: |
+        **Implemented (FI-PATIENT-APP-1D).**
+
+        Requires `Authorization: Bearer <supabase_access_token>`.
+        Server resolves canonical patient/tenant via `requirePatientGatewayContext`,
+        derives journey state from existing FiOS signals (`loadPatientJourneySignals`
+        + optional persisted override), and returns a patient-safe stage vocabulary
+        (`consultation` | `treatment` | `procedure` | `recovery` | `review` | `audit`).
+
+        `nextAction` is always server-derived from FiOS state + upcoming owned
+        appointments (e.g. `attend_appointment`, `upload_images`, `request_review`).
+        Client-supplied `patientId` cannot alter the resolved identity.
+        Internal workflow names, staff blockers, and admin hrefs are not exposed.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          description: Optional claim only — mismatch denies; never used for resolution
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: query
+          required: false
+          description: Optional claim only — mismatch denies; never used for resolution
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Patient-safe journey
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayJourneyResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/appointments:
+    get:
+      tags: [Appointments]
+      operationId: listPatientGatewayAppointments
+      summary: List upcoming and past appointments for the authenticated patient
+      description: |
+        **Implemented (FI-PATIENT-APP-1D).**
+
+        Loads bookings via `loadBookingsForPatient(serverTenantId, serverPatientId)`
+        only. Returns patient-safe DTOs split into `upcoming` / `past` using
+        instant comparison (timezone-safe). Staff notes, assignee IDs, revenue,
+        CRM anchors, and metadata are excluded.
+
+        Read-only in 1D — no booking mutation.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          description: Optional claim only — mismatch denies; never used for resolution
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Patient-owned appointments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayAppointmentListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/appointments/{appointmentId}:
+    get:
+      tags: [Appointments]
+      operationId: getPatientGatewayAppointment
+      summary: Get one appointment after ownership re-check
+      description: |
+        **Implemented (FI-PATIENT-APP-1D).**
+
+        Appointment IDs are untrusted. Server loads the booking for the
+        resolved tenant, then re-verifies `tenant_id` + `patient_id` ownership
+        before returning. Unlinked, foreign-patient, or wrong-tenant rows fail closed
+        (`ownership_denied` / `wrong_tenant` / `not_found`).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Owned appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayAppointmentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/patient/v1/appointments/{appointmentId}/change-request:
+    post:
+      tags: [Appointments]
+      operationId: requestPatientAppointmentChange
+      summary: Request an appointment change (future — not implemented in 1D)
+      description: |
+        **Deferred (FI-PATIENT-APP-1D.1+).**
+
+        1D is read-only. Do not mutate calendar bookings from the mobile client.
+        A future change-request endpoint may record a patient intent for staff
+        review without auto-rescheduling.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "501":
+          description: Not implemented in 1D
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+
   /api/patient/v1/tenants/{tenantId}/visual-summary:
     get:
       tags: [Imaging]
@@ -333,6 +486,10 @@ paths:
       operationId: listPatientAppointments
       summary: List appointments for the linked patient
       description: |
+        **Superseded by** `GET /api/patient/v1/appointments` (FI-PATIENT-APP-1D).
+        Kept as a historical proposed shape; do not implement the tenant-scoped
+        variant for the mobile gateway.
+
         Server loads via `loadBookingsForPatient(tenantId, resolvedPatientId)`
         and maps to a patient-safe DTO (no staff IDs, internal CRM lead fields,
         or operator notes unless explicitly patient-visible).
@@ -888,8 +1045,130 @@ components:
             additionalProperties: true
             description: Sanitized patient portal visual summary item
 
+    PatientGatewayJourneyStep:
+      type: object
+      required: [key, label, status, completedAt]
+      properties:
+        key:
+          type: string
+          enum: [consultation, treatment, procedure, recovery, review, audit]
+        label:
+          type: string
+        status:
+          type: string
+          enum: [completed, current, upcoming]
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    PatientGatewayNextAction:
+      type: object
+      required: [type, label, dueAt, actionKey]
+      properties:
+        type:
+          type: string
+          enum: [attend_appointment, upload_images, request_review, await_clinic, none]
+        label:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        actionKey:
+          type: string
+
+    PatientGatewayJourneyResponse:
+      type: object
+      required: [ok, stage, stageLabel, progress, steps, nextAction]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        stage:
+          type: string
+          enum: [consultation, treatment, procedure, recovery, review, audit]
+        stageLabel:
+          type: string
+        progress:
+          type: object
+          required: [currentStep, totalSteps]
+          properties:
+            currentStep:
+              type: integer
+              minimum: 1
+            totalSteps:
+              type: integer
+              minimum: 1
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientGatewayJourneyStep"
+        nextAction:
+          $ref: "#/components/schemas/PatientGatewayNextAction"
+
+    PatientGatewayAppointment:
+      type: object
+      required: [id, type, title, startAt, endAt, location, status, canRequestChange]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          description: Booking type code (patient-safe; not staff procedure internals)
+        title:
+          type: string
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        location:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+              nullable: true
+        status:
+          type: string
+          enum: [scheduled, confirmed, completed, cancelled, no_show]
+        canRequestChange:
+          type: boolean
+          description: Informational only in 1D — no mutation endpoint is live
+
+    PatientGatewayAppointmentListResponse:
+      type: object
+      required: [ok, upcoming, past]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        upcoming:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientGatewayAppointment"
+        past:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientGatewayAppointment"
+
+    PatientGatewayAppointmentResponse:
+      type: object
+      required: [ok, appointment]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        appointment:
+          $ref: "#/components/schemas/PatientGatewayAppointment"
+
     PatientAppointment:
       type: object
+      description: Legacy proposed shape — superseded by PatientGatewayAppointment
       required: [booking_id, start_at, end_at, status, title]
       properties:
         booking_id:
@@ -918,6 +1197,7 @@ components:
 
     AppointmentListResponse:
       type: object
+      description: Legacy proposed shape — superseded by PatientGatewayAppointmentListResponse
       required: [ok, appointments]
       properties:
         ok:

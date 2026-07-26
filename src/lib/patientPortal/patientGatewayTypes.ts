@@ -22,6 +22,7 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "storage_missing",
   "path_mismatch",
   "consent_required",
+  "not_found",
 ] as const;
 
 export type PatientGatewayDenyCode = (typeof PATIENT_GATEWAY_DENY_CODES)[number];
@@ -41,7 +42,7 @@ export type PatientGatewayContext = {
 export type PatientGatewayDeny = {
   ok: false;
   code: PatientGatewayDenyCode;
-  status: 400 | 401 | 403 | 409 | 500;
+  status: 400 | 401 | 403 | 404 | 409 | 500;
   message: string;
 };
 
@@ -88,4 +89,11 @@ export type PatientGatewayAuditAction =
   | "upload_intent_denied"
   | "upload_completed"
   | "upload_completion_denied"
-  | "upload_replay_denied";
+  | "upload_replay_denied"
+  | "journey_read_success"
+  | "journey_read_denied"
+  | "appointments_list_success"
+  | "appointments_list_denied"
+  | "appointment_read_success"
+  | "appointment_read_denied"
+  | "appointment_ownership_denied";

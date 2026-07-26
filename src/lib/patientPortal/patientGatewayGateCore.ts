@@ -20,7 +20,7 @@ export type PortalPatientMappingRow = {
 
 export function patientGatewayDeny(
   code: PatientGatewayDenyCode,
-  status: 400 | 401 | 403 | 409 | 500,
+  status: 400 | 401 | 403 | 404 | 409 | 500,
   message: string
 ): PatientGatewayDeny {
   return { ok: false, code, status, message };
