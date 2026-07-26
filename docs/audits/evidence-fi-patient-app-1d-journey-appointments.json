@@ -1,0 +1,48 @@
+{
+  "ticket": "FI-PATIENT-APP-1D",
+  "verdict": "GREEN",
+  "closedAt": "2026-07-27",
+  "openapiVersion": "1.0.3",
+  "endpoints": [
+    "GET /api/patient/v1/journey",
+    "GET /api/patient/v1/appointments",
+    "GET /api/patient/v1/appointments/{appointmentId}"
+  ],
+  "deferred": [
+    "POST /api/patient/v1/appointments/{appointmentId}/change-request"
+  ],
+  "reuse": {
+    "journey": [
+      "loadPatientJourneySignals",
+      "derivePatientJourneyStateFromSignals",
+      "loadPatientJourneyStateRow"
+    ],
+    "appointments": ["loadBookingsForPatient", "loadBookingForTenant"],
+    "identity": ["requirePatientGatewayContext"]
+  },
+  "auditActions": [
+    "journey_read_success",
+    "journey_read_denied",
+    "appointments_list_success",
+    "appointments_list_denied",
+    "appointment_read_success",
+    "appointment_read_denied",
+    "appointment_ownership_denied"
+  ],
+  "tests": {
+    "command": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/patientPortal/patientGateway*.test.ts",
+    "passed": 68,
+    "failed": 0,
+    "suites": [
+      "1B gateway",
+      "1C imaging",
+      "1D journey",
+      "1D appointments"
+    ]
+  },
+  "lint": "pass",
+  "typecheck": "pass",
+  "schemaMigrations": false,
+  "mobileApp": false,
+  "appointmentMutations": false
+}
