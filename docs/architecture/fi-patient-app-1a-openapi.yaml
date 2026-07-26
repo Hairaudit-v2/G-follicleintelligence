@@ -1,0 +1,1044 @@
+openapi: 3.1.0
+info:
+  title: Follicle Intelligence Patient Gateway API
+  version: 1.0.1
+  summary: FI Patient Gateway API — 1B foundation implemented; remaining domains proposed
+  description: |
+    `/api/patient/v1` surface for an external patient mobile client.
+
+    **1B implemented:** authentication foundation + `GET /api/patient/v1/me`.
+    Remaining domain paths below remain proposed until later tickets.
+
+    **Identity model:** Supabase Auth user (`auth.users.id`) linked via
+    `fi_patients.portal_auth_user_id`. Canonical patient identity for all gateway
+    operations is `fi_patients.id` resolved server-side — never trusted from the
+    client body, query, or headers.
+
+    **Auth (implemented):** `Authorization: Bearer <supabase_access_token>` is
+    required for `/api/patient/v1/*`. Cookie sessions are intentionally not used
+    as a fallback on this namespace (web portal cookie flows remain on `/patient/*`).
+    Staff elevators (`x-fi-admin-key` / admin query keys) are rejected.
+
+    **Fail-closed mapping:** missing token, invalid token, unlinked auth user,
+    ambiguous portal mappings, inactive/archived/deceased/duplicate patients,
+    wrong-tenant claims, and foreign patient-id claims are denied.
+
+    **Tenant isolation:** resolved from the portal patient row; ownership guards
+    require `tenant_id` + `patient_id` match for future domain routes.
+x-fi-ticket: FI-PATIENT-APP-1B
+x-fi-status: foundation-implemented
+x-fi-constraints:
+  - no_mobile_app_implementation_in_1b
+  - no_patient_data_migration_in_1b
+  - no_schema_changes_in_1b
+  - no_messaging_in_1b
+
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: follicleintelligence.ai
+
+tags:
+  - name: Session
+    description: Auth-bound identity and portal linkage
+  - name: Profile
+    description: Patient-safe profile / clinic context
+  - name: Imaging
+    description: Clinical photography upload and patient-safe viewing
+  - name: Appointments
+    description: Patient appointment visibility and limited intents
+  - name: Medications
+    description: Prescription lines and reorder requests
+  - name: Account
+    description: Patient-safe account / payment summary
+  - name: Messaging
+    description: Deferred — no patient inbox exists today
+  - name: Consent
+    description: Trial / photography consent status for gated uploads
+
+paths:
+  /api/patient/v1/me:
+    get:
+      tags: [Profile]
+      operationId: getPatientMe
+      summary: Patient-safe profile for the authenticated portal patient
+      description: |
+        **Implemented (FI-PATIENT-APP-1B).**
+
+        Requires `Authorization: Bearer <supabase_access_token>`.
+        Server resolves `auth.users.id` via `resolveAuthUserId(request)`, then
+        loads the unique `fi_patients` row with matching `portal_auth_user_id`
+        (`requirePatientGatewayContext`).
+
+        Client-supplied `patientId` / `tenantId` (query, headers, or body) are
+        never used for resolution. If provided and mismatched, the request is
+        denied (`ownership_denied` / `wrong_tenant`).
+
+        Response excludes `portal_auth_user_id`, admin notes, CRM internals,
+        service-role secrets, and signed URLs.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          description: Optional claim only — mismatch denies; never used for resolution
+          schema:
+            type: string
+            format: uuid
+        - name: tenantId
+          in: query
+          required: false
+          description: Optional claim only — mismatch denies; never used for resolution
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Patient-safe profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientMeResponse"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+              examples:
+                missing:
+                  value: { ok: false, error: "Authentication required.", code: "unauthenticated" }
+                invalid:
+                  value: { ok: false, error: "Invalid or expired credentials.", code: "invalid_token" }
+        "403":
+          description: Unlinked, inactive, ambiguous, wrong-tenant, ownership, or staff credential rejection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+              examples:
+                unlinked:
+                  value:
+                    {
+                      ok: false,
+                      error: "No patient portal linkage found for this account.",
+                      code: "unlinked",
+                    }
+                ownership:
+                  value:
+                    {
+                      ok: false,
+                      error: "Patient identity mismatch. Canonical patient is resolved server-side.",
+                      code: "ownership_denied",
+                    }
+
+  /api/patient/v1/tenants/{tenantId}/consent:
+    get:
+      tags: [Consent]
+      operationId: getPatientConsentStatus
+      summary: Photography / treatment consent gate status
+      description: |
+        Wraps `loadTrialConsentGateStatus`. When consent is required and missing,
+        imaging uploads must fail closed.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "200":
+          description: Consent gate status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsentStatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/images:
+    get:
+      tags: [Imaging]
+      operationId: listPatientImages
+      summary: List patient-safe released images (and optional own held uploads)
+      description: |
+        Default list = images with `patient_portal_release_status = released`
+        via `loadPatientSafeImagingExportCardsForPatient`.
+
+        Optional `include_own_held=true` returns the caller's own uploads that are
+        still held (not yet clinic-released), still scoped to the resolved patient.
+        Staff AI / graft / diagnostic metadata must never appear.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - name: include_own_held
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 30
+      responses:
+        "200":
+          description: Image cards with short-lived signed preview URLs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientImageListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Imaging]
+      operationId: uploadPatientImage
+      summary: Upload a patient-portal clinical photograph
+      description: |
+        Multipart upload. Server derives `patient_id` exclusively from
+        `portal_auth_user_id` linkage — client may not supply a patient UUID.
+
+        Reuses `uploadPatientPortalImage` → `createPatientImageRecord` with
+        `capture_source=patient_portal`. New rows default to
+        `patient_portal_release_status=held`.
+
+        Requires consent gate when enabled for the tenant.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                imaging_protocol_slot_slug:
+                  type: string
+                  nullable: true
+                follow_up_interval:
+                  type: string
+                  nullable: true
+                caption:
+                  type: string
+                  nullable: true
+                  maxLength: 2000
+      responses:
+        "200":
+          description: Upload accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientImageUploadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/images/{imageId}:
+    get:
+      tags: [Imaging]
+      operationId: getPatientImage
+      summary: Fetch one image card + signed URL if authorized
+      description: |
+        Allowed when the image belongs to the resolved portal patient in the
+        tenant AND (`released` OR (`held` and uploaded by this portal patient)).
+        Storage paths are never returned raw — only signed URLs.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - $ref: "#/components/parameters/imageId"
+      responses:
+        "200":
+          description: Image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientImageCard"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/patient/v1/tenants/{tenantId}/visual-summary:
+    get:
+      tags: [Imaging]
+      operationId: getPatientVisualSummary
+      summary: Patient-visible visual summary reports
+      description: |
+        Reuses patient portal visual summary loaders
+        (`loadPatientVisualSummary…` / sanitize helpers). Staff-only AI fields
+        redacted.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "200":
+          description: Visual summary bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisualSummaryResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/appointments:
+    get:
+      tags: [Appointments]
+      operationId: listPatientAppointments
+      summary: List appointments for the linked patient
+      description: |
+        Server loads via `loadBookingsForPatient(tenantId, resolvedPatientId)`
+        and maps to a patient-safe DTO (no staff IDs, internal CRM lead fields,
+        or operator notes unless explicitly patient-visible).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Appointments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/appointments/{bookingId}:
+    get:
+      tags: [Appointments]
+      operationId: getPatientAppointment
+      summary: Get one appointment owned by the linked patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - $ref: "#/components/parameters/bookingId"
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientAppointment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/patient/v1/tenants/{tenantId}/appointments/{bookingId}/cancel-request:
+    post:
+      tags: [Appointments]
+      operationId: requestPatientAppointmentCancel
+      summary: Request cancellation of an upcoming appointment
+      description: |
+        **v1 policy (proposed):** create a patient cancel *request* / apply
+        `cancelBooking` only when tenant policy allows self-cancel and the
+        booking `patient_id` matches the portal patient.
+
+        Staff booking APIs under `/api/tenants/.../bookings` must not be called
+        directly by the mobile client (CRM write gate / staff PIN).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - $ref: "#/components/parameters/bookingId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 2000
+      responses:
+        "200":
+          description: Cancelled or request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentCancelResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/patient/v1/tenants/{tenantId}/appointments/{bookingId}/arrival-intent:
+    post:
+      tags: [Appointments]
+      operationId: postPatientArrivalIntent
+      summary: Record patient self-arrival intent for a booking
+      description: |
+        Authenticated alternative to public `POST /api/public/booking-arrival`
+        (token-based). Must verify booking ownership before recording intent.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - $ref: "#/components/parameters/bookingId"
+      responses:
+        "200":
+          description: Arrival intent recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/patient/v1/tenants/{tenantId}/medications:
+    get:
+      tags: [Medications]
+      operationId: listPatientMedications
+      summary: List medication portal lines for the linked patient
+      description: Reuses `loadMedicationPortalLines`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "200":
+          description: Medication lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicationListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/medications/reorders:
+    get:
+      tags: [Medications]
+      operationId: listPatientMedicationReorders
+      summary: List reorder requests for the linked patient
+      description: Reuses `loadMedicationReorderRequestsForPatient`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "200":
+          description: Reorder requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicationReorderListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Medications]
+      operationId: createPatientMedicationReorder
+      summary: Submit a medication reorder request
+      description: |
+        REST equivalent of `submitPatientMedicationReorderAction`.
+        Ownership: prescription `patient_id` must equal resolved portal patient.
+        Eligibility via `validatePatientReorderEligibility`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMedicationReorderRequest"
+      responses:
+        "200":
+          description: Reorder created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicationReorderCreatedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/patient/v1/tenants/{tenantId}/account:
+    get:
+      tags: [Account]
+      operationId: getPatientAccountSummary
+      summary: Patient-safe account / balance summary
+      description: |
+        Aggregates invoices / open payment requests for the resolved patient only.
+        Amounts and titles are allowed; internal finance workflow fields, staff
+        notes, and other patients must never appear.
+
+        Checkout continues via opaque public payment tokens / Stripe checkout URLs
+        already issued by FinancialOS (`/pay/{token}`), not by inventing new
+        payment-method vault APIs in v1.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "200":
+          description: Account summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountSummaryResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/tenants/{tenantId}/account/payment-requests/{publicToken}/pathway:
+    post:
+      tags: [Account]
+      operationId: selectPatientPaymentPathway
+      summary: Select payment pathway for an owned payment request token
+      description: |
+        Authenticated wrapper around FinancialOS Phase 2B public pathway
+        selection. Server must verify the payment request's `patient_id`
+        matches the portal patient before applying selection.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+        - name: publicToken
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 10
+            maxLength: 4096
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pathway_type]
+              properties:
+                pathway_type:
+                  type: string
+                  description: Public pathway option key from FinancialOS Phase 2B
+      responses:
+        "200":
+          description: Pathway selection result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentPathwaySelectionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/patient/v1/tenants/{tenantId}/messages:
+    get:
+      tags: [Messaging]
+      operationId: listPatientMessages
+      summary: Patient messaging inbox (deferred)
+      description: |
+        **Not implementable by reuse today.** Clinic→patient messaging exists as
+        staff CRM communications / ReceptionOS Twilio+Resend outbound. There is
+        no patient-authenticated message inbox table or portal UI.
+
+        v1 servers SHOULD return `501` with a stable error code until a later
+        phase introduces a patient-safe thread model (likely schema work — out of
+        1A scope).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/tenantId"
+      responses:
+        "501":
+          description: Messaging not available in v1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth access token (`supabase.auth.getSession()` / mobile SDK).
+
+  parameters:
+    tenantId:
+      name: tenantId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    imageId:
+      name: imageId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    bookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Forbidden:
+      description: Authenticated but not portal-linked for tenant, or feature gated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    NotFound:
+      description: Resource not found in tenant for this patient (no cross-tenant leak)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    Conflict:
+      description: State conflict (e.g. already cancelled, pending reorder exists)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+
+  schemas:
+    ErrorBody:
+      type: object
+      required: [ok, error]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
+        code:
+          type: string
+          description: Stable machine code when available
+          examples:
+            - unauthenticated
+            - invalid_token
+            - unlinked
+            - ambiguous_mapping
+            - inactive_patient
+            - wrong_tenant
+            - ownership_denied
+            - staff_credential_rejected
+            - consent_required
+            - imaging_disabled
+            - messaging_not_available
+
+    PatientMeResponse:
+      type: object
+      required: [ok, patientId, firstName, lastName, preferredName, clinic]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        patientId:
+          type: string
+          format: uuid
+          description: Canonical foundation patient id (`fi_patients.id`)
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        preferredName:
+          type: string
+          nullable: true
+        clinic:
+          type: object
+          required: [id, name, branding]
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Public clinic routing id (tenant id used by portal URLs)
+            name:
+              type: string
+              nullable: true
+            branding:
+              type: object
+              required: [logoUrl, primaryColor, secondaryColor, accentColor]
+              properties:
+                logoUrl:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: Public http(s) logo only — never storage paths or signed URLs
+                primaryColor:
+                  type: string
+                  nullable: true
+                secondaryColor:
+                  type: string
+                  nullable: true
+                accentColor:
+                  type: string
+                  nullable: true
+
+    ConsentStatusResponse:
+      type: object
+      required: [ok, required, satisfied]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        required:
+          type: boolean
+        satisfied:
+          type: boolean
+        patient_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    PatientImageCard:
+      type: object
+      required: [image_id, release_status, preview_signed_url]
+      properties:
+        image_id:
+          type: string
+          format: uuid
+        release_status:
+          type: string
+          enum: [held, released]
+        caption:
+          type: string
+          nullable: true
+        taken_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        category_label:
+          type: string
+          nullable: true
+        preview_signed_url:
+          type: string
+          format: uri
+          nullable: true
+        preview_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        safe_status_label:
+          type: string
+          nullable: true
+          description: Patient-safe export wording only — no diagnosis
+
+    PatientImageListResponse:
+      type: object
+      required: [ok, patient_id, tenant_id, cards]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        patient_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientImageCard"
+
+    PatientImageUploadResponse:
+      type: object
+      required: [ok, image_id, release_status]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        image_id:
+          type: string
+          format: uuid
+        release_status:
+          type: string
+          enum: [held]
+          description: Uploads always start held pending clinic release
+        quality_blocked:
+          type: boolean
+          default: false
+
+    VisualSummaryResponse:
+      type: object
+      required: [ok, items]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            description: Sanitized patient portal visual summary item
+
+    PatientAppointment:
+      type: object
+      required: [booking_id, start_at, end_at, status, title]
+      properties:
+        booking_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        timezone:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        can_request_cancel:
+          type: boolean
+        can_record_arrival:
+          type: boolean
+
+    AppointmentListResponse:
+      type: object
+      required: [ok, appointments]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        appointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientAppointment"
+
+    AppointmentCancelResponse:
+      type: object
+      required: [ok, outcome]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        outcome:
+          type: string
+          enum: [cancelled, request_recorded]
+        booking_id:
+          type: string
+          format: uuid
+
+    MedicationLine:
+      type: object
+      additionalProperties: true
+      description: Shape aligned with MedicationPortalLine loader output (patient-safe fields only)
+
+    MedicationListResponse:
+      type: object
+      required: [ok, lines]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/MedicationLine"
+
+    MedicationReorder:
+      type: object
+      additionalProperties: true
+      description: Shape aligned with FiMedicationReorderRequestRow (patient-visible fields)
+
+    MedicationReorderListResponse:
+      type: object
+      required: [ok, requests]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        requests:
+          type: array
+          items:
+            $ref: "#/components/schemas/MedicationReorder"
+
+    CreateMedicationReorderRequest:
+      type: object
+      required: [prescription_item_id, delivery_address]
+      properties:
+        prescription_item_id:
+          type: string
+          format: uuid
+        delivery_address:
+          type: string
+          minLength: 5
+          maxLength: 8000
+        payment_acknowledged:
+          type: boolean
+          description: Required when reorder fee payment is required (current stub)
+
+    MedicationReorderCreatedResponse:
+      type: object
+      required: [ok, id, status]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+
+    AccountOpenItem:
+      type: object
+      required: [kind, title, amount_due_cents, currency, status]
+      properties:
+        kind:
+          type: string
+          enum: [invoice, payment_request]
+        title:
+          type: string
+        amount_due_cents:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+        public_payment_token:
+          type: string
+          nullable: true
+        checkout_url:
+          type: string
+          format: uri
+          nullable: true
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    AccountSummaryResponse:
+      type: object
+      required: [ok, open_items, currency]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        currency:
+          type: string
+          nullable: true
+        balance_due_cents:
+          type: integer
+          nullable: true
+        open_items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountOpenItem"
+
+    PaymentPathwaySelectionResponse:
+      type: object
+      required: [ok, pathway_type, status]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        pathway_type:
+          type: string
+        status:
+          type: string
+        confirmation_message:
+          type: string
+          nullable: true
+        continue_to_checkout:
+          type: boolean
+        checkout_url:
+          type: string
+          format: uri
+          nullable: true
