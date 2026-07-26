@@ -1,0 +1,43 @@
+{
+  "ticket": "FI-PATIENT-APP-1B",
+  "verdict": "GREEN",
+  "closed": "2026-07-27",
+  "scope": {
+    "implemented": [
+      "requirePatientGatewayContext",
+      "GET /api/patient/v1/me",
+      "ownership guards",
+      "patient_gateway_audit structured logs",
+      "fail-closed tests A-I",
+      "OpenAPI v1.0.1 /me auth contract"
+    ],
+    "not_implemented": [
+      "mobile application",
+      "messaging",
+      "appointments API",
+      "billing API",
+      "imaging list API",
+      "medications REST",
+      "schema changes",
+      "patient identity migration"
+    ]
+  },
+  "security_proofs": {
+    "A_valid_bearer": "allow — resolves portal patient only",
+    "B_no_bearer": "401 unauthenticated",
+    "C_invalid_bearer": "401 invalid_token",
+    "D_unlinked": "403 unlinked",
+    "E_ambiguous_mapping": "403 ambiguous_mapping",
+    "F_foreign_patient_claim": "403 ownership_denied",
+    "G_wrong_tenant": "403 wrong_tenant",
+    "H_inactive_patient": "403 inactive_patient",
+    "I_staff_admin_key": "403 staff_credential_rejected"
+  },
+  "tests": {
+    "command": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test src/lib/patientPortal/patientGatewayGateCore.test.ts src/lib/patientPortal/patientGatewayOwnershipCore.test.ts src/lib/patientPortal/patientGatewayMeCore.test.ts src/lib/patientPortal/patientGatewayGate.server.test.ts",
+    "passed": 28,
+    "failed": 0
+  },
+  "production_mutations": false,
+  "schema_changes": false
+}
