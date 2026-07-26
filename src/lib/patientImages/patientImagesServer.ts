@@ -728,6 +728,203 @@ export async function createPatientImageRecord(
   };
 }
 
+export type RegisterPreuploadedPatientImageInput = {
+  tenantId: string;
+  patientId: string;
+  imageId: string;
+  storageBucket: string;
+  storagePath: string;
+  contentType: string;
+  fileSizeBytes: number;
+  originalFilename: string;
+  imageCategory: unknown;
+  imagingLibraryAxis?: unknown;
+  anatomicalRegion?: unknown;
+  visitType?: string | null;
+  followUpInterval?: string | null;
+  imagingProtocolTemplateSlug?: string | null;
+  imagingProtocolSlotSlug?: string | null;
+  captureSource?: unknown;
+  actingUserId?: string | null;
+  metadata?: unknown;
+};
+
+/**
+ * Register an image row for an object already present in patient-images storage.
+ * Used by the patient gateway complete flow — does not change staff upload callers.
+ */
+export async function registerPreuploadedPatientImageRecord(
+  input: RegisterPreuploadedPatientImageInput,
+  client?: SupabaseClient
+): Promise<CreatePatientImageRecordResult> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = input.tenantId.trim();
+  const pid = input.patientId.trim();
+  const imageId = input.imageId.trim();
+  const storagePath = input.storagePath.trim();
+  const bucket = input.storageBucket.trim() || PATIENT_IMAGES_BUCKET_DEFAULT;
+  const { person_id } = await assertPatientInTenant(supabase, tid, pid);
+
+  const contentType = assertAllowedPatientImageContentType({
+    name: input.originalFilename,
+    type: input.contentType,
+    size: input.fileSizeBytes,
+  });
+
+  const imageCategory = normalizePatientImageCategory(input.imageCategory);
+  const imagingLibraryAxis = normalizeImagingLibraryAxis(input.imagingLibraryAxis);
+  const anatomicalRegion = normalizeImagingAnatomicalRegion(input.anatomicalRegion);
+  const visitType = normalizeBoundedOptText(input.visitType ?? null, 160, "visit_type");
+  const followUpInterval = normalizeBoundedOptText(
+    input.followUpInterval ?? null,
+    64,
+    "follow_up_interval"
+  );
+  const imagingProtocolTemplateSlug = normalizeBoundedOptText(
+    input.imagingProtocolTemplateSlug ?? null,
+    128,
+    "protocol template"
+  );
+  const imagingProtocolSlotSlug = normalizeBoundedOptText(
+    input.imagingProtocolSlotSlug ?? null,
+    128,
+    "protocol slot"
+  );
+  const metadata = assertPatientImageMetadataObject("metadata", input.metadata ?? {});
+  const now = new Date().toISOString();
+  const safeName = buildSafePatientImageFilename(input.originalFilename);
+
+  const insert = {
+    id: imageId,
+    tenant_id: tid,
+    patient_id: pid,
+    person_id,
+    case_id: null,
+    booking_id: null,
+    lead_id: null,
+    consultation_id: null,
+    form_instance_id: null,
+    image_category: imageCategory,
+    image_status: "active" as const,
+    patient_portal_release_status: "held" as const,
+    portal_released_at: null,
+    portal_released_by_fi_user_id: null,
+    imaging_library_axis: imagingLibraryAxis,
+    clinic_id: null,
+    captured_by_staff_id: null,
+    device_type: null,
+    anatomical_region: anatomicalRegion,
+    visit_type: visitType,
+    follow_up_interval: followUpInterval,
+    imaging_protocol_template_slug: imagingProtocolTemplateSlug,
+    imaging_protocol_slot_slug: imagingProtocolSlotSlug,
+    storage_bucket: bucket,
+    storage_path: storagePath,
+    original_filename: input.originalFilename || null,
+    content_type: contentType,
+    file_size_bytes: input.fileSizeBytes,
+    caption: null,
+    taken_at: now,
+    metadata,
+    uploaded_by_user_id: input.actingUserId ?? null,
+    archived_at: null,
+    archived_by_user_id: null,
+    archive_reason: null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  const { data: objectBlob, error: downloadErr } = await supabase.storage
+    .from(bucket)
+    .download(storagePath);
+  if (downloadErr || !objectBlob) {
+    throw new Error(downloadErr?.message ?? "Uploaded storage object not found.");
+  }
+
+  const file = new File([objectBlob], safeName, { type: contentType });
+
+  const { data: ins, error: insErr } = await supabase
+    .from("fi_patient_images")
+    .insert(insert)
+    .select("*")
+    .single();
+  if (insErr) throw new Error(insErr.message);
+
+  const mappedRow = mapRow(ins as Record<string, unknown>);
+
+  void publishPatientEvent({
+    tenantId: tid,
+    clinicId: mappedRow.clinic_id,
+    eventType: "patient_images_uploaded",
+    entityId: mappedRow.id,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: pid,
+      case_id: mappedRow.case_id,
+      upload_count: 1,
+      image_category: mappedRow.image_category,
+      source: "patient_gateway_v1",
+    },
+  });
+
+  let attribution: PatientImagePostCaptureResult | undefined;
+  let finalRow = mappedRow;
+
+  try {
+    const pipeline = await runPatientImagePostCapturePipeline(
+      {
+        tenantId: tid,
+        patientId: pid,
+        file,
+        imageCategory,
+        imagingLibraryAxis,
+        anatomicalRegion,
+        visitType,
+        followUpInterval,
+        imagingProtocolTemplateSlug,
+        imagingProtocolSlotSlug,
+        captureSource: input.captureSource ?? "patient_portal",
+        captureType: "upload",
+        actingUserId: input.actingUserId ?? null,
+        metadata,
+        imageId,
+        safeFilename: safeName,
+        contentType,
+        protocolSessionId: null,
+      },
+      mappedRow,
+      supabase
+    );
+
+    if (pipeline.quality_blocked) {
+      await supabase.from("fi_patient_images").delete().eq("tenant_id", tid).eq("id", imageId);
+      throw new Error(
+        pipeline.quality.alert_message ?? "Image quality too low. Please retake photo."
+      );
+    }
+
+    finalRow = mapRow(pipeline.updatedRow);
+    attribution = {
+      metadata_patch: pipeline.metadata_patch,
+      quality: pipeline.quality,
+      derivatives: pipeline.derivatives,
+      classification: pipeline.classification,
+      timeline_entry: pipeline.timeline_entry,
+      watermark_applied: pipeline.watermark_applied,
+      marketing_version_created: pipeline.marketing_version_created,
+      quality_blocked: pipeline.quality_blocked,
+    };
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("Image quality too low")) throw e;
+  }
+
+  return {
+    row: finalRow,
+    changed_keys: ["created"],
+    ...(attribution ? { attribution } : {}),
+  };
+}
+
 function editableSnapshotFromRow(row: PatientImageRow): PatientImageEditableSnapshot {
   return {
     image_category: row.image_category,

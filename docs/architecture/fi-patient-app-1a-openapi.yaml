@@ -1,12 +1,13 @@
 openapi: 3.1.0
 info:
   title: Follicle Intelligence Patient Gateway API
-  version: 1.0.1
-  summary: FI Patient Gateway API — 1B foundation implemented; remaining domains proposed
+  version: 1.0.2
+  summary: FI Patient Gateway API — 1B auth + 1C imaging implemented; remaining domains proposed
   description: |
     `/api/patient/v1` surface for an external patient mobile client.
 
     **1B implemented:** authentication foundation + `GET /api/patient/v1/me`.
+    **1C implemented:** secure imaging list + signed upload intent + complete.
     Remaining domain paths below remain proposed until later tickets.
 
     **Identity model:** Supabase Auth user (`auth.users.id`) linked via
@@ -25,13 +26,14 @@ info:
 
     **Tenant isolation:** resolved from the portal patient row; ownership guards
     require `tenant_id` + `patient_id` match for future domain routes.
-x-fi-ticket: FI-PATIENT-APP-1B
-x-fi-status: foundation-implemented
+x-fi-ticket: FI-PATIENT-APP-1C
+x-fi-status: imaging-implemented
 x-fi-constraints:
-  - no_mobile_app_implementation_in_1b
-  - no_patient_data_migration_in_1b
-  - no_schema_changes_in_1b
-  - no_messaging_in_1b
+  - no_mobile_app_implementation_in_1c
+  - no_patient_data_migration_in_1c
+  - no_schema_changes_in_1c
+  - no_messaging_in_1c
+  - no_raw_storage_paths_in_responses
 
 servers:
   - url: https://{host}
@@ -158,91 +160,87 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
-  /api/patient/v1/tenants/{tenantId}/images:
+  /api/patient/v1/images:
     get:
       tags: [Imaging]
       operationId: listPatientImages
-      summary: List patient-safe released images (and optional own held uploads)
+      summary: List images for the authenticated portal patient
       description: |
-        Default list = images with `patient_portal_release_status = released`
-        via `loadPatientSafeImagingExportCardsForPatient`.
+        **Implemented (FI-PATIENT-APP-1C).**
 
-        Optional `include_own_held=true` returns the caller's own uploads that are
-        still held (not yet clinic-released), still scoped to the resolved patient.
-        Staff AI / graft / diagnostic metadata must never appear.
+        Returns active `fi_patient_images` rows for the server-resolved patient/tenant
+        only. Media is exposed as short-lived signed `thumbnailUrl` values — never
+        raw storage paths. Staff AI / graft / diagnostic metadata is omitted.
+
+        Patient-facing category vocabulary uses gateway slots
+        (`front_hairline`, `top_crown`, `donor_area`) mapped server-side to FiOS
+        pathway fields.
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/tenantId"
-        - name: include_own_held
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: limit
           in: query
           schema:
             type: integer
             minimum: 1
             maximum: 100
-            default: 30
+            default: 40
       responses:
         "200":
-          description: Image cards with short-lived signed preview URLs
+          description: Patient-owned images
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatientImageListResponse"
+                $ref: "#/components/schemas/PatientGatewayImageListResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
 
+  /api/patient/v1/images/upload-intent:
     post:
       tags: [Imaging]
-      operationId: uploadPatientImage
-      summary: Upload a patient-portal clinical photograph
+      operationId: createPatientImageUploadIntent
+      summary: Create a short-lived signed upload capability
       description: |
-        Multipart upload. Server derives `patient_id` exclusively from
-        `portal_auth_user_id` linkage — client may not supply a patient UUID.
+        **Implemented (FI-PATIENT-APP-1C).**
 
-        Reuses `uploadPatientPortalImage` → `createPatientImageRecord` with
-        `capture_source=patient_portal`. New rows default to
-        `patient_portal_release_status=held`.
-
-        Requires consent gate when enabled for the tenant.
+        Server derives patient/tenant from the Bearer session, validates the
+        patient-facing slot + MIME + size, selects bucket/path, and returns a
+        short-lived Supabase signed upload URL plus an HMAC `intentToken`.
+        No service-role credentials are returned.
       security:
         - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/tenantId"
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
-              required: [file]
+              required: [category, mimeType, fileSize]
               properties:
-                file:
+                category:
                   type: string
-                  format: binary
-                imaging_protocol_slot_slug:
+                  enum: [front_hairline, top_crown, donor_area]
+                mimeType:
                   type: string
-                  nullable: true
-                follow_up_interval:
-                  type: string
-                  nullable: true
-                caption:
-                  type: string
-                  nullable: true
-                  maxLength: 2000
+                  enum:
+                    - image/jpeg
+                    - image/png
+                    - image/webp
+                    - image/heic
+                    - image/heif
+                fileSize:
+                  type: integer
+                  minimum: 1
+                  maximum: 20971520
       responses:
         "200":
-          description: Upload accepted
+          description: Signed upload intent
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatientImageUploadResponse"
+                $ref: "#/components/schemas/PatientGatewayUploadIntentResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -250,33 +248,59 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
-  /api/patient/v1/tenants/{tenantId}/images/{imageId}:
-    get:
+  /api/patient/v1/images/complete:
+    post:
       tags: [Imaging]
-      operationId: getPatientImage
-      summary: Fetch one image card + signed URL if authorized
+      operationId: completePatientImageUpload
+      summary: Verify ownership and register a completed upload
       description: |
-        Allowed when the image belongs to the resolved portal patient in the
-        tenant AND (`released` OR (`held` and uploaded by this portal patient)).
-        Storage paths are never returned raw — only signed URLs.
+        **Implemented (FI-PATIENT-APP-1C).**
+
+        Verifies the HMAC intent against the current gateway context, rejects
+        expired/replayed/tampered intents, confirms the storage object exists at
+        the server-issued path, then registers via FiOS imaging services
+        (`registerPreuploadedPatientImageRecord`). New rows start `held`.
       security:
         - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/tenantId"
-        - $ref: "#/components/parameters/imageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [intentToken]
+              properties:
+                intentToken:
+                  type: string
+                storagePath:
+                  type: string
+                  description: Optional; if provided must exactly match the issued intent path
       responses:
         "200":
-          description: Image
+          description: Upload registered
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatientImageCard"
+                type: object
+                required: [ok, imageId, status]
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+                  imageId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [held]
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
 
   /api/patient/v1/tenants/{tenantId}/visual-summary:
     get:
@@ -707,6 +731,14 @@ components:
             - staff_credential_rejected
             - consent_required
             - imaging_disabled
+            - invalid_category
+            - invalid_mime
+            - file_too_large
+            - intent_invalid
+            - intent_expired
+            - intent_replay
+            - storage_missing
+            - path_mismatch
             - messaging_not_available
 
     PatientMeResponse:
@@ -775,77 +807,72 @@ components:
           format: uuid
           nullable: true
 
-    PatientImageCard:
+    PatientGatewayImageItem:
       type: object
-      required: [image_id, release_status, preview_signed_url]
+      required: [id, category, capturedAt, status, thumbnailUrl, thumbnailExpiresAt]
       properties:
-        image_id:
+        id:
           type: string
           format: uuid
-        release_status:
+        category:
           type: string
-          enum: [held, released]
-        caption:
-          type: string
-          nullable: true
-        taken_at:
+          description: Patient-facing slot or pathway slug (never staff AI labels)
+        capturedAt:
           type: string
           format: date-time
           nullable: true
-        created_at:
+        status:
           type: string
-          format: date-time
-        category_label:
-          type: string
-          nullable: true
-        preview_signed_url:
+          enum: [held, released, archived]
+        thumbnailUrl:
           type: string
           format: uri
           nullable: true
-        preview_expires_at:
+          description: Short-lived signed URL — never log this value
+        thumbnailExpiresAt:
           type: string
           format: date-time
           nullable: true
-        safe_status_label:
-          type: string
-          nullable: true
-          description: Patient-safe export wording only — no diagnosis
 
-    PatientImageListResponse:
+    PatientGatewayImageListResponse:
       type: object
-      required: [ok, patient_id, tenant_id, cards]
+      required: [ok, images]
       properties:
         ok:
           type: boolean
           const: true
-        patient_id:
-          type: string
-          format: uuid
-        tenant_id:
-          type: string
-          format: uuid
-        cards:
+        images:
           type: array
           items:
-            $ref: "#/components/schemas/PatientImageCard"
+            $ref: "#/components/schemas/PatientGatewayImageItem"
 
-    PatientImageUploadResponse:
+    PatientGatewayUploadIntentResponse:
       type: object
-      required: [ok, image_id, release_status]
+      required: [ok, intentToken, uploadUrl, expiresAt, imageId, headers]
       properties:
         ok:
           type: boolean
           const: true
-        image_id:
+        intentToken:
+          type: string
+          description: HMAC-bound completion token (server-scoped)
+        uploadUrl:
+          type: string
+          format: uri
+          description: Short-lived signed upload URL — never log this value
+        uploadToken:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+        imageId:
           type: string
           format: uuid
-        release_status:
-          type: string
-          enum: [held]
-          description: Uploads always start held pending clinic release
-        quality_blocked:
-          type: boolean
-          default: false
+        headers:
+          type: object
+          additionalProperties:
+            type: string
 
     VisualSummaryResponse:
       type: object

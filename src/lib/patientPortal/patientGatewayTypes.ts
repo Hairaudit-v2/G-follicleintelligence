@@ -12,6 +12,16 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "ownership_denied",
   "staff_credential_rejected",
   "misconfigured",
+  "imaging_disabled",
+  "invalid_category",
+  "invalid_mime",
+  "file_too_large",
+  "intent_invalid",
+  "intent_expired",
+  "intent_replay",
+  "storage_missing",
+  "path_mismatch",
+  "consent_required",
 ] as const;
 
 export type PatientGatewayDenyCode = (typeof PATIENT_GATEWAY_DENY_CODES)[number];
@@ -31,7 +41,7 @@ export type PatientGatewayContext = {
 export type PatientGatewayDeny = {
   ok: false;
   code: PatientGatewayDenyCode;
-  status: 401 | 403 | 500;
+  status: 400 | 401 | 403 | 409 | 500;
   message: string;
 };
 
@@ -71,4 +81,11 @@ export type PatientGatewayAuditAction =
   | "ownership_denied"
   | "inactive_patient"
   | "staff_credential_rejected"
-  | "me_ok";
+  | "me_ok"
+  | "images_list_success"
+  | "images_list_denied"
+  | "upload_intent_created"
+  | "upload_intent_denied"
+  | "upload_completed"
+  | "upload_completion_denied"
+  | "upload_replay_denied";
