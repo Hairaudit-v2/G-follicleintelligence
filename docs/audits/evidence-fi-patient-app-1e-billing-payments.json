@@ -1,0 +1,46 @@
+{
+  "ticket": "FI-PATIENT-APP-1E",
+  "verdict": "GREEN",
+  "closedAt": "2026-07-27",
+  "openapiVersion": "1.0.4",
+  "endpoints": [
+    "GET /api/patient/v1/billing",
+    "GET /api/patient/v1/invoices",
+    "GET /api/patient/v1/invoices/{invoiceId}",
+    "POST /api/patient/v1/invoices/{invoiceId}/payment-session"
+  ],
+  "webhookReuse": "POST /api/fi-payments/stripe/webhook",
+  "reuse": {
+    "summary": ["loadPatientInvoiceSummary"],
+    "checkout": ["createPaymentRequestForInvoice", "createStripePaymentProvider.createCheckoutSession"],
+    "reconciliation": ["recordGatewayPaymentSuccess", "resolveStripeCheckoutCompletedWebhookUpdate"]
+  },
+  "auditActions": [
+    "billing_summary_read_success",
+    "billing_summary_read_denied",
+    "invoices_list_success",
+    "invoices_list_denied",
+    "invoice_read_success",
+    "invoice_read_denied",
+    "invoice_ownership_denied",
+    "payment_session_created",
+    "payment_session_denied",
+    "payment_webhook_received",
+    "payment_webhook_verified",
+    "payment_webhook_rejected",
+    "payment_reconciled",
+    "payment_replay_ignored",
+    "payment_reconciliation_failed"
+  ],
+  "tests": {
+    "gatewayPassed": 85,
+    "webhookCorePassed": 4,
+    "failed": 0
+  },
+  "lint": "pass",
+  "typecheck": "pass",
+  "schemaMigrations": false,
+  "secondLedger": false,
+  "rawCardData": false,
+  "mobileApp": false
+}
