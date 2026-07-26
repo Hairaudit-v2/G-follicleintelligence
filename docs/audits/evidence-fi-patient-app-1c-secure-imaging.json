@@ -1,0 +1,37 @@
+{
+  "ticket": "FI-PATIENT-APP-1C",
+  "verdict": "GREEN",
+  "closed": "2026-07-27",
+  "endpoints": [
+    "GET /api/patient/v1/images",
+    "POST /api/patient/v1/images/upload-intent",
+    "POST /api/patient/v1/images/complete"
+  ],
+  "slots": ["front_hairline", "top_crown", "donor_area"],
+  "slot_mapping": {
+    "front_hairline": { "protocolSlotSlug": "fu_front", "imageCategory": "progress" },
+    "top_crown": { "protocolSlotSlug": "fu_top", "imageCategory": "progress" },
+    "donor_area": { "protocolSlotSlug": "fu_donor", "imageCategory": "progress" }
+  },
+  "security_proofs": {
+    "A_list_own_only": "pass",
+    "B_no_cross_patient": "pass",
+    "C_D_ownership_denied": "pass",
+    "E_invalid_category": "pass",
+    "F_invalid_mime": "pass",
+    "G_oversized": "pass",
+    "H_path_tamper": "pass",
+    "I_intent_replay": "pass",
+    "J_intent_expired": "pass",
+    "K_foreign_intent": "pass",
+    "L_staff_unchanged": "pass",
+    "M_portal_unchanged": "pass"
+  },
+  "tests": {
+    "passed": 21,
+    "failed": 0
+  },
+  "production_mutations": false,
+  "schema_changes": false,
+  "openapi_version": "1.0.2"
+}
