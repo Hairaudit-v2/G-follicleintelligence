@@ -1,14 +1,16 @@
 openapi: 3.1.0
 info:
   title: Follicle Intelligence Patient Gateway API
-  version: 1.0.3
-  summary: FI Patient Gateway API — 1B auth + 1C imaging + 1D journey/appointments implemented; remaining domains proposed
+  version: 1.0.4
+  summary: FI Patient Gateway API — 1B–1E auth, imaging, journey/appointments, billing/payments implemented; remaining domains proposed
   description: |
     `/api/patient/v1` surface for an external patient mobile client.
 
     **1B implemented:** authentication foundation + `GET /api/patient/v1/me`.
     **1C implemented:** secure imaging list + signed upload intent + complete.
     **1D implemented:** patient-safe journey + appointments (read-only).
+    **1E implemented:** billing summary, invoices, Stripe Checkout payment-session;
+    reconciliation via existing verified Stripe webhook (`POST /api/fi-payments/stripe/webhook`).
     Remaining domain paths below remain proposed until later tickets.
 
     **Identity model:** Supabase Auth user (`auth.users.id`) linked via
@@ -26,17 +28,23 @@ info:
     wrong-tenant claims, and foreign patient-id claims are denied.
 
     **Tenant isolation:** resolved from the portal patient row; ownership guards
-    require `tenant_id` + `patient_id` match for domain routes. Journey and
-    appointment reads re-derive identity server-side on every request.
-x-fi-ticket: FI-PATIENT-APP-1D
-x-fi-status: journey-appointments-implemented
+    require `tenant_id` + `patient_id` match for domain routes. Journey,
+    appointment, and invoice reads re-derive identity server-side on every request.
+
+    **Payments:** amount and currency are always server-derived from FiOS invoice
+    balance. Browser/app return URLs are never authoritative — only verified Stripe
+    webhook events reconcile payment success (idempotent).
+x-fi-ticket: FI-PATIENT-APP-1E
+x-fi-status: billing-payments-implemented
 x-fi-constraints:
-  - no_mobile_app_implementation_in_1d
-  - no_patient_data_migration_in_1d
-  - no_schema_changes_in_1d
-  - no_messaging_in_1d
-  - no_billing_in_1d
-  - no_appointment_mutation_in_1d
+  - no_mobile_app_implementation_in_1e
+  - no_patient_data_migration_in_1e
+  - no_schema_changes_in_1e
+  - no_messaging_in_1e
+  - no_second_ledger_in_1e
+  - no_raw_card_data
+  - no_client_declared_paid_status
+  - no_redirect_based_payment_confirmation
   - no_raw_storage_paths_in_responses
   - no_staff_notes_in_patient_responses
 
@@ -57,10 +65,12 @@ tags:
     description: Patient-safe FiOS journey stage and next action
   - name: Appointments
     description: Patient appointment visibility (read-only in 1D)
+  - name: Billing
+    description: Patient-safe account summary, invoices, and payment sessions
   - name: Medications
     description: Prescription lines and reorder requests
   - name: Account
-    description: Patient-safe account / payment summary
+    description: Legacy proposed account paths — superseded by /billing in 1E
   - name: Messaging
     description: Deferred — no patient inbox exists today
   - name: Consent
@@ -454,6 +464,151 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+
+  /api/patient/v1/billing:
+    get:
+      tags: [Billing]
+      operationId: getPatientBillingSummary
+      summary: Patient-safe account / billing summary
+      description: |
+        **Implemented (FI-PATIENT-APP-1E).**
+
+        Derives outstanding/paid totals from owned `fi_invoices` rows for the
+        server-resolved patient/tenant only. Amounts are major currency units
+        computed from FiOS cents. Client-supplied balances are never accepted.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Billing summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayBillingSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/invoices:
+    get:
+      tags: [Billing]
+      operationId: listPatientGatewayInvoices
+      summary: List invoices for the authenticated patient
+      description: |
+        **Implemented (FI-PATIENT-APP-1E).**
+
+        Returns patient-safe invoice DTOs only. Draft invoices are omitted.
+        Staff margins, commissions, CRM anchors, and metadata are excluded.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Invoice list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayInvoiceListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/invoices/{invoiceId}:
+    get:
+      tags: [Billing]
+      operationId: getPatientGatewayInvoice
+      summary: Get one invoice after ownership re-check
+      description: |
+        **Implemented (FI-PATIENT-APP-1E).**
+
+        Invoice IDs are untrusted. Ownership is re-verified against the
+        server-resolved patient/tenant. Includes patient-safe line items and
+        payment history labels (no PAN/CVV/provider secrets).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Owned invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayInvoiceDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/patient/v1/invoices/{invoiceId}/payment-session:
+    post:
+      tags: [Billing]
+      operationId: createPatientInvoicePaymentSession
+      summary: Create Stripe Checkout session for outstanding balance
+      description: |
+        **Implemented (FI-PATIENT-APP-1E).**
+
+        Server re-checks invoice ownership, verifies the invoice is payable,
+        derives outstanding amount + currency from FiOS, and creates a Stripe
+        Checkout session via existing `createPaymentRequestForInvoice`.
+
+        Optional body `amount` / `currency` claims are validated against
+        server-derived values then ignored for derivation — mismatches deny.
+
+        **Return contract:** success/cancel URLs (and deep links such as
+        `folios://payment/return`) only tell the app to refresh billing state.
+        They must never mark an invoice paid. Final settlement requires the
+        verified Stripe webhook at `POST /api/fi-payments/stripe/webhook`
+        (signature verification, idempotent event insert, amount/currency
+        reconciliation against the payment request / invoice balance).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                amount:
+                  type: number
+                  description: Optional claim only — must match server outstanding or request is denied
+                currency:
+                  type: string
+                  description: Optional claim only — must match invoice currency or request is denied
+      responses:
+        "200":
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGatewayPaymentSessionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
 
   /api/patient/v1/tenants/{tenantId}/visual-summary:
     get:
@@ -1165,6 +1320,155 @@ components:
           const: true
         appointment:
           $ref: "#/components/schemas/PatientGatewayAppointment"
+
+    PatientGatewayBillingSummary:
+      type: object
+      required: [ok, currency, outstandingBalance, paidTotal, nextPaymentDue, hasOutstandingBalance]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        currency:
+          type: string
+          example: AUD
+        outstandingBalance:
+          type: number
+        paidTotal:
+          type: number
+        nextPaymentDue:
+          type: object
+          nullable: true
+          required: [amount, dueAt, invoiceId]
+          properties:
+            amount:
+              type: number
+            dueAt:
+              type: string
+              nullable: true
+            invoiceId:
+              type: string
+              format: uuid
+        hasOutstandingBalance:
+          type: boolean
+
+    PatientGatewayInvoice:
+      type: object
+      required: [id, number, title, status, issuedAt, dueAt, currency, total, paid, outstanding, canPay]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, outstanding, partially_paid, paid, overdue, void, refunded]
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          nullable: true
+        currency:
+          type: string
+        total:
+          type: number
+        paid:
+          type: number
+        outstanding:
+          type: number
+        canPay:
+          type: boolean
+
+    PatientGatewayInvoiceListResponse:
+      type: object
+      required: [ok, invoices]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientGatewayInvoice"
+
+    PatientGatewayInvoiceDetailResponse:
+      type: object
+      required: [ok, invoice]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        invoice:
+          allOf:
+            - $ref: "#/components/schemas/PatientGatewayInvoice"
+            - type: object
+              required: [lineItems, payments]
+              properties:
+                lineItems:
+                  type: array
+                  items:
+                    type: object
+                    required: [description, quantity, amount]
+                    properties:
+                      description:
+                        type: string
+                      quantity:
+                        type: number
+                      amount:
+                        type: number
+                payments:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, amount, currency, status, paidAt, methodLabel]
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      amount:
+                        type: number
+                      currency:
+                        type: string
+                      status:
+                        type: string
+                        enum: [pending, succeeded, failed, refunded]
+                      paidAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      methodLabel:
+                        type: string
+
+    PatientGatewayPaymentSessionResponse:
+      type: object
+      required: [ok, invoiceId, checkoutUrl, expiresAt, currency, amount]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        invoiceId:
+          type: string
+          format: uuid
+        checkoutUrl:
+          type: string
+          format: uri
+          description: Stripe-hosted Checkout URL — never includes FiOS service-role credentials
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        currency:
+          type: string
+        amount:
+          type: number
+          description: Server-derived outstanding amount in major units
 
     PatientAppointment:
       type: object

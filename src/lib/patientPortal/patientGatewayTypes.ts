@@ -23,6 +23,10 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "path_mismatch",
   "consent_required",
   "not_found",
+  "payments_disabled",
+  "invoice_not_payable",
+  "amount_mismatch",
+  "currency_mismatch",
 ] as const;
 
 export type PatientGatewayDenyCode = (typeof PATIENT_GATEWAY_DENY_CODES)[number];
@@ -96,4 +100,19 @@ export type PatientGatewayAuditAction =
   | "appointments_list_denied"
   | "appointment_read_success"
   | "appointment_read_denied"
-  | "appointment_ownership_denied";
+  | "appointment_ownership_denied"
+  | "billing_summary_read_success"
+  | "billing_summary_read_denied"
+  | "invoices_list_success"
+  | "invoices_list_denied"
+  | "invoice_read_success"
+  | "invoice_read_denied"
+  | "invoice_ownership_denied"
+  | "payment_session_created"
+  | "payment_session_denied"
+  | "payment_webhook_received"
+  | "payment_webhook_verified"
+  | "payment_webhook_rejected"
+  | "payment_reconciled"
+  | "payment_replay_ignored"
+  | "payment_reconciliation_failed";

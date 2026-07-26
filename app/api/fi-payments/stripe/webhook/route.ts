@@ -10,6 +10,7 @@ import {
   recordGatewayPaymentFailure,
   recordGatewayPaymentSuccess,
 } from "@/src/lib/revenueOs/revenueInvoiceMutations.server";
+import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGatewayAudit.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,12 +29,29 @@ export async function POST(req: NextRequest) {
   const signatureHeader = req.headers.get("stripe-signature");
   const provider = createStripePaymentProvider();
 
+  writePatientGatewayAudit({
+    action: "payment_webhook_received",
+    outcome: "allow",
+    resourceKind: "payment",
+  });
+
   let rawEvent: unknown;
   try {
     rawEvent = await provider.verifyWebhook({ rawBody, signatureHeader });
   } catch {
+    writePatientGatewayAudit({
+      action: "payment_webhook_rejected",
+      outcome: "deny",
+      resourceKind: "payment",
+    });
     return NextResponse.json({ ok: false, error: "Invalid webhook signature" }, { status: 400 });
   }
+
+  writePatientGatewayAudit({
+    action: "payment_webhook_verified",
+    outcome: "allow",
+    resourceKind: "payment",
+  });
 
   const ev = rawEvent as { id?: string; type?: string };
   const supabase = supabaseAdmin();
@@ -59,6 +77,13 @@ export async function POST(req: NextRequest) {
 
   if (whe) {
     if (isStripeWebhookDuplicateInsert(whe)) {
+      writePatientGatewayAudit({
+        action: "payment_replay_ignored",
+        outcome: "allow",
+        tenantId: tenantHint,
+        resourceKind: "payment",
+        resourceId: ev.id ?? null,
+      });
       return NextResponse.json({ ok: true, duplicate: true });
     }
     return NextResponse.json({ ok: false, error: whe.message }, { status: 500 });
@@ -114,6 +139,14 @@ export async function POST(req: NextRequest) {
       await completedQ;
 
       if (rowUpdate.processing_status === "error") {
+        writePatientGatewayAudit({
+          action: "payment_reconciliation_failed",
+          outcome: "deny",
+          code: "misconfigured",
+          tenantId: mapped.tenantId,
+          resourceKind: "payment",
+          resourceId: mapped.invoiceId,
+        });
         logStructured("error", "stripe_webhook_payment_unresolved", {
           webhook_row_id: webhookRowId,
           stripe_event_id: ev.id ?? null,
@@ -121,6 +154,22 @@ export async function POST(req: NextRequest) {
           mapped_kind: mapped.kind,
           gateway_outcome: outcome.status,
           error_message: rowUpdate.error_message,
+        });
+      } else if (outcome.status === "duplicate_already_recorded") {
+        writePatientGatewayAudit({
+          action: "payment_replay_ignored",
+          outcome: "allow",
+          tenantId: mapped.tenantId,
+          resourceKind: "payment",
+          resourceId: mapped.invoiceId,
+        });
+      } else if (outcome.status === "payment_recorded") {
+        writePatientGatewayAudit({
+          action: "payment_reconciled",
+          outcome: "allow",
+          tenantId: mapped.tenantId,
+          resourceKind: "payment",
+          resourceId: mapped.invoiceId,
         });
       }
 

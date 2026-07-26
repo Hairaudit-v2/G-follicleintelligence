@@ -23,9 +23,11 @@ function withOwnershipAudit(
   const action =
     resourceKind === "appointment"
       ? ("appointment_ownership_denied" as const)
-      : deny.code === "wrong_tenant"
-        ? ("wrong_tenant" as const)
-        : ("ownership_denied" as const);
+      : resourceKind === "billing"
+        ? ("invoice_ownership_denied" as const)
+        : deny.code === "wrong_tenant"
+          ? ("wrong_tenant" as const)
+          : ("ownership_denied" as const);
   writePatientGatewayAudit({
     action,
     outcome: "deny",
