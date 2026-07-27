@@ -11,8 +11,8 @@ import {
 } from "@/src/lib/crm/crmHttp";
 import {
   assertFrontDeskPatientMessagesAccess,
-  loadFrontDeskPatientMessageQueue,
-} from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
+} from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessagesAccess.server";
+import { loadFrontDeskPatientMessageQueue } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
 import type { FrontDeskPatientMessageQueueFilter } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessagesCore";
 
 export const dynamic = "force-dynamic";

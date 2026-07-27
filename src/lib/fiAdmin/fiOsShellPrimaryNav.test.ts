@@ -149,6 +149,7 @@ test("resolveFiOsPrimarySidebarItems: consolidated front desk entry with preserv
   assert.ok(subIds.has("tomorrow-board"));
   assert.ok(subIds.has("front-desk-today"));
   assert.ok(subIds.has("front-desk-tomorrow"));
+  assert.ok(subIds.has("front-desk-messages"));
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations entry has no conversion board sub-link when enabled", () => {

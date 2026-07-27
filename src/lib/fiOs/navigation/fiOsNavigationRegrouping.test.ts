@@ -270,6 +270,7 @@ test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in M
   assert.deepEqual(frontIds, ["front-desk"]);
   assert.ok(frontSubIds.includes("front-desk-today"));
   assert.ok(frontSubIds.includes("front-desk-tomorrow"));
+  assert.ok(frontSubIds.includes("front-desk-messages"));
   assert.ok(!frontSubIds.includes("front-desk-clinic-flow"));
   assert.ok(!frontSubIds.includes("front-desk-reception-board"));
   assert.ok(!frontSubIds.includes("reception-os"));

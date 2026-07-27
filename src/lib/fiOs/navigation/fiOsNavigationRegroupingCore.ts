@@ -137,6 +137,7 @@ export const FI_OS_D6G_SUB_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId> = 
   "pathology-email-routes": "SETTINGS",
   "front-desk-today": "FRONT_DESK",
   "front-desk-tomorrow": "FRONT_DESK",
+  "front-desk-messages": "FRONT_DESK",
   "front-desk-reception-operations": "FRONT_DESK",
   "front-desk-clinic-flow": "FRONT_DESK",
   "front-desk-reception-board": "FRONT_DESK",

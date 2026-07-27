@@ -9,10 +9,8 @@ import {
   extractAdminKeyFromRequest,
   mapCrmRouteError,
 } from "@/src/lib/crm/crmHttp";
-import {
-  assertFrontDeskPatientMessagesAccess,
-  markFrontDeskPatientMessageHandled,
-} from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
+import { assertFrontDeskPatientMessagesAccess } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessagesAccess.server";
+import { markFrontDeskPatientMessageHandled } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
 
 export const dynamic = "force-dynamic";
 

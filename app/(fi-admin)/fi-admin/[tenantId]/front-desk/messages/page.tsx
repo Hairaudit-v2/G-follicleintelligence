@@ -3,10 +3,8 @@ import { notFound } from "next/navigation";
 
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { FrontDeskPatientMessagesBoard } from "@/src/components/fi-os/front-desk/FrontDeskPatientMessagesBoard";
-import {
-  assertFrontDeskPatientMessagesAccess,
-  loadFrontDeskPatientMessageQueue,
-} from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
+import { assertFrontDeskPatientMessagesAccess } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessagesAccess.server";
+import { loadFrontDeskPatientMessageQueue } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessages.server";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {

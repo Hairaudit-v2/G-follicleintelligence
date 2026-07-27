@@ -37,13 +37,14 @@ authenticatedTest.describe("FI-UX S3.4 Front Desk cutover @authenticated @smoke"
     await expect(page.getByLabel("Day summary")).toBeVisible({ timeout: 15_000 });
   });
 
-  authenticatedTest("exactly two Front Desk tabs: Today and Tomorrow", async ({ page }) => {
+  authenticatedTest("Front Desk tabs: Today, Tomorrow, and Messages", async ({ page }) => {
     await page.goto(`${BASE()}/front-desk`, { waitUntil: "domcontentloaded", timeout: 60_000 });
     const subNav = page.getByRole("navigation", { name: "Front desk navigation" });
     await expect(subNav).toBeVisible({ timeout: 30_000 });
     await expect(subNav.getByRole("link", { name: "Today" })).toBeVisible();
     await expect(subNav.getByRole("link", { name: "Tomorrow" })).toBeVisible();
-    await expect(subNav.getByRole("link")).toHaveCount(2);
+    await expect(subNav.getByRole("link", { name: /Messages/ })).toBeVisible();
+    await expect(subNav.getByRole("link")).toHaveCount(3);
     for (const absent of [
       "Reception operations",
       "Clinic flow",

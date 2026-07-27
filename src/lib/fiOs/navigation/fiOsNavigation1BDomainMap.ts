@@ -84,6 +84,7 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   },
   "front-desk-today": { domain: "Front Desk" },
   "front-desk-tomorrow": { domain: "Front Desk" },
+  "front-desk-messages": { domain: "Front Desk" },
   "front-desk-reception-operations": { domain: "Front Desk" },
   "front-desk-clinic-flow": { domain: "Front Desk" },
   "front-desk-reception-board": { domain: "Front Desk" },

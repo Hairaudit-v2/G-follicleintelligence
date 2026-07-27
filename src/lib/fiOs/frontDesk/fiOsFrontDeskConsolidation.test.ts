@@ -82,12 +82,12 @@ test("Front desk destination includes all required tabs and legacy deep links", 
   }
 });
 
-test("staff Front desk tabs are exactly Today and Tomorrow", () => {
+test("staff Front desk tabs are Today, Tomorrow, and Messages", () => {
   const tabLabels = FI_OS_FRONT_DESK_TABS.map((t) => t.label);
-  assert.deepEqual(tabLabels, ["Today", "Tomorrow"]);
+  assert.deepEqual(tabLabels, ["Today", "Tomorrow", "Messages"]);
   assert.deepEqual(
     FI_OS_FRONT_DESK_TABS.map((t) => t.id),
-    ["today", "tomorrow"]
+    ["today", "tomorrow", "messages"]
   );
   assert.ok(!tabLabels.includes("Clinic flow"));
   assert.ok(!tabLabels.includes("Reception board"));
