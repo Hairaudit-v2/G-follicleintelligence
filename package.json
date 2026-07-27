@@ -118,6 +118,7 @@
     "dev:provision:evolved": "tsx scripts/provision-evolved-tenant.ts",
     "seed:enterprise-demo": "node scripts/run-with-system-ca.mjs tsx scripts/seedEnterpriseDemoTenant.ts",
     "seed:visual-summary-e2e": "node scripts/run-with-system-ca.mjs tsx scripts/seed-visual-summary-e2e-fixture.ts",
+    "seed:patient-gateway-mobile-demo": "node scripts/run-with-system-ca.mjs tsx scripts/seed-patient-gateway-mobile-demo.ts",
     "seed:evolved-smoketest-payments": "node scripts/run-with-system-ca.mjs tsx scripts/seed-evolved-smoketest-payments.ts",
     "seed:evolved-smoketest-tomorrow": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/seed-evolved-smoketest-tomorrow-board.ts",
     "seed:ihrg-demo": "node scripts/run-with-system-ca.mjs node -r ./scripts/patch-server-only-for-scripts.cjs --import tsx scripts/seed-ihrg-demo-data.ts --tenant ihrg-demo --profile alive",
