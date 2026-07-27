@@ -1247,6 +1247,25 @@ export async function recordGatewayPaymentSuccess(args: {
     await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: updated });
   });
 
+  // FI-PATIENT-APP-2G — privacy-safe billing push after verified settlement only.
+  if (updated.patient_id?.trim()) {
+    await swallowGatewayPaymentBestEffort(async () => {
+      const { sendPatientNotificationBestEffort } = await import(
+        "@/src/lib/patientPortal/patientNotificationDispatch.server"
+      );
+      await sendPatientNotificationBestEffort(
+        {
+          patientId: updated.patient_id!.trim(),
+          tenantId: tid,
+          eventType: "payment_received",
+          sourceEntity: paymentId ?? iid,
+          resourceId: iid,
+        },
+        { supabase, writeAudit: true }
+      );
+    });
+  }
+
   return { status: "payment_recorded", invoice: updated, paymentId };
 }
 

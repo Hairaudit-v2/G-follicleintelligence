@@ -1129,6 +1129,106 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /api/patient/v1/devices:
+    get:
+      tags: [Notifications]
+      operationId: listPatientNotificationDevices
+      summary: List active push devices for the authenticated patient
+      description: |
+        FI-PATIENT-APP-2G. Returns active NotificationDevice records for the
+        server-resolved patient. Provider tokens are never returned.
+        Identity is derived via requirePatientGatewayContext — clients MUST NOT
+        send patientId or tenantId.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Active devices (no tokens)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotificationDevicesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Notifications]
+      operationId: registerPatientNotificationDevice
+      summary: Register or refresh a push device
+      description: |
+        FI-PATIENT-APP-2G. Upserts a provider-neutral NotificationDevice.
+        Client may send only safe device fields (platform, provider, token,
+        appVersion). Server derives patient/tenant ownership. Same token
+        fingerprint is reassigned safely (prior unrelated owners disabled).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterPatientNotificationDeviceRequest"
+      responses:
+        "200":
+          description: Existing registration refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotificationDeviceResponse"
+        "201":
+          description: New device registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotificationDeviceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/devices/{deviceId}:
+    delete:
+      tags: [Notifications]
+      operationId: disablePatientNotificationDevice
+      summary: Disable a push device registration
+      description: |
+        FI-PATIENT-APP-2G. Soft-disables a device owned by the authenticated
+        patient (logout / revoke). Foreign device ids fail closed as not_found.
+        Does not disable other devices belonging to the same patient.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Device disabled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, deviceId]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+                  deviceId:
+                    type: string
+                    format: uuid
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /api/patient/v1/tenants/{tenantId}/messages:
     get:
       tags: [Messaging]
@@ -1956,7 +2056,9 @@ components:
           type: boolean
         push:
           type: boolean
-          description: May be selected but push adapter remains inactive until later
+          description: |
+            Optional push channel. Requires OS permission, an active NotificationDevice,
+            and FiOS push dispatch (FI-PATIENT-APP-2G).
         appointmentReminders:
           type: boolean
         journeyReminders:
@@ -1979,3 +2081,83 @@ components:
           const: true
         preferences:
           $ref: "#/components/schemas/PatientNotificationPreferences"
+
+    RegisterPatientNotificationDeviceRequest:
+      type: object
+      required: [platform, provider, token]
+      additionalProperties: false
+      properties:
+        platform:
+          type: string
+          enum: [android, ios, web]
+        provider:
+          type: string
+          enum: [expo, fcm, apns]
+          description: Provider-neutral; initial adapter is Expo Push.
+        token:
+          type: string
+          description: Provider token (secret). Never logged in full by FiOS.
+        appVersion:
+          type: string
+        deviceLabel:
+          type: string
+        environment:
+          type: string
+          enum: [development, preview, production]
+      description: |
+        Safe device fields only. Clients MUST NOT send patientId or tenantId.
+
+    PatientNotificationDevicePublic:
+      type: object
+      required: [id, platform, provider, createdAt, lastSeenAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          enum: [android, ios, web]
+        provider:
+          type: string
+          enum: [expo, fcm, apns]
+        appVersion:
+          type: string
+          nullable: true
+        environment:
+          type: string
+          enum: [development, preview, production]
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        disabledAt:
+          type: string
+          format: date-time
+          nullable: true
+      description: Public device DTO — provider tokens are never included.
+
+    PatientNotificationDeviceResponse:
+      type: object
+      required: [ok, device]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        device:
+          $ref: "#/components/schemas/PatientNotificationDevicePublic"
+        refreshed:
+          type: boolean
+
+    PatientNotificationDevicesResponse:
+      type: object
+      required: [ok, devices]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientNotificationDevicePublic"

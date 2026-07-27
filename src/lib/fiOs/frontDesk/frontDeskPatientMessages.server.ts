@@ -554,5 +554,26 @@ export async function replyFrontDeskPatientMessage(
       messageId: message.id,
     });
   }
+
+  // FI-PATIENT-APP-2G — privacy-safe patient push on clinic_to_patient persist.
+  try {
+    const { sendPatientNotificationBestEffort } = await import(
+      "@/src/lib/patientPortal/patientNotificationDispatch.server"
+    );
+    await sendPatientNotificationBestEffort(
+      {
+        patientId: thread.patient_id,
+        tenantId: tid,
+        eventType: "new_message",
+        sourceEntity: message.id,
+        resourceId: thread.id,
+        authUserId: opts?.staffUserId ?? null,
+      },
+      { supabase, writeAudit: true }
+    );
+  } catch {
+    /* push best-effort — message already persisted */
+  }
+
   return { ok: true, message };
 }

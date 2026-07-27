@@ -316,6 +316,31 @@ export async function processReminderJobsOnce(opts?: {
         continue;
       }
 
+      // FI-PATIENT-APP-2G — privacy-safe appointment push from canonical reminder jobs.
+      // Push is independent of ReminderOS email/SMS live delivery flag.
+      if (
+        row.booking_id &&
+        /booking_(48h|24h|same_day)/i.test(String(template.trigger_event))
+      ) {
+        try {
+          const { sendPatientNotificationBestEffort } = await import(
+            "@/src/lib/patientPortal/patientNotificationDispatch.server"
+          );
+          await sendPatientNotificationBestEffort(
+            {
+              patientId,
+              tenantId: row.tenant_id,
+              eventType: "appointment_upcoming",
+              sourceEntity: row.id,
+              resourceId: row.booking_id,
+            },
+            { supabase, writeAudit: true }
+          );
+        } catch {
+          /* push best-effort */
+        }
+      }
+
       const contact = await loadPatientReminderContact(supabase, row.tenant_id, patientId);
       if (!contact || !patientHasContactForTemplateType(contact, template.type)) {
         await finalizeJobCancelled(

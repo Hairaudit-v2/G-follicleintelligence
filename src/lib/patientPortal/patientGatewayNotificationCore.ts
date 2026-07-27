@@ -94,22 +94,50 @@ export type NotificationDispatchDecision = {
   skippedReason: string | null;
 };
 
-/** Privacy-safe previews — never embed clinical detail. */
+/** Lock-screen / tray title — brand only, never clinical. */
+export function buildPrivacySafeNotificationTitle(
+  _event: PatientGatewayNotificationEvent
+): string {
+  return "Follicle Intelligence";
+}
+
+/** Privacy-safe previews — never embed clinical detail, meds, results, or amounts. */
 export function buildPrivacySafeNotificationPreview(
   event: PatientGatewayNotificationEvent
 ): string {
   switch (event) {
     case "new_message":
-      return "New message from your clinical team.";
+      return "New message from your clinic.";
     case "appointment_upcoming":
+      return "Your appointment is coming up.";
     case "appointment_changed":
-      return "You have an appointment update in Follicle Intelligence.";
+      return "You have an appointment update.";
     case "images_due":
+      return "It's time to update your progress photos.";
     case "review_due":
-      return "You have an update in Follicle Intelligence.";
+      return "You have an update from your clinic.";
     case "invoice_due":
     case "payment_received":
-      return "You have a billing update in Follicle Intelligence.";
+      return "Your account has been updated.";
+  }
+}
+
+/** Android channel id mapping for Expo push. */
+export function notificationAndroidChannelId(
+  event: PatientGatewayNotificationEvent
+): string {
+  switch (event) {
+    case "new_message":
+      return "messages";
+    case "appointment_upcoming":
+    case "appointment_changed":
+      return "appointments";
+    case "images_due":
+    case "review_due":
+      return "reminders";
+    case "invoice_due":
+    case "payment_received":
+      return "general";
   }
 }
 

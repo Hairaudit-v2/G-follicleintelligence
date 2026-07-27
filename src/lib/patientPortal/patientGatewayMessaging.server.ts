@@ -629,8 +629,9 @@ export async function sendPatientGatewayMessage(
       /* staff surface best-effort — message remains in gateway store */
     }
 
-    // Provider-neutral notification dispatch foundation (staff-facing new_message is
-    // not patient push; policy decision recorded for contract readiness).
+    // Provider-neutral notification dispatch foundation historically recorded policy
+    // decisions on patient→clinic send. Patient-facing push is triggered on
+    // clinic_to_patient (Front Desk reply) via sendPatientNotification — not here.
     try {
       const prefs = await loadPatientGatewayNotificationPreferences(ctx, {
         supabase,

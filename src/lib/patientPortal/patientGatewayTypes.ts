@@ -33,6 +33,8 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "message_rate_limited",
   "message_duplicate",
   "thread_closed",
+  "invalid_device",
+  "device_not_found",
 ] as const;
 
 export type PatientGatewayDenyCode = (typeof PATIENT_GATEWAY_DENY_CODES)[number];
@@ -137,6 +139,14 @@ export type PatientGatewayAuditAction =
   | "notification_dispatch_requested"
   | "notification_dispatch_succeeded"
   | "notification_dispatch_failed"
+  | "patient_device_registered"
+  | "patient_device_refreshed"
+  | "patient_device_disabled"
+  | "patient_device_list"
+  | "patient_notification_dispatch_requested"
+  | "patient_notification_sent"
+  | "patient_notification_failed"
+  | "patient_notification_token_invalidated"
   | "consent_read_success"
   | "consent_recorded"
   | "consent_record_denied";
