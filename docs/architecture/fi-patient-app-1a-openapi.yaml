@@ -171,18 +171,21 @@ paths:
                       code: "ownership_denied",
                     }
 
-  /api/patient/v1/tenants/{tenantId}/consent:
+  /api/patient/v1/consent:
     get:
       tags: [Consent]
       operationId: getPatientConsentStatus
-      summary: Photography / treatment consent gate status
+      summary: Photography consent gate status for the authenticated patient
       description: |
-        Wraps `loadTrialConsentGateStatus`. When consent is required and missing,
-        imaging uploads must fail closed.
+        Returns whether photography consent is required and whether it is already
+        satisfied for the server-resolved patient. Identity is derived from the
+        Bearer token — never from client-supplied tenant/patient ids.
+
+        When `required` is true and `satisfied` is false, imaging upload-intent
+        returns `403 consent_required` until the patient records consent via POST
+        or clinic staff upload a consent document.
       security:
         - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/tenantId"
       responses:
         "200":
           description: Consent gate status
@@ -194,6 +197,35 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Consent]
+      operationId: recordPatientConsent
+      summary: Record in-app photography consent attestation
+      description: |
+        Creates a consent-vault attestation for the authenticated patient so
+        progress photo uploads can proceed when the trial consent gate is enabled.
+
+        Idempotent when consent is not required or already satisfied.
+        Does not accept client patient/tenant identity claims.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Consent recorded (or already satisfied)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsentStatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          description: Attestation could not be stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 
   /api/patient/v1/images:
     get:
@@ -1252,6 +1284,11 @@ components:
             name:
               type: string
               nullable: true
+              description: Tenant / brand display name (e.g. Evolved Hair)
+            locationName:
+              type: string
+              nullable: true
+              description: Clinic / site location label (e.g. Perth)
             branding:
               type: object
               required: [logoUrl, primaryColor, secondaryColor, accentColor]
@@ -1280,12 +1317,10 @@ components:
           const: true
         required:
           type: boolean
+          description: True when the clinic/trial consent gate requires a consent record
         satisfied:
           type: boolean
-        patient_id:
-          type: string
-          format: uuid
-          nullable: true
+          description: True when a consent document or in-app attestation exists (or consent is not required)
 
     PatientGatewayImageItem:
       type: object

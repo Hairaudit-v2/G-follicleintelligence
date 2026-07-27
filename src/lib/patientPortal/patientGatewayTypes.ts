@@ -65,7 +65,10 @@ export type PatientGatewayResult = PatientGatewayOk | PatientGatewayDeny;
 
 export type PatientGatewayMeClinic = {
   id: string;
+  /** Tenant / brand display name (e.g. Evolved Hair). */
   name: string | null;
+  /** Clinic / site location label (e.g. Perth). */
+  locationName: string | null;
   branding: {
     logoUrl: string | null;
     primaryColor: string | null;
@@ -133,4 +136,7 @@ export type PatientGatewayAuditAction =
   | "notification_preferences_updated"
   | "notification_dispatch_requested"
   | "notification_dispatch_succeeded"
-  | "notification_dispatch_failed";
+  | "notification_dispatch_failed"
+  | "consent_read_success"
+  | "consent_recorded"
+  | "consent_record_denied";

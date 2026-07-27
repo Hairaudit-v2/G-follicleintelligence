@@ -72,7 +72,10 @@ export function derivePatientGatewayNameFields(input: {
 export function buildPatientGatewayMeResponse(input: {
   patientId: string;
   clinicId: string;
+  /** Tenant / brand display name (e.g. Evolved Hair). */
   clinicName: string | null;
+  /** Clinic / site location label (e.g. Perth). */
+  locationName?: string | null;
   personMetadata: Record<string, unknown>;
   patientMetadata?: Record<string, unknown> | null;
   branding?: {
@@ -87,9 +90,13 @@ export function buildPatientGatewayMeResponse(input: {
     patientMetadata: input.patientMetadata,
   });
 
+  const tenantName = asTrimmedString(input.clinicName);
+  const locationName = asTrimmedString(input.locationName);
+
   const clinic: PatientGatewayMeClinic = {
     id: input.clinicId.trim(),
-    name: asTrimmedString(input.clinicName),
+    name: tenantName,
+    locationName,
     branding: {
       logoUrl: sanitizePatientGatewayLogoUrl(input.branding?.logoUrl),
       primaryColor: asTrimmedString(input.branding?.primaryColor),

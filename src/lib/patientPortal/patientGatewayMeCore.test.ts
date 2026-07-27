@@ -32,6 +32,7 @@ describe("patientGatewayMeCore", () => {
       patientId: "11111111-1111-4111-8111-111111111111",
       clinicId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       clinicName: "Demo Clinic",
+      locationName: "Perth",
       personMetadata: {
         hubspot: { first_name: "Ada", last_name: "Lovelace" },
         display_name: "Ada L",
@@ -49,6 +50,7 @@ describe("patientGatewayMeCore", () => {
     assert.equal(me.lastName, "Lovelace");
     assert.equal(me.preferredName, "Ada L");
     assert.equal(me.clinic.name, "Demo Clinic");
+    assert.equal(me.clinic.locationName, "Perth");
     assert.equal(me.clinic.branding.logoUrl, "https://cdn.example/logo.png");
     assert.equal("portal_auth_user_id" in me, false);
     assert.equal("admin_note" in me, false);
