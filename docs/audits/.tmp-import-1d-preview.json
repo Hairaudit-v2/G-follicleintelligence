@@ -1,0 +1,158 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 0
+  },
+  "mode": "preview",
+  "preview": {
+    "batchId": "46c77f5f-866d-4363-a012-b8f0c960f966",
+    "checksum": "2bc68b260f24d8b9a25d0a83d4c12bf81914ca83d3b0ca28998dd49f2e0b7069",
+    "links": [
+      {
+        "hubspotContactId": "100039339025",
+        "leadId": "a144dc64-2714-4eb9-8380-2b22b07b85e6",
+        "displayName": "Mahmood Popalzai"
+      },
+      {
+        "hubspotContactId": "100199031693",
+        "leadId": "ed911476-91ff-4619-8dc6-6bec6970a397",
+        "displayName": "Jordan Gunter"
+      },
+      {
+        "hubspotContactId": "100207700369",
+        "leadId": "107cb1b0-c6d2-45fb-b6af-9ba2d4bacbd2",
+        "displayName": "Thomas Berry"
+      },
+      {
+        "hubspotContactId": "100208818774",
+        "leadId": "dd0c0e6e-aaa2-4525-b208-4d5a796fd232",
+        "displayName": "Elisa Dequae"
+      },
+      {
+        "hubspotContactId": "100223594355",
+        "leadId": "c6d2dbef-1280-425f-bdd4-b06e9a986419",
+        "displayName": "Robert East"
+      },
+      {
+        "hubspotContactId": "10022615812",
+        "leadId": "d38f12b4-4808-408d-85c0-0b1c111886e4",
+        "displayName": "Sheila Manhica"
+      },
+      {
+        "hubspotContactId": "10038366549",
+        "leadId": "b0fb9fad-6c6f-4671-8fda-e8d2d4e97927",
+        "displayName": "Ashok Kumar"
+      },
+      {
+        "hubspotContactId": "100449327741",
+        "leadId": "1d2775f6-39d2-45cf-a1e7-6091e3195ead",
+        "displayName": "Terry Leighton"
+      },
+      {
+        "hubspotContactId": "100484847108",
+        "leadId": "ec6b763e-5f51-4308-8590-f8a2e403a5aa",
+        "displayName": "Miki"
+      },
+      {
+        "hubspotContactId": "100491369844",
+        "leadId": "5ef187ad-fba0-4608-a38c-3faaa1dab2eb",
+        "displayName": "Tom Young"
+      },
+      {
+        "hubspotContactId": "100501976675",
+        "leadId": "7d3462e4-1c98-4be4-ac2e-4ca61e576b9b",
+        "displayName": "Khadar Mukhtar"
+      },
+      {
+        "hubspotContactId": "100568375975",
+        "leadId": "fc9df083-a265-4b82-8e64-b3fb13bac1f4",
+        "displayName": "Leinisa Semedo"
+      },
+      {
+        "hubspotContactId": "100770168185",
+        "leadId": "d5849be6-649d-4780-b250-5d566814a313",
+        "displayName": "Nazim Ahmed"
+      },
+      {
+        "hubspotContactId": "100778885398",
+        "leadId": "9fd5870d-c2df-4560-948b-20a9300f3a18",
+        "displayName": "Michelle"
+      },
+      {
+        "hubspotContactId": "100862888240",
+        "leadId": "ceae2ae0-79ce-49be-93d2-ee09f4b191fe",
+        "displayName": "Ruby Woodin Woodin"
+      },
+      {
+        "hubspotContactId": "10092071439",
+        "leadId": "6986a144-71ba-4c54-93d6-5e5f39c5b954",
+        "displayName": "Luke Daniels"
+      },
+      {
+        "hubspotContactId": "1009601",
+        "leadId": "e0d30ee0-1915-4ad8-8705-0d95afe28856",
+        "displayName": "Lisbeth Comissao"
+      },
+      {
+        "hubspotContactId": "101002435620",
+        "leadId": "ac0408a1-8f50-406e-84a2-d8472adc64cc",
+        "displayName": "Mark Curran"
+      },
+      {
+        "hubspotContactId": "101150667395",
+        "leadId": "bbdca9f4-ca98-4f01-9058-66bf917f9e75",
+        "displayName": "Wangdi"
+      },
+      {
+        "hubspotContactId": "10116864909",
+        "leadId": "7ef5e123-09f6-4800-a013-5c0f0034adc1",
+        "displayName": "Geoff Beats"
+      },
+      {
+        "hubspotContactId": "10122057556",
+        "leadId": "60ae707a-acda-45b3-be28-6c4b9648fe92",
+        "displayName": "STEPHEN JOCELYN"
+      },
+      {
+        "hubspotContactId": "101338823040",
+        "leadId": "032b74f6-1fb9-4879-8214-28d72067c60a",
+        "displayName": "Asfiya Anjum"
+      },
+      {
+        "hubspotContactId": "101353919786",
+        "leadId": "1dace051-0a36-4b7f-9af4-355a696f5b68",
+        "displayName": "Mark"
+      },
+      {
+        "hubspotContactId": "101368989060",
+        "leadId": "1c69fafc-92fe-4c06-aa6c-e2ba06401417",
+        "displayName": "Steven"
+      }
+    ],
+    "creates": [],
+    "quarantined": 1,
+    "patientReviewsExcluded": 0,
+    "plainLanguage": {
+      "primaryAction": "Apply approved lead pilot",
+      "patientsStaffUsersNotificationsUnchanged": true,
+      "tablesThatMayChange": [
+        "fi_import_batches",
+        "fi_external_record_mappings",
+        "fi_hubspot_contact_lead_pilot_decisions"
+      ]
+    }
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 0
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

@@ -1,0 +1,1055 @@
+Backup milestone: FI-HUBSPOT-BACKUP-1
+Source system: HubSpot
+Backup type: HubSpot native manual CRM backup
+HubSpot portal ID: 21009770
+Requested by: Paul Green
+Requested date and time:15/07/2026 08.38
+Completed date and time:15/07/2026 08.40
+Downloaded date and time:15/07/2026 08.42
+Original filename:hubspot-data-backup-2026-07-15.zip
+Stored filename:hubspot-data-backup-2026-07-15.zip
+File size:3336kb
+Primary storage location:G:\follicleintelligence\FI-HUBSPOT-BACKUP-1\hubspot-native-backup\hubspot-data-backup-2026-07-15.zip
+Independent copy location:C:\Users\thelo.EVOLVEDPCHOME\OneDrive - Evolved Hair\FI back up\follicleintelligence\FI-HUBSPOT-BACKUP-1
+HubSpot status: Completed 
+
+Notes:CONTACT EXPORT
+
+Export type: All HubSpot contacts
+Export date and time:15/07/2026   08.38
+Exported by: Paul Green
+HubSpot source count:4741
+CSV data row count:4741
+Count result: MATCH / MISMATCH / NOT YET CHECKED
+Properties selected: All properties
+Associations included: Yes / No
+Original filename:
+Stored filename:
+File size:
+Storage location: 02-record-exports/contacts/
+Opened or modified: No
+Notes:
+
+
+
+
+CONTACT EXPORT
+
+Export type: Comprehensive HubSpot contact export
+Source filename: comprehensive-lead-flow(1).csv
+Contact records: 4,740
+Columns: 521
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 4,740
+Populated email addresses: 4,648
+Duplicate populated emails: 0
+
+Associated Deal IDs present: 2,880 contacts
+Associated Company IDs present: 607 contacts
+Associated Note IDs present: 63 contacts
+Associated Call IDs present: 985 contacts
+Associated Meeting IDs present: 14 contacts
+Associated Task IDs present: 1,081 contacts
+Associated Email IDs present: 1,087 contacts
+Associated File IDs present: 0 contacts
+
+Create Date range:
+2021-12-26 15:08 to 2026-07-14 21:21
+
+Last Modified Date range:
+2024-05-04 18:41 to 2026-07-15 08:51
+
+Record ID validation: PASS
+Contact row structure: PASS
+Properties included: PASS
+Associations included: PASS
+Phone number integrity: AMBER
+Scientific notation in Phone Number: 287 values
+Scientific notation in Mobile Phone Number: 41 values
+
+SHA-256:
+54e1219f6b75c04393b8504b596e44fd15e0d830a4fb75df955eca262d1e86a3
+
+File size:
+16,258,971 bytes
+
+Overall result: AMBER
+Reason:
+Complete and usable contact export, but a subset of historical telephone
+numbers is already stored in scientific notation and requires recovery or
+source verification before production migration.
+DEALS EXPORT
+
+Export type: All HubSpot deals
+Source filename: all-deals.csv
+HubSpot source count: 4,958
+CSV data row count: 4,958
+Count result: MATCH
+
+Columns: 170
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 4,958
+
+Pipeline count: 1
+Pipeline: Sales Pipeline
+Deals with pipeline: 4,958
+Deals with stage: 4,958
+
+Associated Contact IDs present: 2,948 deals
+Associated Company IDs present: 59 deals
+Associated Note IDs present: 75 deals
+Associated Call IDs present: 566 deals
+Associated Meeting IDs present: 7 deals
+Associated Email IDs present: 643 deals
+Associated Ticket IDs present: 2 deals
+Associated Line Item IDs present: 0 deals
+Associated Task IDs present: 0 deals
+Associated Quote IDs present: 0 deals
+Associated Invoice IDs present: 0 deals
+Associated Payment IDs present: 0 deals
+
+Deals with amount populated: 732
+Amount formatting validation: PASS
+
+Create Date range:
+2021-12-24 17:39 to 2024-12-11 14:12
+
+Last Modified Date range:
+2022-01-07 18:02 to 2026-07-15 08:53
+
+Historical/deactivated owners preserved: Yes
+Unassigned deals: 5
+
+SHA-256:
+1dea8c04b150686113e945165d2775f47e55ef84d9b80cecff417c9971269b74
+
+File size:
+4,602,700 bytes
+
+Record ID validation: PASS
+Count reconciliation: PASS
+Pipeline and stage validation: PASS
+Association capture: PASS
+Overall result: PASS
+COMPANIES EXPORT
+
+Export type: All HubSpot companies
+Source filename:
+hubspot-crm-exports-all-companies-2026-07-15.csv
+
+HubSpot source count:
+To be confirmed from HubSpot Companies screen
+
+CSV data row count: 653
+Columns: 241
+Count result: PENDING SOURCE COUNT CONFIRMATION
+
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 653
+
+Companies with name: 449
+Companies with domain: 474
+Companies without both name and domain: 179
+Duplicate populated company names: 8
+Duplicate populated domains: 0
+
+Associated Contact IDs present: 459 companies
+Associated Deal IDs present: 56 companies
+Associated Call IDs present: 134 companies
+Associated Ticket IDs present: 53 companies
+Associated Lead IDs present: 1 company
+Associated Email IDs present: 283 companies
+Associated Note IDs present: 10 companies
+Associated Task IDs present: 186 companies
+Associated Meeting IDs present: 2 companies
+Associated Form Submission IDs present: 109 companies
+
+Companies with owner populated: 1
+Phone-number formatting validation: PASS
+Annual-revenue formatting validation: PASS
+Employee-count formatting validation: PASS
+
+Create Date range:
+2021-11-13 19:33 UTC to 2026-07-14 21:21 UTC
+
+Last Modified Date range:
+2021-12-10 11:40 UTC to 2026-07-14 22:16 UTC
+
+SHA-256:
+0ecb57dfbd8f07309fb5a84916dd7cf577190c1156dd9fc0c07f70e2f5580c74
+
+File size:
+1,255,040 bytes
+
+Record ID validation: PASS
+Association capture: PASS
+Formatting validation: PASS
+Overall result: PASS — pending confirmation that HubSpot shows 653 companies
+TICKETS EXPORT
+
+Export type: All HubSpot tickets
+Source filename:
+hubspot-crm-exports-all-tickets-2026-07-15.csv
+
+HubSpot source count:
+To be confirmed from HubSpot Tickets screen
+
+CSV data row count: 682
+Columns: 112
+Count result: PENDING SOURCE COUNT CONFIRMATION
+
+Blank Ticket IDs: 0
+Duplicate Ticket IDs: 0
+Unique Ticket IDs: 682
+
+Pipeline count: 1
+Pipeline: Support Pipeline
+
+Ticket status:
+New: 682
+
+Originating channel:
+Email: 682
+
+Tickets with name: 666
+Tickets without name: 16
+
+Tickets with owner: 23
+Unassigned tickets: 659
+
+Owner breakdown:
+Evolved Hair: 21
+Harsh Singh: 2
+
+Associated Email IDs present: 682 tickets
+Associated Conversation IDs present: 682 tickets
+Associated Company IDs present: 554 tickets
+Associated Contact IDs present: 5 tickets
+Associated Deal IDs present: 2 tickets
+
+Create Date range:
+2021-11-26 16:15 UTC to 2022-02-15 09:55 UTC
+
+Last Modified Date range:
+2021-12-08 11:31 UTC to 2026-07-11 14:45 UTC
+
+Close dates populated: 0
+Last activity dates populated: 682
+Last contacted dates populated: 681
+Last response dates populated: 25
+
+SHA-256:
+453c6977dc4878309a178b59f77f62a3b1518988b779d9a53c0d53fb161b6215
+
+File size:
+1,164,723 bytes
+
+Ticket ID validation: PASS
+Pipeline capture: PASS
+Association capture: PASS
+Historical classification required: YES
+
+Overall result:
+PASS — pending confirmation that HubSpot shows 682 tickets
+TASKS EXPORT — REVISED REPORT
+
+Source filename:
+custom-tasks-report.csv
+
+Summary filename:
+hubspot-export-summary.csv
+
+CSV task count: 1,679
+HubSpot summary count: 1,679
+Count result: MATCH
+
+Columns: 43
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 1,679
+
+Assigned owner populated: 1,678
+Unassigned tasks: 1
+
+Assigned owner breakdown:
+Evolved Hair: 894
+Charlene Stokes: 757
+Roslyn Richards: 14
+Madhur Gusain: 13
+Unassigned: 1
+
+Task status:
+Not Started: 1,175
+Completed: 504
+
+Task type:
+To Do: 1,505
+Call: 174
+
+Priority:
+None: 1,166
+High: 513
+
+Tasks with notes: 785
+Tasks without notes: 894
+Tasks with completion date: 504
+
+Record source:
+Workflow: 1,666
+CRM UI: 13
+
+Workflow source details:
+3.1 Surgery Status: 894
+Brisbane Sales Follow-ups: 757
+Repeat Lead Alert: 15
+Other/manual: 13
+
+Created date range:
+2024-04-11 13:57 to 2026-07-14 15:09
+
+Due date range:
+2024-04-11 13:57 to 2026-07-14 15:09
+
+Last modified range:
+2024-04-11 15:28 to 2026-07-14 15:09
+
+Completed date range:
+2024-06-18 09:38 to 2025-08-28 15:24
+
+Associated Contact IDs: Not included
+Associated Deal IDs: Not included
+Associated Company IDs: Not included
+Formal associations require API extraction: Yes
+
+Tasks CSV SHA-256:
+e002d1eebf34381acece68e6b2c88fd6aa10730a6ded5adcb73b836835dfabf9
+
+Tasks CSV file size:
+826,739 bytes
+
+Summary CSV SHA-256:
+9d80af31eedfa0a8d43afc0d38ffa3442d886d58a74e6df813483326a4bf0b6a
+
+Overall result:
+AMBER — complete task-content export with IDs, ownership, dates,
+status and workflow metadata. Formal CRM associations remain for API capture.
+CALLS EXPORT
+
+Source filename:
+custom-calls-report.csv
+
+Summary filename:
+hubspot-export-summary(1).csv
+
+CSV call count: 2,093
+HubSpot summary count: 2,093
+Count result: MATCH
+
+Columns: 46
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 2,093
+
+Call status:
+Completed: 1,662
+Queued: 156
+No Answer: 138
+Missed: 94
+Failed: 23
+Busy: 15
+Connecting: 3
+Ringing: 2
+
+Call direction:
+Outbound: 1,611
+Inbound: 239
+Not populated: 243
+
+Call outcomes:
+Connected: 566
+No answer: 544
+Left voicemail: 531
+Not populated: 427
+Wrong number: 16
+Busy: 8
+Left live message: 1
+
+Calls with notes: 232
+Calls with duration: 1,784
+Calls with recording URL: 288
+Calls with transcript available: 188
+Calls with voicemail available: 19
+Calls with From number: 1,937
+Calls with To Number: 1,937
+
+Phone-number formatting validation: PASS
+Scientific notation detected: 0
+
+Activity/Create date range:
+2022-01-13 11:11 UTC to 2026-05-17 14:35 UTC
+
+Last modified date range:
+2022-01-13 11:11 UTC to 2026-05-28 17:28 UTC
+
+Associated Contact IDs: Not included
+Associated Deal IDs: Not included
+Associated Company IDs: Not included
+Associated Ticket IDs: Not included
+Formal associations require API extraction: Yes
+
+Recording URLs preserved: 288
+Recording files independently downloaded: No / Pending
+
+Calls CSV SHA-256:
+c0ec92126c1e876b882212cc6b5d436c00a69260b0855b812898ca432e7c3b1c
+
+Calls CSV file size:
+882,599 bytes
+
+Summary CSV SHA-256:
+f2bda7f04692b969208fa56de781d2c0b2525c71195a6b33bfaef01eee26584d
+
+Overall result:
+AMBER — call records, content and metadata are backed up and counts match.
+Formal CRM associations and recording-file capture remain for API extraction.
+MEETINGS EXPORT
+
+Source filename:
+hubspot-core-report-custom-meetings-report-2026-07-15-1.csv
+
+CSV meeting count: 17
+Columns: 38
+
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 17
+
+Meetings with name: 17
+Meetings with description: 17
+Meetings with start time: 17
+Meetings with end time: 17
+Meetings with location: 17
+Meetings with video URL: 17
+
+Assigned owner:
+Daniel Bullen: 17
+
+Created by:
+Daniel Bullen: 17
+
+Meeting source:
+Meeting synced from calendar to CRM: 17
+
+Video platform:
+Zoom: 17
+
+Meeting outcome populated: 0
+Internal meeting notes populated: 0
+Meeting transcripts available: 0
+
+Activity date range:
+2024-02-14 14:00 UTC to 2024-10-10 12:00 UTC
+
+Create date range:
+2024-02-15 15:44 UTC to 2024-10-10 13:19 UTC
+
+Last modified date range:
+2024-02-15 15:44 UTC to 2024-10-17 13:37 UTC
+
+Formal Contact/Deal association IDs:
+Not included in report; capture later through API if required.
+
+SHA-256:
+dbf39199f7704f3d5ac5bab3b9552d4a9f2b4671793c421f474ce4912dd00cf3
+
+File size:
+12,805 bytes
+
+Overall result:
+PASS — complete small historical meeting export.
+NOTES EXPORT
+
+Standalone Notes report available in HubSpot: No
+Manual CSV export completed: No
+Notes association IDs already seen in:
+Contacts export: Yes
+Deals export: Yes
+Companies export: Yes
+Tickets export: Yes
+
+Required extraction method:
+HubSpot Notes API
+
+Data to capture:
+Note Record ID
+Note body
+Created date
+Last modified date
+Activity timestamp
+Created by
+Owner
+Attached file IDs
+Archived status
+Associated Contact IDs
+Associated Deal IDs
+Associated Company IDs
+Associated Ticket IDs
+
+Status:
+PENDING API EXTRACTION
+
+Overall result:
+AMBER — note references are preserved in existing exports,
+but full note bodies and formal associations still require API extraction.
+ACTIVITIES / ENGAGEMENTS INVENTORY EXPORT
+
+Source filename:
+custom-activities-report.csv
+
+Summary filename:
+hubspot-export-summary(2).csv
+
+CSV activity count: 9,331
+HubSpot summary count: 9,331
+Count result: MATCH
+
+Columns: 3
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 9,331
+Blank activity types: 0
+Invalid create dates: 0
+
+Activity breakdown:
+Email reply from contact: 2,832
+Email sent to contact: 2,416
+Call: 2,093
+Task: 1,679
+Note: 244
+Conversation Session: 50
+Meeting: 17
+
+Total CRM email activities: 5,248
+
+Create date range:
+2021-11-22 18:00 to 2026-07-14 15:09
+
+Activity bodies/content included: No
+Formal associations included: No
+Owners included: No
+Attachments included: No
+
+Activities CSV SHA-256:
+1c1770c369db8f3d28002490cd2a4ae1e1e5c37d9f374b6907fa8cb0d7485d47
+
+Activities CSV file size:
+473,054 bytes
+
+Summary CSV SHA-256:
+55dbc57441e85d0e7258396f77de7c42a19765e6fef83f20069b168c60132c79
+
+Overall result:
+PASS for activity inventory and count reconciliation.
+AMBER for full migration because activity bodies, associations,
+owners and attachments still require API extraction.
+CONVERSATIONS EXPORT
+
+Source filename:
+hubspot-core-report-custom-conversations-report-2026-07-15.csv
+
+CSV conversation count: 1,918
+Columns: 56
+
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 1,918
+
+Thread IDs populated: 1,918
+
+Source:
+Email: 1,868
+Live Chat: 50
+
+Conversation status:
+Open: 1,869
+Closed: 49
+
+Inbox:
+Inbox: 1,918
+
+Current owner:
+Evolved Hair: 566
+Roslyn Richards: 4
+Harsh Singh: 1
+Unassigned: 1,347
+
+First-owner history:
+Evolved Hair: 566
+Karen Kelly: 43
+Roslyn Richards: 4
+Kristy Truong: 3
+Harsh Singh: 1
+No first owner: 1,301
+
+Create date range:
+2021-11-26 16:15 UTC to 2026-06-11 16:01 UTC
+
+Last message date range:
+2021-11-26 16:15 UTC to 2026-06-11 16:01 UTC
+
+Closed conversations: 49
+First inbound message dates populated: 1,327
+Last inbound message dates populated: 1,327
+First response dates populated: 667
+Last response dates populated: 667
+
+Message bodies included: No
+Email subjects included: No
+Sender and recipient addresses included: No
+Attachments included: No
+Formal Contact associations included: No
+Formal Ticket associations included: No
+
+Conversation and message content requires API extraction: Yes
+
+SHA-256:
+724cb7a339474b9230a0e7061d322ed66406bcb5e773bce502f24cd4308f94d3
+
+File size:
+687,320 bytes
+
+Overall result:
+PASS for conversation and thread inventory.
+AMBER for migration because individual message content,
+attachments and formal associations still require API extraction.
+USERS EXPORT
+
+Source filename:
+custom-users-report.csv
+
+Summary filename:
+hubspot-export-summary(3).csv
+
+CSV user count: 15
+HubSpot summary count: 15
+Count result: MATCH
+
+Columns: 19
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 15
+Duplicate populated emails: 0
+
+Active users: 8
+Deactivated users: 7
+
+Active users:
+Evolved Hair
+Roslyn Richards
+Madhur Gusain
+Himanshu Gupta
+Harsh Singh
+Payal Jalan
+Your Social Buddy
+HubSpot connector for Claude service account
+
+Deactivated users:
+Mani Pruthi
+Ebony Andrews
+Son Pham
+Charlene Stokes
+Muhammad Mohsin
+Daniel Bullen
+Maddy Portelli
+
+Integration/service accounts identified: 1
+Service account:
+App 16228553 (HubSpot connector for Claude)
+
+Last active date range:
+2024-04-08 18:54 to 2026-07-15 08:34
+
+Users CSV SHA-256:
+936cc8899074c5b35d7d3ebf27a8ff8643c14af9e366b2ff2aed58827487364c
+
+Users CSV file size:
+3,327 bytes
+
+Summary CSV SHA-256:
+641bdde25a8f34cf45ae27e17ffb356ff1632632e2b0ab2d889ce85e7471f48e
+
+Overall result:
+PASS — complete HubSpot user inventory with active and deactivated
+identities preserved for owner mapping.
+FORMS INVENTORY EXPORT
+
+Source filename:
+hubspot-listing-lib-exports-all-forms-2026-07-15.xlsx
+
+Worksheet:
+All forms
+
+Form count: 48
+Columns: 17
+
+Blank Record IDs: 0
+Duplicate Record IDs: 0
+Unique Record IDs: 48
+
+Blank Form IDs: 0
+Duplicate Form IDs: 0
+Unique Form IDs: 48
+
+Status:
+Published: 48
+
+Total recorded submissions: 5,310
+Total page views: 313,284
+
+Created date range:
+2021-11-19 23:19 to 2026-06-11 15:37
+
+Updated date range:
+2021-11-20 00:02 to 2026-06-16 15:47
+
+Individual submission records included: No
+Submission answers included: No
+Contact details included: No
+
+SHA-256:
+321fc5c887dd6d2e78e06b8480069ea41d89dd0b4f7c1d248d1bd9e4f8b28c72
+
+File size:
+10,594 bytes
+
+Overall result:
+PASS — complete forms inventory.
+Individual submissions still require separate exports or API extraction.
+FORM SUBMISSIONS — APPOINTMENT BOOKING FORM
+
+Source filename:
+hubspot-form-submissions-appointment-booking-form-2026-07-15.csv
+
+Form submission count from inventory: 1,584
+CSV submission count: 1,584
+Count result: MATCH
+
+Columns: 21
+
+Conversion IDs populated: 1,584
+Unique Conversion IDs: 1,584
+Blank Conversion IDs: 0
+Duplicate Conversion IDs: 0
+
+Submitted emails populated: 1,584
+Unique submitted emails: 988
+Repeat submissions by email: Present
+
+First names populated: 1,584
+Last names populated: 1,584
+Phone numbers populated: 1,584
+
+Phone-number formatting validation: PASS
+Scientific notation detected: 0
+
+Clinic location:
+Perth: 912
+Brisbane: 196
+Redacted: 196
+Blank: 280
+
+Lead source populated: 1,579
+c_source populated: 1,329
+Conversion page populated: 1,240
+Conversion title populated: 1,240
+
+HubSpot Contact IDs populated: 1,220
+Unique linked Contact IDs: 972
+Submissions without Contact ID: 364
+
+Linked contact emails populated: 1,219
+Submitted/contact email mismatches: 4
+
+Privacy redaction detected: Yes
+Redacted submitted emails: 344
+Redacted first names: 344
+Redacted last names: 344
+Redacted lead sources: 339
+Redacted c_source values: 269
+Redacted clinic locations: 196
+
+Submission date range:
+2023-08-28 22:55 UTC to 2026-07-14 00:51 UTC
+
+UTM fields populated: 0
+Alternative attribution retained:
+Lead source, c_source and Conversion Page
+
+SHA-256:
+f426bc0c3ad4e62ce71297359aa7d396b25040bea7fc7f6974fde728c363a5d3
+
+File size:
+535,331 bytes
+
+Overall result:
+PASS — all 1,584 submission events were captured with unique Conversion IDs.
+Historical privacy redactions and 364 missing Contact IDs must be preserved
+and handled during migration reconciliation.
+POST-CONSULTATION SURVEY
+Rows: 97
+SHA-256:
+6460bbd23d7128bcd9c36808bce1de13c03aba66de3d17ee619f8af1baeb4981
+
+EVOLVED HAIR TRANSPLANT LP 2023
+Rows: 932
+SHA-256:
+e8376049648e9dc6e70f36f27bb2ad5c6853a4688da05a328f3ef2b16cd9d562
+
+PERTH NEW LP
+Rows: 269
+SHA-256:
+011ce42e4dd384bcde419c38c7d19d727bd9e1b841da3addb7bee7bd29032d3d
+
+BRISBANE PRE-CONSULTATION QUESTIONNAIRE
+Rows: 106
+SHA-256:
+9f8652d6ca97f0d2c61ea5b8ed70dd3a36d5d41e39434eed0c69dff2304427ec
+
+POST-SURGERY SURVEY
+Rows: 45
+SHA-256:
+7b7781f1616b8203c8e504762a8e4a5b7806e15c52e2f624b56aab5308ea6577
+
+NEW EBOOK DOWNLOAD LANDING PAGE
+Rows: 393
+SHA-256:
+bfc432d3df1fc29338e930b2fbcac2f298a5aec44af666ed5b50b17b16741068
+
+BRISBANE HAIR TRANSPLANT LP
+Rows: 300
+SHA-256:
+332f8ab03a963fdf05b4c54e276520df1363ea07eed8a8c764e6c09bdf624d2e
+
+CONTACT US FORM
+Rows: 9
+SHA-256:
+3ecab09aed3a917c7e0ebc5257481dac5b69e2d5a6238453c384d5234234dd18
+
+EYEBROW TRANSPLANT LANDING PAGE
+Rows: 15
+SHA-256:
+e8048f0a0a081ab44f2d7dba6f038535ad21595b7c103c1335ef26500d64a4b5
+
+FORM 2
+Rows: 49
+SHA-256:
+e23084bdca3005d6f527c4d0921a37e57c76ab5d05f257ceb572be380243d1b6
+
+QUESTIONNAIRE
+Rows: 1
+SHA-256:
+38f30226d297ae764a6f219f70cedd0e8fcea18d18af08de6cd030040df386ab
+
+PERTH PRE-CONSULTATION QUESTIONNAIRE
+Rows: 420
+SHA-256:
+3b5747e6869b369b877a10bea66c3d331fa91b9e566df67825da941cacd44c95
+[x] Forms inventory exported
+[x] Appointment Booking submissions
+[x] Evolved Transplant LP submissions
+[x] Perth New LP submissions
+[x] Brisbane Transplant LP submissions
+[x] Perth Pre-Consultation submissions
+[x] Brisbane Pre-Consultation submissions
+[x] Post-Consultation survey submissions
+[x] Post-Surgery survey submissions
+[x] eBook landing submissions
+[!] Duplicate Appointment Booking file identified
+[!] Perth New LP count variance documented
+[x] Remaining high-value forms reviewed
+
+FI-HUBSPOT-BACKUP-1
+Step 9 — Forms and submissions
+Status: GREEN / COMPLETE
+
+Forms inventory: 48 forms
+Selected valuable forms exported: Yes
+Distinct submission events secured: 4,220
+Unique Conversion IDs preserved: Yes
+Duplicate exports identified separately: Yes
+Privacy-redacted records preserved: Yes
+Sensitive intake forms identified for restricted handling: Yes
+Low-value remaining forms intentionally excluded: Yes
+PROPERTY DEFINITIONS EXPORT
+
+Source filename:
+hubspot-properties-export-contacts-21-other-objects-2026-07-15-
+Jul-15-2026-01-27-05-8582-AM.zip
+
+CSV files contained: 22
+Total property definitions: 1,841
+HubSpot-defined properties: 1,642
+Custom properties: 199
+Properties with configured options: 304
+
+Blank internal names: 0
+Duplicate internal names within objects: 0
+Properties marked deleted: 0
+
+Core objects:
+Contacts: 432 properties
+Deals: 132 properties
+Companies: 151 properties
+Tickets: 60 properties
+Calls: 45 properties
+Meetings: 37 properties
+Leads: 94 properties
+
+Custom properties:
+Contacts: 191
+Deals: 8
+All other exported objects: 0
+
+Definition fields captured:
+Display name: Yes
+Internal name: Yes
+Type: Yes
+Description: Yes
+Group name: Yes
+Form field status: Yes
+Options: Yes
+Read-only status: Yes
+Calculated status: Yes
+HubSpot-defined/custom status: Yes
+Created user/date: Yes
+Usage and fill rate: Yes
+Data-entry instructions: Yes
+Option descriptions: Yes
+
+SHA-256:
+1db9648b5a48716fca9cb6c8149cd189769be5dd1cd5c728cfae50009f839e67
+
+File size:
+131,175 bytes
+
+Overall result:
+PASS — comprehensive property-schema backup for Contacts and 21
+additional HubSpot objects, including custom fields, internal names,
+types and option definitions.
+
+DEAL PIPELINE CONFIGURATION
+
+Pipeline name:
+Sales Pipeline
+
+Stage order and probability:
+
+1. Contacted
+Probability: 10%
+Deals currently in stage: 645
+
+2. Appointment Scheduled
+Probability: 30%
+Deals currently in stage: 398
+
+3. Consulted
+Probability: 70%
+Deals currently in stage: 639
+Conditional logic rules: 1
+
+4. Surgery Unqualified
+Probability: 40%
+Deals currently in stage: 95
+
+5. Surgery Qualified
+Probability: 80%
+Deals currently in stage: 360
+
+6. Booked Non-Surgical
+Probability: 80%
+Deals currently in stage: 64
+
+7. Booked Surgical
+Probability: 80%
+Deals currently in stage: 51
+
+8. Deposit Paid
+Probability: 90%
+Deals currently in stage: 2
+
+9. Completed Session
+Status: Won
+Probability: 100%
+Deals currently in stage: 140
+Conditional logic rules: 1
+
+10. Post Operative Treatment
+Status: Won
+Probability: 100%
+Deals currently in stage: 219
+Conditional logic rules: 1
+
+11. Lost
+Status: Lost
+Probability: 0%
+Deals currently in stage: 2,345
+Conditional logic rules: 1
+
+Total deals represented:
+4,958
+
+Stage calculated properties:
+Enabled for all visible stages
+
+Internal pipeline ID:
+Pending API extraction
+
+Internal stage IDs:
+Pending API extraction
+
+DATA MODEL BUILDER SCREENSHOT
+
+Captured date:
+2026-07-15
+
+Purpose:
+Visual record of HubSpot CRM object model and available associations.
+
+Objects visible include:
+Contacts
+Companies
+Deals
+Tickets
+Calls
+Meetings
+Notes
+Emails
+Communications
+Tasks
+Invoices
+Payments
+Quotes
+Line items
+Contracts
+Subscriptions
+Orders
+Carts
+Campaigns
+Marketing events
+Appointments
+Courses
+Listings
+Projects
+Services
+Leads
+Credit memos
+Postal mail
+
+Formal object schemas and association IDs:
+Pending API extraction
+
+Status:
+PASS — visual configuration evidence captured.

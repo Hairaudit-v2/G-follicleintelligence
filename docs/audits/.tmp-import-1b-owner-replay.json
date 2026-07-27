@@ -1,0 +1,68 @@
+{
+  "evidenceType": "hubspot_owner_staff_mapping_1b",
+  "milestone": "FI-HUBSPOT-IMPORT-1B",
+  "staffRowsMutated": false,
+  "userRowsMutated": false,
+  "notificationsEmitted": false,
+  "backupWatermarkChanged": false,
+  "mode": "replay",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "batchId": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+  "maxRecords": 2,
+  "expandEnabled": false,
+  "generatedAt": "2026-07-16T05:35:52.847Z",
+  "proposals": [
+    {
+      "hubspotOwnerId": "120371232",
+      "hubspotOwnerIdHash": "b66a993fe22d0b5f",
+      "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+      "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+      "emailNormalizedHash": "891d75a0480a0a3d",
+      "staffId": "f9e0bfdf-535a-4f0c-ab2f-3930b5ffc6c1",
+      "matchMethod": "existing_staff_source_id",
+      "decision": "already_applied",
+      "reasonCode": "staff_source_id_already_present",
+      "staffIsActive": null
+    },
+    {
+      "hubspotOwnerId": "121916721",
+      "hubspotOwnerIdHash": "9a1cb2df05e29c5d",
+      "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+      "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+      "emailNormalizedHash": "46c5977bc0655a8a",
+      "staffId": "be01f2b8-5bd0-4e09-9c4d-5454f9cbc162",
+      "matchMethod": "existing_staff_source_id",
+      "decision": "already_applied",
+      "reasonCode": "staff_source_id_already_present",
+      "staffIsActive": null
+    }
+  ],
+  "counts": {
+    "evaluated": 2,
+    "proposedApply": 0,
+    "alreadyApplied": 2,
+    "quarantined": 0,
+    "conflicts": 0,
+    "wrongTenant": 0,
+    "applied": 0,
+    "rolledBack": 0
+  },
+  "mutations": [
+    {
+      "table": "fi_import_batches",
+      "operation": "update",
+      "rowId": "c73c5fb8-4df2-42b4-93ac-ddefe25d4574",
+      "allowlisted": true
+    }
+  ],
+  "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
+  "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
+  "ok": true,
+  "failClosedReasons": [],
+  "verification": {
+    "hubspotStaffSourceIdsBefore": 2,
+    "hubspotStaffSourceIdsAfter": 2,
+    "delta": 0
+  }
+}

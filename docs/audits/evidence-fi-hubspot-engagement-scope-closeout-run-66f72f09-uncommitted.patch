@@ -1,0 +1,294 @@
+﻿diff --git a/src/lib/onboarding-os/hubspotConnector.server.ts b/src/lib/onboarding-os/hubspotConnector.server.ts
+index bf348e62..d9b09dfd 100644
+--- a/src/lib/onboarding-os/hubspotConnector.server.ts
++++ b/src/lib/onboarding-os/hubspotConnector.server.ts
+@@ -1439,7 +1439,7 @@ export async function runHubspotEngagementCommunicationsBackup(
+       .eq("granted", true),
+     supabase
+       .from("fi_external_hubspot_sync_runs")
+-      .select("id, detail, engagement_capabilities")
++      .select("*")
+       .eq("integration_id", integrationId)
+       .eq("tenant_id", tenantId)
+       .eq("status", "started"),
+@@ -1451,28 +1451,27 @@ export async function runHubspotEngagementCommunicationsBackup(
+       .order("occurred_at", { ascending: false })
+       .limit(25),
+   ]);
+-  const activeEngagementRun = ((activeRows ?? []) as Record<string, unknown>[]).some((row) => {
++  const resumableEngagementRun = ((activeRows ?? []) as Record<string, unknown>[]).find((row) => {
+     const detail = (row.detail ?? {}) as Record<string, unknown>;
+     const capabilities = (row.engagement_capabilities ?? {}) as Record<string, unknown>;
+     return (
+       isEngagementHubspotMilestone(detail.milestone) || Object.keys(capabilities).length > 0
+     );
+   });
++  // Resume is allowed for started engagement runs; the gate must not hide the action.
+   const actionState = resolveHubspotEngagementBackupActionState({
+     credentialConfigured: Boolean(credentialRow),
+     connectorStatus: integration.status as ExternalConnectorStatus,
+     grantedScopes: ((scopeRows ?? []) as { scope_key: string; granted: boolean }[]).map(
+       (row) => row.scope_key
+     ),
+-    activeRun: activeEngagementRun,
++    activeRun: false,
+     liveCapabilitiesVerified: liveEngagementCapabilitiesVerified(
+       ((verificationRows ?? []) as VerificationEvidenceRow[]).find(isLiveEngagementProbe)
+     ),
+     operatorAuthorized: true,
+   });
+-  if (!actionState.visible)
+-    return { ok: false, error: "An engagement-communications backup is already running." };
+-  if (actionState.disabled)
++  if (actionState.disabled && !resumableEngagementRun)
+     return {
+       ok: false,
+       error: actionState.disabledReason ?? "Engagement-communications backup is unavailable.",
+@@ -1545,27 +1544,57 @@ export async function runHubspotEngagementCommunicationsBackup(
+       response_bodies_retained: false,
+     },
+   });
+-  const { data: run, error: runError } = await supabase
+-    .from("fi_external_hubspot_sync_runs")
+-    .insert({
+-      tenant_id: tenantId,
+-      integration_id: integrationId,
+-      status: "started",
+-      started_at: now,
+-      detail: {
+-        milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
+-        read_only: true,
+-        resumable: true,
+-        promotion_enabled: false,
+-        response_bodies_retained: false,
+-        restricted_staging_only: true,
+-      },
+-      engagement_capabilities: capabilities,
+-    })
+-    .select("*")
+-    .single();
+-  if (runError || !run)
+-    return { ok: false, error: "Unable to start HubSpot engagement backup run." };
++  let run = resumableEngagementRun ?? null;
++  if (!run) {
++    const { data: inserted, error: runError } = await supabase
++      .from("fi_external_hubspot_sync_runs")
++      .insert({
++        tenant_id: tenantId,
++        integration_id: integrationId,
++        status: "started",
++        started_at: now,
++        detail: {
++          milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
++          read_only: true,
++          resumable: true,
++          promotion_enabled: false,
++          response_bodies_retained: false,
++          restricted_staging_only: true,
++        },
++        engagement_capabilities: capabilities,
++      })
++      .select("*")
++      .single();
++    if (runError || !inserted)
++      return { ok: false, error: "Unable to start HubSpot engagement backup run." };
++    run = inserted as Record<string, unknown>;
++  } else {
++    await supabase
++      .from("fi_external_hubspot_sync_runs")
++      .update({
++        engagement_capabilities: capabilities,
++        detail: {
++          ...((run.detail as Record<string, unknown>) ?? {}),
++          milestone: HUBSPOT_ENGAGEMENT_MILESTONE,
++          read_only: true,
++          resumable: true,
++          promotion_enabled: false,
++          response_bodies_retained: false,
++          restricted_staging_only: true,
++          resumed_at: now,
++        },
++      })
++      .eq("id", run.id)
++      .eq("status", "started");
++    // Reload checkpoints/counters after resume marker so we never continue from a stale in-memory row.
++    const { data: refreshed } = await supabase
++      .from("fi_external_hubspot_sync_runs")
++      .select("*")
++      .eq("id", run.id)
++      .eq("status", "started")
++      .single();
++    if (refreshed) run = refreshed as Record<string, unknown>;
++  }
+   try {
+     const counters = await runHubspotEngagementBackup({
+       supabase,
+@@ -1582,7 +1611,12 @@ export async function runHubspotEngagementCommunicationsBackup(
+     const unexplained = supported.some(
+       (kind) => counters[kind].reconciliationStatus === "unexplained"
+     );
+-    const status = incomplete || missing.length || unexplained ? "partial" : "completed";
++    // UNSUPPORTED endpoints (e.g. files 405) are classified, not missing-scope failures.
++    const missingScopeKinds = missing.filter(
++      (kind) => capabilities[kind].result === "MISSING_SCOPE"
++    );
++    const status =
++      incomplete || missingScopeKinds.length || unexplained ? "partial" : "completed";
+     const { error } = await supabase
+       .from("fi_external_hubspot_sync_runs")
+       .update({
+diff --git a/src/lib/onboarding-os/hubspotEngagementBackupEngine.server.ts b/src/lib/onboarding-os/hubspotEngagementBackupEngine.server.ts
+index aa81d45a..7c53d9da 100644
+--- a/src/lib/onboarding-os/hubspotEngagementBackupEngine.server.ts
++++ b/src/lib/onboarding-os/hubspotEngagementBackupEngine.server.ts
+@@ -518,6 +518,27 @@ function checkpointFor(
+   return { phase, after: typeof cursor === "string" && cursor ? cursor : null };
+ }
+ 
++/** Advance or end a paging phase. Stalled/repeated cursors must never loop forever. */
++export function resolvePagingPhase(input: {
++  currentPhase: Phase;
++  currentAfter: string | null;
++  nextAfter: string | null;
++  archivedSupported: boolean;
++}): { phase: Phase; after: string | null } {
++  const next =
++    typeof input.nextAfter === "string" && input.nextAfter.trim()
++      ? input.nextAfter.trim()
++      : null;
++  const stalled = Boolean(next && input.currentAfter && next === input.currentAfter);
++  if (next && !stalled) {
++    return { phase: input.currentPhase, after: next };
++  }
++  if (input.currentPhase === "active" && input.archivedSupported) {
++    return { phase: "archived", after: null };
++  }
++  return { phase: "complete", after: null };
++}
++
+ async function persistEngagementCheckpoint(
+   supabase: SupabaseClient,
+   syncRunId: string,
+@@ -1199,23 +1220,25 @@ async function runCrmObjectKind(
+       counter.associations += staged.associations;
+       counter.attachmentReferences += staged.attachmentReferences;
+       params.fileRefs.push(...staged.fileRefs);
+-      const next = page.paging?.next?.after ?? null;
+-      const nextPhase: Phase = next
+-        ? checkpoint.phase
+-        : archived || !capability.archivedSupported
+-          ? "complete"
+-          : "archived";
++      const advanced = resolvePagingPhase({
++        currentPhase: checkpoint.phase,
++        currentAfter: checkpoint.after,
++        nextAfter: page.paging?.next?.after ?? null,
++        archivedSupported: capability.archivedSupported,
++      });
+       params.checkpoints[kind] = {
+         active:
+           checkpoint.phase === "active"
+-            ? next
++            ? advanced.phase === "active"
++              ? advanced.after
++              : null
+             : ((params.checkpoints[kind] as Record<string, unknown>)?.active ?? null),
+-        archived: checkpoint.phase === "archived" ? next : null,
+-        phase: nextPhase,
++        archived: advanced.phase === "archived" ? advanced.after : null,
++        phase: advanced.phase,
+       };
+-      counter.complete = nextPhase === "complete";
+-      counter.checkpointStatus = nextPhase === "complete" ? "complete" : "in_progress";
+-      checkpoint = { phase: nextPhase, after: next };
++      counter.complete = advanced.phase === "complete";
++      counter.checkpointStatus = advanced.phase === "complete" ? "complete" : "in_progress";
++      checkpoint = { phase: advanced.phase, after: advanced.after };
+     }
+     counter.distinctIds = counter.staged;
+     Object.assign(counter, reconcileCounter(counter));
+@@ -1317,27 +1340,32 @@ export async function runHubspotEngagementBackup(params: {
+           counter.archived += staged.archived;
+           counter.active += objects.length - staged.archived;
+           counter.associations += staged.associations;
+-          const next = page.paging?.next?.after ?? null;
+-          const nextPhase: Phase = next
+-            ? checkpoint.phase
+-            : archived || !capabilities[kind].archivedSupported
+-              ? "complete"
+-              : "archived";
++          const advanced = resolvePagingPhase({
++            currentPhase: checkpoint.phase,
++            currentAfter: checkpoint.after,
++            nextAfter: page.paging?.next?.after ?? null,
++            archivedSupported: capabilities[kind].archivedSupported,
++          });
++          const priorIds = new Set(
++            (((checkpoints[kind] as Record<string, unknown>)?.thread_ids as string[]) ?? []).filter(
++              Boolean
++            )
++          );
++          for (const id of staged.threadIds) priorIds.add(id);
+           checkpoints[kind] = {
+             active:
+               checkpoint.phase === "active"
+-                ? next
++                ? advanced.phase === "active"
++                  ? advanced.after
++                  : null
+                 : ((checkpoints[kind] as Record<string, unknown>)?.active ?? null),
+-            archived: checkpoint.phase === "archived" ? next : null,
+-            phase: nextPhase,
+-            thread_ids: [
+-              ...(((checkpoints[kind] as Record<string, unknown>)?.thread_ids as string[]) ?? []),
+-              ...staged.threadIds,
+-            ],
++            archived: advanced.phase === "archived" ? advanced.after : null,
++            phase: advanced.phase,
++            thread_ids: [...priorIds],
+           };
+-          counter.complete = nextPhase === "complete";
+-          counter.checkpointStatus = nextPhase === "complete" ? "complete" : "in_progress";
+-          checkpoint = { phase: nextPhase, after: next };
++          counter.complete = advanced.phase === "complete";
++          counter.checkpointStatus = advanced.phase === "complete" ? "complete" : "in_progress";
++          checkpoint = { phase: advanced.phase, after: advanced.after };
+         }
+         counter.distinctIds = counter.staged;
+         Object.assign(counter, reconcileCounter(counter));
+diff --git a/src/lib/onboarding-os/hubspotEngagementBackupEngine.test.ts b/src/lib/onboarding-os/hubspotEngagementBackupEngine.test.ts
+index f6fc578c..89f5bf5c 100644
+--- a/src/lib/onboarding-os/hubspotEngagementBackupEngine.test.ts
++++ b/src/lib/onboarding-os/hubspotEngagementBackupEngine.test.ts
+@@ -8,6 +8,7 @@ import {
+   HUBSPOT_ENGAGEMENT_MILESTONE,
+   isEngagementHubspotMilestone,
+   probeHubspotEngagementCapabilities,
++  resolvePagingPhase,
+   runHubspotEngagementBackup,
+ } from "./hubspotEngagementBackupEngine.server";
+ 
+@@ -231,6 +232,23 @@ describe("HubSpot engagement backup engine", () => {
+     }
+   });
+ 
++  it("ends paging when HubSpot repeats the same cursor", () => {
++    const stalled = resolvePagingPhase({
++      currentPhase: "active",
++      currentAfter: "cursor-a",
++      nextAfter: "cursor-a",
++      archivedSupported: true,
++    });
++    assert.deepEqual(stalled, { phase: "archived", after: null });
++    const complete = resolvePagingPhase({
++      currentPhase: "archived",
++      currentAfter: "cursor-b",
++      nextAfter: "cursor-b",
++      archivedSupported: true,
++    });
++    assert.deepEqual(complete, { phase: "complete", after: null });
++  });
++
+   it("honours Retry-After via shared hubspotReadJson retries", async () => {
+     const originalFetch = globalThis.fetch;
+     let attempts = 0;

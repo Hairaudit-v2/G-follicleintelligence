@@ -1,0 +1,60 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 24
+  },
+  "mode": "apply",
+  "result": {
+    "ok": true,
+    "linked": 0,
+    "created": 0,
+    "alreadyApplied": 24,
+    "mode": "replay",
+    "newLeadIds": [],
+    "mappingIds": [
+      "6e87bce2-f2d5-4bb1-9d3e-be6140a246f1",
+      "fa406f66-01da-47d4-a640-65b35b75b46a",
+      "4db03b7e-1b15-4820-aaac-52d0a00d11b4",
+      "e0baae3a-402d-43e1-af11-b8d6dd9385d6",
+      "d6bdfc05-d228-4f92-bb5e-f5eab0012a7e",
+      "010f3fef-77b4-4168-8eb7-ab8b90dde479",
+      "e01d6b8d-ae53-4b89-838e-f4382a9561d0",
+      "aa5bf481-7ddc-43bb-b74c-4d6fba450808",
+      "116227c5-fd3c-4b89-9b3d-8cca5709aed2",
+      "682bb9f1-9dcd-40d4-accd-ed7cc0379eb4",
+      "57971caf-fdae-44e0-936f-7b00b22e8f4d",
+      "66500c3e-1886-455c-87aa-eed4d621d09f",
+      "ecf5140d-00d5-47db-a80e-133f171c4736",
+      "dd8a2baf-86cd-433f-b479-95f3fb7193d6",
+      "8e6791b0-8cb8-4700-a39c-5bfe239329fc",
+      "f9dc1653-5953-454a-aaae-ea49fbadd5d4",
+      "ddb066d3-d48d-4d72-91fb-3f3976b007c7",
+      "94f1eeb2-1bd3-4f0a-b2b1-67de7b97bb12",
+      "ef0a5ae2-cdfe-4500-9837-1e8a557dbbb0",
+      "2742c2c1-669c-4e51-9341-d0ae3ffbf5b4",
+      "0a3c621b-6971-4485-8aa3-346c0c47e15b",
+      "b015217f-f9ff-4f2a-b082-99cf64b4ef99",
+      "9c2b42c5-9926-45d6-8c6d-232361a5dbb2",
+      "8adf089c-e498-4540-ae62-80c5b0aa94a8"
+    ],
+    "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
+    "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
+    "leadCountBefore": 4706,
+    "leadCountAfter": 4706,
+    "patientCountBefore": 829,
+    "patientCountAfter": 829
+  },
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 24
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

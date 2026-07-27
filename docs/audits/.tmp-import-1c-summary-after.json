@@ -1,0 +1,286 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": 2,
+  "mode": "summary",
+  "summary": {
+    "totalOwners": 31,
+    "mapped": 2,
+    "proposed": 0,
+    "unresolved": 0,
+    "archivedOrHistorical": 24,
+    "conflicts": 0,
+    "needingAttention": 5,
+    "excluded": 0,
+    "noMatchingStaff": 5,
+    "alreadyApplied": 2,
+    "relevantActiveCoveragePct": 28.6,
+    "relevantActiveDenominator": 7,
+    "relevantActiveMapped": 2
+  },
+  "unresolvedSample": [
+    {
+      "hubspotOwnerId": "392352612",
+      "displayName": "Himanshu Gupta",
+      "archived": false,
+      "state": "no_matching_staff",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "579439921",
+      "displayName": "Madhur Gusain",
+      "archived": false,
+      "state": "no_matching_staff",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "89393041",
+      "displayName": "Payal Jalan",
+      "archived": false,
+      "state": "no_matching_staff",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "448367412",
+      "displayName": "Roslyn Richards",
+      "archived": false,
+      "state": "no_matching_staff",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "258618710",
+      "displayName": "Your Social Buddy",
+      "archived": false,
+      "state": "no_matching_staff",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "128850469",
+      "displayName": "Amol Patil",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "558768737",
+      "displayName": "Booking Team",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "1987801293",
+      "displayName": "Charlene Stokes",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "577967518",
+      "displayName": "Daniel Bullen",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 1
+    },
+    {
+      "hubspotOwnerId": "129141369",
+      "displayName": "Deepak Kumar",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "131812193",
+      "displayName": "Deepak Sanwal",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "1092590619",
+      "displayName": "Ebony Andrews",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "137839783",
+      "displayName": "Gaurang Joshi",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "361308053",
+      "displayName": "Gaurav Singh",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "354183190",
+      "displayName": "jonathan@engageonlinemarketing.co.au",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "132902718",
+      "displayName": "Karen Kelly",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "422539136",
+      "displayName": "Kristy Truong",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "372826171",
+      "displayName": "Maddy Portelli",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "367639850",
+      "displayName": "Mani Pruthi",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "694072996",
+      "displayName": "Muhammad Mohsin",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "128850468",
+      "displayName": "Navendu Jha",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "137801360",
+      "displayName": "Navendu Jha",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "129711525",
+      "displayName": "Nishant Guleria",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "121916235",
+      "displayName": "Patricia Berna",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "139773952",
+      "displayName": "Son Pham",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "129141368",
+      "displayName": "Sourabh Arora",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "122600237",
+      "displayName": "Sunil Kumar",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "137838657",
+      "displayName": "TalkXO Agency",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    },
+    {
+      "hubspotOwnerId": "165384074",
+      "displayName": "vrinda.s@bluefrogs.in",
+      "archived": true,
+      "state": "archived_source_owner",
+      "ownedContacts": 0,
+      "ownedDeals": 0,
+      "candidateCount": 0
+    }
+  ],
+  "after": 2,
+  "delta": 0
+}

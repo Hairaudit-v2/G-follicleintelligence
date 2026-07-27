@@ -1,0 +1,258 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 0
+  },
+  "mode": "cohort",
+  "summary": {
+    "totalPilotRecords": 25,
+    "linkedExistingLeads": 24,
+    "proposedNewLeads": 0,
+    "patientLinkReviews": 0,
+    "quarantined": 1,
+    "conflicts": 0,
+    "readyToApply": 24,
+    "applied": 0,
+    "alreadyApplied": 0
+  },
+  "rows": [
+    {
+      "hubspotContactId": "100039339025",
+      "displayName": "Mahmood Popalzai",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "a144dc64-2714-4eb9-8380-2b22b07b85e6",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100199031693",
+      "displayName": "Jordan Gunter",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "ed911476-91ff-4619-8dc6-6bec6970a397",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100207700369",
+      "displayName": "Thomas Berry",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "107cb1b0-c6d2-45fb-b6af-9ba2d4bacbd2",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100208818774",
+      "displayName": "Elisa Dequae",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "dd0c0e6e-aaa2-4525-b208-4d5a796fd232",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100223594355",
+      "displayName": "Robert East",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "c6d2dbef-1280-425f-bdd4-b06e9a986419",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "10022615812",
+      "displayName": "Sheila Manhica",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "d38f12b4-4808-408d-85c0-0b1c111886e4",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "10038366549",
+      "displayName": "Ashok Kumar",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "b0fb9fad-6c6f-4671-8fda-e8d2d4e97927",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100449327741",
+      "displayName": "Terry Leighton",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "1d2775f6-39d2-45cf-a1e7-6091e3195ead",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100484847108",
+      "displayName": "Miki",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "ec6b763e-5f51-4308-8590-f8a2e403a5aa",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100491369844",
+      "displayName": "Tom Young",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "5ef187ad-fba0-4608-a38c-3faaa1dab2eb",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100501976675",
+      "displayName": "Khadar Mukhtar",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "7d3462e4-1c98-4be4-ac2e-4ca61e576b9b",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100568375975",
+      "displayName": "Leinisa Semedo",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "fc9df083-a265-4b82-8e64-b3fb13bac1f4",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100770168185",
+      "displayName": "Nazim Ahmed",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "d5849be6-649d-4780-b250-5d566814a313",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100778885398",
+      "displayName": "Michelle",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "9fd5870d-c2df-4560-948b-20a9300f3a18",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100862888240",
+      "displayName": "Ruby Woodin Woodin",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "ceae2ae0-79ce-49be-93d2-ee09f4b191fe",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "100040617619",
+      "displayName": "test@gmail.com",
+      "decision": "quarantine_test_or_smoke",
+      "approvedForApply": false,
+      "proposedLeadId": "0c7afee0-4703-474a-81d7-5bded4c672d3",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "10092071439",
+      "displayName": "Luke Daniels",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "6986a144-71ba-4c54-93d6-5e5f39c5b954",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "1009601",
+      "displayName": "Lisbeth Comissao",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "e0d30ee0-1915-4ad8-8705-0d95afe28856",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "101002435620",
+      "displayName": "Mark Curran",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "ac0408a1-8f50-406e-84a2-d8472adc64cc",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "101150667395",
+      "displayName": "Wangdi",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "bbdca9f4-ca98-4f01-9058-66bf917f9e75",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "10116864909",
+      "displayName": "Geoff Beats",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "7ef5e123-09f6-4800-a013-5c0f0034adc1",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "10122057556",
+      "displayName": "STEPHEN JOCELYN",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "60ae707a-acda-45b3-be28-6c4b9648fe92",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "101338823040",
+      "displayName": "Asfiya Anjum",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "032b74f6-1fb9-4879-8214-28d72067c60a",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "101353919786",
+      "displayName": "Mark",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "1dace051-0a36-4b7f-9af4-355a696f5b68",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    },
+    {
+      "hubspotContactId": "101368989060",
+      "displayName": "Steven",
+      "decision": "link_existing_lead",
+      "approvedForApply": true,
+      "proposedLeadId": "1c69fafc-92fe-4c06-aa6c-e2ba06401417",
+      "reasonCode": "person_source_id_single_lead",
+      "ownerResolutionStatus": "none"
+    }
+  ],
+  "after": {
+    "leads": 4706,
+    "patients": 829,
+    "mappings": 0
+  },
+  "deltas": {
+    "leads": 0,
+    "patients": 0,
+    "mappings": 0
+  }
+}

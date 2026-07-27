@@ -1,0 +1,1388 @@
+{
+  "evidenceType": "hubspot_import_1a_dry_run",
+  "milestone": "FI-HUBSPOT-IMPORT-1A",
+  "mappingVersion": "v1",
+  "mode": "dry_run",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "dataset": "contacts",
+  "generatedAt": "2026-07-16T05:24:38.321Z",
+  "entityWritesPerformed": false,
+  "notificationsEmitted": false,
+  "automationsTriggered": false,
+  "backupWatermarkChanged": false,
+  "metrics": {
+    "sourceIdentity": {
+      "uniqueSourceIds": 100,
+      "duplicateSourceIds": 0,
+      "missingCanonicalIds": 0
+    },
+    "identityResolution": {
+      "exactExistingExternalMatch": 96,
+      "exactLeadMatch": 96,
+      "exactPatientMatch": 0,
+      "proposedCreate": 0,
+      "ambiguous": 0,
+      "noMatch": 0,
+      "multipleTargetConflict": 0
+    },
+    "ownerMapping": {
+      "activeStaffMapped": 2,
+      "inactiveStaffMapped": 0,
+      "unmapped": 29,
+      "systemOwner": 0,
+      "ambiguous": 0
+    },
+    "pipeline": {
+      "mappedStages": 10,
+      "unmappedStages": 0,
+      "historyOnlyStages": 1,
+      "potentiallyRegressiveStageChanges": 0
+    },
+    "integrity": {
+      "wrongTenantCandidates": 0,
+      "duplicateFiTargets": 0,
+      "multipleSourcesToOneTarget": 0,
+      "oneSourceToMultipleTargets": 0,
+      "sideEffectRiskRecords": 96
+    },
+    "decisions": {
+      "create_new_lead": 0,
+      "link_existing_lead": 96,
+      "link_existing_patient": 0,
+      "enrich_existing_lead": 0,
+      "import_timeline_event": 0,
+      "import_source_evidence": 0,
+      "skip_already_imported": 0,
+      "skip_out_of_scope": 0,
+      "quarantine_missing_identity": 0,
+      "quarantine_ambiguous_identity": 0,
+      "quarantine_owner_unmapped": 0,
+      "quarantine_stage_unmapped": 0,
+      "quarantine_patient_link_requires_stronger_evidence": 0,
+      "quarantine_test_or_smoke": 4,
+      "conflict_multiple_targets": 0,
+      "unsupported": 0
+    }
+  },
+  "decisions": [
+    {
+      "sourceIdHash": "2d79e9c03dc28734",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "39d6d89fcd91f1b3",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "a914e1ebdd795b55",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "2618e70cf4656c3d",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "516d18c7f39aa69d",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "46b225e973d7141d",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "f7835f9ee3691a8a",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "01383a764517b75b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "5bcde2f14212849a",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e26412b054229663",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "8f48f3a9c147a308",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "bb486494038b9de1",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "d80d25828885ceca",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "aae78620a6267f45",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "dbed9fb3f39a811e",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3a509ce5a29b885e",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "83c48ba65824673b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "84ad6e414de990fe",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "581e92d2c96f1c1e",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "9abdb424cea5461e",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "6733b9ea3965c2dc",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "4a38c8c7b72e577b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "dcf371134757edf4",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "7246b9e5057b1252",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "7ede8d16ca8312ff",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "d784e6fbc20e6055",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "d0342094d9473ee2",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "98f50c601406a6ad",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "9db9ee1b29860360",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "19a696f26fde5b4a",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "bac7e7f3b35a33d7",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "05a77aa3d6cf13ff",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "203a300ce382617d",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "26fd6b0a4c613472",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e1835256691be294",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3540ae993d18dbb0",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "d28d935b3038d9b5",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "9860e436869353e3",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "8c27585989a1ffab",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "0b9e450dac916bdc",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "94129f582b09126c",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "a4c5936eae502abb",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "1e6bbb6041c06718",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "57254e76e25fb53b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "bd4343db78e8de77",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "8fde3ae86bffca8f",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "4abd55b5c080aa1d",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e6dd119ef742ccc8",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "ad8ceb561d9d810c",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "685b53337f5a1840",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3342c25f6d9b2fe0",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3f385836d2c2bc8b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "46c63bed25b73c88",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "0bdeac4c2c9a61e0",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "c548fc34f90663ec",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "4c6f0261ead89725",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "67db59fe04d84f8b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e1e594dbcac8344b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "863b06ada88b6870",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "c459d3d0c80e1123",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3cb808b5c5a08c1a",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "5710ab9feca87779",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "bcd4956be2706c8b",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3f8069d86d821c1c",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "da7ca893df3dc366",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "a5f5d87cdb6f439e",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "2cd0a62a8f23c880",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "cdc0699a10b8b6ea",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "f51d1b6e644b37da",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "abcef3c8336ac935",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "b45fde55210149cb",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "aadffdcc9f7388fa",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "aa6fff7ff1e31a79",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "0f472cf962b96855",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "cb2b587255361bee",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "27076f4a9fc25fd5",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "afbf4b5dac59a0d4",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "ac9b812f91b5cc47",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "1599ba221d395f75",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "fb0721294a201886",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "920cde21a5bd33e3",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "838e5f870def16cf",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e072bb5ccbf6cac8",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "114e924fa25c3971",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "cd2a2786beb8ddf9",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "1cd8b6ea4f4e3ff0",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "e78760e4d9fa9663",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "7d29e1bd73aefcd1",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "1b1314876ff3cf30",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "df0aeb98a44b6294",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "830e9b8b6e935a77",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "3f23ec77b6a50c67",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "6fa0e45f0bb4f1b4",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "a251e98c17974139",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "155d8010e3c5c01a",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "9321b99775de9675",
+      "decision": "link_existing_lead",
+      "proposedFiEntityType": "lead",
+      "proposedFiEntityId": "[redacted-uuid]",
+      "identityTier": "tier2_explicit_hubspot_ref",
+      "reasonCode": "person_source_id_single_lead",
+      "sideEffectRisks": [
+        "analytics"
+      ],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "bb9e8a5f24fbe3a3",
+      "decision": "quarantine_test_or_smoke",
+      "proposedFiEntityType": "none",
+      "proposedFiEntityId": null,
+      "identityTier": "none",
+      "reasonCode": "excluded_test_or_smoke_identity",
+      "sideEffectRisks": [],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "71a87a9c5da87808",
+      "decision": "quarantine_test_or_smoke",
+      "proposedFiEntityType": "none",
+      "proposedFiEntityId": null,
+      "identityTier": "none",
+      "reasonCode": "excluded_test_or_smoke_identity",
+      "sideEffectRisks": [],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "2a46dbbad81533e1",
+      "decision": "quarantine_test_or_smoke",
+      "proposedFiEntityType": "none",
+      "proposedFiEntityId": null,
+      "identityTier": "none",
+      "reasonCode": "excluded_test_or_smoke_identity",
+      "sideEffectRisks": [],
+      "mappingVersion": "v1"
+    },
+    {
+      "sourceIdHash": "5aa4f7fe885aeae4",
+      "decision": "quarantine_test_or_smoke",
+      "proposedFiEntityType": "none",
+      "proposedFiEntityId": null,
+      "identityTier": "none",
+      "reasonCode": "excluded_test_or_smoke_identity",
+      "sideEffectRisks": [],
+      "mappingVersion": "v1"
+    }
+  ],
+  "pipelineStageInventory": [
+    {
+      "hubspotStageLabel": "Contacted",
+      "fiSlug": "contacted",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Appointment Scheduled",
+      "fiSlug": "consult_scheduled",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics",
+        "tasks"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Consulted",
+      "fiSlug": "consult_completed",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Surgery Unqualified",
+      "fiSlug": null,
+      "classification": "history_only",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Surgery Qualified",
+      "fiSlug": "treatment_planning",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Booked Non-Surgical",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Booked Surgical",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Deposit Paid",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Completed Session",
+      "fiSlug": "won_closed",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Post Operative Treatment",
+      "fiSlug": "in_treatment",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Lost",
+      "fiSlug": "lost",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    }
+  ],
+  "recommendedPilot": {
+    "option": "A_owner_mapping",
+    "dataset": "owners",
+    "maxRecords": 25,
+    "rationale": "Owner→staff deterministic coverage is incomplete; mapping active staff first reduces assignee ambiguity and has zero patient/lead duplication risk."
+  },
+  "verdict": "AMBER",
+  "verdictReasons": [
+    "Pipeline stage mapping needs business decisions for history-only/unmapped stages.",
+    "Owner mappings incomplete for some HubSpot owners.",
+    "Preferred external-identity schema is partially covered by existing source-id tables; additive migration proposed, not applied."
+  ],
+  "productionDryRunMeta": {
+    "cohortSize": 100,
+    "stagingContactCountSampled": 1000,
+    "stagingContactTotal": 4750,
+    "mutationGuard": {
+      "inserts": 0,
+      "updates": 0,
+      "deletes": 0,
+      "upserts": 0
+    },
+    "ownerClassSummary": {
+      "unknown_owner": 29,
+      "linked_active_staff": 2
+    }
+  }
+}

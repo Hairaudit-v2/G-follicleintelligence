@@ -1,0 +1,17 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": 2,
+  "mode": "apply",
+  "result": {
+    "ok": true,
+    "applied": 0,
+    "alreadyApplied": 0,
+    "mode": "apply",
+    "watermarkBefore": "2026-07-16T03:45:02.366+00:00",
+    "watermarkAfter": "2026-07-16T03:45:02.366+00:00",
+    "mappingRowIds": []
+  },
+  "after": 2,
+  "delta": 0
+}

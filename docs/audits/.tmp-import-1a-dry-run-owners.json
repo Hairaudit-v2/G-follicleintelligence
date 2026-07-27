@@ -1,0 +1,383 @@
+{
+  "evidenceType": "hubspot_import_1a_dry_run",
+  "milestone": "FI-HUBSPOT-IMPORT-1A",
+  "mappingVersion": "v1",
+  "mode": "dry_run",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "dataset": "owners",
+  "generatedAt": "2026-07-16T05:24:29.927Z",
+  "entityWritesPerformed": false,
+  "notificationsEmitted": false,
+  "automationsTriggered": false,
+  "backupWatermarkChanged": false,
+  "metrics": {
+    "sourceIdentity": {
+      "uniqueSourceIds": 31,
+      "duplicateSourceIds": 0,
+      "missingCanonicalIds": 0
+    },
+    "identityResolution": {
+      "exactExistingExternalMatch": 0,
+      "exactLeadMatch": 0,
+      "exactPatientMatch": 0,
+      "proposedCreate": 0,
+      "ambiguous": 0,
+      "noMatch": 0,
+      "multipleTargetConflict": 0
+    },
+    "ownerMapping": {
+      "activeStaffMapped": 2,
+      "inactiveStaffMapped": 0,
+      "unmapped": 29,
+      "systemOwner": 0,
+      "ambiguous": 0
+    },
+    "pipeline": {
+      "mappedStages": 10,
+      "unmappedStages": 0,
+      "historyOnlyStages": 1,
+      "potentiallyRegressiveStageChanges": 0
+    },
+    "integrity": {
+      "wrongTenantCandidates": 0,
+      "duplicateFiTargets": 0,
+      "multipleSourcesToOneTarget": 0,
+      "oneSourceToMultipleTargets": 0,
+      "sideEffectRiskRecords": 0
+    },
+    "decisions": {
+      "create_new_lead": 0,
+      "link_existing_lead": 0,
+      "link_existing_patient": 0,
+      "enrich_existing_lead": 0,
+      "import_timeline_event": 0,
+      "import_source_evidence": 0,
+      "skip_already_imported": 0,
+      "skip_out_of_scope": 0,
+      "quarantine_missing_identity": 0,
+      "quarantine_ambiguous_identity": 0,
+      "quarantine_owner_unmapped": 0,
+      "quarantine_stage_unmapped": 0,
+      "quarantine_patient_link_requires_stronger_evidence": 0,
+      "quarantine_test_or_smoke": 0,
+      "conflict_multiple_targets": 0,
+      "unsupported": 0
+    }
+  },
+  "decisions": [],
+  "pipelineStageInventory": [
+    {
+      "hubspotStageLabel": "Contacted",
+      "fiSlug": "contacted",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Appointment Scheduled",
+      "fiSlug": "consult_scheduled",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics",
+        "tasks"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Consulted",
+      "fiSlug": "consult_completed",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Surgery Unqualified",
+      "fiSlug": null,
+      "classification": "history_only",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Surgery Qualified",
+      "fiSlug": "treatment_planning",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Booked Non-Surgical",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Booked Surgical",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Deposit Paid",
+      "fiSlug": "deposit_or_booked",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "revenue_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Completed Session",
+      "fiSlug": "won_closed",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics",
+        "conversion_reporting"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Post Operative Treatment",
+      "fiSlug": "in_treatment",
+      "classification": "closest_approved",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    },
+    {
+      "hubspotStageLabel": "Lost",
+      "fiSlug": "lost",
+      "classification": "exact_equivalent",
+      "sideEffectRisks": [
+        "analytics"
+      ]
+    }
+  ],
+  "recommendedPilot": {
+    "option": "A_owner_mapping",
+    "dataset": "owners",
+    "maxRecords": 25,
+    "rationale": "Owner→staff deterministic coverage is incomplete; mapping active staff first reduces assignee ambiguity and has zero patient/lead duplication risk."
+  },
+  "verdict": "AMBER",
+  "verdictReasons": [
+    "Pipeline stage mapping needs business decisions for history-only/unmapped stages.",
+    "Owner mappings incomplete for some HubSpot owners.",
+    "Preferred external-identity schema is partially covered by existing source-id tables; additive migration proposed, not applied."
+  ],
+  "ownerClassifications": [
+    {
+      "hubspotOwnerIdHash": "d1e8b16e0b560332",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "b66a993fe22d0b5f",
+      "classification": "linked_active_staff",
+      "reasonCode": "exact_staff_email_within_tenant",
+      "staffId": "f9e0bfdf-535a-4f0c-ab2f-3930b5ffc6c1"
+    },
+    {
+      "hubspotOwnerIdHash": "bebcf9427b84227c",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "9a1cb2df05e29c5d",
+      "classification": "linked_active_staff",
+      "reasonCode": "exact_staff_email_within_tenant",
+      "staffId": "be01f2b8-5bd0-4e09-9c4d-5454f9cbc162"
+    },
+    {
+      "hubspotOwnerIdHash": "a3c0dff052f02318",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "a43107319812a956",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "554a6c9f24c0ea4e",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "8f1c6b471ca9d77a",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "71604b56f2973373",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "1dc7f41d38c6ddee",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "c48e4f99f015a150",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "a453311617e037b9",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "3d63f669d37b747f",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "787fffe22a6421d5",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "592cf70926096e3f",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "d0a808ebed50e08d",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "6919d9d8f03d8a06",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "edd72779c5a6837a",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "1917961217e70ac4",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "b01c6776797e16c4",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "fd93a15cb9bc770e",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "053486fbe280f059",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "3a0dd0132dd7ca01",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "da7f505c0d581489",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "b2c77df6e035c2f7",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "43db9bd27bd5677c",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "380f6d43d1b0c8b2",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "252282c61fb0b29f",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "da0c85484e91efa1",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "3439abaa986ce43d",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    },
+    {
+      "hubspotOwnerIdHash": "bc4666ae4b5da1a8",
+      "classification": "unknown_owner",
+      "reasonCode": "owner_unmapped_provenance_only",
+      "staffId": null
+    }
+  ],
+  "productionDryRunMeta": {
+    "cohortSize": 31,
+    "stagingContactCountSampled": 0,
+    "stagingContactTotal": null,
+    "mutationGuard": {
+      "inserts": 0,
+      "updates": 0,
+      "deletes": 0,
+      "upserts": 0
+    },
+    "ownerClassSummary": {
+      "unknown_owner": 29,
+      "linked_active_staff": 2
+    }
+  }
+}

@@ -1,0 +1,1373 @@
+{
+  "milestone": "FI-HUBSPOT-IMPORT-1E-R",
+  "mode": "preview",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "portalOwnership": {
+    "configuredPortalId": "21009770",
+    "livePortalId": "21009770",
+    "match": true
+  },
+  "cutoff": {
+    "from": "2026-07-16T03:45:02.366Z",
+    "to": "2026-07-16T16:00:34.530Z",
+    "immutable": true,
+    "dataset": "contacts"
+  },
+  "approvedIds": [
+    "212912271714",
+    "215710882163",
+    "217987713131",
+    "219927242862",
+    "226778812230",
+    "226836338736",
+    "226877437753",
+    "226998940750",
+    "227450310196",
+    "227468262147",
+    "227930895245",
+    "228399343189",
+    "229037454111",
+    "229761370222",
+    "230639040339",
+    "231956151096",
+    "233915878521",
+    "234237072023",
+    "234773951030",
+    "235542182239",
+    "82416974089"
+  ],
+  "checksum": "8f6030f5111e1dbf58d535010c8933513d3a6b8e6cdbc1c781e34512ee0407b5",
+  "syncRunId": null,
+  "stagingResult": null,
+  "counts": {
+    "before": {
+      "leads": 4706,
+      "patients": 829,
+      "staff": 22,
+      "users": 20,
+      "mappings": 4596,
+      "stagingContacts": 4750,
+      "notesWatermark": "2026-07-16T16:00:34.53+00:00",
+      "contactWatermark": null
+    },
+    "after": {
+      "leads": 4706,
+      "patients": 829,
+      "staff": 22,
+      "users": 20,
+      "mappings": 4596,
+      "stagingContacts": 4750,
+      "notesWatermark": "2026-07-16T16:00:34.53+00:00",
+      "contactWatermark": null
+    }
+  },
+  "stagingBefore": [
+    {
+      "hubspot_contact_id": "212912271714",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7f9be788a39e4284eeca05ace67ee1f65077849fda8533b0677a429d33e877ed",
+      "created_at": "2026-07-15T03:27:21.692172+00:00",
+      "updated_at": "2026-07-15T03:27:21.692172+00:00"
+    },
+    {
+      "hubspot_contact_id": "215710882163",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "caa792eafd43c5565c074aaa39e440d3cee8c4467ee04c66a057199126578e28",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "217987713131",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7a9d6008526a12c7b161976c89cf584a9018cf9f1f8c537cc5c2c639624e38d1",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "219927242862",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "896032acedaa6e6fa8046debaaf6db587dce45fa200ed53c08dfaee171ad61aa",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "226778812230",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "f4dfcaee12b2d8d824540c9b06f20f8976927e704db91d28004221af8984bed4",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "226836338736",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "ddeac67d4250a54418f4cbc909e8e9588d79b2c58c3fddd971147bd0cfc49e00",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "226877437753",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "a2fd5c1ef7a0137662b761185e5b98825dd0afefe6a76dbd23a087d7c63cc1ab",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "226998940750",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7ef03a70a39316ce20015eb7db306540e907eb415c09912aad9d361ed0966ada",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "227450310196",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "74fd733e1aa844872791ce351e945ce2508f535fee3c1396b03f7510e44ce817",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "227468262147",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "0f7edc4517110721fa44ff4c60199aa428e974f68380934448529ad4cff1ab03",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "227930895245",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "374cb4f0fa6cd125b5dd20058d6c995419d5cd90eafded0108dbcb45b57310de",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "228399343189",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "ff8801497dd572f075e8cd6e4c357606031ecf9cb5e253dbb56a8177da0b54ea",
+      "created_at": "2026-07-15T03:27:23.172409+00:00",
+      "updated_at": "2026-07-15T03:27:23.172409+00:00"
+    },
+    {
+      "hubspot_contact_id": "229037454111",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "1cb2f0789d7bee0c590cc104d94083252ac1bd45c0ecd81e318a573e4c1f925e",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "230639040339",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "61fb188bd54febefd038c872970b7c9dbeed4a3cb82fafc23cd2d4cc71dbf148",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "231956151096",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "1b73222dcc99b69cc2fba88be054dfb4c91b08c73a8fa8c481a53ac6f68ed1d7",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "233915878521",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "b99fe6a6ac7b4076ec493b82534f9575d8fc4730a80b4334c554412d4784c5a4",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "234237072023",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "e5d61c2ddd2d12d36de4af80b5460578f04cb36ce9ff1aa648c77d2da8a047c7",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "234773951030",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "95850d500aa3725ee5491b01f88a82c7e207ce2ba52204c0b03d598279cf69d4",
+      "created_at": "2026-07-15T03:27:24.548204+00:00",
+      "updated_at": "2026-07-15T03:27:24.548204+00:00"
+    },
+    {
+      "hubspot_contact_id": "82416974089",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "88699f00ba14a316439109582e94b56cced79a859bfbf579dfc9542d5c9376c0",
+      "created_at": "2026-07-15T03:26:58.146126+00:00",
+      "updated_at": "2026-07-15T03:26:58.146126+00:00"
+    }
+  ],
+  "stagingAfter": [
+    {
+      "hubspot_contact_id": "212912271714",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7f9be788a39e4284eeca05ace67ee1f65077849fda8533b0677a429d33e877ed",
+      "hubspot_created_at": "2026-05-25T16:24:00.352+00:00",
+      "hubspot_updated_at": "2026-07-14T16:48:37.665+00:00",
+      "archived": false,
+      "email": "silviososchino@gmail.com",
+      "phone": "0413801291",
+      "raw_payload": {
+        "id": "212912271714",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/212912271714",
+        "archived": false,
+        "createdAt": "2026-05-25T16:24:00.352Z",
+        "updatedAt": "2026-07-14T16:48:37.665Z",
+        "properties": {
+          "email": "silviososchino@gmail.com",
+          "phone": "0413801291",
+          "lastname": "Soschino",
+          "firstname": "Silvio",
+          "createdate": "2026-05-25T16:24:00.352Z",
+          "lead_source": "Website Appointment Button",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "212912271714",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:48:37.665Z",
+          "hs_analytics_source": "AI_REFERRALS"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "215710882163",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "caa792eafd43c5565c074aaa39e440d3cee8c4467ee04c66a057199126578e28",
+      "hubspot_created_at": "2026-05-11T03:33:25.751+00:00",
+      "hubspot_updated_at": "2026-07-14T16:59:41.086+00:00",
+      "archived": false,
+      "email": "robert_kovacev@yahoo.com.au",
+      "phone": "0400983499",
+      "raw_payload": {
+        "id": "215710882163",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/215710882163",
+        "archived": false,
+        "createdAt": "2026-05-11T03:33:25.751Z",
+        "updatedAt": "2026-07-14T16:59:41.086Z",
+        "properties": {
+          "email": "robert_kovacev@yahoo.com.au",
+          "phone": "0400983499",
+          "lastname": "Kovacev",
+          "firstname": "Robert",
+          "createdate": "2026-05-11T03:33:25.751Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "215710882163",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:59:41.086Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "217987713131",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7a9d6008526a12c7b161976c89cf584a9018cf9f1f8c537cc5c2c639624e38d1",
+      "hubspot_created_at": "2026-05-05T14:36:18.513+00:00",
+      "hubspot_updated_at": "2026-06-23T06:32:24.854+00:00",
+      "archived": false,
+      "email": "zainhtan@gmail.com",
+      "phone": "0423432741",
+      "raw_payload": {
+        "id": "217987713131",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/217987713131",
+        "archived": false,
+        "createdAt": "2026-05-05T14:36:18.513Z",
+        "updatedAt": "2026-06-23T06:32:24.854Z",
+        "properties": {
+          "email": "zainhtan@gmail.com",
+          "phone": "0423432741",
+          "lastname": null,
+          "firstname": "Zain Hau Tan",
+          "createdate": "2026-05-05T14:36:18.513Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "217987713131",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-23T06:32:24.854Z",
+          "hs_analytics_source": "ORGANIC_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "219927242862",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "896032acedaa6e6fa8046debaaf6db587dce45fa200ed53c08dfaee171ad61aa",
+      "hubspot_created_at": "2026-05-06T01:29:23.603+00:00",
+      "hubspot_updated_at": "2026-07-14T16:53:56.7+00:00",
+      "archived": false,
+      "email": "tdaveymcpeak@gmail.com",
+      "phone": "0481747169",
+      "raw_payload": {
+        "id": "219927242862",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/219927242862",
+        "archived": false,
+        "createdAt": "2026-05-06T01:29:23.603Z",
+        "updatedAt": "2026-07-14T16:53:56.700Z",
+        "properties": {
+          "email": "tdaveymcpeak@gmail.com",
+          "phone": "0481747169",
+          "lastname": "Davey-McPeak",
+          "firstname": "Tee",
+          "createdate": "2026-05-06T01:29:23.603Z",
+          "lead_source": "Website Appointment Button",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "219927242862",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:53:56.700Z",
+          "hs_analytics_source": "ORGANIC_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "226778812230",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "f4dfcaee12b2d8d824540c9b06f20f8976927e704db91d28004221af8984bed4",
+      "hubspot_created_at": "2026-06-06T15:38:21.143+00:00",
+      "hubspot_updated_at": "2026-07-14T16:43:49.65+00:00",
+      "archived": false,
+      "email": "nathan_lewis92@hotmail.com",
+      "phone": "0423166232",
+      "raw_payload": {
+        "id": "226778812230",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/226778812230",
+        "archived": false,
+        "createdAt": "2026-06-06T15:38:21.143Z",
+        "updatedAt": "2026-07-14T16:43:49.650Z",
+        "properties": {
+          "email": "nathan_lewis92@hotmail.com",
+          "phone": "0423166232",
+          "lastname": null,
+          "firstname": "Nat",
+          "createdate": "2026-06-06T15:38:21.143Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "226778812230",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:43:49.650Z",
+          "hs_analytics_source": "DIRECT_TRAFFIC"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "226836338736",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "ddeac67d4250a54418f4cbc909e8e9588d79b2c58c3fddd971147bd0cfc49e00",
+      "hubspot_created_at": "2026-06-07T00:48:18.372+00:00",
+      "hubspot_updated_at": "2026-06-16T01:57:08.244+00:00",
+      "archived": false,
+      "email": "mijo@sarichgroup.com",
+      "phone": "0421785120",
+      "raw_payload": {
+        "id": "226836338736",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/226836338736",
+        "archived": false,
+        "createdAt": "2026-06-07T00:48:18.372Z",
+        "updatedAt": "2026-06-16T01:57:08.244Z",
+        "properties": {
+          "email": "mijo@sarichgroup.com",
+          "phone": "0421785120",
+          "lastname": "Sarich",
+          "firstname": "Mijo",
+          "createdate": "2026-06-07T00:48:18.372Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "226836338736",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-16T01:57:08.244Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        },
+        "associations": {
+          "companies": {
+            "results": [
+              {
+                "id": "55489020809",
+                "type": "contact_to_company"
+              },
+              {
+                "id": "55489020809",
+                "type": "contact_to_company_unlabeled"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "226877437753",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "a2fd5c1ef7a0137662b761185e5b98825dd0afefe6a76dbd23a087d7c63cc1ab",
+      "hubspot_created_at": "2026-06-07T08:44:38.823+00:00",
+      "hubspot_updated_at": "2026-06-12T18:31:46.422+00:00",
+      "archived": false,
+      "email": "zakashton2014@outlook.com",
+      "phone": "+61480560189",
+      "raw_payload": {
+        "id": "226877437753",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/226877437753",
+        "archived": false,
+        "createdAt": "2026-06-07T08:44:38.823Z",
+        "updatedAt": "2026-06-12T18:31:46.422Z",
+        "properties": {
+          "email": "zakashton2014@outlook.com",
+          "phone": "+61480560189",
+          "lastname": "Ashton",
+          "firstname": "Izaak Ashton",
+          "createdate": "2026-06-07T08:44:38.823Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "226877437753",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-12T18:31:46.422Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "226998940750",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "7ef03a70a39316ce20015eb7db306540e907eb415c09912aad9d361ed0966ada",
+      "hubspot_created_at": "2026-06-08T04:24:05.132+00:00",
+      "hubspot_updated_at": "2026-06-14T11:11:22.051+00:00",
+      "archived": false,
+      "email": "bronsonnorrish@gmail.com",
+      "phone": "0407284488",
+      "raw_payload": {
+        "id": "226998940750",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/226998940750",
+        "archived": false,
+        "createdAt": "2026-06-08T04:24:05.132Z",
+        "updatedAt": "2026-06-14T11:11:22.051Z",
+        "properties": {
+          "email": "bronsonnorrish@gmail.com",
+          "phone": "0407284488",
+          "lastname": null,
+          "firstname": "Bronson",
+          "createdate": "2026-06-08T04:24:05.132Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "226998940750",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-14T11:11:22.051Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "227450310196",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "74fd733e1aa844872791ce351e945ce2508f535fee3c1396b03f7510e44ce817",
+      "hubspot_created_at": "2026-06-10T07:50:08.965+00:00",
+      "hubspot_updated_at": "2026-06-16T05:48:45.93+00:00",
+      "archived": false,
+      "email": "samkholid435@gmail.com",
+      "phone": null,
+      "raw_payload": {
+        "id": "227450310196",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/227450310196",
+        "archived": false,
+        "createdAt": "2026-06-10T07:50:08.965Z",
+        "updatedAt": "2026-06-16T05:48:45.930Z",
+        "properties": {
+          "email": "samkholid435@gmail.com",
+          "phone": null,
+          "lastname": "Hassan",
+          "firstname": "Mohamed ",
+          "createdate": "2026-06-10T07:50:08.965Z",
+          "lead_source": "Direct/Phone call",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "227450310196",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-16T05:48:45.930Z",
+          "hs_analytics_source": "OFFLINE"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "227468262147",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "0f7edc4517110721fa44ff4c60199aa428e974f68380934448529ad4cff1ab03",
+      "hubspot_created_at": "2026-06-10T10:10:17.906+00:00",
+      "hubspot_updated_at": "2026-06-16T05:48:38.335+00:00",
+      "archived": false,
+      "email": "tjanias95@gmail.com",
+      "phone": null,
+      "raw_payload": {
+        "id": "227468262147",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/227468262147",
+        "archived": false,
+        "createdAt": "2026-06-10T10:10:17.906Z",
+        "updatedAt": "2026-06-16T05:48:38.335Z",
+        "properties": {
+          "email": "tjanias95@gmail.com",
+          "phone": null,
+          "lastname": "Smith",
+          "firstname": "Tjania",
+          "createdate": "2026-06-10T10:10:17.906Z",
+          "lead_source": "Direct/Phone call",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "227468262147",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-06-16T05:48:38.335Z",
+          "hs_analytics_source": "OFFLINE"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "227930895245",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "374cb4f0fa6cd125b5dd20058d6c995419d5cd90eafded0108dbcb45b57310de",
+      "hubspot_created_at": "2026-06-15T05:31:54.89+00:00",
+      "hubspot_updated_at": "2026-07-14T16:45:16.008+00:00",
+      "archived": false,
+      "email": "luciomonrrobel@hotmail.com",
+      "phone": "4775670234",
+      "raw_payload": {
+        "id": "227930895245",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/227930895245",
+        "archived": false,
+        "createdAt": "2026-06-15T05:31:54.890Z",
+        "updatedAt": "2026-07-14T16:45:16.008Z",
+        "properties": {
+          "email": "luciomonrrobel@hotmail.com",
+          "phone": "4775670234",
+          "lastname": "monrrobel",
+          "firstname": "lucio",
+          "createdate": "2026-06-15T05:31:54.890Z",
+          "lead_source": "Website Appointment Button",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "227930895245",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:45:16.008Z",
+          "hs_analytics_source": "DIRECT_TRAFFIC"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "228399343189",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "ff8801497dd572f075e8cd6e4c357606031ecf9cb5e253dbb56a8177da0b54ea",
+      "hubspot_created_at": "2026-06-15T01:49:24.639+00:00",
+      "hubspot_updated_at": "2026-07-14T16:48:13.035+00:00",
+      "archived": false,
+      "email": "joshuabhgray@live.com",
+      "phone": "+61416980390",
+      "raw_payload": {
+        "id": "228399343189",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/228399343189",
+        "archived": false,
+        "createdAt": "2026-06-15T01:49:24.639Z",
+        "updatedAt": "2026-07-14T16:48:13.035Z",
+        "properties": {
+          "email": "joshuabhgray@live.com",
+          "phone": "+61416980390",
+          "lastname": null,
+          "firstname": "Josh",
+          "createdate": "2026-06-15T01:49:24.639Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "228399343189",
+          "hs_lead_status": "IN_PROGRESS",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:48:13.035Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "229037454111",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "1cb2f0789d7bee0c590cc104d94083252ac1bd45c0ecd81e318a573e4c1f925e",
+      "hubspot_created_at": "2026-06-17T08:59:14.063+00:00",
+      "hubspot_updated_at": "2026-07-14T16:46:34.238+00:00",
+      "archived": false,
+      "email": "sahilinsan486@gmail.com",
+      "phone": "+61405077782",
+      "raw_payload": {
+        "id": "229037454111",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/229037454111",
+        "archived": false,
+        "createdAt": "2026-06-17T08:59:14.063Z",
+        "updatedAt": "2026-07-14T16:46:34.238Z",
+        "properties": {
+          "email": "sahilinsan486@gmail.com",
+          "phone": "+61405077782",
+          "lastname": null,
+          "firstname": "Sahil",
+          "createdate": "2026-06-17T08:59:14.063Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "229037454111",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:46:34.238Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "230639040339",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "61fb188bd54febefd038c872970b7c9dbeed4a3cb82fafc23cd2d4cc71dbf148",
+      "hubspot_created_at": "2026-06-24T08:54:35.897+00:00",
+      "hubspot_updated_at": "2026-07-14T16:44:15.647+00:00",
+      "archived": false,
+      "email": "josephoswaldlewis@gmail.com",
+      "phone": null,
+      "raw_payload": {
+        "id": "230639040339",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/230639040339",
+        "archived": false,
+        "createdAt": "2026-06-24T08:54:35.897Z",
+        "updatedAt": "2026-07-14T16:44:15.647Z",
+        "properties": {
+          "email": "josephoswaldlewis@gmail.com",
+          "phone": null,
+          "lastname": "Lewis",
+          "firstname": "joseph",
+          "createdate": "2026-06-24T08:54:35.897Z",
+          "lead_source": "Direct/Phone call",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "230639040339",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:44:15.647Z",
+          "hs_analytics_source": "OFFLINE"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "231956151096",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "1b73222dcc99b69cc2fba88be054dfb4c91b08c73a8fa8c481a53ac6f68ed1d7",
+      "hubspot_created_at": "2026-06-29T05:09:45.293+00:00",
+      "hubspot_updated_at": "2026-07-14T16:51:47.015+00:00",
+      "archived": false,
+      "email": "enricosecci@hotmail.com",
+      "phone": "0421729353",
+      "raw_payload": {
+        "id": "231956151096",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/231956151096",
+        "archived": false,
+        "createdAt": "2026-06-29T05:09:45.293Z",
+        "updatedAt": "2026-07-14T16:51:47.015Z",
+        "properties": {
+          "email": "enricosecci@hotmail.com",
+          "phone": "0421729353",
+          "lastname": "Secci",
+          "firstname": "Enrico",
+          "createdate": "2026-06-29T05:09:45.293Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "231956151096",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:51:47.015Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "233915878521",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "b99fe6a6ac7b4076ec493b82534f9575d8fc4730a80b4334c554412d4784c5a4",
+      "hubspot_created_at": "2026-07-08T08:57:16.948+00:00",
+      "hubspot_updated_at": "2026-07-14T16:54:36.095+00:00",
+      "archived": false,
+      "email": "hasanashraf94@hotmail.com",
+      "phone": "0451113007",
+      "raw_payload": {
+        "id": "233915878521",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/233915878521",
+        "archived": false,
+        "createdAt": "2026-07-08T08:57:16.948Z",
+        "updatedAt": "2026-07-14T16:54:36.095Z",
+        "properties": {
+          "email": "hasanashraf94@hotmail.com",
+          "phone": "0451113007",
+          "lastname": "Ashraf",
+          "firstname": "Hassan",
+          "createdate": "2026-07-08T08:57:16.948Z",
+          "lead_source": "Direct/Phone call",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "233915878521",
+          "hs_lead_status": "OPEN_DEAL",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T16:54:36.095Z",
+          "hs_analytics_source": "OFFLINE"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "234237072023",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "e5d61c2ddd2d12d36de4af80b5460578f04cb36ce9ff1aa648c77d2da8a047c7",
+      "hubspot_created_at": "2026-07-14T11:21:40.362+00:00",
+      "hubspot_updated_at": "2026-07-15T02:55:34.392+00:00",
+      "archived": false,
+      "email": "enterprise@grocliq.ai",
+      "phone": "7494950302",
+      "raw_payload": {
+        "id": "234237072023",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/234237072023",
+        "archived": false,
+        "createdAt": "2026-07-14T11:21:40.362Z",
+        "updatedAt": "2026-07-15T02:55:34.392Z",
+        "properties": {
+          "email": "enterprise@grocliq.ai",
+          "phone": "7494950302",
+          "lastname": null,
+          "firstname": "GroCliq",
+          "createdate": "2026-07-14T11:21:40.362Z",
+          "lead_source": "Website Popup Form",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "234237072023",
+          "hs_lead_status": null,
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-15T02:55:34.392Z",
+          "hs_analytics_source": "DIRECT_TRAFFIC"
+        },
+        "associations": {
+          "companies": {
+            "results": [
+              {
+                "id": "56574140575",
+                "type": "contact_to_company"
+              },
+              {
+                "id": "56574140575",
+                "type": "contact_to_company_unlabeled"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "234773951030",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "95850d500aa3725ee5491b01f88a82c7e207ce2ba52204c0b03d598279cf69d4",
+      "hubspot_created_at": "2026-07-12T11:57:58.074+00:00",
+      "hubspot_updated_at": "2026-07-14T04:58:37.062+00:00",
+      "archived": false,
+      "email": "kgoraya550@gmail.com",
+      "phone": "0435046486",
+      "raw_payload": {
+        "id": "234773951030",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/234773951030",
+        "archived": false,
+        "createdAt": "2026-07-12T11:57:58.074Z",
+        "updatedAt": "2026-07-14T04:58:37.062Z",
+        "properties": {
+          "email": "kgoraya550@gmail.com",
+          "phone": "0435046486",
+          "lastname": null,
+          "firstname": "Karanjeet Singh",
+          "createdate": "2026-07-12T11:57:58.074Z",
+          "lead_source": "PAID-Google-LandingPage2",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "234773951030",
+          "hs_lead_status": "IN_PROGRESS",
+          "lifecyclestage": "lead",
+          "lastmodifieddate": "2026-07-14T04:58:37.062Z",
+          "hs_analytics_source": "PAID_SEARCH"
+        }
+      }
+    },
+    {
+      "hubspot_contact_id": "82416974089",
+      "sync_run_id": "fcfb9587-1b0a-4194-9104-86d5ba45e578",
+      "payload_checksum": "88699f00ba14a316439109582e94b56cced79a859bfbf579dfc9542d5c9376c0",
+      "hubspot_created_at": "2024-12-05T07:24:30.725+00:00",
+      "hubspot_updated_at": "2026-07-14T17:20:01.652+00:00",
+      "archived": false,
+      "email": "evolvedhair@outlook.com",
+      "phone": "+61477996513",
+      "raw_payload": {
+        "id": "82416974089",
+        "url": "https://app.hubspot.com/contacts/21009770/record/0-1/82416974089",
+        "archived": false,
+        "createdAt": "2024-12-05T07:24:30.725Z",
+        "updatedAt": "2026-07-14T17:20:01.652Z",
+        "properties": {
+          "email": "evolvedhair@outlook.com",
+          "phone": "+61477996513",
+          "lastname": "Green",
+          "firstname": "Paul M",
+          "createdate": "2024-12-05T07:24:30.725Z",
+          "lead_source": "Timely",
+          "mobilephone": null,
+          "contact_type": null,
+          "hs_object_id": "82416974089",
+          "hs_lead_status": null,
+          "lifecyclestage": "customer",
+          "lastmodifieddate": "2026-07-14T17:20:01.652Z",
+          "hs_analytics_source": "OFFLINE"
+        },
+        "associations": {
+          "deals": {
+            "results": [
+              {
+                "id": "29880971837",
+                "type": "contact_to_deal"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "sourceContacts": [
+    {
+      "hubspotContactId": "212912271714",
+      "createdAt": "2026-05-25T16:24:00.352Z",
+      "updatedAt": "2026-07-16T06:04:25.293Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "215710882163",
+      "createdAt": "2026-05-11T03:33:25.751Z",
+      "updatedAt": "2026-07-16T05:13:35.112Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "217987713131",
+      "createdAt": "2026-05-05T14:36:18.513Z",
+      "updatedAt": "2026-07-16T06:00:44.243Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "219927242862",
+      "createdAt": "2026-05-06T01:29:23.603Z",
+      "updatedAt": "2026-07-16T06:03:46.834Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "226778812230",
+      "createdAt": "2026-06-06T15:38:21.143Z",
+      "updatedAt": "2026-07-16T06:06:07.474Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "226836338736",
+      "createdAt": "2026-06-07T00:48:18.372Z",
+      "updatedAt": "2026-07-16T06:06:12.087Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "226877437753",
+      "createdAt": "2026-06-07T08:44:38.823Z",
+      "updatedAt": "2026-07-16T06:06:24.847Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "226998940750",
+      "createdAt": "2026-06-08T04:24:05.132Z",
+      "updatedAt": "2026-07-16T06:07:13.523Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "227450310196",
+      "createdAt": "2026-06-10T07:50:08.965Z",
+      "updatedAt": "2026-07-16T06:07:22.755Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": false
+    },
+    {
+      "hubspotContactId": "227468262147",
+      "createdAt": "2026-06-10T10:10:17.906Z",
+      "updatedAt": "2026-07-16T06:07:31.949Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": false
+    },
+    {
+      "hubspotContactId": "227930895245",
+      "createdAt": "2026-06-15T05:31:54.890Z",
+      "updatedAt": "2026-07-16T06:08:07.890Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "228399343189",
+      "createdAt": "2026-06-15T01:49:24.639Z",
+      "updatedAt": "2026-07-16T06:07:45.354Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "IN_PROGRESS",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "229037454111",
+      "createdAt": "2026-06-17T08:59:14.063Z",
+      "updatedAt": "2026-07-16T06:08:20.128Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "229761370222",
+      "createdAt": "2026-07-16T04:15:52.321Z",
+      "updatedAt": "2026-07-16T11:33:03.155Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "UNQUALIFIED",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "230639040339",
+      "createdAt": "2026-06-24T08:54:35.897Z",
+      "updatedAt": "2026-07-16T06:09:24.998Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": false
+    },
+    {
+      "hubspotContactId": "231956151096",
+      "createdAt": "2026-06-29T05:09:45.293Z",
+      "updatedAt": "2026-07-16T06:09:07.540Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "233915878521",
+      "createdAt": "2026-07-08T08:57:16.948Z",
+      "updatedAt": "2026-07-16T06:09:03.019Z",
+      "archived": false,
+      "ownerId": "120371232",
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "234237072023",
+      "createdAt": "2026-07-14T11:21:40.362Z",
+      "updatedAt": "2026-07-16T09:47:35.861Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "IN_PROGRESS",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "234773951030",
+      "createdAt": "2026-07-12T11:57:58.074Z",
+      "updatedAt": "2026-07-16T03:57:20.735Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "IN_PROGRESS",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "235542182239",
+      "createdAt": "2026-07-16T03:21:41.141Z",
+      "updatedAt": "2026-07-16T12:06:50.956Z",
+      "archived": false,
+      "ownerId": null,
+      "lifecycleStage": "lead",
+      "leadStatus": "OPEN_DEAL",
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    },
+    {
+      "hubspotContactId": "82416974089",
+      "createdAt": "2024-12-05T07:24:30.725Z",
+      "updatedAt": "2026-07-16T06:50:21.306Z",
+      "archived": false,
+      "ownerId": "579439921",
+      "lifecycleStage": "customer",
+      "leadStatus": null,
+      "nameQuality": true,
+      "emailQuality": true,
+      "phoneQuality": true
+    }
+  ],
+  "reviewedContacts": [
+    {
+      "hubspotContactId": "212912271714",
+      "decision": "already_applied",
+      "reasonCode": "person_source_id_single_lead",
+      "proposedLeadId": "9a4bab70-3927-4bf5-b2e9-86a5205717d9",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:48:37.665Z"
+    },
+    {
+      "hubspotContactId": "215710882163",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "7e2351d2-cabe-414d-8ead-20a523044fc1",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:59:41.086Z"
+    },
+    {
+      "hubspotContactId": "217987713131",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "8b6dccd7-1398-4868-9816-84170a2fc243",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-23T06:32:24.854Z"
+    },
+    {
+      "hubspotContactId": "219927242862",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "f3ee8817-bba1-4845-8693-1cf3a45ff425",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:53:56.700Z"
+    },
+    {
+      "hubspotContactId": "226778812230",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "d062bad0-f484-4b47-8725-e5fc85343dd3",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:43:49.650Z"
+    },
+    {
+      "hubspotContactId": "226836338736",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "9e39b987-abf4-4945-a208-d28fc18df80c",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-16T01:57:08.244Z"
+    },
+    {
+      "hubspotContactId": "226877437753",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "ee14b1b4-254a-4cdf-830c-20923c22569d",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-12T18:31:46.422Z"
+    },
+    {
+      "hubspotContactId": "226998940750",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "c9a5ee76-bf3e-43f1-8a80-438dfdb30ea9",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-14T11:11:22.051Z"
+    },
+    {
+      "hubspotContactId": "227450310196",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "84b9df54-88a7-4289-b04c-b49c7251b548",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-16T05:48:45.930Z"
+    },
+    {
+      "hubspotContactId": "227468262147",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "3c0e0f33-e5ba-4bd3-af5f-2980a2a6086d",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-06-16T05:48:38.335Z"
+    },
+    {
+      "hubspotContactId": "227930895245",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:45:16.008Z"
+    },
+    {
+      "hubspotContactId": "228399343189",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:48:13.035Z"
+    },
+    {
+      "hubspotContactId": "229037454111",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:46:34.238Z"
+    },
+    {
+      "hubspotContactId": "230639040339",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:44:15.647Z"
+    },
+    {
+      "hubspotContactId": "231956151096",
+      "decision": "quarantine_ambiguous_identity",
+      "reasonCode": "email_matches_multiple_persons",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": "Ambiguous identity — quarantined",
+      "identityTier": "tier5_ambiguous",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:51:47.015Z"
+    },
+    {
+      "hubspotContactId": "233915878521",
+      "decision": "quarantine_ambiguous_identity",
+      "reasonCode": "email_matches_multiple_persons",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": "Ambiguous identity — quarantined",
+      "identityTier": "tier5_ambiguous",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T16:54:36.095Z"
+    },
+    {
+      "hubspotContactId": "234237072023",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-15T02:55:34.392Z"
+    },
+    {
+      "hubspotContactId": "234773951030",
+      "decision": "create_new_lead",
+      "reasonCode": "no_deterministic_match_propose_new_lead",
+      "proposedLeadId": null,
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "none",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T04:58:37.062Z"
+    },
+    {
+      "hubspotContactId": "82416974089",
+      "decision": "already_applied",
+      "reasonCode": "existing_external_lead_or_source_id",
+      "proposedLeadId": "86a29e32-041a-4576-8461-eb96f8bfe334",
+      "patientProtectionWarning": null,
+      "quarantineReason": null,
+      "identityTier": "tier1_external_identity",
+      "payloadChecksum": null,
+      "lastSourceActivityAt": "2026-07-14T17:20:01.652Z"
+    }
+  ],
+  "classificationDelta": {
+    "newlyAppearingContactIds": [],
+    "removedContactIds": [],
+    "sourceFieldChangedContactIds": [],
+    "decisionChangedContactIds": [],
+    "targetLeadChangedContactIds": [],
+    "patientWarningChangedContactIds": [],
+    "quarantineReasonChangedContactIds": [],
+    "unexplainedChangeCount": 0
+  },
+  "inventory": {
+    "signature": "e66bd6d93aa78cfc9616dae2bd0b9b87e2b332317bf8d1ce5f62a171b282a2ca",
+    "summary": {
+      "totalSourceContacts": 4750,
+      "alreadyLinked": 4596,
+      "readyToLink": 0,
+      "proposedNewLeads": 46,
+      "patientReview": 4,
+      "quarantined": 104,
+      "excluded": 0,
+      "conflicts": 0,
+      "appliedThisBatch": 4596,
+      "remaining": 46,
+      "migrationCompletionPercent": 99
+    },
+    "decisionCounts": {
+      "already_applied": 4596,
+      "create_new_lead": 46,
+      "patient_link_review_required": 4,
+      "quarantine_ambiguous_identity": 6,
+      "quarantine_duplicate_source": 4,
+      "quarantine_test_or_smoke": 94
+    },
+    "coverage": {
+      "totalSourceContacts": 4750,
+      "mappedContacts": 4596,
+      "createCandidates": 46,
+      "patientReview": 4,
+      "quarantined": 104,
+      "excluded": 0,
+      "conflicts": 0,
+      "wrongTenant": 0,
+      "readyToLink": 0,
+      "accounted": 4750,
+      "unexplained": 0,
+      "balanced": true
+    }
+  },
+  "guards": {
+    "tenantIsolated": true,
+    "portalMatched": true,
+    "fixedCutoff": true,
+    "stagingOnly": true,
+    "noMigrationApply": true,
+    "noPatientCreationOrLinking": true,
+    "noMappingOverwrite": true,
+    "notesWatermarkUnchanged": true,
+    "contactWatermarkUnchanged": true,
+    "noSideEffects": true
+  }
+}

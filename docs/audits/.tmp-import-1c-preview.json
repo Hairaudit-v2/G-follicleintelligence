@@ -1,0 +1,24 @@
+{
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "integrationId": "ade8a7d0-ad45-4fd7-8d53-61d4806b95f6",
+  "before": 2,
+  "mode": "preview",
+  "preview": {
+    "batchId": "3ad9738f-8d8d-4f7e-80d0-665fc4708e71",
+    "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mappingsToCreate": [],
+    "classifications": {
+      "archived_source_owner": 24,
+      "no_matching_staff": 5
+    },
+    "plainLanguage": {
+      "primaryAction": "Apply approved owner mappings",
+      "staffUsersLeadsPatientsUnchanged": true,
+      "tablesThatWillChange": [
+        "fi_import_batches"
+      ]
+    }
+  },
+  "after": 2,
+  "delta": 0
+}
