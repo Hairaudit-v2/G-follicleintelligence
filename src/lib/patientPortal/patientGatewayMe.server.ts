@@ -21,15 +21,26 @@ function asTrimmed(v: unknown): string | null {
 }
 
 /**
- * Resolve tenant/brand display name without falling back to location labels.
- * Prefer tenant settings → organisation settings → organisation name.
+ * Resolve tenant/brand display name without falling back to the location label.
+ * Prefer: tenant brand_name → org brand_name → org name → clinic settings/display name
+ * (clinic display is what admins edit as “Clinic name” / “Display name” in FiOS settings).
  */
 async function loadTenantBrandDisplayName(
   tenantId: string,
   client: SupabaseClient,
-  tenantSettingsBrandName: string | null
+  tenantSettingsBrandName: string | null,
+  locationLabel: string | null
 ): Promise<string | null> {
-  if (tenantSettingsBrandName) return tenantSettingsBrandName;
+  const rejectIfLocation = (value: string | null): string | null => {
+    if (!value) return null;
+    if (locationLabel && value.toLowerCase() === locationLabel.toLowerCase()) return null;
+    return value;
+  };
+
+  if (tenantSettingsBrandName) {
+    const kept = rejectIfLocation(tenantSettingsBrandName);
+    if (kept) return kept;
+  }
 
   const { data: orgSettings } = await client
     .from("fi_organisation_settings")
@@ -40,8 +51,8 @@ async function loadTenantBrandDisplayName(
 
   if (Array.isArray(orgSettings)) {
     for (const row of orgSettings) {
-      const name = asTrimmed((row as { brand_name?: unknown }).brand_name);
-      if (name) return name;
+      const kept = rejectIfLocation(asTrimmed((row as { brand_name?: unknown }).brand_name));
+      if (kept) return kept;
     }
   }
 
@@ -53,8 +64,35 @@ async function loadTenantBrandDisplayName(
 
   if (Array.isArray(orgs)) {
     for (const row of orgs) {
-      const name = asTrimmed((row as { name?: unknown }).name);
-      if (name) return name;
+      const kept = rejectIfLocation(asTrimmed((row as { name?: unknown }).name));
+      if (kept) return kept;
+    }
+  }
+
+  const { data: clinicSettings } = await client
+    .from("fi_clinic_settings")
+    .select("display_name")
+    .eq("tenant_id", tenantId)
+    .not("display_name", "is", null)
+    .limit(20);
+
+  if (Array.isArray(clinicSettings)) {
+    for (const row of clinicSettings) {
+      const kept = rejectIfLocation(asTrimmed((row as { display_name?: unknown }).display_name));
+      if (kept) return kept;
+    }
+  }
+
+  const { data: clinics } = await client
+    .from("fi_clinics")
+    .select("display_name")
+    .eq("tenant_id", tenantId)
+    .limit(20);
+
+  if (Array.isArray(clinics)) {
+    for (const row of clinics) {
+      const kept = rejectIfLocation(asTrimmed((row as { display_name?: unknown }).display_name));
+      if (kept) return kept;
     }
   }
 
@@ -119,7 +157,12 @@ export async function loadPatientGatewayMe(
 
   // ctx.clinicName is the location/site label (historically fi_tenants.name, e.g. Perth).
   const locationName = asTrimmed(ctx.clinicName);
-  const tenantName = await loadTenantBrandDisplayName(ctx.tenantId, supabase, settingsBrandName);
+  const tenantName = await loadTenantBrandDisplayName(
+    ctx.tenantId,
+    supabase,
+    settingsBrandName,
+    locationName
+  );
 
   const response = buildPatientGatewayMeResponse({
     patientId: ctx.patientId,
