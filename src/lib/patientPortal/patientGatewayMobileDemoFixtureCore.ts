@@ -8,6 +8,9 @@ export const PATIENT_GATEWAY_MOBILE_DEMO_FIXTURE_FLAG = "e2e_patient_gateway_mob
 /** Marks synthetic fixture bookings for FI-PATIENT-APP-2C device acceptance. */
 export const PATIENT_GATEWAY_MOBILE_DEMO_BOOKING_FLAG =
   "e2e_patient_gateway_mobile_booking_fixture" as const;
+/** Marks synthetic fixture invoices/payments for FI-PATIENT-APP-2D device acceptance. */
+export const PATIENT_GATEWAY_MOBILE_DEMO_INVOICE_FLAG =
+  "e2e_patient_gateway_mobile_invoice_fixture" as const;
 
 export const PATIENT_GATEWAY_MOBILE_DEMO_EMAIL_DEFAULT =
   "e2e-patient-gateway-mobile@fi-demo.example" as const;
