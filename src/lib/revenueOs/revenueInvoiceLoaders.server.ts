@@ -34,7 +34,25 @@ export async function loadPatientInvoiceSummary(
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw new Error(error.message);
-  const invoices = (data ?? []).map((r) => mapInvoiceRow(r as Record<string, unknown>));
+  let invoices = (data ?? []).map((r) => mapInvoiceRow(r as Record<string, unknown>));
+
+  // Defensive fallback: production has been observed returning [] for the compound
+  // patient_id filter while the same rows are visible via tenant-scoped reads
+  // (same class of issue as patient gateway bookings). Ownership is still enforced
+  // by the patient-gateway caller.
+  if (invoices.length === 0) {
+    const fallback = await supabase
+      .from("fi_invoices")
+      .select("*")
+      .eq("tenant_id", tid)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (fallback.error) throw new Error(fallback.error.message);
+    invoices = ((fallback.data ?? []) as Record<string, unknown>[])
+      .map((r) => mapInvoiceRow(r))
+      .filter((inv) => String(inv.patient_id ?? "").trim() === pid);
+  }
+
   let outstandingCentsAud = 0;
   let unpaidOpenCount = 0;
   let overdueCount = 0;
