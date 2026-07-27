@@ -1,11 +1,12 @@
 /**
  * FI-UX-REBUILD D6G-C / S3.4D — Front Desk workspace.
- * Visible staff tabs: Today + Tomorrow only. Legacy routes stay catalogued for redirects.
+ * Staff tabs: Today + Tomorrow + Messages (2F.3 patient-message queue).
+ * Legacy routes stay catalogued for redirects.
  */
 
 export const FI_OS_FRONT_DESK_NAV_ID = "front-desk" as const;
 
-export type FiOsFrontDeskTabId = "today" | "tomorrow";
+export type FiOsFrontDeskTabId = "today" | "tomorrow" | "messages";
 
 export type FiOsFrontDeskTab = {
   id: FiOsFrontDeskTabId;
@@ -15,7 +16,7 @@ export type FiOsFrontDeskTab = {
   navSubItemId: string;
 };
 
-/** Staff-visible Front Desk tabs (exactly two). */
+/** Staff-visible Front Desk tabs. */
 export const FI_OS_FRONT_DESK_TABS: readonly FiOsFrontDeskTab[] = [
   {
     id: "today",
@@ -28,6 +29,12 @@ export const FI_OS_FRONT_DESK_TABS: readonly FiOsFrontDeskTab[] = [
     label: "Tomorrow",
     segment: "tomorrow",
     navSubItemId: "front-desk-tomorrow",
+  },
+  {
+    id: "messages",
+    label: "Messages",
+    segment: "messages",
+    navSubItemId: "front-desk-messages",
   },
 ] as const;
 
@@ -108,7 +115,10 @@ export function buildFrontDeskSidebarSubItems(tenantId: string): FiOsFrontDeskSi
     id: tab.navSubItemId,
     label: tab.label,
     href: buildFiOsFrontDeskTabHref(tid, tab),
-    featureKey: tab.id === "tomorrow" ? ("calendar" as const) : ("dashboard" as const),
+    featureKey:
+      tab.id === "tomorrow"
+        ? ("calendar" as const)
+        : ("dashboard" as const),
   }));
   const legacy = FI_OS_FRONT_DESK_LEGACY_ROUTES.map((route) => ({
     id: route.id,
