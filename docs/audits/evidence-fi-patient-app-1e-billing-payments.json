@@ -35,7 +35,18 @@
   "tests": {
     "gatewayPassed": 85,
     "webhookCorePassed": 4,
+    "webappNonRegressionPassed": 5,
+    "financePaymentRegressionPassed": 98,
     "failed": 0
+  },
+  "webappNonRegression": {
+    "additiveOnly": true,
+    "staffServicesModified": false,
+    "patientPortalModified": false,
+    "schemaMigrations": false,
+    "frontendDependsOnPatientV1": false,
+    "webhookChange": "audit_only",
+    "rollbackCommits": ["527cd30a", "6c52bbce"]
   },
   "lint": "pass",
   "typecheck": "pass",
