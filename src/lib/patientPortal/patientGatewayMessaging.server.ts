@@ -117,19 +117,46 @@ export function requirePatientGatewayOwnedThread(
   return deny;
 }
 
+async function loadMessageThreadsForPatient(
+  client: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<ThreadRow[]> {
+  const { data, error } = await client
+    .from("fi_patient_gateway_message_threads")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("patient_id", patientId);
+  if (error) throw new Error(error.message);
+
+  let rows = (data ?? []).map((raw) => mapThread(raw as Record<string, unknown>));
+
+  // Same production defect as bookings/invoices: compound patient_id filters can
+  // return [] while primary-key reads succeed. Fall back to tenant scope + memory filter.
+  if (rows.length === 0) {
+    const fallback = await client
+      .from("fi_patient_gateway_message_threads")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .limit(500);
+    if (fallback.error) throw new Error(fallback.error.message);
+    rows = (fallback.data ?? [])
+      .map((raw) => mapThread(raw as Record<string, unknown>))
+      .filter((row) => row.patient_id === patientId);
+  }
+
+  return rows;
+}
+
 async function ensureDefaultGeneralThread(
   ctx: PatientGatewayContext,
   client: SupabaseClient
 ): Promise<ThreadRow> {
-  const { data: existing } = await client
-    .from("fi_patient_gateway_message_threads")
-    .select("*")
-    .eq("tenant_id", ctx.tenantId)
-    .eq("patient_id", ctx.patientId)
-    .eq("category", "general")
-    .eq("status", "open")
-    .maybeSingle();
-  if (existing) return mapThread(existing as Record<string, unknown>);
+  const existingRows = await loadMessageThreadsForPatient(client, ctx.tenantId, ctx.patientId);
+  const existingOpenGeneral = existingRows.find(
+    (row) => row.category === "general" && row.status === "open"
+  );
+  if (existingOpenGeneral) return existingOpenGeneral;
 
   const { data, error } = await client
     .from("fi_patient_gateway_message_threads")
@@ -143,16 +170,15 @@ async function ensureDefaultGeneralThread(
     .select("*")
     .single();
   if (error) {
-    // Unique race — re-read
-    const { data: again } = await client
-      .from("fi_patient_gateway_message_threads")
-      .select("*")
-      .eq("tenant_id", ctx.tenantId)
-      .eq("patient_id", ctx.patientId)
-      .eq("category", "general")
-      .eq("status", "open")
-      .maybeSingle();
-    if (again) return mapThread(again as Record<string, unknown>);
+    // Unique race — re-load via hardened path
+    const again = (await loadMessageThreadsForPatient(client, ctx.tenantId, ctx.patientId)).find(
+      (row) => row.category === "general" && row.status === "open"
+    );
+    if (again) return again;
+    const anyGeneral = (await loadMessageThreadsForPatient(client, ctx.tenantId, ctx.patientId)).find(
+      (row) => row.category === "general"
+    );
+    if (anyGeneral) return anyGeneral;
     throw new Error(error.message);
   }
   return mapThread(data as Record<string, unknown>);
@@ -198,16 +224,10 @@ export async function listPatientGatewayMessageThreads(
   try {
     await ensureDefaultGeneralThread(ctx, supabase);
     // Sort in memory — avoid PostgREST nullsFirst order options that have failed in prod.
-    const { data, error } = await supabase
-      .from("fi_patient_gateway_message_threads")
-      .select("*")
-      .eq("tenant_id", ctx.tenantId)
-      .eq("patient_id", ctx.patientId);
-    if (error) throw new Error(error.message);
+    const ownedRows = await loadMessageThreadsForPatient(supabase, ctx.tenantId, ctx.patientId);
 
     const threads: PatientGatewayThreadSummary[] = [];
-    for (const raw of data ?? []) {
-      const row = mapThread(raw as Record<string, unknown>);
+    for (const row of ownedRows) {
       const ownership = requirePatientGatewayOwnedThread(
         ctx,
         { tenant_id: row.tenant_id, patient_id: row.patient_id },
