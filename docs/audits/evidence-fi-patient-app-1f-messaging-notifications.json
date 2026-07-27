@@ -1,0 +1,58 @@
+{
+  "ticket": "FI-PATIENT-APP-1F",
+  "verdict": "GREEN",
+  "closed": "2026-07-27",
+  "openapiVersion": "1.0.5",
+  "endpoints": [
+    "GET /api/patient/v1/messages",
+    "GET /api/patient/v1/messages/{threadId}",
+    "POST /api/patient/v1/messages/{threadId}",
+    "GET /api/patient/v1/notification-preferences",
+    "PATCH /api/patient/v1/notification-preferences"
+  ],
+  "migration": "supabase/migrations/20261027120002_fi_patient_gateway_messaging_1f.sql",
+  "discoveryClassification": {
+    "A_safe_for_patient_display": [
+      "fi_patient_gateway_message_threads",
+      "fi_patient_gateway_messages",
+      "reminder_consent_seed",
+      "preferred_contact_method_seed"
+    ],
+    "B_staff_only": [
+      "crm_clinical_notes",
+      "internal_tasks_comments",
+      "escalation_comments"
+    ],
+    "C_ambiguous_legacy": [
+      "appointment_messaging_fragments",
+      "hubspot_engagement_exports"
+    ],
+    "D_unsuitable_direct_reuse": [
+      "fi_crm_messages_preview_metadata",
+      "hubspot_conversation_backups",
+      "patient_portal_no_inbox"
+    ]
+  },
+  "staffWorkflow": [
+    "appendCrmActivityEvent:patient_app.message.received",
+    "appendPatientTimelineEvent:patient_message_received",
+    "createCrmMessagePreview:channel=patient_app"
+  ],
+  "notificationPolicy": {
+    "transactionalEvents": ["appointment_changed", "payment_received"],
+    "pushProvider": "none_locked_in",
+    "privacyPreview": "no_clinical_detail"
+  },
+  "tests": {
+    "messagingNotification": 34,
+    "gateway1bTo1e": 85,
+    "lint": "pass",
+    "typecheck": "pass",
+    "migrations": "pass"
+  },
+  "nonRegression": {
+    "crmMessages": "unchanged",
+    "patientPortal": "unchanged",
+    "parallelCrm": false
+  }
+}
