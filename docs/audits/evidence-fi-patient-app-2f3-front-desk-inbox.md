@@ -1,5 +1,8 @@
 # FI-PATIENT-APP-2F.3 — Front Desk Patient Message Inbox
 
+**Verdict:** **GREEN** (part of FI-PATIENT-APP-2F closeout — see `evidence-fi-patient-app-2f-closeout.md`)  
+**Date:** 2026-07-28
+
 ## Summary
 
 First-class Front Desk **Patient Messages** work queue over the existing canonical
@@ -7,6 +10,9 @@ gateway store (`fi_patient_gateway_message_threads` / `fi_patient_gateway_messag
 
 No second inbox database. No duplicated message bodies. Patient OpenAPI / mobile 2F
 contract unchanged.
+
+Closes the staff leg of the 2F round-trip: patient send → Front Desk inbox → staff
+open/reply → same thread on mobile.
 
 ## Surfaces
 
@@ -86,3 +92,5 @@ contract untouched in patient app), P (lint/typecheck).
 - [x] Sensitive preview protected
 - [x] Tenant-scoped queries + role gate
 - [x] Existing Today/Tomorrow Front Desk flows retained (Messages is additive tab)
+
+**2F.3 status: GREEN**
