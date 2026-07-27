@@ -9,6 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import {
+  PATIENT_GATEWAY_MOBILE_DEMO_BOOKING_FLAG,
   PATIENT_GATEWAY_MOBILE_DEMO_EMAIL_DEFAULT,
   PATIENT_GATEWAY_MOBILE_DEMO_FIXTURE_FLAG,
   PATIENT_GATEWAY_MOBILE_DEMO_FIXTURE_KEY,
@@ -27,6 +28,7 @@ export type PatientGatewayMobileDemoFixtureResult = {
     person: boolean;
     patient: boolean;
     authUser: boolean;
+    bookings: boolean;
   };
   warnings: string[];
 };
@@ -126,6 +128,109 @@ async function findFixturePatient(
   return null;
 }
 
+async function ensureFixtureAppointments(
+  supabase: SupabaseClient,
+  opts: {
+    tenantId: string;
+    patientId: string;
+    personId: string;
+    clinicId: string | null;
+  }
+): Promise<{ created: boolean; warning?: string }> {
+  const { data: existing, error: existingErr } = await supabase
+    .from("fi_bookings")
+    .select("id, metadata")
+    .eq("tenant_id", opts.tenantId)
+    .eq("patient_id", opts.patientId)
+    .limit(50);
+  if (existingErr) {
+    return { created: false, warning: `Could not inspect fixture bookings: ${existingErr.message}` };
+  }
+
+  const hasFixtureBooking = (existing ?? []).some((row) => {
+    const meta = (row as { metadata?: unknown }).metadata;
+    return (
+      meta &&
+      typeof meta === "object" &&
+      !Array.isArray(meta) &&
+      (meta as Record<string, unknown>)[PATIENT_GATEWAY_MOBILE_DEMO_BOOKING_FLAG] === true
+    );
+  });
+  if (hasFixtureBooking) {
+    return { created: false };
+  }
+
+  const nowMs = Date.now();
+  const upcomingStart = new Date(nowMs + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const upcomingEnd = new Date(nowMs + 7 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString();
+  const pastStart = new Date(nowMs - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const pastEnd = new Date(nowMs - 30 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString();
+  const now = new Date(nowMs).toISOString();
+  const fixtureMeta = {
+    [PATIENT_GATEWAY_MOBILE_DEMO_BOOKING_FLAG]: true,
+    fixture_key: PATIENT_GATEWAY_MOBILE_DEMO_FIXTURE_KEY,
+  };
+
+  const rows = [
+    {
+      tenant_id: opts.tenantId,
+      patient_id: opts.patientId,
+      person_id: opts.personId,
+      clinic_id: opts.clinicId,
+      room_id: null,
+      room_required: false,
+      assigned_staff_id: null,
+      assigned_user_id: null,
+      booking_type: "prp",
+      booking_status: "confirmed",
+      title: "PRP Treatment",
+      description: null,
+      start_at: upcomingStart,
+      end_at: upcomingEnd,
+      timezone: "Australia/Sydney",
+      location: null,
+      metadata: fixtureMeta,
+      cancelled_at: null,
+      cancelled_by_user_id: null,
+      cancellation_reason: null,
+      created_by_user_id: null,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      tenant_id: opts.tenantId,
+      patient_id: opts.patientId,
+      person_id: opts.personId,
+      clinic_id: opts.clinicId,
+      room_id: null,
+      room_required: false,
+      assigned_staff_id: null,
+      assigned_user_id: null,
+      booking_type: "consultation",
+      booking_status: "completed",
+      title: "Consultation",
+      description: null,
+      start_at: pastStart,
+      end_at: pastEnd,
+      timezone: "Australia/Sydney",
+      location: null,
+      metadata: fixtureMeta,
+      cancelled_at: null,
+      cancelled_by_user_id: null,
+      cancellation_reason: null,
+      created_by_user_id: null,
+      created_at: now,
+      updated_at: now,
+    },
+  ];
+
+  const { error: insertErr } = await supabase.from("fi_bookings").insert(rows);
+  if (insertErr) {
+    return { created: false, warning: `Could not seed fixture bookings: ${insertErr.message}` };
+  }
+  return { created: true };
+}
+
 /**
  * Ensure one unambiguous:
  * auth.users → fi_patients.portal_auth_user_id → active patient + person + tenant
@@ -141,7 +246,7 @@ export async function seedPatientGatewayMobileDemoFixture(
   const portalEmail = fixtureEmail(opts);
   const portalPassword = fixturePassword(opts);
   const now = new Date().toISOString();
-  const created = { person: false, patient: false, authUser: false };
+  const created = { person: false, patient: false, authUser: false, bookings: false };
 
   const { authUserId, created: authCreated } = await ensurePortalAuthUser(
     supabase,
@@ -231,6 +336,15 @@ export async function seedPatientGatewayMobileDemoFixture(
       `Portal mapping is not unique for mobile demo fixture (count=${(linkRows ?? []).length}).`
     );
   }
+
+  const bookingSeed = await ensureFixtureAppointments(supabase, {
+    tenantId,
+    patientId,
+    personId,
+    clinicId,
+  });
+  created.bookings = bookingSeed.created;
+  if (bookingSeed.warning) warnings.push(bookingSeed.warning);
 
   return {
     ok: true,
