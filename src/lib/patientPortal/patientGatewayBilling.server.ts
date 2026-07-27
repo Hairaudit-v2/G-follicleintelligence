@@ -250,7 +250,8 @@ async function loadInvoicePayments(
 ): Promise<PatientGatewayPaymentItem[]> {
   const { data, error } = await client
     .from("fi_payments")
-    .select("id, tenant_id, patient_id, invoice_id, status, amount_cents, total_cents, currency, provider, created_at, paid_at")
+    // fi_payments has no paid_at — use created_at as payment time (paid_at is on fi_invoices).
+    .select("id, tenant_id, patient_id, invoice_id, status, amount_cents, total_cents, currency, provider, created_at")
     .eq("tenant_id", tenantId)
     .eq("patient_id", patientId)
     .eq("invoice_id", invoiceId)
@@ -265,12 +266,7 @@ async function loadInvoicePayments(
       amount: Math.round(Number(r.total_cents ?? r.amount_cents ?? 0)) / 100,
       currency: String(r.currency ?? "AUD").toUpperCase(),
       status: mapGatewayPaymentStatusToPatient(String(r.status ?? "pending")),
-      paidAt:
-        r.paid_at != null
-          ? String(r.paid_at)
-          : r.created_at != null
-            ? String(r.created_at)
-            : null,
+      paidAt: r.created_at != null ? String(r.created_at) : null,
       methodLabel: provider === "stripe" ? "Card" : provider ? "Other" : "Card",
     };
   });
