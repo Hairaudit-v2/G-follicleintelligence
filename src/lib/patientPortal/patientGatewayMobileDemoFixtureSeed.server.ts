@@ -233,10 +233,23 @@ async function ensureFixtureAppointments(
   return { created: true };
 }
 
+function metadataHasFixtureFlag(meta: unknown): boolean {
+  return (
+    !!meta &&
+    typeof meta === "object" &&
+    !Array.isArray(meta) &&
+    (meta as Record<string, unknown>)[PATIENT_GATEWAY_MOBILE_DEMO_INVOICE_FLAG] === true
+  );
+}
+
 /**
  * Additive synthetic billing for mobile Account + Billing acceptance (2D).
  * Invoice A — partially paid / payable. Invoice B — fully paid with payment history.
  * Does not fabricate Stripe settlement or touch FinanceOS UI.
+ *
+ * `fi_payments` has no `paid_at` column — payment timing uses `created_at` only
+ * (`paid_at` lives on `fi_invoices`). If fixture invoices already exist but payments
+ * are missing (e.g. prior seed failed on invalid columns), missing payments are inserted.
  */
 async function ensureFixtureInvoices(
   supabase: SupabaseClient,
@@ -248,7 +261,7 @@ async function ensureFixtureInvoices(
 ): Promise<{ created: boolean; warning?: string }> {
   const { data: existing, error: existingErr } = await supabase
     .from("fi_invoices")
-    .select("id, metadata")
+    .select("id, invoice_number, metadata")
     .eq("tenant_id", opts.tenantId)
     .eq("patient_id", opts.patientId)
     .limit(50);
@@ -256,18 +269,9 @@ async function ensureFixtureInvoices(
     return { created: false, warning: `Could not inspect fixture invoices: ${existingErr.message}` };
   }
 
-  const hasFixtureInvoice = (existing ?? []).some((row) => {
-    const meta = (row as { metadata?: unknown }).metadata;
-    return (
-      meta &&
-      typeof meta === "object" &&
-      !Array.isArray(meta) &&
-      (meta as Record<string, unknown>)[PATIENT_GATEWAY_MOBILE_DEMO_INVOICE_FLAG] === true
-    );
-  });
-  if (hasFixtureInvoice) {
-    return { created: false };
-  }
+  const fixtureInvoices = (existing ?? []).filter((row) =>
+    metadataHasFixtureFlag((row as { metadata?: unknown }).metadata)
+  ) as { id: string; invoice_number: string | null; metadata?: unknown }[];
 
   const nowMs = Date.now();
   const now = new Date(nowMs).toISOString();
@@ -280,122 +284,173 @@ async function ensureFixtureInvoices(
     fixture_key: PATIENT_GATEWAY_MOBILE_DEMO_FIXTURE_KEY,
   };
 
-  // A: AUD 800 total, AUD 300 paid, AUD 500 outstanding, payable
-  const invA = {
-    tenant_id: opts.tenantId,
-    clinic_id: opts.clinicId,
-    patient_id: opts.patientId,
-    case_id: null,
-    consultation_id: null,
-    lead_id: null,
-    invoice_kind: "surgery_deposit",
-    status: "partially_paid",
-    amount_cents: 80000,
-    tax_cents: 0,
-    total_cents: 80000,
-    amount_paid_cents: 30000,
-    currency: "AUD",
-    due_date: dueA,
-    issued_at: issuedA,
-    sent_at: issuedA,
-    paid_at: null,
-    invoice_number: "MOBILE-DEMO-INV-A",
-    title: "PRP treatment package",
-    metadata: { ...fixtureMeta, demo_invoice_key: "mobile_demo_inv_a" },
-    automation_hints: { mobile_demo: true },
-    created_at: now,
-    updated_at: now,
-  };
+  let idA = fixtureInvoices.find((r) => r.invoice_number === "MOBILE-DEMO-INV-A")?.id;
+  let idB = fixtureInvoices.find((r) => r.invoice_number === "MOBILE-DEMO-INV-B")?.id;
+  let createdInvoices = false;
 
-  // B: AUD 250 total, fully paid
-  const invB = {
-    tenant_id: opts.tenantId,
-    clinic_id: opts.clinicId,
-    patient_id: opts.patientId,
-    case_id: null,
-    consultation_id: null,
-    lead_id: null,
-    invoice_kind: "consultation_quote",
-    status: "paid",
-    amount_cents: 25000,
-    tax_cents: 0,
-    total_cents: 25000,
-    amount_paid_cents: 25000,
-    currency: "AUD",
-    due_date: null,
-    issued_at: issuedB,
-    sent_at: issuedB,
-    paid_at: paidB,
-    invoice_number: "MOBILE-DEMO-INV-B",
-    title: "Consultation fee",
-    metadata: { ...fixtureMeta, demo_invoice_key: "mobile_demo_inv_b" },
-    automation_hints: { mobile_demo: true },
-    created_at: now,
-    updated_at: now,
-  };
-
-  const { data: inserted, error: insertErr } = await supabase
-    .from("fi_invoices")
-    .insert([invA, invB])
-    .select("id, invoice_number");
-  if (insertErr) {
-    return { created: false, warning: `Could not seed fixture invoices: ${insertErr.message}` };
-  }
-
-  const rows = (inserted ?? []) as { id: string; invoice_number: string | null }[];
-  const idA = rows.find((r) => r.invoice_number === "MOBILE-DEMO-INV-A")?.id;
-  const idB = rows.find((r) => r.invoice_number === "MOBILE-DEMO-INV-B")?.id;
-  if (!idA || !idB) {
-    return { created: false, warning: "Fixture invoices inserted but ids could not be resolved." };
-  }
-
-  const { error: itemsErr } = await supabase.from("fi_invoice_items").insert([
-    {
+  if (fixtureInvoices.length === 0) {
+    // A: AUD 800 total, AUD 300 paid, AUD 500 outstanding, payable
+    const invA = {
       tenant_id: opts.tenantId,
-      invoice_id: idA,
-      sort_index: 0,
-      description: "PRP treatment package",
-      quantity: 1,
-      unit_amount_cents: 80000,
-      line_tax_cents: 0,
-      line_total_cents: 80000,
-      metadata: { ...fixtureMeta },
+      clinic_id: opts.clinicId,
+      patient_id: opts.patientId,
+      case_id: null,
+      consultation_id: null,
+      lead_id: null,
+      invoice_kind: "surgery_deposit",
+      status: "partially_paid",
+      amount_cents: 80000,
+      tax_cents: 0,
+      total_cents: 80000,
+      amount_paid_cents: 30000,
+      currency: "AUD",
+      due_date: dueA,
+      issued_at: issuedA,
+      sent_at: issuedA,
+      paid_at: null,
+      invoice_number: "MOBILE-DEMO-INV-A",
+      title: "PRP treatment package",
+      metadata: { ...fixtureMeta, demo_invoice_key: "mobile_demo_inv_a" },
+      automation_hints: { mobile_demo: true },
       created_at: now,
       updated_at: now,
-    },
-    {
+    };
+
+    // B: AUD 250 total, fully paid (`paid_at` is on fi_invoices, not fi_payments)
+    const invB = {
       tenant_id: opts.tenantId,
-      invoice_id: idA,
-      sort_index: 1,
-      description: "Deposit received",
-      quantity: 1,
-      unit_amount_cents: 0,
-      line_tax_cents: 0,
-      line_total_cents: 0,
-      metadata: { ...fixtureMeta, informational: true },
+      clinic_id: opts.clinicId,
+      patient_id: opts.patientId,
+      case_id: null,
+      consultation_id: null,
+      lead_id: null,
+      invoice_kind: "consultation_quote",
+      status: "paid",
+      amount_cents: 25000,
+      tax_cents: 0,
+      total_cents: 25000,
+      amount_paid_cents: 25000,
+      currency: "AUD",
+      due_date: null,
+      issued_at: issuedB,
+      sent_at: issuedB,
+      paid_at: paidB,
+      invoice_number: "MOBILE-DEMO-INV-B",
+      title: "Consultation fee",
+      metadata: { ...fixtureMeta, demo_invoice_key: "mobile_demo_inv_b" },
+      automation_hints: { mobile_demo: true },
       created_at: now,
       updated_at: now,
-    },
-    {
-      tenant_id: opts.tenantId,
-      invoice_id: idB,
-      sort_index: 0,
-      description: "Initial consultation",
-      quantity: 1,
-      unit_amount_cents: 25000,
-      line_tax_cents: 0,
-      line_total_cents: 25000,
-      metadata: { ...fixtureMeta },
-      created_at: now,
-      updated_at: now,
-    },
-  ]);
-  if (itemsErr) {
-    return { created: true, warning: `Invoices created but line items failed: ${itemsErr.message}` };
+    };
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from("fi_invoices")
+      .insert([invA, invB])
+      .select("id, invoice_number");
+    if (insertErr) {
+      return { created: false, warning: `Could not seed fixture invoices: ${insertErr.message}` };
+    }
+
+    const rows = (inserted ?? []) as { id: string; invoice_number: string | null }[];
+    idA = rows.find((r) => r.invoice_number === "MOBILE-DEMO-INV-A")?.id;
+    idB = rows.find((r) => r.invoice_number === "MOBILE-DEMO-INV-B")?.id;
+    if (!idA || !idB) {
+      return { created: false, warning: "Fixture invoices inserted but ids could not be resolved." };
+    }
+    createdInvoices = true;
+
+    const { error: itemsErr } = await supabase.from("fi_invoice_items").insert([
+      {
+        tenant_id: opts.tenantId,
+        invoice_id: idA,
+        sort_index: 0,
+        description: "PRP treatment package",
+        quantity: 1,
+        unit_amount_cents: 80000,
+        line_tax_cents: 0,
+        line_total_cents: 80000,
+        metadata: { ...fixtureMeta },
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        tenant_id: opts.tenantId,
+        invoice_id: idA,
+        sort_index: 1,
+        description: "Deposit received",
+        quantity: 1,
+        unit_amount_cents: 0,
+        line_tax_cents: 0,
+        line_total_cents: 0,
+        metadata: { ...fixtureMeta, informational: true },
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        tenant_id: opts.tenantId,
+        invoice_id: idB,
+        sort_index: 0,
+        description: "Initial consultation",
+        quantity: 1,
+        unit_amount_cents: 25000,
+        line_tax_cents: 0,
+        line_total_cents: 25000,
+        metadata: { ...fixtureMeta },
+        created_at: now,
+        updated_at: now,
+      },
+    ]);
+    if (itemsErr) {
+      return { created: true, warning: `Invoices created but line items failed: ${itemsErr.message}` };
+    }
+  } else if (!idA || !idB) {
+    return {
+      created: false,
+      warning:
+        "Fixture invoices exist but MOBILE-DEMO-INV-A/B could not both be resolved; refusing to invent duplicates.",
+    };
   }
 
-  const { error: payErr } = await supabase.from("fi_payments").insert([
-    {
+  const invoiceIds = [idA, idB];
+  const { data: existingPays, error: existingPayErr } = await supabase
+    .from("fi_payments")
+    .select("id, invoice_id, metadata, provider_ref")
+    .eq("tenant_id", opts.tenantId)
+    .eq("patient_id", opts.patientId)
+    .in("invoice_id", invoiceIds)
+    .limit(50);
+  if (existingPayErr) {
+    return {
+      created: createdInvoices,
+      warning: `Could not inspect fixture payments: ${existingPayErr.message}`,
+    };
+  }
+
+  const payRows = (existingPays ?? []) as {
+    id: string;
+    invoice_id: string;
+    metadata?: unknown;
+    provider_ref?: string | null;
+  }[];
+  const hasPayA = payRows.some(
+    (p) =>
+      p.invoice_id === idA &&
+      (metadataHasFixtureFlag(p.metadata) || p.provider_ref === "mobile-demo-deposit-a")
+  );
+  const hasPayB = payRows.some(
+    (p) =>
+      p.invoice_id === idB &&
+      (metadataHasFixtureFlag(p.metadata) || p.provider_ref === "mobile-demo-pay-b")
+  );
+
+  if (hasPayA && hasPayB) {
+    return { created: createdInvoices };
+  }
+
+  // fi_payments schema: created_at/updated_at only — no paid_at (that column is on fi_invoices).
+  const paymentsToInsert: Record<string, unknown>[] = [];
+  if (!hasPayA) {
+    paymentsToInsert.push({
       tenant_id: opts.tenantId,
       clinic_id: opts.clinicId,
       patient_id: opts.patientId,
@@ -409,12 +464,13 @@ async function ensureFixtureInvoices(
       provider: null,
       provider_payment_intent_id: null,
       provider_ref: "mobile-demo-deposit-a",
-      paid_at: issuedA,
       metadata: { ...fixtureMeta, demo_payment_key: "mobile_demo_pay_a_deposit" },
-      created_at: now,
-      updated_at: now,
-    },
-    {
+      created_at: issuedA,
+      updated_at: issuedA,
+    });
+  }
+  if (!hasPayB) {
+    paymentsToInsert.push({
       tenant_id: opts.tenantId,
       clinic_id: opts.clinicId,
       patient_id: opts.patientId,
@@ -428,14 +484,20 @@ async function ensureFixtureInvoices(
       provider: "stripe",
       provider_payment_intent_id: null,
       provider_ref: "mobile-demo-pay-b",
-      paid_at: paidB,
       metadata: { ...fixtureMeta, demo_payment_key: "mobile_demo_pay_b" },
-      created_at: now,
-      updated_at: now,
-    },
-  ]);
+      created_at: paidB,
+      updated_at: paidB,
+    });
+  }
+
+  const { error: payErr } = await supabase.from("fi_payments").insert(paymentsToInsert);
   if (payErr) {
-    return { created: true, warning: `Invoices created but payments failed: ${payErr.message}` };
+    return {
+      created: createdInvoices,
+      warning: createdInvoices
+        ? `Invoices created but payments failed: ${payErr.message}`
+        : `Fixture invoices present but payments failed: ${payErr.message}`,
+    };
   }
 
   return { created: true };
