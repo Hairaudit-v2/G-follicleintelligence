@@ -58,10 +58,17 @@ type Message = {
   created_at?: string;
 };
 
-function createMessagingStore(seed?: { threads?: Thread[]; messages?: Message[] }) {
+function createMessagingStore(seed?: {
+  threads?: Thread[];
+  messages?: Message[];
+  /** When null, findLeadIdForPatient returns no lead. Default: demo lead id. */
+  leadId?: string | null;
+}) {
   const threads = [...(seed?.threads ?? [])];
   const messages = [...(seed?.messages ?? [])];
   let msgSeq = 0;
+  const linkedLeadId =
+    seed && "leadId" in seed ? seed.leadId : "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 
   function matches(row: Record<string, unknown>, filters: { col: string; val: unknown }[]) {
     return filters.every((f) => String(row[f.col] ?? "") === String(f.val ?? ""));
@@ -110,7 +117,10 @@ function createMessagingStore(seed?: { threads?: Thread[]; messages?: Message[] 
       },
       maybeSingle: async () => {
         if (table === "fi_crm_leads") {
-          return { data: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" }, error: null };
+          return {
+            data: linkedLeadId ? { id: linkedLeadId } : null,
+            error: null,
+          };
         }
         if (table === "fi_patient_gateway_message_threads") {
           if (insertPayload) {
@@ -408,6 +418,61 @@ describe("patientGatewayMessaging.server", () => {
     assert.equal(timelineCalls.length, 1);
     assert.equal(previewCalls.length, 1);
     assert.equal(result.staffSurfaced, true);
+    const activity = activityCalls[0] as {
+      activityKind: string;
+      leadId: string | null;
+      detail: Record<string, unknown>;
+    };
+    assert.equal(activity.activityKind, "patient_app.message.received");
+    assert.equal(activity.leadId, "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
+    assert.equal(activity.detail.thread_id, THREAD_A);
+    assert.ok(typeof activity.detail.message_id === "string");
+    const timeline = timelineCalls[0] as { crmLeadId: string | null };
+    assert.equal(timeline.crmLeadId, "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
+  });
+
+  it("2F.2 send without linked lead still surfaces patient activity without leadId", async () => {
+    const store = createMessagingStore({
+      leadId: null,
+      threads: [
+        {
+          id: THREAD_A,
+          tenant_id: TENANT_A,
+          patient_id: PATIENT_A,
+          category: "general",
+          subject: "General enquiry",
+          status: "open",
+          last_message_at: null,
+        },
+      ],
+    });
+
+    const activityCalls: unknown[] = [];
+    const previewCalls: unknown[] = [];
+    const result = await sendPatientGatewayMessage(
+      CTX_A,
+      THREAD_A,
+      { body: "No lead linked yet." },
+      {
+        writeAudit: false,
+        nowIso: NOW,
+        supabase: store as never,
+        appendActivity: async (input) => {
+          activityCalls.push(input);
+          return { ok: true } as never;
+        },
+        appendTimeline: async () => ({ ok: true } as never),
+        createCrmPreview: async (input) => {
+          previewCalls.push(input);
+          return { ok: true } as never;
+        },
+      }
+    );
+    assert.equal(result.ok, true);
+    assert.equal(activityCalls.length, 1);
+    assert.equal(previewCalls.length, 0);
+    const activity = activityCalls[0] as { leadId: string | null | undefined };
+    assert.ok(activity.leadId == null || activity.leadId === "");
   });
 
   it("J. foreign thread send denied", async () => {

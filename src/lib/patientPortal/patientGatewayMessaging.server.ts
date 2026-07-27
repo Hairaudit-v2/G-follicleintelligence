@@ -571,17 +571,21 @@ export async function sendPatientGatewayMessage(
 
     // Staff workflow surfaces (best-effort; message already persisted).
     try {
+      const leadId = await findLeadIdForPatient(ctx.tenantId, ctx.patientId, supabase);
+      const gatewayMessageId = String((inserted as { id: string }).id);
       await appendActivity(
         {
           tenantId: ctx.tenantId,
           patientId: ctx.patientId,
+          leadId,
           activityKind: "patient_app.message.received",
           title: "Patient app message received",
           detail: {
             thread_id: thread.id,
-            message_id: String((inserted as { id: string }).id),
+            message_id: gatewayMessageId,
             category: thread.category,
             body_preview: preview,
+            source: "patient_gateway",
           },
           occurredAt: nowIso,
         },
@@ -591,16 +595,15 @@ export async function sendPatientGatewayMessage(
         tenantId: ctx.tenantId,
         patientId: ctx.patientId,
         personId: ctx.personId,
-        crmLeadId: null,
+        crmLeadId: leadId,
         source: "patient_gateway",
         eventType: "patient_message_received",
         eventTimestamp: nowIso,
         title: "Patient message",
         description: preview,
-        dedupeKey: `patient_gateway_message:${String((inserted as { id: string }).id)}`,
-        metadata: { thread_id: thread.id },
+        dedupeKey: `patient_gateway_message:${gatewayMessageId}`,
+        metadata: { thread_id: thread.id, message_id: gatewayMessageId },
       });
-      const leadId = await findLeadIdForPatient(ctx.tenantId, ctx.patientId, supabase);
       if (leadId) {
         await createCrmPreview(
           {
@@ -615,7 +618,7 @@ export async function sendPatientGatewayMessage(
               sent_at: nowIso,
               metadata: {
                 patient_gateway_thread_id: thread.id,
-                patient_gateway_message_id: String((inserted as { id: string }).id),
+                patient_gateway_message_id: gatewayMessageId,
               },
             },
           },

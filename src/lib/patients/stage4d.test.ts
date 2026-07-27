@@ -128,6 +128,77 @@ describe("Stage 4D — patient treatment timeline (pure)", () => {
     assert.equal(row!.title, "Blood request created");
   });
 
+  it("2F.2 patient-app message with lead opens CRM documents tab", () => {
+    const bundle = minimalBundle({
+      activity: [
+        {
+          id: "act-msg-lead",
+          occurred_at: "2026-07-27T12:00:00.000Z",
+          activity_kind: "patient_app.message.received",
+          title: "Patient app message received",
+          lead_id: "lead-msg-1",
+          case_id: null,
+          patient_id: "patient-1",
+          detail: {
+            thread_id: "thread-1",
+            message_id: "msg-1",
+            body_preview: "secret clinical text must not become title",
+          },
+        },
+      ],
+    });
+    const { items } = buildPatientTimeline(bundle, { hrefContext: href });
+    const row = items.find((i) => i.id === "crm_activity:act-msg-lead");
+    assert.ok(row);
+    assert.equal(row!.title, "Patient app message");
+    assert.equal(row!.href, "/fi-admin/tid-1/crm/leads/lead-msg-1?tab=documents");
+    assert.equal(row!.is_sensitive, true);
+    assert.equal(row!.metadata_summary, null);
+  });
+
+  it("2F.2 historical patient-app message without lead is not a fake self-link", () => {
+    const bundle = minimalBundle({
+      activity: [
+        {
+          id: "act-msg-orphan",
+          occurred_at: "2026-07-27T12:00:00.000Z",
+          activity_kind: "patient_app.message.received",
+          title: "Patient app message received",
+          lead_id: null,
+          case_id: null,
+          patient_id: "patient-1",
+          detail: { thread_id: "thread-1", message_id: "msg-1" },
+        },
+      ],
+    });
+    const { items } = buildPatientTimeline(bundle, { hrefContext: href });
+    const row = items.find((i) => i.id === "crm_activity:act-msg-orphan");
+    assert.ok(row);
+    assert.equal(row!.title, "Patient app message");
+    assert.equal(row!.href, null);
+  });
+
+  it("2F.2 message.logged with lead opens CRM documents tab", () => {
+    const bundle = minimalBundle({
+      activity: [
+        {
+          id: "act-logged",
+          occurred_at: "2026-07-27T12:01:00.000Z",
+          activity_kind: "message.logged",
+          title: "Message preview recorded",
+          lead_id: "lead-msg-1",
+          case_id: null,
+          patient_id: "patient-1",
+          detail: { channel: "patient_app", message_id: "crm-msg-1" },
+        },
+      ],
+    });
+    const { items } = buildPatientTimeline(bundle, { hrefContext: href });
+    const row = items.find((i) => i.id === "crm_activity:act-logged");
+    assert.ok(row);
+    assert.equal(row!.href, "/fi-admin/tid-1/crm/leads/lead-msg-1?tab=documents");
+  });
+
   it("does not leak note bodies or admin narrative via CRM activity titles", () => {
     const bundle = minimalBundle({
       leads: [

@@ -20,6 +20,7 @@ const CRM_ACTIVITY_LABELS: Record<string, string> = {
   "email.clinic.inbound": "Inbound clinic email",
   "email.clinic.outbound": "Outbound clinic email",
   "message.logged": "Message preview logged",
+  "patient_app.message.received": "Patient app message",
   "booking.updated": "Booking updated",
   "booking.created": "Booking activity",
   "booking.completed": "Booking activity",

@@ -30,8 +30,10 @@ const EXCLUDED_DUPLICATE_ACTIVITY_KINDS = new Set([
   "lead.case_seeded",
 ]);
 
-function hrefForLead(ctx: PatientTimelineHrefContext, leadId: string): string {
-  return `/fi-admin/${ctx.tenantId.trim()}/crm/leads/${leadId}`;
+function hrefForLead(ctx: PatientTimelineHrefContext, leadId: string, tab?: string): string {
+  const base = `/fi-admin/${ctx.tenantId.trim()}/crm/leads/${leadId}`;
+  const t = tab?.trim();
+  return t ? `${base}?tab=${encodeURIComponent(t)}` : base;
 }
 
 function hrefForCase(ctx: PatientTimelineHrefContext, caseId: string): string {
@@ -43,11 +45,18 @@ function hrefForBooking(ctx: PatientTimelineHrefContext, startAtIso: string): st
   return buildCalendarHref(ctx.tenantId.trim(), { date: d });
 }
 
+/** Patient-app / CRM message preview kinds that should open lead Documents & notes. */
+function isPatientMessageActivityKind(kind: string): boolean {
+  const k = kind.trim();
+  return k === "patient_app.message.received" || k === "message.logged";
+}
+
 function isSensitiveActivityKind(kind: string): boolean {
   const k = kind.trim();
   return (
     isGenericEmailActivityKind(k) ||
     k === "message.logged" ||
+    k === "patient_app.message.received" ||
     k.startsWith("lead_communication.") ||
     k.startsWith("lead_note.") ||
     k === "note.created"
@@ -199,12 +208,15 @@ export function buildPatientTimeline(
       ev.detail && typeof ev.detail === "object" && !Array.isArray(ev.detail) ? ev.detail : {};
     const summary = safeActivityMetadataSummary(ev.activity_kind, meta as Record<string, unknown>);
     let href: string | null = null;
+    const kind = ev.activity_kind.trim();
     if (ev.case_id) href = hrefForCase(ctx, ev.case_id);
-    else if (ev.lead_id) href = hrefForLead(ctx, ev.lead_id);
-    else if (ev.patient_id) {
+    else if (ev.lead_id) {
+      href = isPatientMessageActivityKind(kind)
+        ? hrefForLead(ctx, ev.lead_id, "documents")
+        : hrefForLead(ctx, ev.lead_id);
+    } else if (ev.patient_id) {
       const pid = String(ev.patient_id);
       const tid = ctx.tenantId.trim();
-      const kind = ev.activity_kind.trim();
       const prid = readString(meta as Record<string, unknown>, "pathology_request_id");
       const resid = readString(meta as Record<string, unknown>, "pathology_result_id");
       if (prid && kind.startsWith("pathology.blood_request.")) {
@@ -215,6 +227,9 @@ export function buildPatientTimeline(
           kind.startsWith("pathology.ai_interpretation."))
       ) {
         href = `/fi-admin/${tid}/patients/${pid}/blood-results/${resid}`;
+      } else if (isPatientMessageActivityKind(kind)) {
+        // Historical patient-app messages without a lead must not fake-link to this page.
+        href = null;
       } else {
         href = `/fi-admin/${tid}/patients/${pid}`;
       }

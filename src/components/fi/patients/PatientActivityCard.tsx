@@ -36,12 +36,19 @@ export function PatientActivityCard({
                   <>
                     {" · "}
                     <Link
-                      href={`/fi-admin/${tenantId}/crm/leads/${a.lead_id}`}
+                      href={
+                        a.activity_kind === "patient_app.message.received" ||
+                        a.activity_kind === "message.logged"
+                          ? `/fi-admin/${tenantId}/crm/leads/${a.lead_id}?tab=documents`
+                          : `/fi-admin/${tenantId}/crm/leads/${a.lead_id}`
+                      }
                       className="text-blue-300 hover:underline"
                     >
                       Lead
                     </Link>
                   </>
+                ) : a.activity_kind === "patient_app.message.received" ? (
+                  <> · Patient app message</>
                 ) : (
                   <>
                     {" · "}
