@@ -12,6 +12,7 @@ import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { createCrmMessagePreview } from "@/src/lib/crm/messages";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { appendPatientTimelineEvent } from "@/src/lib/integrations/hubspot/appendPatientTimelineEvent.server";
+import { logStructured } from "@/src/lib/server/structuredLog";
 
 import { writePatientGatewayAudit } from "./patientGatewayAudit.server";
 import { patientGatewayDeny } from "./patientGatewayGateCore";
@@ -162,15 +163,29 @@ async function unreadCountForThread(
   tenantId: string,
   threadId: string
 ): Promise<number> {
-  const { count, error } = await client
+  // Avoid head:true count queries — some gateway runtimes mishandle Prefer/count HEAD.
+  const { data, error } = await client
     .from("fi_patient_gateway_messages")
-    .select("id", { count: "exact", head: true })
+    .select("id")
     .eq("tenant_id", tenantId)
     .eq("thread_id", threadId)
     .eq("direction", "clinic_to_patient")
-    .is("patient_read_at", null);
+    .is("patient_read_at", null)
+    .limit(100);
   if (error) throw new Error(error.message);
-  return count ?? 0;
+  return data?.length ?? 0;
+}
+
+function sortThreadsByLastMessage(
+  threads: PatientGatewayThreadSummary[]
+): PatientGatewayThreadSummary[] {
+  return [...threads].sort((a, b) => {
+    const aMs = a.lastMessageAt ? Date.parse(a.lastMessageAt) : Number.NEGATIVE_INFINITY;
+    const bMs = b.lastMessageAt ? Date.parse(b.lastMessageAt) : Number.NEGATIVE_INFINITY;
+    const aSafe = Number.isFinite(aMs) ? aMs : Number.NEGATIVE_INFINITY;
+    const bSafe = Number.isFinite(bMs) ? bMs : Number.NEGATIVE_INFINITY;
+    return bSafe - aSafe;
+  });
 }
 
 export async function listPatientGatewayMessageThreads(
@@ -182,12 +197,12 @@ export async function listPatientGatewayMessageThreads(
 
   try {
     await ensureDefaultGeneralThread(ctx, supabase);
+    // Sort in memory — avoid PostgREST nullsFirst order options that have failed in prod.
     const { data, error } = await supabase
       .from("fi_patient_gateway_message_threads")
       .select("*")
       .eq("tenant_id", ctx.tenantId)
-      .eq("patient_id", ctx.patientId)
-      .order("last_message_at", { ascending: false, nullsFirst: false });
+      .eq("patient_id", ctx.patientId);
     if (error) throw new Error(error.message);
 
     const threads: PatientGatewayThreadSummary[] = [];
@@ -214,7 +229,12 @@ export async function listPatientGatewayMessageThreads(
         }
         return ownership;
       }
-      const unread = await unreadCountForThread(supabase, ctx.tenantId, row.id);
+      let unread = 0;
+      try {
+        unread = await unreadCountForThread(supabase, ctx.tenantId, row.id);
+      } catch {
+        unread = 0;
+      }
       threads.push(
         mapThreadRowToSummary({
           id: row.id,
@@ -237,8 +257,15 @@ export async function listPatientGatewayMessageThreads(
         resourceKind: "message",
       });
     }
-    return { ok: true, threads };
-  } catch {
+    return { ok: true, threads: sortThreadsByLastMessage(threads) };
+  } catch (e) {
+    const safeError =
+      e instanceof Error ? e.message.replace(/[^\w\s.:()-]/g, "").slice(0, 160) : "unknown";
+    logStructured("error", "patient_gateway_messaging_list_failed", {
+      error: safeError,
+      tenant_id: ctx.tenantId,
+      patient_id: ctx.patientId,
+    });
     const deny = patientGatewayDeny("misconfigured", 500, "Could not load messages.");
     if (writeAudit) {
       writePatientGatewayAudit({
