@@ -1,0 +1,30 @@
+{
+  "ticket": "FI-PATIENT-APP-2A.1",
+  "title": "Native Gateway Authorization Parity Repair",
+  "date": "2026-07-27",
+  "branch": "feature/fi-patient-app-2a1-gateway-auth-parity",
+  "verdict": "GREEN",
+  "rootCause": "Demo portal auth users were unlinked (portal_auth_user_id unset). Shared gate correctly returned 403 unlinked on /me and /journey. Appointments/messages appeared to pass because FI-PATIENT-APP-2A mobile screens are placeholders that do not call those APIs.",
+  "authWeakened": false,
+  "webappUiChanged": false,
+  "goldenPatientPortalLinkModified": false,
+  "liveParity": {
+    "me": { "status": 200, "ok": true },
+    "journey": { "status": 200, "ok": true },
+    "appointments": { "status": 200, "ok": true },
+    "billing": { "status": 200, "ok": true, "emptyZeroState": true },
+    "messages": { "status": 200, "ok": true },
+    "invalidBearer": { "status": 401, "code": "invalid_token" },
+    "foreignPatientClaim": { "status": 403, "code": "ownership_denied" },
+    "wrongTenantClaim": { "status": 403, "code": "wrong_tenant" }
+  },
+  "fixture": {
+    "email": "e2e-patient-gateway-mobile@fi-demo.example",
+    "seedScript": "npm run seed:patient-gateway-mobile-demo",
+    "probeScript": "node scripts/run-with-system-ca.mjs tsx scripts/probe-patient-gateway-mobile-parity.ts"
+  },
+  "tests": {
+    "parityAndCore": "33 passed",
+    "serverAndNonRegressionSample": "51 passed"
+  }
+}
