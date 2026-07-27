@@ -46,7 +46,7 @@
     "schemaMigrations": false,
     "frontendDependsOnPatientV1": false,
     "webhookChange": "audit_only",
-    "rollbackCommits": ["527cd30a", "6c52bbce"]
+    "rollbackCommits": ["527cd30a", "6c52bbce", "6556422c", "55dba6b9"]
   },
   "lint": "pass",
   "typecheck": "pass",
