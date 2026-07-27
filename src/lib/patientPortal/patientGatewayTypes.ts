@@ -27,6 +27,12 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "invoice_not_payable",
   "amount_mismatch",
   "currency_mismatch",
+  "messaging_disabled",
+  "message_empty",
+  "message_too_long",
+  "message_rate_limited",
+  "message_duplicate",
+  "thread_closed",
 ] as const;
 
 export type PatientGatewayDenyCode = (typeof PATIENT_GATEWAY_DENY_CODES)[number];
@@ -46,7 +52,7 @@ export type PatientGatewayContext = {
 export type PatientGatewayDeny = {
   ok: false;
   code: PatientGatewayDenyCode;
-  status: 400 | 401 | 403 | 404 | 409 | 500;
+  status: 400 | 401 | 403 | 404 | 409 | 429 | 500;
   message: string;
 };
 
@@ -115,4 +121,16 @@ export type PatientGatewayAuditAction =
   | "payment_webhook_rejected"
   | "payment_reconciled"
   | "payment_replay_ignored"
-  | "payment_reconciliation_failed";
+  | "payment_reconciliation_failed"
+  | "message_threads_list_success"
+  | "message_threads_list_denied"
+  | "message_thread_read_success"
+  | "message_thread_read_denied"
+  | "message_ownership_denied"
+  | "patient_message_sent"
+  | "patient_message_send_denied"
+  | "notification_preferences_read"
+  | "notification_preferences_updated"
+  | "notification_dispatch_requested"
+  | "notification_dispatch_succeeded"
+  | "notification_dispatch_failed";

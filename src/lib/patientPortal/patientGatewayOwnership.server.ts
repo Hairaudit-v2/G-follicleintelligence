@@ -7,6 +7,7 @@ import {
   assertOwnedClinicalRow,
   assertOwnedDocumentRow,
   assertOwnedImageRow,
+  assertOwnedMessageThreadRow,
   assertOwnedPatientId,
   assertOwnedTenantId,
   type OwnedTenantPatientRow,
@@ -16,7 +17,7 @@ import type { PatientGatewayContext, PatientGatewayDeny } from "./patientGateway
 function withOwnershipAudit(
   ctx: PatientGatewayContext,
   deny: PatientGatewayDeny | null,
-  resourceKind: "patient" | "image" | "appointment" | "billing" | "document",
+  resourceKind: "patient" | "image" | "appointment" | "billing" | "document" | "message",
   resourceId?: string | null
 ): PatientGatewayDeny | null {
   if (!deny) return null;
@@ -25,9 +26,11 @@ function withOwnershipAudit(
       ? ("appointment_ownership_denied" as const)
       : resourceKind === "billing"
         ? ("invoice_ownership_denied" as const)
-        : deny.code === "wrong_tenant"
-          ? ("wrong_tenant" as const)
-          : ("ownership_denied" as const);
+        : resourceKind === "message"
+          ? ("message_ownership_denied" as const)
+          : deny.code === "wrong_tenant"
+            ? ("wrong_tenant" as const)
+            : ("ownership_denied" as const);
   writePatientGatewayAudit({
     action,
     outcome: "deny",
@@ -74,6 +77,14 @@ export function requireOwnedBillingRow(
   return withOwnershipAudit(ctx, assertOwnedBillingRow(ctx, row), "billing", resourceId);
 }
 
+export function requireOwnedMessageThreadRow(
+  ctx: PatientGatewayContext,
+  row: OwnedTenantPatientRow,
+  resourceId?: string | null
+): PatientGatewayDeny | null {
+  return withOwnershipAudit(ctx, assertOwnedMessageThreadRow(ctx, row), "message", resourceId);
+}
+
 export function requireOwnedDocumentRow(
   ctx: PatientGatewayContext,
   row: OwnedTenantPatientRow,
@@ -102,6 +113,7 @@ export {
   assertOwnedClinicalRow,
   assertOwnedDocumentRow,
   assertOwnedImageRow,
+  assertOwnedMessageThreadRow,
   assertOwnedPatientId,
   assertOwnedTenantId,
 };

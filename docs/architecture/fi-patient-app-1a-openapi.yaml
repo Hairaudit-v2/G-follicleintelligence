@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Follicle Intelligence Patient Gateway API
-  version: 1.0.4
-  summary: FI Patient Gateway API — 1B–1E auth, imaging, journey/appointments, billing/payments implemented; remaining domains proposed
+  version: 1.0.5
+  summary: FI Patient Gateway API — 1B–1F auth, imaging, journey/appointments, billing/payments, messaging/notifications foundation
   description: |
     `/api/patient/v1` surface for an external patient mobile client.
 
@@ -11,6 +11,8 @@ info:
     **1D implemented:** patient-safe journey + appointments (read-only).
     **1E implemented:** billing summary, invoices, Stripe Checkout payment-session;
     reconciliation via existing verified Stripe webhook (`POST /api/fi-payments/stripe/webhook`).
+    **1F implemented:** patient-safe message threads + send into approved FiOS staff
+    workflows; notification preferences; provider-neutral notification policy contract.
     Remaining domain paths below remain proposed until later tickets.
 
     **Identity model:** Supabase Auth user (`auth.users.id`) linked via
@@ -29,24 +31,38 @@ info:
 
     **Tenant isolation:** resolved from the portal patient row; ownership guards
     require `tenant_id` + `patient_id` match for domain routes. Journey,
-    appointment, and invoice reads re-derive identity server-side on every request.
+    appointment, invoice, and message-thread reads re-derive identity server-side
+    on every request.
 
     **Payments:** amount and currency are always server-derived from FiOS invoice
     balance. Browser/app return URLs are never authoritative — only verified Stripe
     webhook events reconcile payment success (idempotent).
-x-fi-ticket: FI-PATIENT-APP-1E
-x-fi-status: billing-payments-implemented
+
+    **Messaging:** threads live in additive `fi_patient_gateway_*` tables (CRM
+    `fi_crm_messages` is preview/metadata-only and is not a patient inbox). Staff
+    visibility reuses CRM activity + patient timeline + CRM message preview.
+    Client cannot set direction, sender identity, or delivery/read status.
+    Message body max length is 4000 characters. Delivery/read states are only
+    exposed when stored truthfully by FiOS.
+
+    **Notifications:** preferences distinguish optional channels/categories from
+    mandatory transactional events (e.g. appointment_changed, payment_received).
+    Push remains provider-neutral and inactive until a later adapter. Notification
+    previews must not leak clinical detail.
+x-fi-ticket: FI-PATIENT-APP-1F
+x-fi-status: messaging-notifications-implemented
 x-fi-constraints:
-  - no_mobile_app_implementation_in_1e
-  - no_patient_data_migration_in_1e
-  - no_schema_changes_in_1e
-  - no_messaging_in_1e
-  - no_second_ledger_in_1e
+  - no_mobile_app_implementation_in_1f
+  - no_unrestricted_realtime_chat
+  - no_parallel_crm
+  - no_staff_notes_in_patient_responses
+  - no_push_provider_lock_in
+  - no_clinical_detail_in_notification_previews
+  - no_second_ledger
   - no_raw_card_data
   - no_client_declared_paid_status
   - no_redirect_based_payment_confirmation
   - no_raw_storage_paths_in_responses
-  - no_staff_notes_in_patient_responses
 
 servers:
   - url: https://{host}
@@ -72,7 +88,9 @@ tags:
   - name: Account
     description: Legacy proposed account paths — superseded by /billing in 1E
   - name: Messaging
-    description: Deferred — no patient inbox exists today
+    description: Patient-safe threads and replies into approved FiOS staff workflows
+  - name: Notifications
+    description: Notification preferences and provider-neutral policy contract
   - name: Consent
     description: Trial / photography consent status for gated uploads
 
@@ -927,30 +945,174 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /api/patient/v1/messages:
+    get:
+      tags: [Messaging]
+      operationId: listPatientMessageThreads
+      summary: List patient-safe message threads
+      description: |
+        Returns only threads owned by the server-resolved patient and tenant.
+        Ensures a default open `general` thread exists. Does not enumerate
+        arbitrary CRM conversations or staff-only notes.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Owned patient-safe threads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientMessageThreadsResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/patient/v1/messages/{threadId}:
+    parameters:
+      - name: threadId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Untrusted thread id — ownership re-checked server-side
+    get:
+      tags: [Messaging]
+      operationId: getPatientMessageThread
+      summary: Open a patient-safe message thread
+      description: |
+        Re-checks thread ownership before returning any messages. Omits staff
+        user ids, internal notes, escalation comments, and CRM audit metadata.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Thread detail with patient-safe messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientMessageThreadDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [Messaging]
+      operationId: sendPatientMessage
+      summary: Send a message into an owned approved thread
+      description: |
+        Persists `patient_to_clinic` messages (max 4000 chars) and surfaces them
+        into existing FiOS staff workflows (CRM activity, patient timeline, CRM
+        message preview when a lead is linked). Client-supplied direction,
+        senderLabel, status, patientId, and tenantId are ignored.
+
+        Unrestricted free-form new-thread creation with arbitrary staff
+        recipients is out of scope; patients reply on approved/default threads.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+      responses:
+        "201":
+          description: Message accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientMessageSendResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/patient/v1/notification-preferences:
+    get:
+      tags: [Notifications]
+      operationId: getPatientNotificationPreferences
+      summary: Read notification preferences
+      description: |
+        Returns channel and category preferences for the authenticated patient.
+        Optional preferences must not disable mandatory transactional
+        communications (appointment changes, payment receipts).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Preferences for the server-resolved patient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotificationPreferencesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      tags: [Notifications]
+      operationId: patchPatientNotificationPreferences
+      summary: Update allowed notification preferences
+      description: |
+        Persists patient-allowed preference toggles under patient metadata.
+        Unknown keys are ignored. Transactional policy is enforced at dispatch
+        time, not by allowing the client to disable required events.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientNotificationPreferences"
+      responses:
+        "200":
+          description: Updated preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientNotificationPreferencesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /api/patient/v1/tenants/{tenantId}/messages:
     get:
       tags: [Messaging]
-      operationId: listPatientMessages
-      summary: Patient messaging inbox (deferred)
+      operationId: listPatientMessagesLegacyPath
+      summary: Legacy tenant-scoped messaging path (not used)
       description: |
-        **Not implementable by reuse today.** Clinic→patient messaging exists as
-        staff CRM communications / ReceptionOS Twilio+Resend outbound. There is
-        no patient-authenticated message inbox table or portal UI.
-
-        v1 servers SHOULD return `501` with a stable error code until a later
-        phase introduces a patient-safe thread model (likely schema work — out of
-        1A scope).
+        Superseded by `GET /api/patient/v1/messages`. Tenant is server-derived;
+        clients MUST NOT use path-tenant messaging.
+      deprecated: true
       security:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/tenantId"
       responses:
-        "501":
-          description: Messaging not available in v1
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -1013,7 +1175,13 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorBody"
     Conflict:
-      description: State conflict (e.g. already cancelled, pending reorder exists)
+      description: State conflict (e.g. already cancelled, pending reorder exists, duplicate message, closed thread)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    TooManyRequests:
+      description: Rate limited (e.g. message flood protection)
       content:
         application/json:
           schema:
@@ -1653,3 +1821,126 @@ components:
           type: string
           format: uri
           nullable: true
+
+    PatientMessageThreadSummary:
+      type: object
+      required: [id, subject, category, status, lastMessageAt, unreadCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+        category:
+          type: string
+          enum: [general, appointment, post_op, medication, billing]
+        status:
+          type: string
+          enum: [open, closed]
+        lastMessageAt:
+          type: string
+          format: date-time
+          nullable: true
+        unreadCount:
+          type: integer
+          minimum: 0
+
+    PatientMessageItem:
+      type: object
+      required: [id, direction, senderLabel, body, sentAt, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum: [patient_to_clinic, clinic_to_patient]
+        senderLabel:
+          type: string
+          description: Patient-safe label (e.g. You / Clinical Team) — never staff user ids
+        body:
+          type: string
+          maxLength: 4000
+        sentAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [sent, delivered, read, failed]
+          description: Only truthfully supported FiOS states; clients cannot set this
+
+    PatientMessageThreadsResponse:
+      type: object
+      required: [ok, threads]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        threads:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatientMessageThreadSummary"
+
+    PatientMessageThreadDetailResponse:
+      type: object
+      required: [ok, thread]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        thread:
+          allOf:
+            - $ref: "#/components/schemas/PatientMessageThreadSummary"
+            - type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PatientMessageItem"
+
+    PatientMessageSendResponse:
+      type: object
+      required: [ok, message, staffSurfaced]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        message:
+          $ref: "#/components/schemas/PatientMessageItem"
+        staffSurfaced:
+          type: boolean
+          description: True when send path attempted staff workflow surfacing
+
+    PatientNotificationPreferences:
+      type: object
+      properties:
+        email:
+          type: boolean
+        sms:
+          type: boolean
+        push:
+          type: boolean
+          description: May be selected but push adapter remains inactive until later
+        appointmentReminders:
+          type: boolean
+        journeyReminders:
+          type: boolean
+        billingNotifications:
+          type: boolean
+        messageNotifications:
+          type: boolean
+      description: |
+        Optional preference toggles. Transactional events (appointment_changed,
+        payment_received) remain dispatchable even when optional channels/categories
+        are opted out (email fallback).
+
+    PatientNotificationPreferencesResponse:
+      type: object
+      required: [ok, preferences]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        preferences:
+          $ref: "#/components/schemas/PatientNotificationPreferences"

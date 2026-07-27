@@ -56,6 +56,13 @@ export function assertOwnedBillingRow(
   return ownedOrDeny(ctx, row, "billing record");
 }
 
+export function assertOwnedMessageThreadRow(
+  ctx: PatientGatewayContext,
+  row: OwnedTenantPatientRow
+): PatientGatewayDeny | null {
+  return ownedOrDeny(ctx, row, "message thread");
+}
+
 export function assertOwnedDocumentRow(
   ctx: PatientGatewayContext,
   row: OwnedTenantPatientRow

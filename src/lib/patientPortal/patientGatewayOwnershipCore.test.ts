@@ -7,6 +7,7 @@ import {
   assertOwnedClinicalRow,
   assertOwnedDocumentRow,
   assertOwnedImageRow,
+  assertOwnedMessageThreadRow,
   assertOwnedPatientId,
   assertOwnedTenantId,
 } from "./patientGatewayOwnershipCore";
@@ -22,13 +23,14 @@ const CTX: PatientGatewayContext = {
 };
 
 describe("patientGatewayOwnershipCore", () => {
-  it("allows owned clinical/image/appointment/billing/document rows", () => {
+  it("allows owned clinical/image/appointment/billing/document/message rows", () => {
     const row = { tenant_id: CTX.tenantId, patient_id: CTX.patientId };
     assert.equal(assertOwnedClinicalRow(CTX, row), null);
     assert.equal(assertOwnedImageRow(CTX, row), null);
     assert.equal(assertOwnedAppointmentRow(CTX, row), null);
     assert.equal(assertOwnedBillingRow(CTX, row), null);
     assert.equal(assertOwnedDocumentRow(CTX, row), null);
+    assert.equal(assertOwnedMessageThreadRow(CTX, row), null);
   });
 
   it("denies foreign patient ownership", () => {
