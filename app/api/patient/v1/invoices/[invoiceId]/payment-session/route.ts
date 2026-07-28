@@ -8,6 +8,7 @@
 import { requirePatientGatewayContext } from "@/src/lib/patientPortal/patientGatewayGate.server";
 import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGatewayAudit.server";
 import { createPatientGatewayPaymentSession } from "@/src/lib/patientPortal/patientGatewayBilling.server";
+import { parsePatientCheckoutPlatform } from "@/src/lib/patientPortal/patientGatewayCheckoutReturn";
 import {
   mapPatientGatewayRouteError,
   patientGatewayJsonDeny,
@@ -59,11 +60,13 @@ export async function POST(
           : null;
     const clientCurrency =
       typeof body.currency === "string" ? body.currency : null;
+    const platform = parsePatientCheckoutPlatform(body.platform);
 
     const { invoiceId } = await ctx.params;
     const session = await createPatientGatewayPaymentSession(gate.context, invoiceId, {
       clientAmountMajor: clientAmount,
       clientCurrency,
+      platform,
     });
     if (!session.ok) return patientGatewayJsonDeny(session);
     return patientGatewayJsonOk(session);

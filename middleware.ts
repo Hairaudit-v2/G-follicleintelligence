@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { isFiAdminPublicSubpath } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
+import {
+  isPatientGatewayApiPath,
+  PATIENT_GATEWAY_CORS_HEADERS,
+  PATIENT_GATEWAY_CORS_METHODS,
+  resolvePatientWebCorsOrigin,
+} from "@/src/lib/patientPortal/patientGatewayCors";
 
 // Shape of the cookie list passed to the Supabase SSR `setAll` callback.
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
@@ -22,6 +28,32 @@ function withBrandingCorsHeaders(response: NextResponse): NextResponse {
   response.headers.set("Cross-Origin-Resource-Policy", "cross-origin");
   response.headers.set("Access-Control-Allow-Origin", "*");
   return response;
+}
+
+function withPatientGatewayCors(
+  response: NextResponse,
+  requestOrigin: string | null
+): NextResponse {
+  const allowed = resolvePatientWebCorsOrigin(requestOrigin);
+  if (!allowed) return response;
+  response.headers.set("Access-Control-Allow-Origin", allowed);
+  response.headers.set("Access-Control-Allow-Methods", PATIENT_GATEWAY_CORS_METHODS);
+  response.headers.set("Access-Control-Allow-Headers", PATIENT_GATEWAY_CORS_HEADERS);
+  response.headers.set("Access-Control-Max-Age", "86400");
+  response.headers.set("Vary", "Origin");
+  // Bearer token auth — do not enable credentialed cookies for patient APIs.
+  return response;
+}
+
+function patientGatewayPreflight(request: NextRequest): NextResponse | null {
+  if (request.method !== "OPTIONS") return null;
+  const origin = request.headers.get("origin");
+  const allowed = resolvePatientWebCorsOrigin(origin);
+  if (!allowed) {
+    return new NextResponse(null, { status: 403 });
+  }
+  const response = new NextResponse(null, { status: 204 });
+  return withPatientGatewayCors(response, origin);
 }
 
 // ---------------------------------------------------------------------------
@@ -185,6 +217,15 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.next();
     response.headers.set("x-pathname", pathname);
     return withBrandingCorsHeaders(response);
+  }
+
+  // 1b. Patient gateway CORS for the dedicated patient web/PWA origin.
+  if (isPatientGatewayApiPath(pathname)) {
+    const preflight = patientGatewayPreflight(request);
+    if (preflight) return preflight;
+    const response = NextResponse.next();
+    response.headers.set("x-pathname", pathname);
+    return withPatientGatewayCors(response, request.headers.get("origin"));
   }
 
   // 2. Bypassed API routes: skip auth guard.

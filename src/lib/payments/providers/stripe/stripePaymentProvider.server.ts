@@ -21,12 +21,20 @@ export function createStripePaymentProvider(): FiPaymentProvider {
   return {
     id: "stripe",
 
-    async createCheckoutSession({ tenantId, invoice, paymentRequestId, amountCents, currency }) {
+    async createCheckoutSession({
+      tenantId,
+      invoice,
+      paymentRequestId,
+      amountCents,
+      currency,
+      successUrl,
+      cancelUrl,
+    }) {
       const StripeSdk = await loadStripe();
       const secret = readStripeSecretKey();
       if (!secret) throw new Error("STRIPE_SECRET_KEY is not configured.");
-      const success = readFiPaymentSuccessUrl();
-      const cancel = readFiPaymentCancelUrl();
+      const success = successUrl?.trim() || readFiPaymentSuccessUrl();
+      const cancel = cancelUrl?.trim() || readFiPaymentCancelUrl();
       if (!success?.trim() || !cancel?.trim()) {
         throw new Error(
           "FI_PAYMENT_SUCCESS_URL and FI_PAYMENT_CANCEL_URL are required for Stripe checkout."

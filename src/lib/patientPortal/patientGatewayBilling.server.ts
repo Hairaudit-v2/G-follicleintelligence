@@ -25,6 +25,7 @@ import {
 import { loadPatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 
 import { writePatientGatewayAudit } from "./patientGatewayAudit.server";
+import { resolvePatientCheckoutReturnUrls } from "./patientGatewayCheckoutReturn";
 import {
   buildPatientGatewayBillingSummary,
   invoiceCanPay,
@@ -387,6 +388,8 @@ export async function getPatientGatewayInvoice(
 export type CreatePatientGatewayPaymentSessionInput = {
   clientAmountMajor?: number | null;
   clientCurrency?: string | null;
+  /** Client platform hint for Checkout return URL selection. */
+  platform?: "web" | "native" | null;
 };
 
 export type PatientGatewayPaymentSessionResponse = {
@@ -492,11 +495,27 @@ export async function createPatientGatewayPaymentSession(
       );
     }
 
+    let returnUrls: { successUrl: string; cancelUrl: string };
+    try {
+      returnUrls = resolvePatientCheckoutReturnUrls(input?.platform ?? null);
+    } catch {
+      return denySession(
+        patientGatewayDeny(
+          "misconfigured",
+          500,
+          "Payment return URLs are not configured."
+        ),
+        inv.id
+      );
+    }
+
     const pr = await createPaymentRequest({
       tenantId: ctx.tenantId,
       invoiceId: inv.id,
       amountCents,
       send: true,
+      checkoutSuccessUrl: returnUrls.successUrl,
+      checkoutCancelUrl: returnUrls.cancelUrl,
     });
 
     const checkoutUrl = pr.checkout_url?.trim() || "";

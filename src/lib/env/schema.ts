@@ -73,6 +73,10 @@ export const serverEnvSchema = z.object({
   FI_PAYMENT_SUCCESS_URL: optionalHttpUrl,
   FI_PAYMENT_CANCEL_URL: optionalHttpUrl,
   FI_PAYMENT_REQUEST_EXPIRY_DAYS: optionalString,
+  /** Canonical patient web/PWA origin for Stripe return URLs (https://app.follicleintelligence.ai). */
+  FI_PATIENT_WEB_APP_URL: optionalHttpUrl,
+  /** Optional comma-separated extra CORS origins for patient web (dev/preview only when needed). */
+  FI_PATIENT_WEB_CORS_ORIGINS: optionalString,
   OPENAI_API_KEY: optionalString,
   OPENAI_CLINICAL_NOTE_MODEL: optionalString,
   OPENAI_PATHOLOGY_INTERPRETATION_MODEL: optionalString,

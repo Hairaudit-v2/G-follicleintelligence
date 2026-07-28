@@ -544,6 +544,9 @@ export async function createPaymentRequestForInvoice(args: {
   staffNote?: string | null;
   /** Optional cap for `expires_at` (ISO). Stripe session expiry is min(session, cap) when both exist. */
   expiresAtIso?: string | null;
+  /** Optional Stripe Checkout return URLs (patient web PWA HTTPS). */
+  checkoutSuccessUrl?: string | null;
+  checkoutCancelUrl?: string | null;
 }): Promise<FiPaymentRequestRow> {
   const tid = assertUuid(args.tenantId, "tenantId");
   const iid = assertUuid(args.invoiceId, "invoiceId");
@@ -605,6 +608,8 @@ export async function createPaymentRequestForInvoice(args: {
       paymentRequestId: out.id,
       amountCents: amt,
       currency: inv.currency,
+      successUrl: args.checkoutSuccessUrl?.trim() || undefined,
+      cancelUrl: args.checkoutCancelUrl?.trim() || undefined,
     });
     let expiresAt = session.expiresAt;
     const cap = args.expiresAtIso?.trim() || null;

@@ -42,6 +42,9 @@ export interface FiPaymentProvider {
     paymentRequestId: string;
     amountCents: number;
     currency: string;
+    /** Optional overrides (patient web PWA HTTPS returns). */
+    successUrl?: string;
+    cancelUrl?: string;
   }): Promise<CheckoutSessionResult>;
   verifyWebhook(input: WebhookVerificationInput): Promise<unknown>;
   mapWebhookToPaymentEvent(rawEvent: unknown): MappedPaymentWebhookEvent;
