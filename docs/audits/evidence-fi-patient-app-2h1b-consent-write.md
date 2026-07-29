@@ -73,3 +73,16 @@ Patient portal auth users are not clinic `fi_users` rows
 Fix: set `actingUserId: null` and record `actor_auth_user_id` in metadata.
 Requires code deploy (not migration-only).
 
+## Final production verification
+
+| Check | Result |
+| --- | --- |
+| FiOS branch | `fix/fi-patient-app-2h1b-consent-write` (`e423ab12`, `0c2fc80e`) pushed |
+| Production deploy | `dpl_59CSPczA7NFGwf4AQ2u3Be3QYUDA` → `https://follicleintelligence.ai` |
+| `npm run test:authenticated-acceptance` | **PASS** |
+| consent | already satisfied / POST path proven earlier |
+| upload-intent | 200 |
+| signed PUT | 200 to `…supabase.co/storage/v1/object/upload/sign/patient-images/…` |
+| images/complete | 200 |
+| journey reload after upload | 200 |
+
