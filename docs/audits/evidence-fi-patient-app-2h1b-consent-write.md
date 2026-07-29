@@ -61,3 +61,15 @@ After MIME migration (before code deploy):
 | `fi_patient_documents` | row `72283978-0b4f-487f-abb9-c9f0684bc8db`, `document_type=consent`, `content_type=text/plain` |
 
 Artifact: `.artifacts/repro-consent-500-result.json`
+
+## Follow-on: upload complete (same ticket verification)
+
+After consent worked, `POST /api/patient/v1/images/complete` still returned
+`500 / misconfigured`. Root cause: gateway passed `actingUserId: authUserId`
+into `fi_patient_images.uploaded_by_user_id`, which FKs `fi_users(id)`.
+Patient portal auth users are not clinic `fi_users` rows
+(`23503 fi_patient_images_uploaded_by_user_id_fkey`).
+
+Fix: set `actingUserId: null` and record `actor_auth_user_id` in metadata.
+Requires code deploy (not migration-only).
+
