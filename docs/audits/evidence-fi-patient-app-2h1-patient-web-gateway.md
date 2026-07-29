@@ -5,6 +5,14 @@
 **Repo:** `G:\follicleintelligence`  
 **Verdict:** **GREEN** for gateway CORS / web return-URL support on production FiOS
 
+## Milestone close-out (2026-07-29)
+
+Overall **FI-PATIENT-APP-2H.1** closed as **GREEN WITH DOCUMENTED LIMITATION**.
+
+- FiOS 2H.1B consent/upload repair merged: https://github.com/Hairaudit-v2/G-follicleintelligence/pull/6 (`3c6537c2`)
+- Patient authenticated-acceptance **PASS** on `https://app.follicleintelligence.ai`
+- **Limitation:** live Stripe checkout not exercised (synthetic patient had no outstanding invoice)
+
 ## Shipped
 
 | Item | Value |
