@@ -3,6 +3,9 @@ import { describe, it } from "node:test";
 
 import {
   getPatientGatewayConsent,
+  parsePatientGatewayConsentRequest,
+  PATIENT_GATEWAY_CONSENT_SOURCE,
+  PATIENT_GATEWAY_CONSENT_TYPE,
   recordPatientGatewayConsent,
 } from "./patientGatewayConsent.server";
 import type { PatientGatewayContext } from "./patientGatewayTypes";
@@ -107,5 +110,43 @@ describe("patientGatewayConsent.server", () => {
     if (result.ok) return;
     assert.equal(result.code, "misconfigured");
     assert.equal(result.status, 500);
+  });
+
+  it("parse accepts empty body and canonical type/version", () => {
+    const empty = parsePatientGatewayConsentRequest(null);
+    assert.equal(empty.ok, true);
+    if (!empty.ok) return;
+    assert.equal(empty.consentType, PATIENT_GATEWAY_CONSENT_TYPE);
+    assert.equal(empty.consentVersion, PATIENT_GATEWAY_CONSENT_SOURCE);
+
+    const ok = parsePatientGatewayConsentRequest({
+      consentType: PATIENT_GATEWAY_CONSENT_TYPE,
+      consentVersion: PATIENT_GATEWAY_CONSENT_SOURCE,
+    });
+    assert.equal(ok.ok, true);
+  });
+
+  it("parse rejects unsupported consent type/version", () => {
+    const badType = parsePatientGatewayConsentRequest({ consentType: "marketing" });
+    assert.equal(badType.ok, false);
+    if (badType.ok) return;
+    assert.equal(badType.code, "invalid_category");
+
+    const badVersion = parsePatientGatewayConsentRequest({
+      consentVersion: "v999",
+    });
+    assert.equal(badVersion.ok, false);
+    if (badVersion.ok) return;
+    assert.equal(badVersion.code, "invalid_category");
+  });
+
+  it("parse rejects client-supplied patientId/tenantId", () => {
+    const denied = parsePatientGatewayConsentRequest({
+      patientId: "11111111-1111-4111-8111-111111111111",
+    });
+    assert.equal(denied.ok, false);
+    if (denied.ok) return;
+    assert.equal(denied.code, "ownership_denied");
+    assert.equal(denied.status, 403);
   });
 });

@@ -8,6 +8,7 @@
 import { requirePatientGatewayContext } from "@/src/lib/patientPortal/patientGatewayGate.server";
 import {
   getPatientGatewayConsent,
+  parsePatientGatewayConsentRequest,
   recordPatientGatewayConsent,
 } from "@/src/lib/patientPortal/patientGatewayConsent.server";
 import {
@@ -20,6 +21,16 @@ export const dynamic = "force-dynamic";
 
 function envReady(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function readOptionalJsonBody(req: Request): Promise<unknown> {
+  const text = await req.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return Symbol.for("patient_gateway_consent_invalid_json");
+  }
 }
 
 export async function GET(req: Request) {
@@ -56,6 +67,19 @@ export async function POST(req: Request) {
 
     const gate = await requirePatientGatewayContext(req);
     if (!gate.ok) return patientGatewayJsonDeny(gate);
+
+    const body = await readOptionalJsonBody(req);
+    if (body === Symbol.for("patient_gateway_consent_invalid_json")) {
+      return patientGatewayJsonDeny({
+        ok: false,
+        code: "invalid_category",
+        status: 400,
+        message: "Unsupported consent payload.",
+      });
+    }
+
+    const parsed = parsePatientGatewayConsentRequest(body);
+    if (!parsed.ok) return patientGatewayJsonDeny(parsed);
 
     const result = await recordPatientGatewayConsent(gate.context);
     if (!result.ok) return patientGatewayJsonDeny(result);

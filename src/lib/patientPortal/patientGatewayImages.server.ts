@@ -5,12 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { buildPatientImageStoragePath } from "@/src/lib/patientImages/patientImagePaths";
-import {
-  PATIENT_IMAGES_BUCKET_DEFAULT,
-} from "@/src/lib/patientImages/patientImagePolicy";
-import {
-  registerPreuploadedPatientImageRecord,
-} from "@/src/lib/patientImages/patientImagesServer";
+import { PATIENT_IMAGES_BUCKET_DEFAULT } from "@/src/lib/patientImages/patientImagePolicy";
+import { registerPreuploadedPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImageRow } from "@/src/lib/patientImages/patientImageTypes";
 import { assertPatientTrialConsentRecorded } from "@/src/lib/patients/patientConsentGate.server";
 import { isPatientPortalImagingEnabled } from "@/src/lib/patientPortal/patientPortalImagingEnabled";
@@ -351,7 +347,10 @@ export async function completePatientGatewayUpload(
   const writeAudit = options?.writeAudit !== false;
   const deny = (
     d: PatientGatewayDeny,
-    action: "upload_completion_denied" | "upload_replay_denied" | "ownership_denied" = "upload_completion_denied"
+    action:
+      | "upload_completion_denied"
+      | "upload_replay_denied"
+      | "ownership_denied" = "upload_completion_denied"
   ): PatientGatewayDeny => {
     if (writeAudit) {
       writePatientGatewayAudit({
@@ -404,9 +403,7 @@ export async function completePatientGatewayUpload(
   }
 
   const claimedPath =
-    body.storagePath == null || body.storagePath === ""
-      ? null
-      : String(body.storagePath);
+    body.storagePath == null || body.storagePath === "" ? null : String(body.storagePath);
   if (!assertStoragePathMatchesIntent(intent, claimedPath)) {
     return deny(
       patientGatewayDeny("path_mismatch", 403, "Storage path does not match the issued intent.")
@@ -480,13 +477,15 @@ export async function completePatientGatewayUpload(
         imagingProtocolTemplateSlug: mapping.protocolTemplateSlug,
         imagingProtocolSlotSlug: mapping.protocolSlotSlug,
         captureSource: mapping.captureSource,
-        actingUserId: ctx.authUserId,
+        // Patient auth users are not fi_users rows; uploaded_by_user_id FKs fi_users.
+        actingUserId: null,
         metadata: {
           patient_portal: true,
           patient_gateway_v1: true,
           capture_source: mapping.captureSource,
           upload_intent_id: intent.intentId,
           protocol_slot_slug: mapping.protocolSlotSlug,
+          actor_auth_user_id: ctx.authUserId,
         },
       },
       supabase
@@ -507,6 +506,13 @@ export async function completePatientGatewayUpload(
     return { ok: true, imageId: registered.row.id, status: "held" };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Could not register upload.";
+    console.error("[patient_gateway_images] complete failed", {
+      patientId: ctx.patientId,
+      tenantId: ctx.tenantId,
+      authUserId: ctx.authUserId,
+      imageId: intent.imageId,
+      message: msg,
+    });
     if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("storage")) {
       return deny(patientGatewayDeny("storage_missing", 409, msg));
     }
