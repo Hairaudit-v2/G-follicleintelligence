@@ -29,7 +29,20 @@ import type { PatientGatewayContext, PatientGatewayDeny } from "./patientGateway
 
 export const PATIENT_GATEWAY_CONSENT_SOURCE = "patient_gateway_consent_v1";
 
+/** Canonical in-app photography consent type recorded on attestation metadata. */
+export const PATIENT_GATEWAY_CONSENT_TYPE = "progress_photography";
+
+/**
+ * Supported consent policy versions for POST /api/patient/v1/consent.
+ * Empty / omitted body defaults to the current gateway version.
+ */
+export const PATIENT_GATEWAY_CONSENT_VERSIONS = [PATIENT_GATEWAY_CONSENT_SOURCE] as const;
+export type PatientGatewayConsentVersion =
+  (typeof PATIENT_GATEWAY_CONSENT_VERSIONS)[number];
+
 const ATTESTATION_FILENAME = "patient-app-consent.txt";
+/** text/plain is allowed on patient-images for consent attestation documents. */
+const ATTESTATION_CONTENT_TYPE = "text/plain";
 
 function buildAttestationBody(ctx: PatientGatewayContext, attestedAt: string): string {
   return [
@@ -39,11 +52,83 @@ function buildAttestationBody(ctx: PatientGatewayContext, attestedAt: string): s
     `Patient id: ${ctx.patientId}`,
     `Tenant id: ${ctx.tenantId}`,
     `Auth user id: ${ctx.authUserId}`,
+    `Consent type: ${PATIENT_GATEWAY_CONSENT_TYPE}`,
+    `Consent version: ${PATIENT_GATEWAY_CONSENT_SOURCE}`,
     "",
     "The patient confirmed in the Follicle Intelligence patient app that they",
     "consent to clinical progress photography being captured and uploaded for",
     "their treating clinic to review as part of their care.",
   ].join("\n");
+}
+
+export function parsePatientGatewayConsentRequest(body: unknown):
+  | { ok: true; consentType: typeof PATIENT_GATEWAY_CONSENT_TYPE; consentVersion: PatientGatewayConsentVersion }
+  | PatientGatewayDeny {
+  if (body == null || body === "") {
+    return {
+      ok: true,
+      consentType: PATIENT_GATEWAY_CONSENT_TYPE,
+      consentVersion: PATIENT_GATEWAY_CONSENT_SOURCE,
+    };
+  }
+  if (typeof body !== "object" || Array.isArray(body)) {
+    return patientGatewayDeny("invalid_category", 400, "Unsupported consent payload.");
+  }
+  const record = body as Record<string, unknown>;
+  const keys = Object.keys(record);
+  if (keys.length === 0) {
+    return {
+      ok: true,
+      consentType: PATIENT_GATEWAY_CONSENT_TYPE,
+      consentVersion: PATIENT_GATEWAY_CONSENT_SOURCE,
+    };
+  }
+
+  const rawType =
+    typeof record.consentType === "string"
+      ? record.consentType.trim()
+      : typeof record.type === "string"
+        ? record.type.trim()
+        : "";
+  const rawVersion =
+    typeof record.consentVersion === "string"
+      ? record.consentVersion.trim()
+      : typeof record.version === "string"
+        ? record.version.trim()
+        : "";
+
+  if (rawType && rawType !== PATIENT_GATEWAY_CONSENT_TYPE) {
+    return patientGatewayDeny(
+      "invalid_category",
+      400,
+      "Unsupported consent type."
+    );
+  }
+  if (
+    rawVersion &&
+    !(PATIENT_GATEWAY_CONSENT_VERSIONS as readonly string[]).includes(rawVersion)
+  ) {
+    return patientGatewayDeny(
+      "invalid_category",
+      400,
+      "Unsupported consent version."
+    );
+  }
+
+  // Never trust client identity claims if present.
+  if (record.patientId != null || record.tenantId != null) {
+    return patientGatewayDeny(
+      "ownership_denied",
+      403,
+      "Client-supplied patient or tenant identity is not allowed."
+    );
+  }
+
+  return {
+    ok: true,
+    consentType: PATIENT_GATEWAY_CONSENT_TYPE,
+    consentVersion: PATIENT_GATEWAY_CONSENT_SOURCE,
+  };
 }
 
 export type PatientGatewayConsentOptions = {
@@ -76,7 +161,7 @@ async function defaultRecordAttestation(
     safeFilename: ATTESTATION_FILENAME,
   });
   const bucket = PATIENT_DOCUMENTS_BUCKET_DEFAULT;
-  const contentType = "text/plain";
+  const contentType = ATTESTATION_CONTENT_TYPE;
 
   const { error: uploadErr } = await client.storage.from(bucket).upload(storagePath, bytes, {
     contentType,
@@ -100,8 +185,11 @@ async function defaultRecordAttestation(
     notes: "Patient attested in mobile app",
     metadata: {
       source: PATIENT_GATEWAY_CONSENT_SOURCE,
+      consent_type: PATIENT_GATEWAY_CONSENT_TYPE,
+      consent_version: PATIENT_GATEWAY_CONSENT_SOURCE,
       method: "in_app_acknowledgment",
       attested_at: now,
+      actor_auth_user_id: ctx.authUserId,
     },
     uploaded_by_user_id: null,
     created_at: now,
@@ -208,7 +296,14 @@ export async function recordPatientGatewayConsent(
     }
 
     return buildPatientGatewayConsentStatus({ required: true, satisfied: true });
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[patient_gateway_consent] record failed", {
+      patientId: ctx.patientId,
+      tenantId: ctx.tenantId,
+      authUserId: ctx.authUserId,
+      message,
+    });
     if (auditEnabled(options)) {
       writePatientGatewayAudit({
         action: "consent_record_denied",
