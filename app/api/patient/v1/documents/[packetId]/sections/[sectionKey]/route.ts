@@ -1,0 +1,68 @@
+/**
+ * PATCH /api/patient/v1/documents/[packetId]/sections/[sectionKey]
+ */
+import { requirePatientGatewayContext } from "@/src/lib/patientPortal/patientGatewayGate.server";
+import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGatewayAudit.server";
+import {
+  mapPatientGatewayRouteError,
+  patientGatewayJsonDeny,
+  patientGatewayJsonOk,
+} from "@/src/lib/patientPortal/patientGatewayHttp";
+import { savePatientDocumentSectionForGateway } from "@/src/lib/patientJourneyControl/patientGatewayDocuments.server";
+
+export const dynamic = "force-dynamic";
+
+function envReady(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function readJson(req: Request): Promise<Record<string, unknown>> {
+  try {
+    const text = await req.text();
+    if (!text.trim()) return {};
+    const parsed = JSON.parse(text) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function PATCH(
+  req: Request,
+  ctx: {
+    params:
+      | Promise<{ packetId: string; sectionKey: string }>
+      | { packetId: string; sectionKey: string };
+  }
+) {
+  try {
+    if (!envReady()) {
+      return patientGatewayJsonDeny({
+        ok: false,
+        code: "misconfigured",
+        status: 500,
+        message: "Server misconfigured.",
+      });
+    }
+    const gateCtx = await requirePatientGatewayContext(req);
+    if (!gateCtx.ok) return patientGatewayJsonDeny(gateCtx);
+    const params = await Promise.resolve(ctx.params);
+    const body = await readJson(req);
+    const formData =
+      body.formData && typeof body.formData === "object" && !Array.isArray(body.formData)
+        ? (body.formData as Record<string, unknown>)
+        : body;
+    const result = await savePatientDocumentSectionForGateway(
+      gateCtx.context,
+      params.packetId,
+      params.sectionKey,
+      formData
+    );
+    if (!result.ok) return patientGatewayJsonDeny(result);
+    return patientGatewayJsonOk(result);
+  } catch (e) {
+    return mapPatientGatewayRouteError(e);
+  }
+}

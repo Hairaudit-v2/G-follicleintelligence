@@ -9,6 +9,7 @@ import {
   patientJourneyProgressPercent,
 } from "@/src/lib/fiOs/staffUxPresentation";
 import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
+import type { ClinicJourneyReadinessSnapshot } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
 
 const TONE_CLASSES: Record<PatientJourneySnapshot["presentation"]["tone"], string> = {
   neutral: "border-slate-600/40 bg-slate-900/50 text-slate-300",
@@ -18,7 +19,14 @@ const TONE_CLASSES: Record<PatientJourneySnapshot["presentation"]["tone"], strin
   critical: "border-rose-500/35 bg-rose-950/40 text-rose-200",
 };
 
-export function PatientJourneyRibbon({ journey }: { journey: PatientJourneySnapshot }) {
+export function PatientJourneyRibbon({
+  journey,
+  readiness,
+}: {
+  journey: PatientJourneySnapshot;
+  /** P1 — same action/milestone SoR as patient Action Centre. */
+  readiness?: ClinicJourneyReadinessSnapshot | null;
+}) {
   const { presentation, blockers, nextBestAction, manuallyOverridden, derivedState, state } =
     journey;
   const pipelineIdx = patientJourneyPipelineIndex(state);
@@ -105,6 +113,71 @@ export function PatientJourneyRibbon({ journey }: { journey: PatientJourneySnaps
           ) : null}
         </div>
       </div>
+
+      {readiness ? (
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Outstanding patient actions
+            </p>
+            {readiness.outstandingPatientActions.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-500">None</p>
+            ) : (
+              <ul className="mt-2 space-y-1.5">
+                {readiness.outstandingPatientActions.map((a) => (
+                  <li key={a.actionId ?? a.title} className="text-sm text-slate-200">
+                    {a.title}
+                    {a.dueAt ? (
+                      <span className="ml-2 text-xs text-amber-300/80">
+                        due {new Date(a.dueAt).toLocaleDateString()}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Outstanding clinic actions
+            </p>
+            {readiness.outstandingClinicActions.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-500">None</p>
+            ) : (
+              <ul className="mt-2 space-y-1.5">
+                {readiness.outstandingClinicActions.map((a) => (
+                  <li key={a.actionId ?? a.title} className="text-sm text-slate-200">
+                    {a.title}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {readiness && readiness.milestones.length > 0 ? (
+        <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-cyan-200/90">
+            Journey milestones
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {readiness.milestones.map((m) => (
+              <li
+                key={m.key}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium",
+                  m.status === "completed"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                    : "border-white/[0.08] bg-black/20 text-slate-300"
+                )}
+              >
+                {m.patientLabel}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {blockers.length > 0 ? (
         <div className="mt-5 rounded-xl border border-amber-500/25 bg-amber-950/20 p-4">

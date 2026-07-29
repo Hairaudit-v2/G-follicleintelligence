@@ -17,6 +17,15 @@ export const PATIENT_GATEWAY_NOTIFICATION_EVENTS = [
   "invoice_due",
   "payment_received",
   "review_due",
+  "quote_delivered",
+  "quote_reminder",
+  "deposit_due",
+  "blood_request_issued",
+  "pathology_received_awaiting_review",
+  "pathology_cleared",
+  "document_required",
+  "document_rejected",
+  "action_overdue",
 ] as const;
 
 export type PatientGatewayNotificationEvent =
@@ -118,7 +127,24 @@ export function buildPrivacySafeNotificationPreview(
       return "You have an update from your clinic.";
     case "invoice_due":
     case "payment_received":
+    case "deposit_due":
       return "Your account has been updated.";
+    case "quote_delivered":
+      return "Your treatment quote is ready to review.";
+    case "quote_reminder":
+      return "You have a quote waiting for your review.";
+    case "blood_request_issued":
+      return "You have a lab request from your clinic.";
+    case "pathology_received_awaiting_review":
+      return "Your clinic has received your results and is reviewing them.";
+    case "pathology_cleared":
+      return "You have an update from your clinic.";
+    case "document_required":
+      return "You have documents to complete.";
+    case "document_rejected":
+      return "Your clinic needs an update on your documents.";
+    case "action_overdue":
+      return "You have an outstanding action to complete.";
   }
 }
 
@@ -134,9 +160,18 @@ export function notificationAndroidChannelId(
       return "appointments";
     case "images_due":
     case "review_due":
+    case "quote_delivered":
+    case "quote_reminder":
+    case "blood_request_issued":
+    case "pathology_received_awaiting_review":
+    case "pathology_cleared":
+    case "document_required":
+    case "document_rejected":
+    case "action_overdue":
       return "reminders";
     case "invoice_due":
     case "payment_received":
+    case "deposit_due":
       return "general";
   }
 }
@@ -162,9 +197,18 @@ export function decideNotificationDispatch(input: {
         return transactional || prefs.appointmentReminders;
       case "images_due":
       case "review_due":
+      case "quote_delivered":
+      case "quote_reminder":
+      case "blood_request_issued":
+      case "pathology_received_awaiting_review":
+      case "pathology_cleared":
+      case "document_required":
+      case "document_rejected":
+      case "action_overdue":
         return transactional || prefs.journeyReminders;
       case "invoice_due":
       case "payment_received":
+      case "deposit_due":
         return transactional || prefs.billingNotifications;
     }
   })();

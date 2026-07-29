@@ -34,6 +34,10 @@ export type PatientGatewayNextActionType =
   | "upload_images"
   | "request_review"
   | "await_clinic"
+  | "review_quote"
+  | "pay_deposit"
+  | "complete_blood_tests"
+  | "sign_document"
   | "none";
 
 export type PatientGatewayNextAction = {
@@ -41,6 +45,21 @@ export type PatientGatewayNextAction = {
   label: string;
   dueAt: string | null;
   actionKey: string;
+  actionId?: string;
+  deepLinkKey?: string;
+  resourceId?: string;
+};
+
+export type PatientGatewayMilestone = {
+  key: string;
+  status: string;
+  responsibleRole: string;
+  dueAt: string | null;
+  completedAt: string | null;
+  patientLabel: string;
+  linkedResourceType: string | null;
+  linkedResourceId: string | null;
+  primaryActionId: string | null;
 };
 
 export type PatientGatewayJourneyResponse = {
@@ -53,6 +72,7 @@ export type PatientGatewayJourneyResponse = {
   };
   steps: PatientGatewayJourneyStep[];
   nextAction: PatientGatewayNextAction;
+  milestones: PatientGatewayMilestone[];
 };
 
 export type PatientGatewayJourneyAppointmentHint = {
@@ -254,6 +274,8 @@ export function buildPatientGatewayJourneyResponse(input: {
   signals: PatientJourneySignals;
   upcomingAppointments: readonly PatientGatewayJourneyAppointmentHint[];
   nowIso: string;
+  milestones?: PatientGatewayMilestone[];
+  primaryActionOverride?: PatientGatewayNextAction;
 }): PatientGatewayJourneyResponse {
   const stage = mapFiJourneyStateToPatientStage(input.state);
   const steps = buildPatientGatewayJourneySteps(stage);
@@ -267,30 +289,48 @@ export function buildPatientGatewayJourneyResponse(input: {
       totalSteps: PATIENT_GATEWAY_JOURNEY_STAGES.length,
     },
     steps,
-    nextAction: derivePatientGatewayNextAction({
-      state: input.state,
-      signals: input.signals,
-      upcomingAppointments: input.upcomingAppointments,
-      nowIso: input.nowIso,
-    }),
+    nextAction:
+      input.primaryActionOverride ??
+      derivePatientGatewayNextAction({
+        state: input.state,
+        signals: input.signals,
+        upcomingAppointments: input.upcomingAppointments,
+        nowIso: input.nowIso,
+      }),
+    milestones: input.milestones ?? [],
   };
 }
 
-/** True when a payload only contains patient-safe journey keys (test helper). */
+/** True when a payload exposes staff/internal workflow fields (test helper). */
 export function journeyResponseExposesInternalWorkflow(payload: Record<string, unknown>): boolean {
-  const forbidden = [
+  const forbiddenKeys = [
     "derivedState",
     "manuallyOverridden",
     "blockers",
     "nextBestAction",
     "href",
+    "internalNote",
+  ];
+  // Fragments only — do not forbid milestone keys quote_sent / deposit_paid.
+  const forbiddenFragments = [
     "fi-admin",
     "unpaid_deposit",
     "missing_consent",
-    "quote_sent",
-    "deposit_paid",
     "pre_op_incomplete",
   ];
+
+  function hasForbiddenKey(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    if (Array.isArray(value)) return value.some(hasForbiddenKey);
+    const obj = value as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      if (forbiddenKeys.includes(key)) return true;
+      if (hasForbiddenKey(obj[key])) return true;
+    }
+    return false;
+  }
+
+  if (hasForbiddenKey(payload)) return true;
   const serialized = JSON.stringify(payload);
-  return forbidden.some((k) => serialized.includes(k));
+  return forbiddenFragments.some((f) => serialized.includes(f));
 }

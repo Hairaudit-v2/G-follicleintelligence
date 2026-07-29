@@ -149,4 +149,10 @@ export type PatientGatewayAuditAction =
   | "patient_notification_token_invalidated"
   | "consent_read_success"
   | "consent_recorded"
-  | "consent_record_denied";
+  | "consent_record_denied"
+  | "actions_list_success"
+  | "actions_list_denied"
+  | "quote_accepted"
+  | "quote_declined"
+  | "document_signed"
+  | "pathology_read";

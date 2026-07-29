@@ -22,7 +22,10 @@ export type PatientGatewayAuditInput = {
     | "invoice"
     | "payment"
     | "message"
-    | "notification";
+    | "notification"
+    | "action"
+    | "quote"
+    | "pathology";
   resourceId?: string | null;
 };
 
