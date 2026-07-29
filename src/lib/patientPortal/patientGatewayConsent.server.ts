@@ -37,8 +37,7 @@ export const PATIENT_GATEWAY_CONSENT_TYPE = "progress_photography";
  * Empty / omitted body defaults to the current gateway version.
  */
 export const PATIENT_GATEWAY_CONSENT_VERSIONS = [PATIENT_GATEWAY_CONSENT_SOURCE] as const;
-export type PatientGatewayConsentVersion =
-  (typeof PATIENT_GATEWAY_CONSENT_VERSIONS)[number];
+export type PatientGatewayConsentVersion = (typeof PATIENT_GATEWAY_CONSENT_VERSIONS)[number];
 
 const ATTESTATION_FILENAME = "patient-app-consent.txt";
 /** text/plain is allowed on patient-images for consent attestation documents. */
@@ -61,8 +60,14 @@ function buildAttestationBody(ctx: PatientGatewayContext, attestedAt: string): s
   ].join("\n");
 }
 
-export function parsePatientGatewayConsentRequest(body: unknown):
-  | { ok: true; consentType: typeof PATIENT_GATEWAY_CONSENT_TYPE; consentVersion: PatientGatewayConsentVersion }
+export function parsePatientGatewayConsentRequest(
+  body: unknown
+):
+  | {
+      ok: true;
+      consentType: typeof PATIENT_GATEWAY_CONSENT_TYPE;
+      consentVersion: PatientGatewayConsentVersion;
+    }
   | PatientGatewayDeny {
   if (body == null || body === "") {
     return {
@@ -98,21 +103,10 @@ export function parsePatientGatewayConsentRequest(body: unknown):
         : "";
 
   if (rawType && rawType !== PATIENT_GATEWAY_CONSENT_TYPE) {
-    return patientGatewayDeny(
-      "invalid_category",
-      400,
-      "Unsupported consent type."
-    );
+    return patientGatewayDeny("invalid_category", 400, "Unsupported consent type.");
   }
-  if (
-    rawVersion &&
-    !(PATIENT_GATEWAY_CONSENT_VERSIONS as readonly string[]).includes(rawVersion)
-  ) {
-    return patientGatewayDeny(
-      "invalid_category",
-      400,
-      "Unsupported consent version."
-    );
+  if (rawVersion && !(PATIENT_GATEWAY_CONSENT_VERSIONS as readonly string[]).includes(rawVersion)) {
+    return patientGatewayDeny("invalid_category", 400, "Unsupported consent version.");
   }
 
   // Never trust client identity claims if present.
@@ -134,10 +128,7 @@ export function parsePatientGatewayConsentRequest(body: unknown):
 export type PatientGatewayConsentOptions = {
   writeAudit?: boolean;
   supabase?: SupabaseClient;
-  loadGateStatus?: (
-    tenantId: string,
-    patientId: string
-  ) => Promise<TrialConsentGateStatus>;
+  loadGateStatus?: (tenantId: string, patientId: string) => Promise<TrialConsentGateStatus>;
   recordAttestation?: (ctx: PatientGatewayContext) => Promise<{ documentId: string }>;
 };
 
@@ -252,11 +243,7 @@ export async function recordPatientGatewayConsent(
   const loadGate =
     options?.loadGateStatus ??
     ((tenantId: string, patientId: string) =>
-      loadTrialConsentGateStatus(
-        tenantId,
-        patientId,
-        options?.supabase ?? supabaseAdmin()
-      ));
+      loadTrialConsentGateStatus(tenantId, patientId, options?.supabase ?? supabaseAdmin()));
 
   const before = await loadGate(ctx.tenantId, ctx.patientId);
   const beforeStatus = buildPatientGatewayConsentStatus(before);

@@ -19,12 +19,12 @@ with:
 
 Affected:
 
-| Layer | Detail |
-| --- | --- |
-| Service | `src/lib/patientPortal/patientGatewayConsent.server.ts` (`defaultRecordAttestation`) |
-| Table | `fi_patient_documents` (canonical consent store — unchanged) |
-| Storage | `storage.buckets` id `patient-images` |
-| Migration | `20260729120001_fi_patient_images_consent_document_mime.sql` |
+| Layer     | Detail                                                                               |
+| --------- | ------------------------------------------------------------------------------------ |
+| Service   | `src/lib/patientPortal/patientGatewayConsent.server.ts` (`defaultRecordAttestation`) |
+| Table     | `fi_patient_documents` (canonical consent store — unchanged)                         |
+| Storage   | `storage.buckets` id `patient-images`                                                |
+| Migration | `20260729120001_fi_patient_images_consent_document_mime.sql`                         |
 
 ## Fix
 
@@ -39,10 +39,10 @@ No client bypass. No second consent store. No demo-only controller branch.
 
 ## Migration status
 
-| Environment | Status |
-| --- | --- |
+| Environment                                  | Status                                                                                              |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | Production Supabase (`iqqvzgxoimxchhcnbzxl`) | Applied via MCP `apply_migration` `fi_patient_images_consent_document_mime` at 2026-07-29T09:26:33Z |
-| Repo migration file | `supabase/migrations/20260729120001_fi_patient_images_consent_document_mime.sql` |
+| Repo migration file                          | `supabase/migrations/20260729120001_fi_patient_images_consent_document_mime.sql`                    |
 
 ## Production verification (synthetic demo patient)
 
@@ -53,11 +53,11 @@ Tenant id: `c2615b95-b707-4485-aa5f-be8f78ec868a`
 
 After MIME migration (before code deploy):
 
-| Step | Result |
-| --- | --- |
-| GET consent | `200` `{ required: true, satisfied: false }` |
-| POST consent (first) | `200` `{ required: true, satisfied: true }` |
-| POST consent (repeat) | `200` idempotent |
+| Step                   | Result                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET consent            | `200` `{ required: true, satisfied: false }`                                                   |
+| POST consent (first)   | `200` `{ required: true, satisfied: true }`                                                    |
+| POST consent (repeat)  | `200` idempotent                                                                               |
 | `fi_patient_documents` | row `72283978-0b4f-487f-abb9-c9f0684bc8db`, `document_type=consent`, `content_type=text/plain` |
 
 Artifact: `.artifacts/repro-consent-500-result.json`
@@ -75,14 +75,21 @@ Requires code deploy (not migration-only).
 
 ## Final production verification
 
-| Check | Result |
-| --- | --- |
-| FiOS branch | `fix/fi-patient-app-2h1b-consent-write` (`e423ab12`, `0c2fc80e`) pushed |
-| Production deploy | `dpl_59CSPczA7NFGwf4AQ2u3Be3QYUDA` → `https://follicleintelligence.ai` |
-| `npm run test:authenticated-acceptance` | **PASS** |
-| consent | already satisfied / POST path proven earlier |
-| upload-intent | 200 |
-| signed PUT | 200 to `…supabase.co/storage/v1/object/upload/sign/patient-images/…` |
-| images/complete | 200 |
-| journey reload after upload | 200 |
+| Check                                   | Result                                                                       |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| FiOS branch                             | `fix/fi-patient-app-2h1b-consent-write` (`e423ab12`, `0c2fc80e`, `8418c27b`) |
+| PR                                      | https://github.com/Hairaudit-v2/G-follicleintelligence/pull/6                |
+| Production deploy                       | `dpl_59CSPczA7NFGwf4AQ2u3Be3QYUDA` → `https://follicleintelligence.ai`       |
+| `npm run test:authenticated-acceptance` | **PASS**                                                                     |
+| consent                                 | already satisfied / POST path proven earlier                                 |
+| upload-intent                           | 200                                                                          |
+| signed PUT                              | 200 to `…supabase.co/storage/v1/object/upload/sign/patient-images/…`         |
+| images/complete                         | 200                                                                          |
+| journey reload after upload             | 200                                                                          |
 
+## Milestone close-out
+
+**FI-PATIENT-APP-2H.1 — GREEN WITH DOCUMENTED LIMITATION**
+
+Limitation: live Stripe checkout not exercised because the synthetic patient had
+no outstanding invoice.
