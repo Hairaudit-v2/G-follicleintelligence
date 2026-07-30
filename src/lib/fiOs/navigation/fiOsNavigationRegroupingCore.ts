@@ -75,6 +75,7 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   "reception-board": "FRONT_DESK",
   "reception-board-command": "FRONT_DESK",
   "tomorrow-board": "FRONT_DESK",
+  "pilot-control": "FRONT_DESK",
   patients: "PATIENTS",
   "patient-twin": "PATIENTS",
   crm: "PIPELINE",

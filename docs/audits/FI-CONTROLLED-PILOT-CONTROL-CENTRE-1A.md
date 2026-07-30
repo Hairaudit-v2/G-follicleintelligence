@@ -2,14 +2,15 @@
 
 **Programme:** Controlled Pilot Control Centre — Evolved Hair Restoration  
 **Phase:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A`  
-**Current stage:** **1A.4 — Read-Only Pilot Control APIs**  
+**Current stage:** **1A.5 — Control Centre User Interface**  
 **Date:** 2026-07-30  
 **Tenant (production programme seed):** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
-**Phase verdict (1A overall):** **AMBER** — APIs delivered; Control Centre UI and live acceptance not yet complete  
+**Phase verdict (1A overall):** **AMBER** — UI delivered on 1A.4 APIs; full Control Centre remains limited (empty live cohort, approximate readiness, migrations governance)  
 **1A.1 stage verdict:** **GREEN** — cohort SoR + readiness/blocker/health contracts + synthetic proofs landed  
 **1A.2 stage verdict:** **GREEN** — read-only readiness engine with provenance, stage map, adapters, and 46-scenario proofs  
 **1A.3 stage verdict:** **GREEN** — derived blocker/ownership/escalation engine with persistence, projections, and 56-scenario proofs  
-**1A.4 stage verdict:** **GREEN** — authenticated, tenant-isolated, role-sensitive read-only APIs with contracts + acceptance tests 
+**1A.4 stage verdict:** **GREEN** — authenticated, tenant-isolated, role-sensitive read-only APIs with contracts + acceptance tests  
+**1A.5 stage verdict:** **GREEN WITH LIMITATIONS** — Control Centre UI consumes only 1A.4 APIs; empty-cohort honesty + role chrome + architecture proofs landed; live role-matrix E2E and applied remote migrations remain governance gates 
 
 ---
 
@@ -23,7 +24,9 @@ This phase builds a **read-only operational command centre** over existing FI ca
 
 **1A.3 converts readiness failures into actionable, deduplicated, aged operational blockers** with ownership, severity, escalation, and pilot-pause recommendations.
 
-**1A.4 exposes authenticated, tenant-isolated, role-sensitive read-only HTTP APIs** that consume 1A.1–1A.3 engines without reimplementing readiness, severity, ownership, escalation, or health rules. The Control Centre remains **AMBER** until the UI (1A.5) and full live acceptance land.
+**1A.4 exposes authenticated, tenant-isolated, role-sensitive read-only HTTP APIs** that consume 1A.1–1A.3 engines without reimplementing readiness, severity, ownership, escalation, or health rules.
+
+**1A.5 delivers the authenticated, role-sensitive Pilot Control Centre UI** at `/fi-admin/[tenantId]/pilot-control` (alias `/admin/pilot-control`), consuming only approved 1A.4 contracts. The full Control Centre remains **AMBER** while the live cohort is empty, batch readiness is approximate, and remote migration apply evidence is incomplete.
 
 ---
 
@@ -31,9 +34,9 @@ This phase builds a **read-only operational command centre** over existing FI ca
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Control Centre UI (/admin/pilot-control)     [1A.5 — TBD] │
+│  Control Centre UI (/fi-admin/.../pilot-control) [1A.5]   │
 └───────────────────────────┬─────────────────────────────────┘
-                            │ read-only
+                            │ read-only (API-only)
 ┌───────────────────────────▼─────────────────────────────────┐
 │  Pilot Control APIs                         [1A.4 DONE]   │
 │  GET programmes | overview | patients | blockers |        │
@@ -746,7 +749,7 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 4. Some optional register filter query params are accepted but not fully applied pending indexed register materialisation.  
 5. Rate limits are process-local (not distributed).  
 6. Migrations for 1A.1/1A.3 must still be applied via governed workflow before live API use.  
-7. No Control Centre UI (1A.5).  
+7. Control Centre UI delivered in 1A.5 (see below).  
 
 ## Production impact
 
@@ -770,7 +773,124 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 | **Real patient pilot** | Not started | |
 | **Formal production** | **NO-GO** | |
 
-**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.5` — Control Centre User Interface consuming only approved 1A.4 contracts.
+**1A.4 recommendation (complete):** Proceeded to **1A.5 Control Centre User Interface**.
+
+---
+
+## 1A.5 — Control Centre User Interface
+
+### UI architecture
+
+- **Route:** `/fi-admin/[tenantId]/pilot-control` (+ optional `/[programmeId]`); alias `/admin/pilot-control` → `/fi-admin`.
+- **Components:** `src/components/pilotControl/*` (page, header, health banner, metrics, attention queue, register, drawer, blockers, activity, technical, export, empty/partial/error).
+- **Hooks:** `src/hooks/pilotControl/*` — fetch-only against `/api/pilot-control/*`.
+- **Pure UI helpers:** `src/lib/pilotControl/ui/*` (formatters, filters, role columns, metrics, client, page access).
+- **Boundary:** No readiness/blocker engine imports in client UI; no DB clients in components; no mutation controls.
+
+### Route and access control
+
+- Server page: `assertFiTenantPortalAccess` + `resolvePilotControlPageAccess` requiring `pilot_control.overview.read`.
+- Unauthorised direct access → `notFound()` (hidden nav is not the only control).
+- Nav: Front desk workflow group → **Pilot Control Centre**, gated by `showPilotControlNav`.
+
+### API-only data boundary
+
+UI consumes only:
+
+`programmes | overview | patients | patients/:id | blockers | activity | health | export`
+
+### Programme header / health / metrics
+
+- Planned empty cohort → **AMBER** + “Insufficient live evidence”; never GREEN success.
+- Real invitations disabled surfaced.
+- Health banner text+icon for GREEN/AMBER/RED/insufficient evidence.
+- Metric cards from `/overview`; approximate readiness labelled; zero denominators → `—`.
+
+### Attention queue / register / drawer
+
+- Active blockers sorted critical → high → attention → oldest.
+- No dismiss/resolve/invite/message/pause controls.
+- Role-default columns (reception / clinical / finance / director / technical).
+- Register cells never fabricate Ready; unknown → “Not evaluated in register”.
+- Drawer read-only; clinical/financial/technical sections permission-gated; source links from API only.
+
+### Role-sensitive UI / empty / partial / refresh / export
+
+- Soft-hide export/pause chrome via frozen scopes; API remains authoritative.
+- Empty cohort copy honest; partial/stale notices; correlation IDs on errors.
+- Overview/blockers auto-refresh 60–120s; pause when document hidden.
+- Export dialog: type/format/row-limit confirm; activity requires date range; role notice.
+
+### Accessibility / responsive
+
+- Text + icon severity; table headers; drawer focus restore on Escape; keyboard-focus rings.
+- Desktop table; tablet reduced columns; mobile cards retain severity/owner/blocker.
+
+### Migration status
+
+- Page checks presence of `fi_pilot_programmes`, `fi_pilot_enrolments`, `fi_pilot_control_events`, `fi_pilot_blockers`.
+- Does **not** auto-apply migrations. Local migrations exist (`202611041001`, `202611041002`); remote apply remains governed.
+
+### Test evidence
+
+```bash
+node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs --test \
+  src/lib/pilotControl/pilotControlContracts.test.ts \
+  src/lib/pilotControl/readiness/pilotReadinessEngine.test.ts \
+  src/lib/pilotControl/blockers/pilotBlockerEngine.test.ts \
+  src/lib/pilotControl/api/pilotControlApi.test.ts \
+  src/lib/pilotControl/ui/pilotControlUi.test.ts
+```
+
+**Result:** **168** passing (146 prior + **22** UI acceptance proofs). Architecture guards confirm no engine/DB imports in UI/hooks.
+
+Playwright: `e2e/journeys/pilot-control-centre.spec.ts` — unauthenticated route/API denial + alias redirect.
+
+### E2E evidence
+
+| Journey | Status |
+|---------|--------|
+| Unauthenticated page/API denial | Covered (Playwright) |
+| Director empty-cohort AMBER / invites disabled | Covered in pure UI proofs + API empty-cohort proofs |
+| Role column / pause / export gating | Covered in pure UI permission proofs |
+| Live authenticated role matrix (reception/clinical/finance/technical) against deployed tenant | **Partial** — deferred to governed live acceptance |
+
+### Screenshots
+
+Deferred to live authenticated deploy (empty planned programme). Capture checklist: header AMBER, health insufficient evidence, empty register, attention queue empty, export hidden for reception.
+
+### Known limitations (1A.5)
+
+1. Empty live cohort — insufficient evidence is correct, not a failure of the UI.
+2. Overview/register readiness still blocker-derived / unknown until 1A.6 batch aggregation.
+3. Remote migrations must be applied via governed workflow before production use.
+4. Full authenticated multi-role Playwright matrix not yet run against production credentials.
+5. Screenshots pending live session capture.
+
+### Production impact (1A.5)
+
+| Area | Impact |
+|------|--------|
+| Clinical / financial / journey SoR | **None** |
+| Patient invites | **None** — disabled flag surfaced |
+| Stripe | **None** |
+| Schema | No new 1A.5 migration |
+| New UI route | Read-only; server permission gated |
+| Nav | Pilot Control Centre for authorised roles only |
+
+### Final verdict (1A.5)
+
+| Scope | Verdict | Rationale |
+|-------|---------|-----------|
+| **1A.1–1A.4** | **GREEN** | Unchanged |
+| **1A.5** | **GREEN WITH LIMITATIONS** | UI API-only, access gated, empty-cohort honest, tests + surface register |
+| **Full Pilot Control Centre** | **AMBER** | Empty cohort + approximate readiness + migration/live E2E gates |
+| **Real patient pilot** | Not started | |
+| **Formal production** | **NO-GO** | |
+
+**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6` — Pilot Health, Adoption Metrics and Operational Validation (canonical batch readiness; no real invites until governance gates pass).
+
+Machine-readable UI register: `docs/audits/fi-pilot-control-ui-surface-register.json`.
 
 ---
 
@@ -778,10 +898,10 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 
 1. **No live patient enrolments** — Evolved programme row is seeded; cohort remains empty until authorised staff approve synthetic/real enrolments via a later controlled process (real invites still out of scope).
 2. **Domain readiness engines wired in 1A.2** (pure + server loaders); some live fields remain limited as listed above.
-3. **Control Centre UI** not started (1A.5). APIs landed in 1A.4 with documented register-row readiness limitations.
+3. **Control Centre UI (1A.5)** landed; still limited by empty cohort and approximate readiness aggregation.
 4. **Adoption event writers** not hooked to journey/finance/notify pipelines (schema ready; API can read events).
 5. **`npm run check:migrations`** currently reports a pre-existing duplicate version `20260729120001` unrelated to this phase.
-6. Migration not applied to remote in this delivery step — apply via governed Supabase workflow before relying on live APIs.
+6. Migration not applied to remote in this delivery step — apply via governed Supabase workflow before relying on live APIs/UI.
 
 ---
 
@@ -795,8 +915,9 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 | Patient App invites | None (explicitly disabled in programme metadata) |
 | Stripe / generative ImagingOS | None |
 | Schema | Additive tables + RLS; Evolved programme seed only if tenant exists |
-| Existing screens | Unchanged |
+| Existing screens | Unchanged except optional Pilot Control nav for authorised roles |
 | New HTTP surface | Read-only `/api/pilot-control/*` (auth + tenant + role gated) |
+| New UI surface | `/fi-admin/[tenantId]/pilot-control` (API-only; server gated) |
 
 ---
 
@@ -804,11 +925,11 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 
 **Do not expand the live patient pilot** until:
 
-1. 1A.5 delivers the Control Centre UI on top of 1A.4 APIs  
+1. 1A.6 replaces blocker-derived readiness approximations with canonical batch aggregation  
 2. 1A.7 acceptance scenarios 1–20 pass against a synthetic (then authorised) cohort  
 3. Phase verdict reaches **GREEN** under the programme rule: authorised staff can identify every active pilot patient, readiness, actions, blockers, and relevant system errors from one screen  
 
-**1A.4 recommendation:** Proceed to **1A.5 Control Centre User Interface**. Keep programme status `planned`; do not invite real patients. UI must not query clinical/financial tables directly — only 1A.4 contracts.
+**1A.5 recommendation:** Proceed to **1A.6**. Keep programme status `planned`; do not invite real patients. Stripe remains disabled.
 
 ---
 
@@ -820,9 +941,9 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 | 1A.2 Readiness engine | **DONE** |
 | 1A.3 Blocker and escalation engine | **DONE** |
 | 1A.4 Read-only APIs | **DONE** |
-| 1A.5 Control Centre UI | Not started |
+| 1A.5 Control Centre UI | **DONE** (GREEN WITH LIMITATIONS) |
 | 1A.6 Pilot health and adoption metrics | Health pure rules done; live metrics partial via API health route |
-| 1A.7 Validation and evidence | Partial (pure + readiness + blocker + API proofs); full live evidence later |
+| 1A.7 Validation and evidence | Partial (pure + readiness + blocker + API + UI proofs); full live evidence later |
 
 ---
 
@@ -834,6 +955,7 @@ Live HTTP auth/tenant proofs against a running deployment remain partially defer
 | **1A.2** | **GREEN** | Read-only readiness engine with provenance, stage-aware requirements, domain adapters, cohort pagination entrypoint, 46-scenario tests |
 | **1A.3** | **GREEN** | Derived blocker/ownership/escalation engine, `fi_pilot_blockers`, role projections, health inputs, 56-scenario proofs |
 | **1A.4** | **GREEN** | Authenticated tenant-isolated role-sensitive read-only APIs; contracts register; 39 API proofs; 107 prior tests retained |
-| **1A overall (Control Centre usable)** | **AMBER** | Staff still lack the UI command centre |
+| **1A.5** | **GREEN WITH LIMITATIONS** | API-only Control Centre UI; access gated; empty-cohort honesty; 168 tests; surface register |
+| **1A overall (Control Centre usable)** | **AMBER** | UI exists but live cohort empty; readiness still approximate; migrations/live E2E incomplete |
 
-**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.5` — Control Centre User Interface consuming only approved 1A.4 API contracts.
+**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6` — Pilot Health, Adoption Metrics and Operational Validation.

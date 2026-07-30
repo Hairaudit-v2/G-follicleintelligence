@@ -170,7 +170,8 @@ export function resolveFiOsPrimarySidebarItems(
   showSurgeryAdminSurfaces: boolean = false,
   showTeamAdminSurfaces: boolean = false,
   visibleTeamTabIds?: readonly FiOsTeamTabId[],
-  showSettingsAdminSurfaces: boolean = false
+  showSettingsAdminSurfaces: boolean = false,
+  showPilotControlNav: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -220,6 +221,19 @@ export function resolveFiOsPrimarySidebarItems(
       hint: "Today’s clinic board and tomorrow prep.",
       subItems: buildFrontDeskSidebarSubItems(b.split("/").filter(Boolean).pop() ?? ""),
     },
+    ...(showPilotControlNav
+      ? [
+          {
+            id: "pilot-control",
+            featureKey: "dashboard" as const,
+            label: "Pilot Control Centre",
+            shortLabel: "Pilot",
+            href: hrefFor(b, "pilot-control"),
+            disabled: false,
+            hint: "Controlled Pilot · Clinic Operations readiness, blockers, and expansion health.",
+          } satisfies FiOsPrimarySidebarItem,
+        ]
+      : []),
     {
       id: FI_OS_SURGERY_NAV_ID,
       featureKey: "surgery_pipeline",
@@ -468,6 +482,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     }
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
+    if (firstEarly === "pilot-control") return "pilot-control";
     if (firstEarly === "reception-board") return "reception-board-command";
     if (firstEarly === "surgery-os") {
       const secondEarly = restEarly.split("/")[1] ?? "";

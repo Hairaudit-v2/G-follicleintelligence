@@ -56,6 +56,7 @@ import {
   canViewTenantConfigurationHub,
   loadActiveTenantAdminProfileForSession,
 } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+import { resolvePilotControlPageAccess } from "@/src/lib/pilotControl/ui/pilotControlPageAccess.server";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
   brand_name: null,
@@ -228,6 +229,12 @@ export default async function TenantAdminLayout({
 
   const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
   const showProcedureDayNav = pinFloorMode ? false : readFiProcedureDayEnabled();
+  const showPilotControlNav = pinFloorMode
+    ? false
+    : (await resolvePilotControlPageAccess(tenantId).catch(() => ({
+        allowed: false as const,
+        reason: "forbidden" as const,
+      }))).allowed;
   const teamWorkspaceAccess = pinFloorMode
     ? null
     : await resolveTeamWorkspaceAccessForViewer(tenantId);
@@ -309,6 +316,7 @@ export default async function TenantAdminLayout({
         staffPinBreaksEnabled={timeClockPolicy?.breaksEnabled ?? false}
         navCollapseActive={navCollapseActive}
         showNavigationAdminSurfaces={showNavigationAdminSurfaces}
+        showPilotControlNav={showPilotControlNav}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (

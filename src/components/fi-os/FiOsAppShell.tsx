@@ -118,6 +118,8 @@ type FiOsAppShellProps = {
   navCollapseActive?: boolean;
   /** D6G-B: show D6 /intelligence admin links in Reports section of More drawer. */
   showNavigationAdminSurfaces?: boolean;
+  /** Controlled Pilot Control Centre — hidden unless overview.read permission. */
+  showPilotControlNav?: boolean;
   children: ReactNode;
 };
 
@@ -151,6 +153,7 @@ function FiOsAppShellBody({
   staffPinBreaksEnabled = false,
   navCollapseActive = false,
   showNavigationAdminSurfaces = false,
+  showPilotControlNav = false,
   children,
   navigationPendingEnabled = true,
 }: FiOsAppShellProps & { navigationPendingEnabled?: boolean }) {
@@ -197,7 +200,8 @@ function FiOsAppShellBody({
       showNavigationAdminSurfaces,
       showNavigationAdminSurfaces,
       visibleTeamTabIds,
-      showNavigationAdminSurfaces
+      showNavigationAdminSurfaces,
+      showPilotControlNav
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -212,6 +216,7 @@ function FiOsAppShellBody({
     showProcedureDayNav,
     showNavigationAdminSurfaces,
     visibleTeamTabIds,
+    showPilotControlNav,
     featureAccessMap,
   ]);
 

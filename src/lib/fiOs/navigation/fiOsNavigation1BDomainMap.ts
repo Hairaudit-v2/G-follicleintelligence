@@ -31,6 +31,7 @@ export const FI_OS_NAV_1B_DOMAIN_BY_ID: Record<string, FiOsNav1BMappingEntry> = 
   dashboard: { domain: "Today" },
   calendar: { domain: "Calendar" },
   "front-desk": { domain: "Front Desk", notes: "Consolidated front desk workspace" },
+  "pilot-control": { domain: "Front Desk", notes: "Controlled Pilot Control Centre (1A.5)" },
   "operations-centre": { domain: "Front Desk", notes: "Clinic flow operational board" },
   "reception-os": { domain: "Front Desk", notes: "Front desk reception workspace" },
   "reception-board": { domain: "Front Desk", notes: "Same-day reception board" },
