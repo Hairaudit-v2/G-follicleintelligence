@@ -16,7 +16,10 @@ import type { PilotBlockerCandidate, PilotBlockerOwnership, PilotEscalationState
 
 export type OwnershipInput = {
   candidate: PilotBlockerCandidate;
-  escalation?: Pick<PilotEscalationState, "escalated" | "level" | "escalationOwnerType">;
+  escalation?: Pick<
+    PilotEscalationState,
+    "escalated" | "level" | "escalationOwnerType" | "escalationReason"
+  >;
   /** Prefer escalation owner when true. */
   preferEscalationOwner?: boolean;
 };

@@ -42,9 +42,11 @@ export type SyntheticPilotEnrolment = {
 const NOW = "2026-07-30T02:00:00.000Z";
 
 function enrolment(
-  partial: Omit<SyntheticPilotEnrolment, "pilotProgrammeKey" | "pilotCohort" | "programmeId"> & {
-    programmeId?: string;
-  }
+  partial: Partial<SyntheticPilotEnrolment> &
+    Pick<
+      SyntheticPilotEnrolment,
+      "id" | "tenantId" | "patientId" | "displayName" | "enrolmentStatus"
+    >
 ): SyntheticPilotEnrolment {
   return {
     programmeId: partial.programmeId ?? PILOT_SYNTHETIC_PROGRAMME_ID,

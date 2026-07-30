@@ -275,7 +275,7 @@ export async function resolvePilotControlRequestContext(
   await tryResolveFiUserIdForTenant(tenantId, args.request).catch(() => null);
 
   let programmeId = "";
-  let programmeKey = EVOLVED_CONTROLLED_PILOT_PROGRAMME_KEY;
+  let programmeKey: string = EVOLVED_CONTROLLED_PILOT_PROGRAMME_KEY;
 
   if (args.requireProgramme !== false && args.programmeIdOrKey) {
     const programme = await loadPilotProgrammeByIdOrKey({

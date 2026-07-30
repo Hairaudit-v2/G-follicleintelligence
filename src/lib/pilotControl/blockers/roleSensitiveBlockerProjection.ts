@@ -98,16 +98,17 @@ export function projectBlockerForRole(
   }
 
   // Technical role: hide clinical/financial content
-  if (role === "technical") {
-    if (blocker.dimension === "clinical" || blocker.dimension === "financial" || blocker.dimension === "patient") {
-      if (blocker.dimension !== "technical" && blocker.dimension !== "identity") {
-        redacted = true;
-        summary = "Operational blocker (clinical/financial detail withheld).";
-        provenance = redactProvenance(provenance, false);
-        sourceRecordId = undefined;
-        patientSafeSummary = undefined;
-      }
-    }
+  if (
+    role === "technical" &&
+    (blocker.dimension === "clinical" ||
+      blocker.dimension === "financial" ||
+      blocker.dimension === "patient")
+  ) {
+    redacted = true;
+    summary = "Operational blocker (clinical/financial detail withheld).";
+    provenance = redactProvenance(provenance, false);
+    sourceRecordId = undefined;
+    patientSafeSummary = undefined;
   }
 
   // Finance: hide unnecessary clinical
