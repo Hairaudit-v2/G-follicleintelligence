@@ -38,8 +38,10 @@ import {
   assertBrowserBackWorks,
   assertCanonicalWorkspaceUrl,
   assertNoFrameworkErrors,
-  HUBSPOT_EXPECTED,
+  HUBSPOT_WEBHOOK_QUEUE_COUNTS,
   hubspotCanonicalPath,
+  hubspotLabelThenCount,
+  hubspotMetricCount,
   hubspotLegacyImportsPath,
   hubspotLegacyOnboardingPath,
   hubspotTenantId,
@@ -168,24 +170,18 @@ test.describe("FI HubSpot authenticated production smoke @hubspot-production-smo
     try {
       await gotoHubspot(page, hubspotCanonicalPath("overview"));
       await expect(page.getByText(/Credentials verified/i)).toBeVisible();
-      await expect(page.getByText(new RegExp(`${HUBSPOT_EXPECTED.contacts}\\s+contacts`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`${HUBSPOT_EXPECTED.deals}\\s+deals`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`companies\\s+${HUBSPOT_EXPECTED.companies}`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`tickets\\s+${HUBSPOT_EXPECTED.tickets}`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`owners\\s+${HUBSPOT_EXPECTED.owners}`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`calls\\s+${HUBSPOT_EXPECTED.calls}`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`tasks\\s+${HUBSPOT_EXPECTED.tasks}`, "i"))).toBeVisible();
-      await expect(page.getByText(new RegExp(`meetings\\s+${HUBSPOT_EXPECTED.meetings}`, "i"))).toBeVisible();
+      // Live inventory drifts — assert metric rows render, not frozen snapshot totals.
+      await expect(page.getByText(hubspotMetricCount("contacts"))).toBeVisible();
+      await expect(page.getByText(hubspotMetricCount("deals"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("companies"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("tickets"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("owners"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("calls"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("tasks"))).toBeVisible();
+      await expect(page.getByText(hubspotLabelThenCount("meetings"))).toBeVisible();
 
       await expect(page.getByRole("heading", { name: /Webhook queue/i })).toBeVisible();
-      await expect(
-        page.getByText(
-          new RegExp(
-            `${HUBSPOT_EXPECTED.webhookPending}\\s+pending\\s*·\\s*${HUBSPOT_EXPECTED.webhookRetrying}\\s+retrying\\s*·\\s*${HUBSPOT_EXPECTED.webhookFailed}\\s+failed`,
-            "i",
-          ),
-        ),
-      ).toBeVisible();
+      await expect(page.getByText(HUBSPOT_WEBHOOK_QUEUE_COUNTS)).toBeVisible();
 
       await expect(page.getByText(/Staged only/i)).toBeVisible();
       await expectNoMutationControls(page);
@@ -272,14 +268,7 @@ test.describe("FI HubSpot authenticated production smoke @hubspot-production-smo
     try {
       await gotoHubspot(page, hubspotCanonicalPath("activity-webhooks"));
       assertCanonicalWorkspaceUrl(page, "activity-webhooks");
-      await expect(
-        page.getByText(
-          new RegExp(
-            `${HUBSPOT_EXPECTED.webhookPending}\\s+pending\\s*·\\s*${HUBSPOT_EXPECTED.webhookRetrying}\\s+retrying\\s*·\\s*${HUBSPOT_EXPECTED.webhookFailed}\\s+failed`,
-            "i",
-          ),
-        ),
-      ).toBeVisible();
+      await expect(page.getByText(HUBSPOT_WEBHOOK_QUEUE_COUNTS)).toBeVisible();
       await expect(page.getByText(/raw (event )?payload|message body/i)).toHaveCount(0);
       await capturePrivacySafeHubspotShot(page, "activity-webhooks", {
         cardTitles: ["Queue health", "Route & signature"],
@@ -413,15 +402,20 @@ test.describe("FI HubSpot authenticated production smoke @hubspot-production-smo
       await gotoHubspot(page, isolatedPath);
       const finalUrl = page.url();
       const body = await page.locator("body").innerText();
-      const showsEvolvedTotals =
-        body.includes(HUBSPOT_EXPECTED.contacts) && body.includes(HUBSPOT_EXPECTED.deals);
+      // Must not render a live connected inventory for the invalid tenant UUID.
+      const showsConnectedInventory =
+        /Credentials verified/i.test(body) &&
+        /\d{1,3}(?:,\d{3})*\s+contacts/i.test(body) &&
+        /\d{1,3}(?:,\d{3})*\s+deals/i.test(body);
       const denied =
         /\/follicle-intelligence\/login/.test(finalUrl) ||
         /404|not found|Could not load this workspace|Access denied|Forbidden/i.test(body) ||
         !finalUrl.includes(`/fi-admin/${INVALID_TENANT_ID}/settings/integrations/hubspot`) ||
         !(await page.getByRole("heading", { name: /HubSpot management/i }).count());
 
-      expect(showsEvolvedTotals, "Must not expose Evolved HubSpot totals for invalid tenant").toBe(false);
+      expect(showsConnectedInventory, "Must not expose live HubSpot inventory for invalid tenant").toBe(
+        false,
+      );
       expect(denied, `Expected denial/redirect for invalid tenant (landed ${finalUrl.split("?")[0]})`).toBe(
         true,
       );

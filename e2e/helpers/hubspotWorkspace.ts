@@ -4,6 +4,10 @@ import { e2eTenantId } from "../fixtures/baseUrl";
 
 export const EVOLVED_HUBSPOT_TENANT_ID = "c2615b95-b707-4485-aa5f-be8f78ec868a";
 
+/**
+ * Historical snapshot only (do not assert equality — live inventory drifts).
+ * Prefer {@link hubspotMetricCount} / {@link HUBSPOT_WEBHOOK_QUEUE_COUNTS} in smoke.
+ */
 export const HUBSPOT_EXPECTED = {
   contacts: "4,750",
   deals: "4,958",
@@ -17,6 +21,22 @@ export const HUBSPOT_EXPECTED = {
   webhookRetrying: "20",
   webhookFailed: "2",
 } as const;
+
+/** Match live totals like `4,750 contacts` or `4750 contacts` (count may grow). */
+export function hubspotMetricCount(unit: string): RegExp {
+  const u = unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(String.raw`\d{1,3}(?:,\d{3})*\s+${u}`, "i");
+}
+
+/** Match live labels like `companies 653` (label then count). */
+export function hubspotLabelThenCount(label: string): RegExp {
+  const l = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(String.raw`${l}\s+\d{1,3}(?:,\d{3})*`, "i");
+}
+
+/** Webhook queue summary: `N pending · M retrying · K failed` (any non-negative counts). */
+export const HUBSPOT_WEBHOOK_QUEUE_COUNTS =
+  /\d{1,3}(?:,\d{3})*\s+pending\s*·\s*\d{1,3}(?:,\d{3})*\s+retrying\s*·\s*\d{1,3}(?:,\d{3})*\s+failed/i;
 
 export const VALID_BATCH_ID = "11111111-1111-4111-8111-111111111111";
 export const INVALID_BATCH_ID = "not-a-uuid";
