@@ -81,9 +81,12 @@ async function loadMembershipSignals(
   const fiUserId = String((fiUser as { id: string }).id);
   const fiUserRole = String((fiUser as { role: string | null }).role ?? "member");
 
+  // Live Evolved `fi_staff` has no clinic FK column today — do not select
+  // `primary_clinic_id` (PostgREST errors and previously wiped staffRole →
+  // false PILOT_CONTROL_FORBIDDEN for owner/manager/reception/clinical).
   const { data: staffRows, error: staffErr } = await supabase
     .from("fi_staff")
-    .select("staff_role, staff_metadata, primary_clinic_id, is_active")
+    .select("staff_role, staff_metadata, is_active")
     .eq("tenant_id", tenantId)
     .eq("fi_user_id", fiUserId)
     .eq("is_active", true);
@@ -95,7 +98,6 @@ async function loadMembershipSignals(
   const rows = (staffRows ?? []) as Array<{
     staff_role: string | null;
     staff_metadata: unknown;
-    primary_clinic_id: string | null;
   }>;
 
   if (rows.length > 1) {
@@ -114,7 +116,7 @@ async function loadMembershipSignals(
     fiUserId,
     fiUserRole,
     staffRole: staff?.staff_role ?? null,
-    clinicId: staff?.primary_clinic_id ? String(staff.primary_clinic_id) : undefined,
+    clinicId: undefined,
     explicitPilotRole:
       typeof meta.pilot_control_role === "string" ? meta.pilot_control_role : null,
   };
