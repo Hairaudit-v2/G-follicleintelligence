@@ -9,6 +9,7 @@ import {
   rankSuggestedSlots,
 } from "../src/lib/calendar/smart-scheduling/smartSchedulingCore";
 import {
+  buildSchedulingPrepRiskRow,
   mergeBookingMetadataWithSchedulingPrep,
   SCHEDULING_PREP_METADATA_KEY,
 } from "../src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
@@ -132,5 +133,20 @@ describe("Smart Scheduling Assistant", () => {
     assert.equal(prep.version, 1);
     assert.ok(prep.items.length >= 2);
     assert.ok(prep.items.every((i) => i.completed === false));
+  });
+
+  it("buildSchedulingPrepRiskRow surfaces open items for the day board", () => {
+    const meta = mergeBookingMetadataWithSchedulingPrep({}, { bookingType: "surgery" });
+    const row = buildSchedulingPrepRiskRow({
+      bookingId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      patientName: "Alex",
+      startAtIso: "2026-07-17T10:00:00.000Z",
+      metadata: meta,
+      appointmentHref: "/fi-admin/t/appointments?bookingId=x",
+    });
+    assert.ok(row);
+    assert.ok(row!.openCount >= 1);
+    assert.match(row!.summary, /Alex/);
+    assert.equal(row!.href?.includes("bookingId"), true);
   });
 });

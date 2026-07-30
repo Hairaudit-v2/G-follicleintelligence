@@ -22,6 +22,7 @@ import type {
   FrontDeskAttentionItem,
   FrontDeskCardActionId,
   FrontDeskMutationMode,
+  FrontDeskPrepRiskItem,
   FrontDeskSeverity,
   FrontDeskTodayCard,
   FrontDeskTodayGlobalAction,
@@ -166,6 +167,91 @@ export function FrontDeskTodaySummaryTiles(props: { summary: FrontDeskTodaySumma
         </div>
       ))}
     </div>
+  );
+}
+
+// --- prep risk strip (Smart Scheduling) ---------------------------------------
+
+/**
+ * Compact strip for today's open scheduling_prep checklist items.
+ * Non-intrusive: empty when no bookings carry prep metadata yet.
+ */
+export function FrontDeskPrepRiskStrip(props: {
+  items: FrontDeskPrepRiskItem[];
+  loadTier: "shell" | "full";
+  onLocateCard: (bookingId: string) => void;
+}) {
+  if (props.loadTier === "shell") return null;
+  if (props.items.length === 0) {
+    return (
+      <section
+        aria-label="Prep checklist"
+        className="rounded-2xl border border-white/[0.06] bg-[#0f1729]/40 px-4 py-3"
+        data-testid="front-desk-prep-risk-strip"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-200">Prep for today</h2>
+          <p className="text-[11px] text-slate-500">Smart Scheduling</p>
+        </div>
+        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+          No open prep checklists on today’s bookings yet. New appointments save gentle prep
+          reminders (photos, consent, forms) when you book.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-label={`Prep for today, ${props.items.length} bookings`}
+      className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-4 sm:px-5"
+      data-testid="front-desk-prep-risk-strip"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-50">Prep for today</h2>
+          <p className="mt-0.5 text-xs text-slate-400">
+            Operational checklist from booking — never clinical advice.
+          </p>
+        </div>
+        <p className="text-xs font-medium tabular-nums text-cyan-200/90">
+          {props.items.length} booking{props.items.length === 1 ? "" : "s"}
+        </p>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {props.items.slice(0, 8).map((item) => (
+          <li key={item.id}>
+            <button
+              type="button"
+              onClick={() => props.onLocateCard(item.bookingId)}
+              className={cn(
+                "flex w-full min-h-11 flex-col gap-0.5 rounded-xl border px-3 py-2.5 text-left transition hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
+                item.severity === "action_needed"
+                  ? "border-amber-400/30 bg-amber-950/25"
+                  : "border-white/[0.08] bg-white/[0.03]"
+              )}
+              data-testid={`front-desk-prep-risk-${item.bookingId}`}
+            >
+              <span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-100">
+                <span className="tabular-nums text-cyan-200/90">{item.startTimeLabel}</span>
+                <span>{item.patientName}</span>
+                <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                  {item.openCount} open
+                </span>
+              </span>
+              <span className="text-[11px] leading-snug text-slate-400">
+                {item.topLabels.join(" · ")}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      {props.items.length > 8 ? (
+        <p className="mt-2 text-[11px] text-slate-500">
+          Showing 8 of {props.items.length}. Use Needs attention for the full list.
+        </p>
+      ) : null}
+    </section>
   );
 }
 

@@ -17,6 +17,7 @@ import {
   FrontDeskAttentionPanel,
   FrontDeskLaneBoard,
   FrontDeskLiveRegion,
+  FrontDeskPrepRiskStrip,
   FrontDeskSessionBanner,
   FrontDeskTerminalSection,
   FrontDeskTodayActionsBar,
@@ -181,6 +182,12 @@ export function FrontDeskTodayBoard(props: FrontDeskTodayBoardProps) {
       />
 
       <FrontDeskTodaySummaryTiles summary={presentation.summary} />
+
+      <FrontDeskPrepRiskStrip
+        items={presentation.prepRiskItems}
+        loadTier={presentation.loadTier}
+        onLocateCard={locateCard}
+      />
 
       <FrontDeskAttentionPanel
         items={presentation.attentionItems}

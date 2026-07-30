@@ -119,6 +119,22 @@ export type FrontDeskTodayGlobalAction = {
   href: string;
 };
 
+/** Prep checklist risk for today's board (from booking.metadata.scheduling_prep). */
+export type FrontDeskPrepRiskItem = {
+  id: string;
+  bookingId: string;
+  patientName: string;
+  patientId: string | null;
+  startAtIso: string;
+  startTimeLabel: string;
+  openCount: number;
+  attentionCount: number;
+  topLabels: string[];
+  severity: FrontDeskSeverity;
+  summary: string;
+  href: string | null;
+};
+
 export type FrontDeskTodayPresentation = {
   generatedAt: string;
   operationalDay: {
@@ -138,6 +154,11 @@ export type FrontDeskTodayPresentation = {
     visible: number;
     hidden: number;
   };
+  /**
+   * Smart Scheduling prep open items for today's active appointments.
+   * Empty when no bookings carry `metadata.scheduling_prep` yet.
+   */
+  prepRiskItems: FrontDeskPrepRiskItem[];
   summary: FrontDeskTodaySummary;
   actions: FrontDeskTodayGlobalAction[];
 };

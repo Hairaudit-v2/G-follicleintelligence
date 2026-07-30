@@ -21,12 +21,15 @@ import type {
 } from "@/src/lib/receptionBoard/receptionBoardTypes";
 import type { ReceptionBoardCard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
+import { buildSchedulingPrepRiskRow } from "@/src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
+
 import type {
   FrontDeskAttentionItem,
   FrontDeskCardActionId,
   FrontDeskCardBlocker,
   FrontDeskMutationMode,
   FrontDeskPaymentState,
+  FrontDeskPrepRiskItem,
   FrontDeskSeverity,
   FrontDeskTodayCard,
   FrontDeskTodayGlobalAction,
@@ -54,6 +57,8 @@ const ATTENTION_ALLOWED_KINDS = new Set([
   "incomplete_consultation",
   "missing_forms",
   "surgery_risk",
+  /** Smart Scheduling prep checklist still open on the booking. */
+  "scheduling_prep_open",
 ]);
 
 /** Kinds excluded from staff Today attention (pipeline / CRM / marketing). */
@@ -230,6 +235,72 @@ export function buildFrontDeskTodayPresentation(
     }
   }
 
+  // Smart Scheduling prep checklist risks (booking.metadata.scheduling_prep).
+  const prepRiskItems: FrontDeskPrepRiskItem[] = [];
+  if (loadTier === "full") {
+    for (const row of payload.receptionCards ?? []) {
+      if (!row?.id) continue;
+      const card = cardsByBookingId.get(row.id);
+      if (!card) continue;
+      // Skip terminal exceptions — prep is for active day flow.
+      if (
+        card.operationalState === "cancelled" ||
+        card.operationalState === "no_show" ||
+        card.operationalState === "completed"
+      ) {
+        continue;
+      }
+      const risk = buildSchedulingPrepRiskRow({
+        bookingId: row.id,
+        patientName: card.patient.displayName,
+        patientId: card.patient.patientId,
+        startAtIso: card.appointment.startAtIso,
+        metadata: row.metadata ?? {},
+        appointmentHref: card.links.appointment,
+      });
+      if (!risk) continue;
+
+      const fdSeverity: FrontDeskSeverity =
+        risk.severity === "attention" ? "action_needed" : "information";
+      const attentionItem: FrontDeskAttentionItem = {
+        id: `scheduling-prep-${risk.bookingId}`,
+        kind: "scheduling_prep_open",
+        title:
+          risk.openCount === 1
+            ? `Prep: ${risk.topLabels[0] ?? "Open item"}`
+            : `Prep: ${risk.openCount} open items`,
+        detail: risk.summary,
+        severity: fdSeverity,
+        href: risk.href,
+        bookingId: risk.bookingId,
+        patientId: risk.patientId,
+        priorityScore: risk.attentionCount > 0 ? 72 : 55,
+      };
+      attachBlockerToCard(card, attentionItem);
+      attentionCandidates.push(attentionItem);
+
+      prepRiskItems.push({
+        id: attentionItem.id,
+        bookingId: risk.bookingId,
+        patientName: risk.patientName,
+        patientId: risk.patientId,
+        startAtIso: risk.startAtIso,
+        startTimeLabel: card.appointment.startTimeLabel,
+        openCount: risk.openCount,
+        attentionCount: risk.attentionCount,
+        topLabels: risk.topLabels,
+        severity: fdSeverity,
+        summary: risk.summary,
+        href: risk.href,
+      });
+    }
+    prepRiskItems.sort((a, b) => {
+      const sev = SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity];
+      if (sev !== 0) return sev;
+      return a.startAtIso.localeCompare(b.startAtIso);
+    });
+  }
+
   // 8–11. Finalize blockers on each card.
   for (const card of cardsByBookingId.values()) {
     finalizeCardBlockers(card);
@@ -323,6 +394,7 @@ export function buildFrontDeskTodayPresentation(
       visible: visibleAttention.length,
       hidden: hiddenAttention,
     },
+    prepRiskItems,
     summary,
     actions,
   };
