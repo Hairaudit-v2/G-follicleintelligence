@@ -8,6 +8,9 @@ export const PATIENT_GATEWAY_DENY_CODES = [
   "unlinked",
   "ambiguous_mapping",
   "inactive_patient",
+  "pilot_paused",
+  "patient_deactivated",
+  "patient_withdrawn",
   "wrong_tenant",
   "ownership_denied",
   "staff_credential_rejected",
@@ -96,6 +99,11 @@ export type PatientGatewayAuditAction =
   | "wrong_tenant"
   | "ownership_denied"
   | "inactive_patient"
+  | "pilot_paused"
+  | "pilot_resumed"
+  | "patient_portal_deactivated"
+  | "patient_portal_reactivated"
+  | "patient_withdrawn"
   | "staff_credential_rejected"
   | "me_ok"
   | "images_list_success"

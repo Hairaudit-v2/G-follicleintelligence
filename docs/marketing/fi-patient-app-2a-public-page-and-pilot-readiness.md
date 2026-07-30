@@ -449,3 +449,13 @@ Record after commit in each repo. Placeholder until commits are created on reque
 - Public product page: acceptance criteria for public readiness are met.  
 - Controlled pilot: **not** READY FOR APPROVAL until §24 blockers clear.  
 - Real patients must **not** be invited under this milestone.
+
+---
+
+## 27. FI-PATIENT-APP-2B follow-on
+
+Canonical controlled-pilot approval packet:
+
+`docs/patient-app/fi-patient-app-2b-controlled-pilot-approval.md`
+
+2B closed product-control gaps (tenant pause, patient deactivation/withdrawal, push suppression, owner table, usability/a11y/support/metrics plans) but overall pilot verdict remains **AMBER** until clinic owner, human usability, device a11y, and native distribution proofs close. **No real patients invited.**

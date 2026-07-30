@@ -7,6 +7,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { normalizePatientStatus } from "@/src/lib/patients/patientPolicy";
 
 import { writePatientGatewayAudit } from "./patientGatewayAudit.server";
+import { assertPatientAppAccessAllowed } from "./patientAppPilotControls.server";
 import {
   assertClaimedPatientMatches,
   assertClaimedTenantMatches,
@@ -230,6 +231,41 @@ export async function requirePatientGatewayContext(
       tenantId,
     });
     return tenantClaimDeny;
+  }
+
+  let pilotDecision: Awaited<ReturnType<typeof assertPatientAppAccessAllowed>>;
+  try {
+    pilotDecision = await assertPatientAppAccessAllowed(
+      { tenantId, patientId, authUserId },
+      { supabase: client, writeAudit: false }
+    );
+  } catch {
+    audit({
+      action: "auth_denied",
+      outcome: "deny",
+      code: "misconfigured",
+      authUserId,
+      patientId,
+      tenantId,
+    });
+    return patientGatewayDeny("misconfigured", 500, "Could not resolve pilot access state.");
+  }
+
+  if (!pilotDecision.ok) {
+    audit({
+      action:
+        pilotDecision.code === "pilot_paused"
+          ? "pilot_paused"
+          : pilotDecision.code === "patient_withdrawn"
+            ? "patient_withdrawn"
+            : "patient_portal_deactivated",
+      outcome: "deny",
+      code: pilotDecision.code,
+      authUserId,
+      patientId,
+      tenantId,
+    });
+    return patientGatewayDeny(pilotDecision.code, 403, pilotDecision.message);
   }
 
   const clinicName = await loadClinicDisplayName(tenantId, client);

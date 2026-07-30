@@ -21,15 +21,26 @@ type PatientRow = {
 function createMockSupabase(input: {
   patients?: PatientRow[];
   tenantName?: string | null;
+  /** Tenant settings metadata.patient_app_pilot */
+  tenantSettingsMetadata?: Record<string, unknown>;
+  /** Patient metadata used for access state (keyed by patient id) */
+  patientMetadataById?: Record<string, Record<string, unknown>>;
 }) {
   return {
     from(table: string) {
-      const state: { limit?: number } = {};
+      const state: {
+        limit?: number;
+        eq?: Array<{ col: string; val: unknown }>;
+        selectCols?: string;
+      } = { eq: [] };
       const builder = {
-        select() {
+        select(cols?: string) {
+          state.selectCols = cols;
           return builder;
         },
-        eq() {
+        eq(col: string, val: unknown) {
+          state.eq = state.eq ?? [];
+          state.eq.push({ col, val });
           return builder;
         },
         limit(n: number) {
@@ -40,6 +51,23 @@ function createMockSupabase(input: {
           if (table === "fi_tenants") {
             return {
               data: input.tenantName != null ? { name: input.tenantName } : { name: "Demo Clinic" },
+              error: null,
+            };
+          }
+          if (table === "fi_tenant_settings") {
+            return {
+              data: { metadata: input.tenantSettingsMetadata ?? {} },
+              error: null,
+            };
+          }
+          if (table === "fi_patients" && state.selectCols?.includes("metadata")) {
+            const patientEq = (state.eq ?? []).find((e) => e.col === "id");
+            const id = patientEq ? String(patientEq.val) : PATIENT;
+            return {
+              data: {
+                metadata: input.patientMetadataById?.[id] ?? {},
+                portal_auth_user_id: AUTH,
+              },
               error: null,
             };
           }
@@ -269,5 +297,91 @@ describe("requirePatientGatewayContext fail-closed", () => {
     if (result.ok) return;
     assert.equal(result.code, "staff_credential_rejected");
     assert.equal(result.status, 403);
+  });
+
+  it("J. tenant pilot pause denies with safe message", async () => {
+    const result = await requirePatientGatewayContext(
+      bearerRequest("https://example.test/api/patient/v1/me"),
+      {
+        writeAudit: false,
+        resolveAuthUserIdForTests: async () => AUTH,
+        supabase: createMockSupabase({
+          patients: [
+            {
+              id: PATIENT,
+              tenant_id: TENANT,
+              person_id: PERSON,
+              patient_status: "active",
+              portal_auth_user_id: AUTH,
+            },
+          ],
+          tenantSettingsMetadata: {
+            patient_app_pilot: { status: "paused", reason: "safety_drill" },
+          },
+        }) as never,
+      }
+    );
+    assert.equal(result.ok, false);
+    if (result.ok) return;
+    assert.equal(result.code, "pilot_paused");
+    assert.equal(result.status, 403);
+    assert.match(result.message, /temporarily unavailable/i);
+  });
+
+  it("K. patient withdrawal denies and recovers after metadata clear in separate request", async () => {
+    const denied = await requirePatientGatewayContext(
+      bearerRequest("https://example.test/api/patient/v1/me"),
+      {
+        writeAudit: false,
+        resolveAuthUserIdForTests: async () => AUTH,
+        supabase: createMockSupabase({
+          patients: [
+            {
+              id: PATIENT,
+              tenant_id: TENANT,
+              person_id: PERSON,
+              patient_status: "active",
+              portal_auth_user_id: AUTH,
+            },
+          ],
+          patientMetadataById: {
+            [PATIENT]: {
+              patient_app_access: {
+                status: "withdrawn",
+                reason_category: "patient_request",
+              },
+            },
+          },
+        }) as never,
+      }
+    );
+    assert.equal(denied.ok, false);
+    if (denied.ok) return;
+    assert.equal(denied.code, "patient_withdrawn");
+
+    const recovered = await requirePatientGatewayContext(
+      bearerRequest("https://example.test/api/patient/v1/me"),
+      {
+        writeAudit: false,
+        resolveAuthUserIdForTests: async () => AUTH,
+        supabase: createMockSupabase({
+          patients: [
+            {
+              id: PATIENT,
+              tenant_id: TENANT,
+              person_id: PERSON,
+              patient_status: "active",
+              portal_auth_user_id: AUTH,
+            },
+          ],
+          patientMetadataById: {
+            [PATIENT]: {
+              patient_app_access: { status: "active" },
+            },
+          },
+        }) as never,
+      }
+    );
+    assert.equal(recovered.ok, true);
   });
 });

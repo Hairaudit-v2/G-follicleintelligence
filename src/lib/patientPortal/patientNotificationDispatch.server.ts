@@ -12,6 +12,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { sendExpoPushNotification } from "./adapters/expoPushAdapter.server";
 import { writePatientGatewayAudit } from "./patientGatewayAudit.server";
+import { shouldSuppressPatientAppPushForPatient } from "./patientAppPilotControls.server";
 import {
   buildNotificationDedupeKey,
   buildSafePushDataPayload,
@@ -141,6 +142,20 @@ export async function sendPatientNotification(
       resourceKind: "notification",
       resourceId: input.sourceEntity,
     });
+  }
+
+  if (
+    await shouldSuppressPatientAppPushForPatient(
+      { tenantId: input.tenantId, patientId: input.patientId },
+      { supabase, writeAudit: false }
+    )
+  ) {
+    return {
+      attempted: false,
+      sent: 0,
+      skippedReason: "pilot_or_access_suppressed",
+      dedupeKey,
+    };
   }
 
   const claim = await claimDedupe({
