@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import {
   getModulesByStatuses,
+  getOperationalOrPilotSummary,
   getPlatformProgressMetrics,
   getPlatformProgressSnapshot,
+  getPlatformStatusDistributionBars,
   PLATFORM_PROGRESS_CHANGELOG,
   PLATFORM_PROGRESS_MODULES,
   PLATFORM_PROGRESS_PAGE_CONTENT,
@@ -35,11 +37,21 @@ import {
 const c = PLATFORM_PROGRESS_PAGE_CONTENT;
 const snapshot = getPlatformProgressSnapshot(PLATFORM_PROGRESS_MODULES);
 const platformMetrics = getPlatformProgressMetrics();
+const statusDistributionBars = getPlatformStatusDistributionBars();
+const operationalOrPilotSummary = getOperationalOrPilotSummary();
 
 const OPERATIONAL_MODULES = getModulesByStatuses(["Deployed", "Operational Pilot"]);
 const ADVANCED_BUILD_MODULES = getModulesByStatuses(["Advanced Build"]);
 const IN_DEVELOPMENT_MODULES = getModulesByStatuses(["In Development"]);
 const RESEARCH_MODULES = getModulesByStatuses(["Research and Future Development"]);
+
+const STATUS_BAR_PATTERN: Record<PlatformProgressStatus, string> = {
+  Deployed: "bg-emerald-400/80",
+  "Operational Pilot": "bg-cyan-400/75",
+  "Advanced Build": "bg-amber-400/70",
+  "In Development": "bg-violet-400/65",
+  "Research and Future Development": "bg-white/35",
+};
 
 function ModuleStatusCard({
   module,
@@ -173,6 +185,46 @@ function StatusMetricsStrip() {
               </GlassCard>
             ))}
           </div>
+
+          <div className="mt-10 space-y-5" aria-label="Portfolio status distribution">
+            <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {operationalOrPilotSummary}
+            </p>
+            <ul className="list-none space-y-4 p-0">
+              {statusDistributionBars.map((bar, index) => (
+                <li key={bar.status}>
+                  <FadeIn delay={0.03 * index}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        <span className="font-mono tabular-nums text-foreground/95">{bar.count}</span>{" "}
+                        {bar.label}
+                      </p>
+                      <p className="font-mono text-xs tabular-nums text-muted-foreground">
+                        {bar.count} of {bar.total}
+                      </p>
+                    </div>
+                    <div
+                      className="mt-2 h-2.5 overflow-hidden rounded-full border border-white/[0.08] bg-black/35"
+                      role="meter"
+                      aria-valuemin={0}
+                      aria-valuemax={bar.total}
+                      aria-valuenow={bar.count}
+                      aria-label={bar.accessibleValue}
+                    >
+                      <div
+                        className={cn("h-full rounded-full", STATUS_BAR_PATTERN[bar.status])}
+                        style={{ width: `${Math.max(bar.widthFraction * 100, bar.count > 0 ? 4 : 0)}%` }}
+                      />
+                    </div>
+                    <p className="sr-only">{bar.accessibleValue}</p>
+                  </FadeIn>
+                </li>
+              ))}
+            </ul>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80">
+              Portfolio distribution by public status — not platform completion
+            </p>
+          </div>
         </FadeIn>
       </div>
     </section>
@@ -180,6 +232,7 @@ function StatusMetricsStrip() {
 }
 
 function VerifiedMilestones() {
+  const journey = c.journeyControlMilestone;
   const hubspot = c.hubspotMilestone;
 
   return (
@@ -196,11 +249,46 @@ function VerifiedMilestones() {
           description={c.milestones.intro}
         />
 
-        <div id={hubspot.id} className="mt-12 scroll-mt-28">
+        <div id={journey.id} className="mt-12 scroll-mt-28">
           <GlassCard variant="os" className="border-amber-400/15 !p-7 sm:!p-9">
             <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full border border-amber-400/25 bg-amber-950/30 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100/90">
                 Featured milestone
+              </span>
+              <time
+                dateTime={journey.date}
+                className="font-mono text-xs tabular-nums text-muted-foreground"
+              >
+                {journey.date}
+              </time>
+            </div>
+            <h3 className="mt-5 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {journey.heading}
+            </h3>
+            <p className="mt-4 max-w-3xl text-base leading-[1.75] text-muted-foreground sm:text-lg">
+              {journey.summary}
+            </p>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85 sm:text-base">
+              {journey.detail}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {journey.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/85"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </GlassCard>
+        </div>
+
+        <div id={hubspot.id} className="mt-6 scroll-mt-28">
+          <GlassCard variant="os" className="border-white/[0.08] !p-7 sm:!p-9">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-white/[0.12] bg-black/25 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/85">
+                Major milestone
               </span>
               <time
                 dateTime="2026-07"
@@ -308,6 +396,123 @@ function VerifiedMilestones() {
             ))}
           </ol>
         </div>
+      </FadeIn>
+    </Section>
+  );
+}
+
+function PatientAppUsabilitySection() {
+  const section = c.patientAppUsability;
+
+  return (
+    <Section
+      id={section.id}
+      className="scroll-mt-28 border-b border-border/40 bg-background py-20 sm:py-24 md:py-28"
+      aria-labelledby="patient-app-usability-heading"
+    >
+      <FadeIn>
+        <SectionHeading
+          id="patient-app-usability-heading"
+          eyebrow={section.eyebrow}
+          title={section.headline}
+          description={section.intro}
+        />
+        <p className="mt-8 max-w-3xl text-base leading-[1.75] text-foreground/88 sm:text-lg">
+          {section.positioning}
+        </p>
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <GlassCard className="border-white/[0.07] !p-6">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              PatientOS
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {section.distinction.patientOs}
+            </p>
+          </GlassCard>
+          <GlassCard className="border-amber-400/15 !p-6">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/75">
+              FI Patient App
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {section.distinction.patientApp}
+            </p>
+          </GlassCard>
+        </div>
+        <ol className="mt-12 grid list-none gap-5 p-0 md:grid-cols-2 xl:grid-cols-3">
+          {section.principles.map((principle, index) => (
+            <li key={principle.title}>
+              <FadeIn delay={0.03 * index}>
+                <GlassCard className="h-full border-white/[0.07] !p-6 sm:!p-7">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-200/55">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">
+                    {principle.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-[1.7] text-muted-foreground">{principle.body}</p>
+                  <ul className="mt-4 space-y-1.5 text-sm text-foreground/85">
+                    {principle.examples.map((example) => (
+                      <li key={example} className="flex gap-2">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber-300/70" aria-hidden />
+                        <span>{example}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </GlassCard>
+              </FadeIn>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-10 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+          {section.honestyNote}
+        </p>
+      </FadeIn>
+    </Section>
+  );
+}
+
+function PatientAppClinicBenefitsSection() {
+  const section = c.patientAppClinicBenefits;
+
+  return (
+    <Section
+      id={section.id}
+      className="scroll-mt-28 border-b border-border/40 bg-muted/[0.04] py-20 sm:py-24 md:py-28"
+      aria-labelledby="patient-app-clinic-benefits-heading"
+    >
+      <FadeIn>
+        <SectionHeading
+          id="patient-app-clinic-benefits-heading"
+          eyebrow={section.eyebrow}
+          title={section.headline}
+        />
+        <p className="mt-8 max-w-3xl text-base leading-[1.75] text-muted-foreground sm:text-lg">
+          {section.clinicOwnerValue}
+        </p>
+        <p className="mt-4 max-w-3xl text-base leading-[1.75] text-foreground/88 sm:text-lg">
+          {section.strategicValue}
+        </p>
+        <ul className="mt-12 grid list-none gap-5 p-0 md:grid-cols-2 xl:grid-cols-3">
+          {section.benefits.map((benefit, index) => (
+            <li key={benefit.title}>
+              <FadeIn delay={0.03 * index}>
+                <GlassCard className="h-full border-white/[0.07] !p-6 sm:!p-7">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">
+                      {benefit.title}
+                    </h3>
+                    {"future" in benefit && benefit.future ? (
+                      <span className="rounded-full border border-white/[0.1] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Future expansion
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-sm leading-[1.7] text-muted-foreground">{benefit.body}</p>
+                </GlassCard>
+              </FadeIn>
+            </li>
+          ))}
+        </ul>
       </FadeIn>
     </Section>
   );
@@ -524,6 +729,10 @@ export function PlatformProgressView() {
         intro={c.operationalSystems.intro}
         modules={OPERATIONAL_MODULES}
       />
+
+      <PatientAppUsabilitySection />
+
+      <PatientAppClinicBenefitsSection />
 
       {/* 3. Advanced build */}
       <ModuleSection

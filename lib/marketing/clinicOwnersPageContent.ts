@@ -138,7 +138,11 @@ export const CLINIC_OWNERS_PAGE_CONTENT = {
         systems: [
           {
             name: "PatientOS",
-            body: "Longitudinal patient record and journey continuity across commercial and clinical activity.",
+            body: "Longitudinal patient record and journey continuity across commercial and clinical activity — the clinic-facing chart shared across FI modules.",
+          },
+          {
+            name: "FI Patient App",
+            body: "Patient-facing mobile surface for next steps, milestones, quotes, documents and pathology — connected to the same journey staff manage inside FI. Operational pilot in controlled scope.",
           },
           {
             name: "ConsultationOS",

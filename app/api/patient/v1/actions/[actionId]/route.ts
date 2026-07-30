@@ -3,7 +3,6 @@
  * FI-PATIENT-APP-P1 — single patient action.
  */
 import { requirePatientGatewayContext } from "@/src/lib/patientPortal/patientGatewayGate.server";
-import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGatewayAudit.server";
 import {
   mapPatientGatewayRouteError,
   patientGatewayJsonDeny,

@@ -1345,7 +1345,7 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Connected infrastructure",
     headline: "One Connected Platform Managing The Entire Clinic",
     subtext:
-      "Eight core systems shown here — a curated subset of the twelve-layer intelligence architecture. Full delivery status by module is on Platform Progress.",
+      "Eight core clinic systems shown here — a curated subset of the connected clinical and operational architecture. The FI Patient App is an additional patient-facing surface. Full delivery status by module is on Platform Progress.",
     architectureCta: {
       label: "View all 12 intelligence layers",
       href: "/platform/ecosystem" as const,
@@ -1367,6 +1367,21 @@ export const HOME_V5_CONTENT = {
       { name: "AnalyticsOS", description: "See performance across every operational layer." },
       { name: "AuditOS", description: "Measure procedural quality and long-term outcomes." },
     ] satisfies readonly HomeV5SystemCard[],
+  },
+
+  patientAppSurface: {
+    id: "patient-app-surface",
+    eyebrow: "Patient surface",
+    name: "FI Patient App",
+    headline: "The connected patient surface for next steps, milestones, documents and journey participation.",
+    benefitLine:
+      "The clinic manages the journey in FI. The patient follows and completes it through the app.",
+    distinction:
+      "PatientOS remains the clinic-facing longitudinal record. The FI Patient App is the patient-facing continuation of that journey.",
+    cta: {
+      label: "See Patient App progress",
+      href: "/platform/progress#progress-patient-app" as const,
+    },
   },
 
   differentiation: {

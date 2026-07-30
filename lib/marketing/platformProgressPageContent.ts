@@ -137,7 +137,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "How Follicle Intelligence is becoming the operating system for hair restoration clinics",
     subtext:
       "Follicle Intelligence is progressing from a connected product ecosystem into a unified operating system for hair restoration clinics — expanding operational workflow depth, connected patient intelligence, and deployment and migration maturity.",
-    lastUpdated: "2026-07-16",
+    lastUpdated: "2026-07-30",
   },
 
   currentPosition: {
@@ -249,6 +249,17 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     ] as const,
   },
 
+  journeyControlMilestone: {
+    id: "patient-journey-control",
+    date: "2026-07-30",
+    heading: "Patient Journey Control completed across FI and the Patient App",
+    summary:
+      "Patients can receive action-driven next steps, follow programme milestones and access quotes, documents and pathology requirements through a mobile experience connected to clinic workflows.",
+    detail:
+      "Core patient journey workflows are implemented across FI and the patient app, including next-step actions, milestones, quotes, documents, pathology and notification deep links. Controlled patient deployment and wider journey expansion continue.",
+    tags: ["Patient App", "PatientOS", "ClinicOS", "Event Bus"] as const,
+  },
+
   hubspotMilestone: {
     id: "controlled-crm-migration",
     date: "2026-07",
@@ -257,6 +268,114 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       "FI now supports staged migration of clinic contact and lead data from HubSpot through a governed process that includes historical backup, migration preview, identity reconciliation, duplicate prevention and post-migration verification.",
     detail:
       "Clinics can connect HubSpot, coexist during adoption, transition selected records in verified stages, or make FI the primary system for CRM and clinic operations within the agreed deployment scope.",
+  },
+
+  patientAppUsability: {
+    id: "patient-app-usability",
+    eyebrow: "Patient experience",
+    headline: "The operating system continues with the patient.",
+    intro:
+      "Clinic workflows are only effective when patients know what happens next. The FI Patient App turns the clinic’s journey plan into a clear, mobile action centre for the patient.",
+    positioning:
+      "The FI Patient App extends the operating system beyond the clinic. Patients can see what they need to do next, follow their milestones, review documents and quotes, and respond to important actions from one connected mobile experience.",
+    distinction: {
+      patientOs:
+        "PatientOS is the clinic-facing longitudinal patient record and operational chart shared across FI modules.",
+      patientApp:
+        "The FI Patient App is the patient-facing mobile surface that gives each patient a secure view of actions, milestones, quotes, documents, pathology and the next step in their journey.",
+    },
+    principles: [
+      {
+        title: "One clear next step",
+        body: "Patients see the action that matters most rather than navigating a full clinic system.",
+        examples: [
+          "Review a quote",
+          "Upload or sign a document",
+          "Complete pathology requirements",
+          "Prepare for the next milestone",
+          "Contact the clinic when attention is required",
+        ],
+      },
+      {
+        title: "Action Centre",
+        body: "Outstanding actions are gathered in one patient-facing location.",
+        examples: [
+          "Reduces uncertainty",
+          "Reduces missed actions",
+          "Makes urgency visible",
+          "Helps patients return directly to unfinished work",
+        ],
+      },
+      {
+        title: "Journey Timeline",
+        body: "Patients can understand where they are in the programme and what comes next.",
+        examples: [
+          "Creates confidence",
+          "Reduces repeated status calls",
+          "Makes the journey feel coordinated",
+          "Helps clinics set expectations consistently",
+        ],
+      },
+      {
+        title: "Connected documents and decisions",
+        body: "Quotes, documents and pathology requirements remain connected to the patient journey rather than arriving as disconnected messages.",
+        examples: [
+          "Easier retrieval",
+          "Clearer decision points",
+          "Better completion tracking",
+          "Less reliance on email threads",
+        ],
+      },
+      {
+        title: "Relevant notifications",
+        body: "Push notifications should take the patient to the correct action or screen rather than merely announcing that something changed.",
+        examples: [
+          "Less friction",
+          "Faster completion",
+          "Better patient engagement",
+          "More meaningful notification analytics",
+        ],
+      },
+    ] as const,
+    honestyNote:
+      "Phase 1 journey workflows are usable in controlled pilot scope. Wider journey coverage, store distribution and routine multi-clinic rollout continue.",
+  },
+
+  patientAppClinicBenefits: {
+    id: "patient-app-clinic-benefits",
+    eyebrow: "Clinic operating system",
+    headline: "Why a patient app matters to the clinic operating system",
+    clinicOwnerValue:
+      "For clinics, the app reduces manual chasing, clarifies responsibility and keeps patient activity connected to the same journey staff manage inside FI.",
+    strategicValue:
+      "The Patient App closes the loop between clinic workflows and patient participation, creating a more complete longitudinal record of actions, communication, readiness and outcomes.",
+    benefits: [
+      {
+        title: "Reduced administrative chasing",
+        body: "The next required action is visible to the patient, reducing reliance on repeated calls, emails and staff memory.",
+      },
+      {
+        title: "Improved readiness",
+        body: "Quotes, documents, pathology and milestones can be completed earlier and tracked against the same operational journey.",
+      },
+      {
+        title: "Clearer accountability",
+        body: "FI can distinguish between what the clinic must do next and what the patient must do next.",
+      },
+      {
+        title: "Better patient experience",
+        body: "Patients receive a consistent journey rather than fragmented instructions from separate systems and staff members.",
+      },
+      {
+        title: "Connected longitudinal record",
+        body: "Patient actions, completion events and journey milestones contribute to the same record used by clinic teams.",
+      },
+      {
+        title: "Stronger outcome engagement",
+        body: "The same patient surface can support future follow-up capture, imaging reminders and long-term outcome review.",
+        future: true,
+      },
+    ] as const,
   },
 
   ctas: {
@@ -305,6 +424,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Public-safe verified milestones (no internal phase codes). */
 export const PLATFORM_PROGRESS_VERIFIED_MILESTONES: PlatformProgressDeploymentMilestone[] = [
+  {
+    id: "patient-journey-control",
+    date: "2026-07-30",
+    tag: "Patient App · PatientOS · ClinicOS · Event Bus",
+    title: "Patient Journey Control completed across FI and the Patient App",
+  },
   {
     id: "controlled-crm-migration",
     date: "2026-07",
@@ -414,6 +539,16 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     latestMilestone: "Longitudinal records integrated with Patient Twin in pilot operations",
     learnMoreHref: "/platform/patient-os",
     evidenceNote: "Patient routes, twin linkage, portal surfaces in operational pilot scope.",
+  },
+  {
+    id: "patient-app",
+    name: "FI Patient App",
+    description:
+      "A secure patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology and journey communication — connected directly to the clinic’s FI workflows.",
+    status: "Operational Pilot",
+    latestMilestone: "Phase 1 Journey Control completed across FI and the patient app",
+    evidenceNote:
+      "Action Centre, home next-step CTAs, journey timeline, quotes/documents/pathology screens, push deep-link routing, mirrored gateway DTOs; app.follicleintelligence.ai web pilot; store distribution not claimed.",
   },
   {
     id: "leadflow",
@@ -666,38 +801,54 @@ export const PLATFORM_PROGRESS_METRICS: PlatformProgressMetric[] = [
 
 export const PLATFORM_ARCHITECTURE_STACK: PlatformArchitectureStackLayer[] = [
   {
-    id: "acquisition",
-    label: "Acquisition Layer",
-    systems: ["LeadFlow", "External Integrations", "Referral Engine", "Communication Systems"],
+    id: "clinic-team",
+    label: "Clinic team surfaces",
+    systems: ["LeadFlow", "ClinicOS", "PatientOS", "ConsultationOS", "SurgeryOS"],
   },
   {
-    id: "patient",
-    label: "Patient Layer",
-    systems: ["ConsultationOS", "PatientOS", "ClinicOS", "Calendar"],
+    id: "patient-surface",
+    label: "Patient surface",
+    systems: ["FI Patient App"],
   },
   {
     id: "clinical",
     label: "Clinical Layer",
-    systems: ["HairIntel", "ImagingOS", "VIE", "SurgeryOS"],
+    systems: ["HairIntel", "ImagingOS", "VIE", "SurgeryOS", "AuditOS"],
   },
   {
     id: "intelligence",
-    label: "Intelligence Layer",
-    systems: ["AuditOS", "AnalyticsOS", "AI Intelligence Engine"],
+    label: "Shared intelligence and infrastructure",
+    systems: [
+      "FoundationOS",
+      "Event Bus",
+      "Security Layer",
+      "ImagingOS",
+      "AuditOS",
+      "AnalyticsOS",
+      "Integration Layer",
+    ],
   },
   {
     id: "workforce",
     label: "Workforce Layer",
     systems: ["AcademyOS", "WorkforceOS"],
   },
-  {
-    id: "infrastructure",
-    label: "Infrastructure Layer",
-    systems: ["FoundationOS", "Security Layer", "Event Bus", "Integration Layer", "OnboardingOS"],
-  },
 ];
 
 export const PLATFORM_SYSTEM_ARCHITECTURE_GROUPS: PlatformSystemArchitectureGroup[] = [
+  {
+    id: "clinic-team",
+    heading: "Clinic team surfaces",
+    description: "Staff-facing operational and clinical workflow surfaces.",
+    moduleNames: ["LeadFlow", "ClinicOS", "PatientOS", "ConsultationOS", "SurgeryOS"],
+  },
+  {
+    id: "patient-surface",
+    heading: "Patient surface",
+    description:
+      "The connected patient-facing mobile experience that continues the clinic journey beyond the clinic wall.",
+    moduleNames: ["FI Patient App"],
+  },
   {
     id: "clinical",
     heading: "Clinical systems",
@@ -736,6 +887,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 /** Internal recent releases (may retain engineering titles for admin). */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
   {
+    id: "2026-07-30-patient-journey-control",
+    title: "Patient Journey Control completed across FI and the Patient App",
+    module: "FI Patient App",
+    date: "2026-07-30",
+  },
+  {
     id: "2026-07-controlled-crm-migration",
     title: "Controlled CRM migration and operational transition",
     module: "LeadFlow",
@@ -772,6 +929,15 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
  * Extended engineering detail remains in internal runbooks and git history.
  */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-07-30-patient-journey-control",
+    date: "2026-07-30",
+    tag: "patient-app",
+    title: "Patient Journey Control completed across FI and the Patient App",
+    summary:
+      "Patients can receive action-driven next steps, follow programme milestones and access quotes, documents and pathology requirements through a mobile experience connected to clinic workflows.",
+    modules: ["FI Patient App", "PatientOS", "ClinicOS", "Event Bus"],
+  },
   {
     id: "2026-07-16-controlled-crm-migration",
     date: "2026-07-16",
@@ -983,6 +1149,55 @@ export function getPlatformProgressMetrics(
       value: String(counts["Research and Future Development"]),
     },
   ];
+}
+
+export type PlatformStatusDistributionBar = {
+  status: PlatformProgressStatus;
+  /** Short public strip label (e.g. "Operational Pilot"). */
+  label: string;
+  count: number;
+  total: number;
+  /** Width fraction 0–1 derived from counts — not a completion percentage. */
+  widthFraction: number;
+  /** Accessible textual value for portfolio distribution. */
+  accessibleValue: string;
+};
+
+const STATUS_STRIP_LABELS: Record<PlatformProgressStatus, string> = {
+  Deployed: "Deployed",
+  "Operational Pilot": "Operational Pilot",
+  "Advanced Build": "Advanced Build",
+  "In Development": "In Development",
+  "Research and Future Development": "Research & Future",
+};
+
+/**
+ * Evidence-based status distribution bars.
+ * Represents portfolio mix of systems by public status — never "platform completion".
+ */
+export function getPlatformStatusDistributionBars(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): PlatformStatusDistributionBar[] {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  const total = snapshot.activeModuleCount;
+  return PLATFORM_PROGRESS_STATUSES.map((status) => {
+    const count = snapshot.statusCounts[status];
+    return {
+      status,
+      label: STATUS_STRIP_LABELS[status],
+      count,
+      total,
+      widthFraction: total === 0 ? 0 : count / total,
+      accessibleValue: `${count} of ${total} systems are in ${status}.`,
+    };
+  });
+}
+
+export function getOperationalOrPilotSummary(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): string {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  return `${snapshot.deployableSurfaceCount} of ${snapshot.activeModuleCount} systems are deployed or operating in controlled pilot scope.`;
 }
 
 export function getOperationalModules(

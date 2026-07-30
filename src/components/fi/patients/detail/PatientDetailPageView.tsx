@@ -29,7 +29,7 @@ import { PatientOverviewTab } from "@/src/components/fi-admin/patients/PatientOv
 import { derivePatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
 import { legacyJourneyLabelFromCanonical } from "@/src/lib/patientJourney/patientJourneyStateCore";
 import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
-import type { ClinicJourneyReadinessSnapshot } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
+import type { ClinicJourneyReadinessItem } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
 import { PatientJourneyRibbon } from "@/src/components/fi-admin/patients/PatientJourneyRibbon";
 import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/StaffUatClarityFeedback";
 import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
@@ -64,7 +64,7 @@ export function PatientDetailPageView({
   prescriptionsTab?: ReactNode;
   canCapturePatientPhotos?: boolean;
   patientJourney?: PatientJourneySnapshot | null;
-  journeyReadiness?: ClinicJourneyReadinessSnapshot | null;
+  journeyReadiness?: ClinicJourneyReadinessItem | null;
 }) {
   const { profile } = initialPayload;
 

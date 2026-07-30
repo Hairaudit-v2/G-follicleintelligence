@@ -2,7 +2,6 @@
  * POST /api/patient/v1/documents/[packetId]/sign
  */
 import { requirePatientGatewayContext } from "@/src/lib/patientPortal/patientGatewayGate.server";
-import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGatewayAudit.server";
 import {
   mapPatientGatewayRouteError,
   patientGatewayJsonDeny,

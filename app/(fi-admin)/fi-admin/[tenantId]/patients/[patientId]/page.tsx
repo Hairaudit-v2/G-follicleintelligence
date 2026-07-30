@@ -96,7 +96,10 @@ export default async function PatientProfileRoutePage({
     loadPatientInvoiceSummary(tenantId.trim(), canonicalPatientId),
     getPatientImagingCaptureCapability(tenantId.trim()),
     loadPatientJourneySnapshot(tenantId.trim(), canonicalPatientId).catch(() => null),
-    loadClinicJourneyReadiness(tenantId.trim(), canonicalPatientId).catch(() => null),
+    loadClinicJourneyReadiness({
+      tenantId: tenantId.trim(),
+      patientId: canonicalPatientId,
+    }).catch(() => null),
   ]);
   const operationalTodayYmd = calendarDateStringFromInstant(
     new Date(),

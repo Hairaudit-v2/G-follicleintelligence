@@ -9,7 +9,7 @@ import {
   patientJourneyProgressPercent,
 } from "@/src/lib/fiOs/staffUxPresentation";
 import type { PatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
-import type { ClinicJourneyReadinessSnapshot } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
+import type { ClinicJourneyReadinessItem } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
 
 const TONE_CLASSES: Record<PatientJourneySnapshot["presentation"]["tone"], string> = {
   neutral: "border-slate-600/40 bg-slate-900/50 text-slate-300",
@@ -25,7 +25,7 @@ export function PatientJourneyRibbon({
 }: {
   journey: PatientJourneySnapshot;
   /** P1 — same action/milestone SoR as patient Action Centre. */
-  readiness?: ClinicJourneyReadinessSnapshot | null;
+  readiness?: ClinicJourneyReadinessItem | null;
 }) {
   const { presentation, blockers, nextBestAction, manuallyOverridden, derivedState, state } =
     journey;
@@ -115,66 +115,67 @@ export function PatientJourneyRibbon({
       </div>
 
       {readiness ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-              Outstanding patient actions
+              Open patient actions
             </p>
-            {readiness.outstandingPatientActions.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">None</p>
-            ) : (
-              <ul className="mt-2 space-y-1.5">
-                {readiness.outstandingPatientActions.map((a) => (
-                  <li key={a.actionId ?? a.title} className="text-sm text-slate-200">
-                    {a.title}
-                    {a.dueAt ? (
-                      <span className="ml-2 text-xs text-amber-300/80">
-                        due {new Date(a.dueAt).toLocaleDateString()}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-slate-100">
+              {readiness.openPatientActions}
+            </p>
           </div>
           <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-              Outstanding clinic actions
+              Waiting on clinic
             </p>
-            {readiness.outstandingClinicActions.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">None</p>
-            ) : (
-              <ul className="mt-2 space-y-1.5">
-                {readiness.outstandingClinicActions.map((a) => (
-                  <li key={a.actionId ?? a.title} className="text-sm text-slate-200">
-                    {a.title}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-slate-100">
+              {readiness.waitingOnClinicActions}
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Overdue actions
+            </p>
+            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-slate-100">
+              {readiness.overdueActions}
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Incomplete milestones
+            </p>
+            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-slate-100">
+              {readiness.milestonesIncomplete}
+            </p>
           </div>
         </div>
       ) : null}
 
-      {readiness && readiness.milestones.length > 0 ? (
+      {readiness ? (
         <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4">
           <p className="text-xs font-bold uppercase tracking-wide text-cyan-200/90">
-            Journey milestones
+            Journey readiness signals
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
-            {readiness.milestones.map((m) => (
-              <li
-                key={m.key}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium",
-                  m.status === "completed"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                    : "border-white/[0.08] bg-black/20 text-slate-300"
-                )}
-              >
-                {m.patientLabel}
-              </li>
-            ))}
+            <li className="rounded-full border border-white/[0.08] bg-black/20 px-3 py-1 text-xs font-medium text-slate-300">
+              Documents: {readiness.documentPacketStatus ?? "—"}
+            </li>
+            <li className="rounded-full border border-white/[0.08] bg-black/20 px-3 py-1 text-xs font-medium text-slate-300">
+              Pathology: {readiness.pathologyStatus ?? "—"}
+            </li>
+            <li className="rounded-full border border-white/[0.08] bg-black/20 px-3 py-1 text-xs font-medium text-slate-300">
+              Quote: {readiness.quoteStatus ?? "—"}
+            </li>
+            <li
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium",
+                readiness.readyForSurgery
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                  : "border-white/[0.08] bg-black/20 text-slate-300"
+              )}
+            >
+              {readiness.readyForSurgery ? "Ready for surgery" : "Not cleared for surgery"}
+            </li>
           </ul>
         </div>
       ) : null}

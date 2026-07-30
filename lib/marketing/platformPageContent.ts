@@ -34,8 +34,8 @@ export const PLATFORM_PAGE_CONTENT = {
       {
         title: "Clinical & Patient Intelligence",
         summary:
-          "Structured assessments, longitudinal records, Patient Twin™, and AI-assisted pathways—without divorcing clinical nuance from operational reality.",
-        modules: ["PatientOS / FoundationOS", "ConsultationOS", "HairIntel"],
+          "Structured assessments, longitudinal records, Patient Twin™, the FI Patient App, and AI-assisted pathways—without divorcing clinical nuance from operational reality.",
+        modules: ["PatientOS / FoundationOS", "FI Patient App", "ConsultationOS", "HairIntel"],
       },
       {
         title: "Surgery & Outcome Governance",
@@ -55,9 +55,9 @@ export const PLATFORM_PAGE_CONTENT = {
   modules: {
     id: "modules",
     eyebrow: "Module surface",
-    headline: "Eleven connected systems. One operating model.",
+    headline: "Connected clinical and operational systems. One operating model.",
     intro:
-      "Each module is a product-grade surface with explicit integration contracts. Together they form the architecture serious operators deploy—not a loose bundle of features.",
+      "Each module is a product-grade surface with explicit integration contracts. Together they form the architecture serious operators deploy—not a loose bundle of features. The FI Patient App extends that architecture to the patient.",
     items: [
       {
         id: "leadflow-os",
@@ -90,10 +90,22 @@ export const PLATFORM_PAGE_CONTENT = {
         description:
           "PatientOS is the longitudinal substrate: demographics, encounters, media, assessments, procedures, and the Patient Twin™ narrative that other modules read and enrich.",
         connects:
-          "Every clinical and governance module—consultation, imaging, surgery, audit, analytics.",
+          "Every clinical and governance module—consultation, imaging, surgery, audit, analytics — and the FI Patient App as the patient-facing continuation of the same journey.",
         why: "Hair restoration is a multi-year story. A fragmented chart makes every downstream module weaker; a unified record compounds intelligence responsibly.",
         learnMoreHref: "/platform/patient-os",
         learnMoreLabel: "PatientOS module",
+      },
+      {
+        id: "patient-app",
+        name: "FI Patient App",
+        tagline: "Patient-facing next steps, milestones, documents and journey participation.",
+        description:
+          "The FI Patient App is the secure patient-facing mobile surface for actions, milestones, next steps, quotes, documents, pathology and journey communication — connected directly to clinic workflows in FI.",
+        connects:
+          "PatientOS longitudinal record, ClinicOS operations, ConsultationOS quotes and pathways, SurgeryOS milestones, ImagingOS and AuditOS evidence loops, Event Bus notifications, Security and Integration layers.",
+        why: "Clinic workflows are only effective when patients know what happens next. The Patient App closes the loop between staff-managed journeys and patient participation.",
+        learnMoreHref: "/platform/progress#progress-patient-app",
+        learnMoreLabel: "Patient App progress",
       },
       {
         id: "consultation-os",

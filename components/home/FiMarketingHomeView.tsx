@@ -477,6 +477,43 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
+      {/* Section 4a — FI Patient App surface */}
+      <Section
+        id={c.patientAppSurface.id}
+        className="scroll-mt-24 border-b border-border/40 bg-background py-16 sm:py-20"
+        aria-labelledby={`${c.patientAppSurface.id}-heading`}
+      >
+        <FadeIn>
+          <GlassCard variant="os" className="border-amber-400/15 !p-7 sm:!p-9">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/75">
+              {c.patientAppSurface.eyebrow}
+            </p>
+            <h2
+              id={`${c.patientAppSurface.id}-heading`}
+              className="mt-4 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+            >
+              {c.patientAppSurface.name}
+            </h2>
+            <p className="mt-4 max-w-3xl text-base leading-[1.75] text-muted-foreground sm:text-lg">
+              {c.patientAppSurface.headline}
+            </p>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/90 sm:text-base">
+              {c.patientAppSurface.benefitLine}
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              {c.patientAppSurface.distinction}
+            </p>
+            <Link
+              href={c.patientAppSurface.cta.href}
+              className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-200/95 transition-colors hover:text-amber-50"
+            >
+              {c.patientAppSurface.cta.label}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </GlassCard>
+        </FadeIn>
+      </Section>
+
       {/* Section 4b — Ecosystem architecture bridge */}
       <Section
         id={c.ecosystemArchitecture.id}
