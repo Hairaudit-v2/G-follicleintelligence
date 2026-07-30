@@ -49,6 +49,7 @@ export const FOOTER_MODULES: FooterNavLink[] = [
   { label: "WorkforceOS", href: "/platform/progress#progress-workforce-os" },
   { label: "SurgeryOS", href: "/platform/surgery-os" },
   { label: "PatientOS", href: "/platform/patient-os" },
+  { label: "FI Patient App", href: "/platform/patient-app" },
   { label: "ImagingOS", href: "/platform/imaging-os" },
   { label: "ClinicOS", href: "/platform/clinic-os" },
   { label: "LeadFlow", href: "/platform/leadflow" },

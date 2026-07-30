@@ -547,6 +547,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "A secure patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology and journey communication — connected directly to the clinic’s FI workflows.",
     status: "Operational Pilot",
     latestMilestone: "Phase 1 Journey Control completed across FI and the patient app",
+    learnMoreHref: "/platform/patient-app",
     evidenceNote:
       "Action Centre, home next-step CTAs, journey timeline, quotes/documents/pathology screens, push deep-link routing, mirrored gateway DTOs; app.follicleintelligence.ai web pilot; store distribution not claimed.",
   },

@@ -1,0 +1,77 @@
+{
+  "ticket": "FI-PATIENT-APP-2A",
+  "capturedAt": "2026-07-30T00:20:17.016Z",
+  "note": "Public-safe synthetic screens only. Live Evolved / Gateway Demo tenant was intentionally not used for marketing imagery.",
+  "shots": [
+    {
+      "id": "home-next-step",
+      "png": "docs/marketing/screenshots/fi-patient-app-2a/patient-app-home-next-step.png",
+      "webp": "/os-images/patient-app/patient-app-home-next-step.webp",
+      "width": 780,
+      "height": 1688,
+      "identity": {
+        "patient": "Alex Morgan",
+        "clinic": "FI Demonstration Clinic",
+        "account": "demo.patient@follicleintelligence.ai"
+      },
+      "source": "public-safe demonstration fixture (Phase 1 UI mirror)",
+      "productionTenantUsed": false
+    },
+    {
+      "id": "action-centre",
+      "png": "docs/marketing/screenshots/fi-patient-app-2a/patient-app-action-centre.png",
+      "webp": "/os-images/patient-app/patient-app-action-centre.webp",
+      "width": 780,
+      "height": 1688,
+      "identity": {
+        "patient": "Alex Morgan",
+        "clinic": "FI Demonstration Clinic",
+        "account": "demo.patient@follicleintelligence.ai"
+      },
+      "source": "public-safe demonstration fixture (Phase 1 UI mirror)",
+      "productionTenantUsed": false
+    },
+    {
+      "id": "journey-timeline",
+      "png": "docs/marketing/screenshots/fi-patient-app-2a/patient-app-journey-timeline.png",
+      "webp": "/os-images/patient-app/patient-app-journey-timeline.webp",
+      "width": 780,
+      "height": 1688,
+      "identity": {
+        "patient": "Alex Morgan",
+        "clinic": "FI Demonstration Clinic",
+        "account": "demo.patient@follicleintelligence.ai"
+      },
+      "source": "public-safe demonstration fixture (Phase 1 UI mirror)",
+      "productionTenantUsed": false
+    },
+    {
+      "id": "quote",
+      "png": "docs/marketing/screenshots/fi-patient-app-2a/patient-app-quote.png",
+      "webp": "/os-images/patient-app/patient-app-quote.webp",
+      "width": 780,
+      "height": 1688,
+      "identity": {
+        "patient": "Alex Morgan",
+        "clinic": "FI Demonstration Clinic",
+        "account": "demo.patient@follicleintelligence.ai"
+      },
+      "source": "public-safe demonstration fixture (Phase 1 UI mirror)",
+      "productionTenantUsed": false
+    },
+    {
+      "id": "pathology",
+      "png": "docs/marketing/screenshots/fi-patient-app-2a/patient-app-pathology.png",
+      "webp": "/os-images/patient-app/patient-app-pathology.webp",
+      "width": 720,
+      "height": 1600,
+      "identity": {
+        "patient": "Alex Morgan",
+        "clinic": "FI Demonstration Clinic",
+        "account": "demo.patient@follicleintelligence.ai"
+      },
+      "source": "public-safe demonstration fixture (Phase 1 UI mirror)",
+      "productionTenantUsed": false
+    }
+  ]
+}

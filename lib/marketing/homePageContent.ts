@@ -1379,8 +1379,8 @@ export const HOME_V5_CONTENT = {
     distinction:
       "PatientOS remains the clinic-facing longitudinal record. The FI Patient App is the patient-facing continuation of that journey.",
     cta: {
-      label: "See Patient App progress",
-      href: "/platform/progress#progress-patient-app" as const,
+      label: "Explore FI Patient App",
+      href: "/platform/patient-app" as const,
     },
   },
 

@@ -2,16 +2,17 @@
 
 **Date:** 2026-07-30  
 **Depends on:** FI-WEB-REFRESH-1A…1I, FI-PATIENT-APP-P1 Journey Control  
-**Routes:** `/`, `/platform`, `/platform/progress`, Clinic Owners
+**Routes:** `/`, `/platform`, `/platform/progress`, Clinic Owners  
+**Superseded for dedicated route by:** FI-PATIENT-APP-2A (`/platform/patient-app`)
 
 ## Verdict
 
-Public platform progress now treats **FI Patient App** as a distinct patient-facing Operational Pilot surface connected to PatientOS and the wider FI OS — without conflating the two, without speculative completion percentages, and without a dead dedicated module route.
+Public platform progress treats **FI Patient App** as a distinct patient-facing Operational Pilot surface connected to PatientOS and the wider FI OS — without conflating the two, without speculative completion percentages.
 
 ## Dedicated route decision
 
-**Deferred:** `/platform/patient-app`  
-No suitable public patient-app screenshots exist. Progress + Platform + homepage band carry the narrative; Learn More on the module card is omitted until a dedicated route is justified.
+**Resolved in FI-PATIENT-APP-2A:** `/platform/patient-app`  
+Public-safe demonstration screenshots now exist. Progress, Platform, homepage band and footer link to the dedicated product page.
 
 ## Status classification
 
@@ -31,4 +32,4 @@ No suitable public patient-app screenshots exist. Progress + Platform + homepage
 
 ## Production routing note
 
-Canonical production is Vercel project `g-follicleintelligence` serving `follicleintelligence.ai` / `www.follicleintelligence.ai`. `/` and `/platform/progress` are the same Next.js application. Journey Control commit `ceee61c9` previously failed production build on unused-import lint; this ticket includes that unblock so marketing updates can deploy.
+Canonical production is Vercel project `g-follicleintelligence` serving `follicleintelligence.ai` / `www.follicleintelligence.ai`.

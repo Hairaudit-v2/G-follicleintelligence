@@ -142,7 +142,7 @@ export const CLINIC_OWNERS_PAGE_CONTENT = {
           },
           {
             name: "FI Patient App",
-            body: "Patient-facing mobile surface for next steps, milestones, quotes, documents and pathology — connected to the same journey staff manage inside FI. Operational pilot in controlled scope.",
+            body: "FI Patient App gives patients one clear place for next steps, milestones, quotes, documents and pathology — connected directly to clinic workflows. Operational Pilot.",
           },
           {
             name: "ConsultationOS",

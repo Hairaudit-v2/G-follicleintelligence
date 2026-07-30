@@ -141,6 +141,17 @@ const nextConfig = {
         destination: "/migrate-from-hubspot",
         permanent: true,
       },
+      // FI-PATIENT-APP-2A — canonical Patient App product page only
+      {
+        source: "/patient-app",
+        destination: "/platform/patient-app",
+        permanent: true,
+      },
+      {
+        source: "/platform/patientos-app",
+        destination: "/platform/patient-app",
+        permanent: true,
+      },
     ];
   },
   async headers() {

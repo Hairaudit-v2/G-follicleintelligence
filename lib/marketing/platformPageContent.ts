@@ -104,8 +104,8 @@ export const PLATFORM_PAGE_CONTENT = {
         connects:
           "PatientOS longitudinal record, ClinicOS operations, ConsultationOS quotes and pathways, SurgeryOS milestones, ImagingOS and AuditOS evidence loops, Event Bus notifications, Security and Integration layers.",
         why: "Clinic workflows are only effective when patients know what happens next. The Patient App closes the loop between staff-managed journeys and patient participation.",
-        learnMoreHref: "/platform/progress#progress-patient-app",
-        learnMoreLabel: "Patient App progress",
+        learnMoreHref: "/platform/patient-app",
+        learnMoreLabel: "FI Patient App",
       },
       {
         id: "consultation-os",

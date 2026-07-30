@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FI Patient App — public-safe demonstration screens</title>
+  <style>
+    :root {
+      --bg: #0c1117;
+      --surface: #131820;
+      --surface-muted: #222730;
+      --border: #333a47;
+      --text: #eff2f5;
+      --text-secondary: #acb5c3;
+      --text-muted: #7b8798;
+      --primary: #45b9e3;
+      --accent: #c4a35a;
+      --success: #3dcf8e;
+      --warning: #e8b84a;
+      --primary-soft: rgba(69, 185, 227, 0.16);
+      --accent-soft: rgba(196, 163, 90, 0.18);
+      --success-soft: rgba(61, 207, 142, 0.16);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #1a1f28;
+      color: var(--text);
+      padding: 24px;
+    }
+    h1 { font-size: 14px; font-weight: 600; color: #9aa4b2; margin: 0 0 16px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+    .shot {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9aa4b2;
+      font-weight: 600;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      border-radius: 36px;
+      overflow: hidden;
+      background: var(--bg);
+      border: 3px solid #2a3140;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+      position: relative;
+    }
+    .phone.android {
+      width: 360px;
+      height: 800px;
+      border-radius: 28px;
+    }
+    .status {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg);
+    }
+    .screen {
+      height: calc(100% - 44px - 64px);
+      overflow: hidden;
+      padding: 8px 20px 20px;
+    }
+    .tabbar {
+      height: 64px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      background: var(--surface);
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .tab.active { color: var(--accent); }
+    .tab .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: var(--surface-muted);
+    }
+    .tab.active .dot { background: var(--accent-soft); border: 1px solid var(--accent); }
+    .clinic {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .clinic-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #9a7a3a);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0c1117;
+    }
+    .clinic-name { font-size: 13px; font-weight: 600; }
+    .clinic-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .greeting { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; margin: 4px 0 6px; }
+    .muted { color: var(--text-secondary); font-size: 14px; line-height: 1.45; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .card.primary {
+      background: linear-gradient(160deg, rgba(69,185,227,0.14), rgba(19,24,32,0.95));
+      border-color: rgba(69,185,227,0.35);
+    }
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .title { font-size: 17px; font-weight: 650; margin: 0 0 6px; }
+    .body { font-size: 13px; color: var(--text-secondary); line-height: 1.45; margin: 0; }
+    .btn {
+      margin-top: 14px;
+      background: var(--primary);
+      color: #0c1117;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 700;
+      font-size: 14px;
+      width: 100%;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 650;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid rgba(69,185,227,0.25);
+    }
+    .pill.warn {
+      background: rgba(232,184,74,0.16);
+      color: var(--warning);
+      border-color: rgba(232,184,74,0.28);
+    }
+    .pill.ok {
+      background: var(--success-soft);
+      color: var(--success);
+      border-color: rgba(61,207,142,0.28);
+    }
+    .pill.muted {
+      background: var(--surface-muted);
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+    .row { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .section-h {
+      margin: 18px 0 8px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+    .tile h3 { margin: 0 0 4px; font-size: 15px; }
+    .timeline { margin-top: 8px; }
+    .milestone {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(51,58,71,0.7);
+    }
+    .milestone:last-child { border-bottom: 0; }
+    .node {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-top: 4px;
+      border: 2px solid var(--border);
+      background: var(--surface-muted);
+    }
+    .node.done { background: var(--success); border-color: var(--success); }
+    .node.current { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
+    .note {
+      margin-top: 20px;
+      max-width: 720px;
+      font-size: 12px;
+      color: #8b95a5;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Public-safe demonstration data only — Alex Morgan · FI Demonstration Clinic · demo.patient@follicleintelligence.ai</h1>
+  <div class="grid">
+
+    <div class="shot" data-shot="home-next-step" data-viewport="iphone">
+      <div class="label">1 · Home next step · iPhone</div>
+      <div class="phone" id="shot-home-next-step">
+        <div class="status"><span>9:41</span><span>FI</span></div>
+        <div class="screen">
+          <div class="clinic">
+            <div class="clinic-mark">FI</div>
+            <div>
+              <div class="clinic-name">FI Demonstration Clinic</div>
+              <div class="clinic-sub">Demonstration programme</div>
+            </div>
+          </div>
+          <div class="greeting">Good morning, Alex</div>
+          <p class="muted">Here is what matters most for your journey today.</p>
+          <div class="card primary">
+            <div class="eyebrow">Your next step</div>
+            <div class="row">
+              <h2 class="title" style="margin:0">Review your treatment quote</h2>
+              <span class="pill">Due soon</span>
+            </div>
+            <p class="body" style="margin-top:8px">Your clinic has shared a proposal. Review it and respond when you are ready.</p>
+            <button class="btn" type="button">Review quote</button>
+          </div>
+          <div class="section-h">Quick access</div>
+          <div class="tile"><h3>Action Centre</h3><p class="body">See what you need to do next.</p></div>
+          <div class="tile"><h3>Journey</h3><p class="body">View your milestones and progress.</p></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><div class="dot"></div>Home</div>
+          <div class="tab"><div class="dot"></div>Actions</div>
+          <div class="tab"><div class="dot"></div>Journey</div>
+          <div class="tab"><div class="dot"></div>Account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot" data-shot="action-centre" data-viewport="iphone">
+      <div class="label">2 · Action Centre · iPhone</div>
+      <div class="phone" id="shot-action-centre">
+        <div class="status"><span>9:41</span><span>FI</span></div>
+        <div class="screen">
+          <h2 class="greeting" style="font-size:24px">Action Centre</h2>
+          <p class="muted">Everything you need to do next, in one place.</p>
+          <div class="section-h">Action required by you</div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Review treatment quote</h3>
+              <span class="pill warn">Open</span>
+            </div>
+            <p class="body">Respond to the clinic proposal linked to your journey.</p>
+          </div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Complete pre-surgery documents</h3>
+              <span class="pill warn">Due</span>
+            </div>
+            <p class="body">Two sections still need your attention.</p>
+          </div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Confirm pathology requirements</h3>
+              <span class="pill">Priority</span>
+            </div>
+            <p class="body">See what remains outstanding before the next milestone.</p>
+          </div>
+          <div class="section-h">Waiting on the clinic</div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Clinic scheduling review</h3>
+              <span class="pill muted">Waiting</span>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="dot"></div>Home</div>
+          <div class="tab active"><div class="dot"></div>Actions</div>
+          <div class="tab"><div class="dot"></div>Journey</div>
+          <div class="tab"><div class="dot"></div>Account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot" data-shot="journey-timeline" data-viewport="iphone">
+      <div class="label">3 · Journey Timeline · iPhone</div>
+      <div class="phone" id="shot-journey-timeline">
+        <div class="status"><span>9:41</span><span>FI</span></div>
+        <div class="screen">
+          <h2 class="greeting" style="font-size:24px">Your journey</h2>
+          <p class="muted">A clear view of completed milestones and what comes next.</p>
+          <div class="card">
+            <div class="eyebrow">Current stage</div>
+            <h3 class="title">Pre-surgery readiness</h3>
+            <p class="body">Your clinic manages the pathway. You complete the actions assigned to you.</p>
+          </div>
+          <div class="timeline">
+            <div class="milestone">
+              <div class="node done"></div>
+              <div>
+                <div class="row"><strong>Consultation completed</strong><span class="pill ok">Done</span></div>
+                <p class="body">Clinic-managed</p>
+              </div>
+            </div>
+            <div class="milestone">
+              <div class="node done"></div>
+              <div>
+                <div class="row"><strong>Quote delivered</strong><span class="pill ok">Done</span></div>
+                <p class="body">Ready for your review</p>
+              </div>
+            </div>
+            <div class="milestone">
+              <div class="node current"></div>
+              <div>
+                <div class="row"><strong>Documents &amp; pathology</strong><span class="pill">Action</span></div>
+                <p class="body">Patient action required</p>
+              </div>
+            </div>
+            <div class="milestone">
+              <div class="node"></div>
+              <div>
+                <div class="row"><strong>Procedure preparation</strong><span class="pill muted">Upcoming</span></div>
+                <p class="body">Clinic-managed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="dot"></div>Home</div>
+          <div class="tab"><div class="dot"></div>Actions</div>
+          <div class="tab active"><div class="dot"></div>Journey</div>
+          <div class="tab"><div class="dot"></div>Account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot" data-shot="quote" data-viewport="iphone">
+      <div class="label">4 · Quote · iPhone</div>
+      <div class="phone" id="shot-quote">
+        <div class="status"><span>9:41</span><span>FI</span></div>
+        <div class="screen">
+          <p class="eyebrow" style="margin-top:8px">Connected to your journey</p>
+          <h2 class="greeting" style="font-size:24px">Treatment quote</h2>
+          <p class="muted">Shared by FI Demonstration Clinic for Alex Morgan.</p>
+          <div class="card primary">
+            <div class="row">
+              <h3 class="title">Follicular unit restoration plan</h3>
+              <span class="pill">Review</span>
+            </div>
+            <p class="body" style="margin-top:8px">Demonstration proposal for public product imagery. No production pricing or clinical identifiers.</p>
+            <div class="tile" style="margin-top:12px;background:rgba(0,0,0,0.2)">
+              <div class="row"><span class="body">Status</span><strong>Awaiting patient review</strong></div>
+              <div class="row" style="margin-top:8px"><span class="body">Reference</span><strong>DEMO-QUOTE-001</strong></div>
+            </div>
+            <button class="btn" type="button">Open quote details</button>
+          </div>
+          <div class="card">
+            <p class="body">You can return here from Action Centre or notifications without searching email.</p>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="dot"></div>Home</div>
+          <div class="tab active"><div class="dot"></div>Actions</div>
+          <div class="tab"><div class="dot"></div>Journey</div>
+          <div class="tab"><div class="dot"></div>Account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot" data-shot="pathology" data-viewport="android">
+      <div class="label">5 · Pathology · Android</div>
+      <div class="phone android" id="shot-pathology">
+        <div class="status"><span>9:41</span><span>FI</span></div>
+        <div class="screen">
+          <h2 class="greeting" style="font-size:22px">Blood tests</h2>
+          <p class="muted">Track what is required and what remains outstanding.</p>
+          <div class="card primary">
+            <div class="eyebrow">Readiness</div>
+            <h3 class="title">Pathology requirements in progress</h3>
+            <p class="body">Visible to you and your clinic as part of the same journey.</p>
+          </div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Baseline panel</h3>
+              <span class="pill ok">Complete</span>
+            </div>
+            <p class="body">Demonstration requirement — no clinical results shown.</p>
+          </div>
+          <div class="card">
+            <div class="row">
+              <h3 class="title">Clinic-requested follow-up</h3>
+              <span class="pill warn">Outstanding</span>
+            </div>
+            <p class="body">Complete this before the next preparation milestone.</p>
+          </div>
+          <div class="card">
+            <p class="body">The FI Patient App does not interpret results or provide medical advice.</p>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><div class="dot"></div>Home</div>
+          <div class="tab active"><div class="dot"></div>Actions</div>
+          <div class="tab"><div class="dot"></div>Journey</div>
+          <div class="tab"><div class="dot"></div>Account</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="note">
+    Synthetic demonstration identity only. Not captured from a production patient or clinic tenant.
+    Visual system mirrors FI Patient App Phase 1 Journey Control (palette, hierarchy, Action Centre, timeline, quote and pathology framing).
+  </p>
+</body>
+</html>

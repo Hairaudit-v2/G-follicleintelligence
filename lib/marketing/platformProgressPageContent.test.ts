@@ -38,7 +38,7 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     assert.equal(patientApp?.name, "FI Patient App");
     assert.equal(patientApp?.status, "Operational Pilot");
     assert.match(patientApp?.latestMilestone ?? "", /Phase 1 Journey Control/i);
-    assert.equal(patientApp?.learnMoreHref, undefined);
+    assert.equal(patientApp?.learnMoreHref, "/platform/patient-app");
 
     const operational = getModulesByStatuses(["Deployed", "Operational Pilot"]);
     const names = operational.map((m) => m.name);
