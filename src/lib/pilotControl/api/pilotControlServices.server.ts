@@ -14,9 +14,19 @@ import {
   loadPilotProgrammesForTenant,
 } from "../pilotCohortQuery.server";
 import { evaluatePilotPatientReadiness } from "../readiness/evaluatePilotPatientReadiness.server";
+import {
+  evaluatePilotCohortReadinessSummary,
+  evaluatePilotEnrolmentPageReadiness,
+} from "../readiness/evaluatePilotCohortReadinessSummary.server";
+import { projectRegisterReadiness } from "../readiness/cohortReadinessSummary";
 import { evaluatePilotPatientBlockers } from "../blockers/evaluatePilotPatientBlockers.server";
 import { buildPilotBlockerHealthInput } from "../blockers/blockerHealthInput";
+import { classifyPilotEvidenceSource } from "../readiness/cohortReadinessSummary";
+import { computePilotAdoptionMetrics } from "../adoption/adoptionMetrics";
+import { evaluateRealPatientPilotGate } from "../adoption/realPatientPilotGate";
+import type { PilotAdoptionEvent } from "../adoption/adoptionTypes";
 import type { OverallReadinessState, PilotEnrolmentStatus } from "../pilotControlContracts";
+import type { PilotControlActorType } from "../pilotControlContracts";
 import { PilotControlApiError } from "./pilotControlApiErrors";
 import {
   buildEvaluationMetadata,
@@ -216,12 +226,41 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
     programmeId: programme.id,
   });
   const blockerHealth = buildPilotBlockerHealthInput(blockers);
+
+  const readinessSummary = await evaluatePilotCohortReadinessSummary({
+    tenantId: ctx.tenantId,
+    programmeId: programme.id,
+    clinicId: ctx.clinicId,
+    asOf: ctx.requestedAt,
+  });
+
+  const invitationGate = evaluateRealPatientPilotGate({
+    technicalAcceptance: true,
+    migrationsApplied: false,
+    tenantIsolationProven: true,
+    roleMatrixProven: false,
+    identityIntegrityProven: true,
+    financeIntegrityProven: true,
+    consentControlsProven: true,
+    // Human gates remain false until governance completes.
+  });
+
   const health = mapHealthVerdictForPauseVisibility(
     assemblePilotControlHealth({
       programmeStatus: programme.status,
       enrolments,
       blockers,
       evaluatedAt: ctx.requestedAt,
+      evidenceConfidence:
+        readinessSummary.cohort.liveEnrolled === 0
+          ? "insufficient_evidence"
+          : readinessSummary.cohort.partialEvaluations > 0
+            ? "live_partial"
+            : "live_verified",
+      liveEvidenceDurationDays: 0,
+      invitationGateEligible: invitationGate.eligible,
+      technicalAcceptanceComplete: invitationGate.technicalAcceptance,
+      operationalAcceptanceComplete: false,
     }),
     canSeePilotPauseRecommendation(ctx.actorRole)
   );
@@ -272,12 +311,12 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
       withdrawn: counts.withdrawn,
     },
     readiness: {
-      notStarted: 0,
-      inProgress: 0,
-      attentionRequired: 0,
-      blocked: blockerHealth.openBySeverity.critical + blockerHealth.openBySeverity.high,
-      ready: 0,
-      completed: counts.completed,
+      source: "canonical_batch_readiness" as const,
+      evaluatedPatients: readinessSummary.cohort.evaluated,
+      partialEvaluations: readinessSummary.cohort.partialEvaluations,
+      failedEvaluations: readinessSummary.cohort.failedEvaluations,
+      overall: readinessSummary.overall,
+      dimensions: readinessSummary.dimensions,
     },
     blockers: blockerHealth,
     actions: {
@@ -317,6 +356,10 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
           },
         }
       : {}),
+    invitationGate: {
+      eligible: invitationGate.eligible,
+      blockers: invitationGate.blockers,
+    },
     generatedAt: ctx.requestedAt,
   };
 
@@ -339,8 +382,14 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
       tenantId: ctx.tenantId,
       correlationId: ctx.correlationId,
       generatedAt: ctx.requestedAt,
+      partial:
+        readinessSummary.cohort.partialEvaluations > 0 ||
+        readinessSummary.cohort.failedEvaluations > 0 ||
+        readinessSummary.truncated,
       evaluation: buildEvaluationMetadata({
-        evaluatedAt: ctx.requestedAt,
+        evaluatedAt: readinessSummary.freshness.evaluatedAt,
+        oldestSourceUpdatedAt: readinessSummary.freshness.oldestSourceUpdatedAt,
+        staleSources: readinessSummary.freshness.staleSourceSystems,
         blockerPersistenceMode: "read_only",
       }),
     })
@@ -448,9 +497,26 @@ export async function assemblePatientRegisterResponse(
     blockersByEnrolment.set(b.enrolmentId, list);
   }
 
+  const readinessByEnrolment = await evaluatePilotEnrolmentPageReadiness({
+    tenantId: ctx.tenantId,
+    programmeId: ctx.programmeId,
+    enrolments: pageRows,
+    asOf: ctx.requestedAt,
+  });
+
+  let partialRows = 0;
   const rows: PilotPatientRegisterRow[] = pageRows.map((e) => {
     const blockers = (blockersByEnrolment.get(e.id) ?? []).sort(compareBlockersBySeverityThenAge);
     const primary = blockers[0];
+    const evalResult = readinessByEnrolment.get(e.id);
+    const projected = projectRegisterReadiness(
+      evalResult?.ok ? evalResult.readiness : null,
+      {
+        failed: evalResult != null && !evalResult.ok,
+        evaluatedAt: ctx.requestedAt,
+      }
+    );
+    if (projected.partial) partialRows += 1;
     return {
       enrolmentId: e.id,
       patientId: e.patientId,
@@ -462,12 +528,15 @@ export async function assemblePatientRegisterResponse(
       pilotStatus: e.enrolmentStatus,
       journey: { milestone: "unknown", milestoneLabel: "Unknown" },
       readiness: {
-        clinical: "unknown",
-        financial: "unknown",
-        patient: "unknown",
-        operational: "unknown",
-        technical: "unknown",
-        overall: "not_started" as OverallReadinessState,
+        clinical: projected.clinical,
+        financial: projected.financial,
+        patient: projected.patient,
+        operational: projected.operational,
+        technical: projected.technical,
+        overall: projected.overall as OverallReadinessState,
+        partial: projected.partial,
+        unknownMandatorySignalCount: projected.unknownMandatorySignalCount,
+        evaluationFreshnessAt: projected.evaluationFreshnessAt,
       },
       nextActions: {},
       blockerSummary: {
@@ -492,7 +561,7 @@ export async function assemblePatientRegisterResponse(
         operationalOwnerType: e.operationalOwnerRole ?? undefined,
       },
       activity: {},
-      evaluatedAt: ctx.requestedAt,
+      evaluatedAt: projected.evaluatedAt,
     };
   });
 
@@ -526,6 +595,7 @@ export async function assemblePatientRegisterResponse(
       tenantId: ctx.tenantId,
       correlationId: ctx.correlationId,
       generatedAt: ctx.requestedAt,
+      partial: partialRows > 0,
       evaluation: buildEvaluationMetadata({
         evaluatedAt: ctx.requestedAt,
         blockerPersistenceMode: "read_only",
@@ -885,6 +955,16 @@ export async function assembleHealthResponse(ctx: PilotControlRequestContext) {
       enrolments,
       blockers,
       evaluatedAt: ctx.requestedAt,
+      evidenceConfidence:
+        enrolments.filter((e) =>
+          classifyPilotEvidenceSource({ pilotCohort: e.pilotCohort }) === "live_patient"
+        ).length === 0
+          ? "insufficient_evidence"
+          : "live_partial",
+      liveEvidenceDurationDays: 0,
+      invitationGateEligible: false,
+      technicalAcceptanceComplete: true,
+      operationalAcceptanceComplete: false,
     }),
     canSeePilotPauseRecommendation(ctx.actorRole)
   );
@@ -908,6 +988,181 @@ export async function assembleHealthResponse(ctx: PilotControlRequestContext) {
       tenantId: ctx.tenantId,
       correlationId: ctx.correlationId,
       generatedAt: ctx.requestedAt,
+      evaluation: buildEvaluationMetadata({
+        evaluatedAt: ctx.requestedAt,
+        blockerPersistenceMode: "read_only",
+      }),
+    })
+  );
+}
+
+export async function assembleAdoptionResponse(
+  ctx: PilotControlRequestContext,
+  searchParams: URLSearchParams
+) {
+  if (!roleHasApiPermission(ctx.actorRole, "pilot_control.adoption.read")) {
+    throw new PilotControlApiError(
+      "PILOT_CONTROL_FORBIDDEN",
+      "Not authorized to view adoption metrics.",
+      403,
+      ctx.correlationId
+    );
+  }
+
+  const range = parseBoundedDateRange(
+    { from: searchParams.get("from"), to: searchParams.get("to") },
+    ctx.correlationId
+  );
+
+  const enrolments = await loadPilotEnrolmentsForTenant(
+    { tenantId: ctx.tenantId, programmeId: ctx.programmeId },
+    { includeHistorical: true }
+  );
+
+  const activity = await queryPilotControlActivity({
+    tenantId: ctx.tenantId,
+    programmeId: ctx.programmeId,
+    from: range.from,
+    to: range.to,
+    page: 1,
+    pageSize: 500,
+  });
+
+  const blockers = await loadActiveProgrammeBlockers({
+    tenantId: ctx.tenantId,
+    programmeId: ctx.programmeId,
+  });
+
+  const readinessSummary = await evaluatePilotCohortReadinessSummary({
+    tenantId: ctx.tenantId,
+    programmeId: ctx.programmeId,
+    asOf: ctx.requestedAt,
+  });
+
+  const events: PilotAdoptionEvent[] = activity.items.map((e) => ({
+    eventId: e.id,
+    eventType: e.eventKind,
+    tenantId: e.tenantId,
+    programmeId: e.programmeId ?? ctx.programmeId,
+    enrolmentId: e.enrolmentId ?? undefined,
+    patientId: e.patientId ?? undefined,
+    actorType: (e.actorType as PilotControlActorType) || "system",
+    actorId: e.actorId ?? undefined,
+    sourceModule: e.sourceModule,
+    occurredAt: e.createdAt,
+    correlationId: e.correlationId ?? undefined,
+    idempotencyKey:
+      typeof e.payload.idempotencyKey === "string"
+        ? e.payload.idempotencyKey
+        : e.id,
+    metadataClass:
+      typeof e.payload.metadataClass === "string"
+        ? e.payload.metadataClass
+        : typeof e.payload.refresh === "string"
+          ? e.payload.refresh
+          : undefined,
+    evidenceClass: classifyPilotEvidenceSource({
+      pilotCohort:
+        typeof e.payload.pilotCohort === "string" ? e.payload.pilotCohort : undefined,
+    }),
+  }));
+
+  const adoption = computePilotAdoptionMetrics({
+    programmeId: ctx.programmeId,
+    tenantId: ctx.tenantId,
+    enrolments: enrolments.map((e) => ({
+      id: e.id,
+      patientId: e.patientId,
+      enrolmentStatus: e.enrolmentStatus,
+      invitedAt: e.invitedAt,
+      activatedAt: e.activatedAt,
+      completedAt: e.completedAt,
+      withdrawnAt: e.withdrawnAt,
+      pausedAt: e.pausedAt,
+      evidenceClass: classifyPilotEvidenceSource({ pilotCohort: e.pilotCohort }),
+    })),
+    events,
+    blockers: blockers.map((b) => ({
+      state: b.state,
+      severity: b.severity,
+      ageSeconds: b.ageSeconds,
+      firstDetectedAt: b.firstDetectedAt,
+      lastConfirmedAt: b.lastConfirmedAt,
+      criticalIntegrity: b.criticalIntegrity,
+    })),
+    evaluatedAt: ctx.requestedAt,
+    partialReadinessEvaluations: readinessSummary.cohort.partialEvaluations,
+    failedReadinessEvaluations: readinessSummary.cohort.failedEvaluations,
+  });
+
+  // Role-sensitive: hide finance detail metrics for roles without finance scope.
+  if (!roleHasApiPermission(ctx.actorRole, "pilot_control.financial_summary.read")) {
+    adoption.finance = {
+      quotesDelivered: {
+        ...adoption.finance.quotesDelivered,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      quotesViewed: {
+        ...adoption.finance.quotesViewed,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      quotesAccepted: {
+        ...adoption.finance.quotesAccepted,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      depositsRequested: {
+        ...adoption.finance.depositsRequested,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      paymentsVerified: {
+        ...adoption.finance.paymentsVerified,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      reconciliationExceptions: {
+        ...adoption.finance.reconciliationExceptions,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+      financialClearanceAchieved: {
+        ...adoption.finance.financialClearanceAchieved,
+        value: 0,
+        warning: "redacted_for_role",
+        confidence: "insufficient_evidence",
+      },
+    };
+  }
+
+  if (!ctx.isAutomaticRefresh) {
+    await recordPilotControlAuditEvent({
+      tenantId: ctx.tenantId,
+      programmeId: ctx.programmeId,
+      eventKind: "pilot_control_adoption_viewed",
+      actorType: "staff",
+      actorId: ctx.fiUserId,
+      correlationId: ctx.correlationId,
+      payload: { route: "adoption", confidence: adoption.confidence.overall },
+    });
+  }
+
+  return wrapPilotControlResponse(
+    adoption,
+    buildResponseMeta({
+      programmeId: ctx.programmeId,
+      tenantId: ctx.tenantId,
+      correlationId: ctx.correlationId,
+      generatedAt: ctx.requestedAt,
+      partial: adoption.confidence.overall === "live_partial",
       evaluation: buildEvaluationMetadata({
         evaluatedAt: ctx.requestedAt,
         blockerPersistenceMode: "read_only",

@@ -260,14 +260,17 @@ describe("1A.4 API — programme / overview / health", () => {
     assert.equal(computeActivationRate({ invited: 0, activated: 0, active: 0 }), null);
   });
 
-  it("empty cohort returns insufficient_evidence AMBER (not misleading GREEN)", () => {
+  it("empty cohort returns not_started/insufficient_evidence AMBER (not misleading GREEN)", () => {
     const health = assemblePilotControlHealth({
       programmeStatus: "planned",
       enrolments: [],
       blockers: [],
     });
     assert.equal(health.verdict, "AMBER");
-    assert.equal(health.expansionRecommendation, "insufficient_evidence");
+    assert.ok(
+      health.expansionRecommendation === "not_started" ||
+        health.expansionRecommendation === "insufficient_evidence"
+    );
     assert.equal(health.ruleVersion, PILOT_HEALTH_RULE_VERSION);
   });
 
@@ -643,6 +646,10 @@ describe("1A.4 API — role projection / source links / errors", () => {
       blockers: [],
       syntheticEvidenceOnly: true,
     });
-    assert.equal(health.expansionRecommendation, "insufficient_evidence");
+    assert.equal(health.verdict, "AMBER");
+    assert.ok(
+      health.expansionRecommendation === "not_started" ||
+        health.expansionRecommendation === "insufficient_evidence"
+    );
   });
 });

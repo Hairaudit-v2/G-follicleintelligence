@@ -296,7 +296,7 @@ export const BLOCKER_EVALUATION_VERSION = "1A.3.0" as const;
 export const PILOT_HEALTH_RULE_VERSION = "1A.1.0" as const;
 
 /** Pilot Control API envelope version. */
-export const PILOT_CONTROL_API_VERSION = "1A.4.0" as const;
+export const PILOT_CONTROL_API_VERSION = "1A.6.0" as const;
 
 // ---------------------------------------------------------------------------
 // Escalation + health
@@ -380,6 +380,23 @@ export const PILOT_CONTROL_EVENT_KINDS = [
   "pilot_control_export_created",
   "pilot_control_access_denied",
   "pilot_control_evaluation_failed",
+  // 1A.6 adoption / workflow coverage (emitters may still be contract_only)
+  "patient_action_overdue",
+  "clinic_action_overdue",
+  "journey_milestone_blocked",
+  "quote_accepted",
+  "payment_reconciliation_required",
+  "pathology_reviewed",
+  "images_requested",
+  "images_reviewed",
+  "notification_delivered",
+  "readiness_evaluated",
+  "blocker_opened",
+  "blocker_escalated",
+  "blocker_resolved",
+  "manual_channel_fallback_recorded",
+  "workflow_abandoned",
+  "pilot_control_adoption_viewed",
 ] as const;
 
 export type PilotControlEventKind = (typeof PILOT_CONTROL_EVENT_KINDS)[number];

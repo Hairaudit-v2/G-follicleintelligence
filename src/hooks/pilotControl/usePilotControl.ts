@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   fetchPilotActivity,
+  fetchPilotAdoption,
   fetchPilotBlockers,
   fetchPilotExport,
   fetchPilotHealth,
@@ -14,6 +15,7 @@ import {
   PilotControlClientError,
 } from "@/src/lib/pilotControl/ui/pilotControlClient";
 import type {
+  PilotAdoptionResponse,
   PilotBlockerListItem,
   PilotControlActivityItem,
   PilotControlExportFormat,
@@ -439,4 +441,62 @@ export function usePilotExport() {
   );
 
   return { busy, error, runExport };
+}
+
+export function usePilotAdoption(opts: {
+  programmeId: string | null;
+  tenantId?: string;
+  from?: string;
+  to?: string;
+  autoRefresh?: boolean;
+}): AsyncState<PilotAdoptionResponse> {
+  const [data, setData] = useState<PilotAdoptionResponse | null>(null);
+  const [meta, setMeta] = useState<PilotControlResponseMetadata | null>(null);
+  const [error, setError] = useState<PilotControlClientError | Error | null>(null);
+  const [loading, setLoading] = useState(Boolean(opts.programmeId));
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
+  const inFlight = useRef(false);
+
+  const refresh = useCallback(
+    async (o?: { automatic?: boolean }) => {
+      if (!opts.programmeId || inFlight.current) return;
+      inFlight.current = true;
+      if (data) setRefreshing(true);
+      else setLoading(true);
+      setError(null);
+      try {
+        const res = await fetchPilotAdoption(opts.programmeId, {
+          tenantId: opts.tenantId,
+          from: opts.from,
+          to: opts.to,
+          automaticRefresh: o?.automatic,
+        });
+        setData(res.data);
+        setMeta(res.meta);
+        setLastRefreshedAt(new Date());
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      } finally {
+        inFlight.current = false;
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [opts.programmeId, opts.tenantId, opts.from, opts.to, data]
+  );
+
+  useEffect(() => {
+    if (!opts.programmeId) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts.programmeId, opts.from, opts.to]);
+
+  useIntervalRefresh(refresh, PILOT_CONTROL_REFRESH_MS.health, Boolean(opts.autoRefresh && opts.programmeId));
+
+  return { data, meta, error, loading, refreshing, lastRefreshedAt, refresh };
 }

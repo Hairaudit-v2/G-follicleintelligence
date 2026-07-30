@@ -1,10 +1,9 @@
 /**
- * FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.5 — metric card definitions (pure).
+ * FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.5 / 1A.6 — metric card definitions (pure).
  */
 
 import type { PilotControlOverview } from "../api/pilotControlApiTypes";
 import { formatAgeSeconds, formatCountOrDash, formatRateOrDash } from "./pilotControlFormatters";
-import { READINESS_DISTRIBUTION_DISCLAIMER } from "./pilotControlUiConstants";
 
 export type PilotMetricCardDef = {
   key: string;
@@ -18,6 +17,7 @@ export type PilotMetricCardDef = {
 export function buildOverviewMetricCards(overview: PilotControlOverview | null): PilotMetricCardDef[] {
   if (!overview) return [];
   const b = overview.blockers;
+  const overall = overview.readiness.overall;
   const oldest =
     typeof b.oldestOpenAgeSeconds === "number"
       ? formatAgeSeconds(b.oldestOpenAgeSeconds)
@@ -51,16 +51,14 @@ export function buildOverviewMetricCards(overview: PilotControlOverview | null):
     {
       key: "blockedPatients",
       label: "Patients blocked",
-      value: formatCountOrDash(overview.readiness.blocked),
-      tooltip: READINESS_DISTRIBUTION_DISCLAIMER,
-      approximate: true,
+      value: formatCountOrDash(overall.blocked),
+      tooltip: "Patients with overall readiness blocked from canonical batch evaluation.",
     },
     {
       key: "attentionPatients",
       label: "Patients requiring attention",
-      value: formatCountOrDash(overview.readiness.attentionRequired),
-      tooltip: READINESS_DISTRIBUTION_DISCLAIMER,
-      approximate: true,
+      value: formatCountOrDash(overall.attentionRequired),
+      tooltip: "Patients with overall readiness attention_required from canonical batch evaluation.",
     },
     {
       key: "criticalBlockers",

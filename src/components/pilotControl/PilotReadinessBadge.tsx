@@ -11,17 +11,23 @@ export function PilotReadinessBadge({
   value,
   approximate,
   size = "sm",
+  title,
 }: {
   value: string | null | undefined;
   approximate?: boolean;
   size?: "sm" | "md";
+  title?: string;
 }) {
   const label = formatReadinessLabel(value);
   const isReady = readinessLooksReady(value) && !readinessMustNotLookReady(value);
   const tone =
     label === "Not applicable"
       ? "neutral"
-      : label === "Unknown" || label === "Not evaluated in register" || label === "Blocker-derived attention"
+      : label === "Unknown" ||
+          label === "Not evaluated" ||
+          label === "Not evaluated in register" ||
+          label === "Blocker-derived attention" ||
+          label === "Partial evaluation"
         ? "neutral"
         : label === "Blocked" || label === "Attention required"
           ? "danger"
@@ -30,7 +36,7 @@ export function PilotReadinessBadge({
             : "warning";
 
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className="inline-flex items-center gap-1" title={title}>
       <FiStatusBadge tone={tone} className={size === "sm" ? "text-[10px]" : undefined}>
         <span className="sr-only">Readiness status: </span>
         {label}

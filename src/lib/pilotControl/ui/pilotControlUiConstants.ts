@@ -65,7 +65,12 @@ export const PILOT_CONTROL_ALLOWLISTED_BLOCKER_FILTERS = [
 ] as const;
 
 export const READINESS_DISTRIBUTION_DISCLAIMER =
-  "Readiness distribution is currently derived from blocker and enrolment data. Full batch readiness aggregation will be added before pilot expansion.";
+  "Readiness distribution is produced by the canonical cohort readiness engine (1A.2/1A.6). Partial mandatory evaluations are never shown as Ready.";
+
+export const ADOPTION_EMPTY_COHORT_MESSAGE =
+  "No live adoption evidence is available.\n\nThe event and metric framework is ready, but real-patient adoption cannot be assessed until an approved cohort begins.";
+
+export const CANONICAL_READINESS_SOURCE = "canonical_batch_readiness" as const;
 
 export const EXPORT_ROLE_NOTICE =
   "Exports contain only the fields permitted for your current role.";

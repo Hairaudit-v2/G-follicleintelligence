@@ -10,4 +10,5 @@ export * from "./composeOverallReadiness";
 export * from "./composeDimensionState";
 export * from "./roleSensitiveProjection";
 export * from "./readinessFixtures";
+export * from "./cohortReadinessSummary";
 export { evaluatePilotPatientReadinessFromSources } from "./evaluateFromSources";

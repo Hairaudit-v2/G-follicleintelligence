@@ -21,6 +21,7 @@ export const PILOT_CONTROL_API_PERMISSION_ALIASES = {
   "pilot_control.blockers.read": ["register_read", "overview_clinic", "overview_full"],
   "pilot_control.activity.read": ["register_read", "overview_clinic", "overview_full"],
   "pilot_control.health.read": ["overview_full", "overview_clinic"],
+  "pilot_control.adoption.read": ["overview_full", "overview_clinic"],
   "pilot_control.export": ["export"],
   "pilot_control.pause_recommendation.read": ["overview_full"],
   "pilot_control.clinical_summary.read": ["detail_clinical_summary", "detail_clinical_full"],

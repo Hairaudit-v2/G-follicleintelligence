@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { PilotAdoptionSection } from "@/src/components/pilotControl/PilotAdoptionSection";
 import { PilotActivityTimeline } from "@/src/components/pilotControl/PilotActivityTimeline";
 import { PilotAttentionQueue } from "@/src/components/pilotControl/PilotAttentionQueue";
 import { PilotBlockerList } from "@/src/components/pilotControl/PilotBlockerList";
@@ -22,6 +23,7 @@ import { PilotPatientRegister } from "@/src/components/pilotControl/PilotPatient
 import { PilotProgrammeHeader } from "@/src/components/pilotControl/PilotProgrammeHeader";
 import {
   usePilotActivity,
+  usePilotAdoption,
   usePilotBlockers,
   usePilotExport,
   usePilotHealth,
@@ -101,6 +103,14 @@ export function PilotControlPage({
   const health = usePilotHealth({
     programmeId,
     tenantId,
+    autoRefresh: true,
+  });
+  const adoptionRange = useMemo(() => activityDateRangeIso("30d"), []);
+  const adoption = usePilotAdoption({
+    programmeId,
+    tenantId,
+    from: adoptionRange.from,
+    to: adoptionRange.to,
     autoRefresh: true,
   });
 
@@ -329,6 +339,8 @@ export function PilotControlPage({
       ) : null}
 
       {overview.data ? <PilotJourneySummary overview={overview.data} /> : null}
+
+      <PilotAdoptionSection adoption={adoption.data} />
 
       <PilotActivityTimeline
         items={activity.data ?? []}

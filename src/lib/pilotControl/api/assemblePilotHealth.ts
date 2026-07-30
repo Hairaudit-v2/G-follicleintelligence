@@ -1,6 +1,8 @@
 /**
- * FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.4 — assemble health response from frozen rules (pure).
+ * FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.4 / 1A.6 — assemble health response from frozen rules (pure).
  * Does not redefine GREEN/AMBER/RED — consumes derivePilotHealthVerdict.
+ * 1A.6: expansion recommendation distinguishes not_started / insufficient_evidence /
+ * technical readiness vs live evidence confidence.
  */
 
 import {
@@ -12,6 +14,8 @@ import { derivePilotHealthVerdict, type PilotHealthDimensions } from "../pilotHe
 import { computeActivationRate, countEnrolmentsByStatus } from "../pilotEnrolmentCore";
 import type { PilotBlockerHealthInput, PilotBlockerRecord } from "../blockers/blockerTypes";
 import { buildPilotBlockerHealthInput } from "../blockers/blockerHealthInput";
+import { derivePilotExpansionRecommendation } from "../adoption/expansionRecommendation";
+import type { PilotMetricConfidence } from "../adoption/adoptionTypes";
 import type { PilotControlHealthResponse } from "./pilotControlApiTypes";
 
 export type AssemblePilotHealthArgs = {
@@ -22,6 +26,11 @@ export type AssemblePilotHealthArgs = {
   syntheticEvidenceOnly?: boolean;
   evaluatedAt?: string;
   previousOldestAgeSeconds?: number;
+  evidenceConfidence?: PilotMetricConfidence;
+  liveEvidenceDurationDays?: number;
+  invitationGateEligible?: boolean;
+  technicalAcceptanceComplete?: boolean;
+  operationalAcceptanceComplete?: boolean;
 };
 
 function dim(
@@ -87,13 +96,29 @@ export function assemblePilotControlHealth(
   }
 
   if (insufficientEvidence) {
+    const expansionRecommendation = derivePilotExpansionRecommendation({
+      programmeStatus: args.programmeStatus,
+      liveEnrolmentCount: realOps,
+      healthVerdict: "AMBER",
+      stopConditionsCritical: stopConditions.some((s) => s.severity === "critical"),
+      blockersRequiringPilotPause: blockerInputs.blockersRequiringPilotPause,
+      openHighBlockers: blockerInputs.openBySeverity.high,
+      evidenceConfidence:
+        args.syntheticEvidenceOnly === true
+          ? "synthetic_only"
+          : args.evidenceConfidence ?? "insufficient_evidence",
+      liveEvidenceDurationDays: args.liveEvidenceDurationDays ?? 0,
+      invitationGateEligible: args.invitationGateEligible,
+      technicalAcceptanceComplete: args.technicalAcceptanceComplete,
+      operationalAcceptanceComplete: args.operationalAcceptanceComplete,
+    });
     return {
       verdict: "AMBER",
       score: undefined,
       dimensions: emptyInsufficientDimensions(activationRate, blockerInputs),
       blockerInputs,
       stopConditions,
-      expansionRecommendation: "insufficient_evidence",
+      expansionRecommendation,
       evaluatedAt,
       ruleVersion: PILOT_HEALTH_RULE_VERSION,
     };
@@ -136,13 +161,19 @@ export function assemblePilotControlHealth(
     criticalSafetyLatch,
   });
 
-  let expansionRecommendation: PilotControlHealthResponse["expansionRecommendation"] =
-    "continue_current_scope";
-  if (result.verdict === "RED" || blockerInputs.blockersRequiringPilotPause > 0) {
-    expansionRecommendation = "pause_pilot";
-  } else if (result.verdict === "AMBER") {
-    expansionRecommendation = "hold_expansion";
-  }
+  const expansionRecommendation = derivePilotExpansionRecommendation({
+    programmeStatus: args.programmeStatus,
+    liveEnrolmentCount: realOps,
+    healthVerdict: result.verdict,
+    stopConditionsCritical: stopConditions.some((s) => s.severity === "critical"),
+    blockersRequiringPilotPause: blockerInputs.blockersRequiringPilotPause,
+    openHighBlockers: blockerInputs.openBySeverity.high,
+    evidenceConfidence: args.evidenceConfidence ?? "live_partial",
+    liveEvidenceDurationDays: args.liveEvidenceDurationDays ?? 0,
+    invitationGateEligible: args.invitationGateEligible,
+    technicalAcceptanceComplete: args.technicalAcceptanceComplete,
+    operationalAcceptanceComplete: args.operationalAcceptanceComplete,
+  });
 
   return {
     verdict: result.verdict,

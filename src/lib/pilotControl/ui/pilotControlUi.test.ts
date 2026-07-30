@@ -77,12 +77,78 @@ function sampleOverview(overrides?: Partial<PilotControlOverview>): PilotControl
       withdrawn: 0,
     },
     readiness: {
-      notStarted: 0,
-      inProgress: 0,
-      attentionRequired: 0,
-      blocked: 0,
-      ready: 0,
-      completed: 0,
+      source: "canonical_batch_readiness",
+      evaluatedPatients: 0,
+      partialEvaluations: 0,
+      failedEvaluations: 0,
+      overall: {
+        notStarted: 0,
+        inProgress: 0,
+        awaitingReview: 0,
+        attentionRequired: 0,
+        blocked: 0,
+        ready: 0,
+        completed: 0,
+        notApplicable: 0,
+        unknown: 0,
+      },
+      dimensions: {
+        clinical: {
+          notStarted: 0,
+          inProgress: 0,
+          awaitingReview: 0,
+          attentionRequired: 0,
+          blocked: 0,
+          ready: 0,
+          completed: 0,
+          notApplicable: 0,
+          unknown: 0,
+        },
+        financial: {
+          notStarted: 0,
+          inProgress: 0,
+          awaitingReview: 0,
+          attentionRequired: 0,
+          blocked: 0,
+          ready: 0,
+          completed: 0,
+          notApplicable: 0,
+          unknown: 0,
+        },
+        patient: {
+          notStarted: 0,
+          inProgress: 0,
+          awaitingReview: 0,
+          attentionRequired: 0,
+          blocked: 0,
+          ready: 0,
+          completed: 0,
+          notApplicable: 0,
+          unknown: 0,
+        },
+        operational: {
+          notStarted: 0,
+          inProgress: 0,
+          awaitingReview: 0,
+          attentionRequired: 0,
+          blocked: 0,
+          ready: 0,
+          completed: 0,
+          notApplicable: 0,
+          unknown: 0,
+        },
+        technical: {
+          notStarted: 0,
+          inProgress: 0,
+          awaitingReview: 0,
+          attentionRequired: 0,
+          blocked: 0,
+          ready: 0,
+          completed: 0,
+          notApplicable: 0,
+          unknown: 0,
+        },
+      },
     },
     blockers: {
       openBySeverity: { info: 0, attention: 0, high: 0, critical: 0 },
@@ -188,7 +254,7 @@ test("1A.5 metrics: zero denominator shows em dash not 0%", () => {
   const rate = cards.find((c) => c.key === "activationRate");
   assert.equal(rate?.value, "—");
   assert.equal(metricCardsContainSensitiveValues(cards), false);
-  assert.ok(cards.some((c) => c.approximate));
+  assert.ok(cards.every((c) => !c.approximate));
 });
 
 // —— Readiness display ——
@@ -199,9 +265,9 @@ test("1A.5 readiness: unknown does not look ready", () => {
   assert.equal(readinessMustNotLookReady("unknown"), true);
   assert.equal(readinessLooksReady("ready"), true);
   const dim = registerDimensionDisplay("unknown");
-  assert.equal(dim.label, "Not evaluated in register");
+  assert.equal(dim.label, "Not evaluated");
   assert.equal(dim.isReady, false);
-  assert.equal(dim.approximate, true);
+  assert.equal(dim.approximate, false);
 });
 
 test("1A.5 readiness: not applicable is not failure styling cue", () => {

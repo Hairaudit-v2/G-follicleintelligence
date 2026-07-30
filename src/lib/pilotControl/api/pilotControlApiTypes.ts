@@ -15,7 +15,16 @@ import type {
   PilotProgrammeStatus,
   PilotSourceModule,
 } from "../pilotControlContracts";
+import type {
+  PilotExpansionRecommendation,
+  RealPatientPilotGate,
+} from "../adoption/adoptionTypes";
+import type { PilotAdoptionResponse } from "../adoption/adoptionMetrics";
 import type { PilotBlockerHealthInput } from "../blockers/blockerTypes";
+import type {
+  PilotCohortReadinessSummary,
+  ReadinessStateDistribution,
+} from "../readiness/cohortReadinessSummary";
 import type { PilotPatientReadiness } from "../readiness/readinessTypes";
 
 export const PILOT_CONTROL_API_ERROR_CODES = [
@@ -176,12 +185,18 @@ export type PilotControlOverview = {
     withdrawn: number;
   };
   readiness: {
-    notStarted: number;
-    inProgress: number;
-    attentionRequired: number;
-    blocked: number;
-    ready: number;
-    completed: number;
+    source: "canonical_batch_readiness";
+    evaluatedPatients: number;
+    partialEvaluations: number;
+    failedEvaluations: number;
+    overall: ReadinessStateDistribution;
+    dimensions: {
+      clinical: ReadinessStateDistribution;
+      financial: ReadinessStateDistribution;
+      patient: ReadinessStateDistribution;
+      operational: ReadinessStateDistribution;
+      technical: ReadinessStateDistribution;
+    };
   };
   blockers: PilotBlockerHealthInput;
   actions: {
@@ -204,11 +219,7 @@ export type PilotControlOverview = {
     score: number;
     reasons: string[];
     criticalFailClosed: boolean;
-    expansionRecommendation:
-      | "continue_current_scope"
-      | "hold_expansion"
-      | "pause_pilot"
-      | "insufficient_evidence";
+    expansionRecommendation: PilotExpansionRecommendation;
     ruleVersion: string;
   };
   urgentItems: PilotUrgentItemSummary[];
@@ -217,6 +228,8 @@ export type PilotControlOverview = {
     requiresPilotPause: boolean;
     blockersRequiringPilotPause: number;
   };
+  /** Invitation gate completeness — never auto-approves humans. */
+  invitationGate?: Pick<RealPatientPilotGate, "eligible" | "blockers">;
   generatedAt: string;
 };
 
@@ -237,7 +250,10 @@ export type PilotPatientRegisterRow = {
     patient: string;
     operational: string;
     technical: string;
-    overall: OverallReadinessState;
+    overall: OverallReadinessState | "attention_required";
+    partial?: boolean;
+    unknownMandatorySignalCount?: number;
+    evaluationFreshnessAt?: string;
   };
   nextActions: {
     patient?: PilotActionSummary;
@@ -362,13 +378,17 @@ export type PilotControlHealthResponse = {
   };
   blockerInputs: PilotBlockerHealthInput;
   stopConditions: Array<{ code: string; message: string; severity: "critical" | "high" }>;
-  expansionRecommendation:
-    | "continue_current_scope"
-    | "hold_expansion"
-    | "pause_pilot"
-    | "insufficient_evidence";
+  expansionRecommendation: PilotExpansionRecommendation;
   evaluatedAt: string;
   ruleVersion: string;
+};
+
+export type {
+  PilotAdoptionResponse,
+  PilotCohortReadinessSummary,
+  PilotExpansionRecommendation,
+  ReadinessStateDistribution,
+  RealPatientPilotGate,
 };
 
 export type PilotControlExportType =

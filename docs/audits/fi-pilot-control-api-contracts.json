@@ -1,10 +1,12 @@
 {
-  "phase": "FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.4",
-  "apiVersion": "1A.4.0",
+  "phase": "FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6",
+  "apiVersion": "1A.6.0",
   "evaluationVersions": {
     "readiness": "1A.2.0",
+    "cohortReadinessSummary": "1A.6.0",
     "blocker": "1A.3.0",
-    "health": "1A.1.0"
+    "health": "1A.1.0",
+    "adoption": "1A.6.0"
   },
   "permissionModel": {
     "frozenScopes": "PILOT_CONTROL_PERMISSION_SCOPES",
@@ -16,6 +18,7 @@
       "pilot_control.blockers.read": ["register_read", "overview_clinic", "overview_full"],
       "pilot_control.activity.read": ["register_read", "overview_clinic", "overview_full"],
       "pilot_control.health.read": ["overview_full", "overview_clinic"],
+      "pilot_control.adoption.read": ["overview_full", "overview_clinic"],
       "pilot_control.export": ["export"],
       "pilot_control.pause_recommendation.read": ["overview_full"],
       "pilot_control.clinical_summary.read": ["detail_clinical_summary", "detail_clinical_full"],
@@ -85,10 +88,11 @@
         "PILOT_CONTROL_INVALID_FILTER",
         "PILOT_CONTROL_RATE_LIMITED"
       ],
-      "implementationStatus": "implemented_with_limitation",
+      "implementationStatus": "implemented",
+      "notes": "Readiness distribution source is canonical_batch_readiness (1A.6 ephemeral cohort summary; not blocker-derived)",
       "limitations": [
-        "Readiness distribution counts are approximated from blocker severity until cohort readiness aggregation cache lands",
-        "App push availability counts return zeros until notification inventory is wired for pilot control"
+        "App push availability counts may return zeros until notification inventory is wired for pilot control",
+        "Empty live cohort correctly yields insufficient evidence / AMBER — not a GREEN success"
       ]
     },
     {
@@ -139,7 +143,7 @@
       ],
       "implementationStatus": "implemented_with_limitation",
       "limitations": [
-        "Register rows do not yet batch full readiness evaluation; journey/readiness cells may show unknown until 1A.5 cache",
+        "Register readiness comes from canonical batch / targeted evaluation — never fabricate Ready; unevaluated cells stay unknown",
         "Some filter query params are accepted but not fully applied pending indexed register materialisation"
       ]
     },
@@ -267,6 +271,31 @@
         "PILOT_CONTROL_PROGRAMME_NOT_FOUND"
       ],
       "implementationStatus": "implemented"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/adoption",
+      "requiredPermission": "pilot_control.adoption.read",
+      "queryParameters": ["programmeId", "from?", "to?", "tenantId?"],
+      "filters": "optional bounded activity window when provided",
+      "pagination": false,
+      "responseContract": "PilotAdoptionResponse (+ invitationGate / meta)",
+      "roleProjections": "overview_full or overview_clinic; no clinical free text or payment instruments",
+      "sensitiveFields": [],
+      "auditEvent": "pilot_control_adoption_viewed",
+      "rateLimits": "perUserRequestsPerMinute",
+      "partialResultBehaviour": "confidence.overall live_partial or insufficient_evidence; empty cohort honest empty state",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_PROGRAMME_NOT_FOUND",
+        "PILOT_CONTROL_RATE_LIMITED"
+      ],
+      "implementationStatus": "implemented_with_limitation",
+      "limitations": [
+        "Many domain event emitters remain contract_only — rates stay insufficient_evidence until live events exist",
+        "Invitation gate reports software completeness only; never enables invites"
+      ]
     },
     {
       "method": "GET",

@@ -2,15 +2,18 @@
 
 **Programme:** Controlled Pilot Control Centre — Evolved Hair Restoration  
 **Phase:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A`  
-**Current stage:** **1A.5 — Control Centre User Interface**  
+**Current stage:** **1A.6 — Pilot Health, Adoption Metrics and Operational Validation**  
 **Date:** 2026-07-30  
 **Tenant (production programme seed):** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
-**Phase verdict (1A overall):** **AMBER** — UI delivered on 1A.4 APIs; full Control Centre remains limited (empty live cohort, approximate readiness, migrations governance)  
+**Phase verdict (1A overall / Full Control Centre):** **GREEN WITH LIMITATIONS** — canonical batch readiness + adoption/health/expansion landed; empty live cohort, incomplete remote migration proof, pending live role-matrix E2E, many adoption emitters `contract_only`  
+**Formal production:** **NO-GO**  
+**Stripe:** **Disabled**  
 **1A.1 stage verdict:** **GREEN** — cohort SoR + readiness/blocker/health contracts + synthetic proofs landed  
 **1A.2 stage verdict:** **GREEN** — read-only readiness engine with provenance, stage map, adapters, and 46-scenario proofs  
 **1A.3 stage verdict:** **GREEN** — derived blocker/ownership/escalation engine with persistence, projections, and 56-scenario proofs  
 **1A.4 stage verdict:** **GREEN** — authenticated, tenant-isolated, role-sensitive read-only APIs with contracts + acceptance tests  
-**1A.5 stage verdict:** **GREEN WITH LIMITATIONS** — Control Centre UI consumes only 1A.4 APIs; empty-cohort honesty + role chrome + architecture proofs landed; live role-matrix E2E and applied remote migrations remain governance gates 
+**1A.5 stage verdict:** **GREEN WITH LIMITATIONS** — Control Centre UI consumes only approved APIs; empty-cohort honesty + role chrome + architecture proofs landed  
+**1A.6 stage verdict:** **GREEN WITH LIMITATIONS** — batch readiness, adoption metrics, expansion recommendation, invitation gate (software completeness), operational acceptance packet; limitations below 
 
 ---
 
@@ -26,7 +29,9 @@ This phase builds a **read-only operational command centre** over existing FI ca
 
 **1A.4 exposes authenticated, tenant-isolated, role-sensitive read-only HTTP APIs** that consume 1A.1–1A.3 engines without reimplementing readiness, severity, ownership, escalation, or health rules.
 
-**1A.5 delivers the authenticated, role-sensitive Pilot Control Centre UI** at `/fi-admin/[tenantId]/pilot-control` (alias `/admin/pilot-control`), consuming only approved 1A.4 contracts. The full Control Centre remains **AMBER** while the live cohort is empty, batch readiness is approximate, and remote migration apply evidence is incomplete.
+**1A.5 delivers the authenticated, role-sensitive Pilot Control Centre UI** at `/fi-admin/[tenantId]/pilot-control` (alias `/admin/pilot-control`), consuming only approved 1A.4 contracts.
+
+**1A.6 completes pilot health, canonical batch readiness, adoption metrics, expansion recommendation, and the real-patient invitation gate (software completeness only).** Full Control Centre is **GREEN WITH LIMITATIONS**; formal production remains **NO-GO** (empty live cohort, remote migration apply evidence incomplete, authenticated role-matrix E2E pending, many adoption emitters `contract_only`).
 
 ---
 
@@ -34,20 +39,20 @@ This phase builds a **read-only operational command centre** over existing FI ca
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Control Centre UI (/fi-admin/.../pilot-control) [1A.5]   │
+│  Control Centre UI (+ adoption)              [1A.5/1A.6]  │
 └───────────────────────────┬─────────────────────────────────┘
                             │ read-only (API-only)
 ┌───────────────────────────▼─────────────────────────────────┐
-│  Pilot Control APIs                         [1A.4 DONE]   │
+│  Pilot Control APIs                         [1A.4/1A.6]  │
 │  GET programmes | overview | patients | blockers |        │
-│  activity | health | export                               │
+│  activity | health | adoption | export                      │
 └───────────────────────────┬─────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────┐
 │  Derived engines (app-layer; not competing SoR)            │
-│  Readiness [1A.2 DONE] · Blockers/escalation [1A.3 DONE]  │
-│  Health pure rules [1A.1] · live metrics [1A.6]           │
-│  Contracts frozen in src/lib/pilotControl/* (1A.1)         │
+│  Readiness [1A.2] · Batch summary [1A.6] · Blockers [1A.3]│
+│  Health [1A.1/1A.6] · Adoption metrics [1A.6]             │
+│  Contracts frozen in src/lib/pilotControl/* (1A.1+)         │
 └─────────────┬───────────────────────────────┬───────────────┘
               │ observes                      │ membership SoR
               ▼                               ▼
@@ -55,7 +60,7 @@ This phase builds a **read-only operational command centre** over existing FI ca
 │ Existing domain SoR      │    │ fi_pilot_programmes         │
 │ Journey · Finance · Docs │    │ fi_pilot_enrolments         │
 │ Pathology · Imaging ·    │    │ fi_pilot_control_events     │
-│ Bookings · Inbox · Notify│    │ (telemetry; no clinical PHI)│
+│ Bookings · Inbox · Notify│    │ fi_pilot_blockers           │
 └──────────────────────────┘    └─────────────────────────────┘
 ```
 
@@ -888,20 +893,174 @@ Deferred to live authenticated deploy (empty planned programme). Capture checkli
 | **Real patient pilot** | Not started | |
 | **Formal production** | **NO-GO** | |
 
-**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6` — Pilot Health, Adoption Metrics and Operational Validation (canonical batch readiness; no real invites until governance gates pass).
+**Next authorised step (historical):** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6` — completed below.
 
 Machine-readable UI register: `docs/audits/fi-pilot-control-ui-surface-register.json`.
 
 ---
 
+# 1A.6 — Pilot Health, Adoption Metrics and Operational Validation
+
+## Batch readiness architecture
+
+```
+evaluatePilotCohortReadinessSummary (server)
+  → loadPilotEnrolmentsForTenant (explicit membership; optional liveOnly)
+  → bounded concurrency (default 4, max 8; max cohort 50)
+  → per enrolment: loadPilotReadinessSourceBag → evaluatePilotPatientReadinessFromSources (1A.2)
+  → summarizePilotCohortReadiness (pure)
+       overall + per-dimension distributions
+       mandatory signal counts
+       live vs synthetic enrolment counts
+       partial/failed evaluation counts
+       freshness + truncated flags
+       source: "canonical_batch_readiness"
+```
+
+| Path | Role |
+|------|------|
+| `readiness/cohortReadinessSummary.ts` | Pure aggregation + evidence classification |
+| `readiness/evaluatePilotCohortReadinessSummary.server.ts` | Bounded server batch |
+| Overview / register / adoption / health assembly | Consume summary; do not re-derive overall from blockers alone |
+
+Partial patient evaluations **never** count as Ready. Unknown mandatory signals remain fail-closed per 1A.2.
+
+## Ephemeral snapshot decision
+
+**No `fi_pilot_readiness_snapshots` table.** Cohort readiness remains an **ephemeral derived evaluation** over domain SoR + 1A.2 engine. Persisted SoR for this phase stays limited to programmes, enrolments, control events, and blockers. Avoids a competing readiness system of record and stale snapshot drift.
+
+## Overview correction
+
+Overview readiness distribution previously approximated from blocker severity (1A.4/1A.5 limitation). **1A.6 sets `source: canonical_batch_readiness`** on overview readiness metrics. Blocker counts remain separate attention signals; they do not substitute for overall readiness composition.
+
+## Register readiness
+
+Patient register rows may still show unevaluated cells when a patient has not been included in the current batch page evaluation. Cells must not fabricate Ready. Full per-patient detail continues to run targeted 1A.2 evaluation (`persistDerivedState=false` on GET).
+
+## Adoption model
+
+| Layer | Location |
+|-------|----------|
+| Event + metric contracts | `adoption/adoptionTypes.ts` (`PILOT_ADOPTION_METRIC_VERSION` `1A.6.0`) |
+| Metric aggregation | `adoption/adoptionMetrics.ts` (idempotent dedupe; live/synthetic split) |
+| Expansion recommendation | `adoption/expansionRecommendation.ts` |
+| Invitation gate | `adoption/realPatientPilotGate.ts` (software completeness; human flags default false) |
+| API | `GET /api/pilot-control/adoption` (`pilot_control.adoption.read`) |
+| UI | `PilotAdoptionSection` |
+
+Registers: `docs/audits/fi-pilot-adoption-event-register.json`, `docs/audits/fi-pilot-adoption-metric-register.json`.
+
+## Event coverage
+
+- **Wired:** Control Centre audit views (`pilot_control_*_viewed`, export, access denied, evaluation failed, adoption viewed).
+- **Contract only:** Domain lifecycle / journey / finance / documents / pathology / images / notifications / readiness / blocker companion events — kinds frozen; emitters not hooked to domain pipelines.
+- **Defined:** `manual_channel_fallback_recorded` (channel classes frozen; no write UI yet).
+
+Staff adoption **excludes** automatic polling (`metadataClass` automatic_refresh / polling / auto_refresh).
+
+## Metric denominators
+
+| Metric | Denominator rule |
+|--------|------------------|
+| Activation rate | activated ÷ **invited** (not approved) |
+| Patient action completion | completed ÷ (completed + overdue); optional actions must not dilute |
+| Notification delivery | delivered ÷ (delivered + failed); sent-alone ≠ success |
+| Journey / completion rate | completed ÷ activated\|active\|completed pool |
+| Zero denominator | `null` / UI `—`; never invent GREEN rates |
+
+## Confidence
+
+`live_verified` · `live_partial` · `synthetic_only` · `snapshot_derived` · `insufficient_evidence` · `source_unavailable`.
+
+Empty live cohort → overall adoption confidence **insufficient_evidence**. Synthetic-only fixtures never promote to live_verified.
+
+## Live versus synthetic
+
+Evidence classes: `live_patient`, `synthetic_fixture`, `staff_test`, `smoke_test`, `migration_test`. Live rates exclude non-live classes via `isLivePilotEvidence`.
+
+## Health completion
+
+`assemblePilotControlHealth` consumes frozen `derivePilotHealthVerdict` and adds:
+
+- Empty / planned / synthetic-only → AMBER + insufficient evidence (never misleading GREEN)
+- Expansion recommendation codes (`not_started` … `eligible_for_governance_review`)
+- Stop conditions (identity, pause-recommended, clinical safety)
+- Dimension framing for technical / operational / evidence confidence
+
+## Expansion recommendation
+
+Deterministic pure function. Critical stop / RED / pause-recommended → `pause_pilot`. Planned or zero live enrolments → `not_started` / `insufficient_evidence`. Never auto-invites.
+
+## Invitation gate (software completeness only)
+
+`evaluateRealPatientPilotGate` computes completeness for software + human gates. Human approvals **default false** and are never invented. Software **must not** flip `real_patient_invites_enabled`, invite patients, or activate the programme. `eligible` only when all gates true — still requires human invite process.
+
+Operational packet: `docs/audits/FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A6-OPERATIONAL-ACCEPTANCE.md`.
+
+Recommended initial cohort (docs only): **3–5 patients, one clinic, one pathway**.
+
+## Remote migration proof status
+
+| Migration | Local | Remote apply evidence |
+|-----------|-------|----------------------|
+| `202611041001_platform_pilot_control_centre_1a1_cohort.sql` | Present | **Not claimed** — governance-gated |
+| `202611041002_platform_pilot_control_centre_1a3_blockers.sql` | Present | **Not claimed** — governance-gated |
+
+This audit does **not** invent remote apply proof. UI migration gate checks table presence at runtime and does not auto-apply.
+
+## Authenticated E2E status
+
+| Journey | Status |
+|---------|--------|
+| Unauthenticated denial + alias redirect | Covered (Playwright) |
+| Pure unit/API/UI/1A.6 proofs | Covered (`pilotCohortReadiness1A6.test.ts` + prior suites) |
+| Live authenticated role matrix (reception/clinical/finance/technical) against deployed tenant | **Pending** live credentials / governed acceptance |
+
+## Known limitations (1A.6)
+
+1. No live patient enrolments — empty cohort AMBER / insufficient evidence is correct.
+2. Many domain adoption emitters remain `contract_only`.
+3. `manual_channel_fallback_recorded` defined but no staff write UI.
+4. Remote migration apply evidence incomplete (local files only).
+5. Authenticated multi-role live E2E pending.
+6. Formal production **NO-GO**; Stripe **Disabled**; real invites **Disabled**.
+
+## Production impact (1A.6)
+
+| Area | Impact |
+|------|--------|
+| Clinical / financial / journey SoR | **None** |
+| Patient invites / Stripe | **None** |
+| Schema | No new competing readiness snapshot table |
+| New HTTP | Read-only `/api/pilot-control/adoption` |
+| UI | Adoption section + canonical readiness labelling |
+| Programme activation | Software gate only; humans retain authority |
+
+## Final verdict (1A.6)
+
+| Scope | Verdict | Rationale |
+|-------|---------|-----------|
+| **1A.1–1A.4** | **GREEN** | Unchanged |
+| **1A.5** | **GREEN WITH LIMITATIONS** | Unchanged |
+| **1A.6** | **GREEN WITH LIMITATIONS** | Batch readiness, adoption, health/expansion, gate, ops packet; empty cohort + emitters + migrations + live E2E open |
+| **Full Pilot Control Centre** | **GREEN WITH LIMITATIONS** | Usable observe-only centre; not production-authorised for live patients |
+| **Real patient pilot** | **Not started** | |
+| **Formal production** | **NO-GO** | |
+| **Stripe** | **Disabled** | |
+
+**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.7` — Validation and live evidence (synthetic then authorised cohort); no real invites until invitation gates + leadership sign-off.
+
+---
+
 ## Known limitations
 
-1. **No live patient enrolments** — Evolved programme row is seeded; cohort remains empty until authorised staff approve synthetic/real enrolments via a later controlled process (real invites still out of scope).
-2. **Domain readiness engines wired in 1A.2** (pure + server loaders); some live fields remain limited as listed above.
-3. **Control Centre UI (1A.5)** landed; still limited by empty cohort and approximate readiness aggregation.
-4. **Adoption event writers** not hooked to journey/finance/notify pipelines (schema ready; API can read events).
-5. **`npm run check:migrations`** currently reports a pre-existing duplicate version `20260729120001` unrelated to this phase.
-6. Migration not applied to remote in this delivery step — apply via governed Supabase workflow before relying on live APIs/UI.
+1. **No live patient enrolments** — Evolved programme row is seeded; cohort empty until governed enrolment; real invites still disabled.
+2. **Domain readiness engines wired in 1A.2**; some live adapter fields remain limited as listed in 1A.2.
+3. **Canonical batch readiness landed in 1A.6** (ephemeral; no snapshot SoR); empty cohort still yields insufficient evidence.
+4. **Adoption event writers** mostly `contract_only` for domain pipelines; Control Centre audit views are `wired`.
+5. **Remote migration apply evidence incomplete** — local `202611041001` / `202611041002` exist; do not treat as remotely proven.
+6. **Authenticated role-matrix E2E** pending live credentials.
+7. **`npm run check:migrations`** may still report pre-existing unrelated duplicate versions.
 
 ---
 
@@ -914,22 +1073,24 @@ Machine-readable UI register: `docs/audits/fi-pilot-control-ui-surface-register.
 | Journey state machine | None |
 | Patient App invites | None (explicitly disabled in programme metadata) |
 | Stripe / generative ImagingOS | None |
-| Schema | Additive tables + RLS; Evolved programme seed only if tenant exists |
+| Schema | Additive tables + RLS; Evolved programme seed only if tenant exists; **no** readiness snapshot table |
 | Existing screens | Unchanged except optional Pilot Control nav for authorised roles |
-| New HTTP surface | Read-only `/api/pilot-control/*` (auth + tenant + role gated) |
-| New UI surface | `/fi-admin/[tenantId]/pilot-control` (API-only; server gated) |
+| New HTTP surface | Read-only `/api/pilot-control/*` including `/adoption` (auth + tenant + role gated) |
+| New UI surface | `/fi-admin/[tenantId]/pilot-control` (API-only; server gated; adoption section) |
 
 ---
 
 ## Pilot expansion recommendation
 
-**Do not expand the live patient pilot** until:
+**Do not invite or expand live patients** until:
 
-1. 1A.6 replaces blocker-derived readiness approximations with canonical batch aggregation  
-2. 1A.7 acceptance scenarios 1–20 pass against a synthetic (then authorised) cohort  
-3. Phase verdict reaches **GREEN** under the programme rule: authorised staff can identify every active pilot patient, readiness, actions, blockers, and relevant system errors from one screen  
+1. Remote migrations applied under governance with recorded proof  
+2. Authenticated role-matrix E2E passes on the target tenant  
+3. Invitation gate software + human fields are complete and director-signed  
+4. 1A.7 acceptance scenarios pass against synthetic then authorised cohort  
+5. Expansion recommendation is not `not_started` / `insufficient_evidence` / `pause_pilot` / `hold_expansion` without explicit leadership override  
 
-**1A.5 recommendation:** Proceed to **1A.6**. Keep programme status `planned`; do not invite real patients. Stripe remains disabled.
+**1A.6 recommendation:** Keep programme `planned`. Stripe disabled. Real invites disabled. Use Control Centre for observe-only readiness/health/adoption framework validation.
 
 ---
 
@@ -942,8 +1103,8 @@ Machine-readable UI register: `docs/audits/fi-pilot-control-ui-surface-register.
 | 1A.3 Blocker and escalation engine | **DONE** |
 | 1A.4 Read-only APIs | **DONE** |
 | 1A.5 Control Centre UI | **DONE** (GREEN WITH LIMITATIONS) |
-| 1A.6 Pilot health and adoption metrics | Health pure rules done; live metrics partial via API health route |
-| 1A.7 Validation and evidence | Partial (pure + readiness + blocker + API + UI proofs); full live evidence later |
+| 1A.6 Pilot health and adoption metrics | **DONE** (GREEN WITH LIMITATIONS) |
+| 1A.7 Validation and evidence | Partial (pure + readiness + blocker + API + UI + 1A.6 proofs); full live evidence later |
 
 ---
 
@@ -954,8 +1115,11 @@ Machine-readable UI register: `docs/audits/fi-pilot-control-ui-surface-register.
 | **1A.1** | **GREEN** | Explicit cohort SoR, frozen readiness/blocker/escalation/health/permission contracts, tenant-safe queries, synthetic fixture, unit proofs |
 | **1A.2** | **GREEN** | Read-only readiness engine with provenance, stage-aware requirements, domain adapters, cohort pagination entrypoint, 46-scenario tests |
 | **1A.3** | **GREEN** | Derived blocker/ownership/escalation engine, `fi_pilot_blockers`, role projections, health inputs, 56-scenario proofs |
-| **1A.4** | **GREEN** | Authenticated tenant-isolated role-sensitive read-only APIs; contracts register; 39 API proofs; 107 prior tests retained |
-| **1A.5** | **GREEN WITH LIMITATIONS** | API-only Control Centre UI; access gated; empty-cohort honesty; 168 tests; surface register |
-| **1A overall (Control Centre usable)** | **AMBER** | UI exists but live cohort empty; readiness still approximate; migrations/live E2E incomplete |
+| **1A.4** | **GREEN** | Authenticated tenant-isolated role-sensitive read-only APIs; contracts register; API proofs retained |
+| **1A.5** | **GREEN WITH LIMITATIONS** | API-only Control Centre UI; access gated; empty-cohort honesty; surface register |
+| **1A.6** | **GREEN WITH LIMITATIONS** | Canonical batch readiness; adoption metrics/events; expansion + invitation gate; ops packet; limitations honest |
+| **Full Pilot Control Centre** | **GREEN WITH LIMITATIONS** | Observe-only centre complete enough to operate; not live-patient authorised |
+| **Formal production** | **NO-GO** | Empty cohort; migrations/E2E/emitters/gates open |
+| **Stripe** | **Disabled** | |
 
-**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6` — Pilot Health, Adoption Metrics and Operational Validation.
+**Next authorised step:** `FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.7` — Validation and live evidence. No real patient invites until governance gates pass.

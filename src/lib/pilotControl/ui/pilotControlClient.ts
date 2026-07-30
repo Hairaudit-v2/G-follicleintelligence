@@ -12,6 +12,7 @@ import type {
   PilotControlHealthResponse,
   PilotControlOverview,
   PilotControlPaginatedResponse,
+  PilotAdoptionResponse,
   PilotBlockerListItem,
   PilotPatientControlDetail,
   PilotPatientRegisterRow,
@@ -110,6 +111,28 @@ export function fetchPilotHealth(
   return pilotControlFetch<PilotControlApiResponse<PilotControlHealthResponse>>(
     "/health",
     { programmeId, tenantId: opts?.tenantId },
+    opts
+  );
+}
+
+export function fetchPilotAdoption(
+  programmeId: string,
+  opts?: {
+    tenantId?: string;
+    from?: string;
+    to?: string;
+    automaticRefresh?: boolean;
+    signal?: AbortSignal;
+  }
+) {
+  return pilotControlFetch<PilotControlApiResponse<PilotAdoptionResponse>>(
+    "/adoption",
+    {
+      programmeId,
+      tenantId: opts?.tenantId,
+      from: opts?.from,
+      to: opts?.to,
+    },
     opts
   );
 }

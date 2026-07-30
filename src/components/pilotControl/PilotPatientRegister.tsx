@@ -40,25 +40,45 @@ function cellValue(
     case "milestone":
       return row.journey.milestoneLabel || row.journey.milestone || "—";
     case "overallReadiness":
-      return <PilotReadinessBadge value={row.readiness.overall} />;
+      return (
+        <PilotReadinessBadge
+          value={row.readiness.overall}
+          approximate={false}
+          title={
+            row.readiness.partial
+              ? "Partial: one or more mandatory sources were unavailable"
+              : undefined
+          }
+        />
+      );
     case "clinical": {
-      const d = registerDimensionDisplay(row.readiness.clinical);
+      const d = registerDimensionDisplay(row.readiness.clinical, {
+        partial: row.readiness.partial,
+      });
       return <PilotReadinessBadge value={d.label} approximate={d.approximate} />;
     }
     case "financial": {
-      const d = registerDimensionDisplay(row.readiness.financial);
+      const d = registerDimensionDisplay(row.readiness.financial, {
+        partial: row.readiness.partial,
+      });
       return <PilotReadinessBadge value={d.label} approximate={d.approximate} />;
     }
     case "patientDim": {
-      const d = registerDimensionDisplay(row.readiness.patient);
+      const d = registerDimensionDisplay(row.readiness.patient, {
+        partial: row.readiness.partial,
+      });
       return <PilotReadinessBadge value={d.label} approximate={d.approximate} />;
     }
     case "operational": {
-      const d = registerDimensionDisplay(row.readiness.operational);
+      const d = registerDimensionDisplay(row.readiness.operational, {
+        partial: row.readiness.partial,
+      });
       return <PilotReadinessBadge value={d.label} approximate={d.approximate} />;
     }
     case "technical": {
-      const d = registerDimensionDisplay(row.readiness.technical);
+      const d = registerDimensionDisplay(row.readiness.technical, {
+        partial: row.readiness.partial,
+      });
       return <PilotReadinessBadge value={d.label} approximate={d.approximate} />;
     }
     case "primaryBlocker":

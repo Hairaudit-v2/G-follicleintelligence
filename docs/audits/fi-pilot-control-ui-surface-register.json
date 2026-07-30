@@ -1,7 +1,7 @@
 {
-  "phase": "FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.5",
-  "uiVersion": "1A.5.0",
-  "apiVersionConsumed": "1A.4.0",
+  "phase": "FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.6",
+  "uiVersion": "1A.6.0",
+  "apiVersionConsumed": "1A.6.0",
   "primaryRoute": "/fi-admin/[tenantId]/pilot-control",
   "aliasRoute": "/admin/pilot-control",
   "programmeRoute": "/fi-admin/[tenantId]/pilot-control/[programmeId]",
@@ -21,6 +21,7 @@
       "GET /api/pilot-control/blockers",
       "GET /api/pilot-control/activity",
       "GET /api/pilot-control/health",
+      "GET /api/pilot-control/adoption",
       "GET /api/pilot-control/export"
     ],
     "forbidden": [
@@ -51,8 +52,8 @@
       "apiSource": "GET /health + overview.health",
       "permission": "pilot_control.health.read",
       "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
-      "sensitiveFields": ["stopConditions", "pauseRecommendation"],
-      "emptyStateBehaviour": "insufficient evidence copy",
+      "sensitiveFields": ["stopConditions", "pauseRecommendation", "expansionRecommendation"],
+      "emptyStateBehaviour": "insufficient evidence copy; expansion not_started",
       "partialStateBehaviour": "inherits overview/health warnings",
       "refreshBehaviour": "60–120s automatic",
       "implementationStatus": "implemented"
@@ -66,7 +67,7 @@
       "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
       "sensitiveFields": [],
       "emptyStateBehaviour": "zeros + activation rate —",
-      "partialStateBehaviour": "approximate readiness labelled",
+      "partialStateBehaviour": "canonical_batch_readiness labelled; never blocker-derived as readiness SoR",
       "refreshBehaviour": "with overview",
       "implementationStatus": "implemented"
     },
@@ -92,7 +93,7 @@
       "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
       "sensitiveFields": ["pathology/finance cells role-column gated; no fabricated ready"],
       "emptyStateBehaviour": "empty enrolments explanation",
-      "partialStateBehaviour": "unknown cells show Not evaluated in register",
+      "partialStateBehaviour": "unknown cells show Not evaluated in register; partial never Ready; canonical batch where evaluated",
       "refreshBehaviour": "manual or 120s",
       "implementationStatus": "implemented"
     },
@@ -126,13 +127,26 @@
       "surfaceKey": "journey_readiness_summary",
       "route": "/fi-admin/[tenantId]/pilot-control",
       "component": "PilotJourneySummary",
-      "apiSource": "GET /overview",
+      "apiSource": "GET /overview (canonical_batch_readiness)",
       "permission": "pilot_control.overview.read",
       "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
       "sensitiveFields": [],
-      "emptyStateBehaviour": "zero distribution",
-      "partialStateBehaviour": "blocker-derived disclaimer",
+      "emptyStateBehaviour": "zero distribution + insufficient evidence",
+      "partialStateBehaviour": "canonical batch source; partial evaluations never count as Ready",
       "refreshBehaviour": "with overview",
+      "implementationStatus": "implemented"
+    },
+    {
+      "surfaceKey": "adoption_and_engagement",
+      "route": "/fi-admin/[tenantId]/pilot-control",
+      "component": "PilotAdoptionSection",
+      "apiSource": "GET /adoption",
+      "permission": "pilot_control.adoption.read",
+      "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
+      "sensitiveFields": [],
+      "emptyStateBehaviour": "No live adoption evidence copy; framework ready",
+      "partialStateBehaviour": "confidence badge (live_partial / insufficient_evidence); rates as — when zero denominator",
+      "refreshBehaviour": "with overview/adoption load",
       "implementationStatus": "implemented"
     },
     {
@@ -156,7 +170,7 @@
       "permission": "pilot_control.health.read",
       "roleVisibility": ["director", "administrator", "clinic_manager", "reception", "consultant", "clinical", "finance", "technical"],
       "sensitiveFields": [],
-      "emptyStateBehaviour": "dimensions unavailable",
+      "emptyStateBehaviour": "dimensions unavailable / insufficient evidence",
       "partialStateBehaviour": "stale/partial flagged",
       "refreshBehaviour": "with health",
       "implementationStatus": "implemented"

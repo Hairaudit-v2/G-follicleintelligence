@@ -10,14 +10,23 @@ import { formatDateTime } from "@/src/lib/pilotControl/ui/pilotControlFormatters
 import { READINESS_DISTRIBUTION_DISCLAIMER } from "@/src/lib/pilotControl/ui/pilotControlUiConstants";
 
 export function PilotJourneySummary({ overview }: { overview: PilotControlOverview }) {
-  const r = overview.readiness;
+  const r = overview.readiness.overall;
+  const canonical = overview.readiness.source === "canonical_batch_readiness";
   return (
     <section className="space-y-3" aria-labelledby="pilot-journey-summary-heading">
       <SectionHeader
         id="pilot-journey-summary-heading"
         title="Journey and readiness summary"
-        description={READINESS_DISTRIBUTION_DISCLAIMER}
+        description={
+          canonical
+            ? "Canonical cohort readiness from the 1A.2 engine. Partial evaluations are never Ready."
+            : READINESS_DISTRIBUTION_DISCLAIMER
+        }
       />
+      <p className="text-xs text-slate-500">
+        Evaluated {overview.readiness.evaluatedPatients} · Partial{" "}
+        {overview.readiness.partialEvaluations} · Failed {overview.readiness.failedEvaluations}
+      </p>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {(
           [
@@ -25,7 +34,7 @@ export function PilotJourneySummary({ overview }: { overview: PilotControlOvervi
             ["In progress", r.inProgress],
             ["Attention", r.attentionRequired],
             ["Blocked", r.blocked],
-            ["Ready (approx.)", r.ready],
+            ["Ready", r.ready],
             ["Completed", r.completed],
           ] as const
         ).map(([label, count]) => (

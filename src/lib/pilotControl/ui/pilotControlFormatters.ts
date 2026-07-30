@@ -19,8 +19,10 @@ export type ReadinessDisplayLabel =
   | "Completed"
   | "Not applicable"
   | "Unknown"
+  | "Not evaluated"
   | "Not evaluated in register"
-  | "Blocker-derived attention";
+  | "Blocker-derived attention"
+  | "Partial evaluation";
 
 const READY_LIKE = new Set(["ready", "completed"]);
 
@@ -139,6 +141,10 @@ export function formatExpansionRecommendation(
       return "Pause pilot recommended";
     case "insufficient_evidence":
       return "Insufficient live evidence";
+    case "not_started":
+      return "Pilot not started";
+    case "eligible_for_governance_review":
+      return "Eligible for governance review";
     default:
       return "—";
   }
@@ -176,6 +182,7 @@ export function coerceDisplayedHealthVerdict(args: {
   const total = args.totalApproved ?? 0;
   if (
     expansion === "insufficient_evidence" ||
+    expansion === "not_started" ||
     (total === 0 && !args.realPatientInvitesEnabled)
   ) {
     return { verdict: "AMBER", forceInsufficientEvidence: true };
@@ -195,11 +202,15 @@ export function healthBannerCopy(args: {
 }): { title: string; body: string } {
   if (
     args.forceInsufficientEvidence ||
-    args.expansionRecommendation === "insufficient_evidence"
+    args.expansionRecommendation === "insufficient_evidence" ||
+    args.expansionRecommendation === "not_started"
   ) {
     return {
       title: "Insufficient live pilot evidence",
-      body: "The platform is technically ready for controlled use, but no real patient cohort has been evaluated.",
+      body:
+        args.expansionRecommendation === "not_started"
+          ? "The programme has not started a live cohort. Technical readiness does not equal operational pilot evidence."
+          : "No real pilot enrolments or live patient activity yet. Do not treat the Control Centre as live-pilot GREEN.",
     };
   }
   const v = String(args.verdict).toUpperCase();
@@ -221,29 +232,33 @@ export function healthBannerCopy(args: {
   };
 }
 
-/** Dimension readiness for register: never fabricate ready. */
+/** Dimension readiness for register: never fabricate ready. Partial ≠ Ready. */
 export function registerDimensionDisplay(
   value: string | null | undefined,
-  opts?: { approximate?: boolean }
+  opts?: { approximate?: boolean; partial?: boolean }
 ): { label: ReadinessDisplayLabel; approximate: boolean; isReady: boolean } {
   const raw = String(value ?? "").trim();
-  if (!raw || raw.toLowerCase() === "unknown") {
+  if (opts?.partial) {
     return {
-      label: "Not evaluated in register",
-      approximate: true,
+      label: "Attention required",
+      approximate: false,
       isReady: false,
     };
   }
-  if (opts?.approximate && !readinessLooksReady(raw)) {
-    const label = formatReadinessLabel(raw);
-    if (label === "Attention required" || label === "Blocked") {
-      return { label: "Blocker-derived attention", approximate: true, isReady: false };
-    }
+  if (!raw || raw.toLowerCase() === "unknown") {
+    return {
+      label: "Not evaluated",
+      approximate: false,
+      isReady: false,
+    };
   }
   const label = formatReadinessLabel(raw);
+  if (label === "Ready" && opts?.partial) {
+    return { label: "Attention required", approximate: false, isReady: false };
+  }
   return {
     label,
-    approximate: Boolean(opts?.approximate),
+    approximate: false,
     isReady: readinessLooksReady(raw) && label !== "Unknown",
   };
 }
