@@ -27,6 +27,7 @@ export const PILOT_CONTROL_API_PERMISSION_ALIASES = {
   "pilot_control.clinical_summary.read": ["detail_clinical_summary", "detail_clinical_full"],
   "pilot_control.financial_summary.read": ["detail_financial_summary", "detail_financial_full"],
   "pilot_control.technical_summary.read": ["detail_technical"],
+  "pilot_control.activation_readiness.read": ["activation_readiness_read"],
 } as const satisfies Record<string, readonly PilotControlPermissionScope[]>;
 
 export type PilotControlApiPermissionAlias = keyof typeof PILOT_CONTROL_API_PERMISSION_ALIASES;
@@ -55,4 +56,9 @@ export function canSeePilotPauseRecommendation(role: PilotControlRoleKey): boole
 
 export function canExportPilotControl(role: PilotControlRoleKey): boolean {
   return pilotControlRoleHasScope(role, "export");
+}
+
+/** 1B activation readiness surface — director/administrator only; read-only. */
+export function canSeePilotActivationReadiness(role: PilotControlRoleKey): boolean {
+  return pilotControlRoleHasScope(role, "activation_readiness_read");
 }

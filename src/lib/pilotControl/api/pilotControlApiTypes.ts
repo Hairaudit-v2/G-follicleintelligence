@@ -230,6 +230,18 @@ export type PilotControlOverview = {
   };
   /** Invitation gate completeness — never auto-approves humans. */
   invitationGate?: Pick<RealPatientPilotGate, "eligible" | "blockers">;
+  /**
+   * 1B controlled activation gate — director/admin only.
+   * approvedForInitialInvites requires human decision; never auto-set.
+   */
+  activationGate?: {
+    eligibleForGovernanceReview: boolean;
+    approvedForInitialInvites: boolean;
+    blockers: string[];
+    warnings: string[];
+    version: string;
+    fields: Record<string, boolean>;
+  };
   generatedAt: string;
 };
 

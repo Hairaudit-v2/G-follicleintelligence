@@ -397,6 +397,11 @@ export const PILOT_CONTROL_EVENT_KINDS = [
   "manual_channel_fallback_recorded",
   "workflow_abandoned",
   "pilot_control_adoption_viewed",
+  // 1B activation / candidate / preflight coverage (emitters may remain contract_only)
+  "pilot_patient_candidate_added",
+  "pilot_patient_preflight_started",
+  "pilot_patient_preflight_completed",
+  "pilot_patient_enrolled",
 ] as const;
 
 export type PilotControlEventKind = (typeof PILOT_CONTROL_EVENT_KINDS)[number];
@@ -459,6 +464,8 @@ export const PILOT_CONTROL_PERMISSION_SCOPES = [
   "detail_app_activity",
   "detail_technical",
   "export",
+  /** 1B: read-only activation readiness projection (director / administrator). */
+  "activation_readiness_read",
 ] as const;
 
 export type PilotControlPermissionScope = (typeof PILOT_CONTROL_PERMISSION_SCOPES)[number];
@@ -495,6 +502,7 @@ export const PILOT_CONTROL_ROLE_SCOPES: Record<PilotControlRoleKey, readonly Pil
       "detail_communication",
       "detail_app_activity",
       "detail_technical",
+      // No activation_readiness_read — director/admin only for approval surface
     ],
     reception: [
       "overview_clinic",

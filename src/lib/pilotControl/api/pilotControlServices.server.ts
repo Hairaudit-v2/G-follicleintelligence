@@ -24,6 +24,10 @@ import { buildPilotBlockerHealthInput } from "../blockers/blockerHealthInput";
 import { classifyPilotEvidenceSource } from "../readiness/cohortReadinessSummary";
 import { computePilotAdoptionMetrics } from "../adoption/adoptionMetrics";
 import { evaluateRealPatientPilotGate } from "../adoption/realPatientPilotGate";
+import {
+  evaluateControlledPilotActivationGate,
+  summariseEventCoverage,
+} from "../activation";
 import type { PilotAdoptionEvent } from "../adoption/adoptionTypes";
 import type { OverallReadinessState, PilotEnrolmentStatus } from "../pilotControlContracts";
 import type { PilotControlActorType } from "../pilotControlContracts";
@@ -47,6 +51,7 @@ import {
 } from "./pilotControlPagination";
 import {
   canExportPilotControl,
+  canSeePilotActivationReadiness,
   canSeePilotPauseRecommendation,
   roleHasApiPermission,
 } from "./pilotControlPermissions";
@@ -245,6 +250,21 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
     // Human gates remain false until governance completes.
   });
 
+  const eventCoverage = summariseEventCoverage();
+  const activationGate = evaluateControlledPilotActivationGate({
+    controlCentreAccepted: true,
+    migrationsApplied: false,
+    tenantIsolationProven: true,
+    roleMatrixProven: false,
+    identityPreflightProven: true,
+    financePreflightProven: true,
+    consentControlsProven: true,
+    eventCoverageSufficient: eventCoverage.sufficientForInitialPathway,
+    evaluatedAt: ctx.requestedAt,
+    warnings: eventCoverage.warnings,
+    // Human fields remain false; approvedForInitialInvites never auto-set.
+  });
+
   const health = mapHealthVerdictForPauseVisibility(
     assemblePilotControlHealth({
       programmeStatus: programme.status,
@@ -360,6 +380,39 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
       eligible: invitationGate.eligible,
       blockers: invitationGate.blockers,
     },
+    ...(canSeePilotActivationReadiness(ctx.actorRole)
+      ? {
+          activationGate: {
+            eligibleForGovernanceReview: activationGate.eligibleForGovernanceReview,
+            approvedForInitialInvites: activationGate.approvedForInitialInvites,
+            blockers: activationGate.blockers,
+            warnings: activationGate.warnings,
+            version: activationGate.version,
+            fields: {
+              controlCentreAccepted: activationGate.controlCentreAccepted,
+              migrationsApplied: activationGate.migrationsApplied,
+              tenantIsolationProven: activationGate.tenantIsolationProven,
+              roleMatrixProven: activationGate.roleMatrixProven,
+              identityPreflightProven: activationGate.identityPreflightProven,
+              financePreflightProven: activationGate.financePreflightProven,
+              consentControlsProven: activationGate.consentControlsProven,
+              eventCoverageSufficient: activationGate.eventCoverageSufficient,
+              operationalSopApproved: activationGate.operationalSopApproved,
+              staffTrainingCompleted: activationGate.staffTrainingCompleted,
+              supportCoverageConfirmed: activationGate.supportCoverageConfirmed,
+              incidentResponseConfirmed: activationGate.incidentResponseConfirmed,
+              manualFallbackConfirmed: activationGate.manualFallbackConfirmed,
+              rollbackConfirmed: activationGate.rollbackConfirmed,
+              patientPilotConsentApproved: activationGate.patientPilotConsentApproved,
+              clinicalGovernanceApproved: activationGate.clinicalGovernanceApproved,
+              privacyApproved: activationGate.privacyApproved,
+              initialPathwayApproved: activationGate.initialPathwayApproved,
+              initialCohortApproved: activationGate.initialCohortApproved,
+              directorApproval: activationGate.directorApproval,
+            },
+          },
+        }
+      : {}),
     generatedAt: ctx.requestedAt,
   };
 

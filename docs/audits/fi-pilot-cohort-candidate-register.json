@@ -1,0 +1,39 @@
+{
+  "phase": "1B",
+  "programme": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+  "pathwayLock": "quote_to_deposit",
+  "recommendedCohortSize": { "min": 3, "max": 5 },
+  "notes": [
+    "No real patient-sensitive data in this register.",
+    "Candidates are reviewed individually — bulk approval is forbidden.",
+    "Synthetic/smoke fixtures must be excluded from live cohort.",
+    "Table fi_pilot_cohort_candidate_reviews is the persistence target when reviews are recorded."
+  ],
+  "eligibilityRules": [
+    "one_clinic",
+    "one_pathway",
+    "trained_staff",
+    "identity_preflight_pass",
+    "finance_preflight_pass",
+    "consent_preflight_pass",
+    "no_disputed_finance",
+    "no_ambiguous_identity",
+    "no_high_complexity_clinical_exception",
+    "explicit_pilot_consent_ready",
+    "named_operational_owner",
+    "named_clinical_owner_where_applicable",
+    "not_synthetic_or_smoke"
+  ],
+  "lifecycle": [
+    "candidate",
+    "preflight_in_progress",
+    "eligible_for_clinical_review",
+    "eligible_for_governance_review",
+    "approved",
+    "enrolled"
+  ],
+  "alternateOutcomes": ["deferred", "excluded", "withdrawn"],
+  "candidates": [],
+  "approvedCount": 0,
+  "invitationsEnabled": false
+}

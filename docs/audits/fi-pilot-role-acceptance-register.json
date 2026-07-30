@@ -1,0 +1,37 @@
+{
+  "phase": "1B",
+  "programme": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+  "notes": [
+    "Contract expectations for authenticated browser acceptance.",
+    "Live session evidence remains pending — unauthenticated denial alone is insufficient.",
+    "No real credentials or patient data in this register."
+  ],
+  "sourceModule": "src/lib/pilotControl/activation/roleMatrixAcceptance.ts",
+  "liveBrowserProofStatus": "pending",
+  "roles": [
+    { "role": "director", "expectedAccess": "full", "liveStatus": "pending" },
+    { "role": "clinic_manager", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "reception", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "consultant", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "clinical", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "finance", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "technical", "expectedAccess": "role_projected", "liveStatus": "pending" },
+    { "role": "unauthorised", "expectedAccess": "denied", "liveStatus": "pending" },
+    { "role": "wrong_tenant", "expectedAccess": "denied", "liveStatus": "pending" },
+    { "role": "wrong_programme", "expectedAccess": "denied", "liveStatus": "pending" }
+  ],
+  "dimensions": [
+    "sign_in",
+    "route_access",
+    "navigation_visibility",
+    "overview_access",
+    "patient_register_access",
+    "patient_detail_access",
+    "blocker_visibility",
+    "hidden_fields",
+    "source_link_permissions",
+    "export_permissions",
+    "direct_api_denial",
+    "sign_out_or_session_expiry"
+  ]
+}

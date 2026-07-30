@@ -1,0 +1,66 @@
+{
+  "phase": "1B",
+  "programme": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+  "version": "1B.0.0",
+  "pathwayLock": "quote_to_deposit",
+  "notes": [
+    "eligibleForGovernanceReview may be computed by software.",
+    "approvedForInitialInvites requires an explicit human decision record — never auto-set.",
+    "Human fields cannot be inferred from role membership or test results.",
+    "No real patient identifiers in this register."
+  ],
+  "softwareFields": [
+    "controlCentreAccepted",
+    "migrationsApplied",
+    "tenantIsolationProven",
+    "roleMatrixProven",
+    "identityPreflightProven",
+    "financePreflightProven",
+    "consentControlsProven",
+    "eventCoverageSufficient"
+  ],
+  "humanFields": [
+    "operationalSopApproved",
+    "staffTrainingCompleted",
+    "supportCoverageConfirmed",
+    "incidentResponseConfirmed",
+    "manualFallbackConfirmed",
+    "rollbackConfirmed",
+    "patientPilotConsentApproved",
+    "clinicalGovernanceApproved",
+    "privacyApproved",
+    "initialPathwayApproved",
+    "initialCohortApproved",
+    "directorApproval"
+  ],
+  "currentEvaluation": {
+    "controlCentreAccepted": true,
+    "migrationsApplied": false,
+    "tenantIsolationProven": true,
+    "roleMatrixProven": false,
+    "identityPreflightProven": true,
+    "financePreflightProven": true,
+    "consentControlsProven": true,
+    "eventCoverageSufficient": true,
+    "operationalSopApproved": false,
+    "staffTrainingCompleted": false,
+    "supportCoverageConfirmed": false,
+    "incidentResponseConfirmed": false,
+    "manualFallbackConfirmed": false,
+    "rollbackConfirmed": false,
+    "patientPilotConsentApproved": false,
+    "clinicalGovernanceApproved": false,
+    "privacyApproved": false,
+    "initialPathwayApproved": false,
+    "initialCohortApproved": false,
+    "directorApproval": false,
+    "eligibleForGovernanceReview": false,
+    "approvedForInitialInvites": false,
+    "limitations": [
+      "remote_migration_apply_evidence_pending",
+      "live_role_matrix_browser_proof_pending",
+      "human_approvals_pending"
+    ]
+  },
+  "modulePath": "src/lib/pilotControl/activation/controlledPilotActivationGate.ts"
+}

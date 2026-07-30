@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { PilotAdoptionSection } from "@/src/components/pilotControl/PilotAdoptionSection";
+import { PilotActivationSection } from "@/src/components/pilotControl/PilotActivationSection";
 import { PilotActivityTimeline } from "@/src/components/pilotControl/PilotActivityTimeline";
 import { PilotAttentionQueue } from "@/src/components/pilotControl/PilotAttentionQueue";
 import { PilotBlockerList } from "@/src/components/pilotControl/PilotBlockerList";
@@ -341,6 +342,8 @@ export function PilotControlPage({
       {overview.data ? <PilotJourneySummary overview={overview.data} /> : null}
 
       <PilotAdoptionSection adoption={adoption.data} />
+
+      <PilotActivationSection overview={overview.data} role={role} />
 
       <PilotActivityTimeline
         items={activity.data ?? []}

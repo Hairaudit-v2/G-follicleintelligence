@@ -38,6 +38,10 @@ export function canShowTechnicalSummary(role: PilotControlRoleKey | null | undef
   return roleHasApiPermission(role, "pilot_control.technical_summary.read");
 }
 
+export function canShowActivationReadiness(role: PilotControlRoleKey | null | undefined): boolean {
+  return roleHasApiPermission(role, "pilot_control.activation_readiness.read");
+}
+
 /** Identity / privacy blockers must not show patient-safe summary in UI. */
 export function shouldSuppressPatientSafeSummary(category: string | null | undefined): boolean {
   const c = String(category ?? "")
@@ -58,6 +62,9 @@ export const FORBIDDEN_MUTATION_CONTROL_LABELS = [
   "pause pilot",
   "enable stripe",
   "collect payment",
+  "approve invites",
+  "activate programme",
+  "enrol patient",
 ] as const;
 
 export function uiContainsForbiddenMutationControl(labels: string[]): boolean {

@@ -45,7 +45,7 @@ describe("pilotControlContracts", () => {
     assert.equal(PILOT_ENROLMENT_STATUSES.length, 9);
     assert.equal(OVERALL_READINESS_STATES.length, 6);
     assert.equal(PILOT_BLOCKER_CATEGORIES.length, 19);
-    assert.equal(PILOT_CONTROL_EVENT_KINDS.length, 58);
+    assert.equal(PILOT_CONTROL_EVENT_KINDS.length, 62);
     assert.deepEqual([...PILOT_HEALTH_VERDICTS], ["GREEN", "AMBER", "RED"]);
   });
 
