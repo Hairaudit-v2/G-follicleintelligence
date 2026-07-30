@@ -1,0 +1,329 @@
+{
+  "phase": "FI-CONTROLLED-PILOT-CONTROL-CENTRE-1A.4",
+  "apiVersion": "1A.4.0",
+  "evaluationVersions": {
+    "readiness": "1A.2.0",
+    "blocker": "1A.3.0",
+    "health": "1A.1.0"
+  },
+  "permissionModel": {
+    "frozenScopes": "PILOT_CONTROL_PERMISSION_SCOPES",
+    "aliases": {
+      "pilot_control.programmes.read": ["overview_full", "overview_clinic", "register_read"],
+      "pilot_control.overview.read": ["overview_full", "overview_clinic"],
+      "pilot_control.patient_register.read": ["register_read"],
+      "pilot_control.patient_detail.read": ["detail_identity", "detail_journey", "register_read"],
+      "pilot_control.blockers.read": ["register_read", "overview_clinic", "overview_full"],
+      "pilot_control.activity.read": ["register_read", "overview_clinic", "overview_full"],
+      "pilot_control.health.read": ["overview_full", "overview_clinic"],
+      "pilot_control.export": ["export"],
+      "pilot_control.pause_recommendation.read": ["overview_full"],
+      "pilot_control.clinical_summary.read": ["detail_clinical_summary", "detail_clinical_full"],
+      "pilot_control.financial_summary.read": ["detail_financial_summary", "detail_financial_full"],
+      "pilot_control.technical_summary.read": ["detail_technical"]
+    }
+  },
+  "limits": {
+    "maxPageSize": 100,
+    "defaultPageSize": 25,
+    "maxSearchLength": 80,
+    "maxActivityRangeDays": 31,
+    "maxExportRows": 500,
+    "perUserRequestsPerMinute": 120,
+    "exportPerUserPer10Minutes": 5,
+    "maxSimultaneousEvaluations": 3,
+    "defaultEvaluationConcurrency": 4
+  },
+  "blockerPersistence": {
+    "defaultGetMode": "read_only",
+    "reconciliationTrigger": "deferred_internal_or_targeted_patient_detail_eval_with_persistDerivedState_false",
+    "maximumStaleness": "documented_as_read_from_fi_pilot_blockers; broad cohort reconcile not on every UI refresh",
+    "stalenessBehaviour": "overview_and_register_use_persisted_blocker_register; patient_detail_may_re-evaluate_in_memory_without_persist",
+    "failureBehaviour": "fail_closed_on_mandatory_identity; optional_sources_may_set_partial_true",
+    "authorisedRefreshEndpoint": "deferred"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/programmes",
+      "requiredPermission": "pilot_control.programmes.read",
+      "queryParameters": ["tenantId?"],
+      "filters": [],
+      "pagination": false,
+      "responseContract": "PilotProgrammeSummary[]",
+      "roleProjections": "programme list only; no clinical fields",
+      "sensitiveFields": [],
+      "auditEvent": null,
+      "rateLimits": "perUserRequestsPerMinute",
+      "partialResultBehaviour": "n/a",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_IDENTITY_AMBIGUOUS",
+        "PILOT_CONTROL_TENANT_MISMATCH",
+        "PILOT_CONTROL_RATE_LIMITED"
+      ],
+      "implementationStatus": "implemented"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/overview",
+      "requiredPermission": "pilot_control.overview.read",
+      "queryParameters": ["programmeId", "tenantId?", "refresh?"],
+      "filters": [],
+      "pagination": false,
+      "responseContract": "PilotControlOverview",
+      "roleProjections": "pauseRecommendation only with overview_full; no clinical detail in metric cards",
+      "sensitiveFields": ["pauseRecommendation"],
+      "auditEvent": "pilot_control_overview_viewed",
+      "rateLimits": "perUserRequestsPerMinute",
+      "partialResultBehaviour": "partial flag via meta when warnings present",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_PROGRAMME_NOT_FOUND",
+        "PILOT_CONTROL_INVALID_FILTER",
+        "PILOT_CONTROL_RATE_LIMITED"
+      ],
+      "implementationStatus": "implemented_with_limitation",
+      "limitations": [
+        "Readiness distribution counts are approximated from blocker severity until cohort readiness aggregation cache lands",
+        "App push availability counts return zeros until notification inventory is wired for pilot control"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/patients",
+      "requiredPermission": "pilot_control.patient_register.read",
+      "queryParameters": [
+        "programmeId",
+        "page",
+        "pageSize",
+        "status",
+        "readiness",
+        "blockerCategory",
+        "severity",
+        "ownerType",
+        "clinicId",
+        "milestone",
+        "appActivation",
+        "inactiveFor",
+        "sort",
+        "direction",
+        "search",
+        "tenantId?"
+      ],
+      "filters": "allowlisted only; no SQL-like expressions",
+      "pagination": {
+        "required": true,
+        "maxPageSize": 100
+      },
+      "responseContract": "PilotPatientRegisterRow[]",
+      "roleProjections": "reception clinical redacted; finance fields redacted for clinical/technical",
+      "sensitiveFields": [
+        "pathology",
+        "payment amounts",
+        "image URLs",
+        "message content",
+        "clinical free text"
+      ],
+      "auditEvent": "pilot_control_patient_register_viewed",
+      "rateLimits": "perUserRequestsPerMinute; maxSearchLength",
+      "partialResultBehaviour": "meta.partial",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_INVALID_PAGINATION",
+        "PILOT_CONTROL_INVALID_FILTER",
+        "PILOT_CONTROL_PROGRAMME_NOT_FOUND"
+      ],
+      "implementationStatus": "implemented_with_limitation",
+      "limitations": [
+        "Register rows do not yet batch full readiness evaluation; journey/readiness cells may show unknown until 1A.5 cache",
+        "Some filter query params are accepted but not fully applied pending indexed register materialisation"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/patients/:patientId",
+      "requiredPermission": "pilot_control.patient_detail.read",
+      "queryParameters": ["programmeId", "tenantId?"],
+      "filters": [],
+      "pagination": false,
+      "responseContract": "PilotPatientControlDetail",
+      "roleProjections": "projectReadinessForRole + projectBlockerForRole before serialize",
+      "sensitiveFields": [
+        "clinical provenance",
+        "pathology",
+        "financial detail",
+        "identityIntegrityOk (technical only)"
+      ],
+      "auditEvent": "pilot_control_patient_detail_viewed",
+      "rateLimits": "perUserRequestsPerMinute; maxSimultaneousEvaluations",
+      "partialResultBehaviour": "warnings from readiness adapters set meta.partial",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_PATIENT_NOT_ENROLLED",
+        "PILOT_CONTROL_IDENTITY_AMBIGUOUS",
+        "PILOT_CONTROL_EVALUATION_FAILED"
+      ],
+      "implementationStatus": "implemented",
+      "notes": "persistDerivedState=false on GET; targeted single-patient evaluation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/blockers",
+      "requiredPermission": "pilot_control.blockers.read",
+      "queryParameters": [
+        "programmeId",
+        "patientId",
+        "state",
+        "category",
+        "dimension",
+        "severity",
+        "ownerType",
+        "ownerUserId",
+        "escalated",
+        "requiresPilotPause",
+        "ageFrom",
+        "ageTo",
+        "page",
+        "pageSize",
+        "sort",
+        "direction",
+        "tenantId?"
+      ],
+      "filters": "allowlisted; default state=active open/acknowledged/in_progress",
+      "pagination": true,
+      "responseContract": "PilotBlockerListItem[]",
+      "roleProjections": "roleSensitiveBlockerProjection; pause flags overview_full only",
+      "sensitiveFields": ["patientSafeSummary (absent for identity)", "requiresPilotPause"],
+      "auditEvent": "pilot_control_blockers_viewed",
+      "rateLimits": "perUserRequestsPerMinute",
+      "partialResultBehaviour": "empty register if table missing (local)",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_INVALID_FILTER",
+        "PILOT_CONTROL_INVALID_PAGINATION"
+      ],
+      "implementationStatus": "implemented"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/activity",
+      "requiredPermission": "pilot_control.activity.read",
+      "queryParameters": [
+        "programmeId",
+        "patientId",
+        "eventType",
+        "actorType",
+        "sourceModule",
+        "from",
+        "to",
+        "page",
+        "pageSize",
+        "tenantId?"
+      ],
+      "filters": "bounded date range (default max 31 days)",
+      "pagination": true,
+      "responseContract": "PilotControlActivityItem[]",
+      "roleProjections": "safeSummary only; no payload content",
+      "sensitiveFields": [
+        "message bodies",
+        "clinical content",
+        "payment instruments",
+        "image URLs",
+        "document contents"
+      ],
+      "auditEvent": "pilot_control_activity_viewed",
+      "rateLimits": "perUserRequestsPerMinute; maxActivityRangeDays",
+      "partialResultBehaviour": "n/a",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_DATE_RANGE_TOO_WIDE",
+        "PILOT_CONTROL_INVALID_FILTER"
+      ],
+      "implementationStatus": "implemented"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/health",
+      "requiredPermission": "pilot_control.health.read",
+      "queryParameters": ["programmeId", "tenantId?"],
+      "filters": [],
+      "pagination": false,
+      "responseContract": "PilotControlHealthResponse",
+      "roleProjections": "pause stop conditions redacted without overview_full",
+      "sensitiveFields": ["stopConditions.pilot_pause_recommended"],
+      "auditEvent": "pilot_control_health_viewed",
+      "rateLimits": "perUserRequestsPerMinute",
+      "partialResultBehaviour": "empty cohort => AMBER + insufficient_evidence",
+      "errorCodes": [
+        "PILOT_CONTROL_UNAUTHENTICATED",
+        "PILOT_CONTROL_FORBIDDEN",
+        "PILOT_CONTROL_PROGRAMME_NOT_FOUND"
+      ],
+      "implementationStatus": "implemented"
+    },
+    {
+      "method": "GET",
+      "path": "/api/pilot-control/export",
+      "requiredPermission": "pilot_control.export",
+      "queryParameters": [
+        "programmeId",
+        "type|exportType",
+        "format",
+        "from",
+        "to",
+        "tenantId?"
+      ],
+      "filters": "exportType: patient_register|active_blockers|programme_summary|activity_summary; format csv|json",
+      "pagination": false,
+      "responseContract": "CSV or JSON attachment",
+      "roleProjections": "same field projection as list routes before export",
+      "sensitiveFields": [
+        "clinical free text",
+        "pathology values",
+        "message contents",
+        "image URLs",
+        "payment tokens",
+        "card information",
+        "document contents"
+      ],
+      "auditEvent": "pilot_control_export_created",
+      "rateLimits": "exportPerUserPer10Minutes; maxExportRows; activity requires bounded date range",
+      "partialResultBehaviour": "n/a",
+      "errorCodes": [
+        "PILOT_CONTROL_EXPORT_DENIED",
+        "PILOT_CONTROL_RATE_LIMITED",
+        "PILOT_CONTROL_DATE_RANGE_TOO_WIDE",
+        "PILOT_CONTROL_INVALID_FILTER"
+      ],
+      "implementationStatus": "implemented"
+    }
+  ],
+  "errorModel": {
+    "envelope": {
+      "error": { "code": "string", "message": "string", "correlationId": "string" }
+    },
+    "codes": [
+      "PILOT_CONTROL_UNAUTHENTICATED",
+      "PILOT_CONTROL_FORBIDDEN",
+      "PILOT_CONTROL_PROGRAMME_NOT_FOUND",
+      "PILOT_CONTROL_PATIENT_NOT_ENROLLED",
+      "PILOT_CONTROL_IDENTITY_AMBIGUOUS",
+      "PILOT_CONTROL_TENANT_MISMATCH",
+      "PILOT_CONTROL_INVALID_FILTER",
+      "PILOT_CONTROL_INVALID_PAGINATION",
+      "PILOT_CONTROL_DATE_RANGE_TOO_WIDE",
+      "PILOT_CONTROL_SOURCE_UNAVAILABLE",
+      "PILOT_CONTROL_PARTIAL_RESULT",
+      "PILOT_CONTROL_EVALUATION_FAILED",
+      "PILOT_CONTROL_RATE_LIMITED",
+      "PILOT_CONTROL_EXPORT_DENIED"
+    ]
+  }
+}
