@@ -16,6 +16,8 @@ import {
   buildNotificationDedupeKey,
   buildSafePushDataPayload,
 } from "./patientGatewayDeviceCore";
+import { emitPathwayEventForPatientBestEffort } from "@/src/lib/pilotControl/activation/pathwayEventHooks.server";
+import { buildEventIdempotencyKey } from "@/src/lib/pilotControl/activation/domainEvents";
 import {
   disableDeviceById,
   listActiveDevicesForPatient,
@@ -292,6 +294,19 @@ export async function sendPatientNotification(
           resourceId: input.sourceEntity,
         });
       }
+      void emitPathwayEventForPatientBestEffort({
+        tenantId: input.tenantId,
+        patientId: input.patientId,
+        eventType: "notification_sent",
+        idempotencyKey: buildEventIdempotencyKey([
+          "notification_sent",
+          dedupeKey,
+        ]),
+        sourceModule: "notifications",
+        sourceRecordId: input.sourceEntity,
+        actorType: "system",
+        supabase,
+      });
       return { attempted: true, sent, skippedReason: null, dedupeKey };
     }
 
@@ -318,6 +333,20 @@ export async function sendPatientNotification(
         resourceId: input.sourceEntity,
       });
     }
+    void emitPathwayEventForPatientBestEffort({
+      tenantId: input.tenantId,
+      patientId: input.patientId,
+      eventType: "notification_failed",
+      idempotencyKey: buildEventIdempotencyKey([
+        "notification_failed",
+        dedupeKey,
+        skipReason,
+      ]),
+      sourceModule: "notifications",
+      sourceRecordId: input.sourceEntity,
+      actorType: "system",
+      supabase,
+    });
     return { attempted: true, sent: 0, skippedReason: skipReason, dedupeKey };
   } catch {
     await finalizeDedupe({

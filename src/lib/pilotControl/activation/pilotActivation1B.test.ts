@@ -564,6 +564,8 @@ describe("FI-CONTROLLED-PILOT-ACTIVATION-1B", () => {
         migrationsApplied: true,
         tenantIsolationProven: true,
         roleMatrixProven: true,
+        financeRoleMappingCorrect: true,
+        exportSurfaceProven: true,
         identityPreflightProven: true,
         financePreflightProven: true,
         consentControlsProven: true,

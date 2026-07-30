@@ -7,6 +7,8 @@ import {
   invoiceBalanceDueCents,
   isInvoiceOpenForCollection,
 } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { emitPathwayEventForPatientBestEffort } from "@/src/lib/pilotControl/activation/pathwayEventHooks.server";
+import { depositRequestedIdempotencyKey } from "@/src/lib/pilotControl/activation/domainEvents";
 
 /**
  * FinancialOS deposit path: create a (Stripe) payment request for a consultation quote invoice
@@ -51,6 +53,20 @@ export async function startConsultationQuoteDepositPaymentRequest(args: {
     send: args.sendCheckout,
     staffNote: "FinancialOS consultation deposit",
   });
+
+  const patientId =
+    (inv as { patient_id?: string | null }).patient_id?.trim() || null;
+  if (patientId) {
+    void emitPathwayEventForPatientBestEffort({
+      tenantId: tid,
+      patientId,
+      eventType: "deposit_requested",
+      idempotencyKey: depositRequestedIdempotencyKey(pr.id),
+      sourceModule: "financial_os",
+      sourceRecordId: pr.id,
+      actorType: "staff",
+    });
+  }
 
   let bookingId: string | null = null;
   const cid = inv.consultation_id?.trim();

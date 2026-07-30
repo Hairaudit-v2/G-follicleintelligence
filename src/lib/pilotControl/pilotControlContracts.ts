@@ -553,6 +553,11 @@ export const PILOT_CONTROL_ROLE_SCOPES: Record<PilotControlRoleKey, readonly Pil
       "detail_financial_full",
       "detail_communication",
       "detail_app_activity",
+      // Finance may export finance-permitted records only (projected server-side).
+      "export",
+      // No activation_readiness_read — finance cannot approve pilot activation.
+      // No detail_clinical_* — clinical / pathology provenance excluded.
+      // No detail_technical — identity provenance beyond safe status excluded.
     ],
     technical: [
       "overview_clinic",

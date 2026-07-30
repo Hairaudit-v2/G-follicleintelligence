@@ -43,6 +43,7 @@ export function buildResponseMeta(args: {
   partial?: boolean;
   warnings?: PilotControlApiWarning[];
   evaluation?: PilotEvaluationMetadata;
+  actorRole?: PilotControlResponseMetadata["actorRole"];
 }): PilotControlResponseMetadata {
   return {
     apiVersion: PILOT_CONTROL_API_VERSION,
@@ -55,6 +56,7 @@ export function buildResponseMeta(args: {
     partial: args.partial ?? false,
     warnings: args.warnings ?? [],
     evaluation: args.evaluation ?? buildEvaluationMetadata({}),
+    ...(args.actorRole ? { actorRole: args.actorRole } : {}),
   };
 }
 

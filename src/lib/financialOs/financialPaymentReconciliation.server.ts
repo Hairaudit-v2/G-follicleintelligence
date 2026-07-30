@@ -10,6 +10,12 @@ import {
   type FiPaymentReconciliationRow,
   type FiPaymentReconciliationStatus,
 } from "@/src/lib/financialOs/financialPaymentReconciliationCore";
+import { emitPathwayEventForPatientBestEffort } from "@/src/lib/pilotControl/activation/pathwayEventHooks.server";
+import {
+  buildEventIdempotencyKey,
+  paymentVerifiedIdempotencyKey,
+} from "@/src/lib/pilotControl/activation/domainEvents";
+import { mayEmitPaymentVerified } from "@/src/lib/pilotControl/activation/domainEvents";
 
 export type RecordPaymentReconciliationArgs = {
   tenantId: string;
@@ -192,6 +198,15 @@ export async function reconcileGatewayPaymentAmounts(args: {
       /* AR best-effort */
     }
 
+    void emitReconciliationPathwayEvents({
+      tenantId: tid,
+      invoiceId: args.invoiceId,
+      matched: false,
+      reconciliationId: reconciliation.id,
+      paymentId: args.paymentId ?? null,
+      client: args.client,
+    });
+
     return { ok: true, reconciliation, matched: false, varianceCents: check.varianceCents };
   }
 
@@ -222,7 +237,77 @@ export async function reconcileGatewayPaymentAmounts(args: {
     client: args.client,
   });
 
+  void emitReconciliationPathwayEvents({
+    tenantId: tid,
+    invoiceId: args.invoiceId,
+    matched: true,
+    reconciliationId: reconciliation.id,
+    paymentId: args.paymentId ?? null,
+    client: args.client,
+  });
+
   return { ok: true, reconciliation, matched: true };
+}
+
+async function emitReconciliationPathwayEvents(args: {
+  tenantId: string;
+  invoiceId: string;
+  matched: boolean;
+  reconciliationId: string;
+  paymentId: string | null;
+  client?: SupabaseClient;
+}): Promise<void> {
+  try {
+    const db = args.client ?? supabaseAdmin();
+    const { data } = await db
+      .from("fi_invoices")
+      .select("patient_id")
+      .eq("tenant_id", args.tenantId)
+      .eq("id", args.invoiceId)
+      .maybeSingle();
+    const patientId =
+      (data as { patient_id?: string | null } | null)?.patient_id?.trim() || null;
+    if (!patientId) return;
+
+    if (!args.matched) {
+      void emitPathwayEventForPatientBestEffort({
+        tenantId: args.tenantId,
+        patientId,
+        eventType: "payment_reconciliation_required",
+        idempotencyKey: buildEventIdempotencyKey([
+          "payment_reconciliation_required",
+          args.reconciliationId,
+        ]),
+        sourceModule: "financial_os",
+        sourceRecordId: args.reconciliationId,
+        actorType: "system",
+        supabase: args.client,
+      });
+      return;
+    }
+
+    const verified = mayEmitPaymentVerified({
+      allocationId: args.paymentId ?? args.reconciliationId,
+      allocationMatched: true,
+    });
+    if (verified.emit) {
+      void emitPathwayEventForPatientBestEffort({
+        tenantId: args.tenantId,
+        patientId,
+        eventType: "payment_verified",
+        idempotencyKey: paymentVerifiedIdempotencyKey(
+          args.paymentId ?? args.reconciliationId,
+          "1"
+        ),
+        sourceModule: "financial_os",
+        sourceRecordId: args.paymentId ?? args.reconciliationId,
+        actorType: "system",
+        supabase: args.client,
+      });
+    }
+  } catch {
+    /* pathway telemetry best-effort */
+  }
 }
 
 export async function recordGatewayPaymentReconciliationSuccess(args: {

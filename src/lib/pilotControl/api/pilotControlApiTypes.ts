@@ -36,6 +36,8 @@ export const PILOT_CONTROL_API_ERROR_CODES = [
   "PILOT_CONTROL_TENANT_MISMATCH",
   "PILOT_CONTROL_INVALID_FILTER",
   "PILOT_CONTROL_INVALID_PAGINATION",
+  "PILOT_CONTROL_INVALID_EXPORT_TYPE",
+  "PILOT_CONTROL_INVALID_EXPORT_FORMAT",
   "PILOT_CONTROL_DATE_RANGE_TOO_WIDE",
   "PILOT_CONTROL_SOURCE_UNAVAILABLE",
   "PILOT_CONTROL_PARTIAL_RESULT",
@@ -74,6 +76,8 @@ export type PilotControlResponseMetadata = {
   partial: boolean;
   warnings: PilotControlApiWarning[];
   evaluation?: PilotEvaluationMetadata;
+  /** Resolved Pilot Control role for the actor (Governance Closure observability). */
+  actorRole?: PilotControlRoleKey;
 };
 
 export type PilotControlApiResponse<T> = {

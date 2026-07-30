@@ -259,6 +259,7 @@ export async function resolvePilotControlRequestContext(
   const actorRole = mapToPilotControlRole({
     explicitPilotRole: signals.explicitPilotRole,
     staffRole: signals.staffRole,
+    jobTitle: signals.staffRole,
     fiUserRole: signals.fiUserRole,
     tenantAdminRole: tenantAdmin?.adminRole ?? null,
     platformAdmin,

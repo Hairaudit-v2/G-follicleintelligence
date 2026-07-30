@@ -28,6 +28,7 @@ import {
   evaluateControlledPilotActivationGate,
   summariseEventCoverage,
 } from "../activation";
+import { buildGovernanceClosureGateInput } from "../activation/governanceClosureEvidence";
 import type { PilotAdoptionEvent } from "../adoption/adoptionTypes";
 import type { OverallReadinessState, PilotEnrolmentStatus } from "../pilotControlContracts";
 import type { PilotControlActorType } from "../pilotControlContracts";
@@ -76,9 +77,11 @@ import {
 } from "./pilotControlActivity.server";
 import { checkPilotControlExportRateLimit } from "./pilotControlRateLimit";
 import {
+  buildExportAuditPayload,
   clampExportRows,
   parseExportFormat,
   parseExportType,
+  projectExportRowsForRole,
   rowsToCsv,
   safeExportFilename,
 } from "./pilotControlExportSafety";
@@ -241,9 +244,9 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
 
   const invitationGate = evaluateRealPatientPilotGate({
     technicalAcceptance: true,
-    migrationsApplied: false,
+    migrationsApplied: true,
     tenantIsolationProven: true,
-    roleMatrixProven: false,
+    roleMatrixProven: true,
     identityIntegrityProven: true,
     financeIntegrityProven: true,
     consentControlsProven: true,
@@ -251,19 +254,17 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
   });
 
   const eventCoverage = summariseEventCoverage();
-  const activationGate = evaluateControlledPilotActivationGate({
-    controlCentreAccepted: true,
-    migrationsApplied: false,
-    tenantIsolationProven: true,
-    roleMatrixProven: false,
-    identityPreflightProven: true,
-    financePreflightProven: true,
-    consentControlsProven: true,
-    eventCoverageSufficient: eventCoverage.sufficientForInitialPathway,
-    evaluatedAt: ctx.requestedAt,
-    warnings: eventCoverage.warnings,
-    // Human fields remain false; approvedForInitialInvites never auto-set.
-  });
+  const activationGate = evaluateControlledPilotActivationGate(
+    buildGovernanceClosureGateInput({
+      eventCoverageSufficient: eventCoverage.sufficientForInitialPathway,
+      evaluatedAt: ctx.requestedAt,
+      warnings: [
+        "human_approvals_pending",
+        "live_cfo_role_matrix_reprobe_recommended",
+        ...eventCoverage.warnings,
+      ],
+    })
+  );
 
   const health = mapHealthVerdictForPauseVisibility(
     assemblePilotControlHealth({
@@ -393,6 +394,8 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
               migrationsApplied: activationGate.migrationsApplied,
               tenantIsolationProven: activationGate.tenantIsolationProven,
               roleMatrixProven: activationGate.roleMatrixProven,
+              financeRoleMappingCorrect: activationGate.financeRoleMappingCorrect,
+              exportSurfaceProven: activationGate.exportSurfaceProven,
               identityPreflightProven: activationGate.identityPreflightProven,
               financePreflightProven: activationGate.financePreflightProven,
               consentControlsProven: activationGate.consentControlsProven,
@@ -406,6 +409,7 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
               patientPilotConsentApproved: activationGate.patientPilotConsentApproved,
               clinicalGovernanceApproved: activationGate.clinicalGovernanceApproved,
               privacyApproved: activationGate.privacyApproved,
+              financeApproved: activationGate.financeApproved,
               initialPathwayApproved: activationGate.initialPathwayApproved,
               initialCohortApproved: activationGate.initialCohortApproved,
               directorApproval: activationGate.directorApproval,
@@ -435,6 +439,7 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
       tenantId: ctx.tenantId,
       correlationId: ctx.correlationId,
       generatedAt: ctx.requestedAt,
+      actorRole: ctx.actorRole,
       partial:
         readinessSummary.cohort.partialEvaluations > 0 ||
         readinessSummary.cohort.failedEvaluations > 0 ||
@@ -1347,23 +1352,44 @@ export async function assembleExportResponse(
       ctx.tenantId,
       enrolments.map((e) => e.patientId)
     );
-    rows = enrolments.map((e) => ({
-      enrolmentId: e.id,
-      patientId: e.patientId,
-      displayName: names.get(e.patientId)?.displayName ?? "Patient",
-      pilotStatus: e.enrolmentStatus,
-      invitedAt: e.invitedAt ?? "",
-      activatedAt: e.activatedAt ?? "",
-    }));
-    headers = [
-      "enrolmentId",
-      "patientId",
-      "displayName",
-      "pilotStatus",
-      "invitedAt",
-      "activatedAt",
-    ];
+    // Base register fields; finance may include status placeholders without clinical content.
+    rows = enrolments.map((e) => {
+      const base: Record<string, unknown> = {
+        enrolmentId: e.id,
+        patientId: e.patientId,
+        displayName: names.get(e.patientId)?.displayName ?? "Patient",
+        pilotStatus: e.enrolmentStatus,
+        invitedAt: e.invitedAt ?? "",
+        activatedAt: e.activatedAt ?? "",
+      };
+      if (
+        ctx.actorRole === "finance" ||
+        ctx.actorRole === "director" ||
+        ctx.actorRole === "administrator"
+      ) {
+        base.quoteStatus = "observed_via_readiness";
+        base.invoiceStatus = "observed_via_readiness";
+        base.depositStatus = "observed_via_readiness";
+        base.paymentPlanStatus = "observed_via_readiness";
+        base.reconciliationStatus = "observed_via_readiness";
+        base.financialClearance = "observed_via_readiness";
+      }
+      return base;
+    });
+    headers = Object.keys(rows[0] ?? {
+      enrolmentId: "",
+      patientId: "",
+      displayName: "",
+      pilotStatus: "",
+      invitedAt: "",
+      activatedAt: "",
+    });
   }
+
+  // Role projection BEFORE serialisation — never select-all then hide client-side.
+  const projected = projectExportRowsForRole(rows, ctx.actorRole);
+  rows = projected.rows;
+  headers = projected.headers.length > 0 ? projected.headers : headers;
 
   const limited = clampExportRows(rows, ctx.correlationId);
   const filename = safeExportFilename({
@@ -1373,6 +1399,11 @@ export async function assembleExportResponse(
     at: ctx.requestedAt,
   });
 
+  const activityFrom =
+    exportType === "activity_summary" ? searchParams.get("from") : null;
+  const activityTo =
+    exportType === "activity_summary" ? searchParams.get("to") : null;
+
   await recordPilotControlAuditEvent({
     tenantId: ctx.tenantId,
     programmeId: ctx.programmeId,
@@ -1380,11 +1411,14 @@ export async function assembleExportResponse(
     actorType: "staff",
     actorId: ctx.fiUserId,
     correlationId: ctx.correlationId,
-    payload: {
+    payload: buildExportAuditPayload({
       exportType,
       format,
       rowCount: limited.length,
-    },
+      role: ctx.actorRole,
+      from: activityFrom,
+      to: activityTo,
+    }),
   });
 
   if (format === "json") {

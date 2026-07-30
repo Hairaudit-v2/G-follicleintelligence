@@ -440,4 +440,39 @@ export async function insertFinancialClearanceSnapshots(
   if (!rows.length) return;
   const { error } = await supabase.from("fi_financial_clearance_snapshots").insert(rows);
   if (error) throw new Error(error.message);
+
+  // Best-effort pathway telemetry for cleared states only.
+  try {
+    const { emitPathwayEventForPatientBestEffort } = await import(
+      "@/src/lib/pilotControl/activation/pathwayEventHooks.server"
+    );
+    const { financialClearanceIdempotencyKey, mayEmitFinancialClearance } = await import(
+      "@/src/lib/pilotControl/activation/domainEvents"
+    );
+    for (const row of rows) {
+      const patientId = row.patient_id?.trim();
+      if (!patientId) continue;
+      const decision = mayEmitFinancialClearance({
+        clearanceState: row.clearance_state,
+        paymentAllocated: true,
+        clearanceId: `${row.booking_id ?? row.case_id ?? "unknown"}:${row.clearance_state}`,
+      });
+      if (!decision.emit) continue;
+      void emitPathwayEventForPatientBestEffort({
+        tenantId: row.tenant_id,
+        patientId,
+        eventType: "financial_clearance_achieved",
+        idempotencyKey: financialClearanceIdempotencyKey(
+          `${row.booking_id ?? row.case_id ?? "unknown"}`,
+          row.clearance_state
+        ),
+        sourceModule: "financial_os",
+        sourceRecordId: row.booking_id ?? row.case_id ?? undefined,
+        actorType: "system",
+        supabase,
+      });
+    }
+  } catch {
+    /* pathway telemetry must not break clearance persistence */
+  }
 }

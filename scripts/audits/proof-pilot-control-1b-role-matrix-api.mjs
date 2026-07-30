@@ -78,12 +78,13 @@ const ROLE_PROBES = [
     passwordEnv: "FI_E2E_LOW_ROLE_PASSWORD",
   },
   {
-    label: "finance_cfo_unmapped_or_finance",
+    label: "finance",
     email: "harsh@evolvedhair.com.au",
-    // CFO may fail-closed to null unless mapped — record actual outcome honestly.
-    expectedAccess: "observe",
-    expectExport: false,
+    // CFO staff_role must map to finance (not administrator via tenant_backend).
+    expectedAccess: "allowed",
+    expectExport: true,
     expectActivation: false,
+    expectedActorRole: "finance",
   },
   {
     label: "administrator_platform",
@@ -222,14 +223,14 @@ async function main() {
         token
       );
       const exp = await api(
-        `/api/pilot-control/export?programmeId=${PROGRAMME_KEY}&format=json&type=overview`,
+        `/api/pilot-control/export?programmeId=${PROGRAMME_KEY}&format=json&type=programme_summary`,
         token
       );
 
       row.checks = {
         overviewStatus: overview.status,
         overviewCode: overview.json?.error?.code ?? null,
-        actorRole: overview.json?.actorRole ?? overview.json?.data?.actorRole ?? null,
+        actorRole: overview.json?.meta?.actorRole ?? overview.json?.actorRole ?? overview.json?.data?.actorRole ?? null,
         patientsStatus: patients.status,
         blockersStatus: blockers.status,
         adoptionStatus: adoption.status,
@@ -267,6 +268,17 @@ async function main() {
         if (!probe.expectExport && exp.status === 200) {
           row.notes.push("export_unexpectedly_allowed");
           // Not necessarily RED if role has export — mark limitation.
+        }
+        if (
+          probe.expectedActorRole &&
+          row.checks.actorRole &&
+          row.checks.actorRole !== probe.expectedActorRole
+        ) {
+          row.notes.push(
+            `actorRole_expected_${probe.expectedActorRole}_got_${row.checks.actorRole}`
+          );
+          row.liveStatus = "fail";
+          red = true;
         }
       } else {
         row.liveStatus = "observed";

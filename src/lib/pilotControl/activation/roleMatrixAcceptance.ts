@@ -72,8 +72,9 @@ export const PILOT_1B_ROLE_ACCEPTANCE_MATRIX: readonly RoleAcceptanceResult[] = 
     dimensions: {
       ...basePass(),
       hidden_fields: "pass",
+      export_permissions: "pass",
     },
-    notes: "No clinical detail",
+    notes: "Finance export permitted; no clinical detail; no activation approval",
   },
   {
     role: "technical",

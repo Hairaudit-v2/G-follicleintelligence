@@ -13,6 +13,13 @@ import { writePatientGatewayAudit } from "@/src/lib/patientPortal/patientGateway
 import type { PatientGatewayContext, PatientGatewayDeny } from "@/src/lib/patientPortal/patientGatewayTypes";
 
 import { handleJourneyControlEvent } from "./patientJourneyControlEvents.server";
+import { emitPathwayEventForPatientBestEffort } from "@/src/lib/pilotControl/activation/pathwayEventHooks.server";
+import {
+  quoteAcceptedIdempotencyKey,
+  quoteDeliveredIdempotencyKey,
+  quoteViewedIdempotencyKey,
+  mayEmitQuoteView,
+} from "@/src/lib/pilotControl/activation/domainEvents";
 
 export type PatientGatewayQuoteSummary = {
   id: string;
@@ -223,9 +230,29 @@ export async function getPatientQuoteForGateway(
   if (!loaded.ok) return loaded;
 
   const row = loaded.row;
+  const previousFirstViewedAt =
+    row.first_viewed_at != null ? String(row.first_viewed_at) : null;
   const patch: Record<string, unknown> = { last_viewed_at: now, updated_at: now };
   if (!row.first_viewed_at) patch.first_viewed_at = now;
   await supabase.from("fi_crm_quotes").update(patch).eq("id", String(row.id)).eq("tenant_id", ctx.tenantId);
+
+  const viewDecision = mayEmitQuoteView({
+    previousFirstViewedAt,
+    nextFirstViewedAt: patch.first_viewed_at != null ? String(patch.first_viewed_at) : null,
+  });
+  if (viewDecision.emit) {
+    void emitPathwayEventForPatientBestEffort({
+      tenantId: ctx.tenantId,
+      patientId: ctx.patientId,
+      eventType: "quote_viewed",
+      idempotencyKey: quoteViewedIdempotencyKey(String(row.id), "first"),
+      sourceModule: "crm_quotes",
+      sourceRecordId: String(row.id),
+      actorType: "patient",
+      actorId: ctx.authUserId,
+      supabase,
+    });
+  }
 
   return { ok: true, quote: mapDetail({ ...row, ...patch }) };
 }
@@ -277,6 +304,18 @@ export async function acceptPatientQuoteForGateway(
     },
     { supabase, nowIso: options?.nowIso }
   );
+
+  void emitPathwayEventForPatientBestEffort({
+    tenantId: ctx.tenantId,
+    patientId: ctx.patientId,
+    eventType: "quote_accepted",
+    idempotencyKey: quoteAcceptedIdempotencyKey(String(row.id), String(row.id)),
+    sourceModule: "crm_quotes",
+    sourceRecordId: String(row.id),
+    actorType: "patient",
+    actorId: ctx.authUserId,
+    supabase,
+  });
 
   if (writeAudit) {
     writePatientGatewayAudit({
@@ -396,6 +435,19 @@ export async function deliverQuoteToPatientApp(
     },
     { supabase, nowIso: now }
   );
+
+  void emitPathwayEventForPatientBestEffort({
+    tenantId: tid,
+    patientId: pid,
+    eventType: "quote_delivered",
+    idempotencyKey: quoteDeliveredIdempotencyKey(qid, now),
+    sourceModule: "crm_quotes",
+    sourceRecordId: qid,
+    actorType: "staff",
+    actorId: args.authUserId ?? undefined,
+    supabase,
+  });
+
   return { ok: true, quoteId: qid };
 }
 

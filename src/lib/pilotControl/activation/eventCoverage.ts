@@ -154,7 +154,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "quote_delivered",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "crm_quotes",
     triggerCondition: "quote_delivered",
     idempotencyRule: "tenant:quoteId:quote_delivered",
@@ -162,7 +162,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "quote_viewed",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "crm_quotes",
     triggerCondition: "quote_viewed",
     idempotencyRule: "tenant:quoteId:quote_viewed:day",
@@ -170,7 +170,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "quote_accepted",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "crm_quotes",
     triggerCondition: "quote_accepted",
     idempotencyRule: "tenant:quoteId:quote_accepted",
@@ -178,7 +178,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "deposit_requested",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "financial_os",
     triggerCondition: "deposit_requested",
     idempotencyRule: "tenant:invoiceId:deposit_requested",
@@ -186,7 +186,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "payment_verified",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "financial_os",
     triggerCondition: "manual_payment_verified",
     idempotencyRule: "tenant:paymentId:payment_verified",
@@ -194,7 +194,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "payment_reconciliation_required",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "financial_os",
     triggerCondition: "reconciliation_exception_opened",
     idempotencyRule: "tenant:exceptionId:payment_reconciliation_required",
@@ -202,7 +202,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "financial_clearance_achieved",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "financial_os",
     triggerCondition: "clearance_state→cleared",
     idempotencyRule: "tenant:patientId:financial_clearance_achieved:snapshotId",
@@ -267,7 +267,7 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "notification_sent",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "notifications",
     triggerCondition: "notification_dispatch",
     idempotencyRule: "tenant:notificationId:notification_sent",
@@ -275,15 +275,17 @@ export const PILOT_1B_REQUIRED_EVENT_COVERAGE: readonly PilotEventCoverageEntry[
   },
   {
     eventKey: "notification_delivered",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired_with_limitation",
     sourceWorkflow: "notifications",
     triggerCondition: "delivery_receipt",
     idempotencyRule: "tenant:notificationId:notification_delivered",
     metricConsumer: "notificationReliability",
+    knownLimitation:
+      "Expo push has no durable delivery-receipt producer yet; sent/failed are wired",
   },
   {
     eventKey: "notification_failed",
-    implementationStatus: "contract_only",
+    implementationStatus: "wired",
     sourceWorkflow: "notifications",
     triggerCondition: "delivery_failure",
     idempotencyRule: "tenant:notificationId:notification_failed",

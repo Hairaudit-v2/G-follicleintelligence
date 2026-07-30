@@ -4,20 +4,23 @@
   "notes": [
     "Live authenticated API role-matrix proof completed 2026-07-30 against follicleintelligence.ai.",
     "Evidence file: evidence-fi-pilot-activation-1b-role-matrix-api.json",
-    "Full headed browser screenshots remain optional follow-up; API proofs cover auth, route denial, overview, register/blockers/adoption, export denial, and sensitive-field absence.",
-    "Permission defect found and fixed: fi_staff.primary_clinic_id select wiped staffRole (commit 707bac90).",
+    "Governance Closure: CFO→finance mapping corrected in resolvePilotControlRole; finance gains export scope without activation_readiness_read.",
+    "Export proof script corrected from invalid type=overview to type=programme_summary.",
+    "Live CFO re-probe recommended after Governance Closure deploy.",
     "No real credentials stored in this register."
   ],
   "sourceModule": "src/lib/pilotControl/activation/roleMatrixAcceptance.ts",
+  "roleResolver": "src/lib/pilotControl/api/pilotControlRoleMap.ts",
   "liveBrowserProofStatus": "api_authenticated_pass_with_limitations",
   "deployShaAtProof": "707bac907bdc4e2614f2da46d4d6bdaa616da3d9",
+  "governanceClosureFinanceMapping": "unit_proven_live_reprobe_pending",
   "roles": [
     { "role": "director", "expectedAccess": "full", "liveStatus": "pass", "identity": "paul@evolvedhair.com.au" },
     { "role": "clinic_manager", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "manager@evolvedhair.com.au" },
     { "role": "reception", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "jesika.watt11@hotmail.com" },
     { "role": "consultant", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "connorgreen0310@icloud.com" },
     { "role": "clinical", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "tlbpmg@gmail.com" },
-    { "role": "finance", "expectedAccess": "role_projected", "liveStatus": "limitation", "identity": "harsh@evolvedhair.com.au", "note": "fi_users.role tenant_backend maps to administrator; CFO staff_role does not map to finance — over-privilege vs intended finance projection" },
+    { "role": "finance", "expectedAccess": "role_projected", "liveStatus": "unit_pass_live_reprobe_pending", "identity": "harsh@evolvedhair.com.au", "note": "CFO staff_role now maps to finance ahead of tenant_backend; must not inherit administrator" },
     { "role": "technical", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "auditor@hairaudit.com (administrator/platform)" },
     { "role": "unauthorised", "expectedAccess": "denied", "liveStatus": "pass", "note": "unauthenticated API 401; inactive staff support@follicleintelligence.ai 403" },
     { "role": "wrong_tenant", "expectedAccess": "denied", "liveStatus": "pass", "identity": "reception@evolvedhair.com.au" },
@@ -41,6 +44,6 @@
     "navigation_visibility": "pending_headed_browser_screenshot",
     "sign_out_or_session_expiry": "pending_headed_browser",
     "hidden_fields": "pass_api_sensitive_key_scan_empty",
-    "export_permissions": "pass_non_director_403; director/admin export query returned 400 (param validation) not privilege leak"
+    "export_permissions": "director/admin/finance may export; others 403; approved types patient_register|active_blockers|programme_summary|activity_summary"
   }
 }

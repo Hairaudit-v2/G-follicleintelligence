@@ -10,8 +10,50 @@ export type PilotActivationSectionProps = {
   role: PilotControlRoleKey;
 };
 
+const GOVERNANCE_FIELD_LABELS: Record<string, string> = {
+  controlCentreAccepted: "Control Centre accepted",
+  migrationsApplied: "Migrations applied",
+  tenantIsolationProven: "Tenant isolation proven",
+  roleMatrixProven: "Role matrix proven",
+  financeRoleMappingCorrect: "Finance role mapping",
+  exportSurfaceProven: "Export surface proven",
+  identityPreflightProven: "Identity preflight proven",
+  financePreflightProven: "Finance preflight proven",
+  consentControlsProven: "Consent controls proven",
+  eventCoverageSufficient: "Minimum event coverage",
+  operationalSopApproved: "SOP approval",
+  staffTrainingCompleted: "Staff training completion",
+  supportCoverageConfirmed: "Support coverage",
+  incidentResponseConfirmed: "Tabletop / incident response",
+  manualFallbackConfirmed: "Manual fallback",
+  rollbackConfirmed: "Rollback confirmed",
+  patientPilotConsentApproved: "Patient pilot consent approval",
+  clinicalGovernanceApproved: "Clinical governance approval",
+  privacyApproved: "Privacy approval",
+  financeApproved: "Finance approval",
+  initialPathwayApproved: "Initial pathway approval",
+  initialCohortApproved: "Initial cohort approval",
+  directorApproval: "Director approval",
+};
+
+const HUMAN_FIELDS = new Set([
+  "operationalSopApproved",
+  "staffTrainingCompleted",
+  "supportCoverageConfirmed",
+  "incidentResponseConfirmed",
+  "manualFallbackConfirmed",
+  "rollbackConfirmed",
+  "patientPilotConsentApproved",
+  "clinicalGovernanceApproved",
+  "privacyApproved",
+  "financeApproved",
+  "initialPathwayApproved",
+  "initialCohortApproved",
+  "directorApproval",
+]);
+
 /**
- * 1B read-only activation readiness surface.
+ * 1B read-only activation readiness surface (Governance Closure).
  * No approval controls — human approvals remain in the governance process.
  */
 export function PilotActivationSection({ overview, role }: PilotActivationSectionProps) {
@@ -31,6 +73,11 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
   }
 
   const fieldEntries = Object.entries(gate.fields);
+  const recommendation = gate.approvedForInitialInvites
+    ? "approve_invites"
+    : gate.eligibleForGovernanceReview
+      ? "defer"
+      : "hold_technical";
 
   return (
     <section className="space-y-3" aria-labelledby="pilot-activation-heading">
@@ -44,17 +91,19 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
         <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
           <div className="text-slate-400">Eligible for governance review</div>
           <div className="mt-1 text-sm text-slate-100">
-            {gate.eligibleForGovernanceReview ? "Yes" : "No"}
+            {gate.eligibleForGovernanceReview ? "Eligible for governance review" : "Not yet eligible"}
           </div>
         </div>
         <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
           <div className="text-slate-400">Approved for initial invites</div>
           <div className="mt-1 text-sm text-slate-100">
-            {gate.approvedForInitialInvites ? "Yes" : "No — human decision required"}
+            {gate.approvedForInitialInvites
+              ? "Yes"
+              : "Not approved for initial invitations"}
           </div>
         </div>
         <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-          <div className="text-slate-400">Gate version</div>
+          <div className="text-slate-400">Gate version / evidence</div>
           <div className="mt-1 text-sm text-slate-100">{gate.version}</div>
         </div>
       </div>
@@ -62,9 +111,15 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
       <ul className="grid gap-1 sm:grid-cols-2 text-xs text-slate-300">
         {fieldEntries.map(([key, value]) => (
           <li key={key} className="flex items-center justify-between gap-2 border-b border-white/5 py-1">
-            <span className="text-slate-400">{formatField(key)}</span>
+            <span className="text-slate-400">{GOVERNANCE_FIELD_LABELS[key] ?? formatField(key)}</span>
             <span className={value ? "text-emerald-300/90" : "text-amber-200/90"}>
-              {value ? "Complete" : "Pending"}
+              {value
+                ? HUMAN_FIELDS.has(key)
+                  ? "Named approval recorded"
+                  : "Complete"
+                : HUMAN_FIELDS.has(key)
+                  ? "Pending named approval"
+                  : "Pending"}
             </span>
           </li>
         ))}
@@ -72,7 +127,7 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
 
       {gate.blockers.length > 0 ? (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-100/90">
-          <div className="font-medium text-amber-100">Current blockers</div>
+          <div className="font-medium text-amber-100">Gate blockers</div>
           <ul className="mt-1 list-disc pl-4 space-y-0.5">
             {gate.blockers.slice(0, 12).map((b) => (
               <li key={b}>{b}</li>
@@ -86,18 +141,18 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
 
       {gate.warnings.length > 0 ? (
         <div className="text-[11px] text-slate-400">
-          Warnings: {gate.warnings.join("; ")}
+          Gate warnings: {gate.warnings.join("; ")}
         </div>
       ) : null}
 
       <p className="text-[11px] text-slate-500">
-        Recommendation:{" "}
-        {gate.approvedForInitialInvites
+        Current recommendation:{" "}
+        {recommendation === "approve_invites"
           ? "Human invite enablement may proceed through the audited write path."
-          : gate.eligibleForGovernanceReview
-            ? "Technical evidence ready — submit for named clinical, privacy, operations, and director review."
-            : "Complete outstanding software and human gates before governance review."}{" "}
-        Formal production remains NO-GO. Stripe remains disabled.
+          : recommendation === "defer"
+            ? "defer — technical evidence ready; named human approvals still required."
+            : "Complete outstanding software gates before governance review."}{" "}
+        Formal production remains NO-GO. Stripe remains disabled. Programme remains planned.
       </p>
     </section>
   );

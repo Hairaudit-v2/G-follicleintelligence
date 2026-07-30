@@ -14,6 +14,8 @@ export type ControlledPilotActivationGateInput = {
   migrationsApplied?: boolean;
   tenantIsolationProven?: boolean;
   roleMatrixProven?: boolean;
+  financeRoleMappingCorrect?: boolean;
+  exportSurfaceProven?: boolean;
   identityPreflightProven?: boolean;
   financePreflightProven?: boolean;
   consentControlsProven?: boolean;
@@ -28,6 +30,7 @@ export type ControlledPilotActivationGateInput = {
   patientPilotConsentApproved?: boolean;
   clinicalGovernanceApproved?: boolean;
   privacyApproved?: boolean;
+  financeApproved?: boolean;
   initialPathwayApproved?: boolean;
   initialCohortApproved?: boolean;
   directorApproval?: boolean;
@@ -46,6 +49,8 @@ const SOFTWARE_FIELDS = [
   "migrationsApplied",
   "tenantIsolationProven",
   "roleMatrixProven",
+  "financeRoleMappingCorrect",
+  "exportSurfaceProven",
   "identityPreflightProven",
   "financePreflightProven",
   "consentControlsProven",
@@ -62,6 +67,7 @@ const HUMAN_FIELDS = [
   "patientPilotConsentApproved",
   "clinicalGovernanceApproved",
   "privacyApproved",
+  "financeApproved",
   "initialPathwayApproved",
   "initialCohortApproved",
   "directorApproval",
@@ -80,6 +86,8 @@ export function evaluateControlledPilotActivationGate(
     migrationsApplied: Boolean(input.migrationsApplied),
     tenantIsolationProven: Boolean(input.tenantIsolationProven),
     roleMatrixProven: Boolean(input.roleMatrixProven),
+    financeRoleMappingCorrect: Boolean(input.financeRoleMappingCorrect),
+    exportSurfaceProven: Boolean(input.exportSurfaceProven),
     identityPreflightProven: Boolean(input.identityPreflightProven),
     financePreflightProven: Boolean(input.financePreflightProven),
     consentControlsProven: Boolean(input.consentControlsProven),
@@ -93,6 +101,7 @@ export function evaluateControlledPilotActivationGate(
     patientPilotConsentApproved: Boolean(input.patientPilotConsentApproved),
     clinicalGovernanceApproved: Boolean(input.clinicalGovernanceApproved),
     privacyApproved: Boolean(input.privacyApproved),
+    financeApproved: Boolean(input.financeApproved),
     initialPathwayApproved: Boolean(input.initialPathwayApproved),
     initialCohortApproved: Boolean(input.initialCohortApproved),
     directorApproval: Boolean(input.directorApproval),
@@ -153,6 +162,8 @@ export function completeActivationGateInput(
     migrationsApplied: true,
     tenantIsolationProven: true,
     roleMatrixProven: true,
+    financeRoleMappingCorrect: true,
+    exportSurfaceProven: true,
     identityPreflightProven: true,
     financePreflightProven: true,
     consentControlsProven: true,
@@ -166,6 +177,7 @@ export function completeActivationGateInput(
     patientPilotConsentApproved: true,
     clinicalGovernanceApproved: true,
     privacyApproved: true,
+    financeApproved: true,
     initialPathwayApproved: true,
     initialCohortApproved: true,
     directorApproval: true,

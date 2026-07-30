@@ -26,6 +26,8 @@ export const PILOT_CONTROL_API_PERMISSION_ALIASES = {
   "pilot_control.pause_recommendation.read": ["overview_full"],
   "pilot_control.clinical_summary.read": ["detail_clinical_summary", "detail_clinical_full"],
   "pilot_control.financial_summary.read": ["detail_financial_summary", "detail_financial_full"],
+  "pilot_control.finance_blockers.read": ["detail_financial_summary", "detail_financial_full", "register_read"],
+  "pilot_control.finance_export": ["export", "detail_financial_full"],
   "pilot_control.technical_summary.read": ["detail_technical"],
   "pilot_control.activation_readiness.read": ["activation_readiness_read"],
 } as const satisfies Record<string, readonly PilotControlPermissionScope[]>;

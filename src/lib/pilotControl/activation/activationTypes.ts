@@ -168,19 +168,29 @@ export type ControlledPilotActivationGate = {
   migrationsApplied: boolean;
   tenantIsolationProven: boolean;
   roleMatrixProven: boolean;
+
+  /** Governance Closure — CFO maps to finance, not administrator. */
+  financeRoleMappingCorrect: boolean;
+  /** Governance Closure — approved export types succeed safely. */
+  exportSurfaceProven: boolean;
+
   identityPreflightProven: boolean;
   financePreflightProven: boolean;
   consentControlsProven: boolean;
   eventCoverageSufficient: boolean;
+
   operationalSopApproved: boolean;
   staffTrainingCompleted: boolean;
   supportCoverageConfirmed: boolean;
   incidentResponseConfirmed: boolean;
   manualFallbackConfirmed: boolean;
   rollbackConfirmed: boolean;
+
   patientPilotConsentApproved: boolean;
   clinicalGovernanceApproved: boolean;
   privacyApproved: boolean;
+  financeApproved: boolean;
+
   initialPathwayApproved: boolean;
   initialCohortApproved: boolean;
   directorApproval: boolean;
