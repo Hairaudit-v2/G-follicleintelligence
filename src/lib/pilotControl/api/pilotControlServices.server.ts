@@ -26,9 +26,13 @@ import { computePilotAdoptionMetrics } from "../adoption/adoptionMetrics";
 import { evaluateRealPatientPilotGate } from "../adoption/realPatientPilotGate";
 import {
   evaluateControlledPilotActivationGate,
+  resolveProgrammeGovernanceTier,
   summariseEventCoverage,
+  type ControlledPilotActivationGate,
 } from "../activation";
 import { buildGovernanceClosureGateInput } from "../activation/governanceClosureEvidence";
+import { EVOLVED_CONTROLLED_PILOT_PROGRAMME_KEY } from "../pilotControlContracts";
+import { ACTIVATION_GATE_SOFTWARE_FIELDS } from "../activation/controlledPilotActivationGate";
 import type { PilotAdoptionEvent } from "../adoption/adoptionTypes";
 import type { OverallReadinessState, PilotEnrolmentStatus } from "../pilotControlContracts";
 import type { PilotControlActorType } from "../pilotControlContracts";
@@ -254,13 +258,25 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
   });
 
   const eventCoverage = summariseEventCoverage();
+  const programmeMeta =
+    programme.metadata &&
+    typeof programme.metadata === "object" &&
+    !Array.isArray(programme.metadata)
+      ? (programme.metadata as Record<string, unknown>)
+      : {};
+  const governanceTier = resolveProgrammeGovernanceTier({
+    programmeKey: programme.programmeKey ?? null,
+    metadata: programmeMeta,
+    evolvedProgrammeKey: EVOLVED_CONTROLLED_PILOT_PROGRAMME_KEY,
+  });
   const activationGate = evaluateControlledPilotActivationGate(
     buildGovernanceClosureGateInput({
+      governanceTier,
       eventCoverageSufficient: eventCoverage.sufficientForInitialPathway,
       evaluatedAt: ctx.requestedAt,
       warnings: [
         "human_approvals_pending",
-        "live_cfo_role_matrix_reprobe_recommended",
+        "small_team_pilot_compact_human_gates",
         ...eventCoverage.warnings,
       ],
     })
@@ -389,31 +405,11 @@ export async function assembleOverviewResponse(ctx: PilotControlRequestContext) 
             blockers: activationGate.blockers,
             warnings: activationGate.warnings,
             version: activationGate.version,
-            fields: {
-              controlCentreAccepted: activationGate.controlCentreAccepted,
-              migrationsApplied: activationGate.migrationsApplied,
-              tenantIsolationProven: activationGate.tenantIsolationProven,
-              roleMatrixProven: activationGate.roleMatrixProven,
-              financeRoleMappingCorrect: activationGate.financeRoleMappingCorrect,
-              exportSurfaceProven: activationGate.exportSurfaceProven,
-              identityPreflightProven: activationGate.identityPreflightProven,
-              financePreflightProven: activationGate.financePreflightProven,
-              consentControlsProven: activationGate.consentControlsProven,
-              eventCoverageSufficient: activationGate.eventCoverageSufficient,
-              operationalSopApproved: activationGate.operationalSopApproved,
-              staffTrainingCompleted: activationGate.staffTrainingCompleted,
-              supportCoverageConfirmed: activationGate.supportCoverageConfirmed,
-              incidentResponseConfirmed: activationGate.incidentResponseConfirmed,
-              manualFallbackConfirmed: activationGate.manualFallbackConfirmed,
-              rollbackConfirmed: activationGate.rollbackConfirmed,
-              patientPilotConsentApproved: activationGate.patientPilotConsentApproved,
-              clinicalGovernanceApproved: activationGate.clinicalGovernanceApproved,
-              privacyApproved: activationGate.privacyApproved,
-              financeApproved: activationGate.financeApproved,
-              initialPathwayApproved: activationGate.initialPathwayApproved,
-              initialCohortApproved: activationGate.initialCohortApproved,
-              directorApproval: activationGate.directorApproval,
-            },
+            governanceTier: activationGate.governanceTier,
+            requiredHumanFields: activationGate.requiredHumanFields,
+            notApplicableHumanFields: activationGate.notApplicableHumanFields,
+            fields: buildActivationGateFields(activationGate),
+            fieldApplicability: buildActivationGateFieldApplicability(activationGate),
           },
         }
       : {}),
@@ -1434,4 +1430,76 @@ export async function assembleExportResponse(
     contentType: "text/csv; charset=utf-8",
     filename,
   };
+}
+
+function buildActivationGateFields(
+  gate: ControlledPilotActivationGate
+): Record<string, boolean> {
+  const fields: Record<string, boolean> = {
+    controlCentreAccepted: gate.controlCentreAccepted,
+    migrationsApplied: gate.migrationsApplied,
+    tenantIsolationProven: gate.tenantIsolationProven,
+    roleMatrixProven: gate.roleMatrixProven,
+    financeRoleMappingCorrect: gate.financeRoleMappingCorrect,
+    exportSurfaceProven: gate.exportSurfaceProven,
+    identityPreflightProven: gate.identityPreflightProven,
+    financePreflightProven: gate.financePreflightProven,
+    consentControlsProven: gate.consentControlsProven,
+    eventCoverageSufficient: gate.eventCoverageSufficient,
+    teamBriefingCompleted: gate.teamBriefingCompleted,
+    clinicalWorkflowConfirmed: gate.clinicalWorkflowConfirmed,
+    financeWorkflowConfirmed: gate.financeWorkflowConfirmed,
+    supportContactConfirmed: gate.supportContactConfirmed,
+    fallbackConfirmed: gate.fallbackConfirmed,
+    directorApproval: gate.directorApproval,
+  };
+
+  // Include standard/enterprise fields only when they are required for the tier
+  // (or keep them for standard/enterprise visibility).
+  if (gate.governanceTier !== "small_team_pilot") {
+    Object.assign(fields, {
+      operationalSopApproved: gate.operationalSopApproved,
+      staffTrainingCompleted: gate.staffTrainingCompleted,
+      supportCoverageConfirmed: gate.supportCoverageConfirmed,
+      incidentResponseConfirmed: gate.incidentResponseConfirmed,
+      manualFallbackConfirmed: gate.manualFallbackConfirmed,
+      rollbackConfirmed: gate.rollbackConfirmed,
+      patientPilotConsentApproved: gate.patientPilotConsentApproved,
+      clinicalGovernanceApproved: gate.clinicalGovernanceApproved,
+      privacyApproved: gate.privacyApproved,
+      financeApproved: gate.financeApproved,
+      initialPathwayApproved: gate.initialPathwayApproved,
+      initialCohortApproved: gate.initialCohortApproved,
+    });
+  }
+  if (gate.governanceTier === "enterprise_or_high_risk") {
+    Object.assign(fields, {
+      formalPrivacyCommitteeApproval: gate.formalPrivacyCommitteeApproval,
+      multiClinicGovernanceConfirmed: gate.multiClinicGovernanceConfirmed,
+      enterpriseIncidentExerciseConfirmed: gate.enterpriseIncidentExerciseConfirmed,
+      enterpriseSegregationOfDutiesConfirmed:
+        gate.enterpriseSegregationOfDutiesConfirmed,
+      enterpriseIntegrationApprovalsConfirmed:
+        gate.enterpriseIntegrationApprovalsConfirmed,
+      enterpriseStagedRolloutApproved: gate.enterpriseStagedRolloutApproved,
+    });
+  }
+
+  return fields;
+}
+
+function buildActivationGateFieldApplicability(
+  gate: ControlledPilotActivationGate
+): Record<string, "required" | "not_applicable" | "software"> {
+  const out: Record<string, "required" | "not_applicable" | "software"> = {};
+  for (const key of ACTIVATION_GATE_SOFTWARE_FIELDS) {
+    out[key] = "software";
+  }
+  for (const key of gate.requiredHumanFields) {
+    out[key] = "required";
+  }
+  for (const key of gate.notApplicableHumanFields) {
+    if (!out[key]) out[key] = "not_applicable";
+  }
+  return out;
 }

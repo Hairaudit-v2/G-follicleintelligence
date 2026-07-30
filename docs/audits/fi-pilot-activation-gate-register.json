@@ -1,15 +1,64 @@
 {
   "phase": "1B",
   "programme": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
-  "version": "1B.0.0",
+  "version": "1B.1.0",
   "pathwayLock": "quote_to_deposit",
+  "governanceTier": "small_team_pilot",
   "notes": [
     "eligibleForGovernanceReview may be computed by software.",
     "approvedForInitialInvites requires an explicit human decision record — never auto-set.",
     "Human fields cannot be inferred from role membership or test results.",
-    "Governance Closure recalculated 2026-07-30 — technical fields updated; human fields remain pending.",
+    "Tiered governance (1B.1.0): Evolved uses small_team_pilot — compact human gates only.",
+    "Formal SOP/training/support/tabletop/privacy-committee docs remain templates for larger tenants and are not mandatory for Evolved.",
     "No real patient identifiers in this register."
   ],
+  "tiers": {
+    "small_team_pilot": {
+      "requiredHumanFields": [
+        "teamBriefingCompleted",
+        "clinicalWorkflowConfirmed",
+        "financeWorkflowConfirmed",
+        "supportContactConfirmed",
+        "fallbackConfirmed",
+        "directorApproval"
+      ],
+      "deferredOrNotApplicable": [
+        "formalPrivacyCommitteeApproval",
+        "separateTrainingRegister",
+        "separateSupportCoverageDocument",
+        "separateSOPApprovalDocument",
+        "separateTabletopApproval",
+        "multiRoleSegregationBeyondTeam"
+      ]
+    },
+    "standard_tenant": {
+      "requiredHumanFields": [
+        "operationalSopApproved",
+        "staffTrainingCompleted",
+        "supportCoverageConfirmed",
+        "incidentResponseConfirmed",
+        "manualFallbackConfirmed",
+        "rollbackConfirmed",
+        "patientPilotConsentApproved",
+        "clinicalGovernanceApproved",
+        "privacyApproved",
+        "financeApproved",
+        "initialPathwayApproved",
+        "initialCohortApproved",
+        "directorApproval"
+      ]
+    },
+    "enterprise_or_high_risk": {
+      "adds": [
+        "formalPrivacyCommitteeApproval",
+        "multiClinicGovernanceConfirmed",
+        "enterpriseIncidentExerciseConfirmed",
+        "enterpriseSegregationOfDutiesConfirmed",
+        "enterpriseIntegrationApprovalsConfirmed",
+        "enterpriseStagedRolloutApproved"
+      ]
+    }
+  },
   "softwareFields": [
     "controlCentreAccepted",
     "migrationsApplied",
@@ -23,21 +72,15 @@
     "eventCoverageSufficient"
   ],
   "humanFields": [
-    "operationalSopApproved",
-    "staffTrainingCompleted",
-    "supportCoverageConfirmed",
-    "incidentResponseConfirmed",
-    "manualFallbackConfirmed",
-    "rollbackConfirmed",
-    "patientPilotConsentApproved",
-    "clinicalGovernanceApproved",
-    "privacyApproved",
-    "financeApproved",
-    "initialPathwayApproved",
-    "initialCohortApproved",
+    "teamBriefingCompleted",
+    "clinicalWorkflowConfirmed",
+    "financeWorkflowConfirmed",
+    "supportContactConfirmed",
+    "fallbackConfirmed",
     "directorApproval"
   ],
   "currentEvaluation": {
+    "governanceTier": "small_team_pilot",
     "controlCentreAccepted": true,
     "migrationsApplied": true,
     "tenantIsolationProven": true,
@@ -48,28 +91,22 @@
     "financePreflightProven": true,
     "consentControlsProven": true,
     "eventCoverageSufficient": true,
-    "operationalSopApproved": false,
-    "staffTrainingCompleted": false,
-    "supportCoverageConfirmed": false,
-    "incidentResponseConfirmed": false,
-    "manualFallbackConfirmed": false,
-    "rollbackConfirmed": false,
-    "patientPilotConsentApproved": false,
-    "clinicalGovernanceApproved": false,
-    "privacyApproved": false,
-    "financeApproved": false,
-    "initialPathwayApproved": false,
-    "initialCohortApproved": false,
+    "teamBriefingCompleted": false,
+    "clinicalWorkflowConfirmed": false,
+    "financeWorkflowConfirmed": false,
+    "supportContactConfirmed": false,
+    "fallbackConfirmed": false,
     "directorApproval": false,
     "eligibleForGovernanceReview": true,
     "approvedForInitialInvites": false,
     "recommendation": "defer",
     "limitations": [
-      "human_approvals_pending",
-      "live_cfo_role_matrix_reprobe_recommended_after_deploy",
+      "human_approvals_pending_small_team_briefing",
       "notification_delivered_wired_with_limitation"
     ]
   },
   "modulePath": "src/lib/pilotControl/activation/controlledPilotActivationGate.ts",
-  "evidenceModule": "src/lib/pilotControl/activation/governanceClosureEvidence.ts"
+  "tierModule": "src/lib/pilotControl/activation/governanceTier.ts",
+  "evidenceModule": "src/lib/pilotControl/activation/governanceClosureEvidence.ts",
+  "briefingTemplate": "docs/governance/FI-CONTROLLED-PILOT-SMALL-TEAM-BRIEFING-1B.md"
 }

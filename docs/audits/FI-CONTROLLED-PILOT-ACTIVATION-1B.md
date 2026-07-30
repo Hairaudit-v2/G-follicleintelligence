@@ -5,13 +5,15 @@
 **Date:** 2026-07-30  
 **Tenant:** Evolved Hair Restoration `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`)  
 **Pathway lock:** `quote_to_deposit`  
-**Phase verdict:** **GREEN WITH LIMITATIONS** — technical Governance Closure complete; human approvals incomplete; **not** approved for invites  
+**Phase verdict:** **GREEN WITH LIMITATIONS** — technical workstream **GREEN**; human approvals incomplete; **not** approved for invites  
 **Formal production:** **NO-GO**  
 **Stripe:** **Disabled**  
 **Initial invitations:** **OFF** — human approval required  
 **Governance boundary:** `FI-CONTROLLED-PILOT-ACTIVATION-1B-GOVERNANCE-BOUNDARY`  
 **Permission fix:** `707bac907bdc4e2614f2da46d4d6bdaa616da3d9`  
 **Governance evidence:** `f2d7dba994e82b57598102d2dcc3d2b89f8b7be9`  
+**Governance Closure (technical):** `575dec05` + build fix `df2b4230`  
+**Live production deploy:** `dpl_AUR3k5R4eY7ppvDJEurCEB5oiot7` @ `df2b42308d1e71d58d7a7333b8ecfdc70b85d0aa` (**READY**)  
 **Recommendation:** **defer**  
 **Next phase (after human approvals):** `FI-CONTROLLED-PILOT-INITIAL-COHORT-1C`
 
@@ -31,7 +33,7 @@
 |---|---------|--------|
 | 1 | Governed remote migration application | Schema on live FI project (`202611041001`–`202611041003`); programme remains planned / invites off |
 | 2 | Live tenant / identity isolation proof | **PASS** — remote RLS + wrong-tenant JWT/API proofs (`evidence-fi-pilot-activation-1b-rls-readonly.json`) |
-| 3 | Authenticated role-matrix browser proof | **PASS WITH LIMITATIONS** — live API role matrix after fix `707bac90`; headed screenshots optional |
+| 3 | Authenticated role-matrix browser proof | **PASS** — live API role matrix after Governance Closure deploy `df2b4230` (CFO→finance); headed screenshots optional |
 | 4 | First-cohort event coverage | Register honest (`wired` / `contract_only` / `not_required`) — **not** upgraded without emitter proof |
 | 5 | Operational SOP and staff readiness | Docs landed; human training completion **pending** |
 | 6 | Incident, support, rollback readiness | Docs + engines landed; human tabletop / named coverage **pending** |
@@ -69,10 +71,11 @@ Commit scope confirmed: activation model, decision/candidate-review schema, pref
 | Environment classification | **LIVE production project hosting Evolved tenant** (not IIHOR-staging) |
 | Evolved tenant | `c2615b95-b707-4485-aa5f-be8f78ec868a` (`evolved-hair`) |
 | Programme | `evolved_controlled_pilot_1a` / `a5ede63d-5cad-4d50-96f1-93ba7ee28cf3` |
-| Current deployed app commit | `5430235a7e818325a637cd068bf8b1fdbec06db8` (Vercel production `dpl_Fk86fZsWaJmbJkcV3Vihg5hUTDAa`, READY) |
+| Current deployed app commit | `df2b42308d1e71d58d7a7333b8ecfdc70b85d0aa` (Vercel production `dpl_AUR3k5R4eY7ppvDJEurCEB5oiot7`, READY → `follicleintelligence.ai`) |
+| Prior Governance Closure commit | `575dec05` (build failed on first prod attempt; fixed by `df2b4230`) |
 | Current migration head (pilot chain) | `202611041003` / `platform_pilot_activation_1b` |
 | Operator recording this pack | Cursor agent + HairAudit operator context (`manager@evolvedhair.com.au`) |
-| Date / time (AEST) | 2026-07-30 ~20:25 AEST |
+| Date / time (AEST) | 2026-07-31 ~07:07 AEST (live role-matrix + export re-proof) |
 | Backup / recovery position | Production PITR / restore-drill source project `iqqvzgxoimxchhcnbzxl` (see `docs/security/fi-security-restore-drill-1.md`) |
 | Rollback procedure | `docs/operations/FI-CONTROLLED-PILOT-ROLLBACK-1B.md` + tag `FI-CONTROLLED-PILOT-ACTIVATION-1B-GOVERNANCE-BOUNDARY` |
 | Scope restriction | Evolved tenant only — no other clinic / demo tenant mutations |
@@ -155,22 +158,25 @@ Evidence: `docs/audits/evidence-fi-pilot-activation-1b-rls-readonly.json`
 ## Governance evidence run — Stage 7 role matrix
 
 Script: `scripts/audits/proof-pilot-control-1b-role-matrix-api.mjs`  
-Evidence: `docs/audits/evidence-fi-pilot-activation-1b-role-matrix-api.json`  
+Evidence (canonical live): `docs/audits/evidence-fi-pilot-control-1b-live-role-matrix.json`  
+Legacy mirror: `docs/audits/evidence-fi-pilot-activation-1b-role-matrix-api.json`  
 Register: `docs/audits/fi-pilot-role-acceptance-register.json`
 
 **Permission defect found and stopped progression:** API selected non-existent `fi_staff.primary_clinic_id`, wiping `staffRole` and falsely returning `PILOT_CONTROL_FORBIDDEN` for owner/manager/reception/clinical. Fixed in `707bac90`, deployed `dpl_4SV6831rvs4H5oU6dj44prNy7SkR`, then re-proved.
 
+**Live re-proof after Governance Closure deploy `df2b4230` / `dpl_AUR3k5R4eY7ppvDJEurCEB5oiot7` (2026-07-31):**
+
 | Role | Live API overview | Notes |
 |------|-------------------|-------|
-| director (paul) | 200 | PASS |
+| director (paul) | 200 | PASS; export 200 |
 | clinic_manager (manager) | 200 | PASS; export 403 |
 | reception (jesika) | 200 | PASS; export 403 |
-| consultant (connor) | 200 | PASS |
+| consultant (connor) | 200 | PASS; export 403 |
 | clinical (tlbpmg) | 200 | PASS; export 403 |
-| finance (harsh/CFO) | 200 | **Limitation** — `tenant_backend` → administrator |
-| administrator (auditor) | 200 | PASS |
-| wrong_tenant | 403 | PASS |
-| inactive staff | 403 | PASS |
+| finance (harsh/CFO) | 200 | **PASS** — `actorRole=finance` (not administrator); export 200; `activationGate` absent; clinical detail `404 PILOT_CONTROL_PATIENT_NOT_ENROLLED` / no clinical leak |
+| administrator (auditor) | 200 | PASS; export 200 |
+| wrong_tenant | 403 | PASS (`PILOT_CONTROL_TENANT_MISMATCH`) |
+| inactive staff | 403 | PASS (`PILOT_CONTROL_FORBIDDEN`) |
 | unauthenticated | 401 | PASS |
 | Sensitive keys in API bodies | none | PASS |
 
@@ -209,7 +215,7 @@ Headed browser nav/screenshot matrix remains optional; API proofs cover access, 
 | Real candidate selection | **Not started** (restriction: no real patients) |
 | Candidate reviews / enrolments | Still **0** |
 | Named governance approvals | **None recorded** |
-| Recommendation | **defer** — technical isolation proven; human gates incomplete; finance role mapping limitation open |
+| Recommendation | **defer** — technical isolation + finance/export live-proven; human gates incomplete |
 | `approved_for_initial_invites` | **false** |
 
 ---
@@ -244,7 +250,7 @@ Headed browser nav/screenshot matrix remains optional; API proofs cover access, 
 | Fix | `resolvePilotControlRole` — staff/finance titles (CFO, finance manager, bookkeeper) map to `finance` before fi_users fallback; job title alone cannot elevate to administrator |
 | Finance scopes | Overview/register/finance detail + **export**; **no** `activation_readiness_read`, clinical full, or admin elevation |
 | Unit proof | CFO → finance; CFO ≠ administrator; finance export allowed; activation denied |
-| Live re-probe | Recommended after deploy (`scripts/audits/proof-pilot-control-1b-role-matrix-api.mjs`) |
+| Live re-probe | **PASS** — evidence `docs/audits/evidence-fi-pilot-control-1b-live-role-matrix.json` @ SHA `df2b4230` |
 
 ### Export repair
 
@@ -254,11 +260,11 @@ Headed browser nav/screenshot matrix remains optional; API proofs cover access, 
 | Errors | `PILOT_CONTROL_INVALID_EXPORT_TYPE` / `PILOT_CONTROL_INVALID_EXPORT_FORMAT` |
 | Projection | Server-side `projectExportRowsForRole` before serialisation |
 | Audit | `pilot_control_export_created` without row contents |
-| Proof script | Updated to `type=programme_summary` |
+| Live export proof | **PASS** — evidence `docs/audits/evidence-fi-pilot-control-1b-live-export.json` |
 
-### Authenticated matrix rerun
+### Authenticated matrix rerun (live)
 
-Prior live matrix remains valid for non-finance roles. Finance mapping corrected in code; live CFO re-probe pending Governance Closure deploy. Wrong-tenant / inactive / unauth proofs unchanged.
+Live CFO/finance matrix re-proved on production after deploy. Wrong-tenant / inactive / unauth proofs remain PASS. See **Live production proof pack** below.
 
 ### Event wiring status
 
@@ -271,20 +277,45 @@ Minimum quote-to-deposit emitters wired (best-effort, enrolled patients only):
 
 Human-gated lifecycle (`pilot_patient_enrolled` / `invited` / `activated`) remain blocked until invite approval. No real enrolment or invitation emitted.
 
-### SOP / training / support / consent / tabletop / named approvals
+### Tiered human governance (1B.1.0)
+
+Evolved uses **`small_team_pilot`**. Formal SOP / training / support / privacy-committee / tabletop documents remain in-repo as templates for `standard_tenant` and `enterprise_or_high_risk` clinics — they are **not** mandatory for Evolved’s first small pilot.
+
+| Tier | When | Required human gates |
+|------|------|----------------------|
+| `small_team_pilot` | ≤10 staff, one clinic, one pathway, 3–5 patients | Compact briefing set (below) |
+| `standard_tenant` | Multi-role clinic, formal artefacts | Role appointments, access matrix, training register, support coverage, operating acceptance, activation decision |
+| `enterprise_or_high_risk` | Multi-clinic / integrations / high risk | Standard + privacy committee, multi-clinic governance, incident exercise, SoD, integration approvals, staged rollout |
+
+**Evolved small-team required gates**
 
 | Gate | Status |
 |------|--------|
-| SOP approval | Template `docs/governance/FI-CONTROLLED-PILOT-SOP-APPROVAL-1B.md` — **pending named approval** |
-| Staff training | Register `…-TRAINING-REGISTER-1B.md` — **pending** |
-| Support coverage | `…-SUPPORT-COVERAGE-1B.md` — **draft** |
-| Patient consent | `…-CONSENT-APPROVAL-1B.md` — **pending four named approvals** |
-| Tabletop | `…-TABLETOP-1B.md` — **pending exercise** |
-| Activation decision | `…-ACTIVATION-DECISION-1B.md` — **defer** |
+| `teamBriefingCompleted` | Pending — template `docs/governance/FI-CONTROLLED-PILOT-SMALL-TEAM-BRIEFING-1B.md` |
+| `clinicalWorkflowConfirmed` | Pending named clinical lead confirmation |
+| `financeWorkflowConfirmed` | Pending named finance contact confirmation |
+| `supportContactConfirmed` | Pending named support contact |
+| `fallbackConfirmed` | Pending fallback / pause confirmation |
+| `directorApproval` | Pending |
 
-### Activation gate (recalculated)
+**Deferred / not applicable for Evolved small-team**
+
+| Artefact | Status |
+|----------|--------|
+| Formal privacy committee approval | **N/A** (template retained) |
+| Separate training register | **N/A** (template retained) |
+| Separate support coverage document | **N/A** (template retained) |
+| Separate SOP approval document | **N/A** (template retained) |
+| Separate tabletop approval | **N/A** (template retained) |
+| Multi-role segregation beyond actual team | **N/A** |
+
+Activation decision template `…-ACTIVATION-DECISION-1B.md` remains available; recommendation stays **defer** until small-team confirmations + explicit invite decision.
+
+### Activation gate (recalculated — Evolved `small_team_pilot`)
 
 ```text
+governanceTier = small_team_pilot
+
 controlCentreAccepted = true
 migrationsApplied = true
 tenantIsolationProven = true
@@ -296,19 +327,16 @@ financePreflightProven = true
 consentControlsProven = true
 eventCoverageSufficient = true
 
-operationalSopApproved = false
-staffTrainingCompleted = false
-supportCoverageConfirmed = false
-incidentResponseConfirmed = false
-manualFallbackConfirmed = false
-rollbackConfirmed = false
-patientPilotConsentApproved = false
-clinicalGovernanceApproved = false
-privacyApproved = false
-financeApproved = false
-initialPathwayApproved = false
-initialCohortApproved = false
+teamBriefingCompleted = false
+clinicalWorkflowConfirmed = false
+financeWorkflowConfirmed = false
+supportContactConfirmed = false
+fallbackConfirmed = false
 directorApproval = false
+
+# Not mandatory for this tier (templates only):
+# operationalSopApproved / staffTrainingCompleted / supportCoverageConfirmed /
+# incidentResponseConfirmed / privacyApproved / formalPrivacyCommitteeApproval / …
 
 eligibleForGovernanceReview = true
 approvedForInitialInvites = false
@@ -317,13 +345,80 @@ recommendation = defer
 
 ### Open blockers
 
-All `human_gate:*` fields. Live CFO export/role re-probe after deploy. Headed browser screenshots optional.
+Small-team `human_gate:*` fields only (`teamBriefingCompleted`, `clinicalWorkflowConfirmed`, `financeWorkflowConfirmed`, `supportContactConfirmed`, `fallbackConfirmed`, `directorApproval`). Headed browser screenshots optional. Technical CFO/export live re-probes **closed**.
+
+### Live production proof pack (2026-07-31)
+
+| Field | Value |
+|-------|-------|
+| Deployment SHA | `df2b42308d1e71d58d7a7333b8ecfdc70b85d0aa` |
+| Deployment ID | `dpl_AUR3k5R4eY7ppvDJEurCEB5oiot7` |
+| Target | production → `follicleintelligence.ai` |
+| Ready state | **READY** |
+| Operator | HairAudit / `manager@evolvedhair.com.au` |
+| Post-deploy programme | `activation_state=planned`; invites `false`; Stripe `false`; enrolments `0`; candidates `0` |
+
+**CFO → finance live result**
+
+| Check | Result |
+|-------|--------|
+| `actorRole` | `finance` |
+| Not administrator | **PASS** |
+| Finance overview | **200** |
+| Finance permitted export | **200** |
+| Finance activation surface | **denied** (`activationGate` absent) |
+| Finance clinical detail | **denied / not enrolled** (`404 PILOT_CONTROL_PATIENT_NOT_ENROLLED`; no clinical leak) |
+| Wrong tenant | **403** `PILOT_CONTROL_TENANT_MISMATCH` |
+| Inactive membership | **403** `PILOT_CONTROL_FORBIDDEN` |
+
+**Export 200 proofs** (`evidence-fi-pilot-control-1b-live-export.json`)
+
+| Combination | Status |
+|-------------|--------|
+| `patient_register` + csv | **200** |
+| `patient_register` + json | **200** |
+| `active_blockers` + csv | **200** |
+| `programme_summary` + csv | **200** |
+| `activity_summary` + valid ≤31d range | **200** |
+| CSV formula injection | **neutralised** (`formulaInjectionDetected=false`) |
+| Finance permitted fields only | **PASS** (no clinical/pathology leak) |
+
+**Negative export proofs**
+
+| Case | Result |
+|------|--------|
+| `type=overview` | **400** `PILOT_CONTROL_INVALID_EXPORT_TYPE` |
+| invalid format `xlsx` | **400** `PILOT_CONTROL_INVALID_EXPORT_FORMAT` |
+| activity range >31 days | **400** `PILOT_CONTROL_DATE_RANGE_TOO_WIDE` |
+| wrong tenant | **403** `PILOT_CONTROL_TENANT_MISMATCH` — no information disclosure |
+
+**Audit-event proof**
+
+| Check | Result |
+|-------|--------|
+| Event written | **PASS** — `pilot_control_export_created` id `944f37e2-7050-474b-8956-4783aa5484ae` |
+| Metadata only | **PASS** — keys `role`, `format`, `rowCount`, `exportType` (no rows/body) |
+
+**Remaining event limitations**
+
+- `notification_delivered` = `wired_with_limitation` (no Expo delivery-receipt producer)
+- Some non-pathway domain emitters remain `contract_only` (documents/messages/journey actions)
+- Human-gated lifecycle events (`pilot_patient_enrolled` / `invited` / `activated`) correctly unwired until invite approval
+
+**Human approval state (Evolved `small_team_pilot`)**
+
+| Gate | Status |
+|------|--------|
+| Compact briefing confirmations (team / clinical / finance / support / fallback / director) | **incomplete** |
+| Formal SOP / training / support / tabletop / privacy-committee docs | **N/A for this tier** (templates retained) |
+| `approved_for_initial_invites` | **false** |
+| Recommendation | **defer** |
 
 ### Final recommendation / phase verdict
 
 | Scope | Verdict |
 |-------|---------|
-| Technical controls | **GREEN WITH LIMITATIONS** |
+| Technical controls | **GREEN** |
 | Human governance | **AMBER — pending** |
 | Overall 1B | **GREEN WITH LIMITATIONS** |
 | Formal production | **NO-GO** |
@@ -393,8 +488,8 @@ Director/admin read-only UI: **Pilot Activation Readiness** on Control Centre (`
 | Suite | Count |
 |-------|-------|
 | Prior pilot-control baseline | 305 |
-| Governance Closure additions | +41 (net; suite now 346) |
-| **Total pilot-control unit tests** | **346** (all passing) |
+| Governance Closure + tiered human gates | +47 (net) |
+| **Total pilot-control unit tests** | **352** (all passing) |
 
 ---
 
@@ -407,11 +502,12 @@ Director/admin read-only UI: **Pilot Activation Readiness** on Control Centre (`
 5. Human SOP/training/support/privacy/clinical/director approvals not yet recorded  
 6. Patient-facing consent text requires legal/clinical review before use  
 7. Invitation write path remains disabled (correct for this boundary)  
-8. ~~CFO → administrator~~ **Corrected** in Governance Closure (unit-proven; live CFO re-probe pending deploy)  
-9. ~~Export `type=overview` 400~~ **Corrected** — approved types succeed; invalid types return `PILOT_CONTROL_INVALID_EXPORT_TYPE`  
+8. ~~CFO → administrator~~ **Corrected and live-proven** — CFO → `finance`; export 200; activation denied (`df2b4230` / `dpl_AUR3k5R4eY7ppvDJEurCEB5oiot7`)  
+9. ~~Export `type=overview` 400~~ **Corrected and live-proven** — approved types 200; invalid type/format/range fail safely  
 10. No live incident tabletop or named support roster completed  
 11. Permission defect `primary_clinic_id` was found during Stage 7 and fixed in `707bac90` before re-proof  
 12. `notification_delivered` remains `wired_with_limitation` (no Expo delivery-receipt producer)  
+13. Process-local export rate limit (5/user/10min) can throttle dense live proof scripts — not a product defect; proofs rotated actors / waited for quota  
 
 ---
 
@@ -423,16 +519,19 @@ Director/admin read-only UI: **Pilot Activation Readiness** on Control Centre (`
 | Incident response | `docs/operations/FI-CONTROLLED-PILOT-INCIDENT-RESPONSE-1B.md` |
 | Rollback | `docs/operations/FI-CONTROLLED-PILOT-ROLLBACK-1B.md` |
 | Training | `docs/operations/FI-CONTROLLED-PILOT-TRAINING-1B.md` |
-| SOP approval | `docs/governance/FI-CONTROLLED-PILOT-SOP-APPROVAL-1B.md` |
-| Training register | `docs/governance/FI-CONTROLLED-PILOT-TRAINING-REGISTER-1B.md` |
-| Support coverage | `docs/governance/FI-CONTROLLED-PILOT-SUPPORT-COVERAGE-1B.md` |
-| Consent approval | `docs/governance/FI-CONTROLLED-PILOT-CONSENT-APPROVAL-1B.md` |
-| Tabletop | `docs/governance/FI-CONTROLLED-PILOT-TABLETOP-1B.md` |
+| Small-team briefing (Evolved) | `docs/governance/FI-CONTROLLED-PILOT-SMALL-TEAM-BRIEFING-1B.md` |
+| SOP approval (larger tenants) | `docs/governance/FI-CONTROLLED-PILOT-SOP-APPROVAL-1B.md` |
+| Training register (template) | `docs/governance/FI-CONTROLLED-PILOT-TRAINING-REGISTER-1B.md` |
+| Support coverage (template) | `docs/governance/FI-CONTROLLED-PILOT-SUPPORT-COVERAGE-1B.md` |
+| Consent approval (template) | `docs/governance/FI-CONTROLLED-PILOT-CONSENT-APPROVAL-1B.md` |
+| Tabletop (template) | `docs/governance/FI-CONTROLLED-PILOT-TABLETOP-1B.md` |
 | Activation decision | `docs/governance/FI-CONTROLLED-PILOT-ACTIVATION-DECISION-1B.md` |
 | Gate register | `docs/audits/fi-pilot-activation-gate-register.json` |
 | Event coverage | `docs/audits/fi-pilot-event-coverage-register.json` |
 | Role acceptance | `docs/audits/fi-pilot-role-acceptance-register.json` |
 | Cohort candidates | `docs/audits/fi-pilot-cohort-candidate-register.json` |
+| Live role-matrix evidence | `docs/audits/evidence-fi-pilot-control-1b-live-role-matrix.json` |
+| Live export evidence | `docs/audits/evidence-fi-pilot-control-1b-live-export.json` |
 
 ---
 
@@ -441,7 +540,8 @@ Director/admin read-only UI: **Pilot Activation Readiness** on Control Centre (`
 | Scope | Status |
 |-------|--------|
 | Pilot Control Centre 1A | GREEN WITH LIMITATIONS |
-| Pilot Activation 1B | **GREEN WITH LIMITATIONS** |
+| Pilot Activation 1B (technical) | **GREEN** |
+| Pilot Activation 1B (overall) | **GREEN WITH LIMITATIONS** (human gates incomplete) |
 | Initial patient invitations | Human approval required |
 | Initial cohort | Not active |
 | Formal production | NO-GO |

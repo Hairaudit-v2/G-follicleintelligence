@@ -442,3 +442,108 @@ export function assertHumanApprovalsNotAutoSet(args: {
   }
   return { valid: blockers.length === 0, blockers };
 }
+
+/** Named contacts required for the Evolved small-team pilot briefing. */
+export const SMALL_TEAM_REQUIRED_CONTACTS = [
+  "operations_lead",
+  "clinical_lead",
+  "finance_contact",
+  "technical_contact",
+] as const;
+
+export type SmallTeamPilotBriefingEvidence = {
+  programmeId: string;
+  briefingVersion: string;
+  briefingChecksum?: string;
+  operationsLeadName: string;
+  clinicalLeadName: string;
+  financeContactName: string;
+  technicalContactName: string;
+  staffAcknowledgements: ReadonlyArray<{
+    staffName: string;
+    staffRole: string;
+    acknowledgedAt: string;
+  }>;
+  clinicalWorkflowConfirmed: boolean;
+  financeWorkflowConfirmed: boolean;
+  supportContactConfirmed: boolean;
+  fallbackConfirmed: boolean;
+  directorApproval: NamedApproval | null;
+  decidedAt?: string;
+};
+
+/**
+ * Compact small-team briefing evaluator.
+ * Combined briefing + named contacts + staff ack + director replace separate
+ * SOP / training / support / tabletop / privacy-committee artefacts.
+ */
+export function evaluateSmallTeamPilotBriefing(
+  evidence: SmallTeamPilotBriefingEvidence | null | undefined
+): {
+  teamBriefingCompleted: boolean;
+  clinicalWorkflowConfirmed: boolean;
+  financeWorkflowConfirmed: boolean;
+  supportContactConfirmed: boolean;
+  fallbackConfirmed: boolean;
+  directorApproval: boolean;
+  blockers: string[];
+} {
+  const blockers: string[] = [];
+  if (!evidence) {
+    return {
+      teamBriefingCompleted: false,
+      clinicalWorkflowConfirmed: false,
+      financeWorkflowConfirmed: false,
+      supportContactConfirmed: false,
+      fallbackConfirmed: false,
+      directorApproval: false,
+      blockers: ["small_team_briefing_missing"],
+    };
+  }
+
+  const namedContacts = [
+    evidence.operationsLeadName,
+    evidence.clinicalLeadName,
+    evidence.financeContactName,
+    evidence.technicalContactName,
+  ];
+  if (namedContacts.some((n) => !n?.trim())) {
+    blockers.push("small_team_named_contacts_incomplete");
+  }
+  if (!evidence.briefingVersion?.trim()) {
+    blockers.push("small_team_briefing_version_missing");
+  }
+  if (evidence.staffAcknowledgements.length === 0) {
+    blockers.push("small_team_staff_acknowledgement_missing");
+  }
+  if (!evidence.clinicalWorkflowConfirmed) {
+    blockers.push("small_team_clinical_workflow_unconfirmed");
+  }
+  if (!evidence.financeWorkflowConfirmed) {
+    blockers.push("small_team_finance_workflow_unconfirmed");
+  }
+  if (!evidence.supportContactConfirmed) {
+    blockers.push("small_team_support_contact_unconfirmed");
+  }
+  if (!evidence.fallbackConfirmed) {
+    blockers.push("small_team_fallback_unconfirmed");
+  }
+  const directorOk = isNamedApprovalSatisfying(evidence.directorApproval ?? undefined);
+  if (!directorOk) blockers.push("small_team_director_approval_missing");
+
+  const contactsComplete = namedContacts.every((n) => Boolean(n?.trim()));
+  const teamBriefingCompleted =
+    contactsComplete &&
+    Boolean(evidence.briefingVersion?.trim()) &&
+    evidence.staffAcknowledgements.length > 0;
+
+  return {
+    teamBriefingCompleted,
+    clinicalWorkflowConfirmed: evidence.clinicalWorkflowConfirmed,
+    financeWorkflowConfirmed: evidence.financeWorkflowConfirmed,
+    supportContactConfirmed: evidence.supportContactConfirmed,
+    fallbackConfirmed: evidence.fallbackConfirmed,
+    directorApproval: directorOk,
+    blockers,
+  };
+}

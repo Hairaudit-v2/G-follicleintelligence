@@ -673,6 +673,34 @@ describe("FI-CONTROLLED-PILOT-ACTIVATION-1B", () => {
         "complete_gate_awaits_explicit_human_invite_decision"
       ));
     });
+
+    it("68b. small-team compact gates replace formal document set", () => {
+      const gate = evaluateControlledPilotActivationGate(
+        completeActivationGateInput({
+          governanceTier: "small_team_pilot",
+          teamBriefingCompleted: false,
+          clinicalWorkflowConfirmed: false,
+          financeWorkflowConfirmed: false,
+          supportContactConfirmed: false,
+          fallbackConfirmed: false,
+          directorApproval: false,
+          humanApprovedForInitialInvites: true,
+        })
+      );
+      assert.equal(gate.governanceTier, "small_team_pilot");
+      for (const key of [
+        "teamBriefingCompleted",
+        "clinicalWorkflowConfirmed",
+        "financeWorkflowConfirmed",
+        "supportContactConfirmed",
+        "fallbackConfirmed",
+        "directorApproval",
+      ]) {
+        assert.ok(gate.blockers.includes(`human_gate:${key}`), key);
+      }
+      assert.ok(!gate.blockers.includes("human_gate:operationalSopApproved"));
+      assert.ok(!gate.blockers.includes("human_gate:separateTrainingRegister"));
+    });
   });
 
   // -------------------------------------------------------------------------

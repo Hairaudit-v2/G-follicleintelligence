@@ -53,6 +53,7 @@ import {
   evaluateGovernanceTabletop,
   evaluateNamedActivationApprovals,
   assertHumanApprovalsNotAutoSet,
+  evaluateSmallTeamPilotBriefing,
   REQUIRED_SOP_SECTIONS,
   type NamedApproval,
   type PilotSopApproval,
@@ -60,6 +61,7 @@ import {
   type PatientPilotConsentApproval,
   type PilotGovernanceTabletopRecord,
 } from "./governanceEvidence";
+import { resolveProgrammeGovernanceTier } from "./governanceTier";
 import { PILOT_1B_REQUIRED_EVENT_COVERAGE, summariseEventCoverage } from "./eventCoverage";
 
 function emptyDim(
@@ -679,7 +681,11 @@ describe("1B Governance Closure — human gates", () => {
     const gate = evaluateControlledPilotActivationGate(buildGovernanceClosureGateInput());
     assert.equal(gate.eligibleForGovernanceReview, true);
     assert.equal(gate.approvedForInitialInvites, false);
-    assert.equal(gate.operationalSopApproved, false);
+    assert.equal(gate.governanceTier, "small_team_pilot");
+    assert.equal(gate.teamBriefingCompleted, false);
+    assert.equal(gate.directorApproval, false);
+    assert.ok(gate.blockers.includes("human_gate:teamBriefingCompleted"));
+    assert.ok(!gate.blockers.includes("human_gate:operationalSopApproved"));
     assert.equal(gate.financeRoleMappingCorrect, true);
     assert.equal(gate.exportSurfaceProven, true);
   });
@@ -697,5 +703,119 @@ describe("1B Governance Closure — human gates", () => {
       completeActivationGateInput({ humanApprovedForInitialInvites: false })
     );
     assert.equal(gate.approvedForInitialInvites, false);
+  });
+
+  it("41. Small-team tier does not require formal SOP / training / tabletop gates", () => {
+    const gate = evaluateControlledPilotActivationGate(
+      completeActivationGateInput({
+        governanceTier: "small_team_pilot",
+        teamBriefingCompleted: true,
+        clinicalWorkflowConfirmed: true,
+        financeWorkflowConfirmed: true,
+        supportContactConfirmed: true,
+        fallbackConfirmed: true,
+        directorApproval: true,
+        operationalSopApproved: false,
+        staffTrainingCompleted: false,
+        incidentResponseConfirmed: false,
+        privacyApproved: false,
+        humanApprovedForInitialInvites: true,
+      })
+    );
+    assert.equal(gate.governanceTier, "small_team_pilot");
+    assert.equal(gate.approvedForInitialInvites, true);
+    assert.ok(!gate.blockers.some((b) => b.startsWith("human_gate:operationalSop")));
+    assert.ok(!gate.blockers.some((b) => b.startsWith("human_gate:staffTraining")));
+    assert.ok(!gate.blockers.some((b) => b.startsWith("human_gate:privacy")));
+  });
+
+  it("42. Small-team missing briefing blocks invites", () => {
+    const gate = evaluateControlledPilotActivationGate(
+      completeActivationGateInput({
+        governanceTier: "small_team_pilot",
+        teamBriefingCompleted: false,
+        humanApprovedForInitialInvites: true,
+      })
+    );
+    assert.ok(gate.blockers.includes("human_gate:teamBriefingCompleted"));
+    assert.equal(gate.approvedForInitialInvites, false);
+  });
+
+  it("43. Enterprise tier requires formal privacy + staged rollout", () => {
+    const gate = evaluateControlledPilotActivationGate(
+      completeActivationGateInput({
+        governanceTier: "enterprise_or_high_risk",
+        formalPrivacyCommitteeApproval: false,
+        enterpriseStagedRolloutApproved: false,
+        humanApprovedForInitialInvites: true,
+      })
+    );
+    assert.ok(gate.blockers.includes("human_gate:formalPrivacyCommitteeApproval"));
+    assert.ok(gate.blockers.includes("human_gate:enterpriseStagedRolloutApproved"));
+    assert.equal(gate.approvedForInitialInvites, false);
+  });
+
+  it("44. Evolved programme key resolves to small_team_pilot", () => {
+    assert.equal(
+      resolveProgrammeGovernanceTier({
+        programmeKey: "evolved_controlled_pilot_1a",
+        metadata: {},
+      }),
+      "small_team_pilot"
+    );
+  });
+
+  it("45. Small-team briefing evaluator requires named contacts + director", () => {
+    const incomplete = evaluateSmallTeamPilotBriefing({
+      programmeId: "p1",
+      briefingVersion: "1B.0",
+      operationsLeadName: "Ops",
+      clinicalLeadName: "",
+      financeContactName: "Fin",
+      technicalContactName: "Tech",
+      staffAcknowledgements: [],
+      clinicalWorkflowConfirmed: true,
+      financeWorkflowConfirmed: true,
+      supportContactConfirmed: true,
+      fallbackConfirmed: true,
+      directorApproval: null,
+    });
+    assert.equal(incomplete.teamBriefingCompleted, false);
+    assert.ok(incomplete.blockers.includes("small_team_named_contacts_incomplete"));
+    assert.ok(incomplete.blockers.includes("small_team_staff_acknowledgement_missing"));
+    assert.ok(incomplete.blockers.includes("small_team_director_approval_missing"));
+
+    const complete = evaluateSmallTeamPilotBriefing({
+      programmeId: "p1",
+      briefingVersion: "1B.0",
+      operationsLeadName: "Ops",
+      clinicalLeadName: "Clin",
+      financeContactName: "Fin",
+      technicalContactName: "Tech",
+      staffAcknowledgements: [
+        {
+          staffName: "A",
+          staffRole: "reception",
+          acknowledgedAt: "2026-07-31T00:00:00.000Z",
+        },
+      ],
+      clinicalWorkflowConfirmed: true,
+      financeWorkflowConfirmed: true,
+      supportContactConfirmed: true,
+      fallbackConfirmed: true,
+      directorApproval: {
+        area: "director",
+        approverName: "Dir",
+        approverRole: "director",
+        decision: "approved",
+        decisionReason: "ok",
+        conditions: [],
+        evidenceReferences: ["briefing"],
+        decidedAt: "2026-07-31T00:00:00.000Z",
+      },
+    });
+    assert.equal(complete.teamBriefingCompleted, true);
+    assert.equal(complete.directorApproval, true);
+    assert.equal(complete.blockers.length, 0);
   });
 });

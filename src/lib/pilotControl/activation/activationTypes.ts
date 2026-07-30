@@ -4,7 +4,7 @@
  * Software must never set approved_for_initial_invites or initial_cohort_active.
  */
 
-export const PILOT_ACTIVATION_VERSION = "1B.0.0" as const;
+export const PILOT_ACTIVATION_VERSION = "1B.1.0" as const;
 
 export const PILOT_ACTIVATION_STATES = [
   "planned",
@@ -164,6 +164,16 @@ export type PilotClinicalConsentPreflightResult = {
 };
 
 export type ControlledPilotActivationGate = {
+  /** Tenant governance model — selects which human fields are mandatory. */
+  governanceTier:
+    | "small_team_pilot"
+    | "standard_tenant"
+    | "enterprise_or_high_risk";
+  /** Human fields that block invite readiness for this tier. */
+  requiredHumanFields: string[];
+  /** Formal artefacts / legacy fields deferred or N/A for this tier. */
+  notApplicableHumanFields: string[];
+
   controlCentreAccepted: boolean;
   migrationsApplied: boolean;
   tenantIsolationProven: boolean;
@@ -178,6 +188,13 @@ export type ControlledPilotActivationGate = {
   financePreflightProven: boolean;
   consentControlsProven: boolean;
   eventCoverageSufficient: boolean;
+
+  /** Small-team pilot compact human set. */
+  teamBriefingCompleted: boolean;
+  clinicalWorkflowConfirmed: boolean;
+  financeWorkflowConfirmed: boolean;
+  supportContactConfirmed: boolean;
+  fallbackConfirmed: boolean;
 
   operationalSopApproved: boolean;
   staffTrainingCompleted: boolean;
@@ -194,6 +211,14 @@ export type ControlledPilotActivationGate = {
   initialPathwayApproved: boolean;
   initialCohortApproved: boolean;
   directorApproval: boolean;
+
+  /** Enterprise / high-risk extras (N/A for small-team). */
+  formalPrivacyCommitteeApproval: boolean;
+  multiClinicGovernanceConfirmed: boolean;
+  enterpriseIncidentExerciseConfirmed: boolean;
+  enterpriseSegregationOfDutiesConfirmed: boolean;
+  enterpriseIntegrationApprovalsConfirmed: boolean;
+  enterpriseStagedRolloutApproved: boolean;
 
   eligibleForGovernanceReview: boolean;
   /** Requires human decision record — never auto-set by software. */

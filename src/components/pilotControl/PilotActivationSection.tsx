@@ -21,6 +21,12 @@ const GOVERNANCE_FIELD_LABELS: Record<string, string> = {
   financePreflightProven: "Finance preflight proven",
   consentControlsProven: "Consent controls proven",
   eventCoverageSufficient: "Minimum event coverage",
+  teamBriefingCompleted: "Combined pilot briefing + staff acknowledgement",
+  clinicalWorkflowConfirmed: "Clinical workflow confirmed",
+  financeWorkflowConfirmed: "Finance workflow confirmed",
+  supportContactConfirmed: "Support contact confirmed",
+  fallbackConfirmed: "Fallback / pause confirmed",
+  directorApproval: "Director approval",
   operationalSopApproved: "SOP approval",
   staffTrainingCompleted: "Staff training completion",
   supportCoverageConfirmed: "Support coverage",
@@ -33,27 +39,22 @@ const GOVERNANCE_FIELD_LABELS: Record<string, string> = {
   financeApproved: "Finance approval",
   initialPathwayApproved: "Initial pathway approval",
   initialCohortApproved: "Initial cohort approval",
-  directorApproval: "Director approval",
+  formalPrivacyCommitteeApproval: "Formal privacy committee approval",
+  multiClinicGovernanceConfirmed: "Multi-clinic governance",
+  enterpriseIncidentExerciseConfirmed: "Enterprise incident exercise",
+  enterpriseSegregationOfDutiesConfirmed: "Segregation of duties",
+  enterpriseIntegrationApprovalsConfirmed: "Integration-specific approvals",
+  enterpriseStagedRolloutApproved: "Staged rollout decision",
 };
 
-const HUMAN_FIELDS = new Set([
-  "operationalSopApproved",
-  "staffTrainingCompleted",
-  "supportCoverageConfirmed",
-  "incidentResponseConfirmed",
-  "manualFallbackConfirmed",
-  "rollbackConfirmed",
-  "patientPilotConsentApproved",
-  "clinicalGovernanceApproved",
-  "privacyApproved",
-  "financeApproved",
-  "initialPathwayApproved",
-  "initialCohortApproved",
-  "directorApproval",
-]);
+const TIER_LABELS: Record<string, string> = {
+  small_team_pilot: "Small team pilot",
+  standard_tenant: "Standard tenant",
+  enterprise_or_high_risk: "Enterprise / high-risk",
+};
 
 /**
- * 1B read-only activation readiness surface (Governance Closure).
+ * 1B read-only activation readiness surface (tiered governance).
  * No approval controls — human approvals remain in the governance process.
  */
 export function PilotActivationSection({ overview, role }: PilotActivationSectionProps) {
@@ -72,6 +73,9 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
     );
   }
 
+  const tier = gate.governanceTier ?? "standard_tenant";
+  const applicability = gate.fieldApplicability ?? {};
+  const requiredHuman = new Set(gate.requiredHumanFields ?? []);
   const fieldEntries = Object.entries(gate.fields);
   const recommendation = gate.approvedForInitialInvites
     ? "approve_invites"
@@ -89,6 +93,12 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
 
       <div className="grid gap-3 sm:grid-cols-3 text-xs">
         <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
+          <div className="text-slate-400">Governance tier</div>
+          <div className="mt-1 text-sm text-slate-100">
+            {TIER_LABELS[tier] ?? tier}
+          </div>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
           <div className="text-slate-400">Eligible for governance review</div>
           <div className="mt-1 text-sm text-slate-100">
             {gate.eligibleForGovernanceReview ? "Eligible for governance review" : "Not yet eligible"}
@@ -102,28 +112,54 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
               : "Not approved for initial invitations"}
           </div>
         </div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-          <div className="text-slate-400">Gate version / evidence</div>
-          <div className="mt-1 text-sm text-slate-100">{gate.version}</div>
-        </div>
       </div>
 
       <ul className="grid gap-1 sm:grid-cols-2 text-xs text-slate-300">
-        {fieldEntries.map(([key, value]) => (
-          <li key={key} className="flex items-center justify-between gap-2 border-b border-white/5 py-1">
-            <span className="text-slate-400">{GOVERNANCE_FIELD_LABELS[key] ?? formatField(key)}</span>
-            <span className={value ? "text-emerald-300/90" : "text-amber-200/90"}>
-              {value
-                ? HUMAN_FIELDS.has(key)
-                  ? "Named approval recorded"
-                  : "Complete"
-                : HUMAN_FIELDS.has(key)
-                  ? "Pending named approval"
-                  : "Pending"}
-            </span>
-          </li>
-        ))}
+        {fieldEntries.map(([key, value]) => {
+          const kind =
+            applicability[key] ??
+            (requiredHuman.has(key)
+              ? "required"
+              : key in GOVERNANCE_FIELD_LABELS && !key.startsWith("control")
+                ? "required"
+                : "software");
+          const isHuman = kind === "required" || kind === "not_applicable";
+          return (
+            <li key={key} className="flex items-center justify-between gap-2 border-b border-white/5 py-1">
+              <span className="text-slate-400">
+                {GOVERNANCE_FIELD_LABELS[key] ?? formatField(key)}
+              </span>
+              <span
+                className={
+                  kind === "not_applicable"
+                    ? "text-slate-500"
+                    : value
+                      ? "text-emerald-300/90"
+                      : "text-amber-200/90"
+                }
+              >
+                {kind === "not_applicable"
+                  ? "Not applicable for this tier"
+                  : value
+                    ? isHuman
+                      ? "Named confirmation recorded"
+                      : "Complete"
+                    : isHuman
+                      ? "Pending named confirmation"
+                      : "Pending"}
+              </span>
+            </li>
+          );
+        })}
       </ul>
+
+      {tier === "small_team_pilot" ? (
+        <p className="text-[11px] text-slate-500">
+          Small-team pilot: separate SOP approval, training register, support coverage
+          document, privacy committee, and tabletop artefacts are not mandatory. Keep
+          those templates for larger tenants; Evolved requires the compact briefing set.
+        </p>
+      ) : null}
 
       {gate.blockers.length > 0 ? (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-100/90">
@@ -146,11 +182,13 @@ export function PilotActivationSection({ overview, role }: PilotActivationSectio
       ) : null}
 
       <p className="text-[11px] text-slate-500">
-        Current recommendation:{" "}
+        Gate version: {gate.version}. Current recommendation:{" "}
         {recommendation === "approve_invites"
           ? "Human invite enablement may proceed through the audited write path."
           : recommendation === "defer"
-            ? "defer — technical evidence ready; named human approvals still required."
+            ? tier === "small_team_pilot"
+              ? "defer — technical evidence ready; small-team briefing confirmations still required."
+              : "defer — technical evidence ready; named human approvals still required."
             : "Complete outstanding software gates before governance review."}{" "}
         Formal production remains NO-GO. Stripe remains disabled. Programme remains planned.
       </p>

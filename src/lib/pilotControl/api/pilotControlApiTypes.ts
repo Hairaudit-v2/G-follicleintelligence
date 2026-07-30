@@ -244,7 +244,15 @@ export type PilotControlOverview = {
     blockers: string[];
     warnings: string[];
     version: string;
+    governanceTier:
+      | "small_team_pilot"
+      | "standard_tenant"
+      | "enterprise_or_high_risk";
+    requiredHumanFields: string[];
+    notApplicableHumanFields: string[];
     fields: Record<string, boolean>;
+    /** required | not_applicable | software — drives UI pending vs N/A labels. */
+    fieldApplicability: Record<string, "required" | "not_applicable" | "software">;
   };
   generatedAt: string;
 };

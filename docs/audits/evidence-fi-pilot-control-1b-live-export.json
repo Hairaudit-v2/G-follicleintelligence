@@ -1,0 +1,121 @@
+{
+  "phase": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+  "proofType": "authenticated_export_surface_readonly",
+  "timestamp": "2026-07-30T20:51:57.911Z",
+  "programmeKey": "evolved_controlled_pilot_1a",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "baseUrl": "https://follicleintelligence.ai",
+  "gitCommitSha": "df2b42308d1e71d58d7a7333b8ecfdc70b85d0aa",
+  "red": false,
+  "proofs": [
+    {
+      "case": "approved_patient_register_csv",
+      "expected": 200,
+      "status": 200,
+      "code": null,
+      "contentType": "text/csv; charset=utf-8",
+      "actor": "finance",
+      "pass": true,
+      "formulaInjectionDetected": false
+    },
+    {
+      "case": "approved_patient_register_json",
+      "expected": 200,
+      "status": 200,
+      "code": null,
+      "contentType": "application/json; charset=utf-8",
+      "actor": "privileged",
+      "pass": true,
+      "formulaInjectionDetected": null
+    },
+    {
+      "case": "approved_active_blockers_csv",
+      "expected": 200,
+      "status": 200,
+      "code": null,
+      "contentType": "text/csv; charset=utf-8",
+      "actor": "privileged",
+      "pass": true,
+      "formulaInjectionDetected": false
+    },
+    {
+      "case": "approved_programme_summary_csv",
+      "expected": 200,
+      "status": 200,
+      "code": null,
+      "contentType": "text/csv; charset=utf-8",
+      "actor": "finance",
+      "pass": true,
+      "formulaInjectionDetected": false
+    },
+    {
+      "case": "approved_activity_summary_csv",
+      "expected": 200,
+      "status": 200,
+      "code": null,
+      "contentType": "text/csv; charset=utf-8",
+      "actor": "privileged",
+      "pass": true,
+      "formulaInjectionDetected": false
+    },
+    {
+      "case": "invalid_type_overview",
+      "expected": "400 PILOT_CONTROL_INVALID_EXPORT_TYPE",
+      "status": 400,
+      "code": "PILOT_CONTROL_INVALID_EXPORT_TYPE",
+      "pass": true
+    },
+    {
+      "case": "invalid_format_xlsx",
+      "expected": "400 PILOT_CONTROL_INVALID_EXPORT_FORMAT",
+      "status": 400,
+      "code": "PILOT_CONTROL_INVALID_EXPORT_FORMAT",
+      "pass": true
+    },
+    {
+      "case": "activity_range_too_wide",
+      "expected": "400 DATE_RANGE_TOO_WIDE or INVALID_FILTER",
+      "status": 400,
+      "code": "PILOT_CONTROL_DATE_RANGE_TOO_WIDE",
+      "pass": true
+    },
+    {
+      "case": "wrong_tenant_export",
+      "expected": "403/404 no disclosure",
+      "status": 403,
+      "code": "PILOT_CONTROL_TENANT_MISMATCH",
+      "pass": true,
+      "bodySnippet": "{\"error\":{\"code\":\"PILOT_CONTROL_TENANT_MISMATCH\",\"message\":\"Not authorized for this tenant.\",\"correlationId\":\"d3bcd2ca-d6af-4eb8-9c2c-d334e0a1e8f8\"}}"
+    },
+    {
+      "case": "finance_patient_register_projection",
+      "expected": "200 without clinical/pathology fields",
+      "status": 200,
+      "code": null,
+      "actorRole": null,
+      "pass": true,
+      "clinicalLeak": false
+    },
+    {
+      "case": "finance_activation_surface_denied",
+      "expected": "actorRole=finance and no activationGate",
+      "status": 200,
+      "actorRole": "finance",
+      "hasActivationGate": false,
+      "pass": true
+    }
+  ],
+  "auditEvent": {
+    "pass": true,
+    "latestId": "944f37e2-7050-474b-8956-4783aa5484ae",
+    "createdAt": "2026-07-30T20:51:56.954617+00:00",
+    "payloadKeys": [
+      "role",
+      "format",
+      "rowCount",
+      "exportType"
+    ],
+    "hasRowContent": false,
+    "hasMeta": true
+  }
+}

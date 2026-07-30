@@ -67,39 +67,67 @@ async function magicLinkSession(email) {
     token_hash: hashed,
   });
   if (error) throw error;
-  return { client, session: data.session };
+  return { client, session: data.session, label: email };
+}
+
+async function passwordSession(email, password) {
+  const client = createClient(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error || !data.session) throw new Error(error?.message ?? "password_sign_in_failed");
+  return { client, session: data.session, label: email };
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 async function api(path, token, opts = {}) {
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: opts.accept || "application/json",
-      ...(opts.headers || {}),
-    },
-  });
-  const contentType = res.headers.get("content-type") || "";
-  let bodyText = "";
-  let json = null;
-  bodyText = await res.text();
-  if (contentType.includes("application/json") || bodyText.trim().startsWith("{")) {
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      json = null;
-    }
-  }
-  return {
-    status: res.status,
-    contentType,
-    bodyText: bodyText.slice(0, 4000),
-    json,
-    correlationId:
-      json?.error?.correlationId ||
-      res.headers.get("x-correlation-id") ||
-      null,
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: opts.accept || "application/json",
+    ...(opts.headers || {}),
   };
+  // Default Evolved tenant context unless caller opts out (wrong-tenant probe).
+  if (opts.tenantId !== null && opts.tenantId !== undefined) {
+    headers["x-fi-tenant-id"] = opts.tenantId;
+  } else if (opts.omitTenantHeader !== true) {
+    headers["x-fi-tenant-id"] = EVOLVED_TENANT;
+  }
+
+  let last = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: "GET",
+      headers,
+    });
+    const contentType = res.headers.get("content-type") || "";
+    let bodyText = "";
+    let json = null;
+    bodyText = await res.text();
+    if (contentType.includes("application/json") || bodyText.trim().startsWith("{")) {
+      try {
+        json = JSON.parse(bodyText);
+      } catch {
+        json = null;
+      }
+    }
+    last = {
+      status: res.status,
+      contentType,
+      bodyText: bodyText.slice(0, 4000),
+      json,
+      correlationId:
+        json?.error?.correlationId ||
+        res.headers.get("x-correlation-id") ||
+        null,
+    };
+    // Export quota is 5 / user / 10 min (process-local). Back off hard before giving up.
+    if (res.status !== 429) return last;
+    await sleep(Math.min(120_000, 8_000 * (attempt + 1)));
+  }
+  return last;
 }
 
 function hasFormulaInjection(csvText) {
@@ -123,28 +151,42 @@ async function main() {
   const proofs = [];
   let red = false;
 
-  const director = await magicLinkSession("paul@evolvedhair.com.au");
   const finance = await magicLinkSession("harsh@evolvedhair.com.au");
   const wrongTenant = await magicLinkSession("reception@evolvedhair.com.au");
+  // Prefer admin password when available — spreads export quota (5/user/10min) off director.
+  let privileged = null;
+  const adminEmail = process.env.FI_E2E_PRODUCTION_ADMIN_EMAIL?.trim() || "auditor@hairaudit.com";
+  const adminPassword = process.env.FI_E2E_PRODUCTION_ADMIN_PASSWORD?.trim();
+  if (adminPassword) {
+    privileged = await passwordSession(adminEmail, adminPassword);
+  } else {
+    privileged = await magicLinkSession("paul@evolvedhair.com.au");
+  }
 
   const from = isoDaysAgo(7);
   const to = new Date().toISOString();
   const wideFrom = isoDaysAgo(45);
 
+  // Spread across finance + privileged so live proofs survive the 5/export/10min cap.
   const approved = [
-    { type: "patient_register", format: "csv" },
-    { type: "patient_register", format: "json" },
-    { type: "active_blockers", format: "csv" },
-    { type: "programme_summary", format: "csv" },
+    { type: "patient_register", format: "csv", actor: "finance" },
+    { type: "patient_register", format: "json", actor: "privileged" },
+    { type: "active_blockers", format: "csv", actor: "privileged" },
+    { type: "programme_summary", format: "csv", actor: "finance" },
     {
       type: "activity_summary",
       format: "csv",
       from,
       to,
+      actor: "privileged",
     },
   ];
 
+  const tokenFor = (actor) =>
+    actor === "finance" ? finance.session.access_token : privileged.session.access_token;
+
   for (const combo of approved) {
+    await sleep(500);
     const qs = new URLSearchParams({
       programmeId: PROGRAMME_KEY,
       type: combo.type,
@@ -152,11 +194,9 @@ async function main() {
     });
     if (combo.from) qs.set("from", combo.from);
     if (combo.to) qs.set("to", combo.to);
-    const r = await api(
-      `/api/pilot-control/export?${qs}`,
-      director.session.access_token,
-      { accept: combo.format === "csv" ? "text/csv" : "application/json" }
-    );
+    const r = await api(`/api/pilot-control/export?${qs}`, tokenFor(combo.actor), {
+      accept: combo.format === "csv" ? "text/csv" : "application/json",
+    });
     const ok = r.status === 200;
     if (!ok) red = true;
     proofs.push({
@@ -165,6 +205,7 @@ async function main() {
       status: r.status,
       code: r.json?.error?.code ?? null,
       contentType: r.contentType,
+      actor: combo.actor,
       pass: ok,
       formulaInjectionDetected:
         combo.format === "csv" && ok ? hasFormulaInjection(r.bodyText) : null,
@@ -174,11 +215,11 @@ async function main() {
     }
   }
 
-  // Invalid type
+  // Invalid type (privileged actor — not counted against finance export quota for finance projection)
   {
     const r = await api(
       `/api/pilot-control/export?programmeId=${PROGRAMME_KEY}&format=json&type=overview`,
-      director.session.access_token
+      privileged.session.access_token
     );
     const pass =
       r.status === 400 && r.json?.error?.code === "PILOT_CONTROL_INVALID_EXPORT_TYPE";
@@ -196,7 +237,7 @@ async function main() {
   {
     const r = await api(
       `/api/pilot-control/export?programmeId=${PROGRAMME_KEY}&format=xlsx&type=programme_summary`,
-      director.session.access_token
+      finance.session.access_token
     );
     const pass =
       r.status === 400 &&
@@ -220,10 +261,7 @@ async function main() {
       from: wideFrom,
       to,
     });
-    const r = await api(
-      `/api/pilot-control/export?${qs}`,
-      director.session.access_token
-    );
+    const r = await api(`/api/pilot-control/export?${qs}`, privileged.session.access_token);
     const pass =
       r.status === 400 &&
       (r.json?.error?.code === "PILOT_CONTROL_DATE_RANGE_TOO_WIDE" ||
@@ -342,7 +380,7 @@ async function main() {
     }
   }
 
-  await director.client.auth.signOut();
+  await privileged.client.auth.signOut();
   await finance.client.auth.signOut();
   await wrongTenant.client.auth.signOut();
 

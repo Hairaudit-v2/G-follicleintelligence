@@ -211,7 +211,7 @@ async function main() {
         token
       );
       const patients = await api(
-        `/api/pilot-control/patients?programmeId=${PROGRAMME_KEY}`,
+        `/api/pilot-control/patients?programmeId=${PROGRAMME_KEY}&page=1&pageSize=25`,
         token
       );
       const blockers = await api(
@@ -226,19 +226,41 @@ async function main() {
         `/api/pilot-control/export?programmeId=${PROGRAMME_KEY}&format=json&type=programme_summary`,
         token
       );
+      // Clinical detail: synthetic id — empty cohort expects not-enrolled / forbidden, not full clinical.
+      const clinicalDetail = await api(
+        `/api/pilot-control/patients/00000000-0000-4000-8000-000000000001?programmeId=${PROGRAMME_KEY}`,
+        token
+      );
+
+      const actorRole =
+        overview.json?.meta?.actorRole ??
+        overview.json?.actorRole ??
+        overview.json?.data?.actorRole ??
+        null;
+      const hasActivationGate = Boolean(overview.json?.data?.activationGate);
+      const clinicalBody = JSON.stringify(clinicalDetail.json ?? {});
+      const clinicalLeak =
+        /clinicalNotes|clinical_free_text|pathologyDetail|medicationDetail/i.test(
+          clinicalBody
+        );
 
       row.checks = {
         overviewStatus: overview.status,
         overviewCode: overview.json?.error?.code ?? null,
-        actorRole: overview.json?.meta?.actorRole ?? overview.json?.actorRole ?? overview.json?.data?.actorRole ?? null,
+        actorRole,
+        hasActivationGate,
         patientsStatus: patients.status,
         blockersStatus: blockers.status,
         adoptionStatus: adoption.status,
         exportStatus: exp.status,
+        clinicalDetailStatus: clinicalDetail.status,
+        clinicalDetailCode: clinicalDetail.json?.error?.code ?? null,
+        clinicalLeak,
         sensitiveHits: [
           ...containsSensitive(overview.json),
           ...containsSensitive(patients.json),
           ...containsSensitive(blockers.json),
+          ...containsSensitive(clinicalDetail.json),
         ],
         emptyCohortHonest:
           overview.status === 200
@@ -263,11 +285,44 @@ async function main() {
         row.liveStatus = allowed ? "pass" : "fail";
         if (!allowed) red = true;
         if (probe.expectExport && !(exp.status === 200 || exp.status === 201)) {
-          row.notes.push(`export_expected_but_status=${exp.status}`);
+          // Export quota is 5/user/10min (process-local). Live export proof covers the surface;
+          // finance export 200 remains mandatory for Governance Closure.
+          if (exp.status === 429 && probe.label !== "finance") {
+            row.notes.push("export_rate_limited_non_blocking");
+          } else {
+            row.notes.push(`export_expected_but_status=${exp.status}`);
+            row.liveStatus = "fail";
+            red = true;
+          }
         }
         if (!probe.expectExport && exp.status === 200) {
           row.notes.push("export_unexpectedly_allowed");
           // Not necessarily RED if role has export — mark limitation.
+        }
+        if (probe.expectActivation === false && hasActivationGate) {
+          row.notes.push("activationGate_unexpectedly_present");
+          row.liveStatus = "fail";
+          red = true;
+        }
+        if (probe.expectActivation === true && allowed && !hasActivationGate) {
+          row.notes.push("activationGate_missing_for_privileged_role");
+          // Limitation only — do not fail matrix if UI omits empty gate on planned programme.
+        }
+        if (
+          probe.label === "finance" &&
+          (clinicalLeak ||
+            (clinicalDetail.status === 200 &&
+              /clinicalNotes|pathologyDetail/i.test(clinicalBody)))
+        ) {
+          row.notes.push("finance_clinical_detail_not_redacted");
+          row.liveStatus = "fail";
+          red = true;
+        } else if (
+          probe.label === "finance" &&
+          clinicalDetail.status >= 400 &&
+          !clinicalLeak
+        ) {
+          row.notes.push("finance_clinical_detail_denied_or_not_enrolled");
         }
         if (
           probe.expectedActorRole &&
@@ -277,6 +332,14 @@ async function main() {
           row.notes.push(
             `actorRole_expected_${probe.expectedActorRole}_got_${row.checks.actorRole}`
           );
+          row.liveStatus = "fail";
+          red = true;
+        }
+        if (
+          probe.expectedActorRole === "finance" &&
+          row.checks.actorRole === "administrator"
+        ) {
+          row.notes.push("CFO_mapped_to_administrator");
           row.liveStatus = "fail";
           red = true;
         }

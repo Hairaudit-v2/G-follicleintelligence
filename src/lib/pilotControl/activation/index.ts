@@ -13,6 +13,7 @@ export * from "./cohortCandidate";
 export * from "./eventCoverage";
 export * from "./domainEvents";
 export * from "./governanceEvidence";
+export * from "./governanceTier";
 export * from "./governanceClosureEvidence";
 export * from "./pauseRollback";
 export * from "./roleMatrixAcceptance";
