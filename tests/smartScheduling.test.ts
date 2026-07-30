@@ -8,6 +8,10 @@ import {
   prepBufferMinutesForBookingType,
   rankSuggestedSlots,
 } from "../src/lib/calendar/smart-scheduling/smartSchedulingCore";
+import {
+  mergeBookingMetadataWithSchedulingPrep,
+  SCHEDULING_PREP_METADATA_KEY,
+} from "../src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
 
 const STAFF = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const ROOM = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
@@ -113,5 +117,20 @@ describe("Smart Scheduling Assistant", () => {
       { preferStaffId: STAFF, max: 2 }
     );
     assert.equal(ranked[0]!.staffId, STAFF);
+  });
+
+  it("merges scheduling_prep into booking metadata without wiping other keys", () => {
+    const meta = mergeBookingMetadataWithSchedulingPrep(
+      { template_label: "Consult" },
+      { bookingType: "surgery", hasPatient: true }
+    );
+    assert.equal(meta.template_label, "Consult");
+    const prep = meta[SCHEDULING_PREP_METADATA_KEY] as {
+      version: number;
+      items: { code: string; completed: boolean }[];
+    };
+    assert.equal(prep.version, 1);
+    assert.ok(prep.items.length >= 2);
+    assert.ok(prep.items.every((i) => i.completed === false));
   });
 });

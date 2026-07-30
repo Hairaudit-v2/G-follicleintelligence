@@ -45,20 +45,12 @@ export function NewBookingEntryPage({
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-        <FiCard className="flex min-h-[200px] flex-col border-dashed bg-white/[0.03] sm:min-h-[220px]">
-          <h2 className="text-lg font-semibold text-slate-200">Book from existing patient</h2>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-            Use this when the person already has a patient profile.
-          </p>
-          <button
-            type="button"
-            disabled
-            className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-400"
-            title="Coming soon"
-          >
-            Coming soon
-          </button>
-        </FiCard>
+        <FiQuickActionCard
+          title="Book from existing patient"
+          description="Open the patient directory, then use Calendar or Bookings quick create — Smart Scheduling checks conflicts and prep as you book."
+          href={`${base}/patients`}
+          openAffordanceLabel="Open patients"
+        />
 
         {showCrmNav ? (
           <FiQuickActionCard

@@ -18,6 +18,7 @@ import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedul
 import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
 import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
 import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
+import { mergeBookingMetadataWithSchedulingPrep } from "@/src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
 import { BOOKING_CONFLICT_PREVIEW_CALM_INCOMPLETE_MESSAGE } from "@/src/lib/calendar/bookingConflictPreviewConstants";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
@@ -918,7 +919,13 @@ export function CalendarQuickCreateDrawer({
         templateId: tpl.id,
         anchor,
         description: notes.trim() || null,
-        metadata: { template_label: tpl.label },
+        metadata: mergeBookingMetadataWithSchedulingPrep(
+          { template_label: tpl.label },
+          {
+            bookingType: tpl.bookingType,
+            hasPatient: anchor.kind === "patient",
+          }
+        ),
         resourceAssignments: builtResourceExtras.length > 0 ? builtResourceExtras : undefined,
       });
       if (!r.ok) {

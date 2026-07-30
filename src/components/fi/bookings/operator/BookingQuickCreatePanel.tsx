@@ -23,6 +23,10 @@ import {
   toDatetimeLocalValue,
 } from "@/src/components/fi/bookings/bookingFormUtils";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
+import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedulingAssistant";
+import { useSmartSchedulingRequest } from "@/src/components/calendar/useSmartSchedulingRequest";
+import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
+import { mergeBookingMetadataWithSchedulingPrep } from "@/src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -100,6 +104,23 @@ export function BookingQuickCreatePanel({
     if (nextEnd) setEndLocal(nextEnd);
   }
 
+  const smartRequest = useSmartSchedulingRequest({
+    startLocal,
+    endLocal,
+    timeZone: tz,
+    clinicId,
+    bookingType,
+    staffId: assignedStaffId,
+    staffLabel: selectedStaff?.full_name?.trim() || selectedStaff?.email?.trim() || null,
+    patientId: anchorKind === "patient" && isUuid(anchorId) ? anchorId.trim() : null,
+  });
+
+  const onApplySuggestedSlot = (slot: SmartSuggestedSlot) => {
+    setStartLocal(toDatetimeLocalValue(slot.startAt, tz));
+    setEndLocal(toDatetimeLocalValue(slot.endAt, tz));
+    if (slot.staffId) setAssignedStaffId(slot.staffId);
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -147,7 +168,13 @@ export function BookingQuickCreatePanel({
           clinicId: clinicId.trim() || null,
           timezone: tz,
           description: null,
-          metadata: {},
+          metadata: mergeBookingMetadataWithSchedulingPrep(
+            {},
+            {
+              bookingType,
+              hasPatient: anchorKind === "patient" || Boolean(anchors.patientId),
+            }
+          ),
         })
       );
       if (!r.ok) setFeedback(r.error);
@@ -275,6 +302,15 @@ export function BookingQuickCreatePanel({
             className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
         </label>
+        <div className="sm:col-span-2">
+          <SmartSchedulingAssistant
+            tenantId={tenantId}
+            request={smartRequest}
+            calendarTimezone={tz}
+            onApplySlot={onApplySuggestedSlot}
+            variant="dark"
+          />
+        </div>
         <div className="sm:col-span-2">
           <button
             type="submit"

@@ -23,6 +23,10 @@ import {
   toDatetimeLocalValue,
 } from "./bookingFormUtils";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
+import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedulingAssistant";
+import { useSmartSchedulingRequest } from "@/src/components/calendar/useSmartSchedulingRequest";
+import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
+import { mergeBookingMetadataWithSchedulingPrep } from "@/src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
 
 const card =
   "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
@@ -105,6 +109,29 @@ export function BookingCreatePanel({
     if (nextEnd) setEndLocal(nextEnd);
   }
 
+  const effectiveType = converted ? bookingType : "consultation";
+  const assigneeLabel =
+    assigneeOptions.find((u) => u.id === assignee.trim())?.email?.trim() || null;
+
+  const smartRequest = useSmartSchedulingRequest({
+    startLocal,
+    endLocal,
+    timeZone: wallClockTz(),
+    clinicId,
+    bookingType: effectiveType,
+    // Lead panel assigns by auth user id — still useful for patient/time checks
+    staffId: null,
+    staffLabel: assigneeLabel,
+    patientId: converted && lead.patient_id ? lead.patient_id : null,
+    bookingId: mode === "edit" ? initialBooking?.id ?? null : null,
+  });
+
+  const onApplySuggestedSlot = (slot: SmartSuggestedSlot) => {
+    const tz = wallClockTz();
+    setStartLocal(toDatetimeLocalValue(slot.startAt, tz));
+    setEndLocal(toDatetimeLocalValue(slot.endAt, tz));
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -125,7 +152,15 @@ export function BookingCreatePanel({
         endAt: endIso,
         timezone: timezone.trim() || null,
         location: location.trim() || null,
-        metadata: {},
+        metadata: mergeBookingMetadataWithSchedulingPrep(
+          mode === "edit" && initialBooking?.metadata
+            ? (initialBooking.metadata as Record<string, unknown>)
+            : {},
+          {
+            bookingType: converted ? bookingType : "consultation",
+            hasPatient: Boolean(converted && lead.patient_id),
+          }
+        ),
         leadId: lead.id,
         personId: converted ? lead.person_id : null,
         patientId: converted && lead.patient_id ? lead.patient_id : null,
@@ -283,6 +318,13 @@ export function BookingCreatePanel({
             ))}
           </select>
         </label>
+        <SmartSchedulingAssistant
+          tenantId={tenantId}
+          request={smartRequest}
+          calendarTimezone={clinicTz}
+          onApplySlot={onApplySuggestedSlot}
+          variant="dark"
+        />
         <div className="flex flex-wrap gap-2">
           <button
             type="submit"

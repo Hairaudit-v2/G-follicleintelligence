@@ -13,6 +13,7 @@ import { SmartSchedulingAssistant } from "@/src/components/calendar/SmartSchedul
 import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
 import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
 import type { SmartSuggestedSlot } from "@/src/lib/calendar/smart-scheduling/smartSchedulingTypes";
+import { mergeBookingMetadataWithSchedulingPrep } from "@/src/lib/calendar/smart-scheduling/schedulingPrepMetadata";
 import { BOOKING_TYPES, isBookingCancelled } from "@/src/lib/bookings";
 import {
   defaultProcedureDurationMinutes,
@@ -367,7 +368,13 @@ export function BookingEditDrawer({
           roomId: draftRoomId.trim() || null,
           roomRequired: booking.room_required,
           assignedStaffId: assignedStaffId.trim() || null,
-          metadata: booking.metadata ?? {},
+          metadata: mergeBookingMetadataWithSchedulingPrep(
+            (booking.metadata as Record<string, unknown> | null) ?? {},
+            {
+              bookingType,
+              hasPatient: Boolean(booking.patient_id),
+            }
+          ),
           ...(resourceDraftHydrated ? { resourceAssignments: resourceDraft } : {}),
         })
       );
