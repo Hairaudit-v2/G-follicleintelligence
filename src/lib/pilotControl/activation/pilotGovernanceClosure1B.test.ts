@@ -62,8 +62,12 @@ import {
 } from "./governanceEvidence";
 import { PILOT_1B_REQUIRED_EVENT_COVERAGE, summariseEventCoverage } from "./eventCoverage";
 
-function emptyDim(state: "ready" = "ready") {
+function emptyDim(
+  dimension: PilotPatientReadiness["clinical"]["dimension"],
+  state: "ready" = "ready"
+) {
   return {
+    dimension,
     state,
     mandatorySignals: [] as [],
     optionalSignals: [] as [],
@@ -87,11 +91,11 @@ function minimalReadiness(): PilotPatientReadiness {
     patientId: "p1",
     programmeId: "prog",
     tenantId: "t1",
-    clinical: emptyDim(),
-    financial: emptyDim(),
-    operational: emptyDim(),
-    patient: emptyDim(),
-    technical: emptyDim(),
+    clinical: emptyDim("clinical"),
+    financial: emptyDim("financial"),
+    operational: emptyDim("operational"),
+    patient: emptyDim("patient"),
+    technical: emptyDim("technical"),
     overall: {
       state: "ready",
       reasons: [],

@@ -13,6 +13,8 @@ import {
   rejectWrongTenantEvent,
 } from "./eventCoverage";
 
+export { buildEventIdempotencyKey };
+
 export type PilotControlDomainEventActorType =
   | "patient"
   | "staff"

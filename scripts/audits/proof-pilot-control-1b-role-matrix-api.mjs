@@ -318,26 +318,27 @@ async function main() {
 
   const outPath = resolve(
     process.cwd(),
+    "docs/audits/evidence-fi-pilot-control-1b-live-role-matrix.json"
+  );
+  const legacyPath = resolve(
+    process.cwd(),
     "docs/audits/evidence-fi-pilot-activation-1b-role-matrix-api.json"
   );
-  writeFileSync(
-    outPath,
-    JSON.stringify(
-      {
-        phase: "FI-CONTROLLED-PILOT-ACTIVATION-1B",
-        proofType: "authenticated_api_role_matrix_readonly",
-        timestamp: new Date().toISOString(),
-        programmeKey: PROGRAMME_KEY,
-        tenantId: EVOLVED_TENANT,
-        baseUrl,
-        red,
-        outcomes,
-      },
-      null,
-      2
-    )
-  );
+  const payload = {
+    phase: "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+    proofType: "authenticated_api_role_matrix_readonly",
+    timestamp: new Date().toISOString(),
+    programmeKey: PROGRAMME_KEY,
+    tenantId: EVOLVED_TENANT,
+    baseUrl,
+    gitCommitSha: process.env.FI_DEPLOY_SHA || null,
+    red,
+    outcomes,
+  };
+  writeFileSync(outPath, JSON.stringify(payload, null, 2));
+  writeFileSync(legacyPath, JSON.stringify(payload, null, 2));
   console.log(`wrote ${outPath}`);
+  console.log(`wrote ${legacyPath}`);
   if (red) process.exit(1);
 }
 
