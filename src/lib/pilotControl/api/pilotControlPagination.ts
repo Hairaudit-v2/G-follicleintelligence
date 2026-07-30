@@ -54,7 +54,7 @@ export function parsePagination(
   }
 
   const page = pageRaw ? Number(pageRaw) : 1;
-  let pageSize = sizeRaw ? Number(sizeRaw) : PILOT_CONTROL_DEFAULT_PAGE_SIZE;
+  const pageSize = sizeRaw ? Number(sizeRaw) : PILOT_CONTROL_DEFAULT_PAGE_SIZE;
 
   if (!Number.isInteger(page) || page < 1) {
     throw new PilotControlApiError(

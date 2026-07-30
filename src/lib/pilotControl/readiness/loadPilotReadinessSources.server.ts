@@ -188,7 +188,7 @@ export async function loadPilotReadinessSourceBag(
   let mandatoryConsentSatisfied: boolean | null = null;
   let mandatoryConsentUnknown = false;
   let optionalDocumentMissing = false;
-  let packetId: string | null = packetIds[0] ?? null;
+  const packetId: string | null = packetIds[0] ?? null;
 
   if (packetIds.length > 0) {
     const { data: sections } = await supabase
