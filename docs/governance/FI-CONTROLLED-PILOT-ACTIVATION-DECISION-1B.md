@@ -74,9 +74,11 @@ Do not overstate AI or automation.
 | Item | Status |
 |------|--------|
 | Control Centre 1A | GREEN WITH LIMITATIONS |
-| Activation 1B technical controls | Landed (gate, preflights, decisions schema) |
-| Remote migration apply evidence | Pending operator proof |
-| Authenticated role-matrix browser proof | Pending live sessions |
+| Activation 1B technical controls | Landed + live RLS/API proofs |
+| Remote migration apply evidence | Present on live (`202611041001`–`003`) |
+| Authenticated role-matrix proof | API PASS WITH LIMITATIONS (`707bac90`) |
 | Initial invitations | **OFF** — human approval required |
+| Governance recommendation | **defer** |
+| `approved_for_initial_invites` | **false** |
 | Formal production | **NO-GO** |
 | Stripe | **Disabled** |

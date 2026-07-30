@@ -1,0 +1,187 @@
+{
+  "phase": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
+  "proofType": "authenticated_api_role_matrix_readonly",
+  "timestamp": "2026-07-30T10:40:40.221Z",
+  "programmeKey": "evolved_controlled_pilot_1a",
+  "tenantId": "c2615b95-b707-4485-aa5f-be8f78ec868a",
+  "baseUrl": "https://follicleintelligence.ai",
+  "red": false,
+  "outcomes": [
+    {
+      "role": "director",
+      "email": "paul@evolvedhair.com.au",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 400,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": [
+        "export_expected_but_status=400"
+      ]
+    },
+    {
+      "role": "clinic_manager",
+      "email": "manager@evolvedhair.com.au",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": []
+    },
+    {
+      "role": "reception",
+      "email": "jesika.watt11@hotmail.com",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": []
+    },
+    {
+      "role": "consultant",
+      "email": "connorgreen0310@icloud.com",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": []
+    },
+    {
+      "role": "clinical",
+      "email": "tlbpmg@gmail.com",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": []
+    },
+    {
+      "role": "finance_cfo_unmapped_or_finance",
+      "email": "harsh@evolvedhair.com.au",
+      "expectedAccess": "observe",
+      "liveStatus": "observed",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 400,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": [
+        "access_granted"
+      ]
+    },
+    {
+      "role": "administrator_platform",
+      "email": "auditor@hairaudit.com",
+      "expectedAccess": "allowed",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 200,
+        "overviewCode": null,
+        "actorRole": null,
+        "patientsStatus": 400,
+        "blockersStatus": 200,
+        "adoptionStatus": 200,
+        "exportStatus": 400,
+        "sensitiveHits": [],
+        "emptyCohortHonest": true
+      },
+      "notes": [
+        "export_expected_but_status=400"
+      ]
+    },
+    {
+      "role": "wrong_tenant",
+      "email": "reception@evolvedhair.com.au",
+      "expectedAccess": "denied",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 403,
+        "overviewCode": "PILOT_CONTROL_TENANT_MISMATCH",
+        "actorRole": null,
+        "patientsStatus": 403,
+        "blockersStatus": 403,
+        "adoptionStatus": 403,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": null
+      },
+      "notes": []
+    },
+    {
+      "role": "inactive_staff_member",
+      "email": "support@follicleintelligence.ai",
+      "expectedAccess": "denied",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 403,
+        "overviewCode": "PILOT_CONTROL_FORBIDDEN",
+        "actorRole": null,
+        "patientsStatus": 403,
+        "blockersStatus": 403,
+        "adoptionStatus": 403,
+        "exportStatus": 403,
+        "sensitiveHits": [],
+        "emptyCohortHonest": null
+      },
+      "notes": []
+    },
+    {
+      "role": "unauthorised_unauthenticated",
+      "expectedAccess": "denied",
+      "liveStatus": "pass",
+      "checks": {
+        "overviewStatus": 401
+      }
+    }
+  ]
+}

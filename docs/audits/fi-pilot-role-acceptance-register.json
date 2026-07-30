@@ -2,23 +2,26 @@
   "phase": "1B",
   "programme": "FI-CONTROLLED-PILOT-ACTIVATION-1B",
   "notes": [
-    "Contract expectations for authenticated browser acceptance.",
-    "Live session evidence remains pending — unauthenticated denial alone is insufficient.",
-    "No real credentials or patient data in this register."
+    "Live authenticated API role-matrix proof completed 2026-07-30 against follicleintelligence.ai.",
+    "Evidence file: evidence-fi-pilot-activation-1b-role-matrix-api.json",
+    "Full headed browser screenshots remain optional follow-up; API proofs cover auth, route denial, overview, register/blockers/adoption, export denial, and sensitive-field absence.",
+    "Permission defect found and fixed: fi_staff.primary_clinic_id select wiped staffRole (commit 707bac90).",
+    "No real credentials stored in this register."
   ],
   "sourceModule": "src/lib/pilotControl/activation/roleMatrixAcceptance.ts",
-  "liveBrowserProofStatus": "pending",
+  "liveBrowserProofStatus": "api_authenticated_pass_with_limitations",
+  "deployShaAtProof": "707bac907bdc4e2614f2da46d4d6bdaa616da3d9",
   "roles": [
-    { "role": "director", "expectedAccess": "full", "liveStatus": "pending" },
-    { "role": "clinic_manager", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "reception", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "consultant", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "clinical", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "finance", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "technical", "expectedAccess": "role_projected", "liveStatus": "pending" },
-    { "role": "unauthorised", "expectedAccess": "denied", "liveStatus": "pending" },
-    { "role": "wrong_tenant", "expectedAccess": "denied", "liveStatus": "pending" },
-    { "role": "wrong_programme", "expectedAccess": "denied", "liveStatus": "pending" }
+    { "role": "director", "expectedAccess": "full", "liveStatus": "pass", "identity": "paul@evolvedhair.com.au" },
+    { "role": "clinic_manager", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "manager@evolvedhair.com.au" },
+    { "role": "reception", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "jesika.watt11@hotmail.com" },
+    { "role": "consultant", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "connorgreen0310@icloud.com" },
+    { "role": "clinical", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "tlbpmg@gmail.com" },
+    { "role": "finance", "expectedAccess": "role_projected", "liveStatus": "limitation", "identity": "harsh@evolvedhair.com.au", "note": "fi_users.role tenant_backend maps to administrator; CFO staff_role does not map to finance — over-privilege vs intended finance projection" },
+    { "role": "technical", "expectedAccess": "role_projected", "liveStatus": "pass", "identity": "auditor@hairaudit.com (administrator/platform)" },
+    { "role": "unauthorised", "expectedAccess": "denied", "liveStatus": "pass", "note": "unauthenticated API 401; inactive staff support@follicleintelligence.ai 403" },
+    { "role": "wrong_tenant", "expectedAccess": "denied", "liveStatus": "pass", "identity": "reception@evolvedhair.com.au" },
+    { "role": "wrong_programme", "expectedAccess": "denied", "liveStatus": "pass", "note": "wrong-tenant hint yields PROGRAMME_NOT_FOUND / TENANT_MISMATCH" }
   ],
   "dimensions": [
     "sign_in",
@@ -33,5 +36,11 @@
     "export_permissions",
     "direct_api_denial",
     "sign_out_or_session_expiry"
-  ]
+  ],
+  "dimensionNotes": {
+    "navigation_visibility": "pending_headed_browser_screenshot",
+    "sign_out_or_session_expiry": "pending_headed_browser",
+    "hidden_fields": "pass_api_sensitive_key_scan_empty",
+    "export_permissions": "pass_non_director_403; director/admin export query returned 400 (param validation) not privilege leak"
+  }
 }
