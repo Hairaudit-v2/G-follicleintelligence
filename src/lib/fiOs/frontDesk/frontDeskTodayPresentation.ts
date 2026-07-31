@@ -243,11 +243,7 @@ export function buildFrontDeskTodayPresentation(
       const card = cardsByBookingId.get(row.id);
       if (!card) continue;
       // Skip terminal exceptions — prep is for active day flow.
-      if (
-        card.operationalState === "cancelled" ||
-        card.operationalState === "no_show" ||
-        card.operationalState === "completed"
-      ) {
+      if (isReceptionOperationalTerminalState(card.operationalState)) {
         continue;
       }
       const risk = buildSchedulingPrepRiskRow({
