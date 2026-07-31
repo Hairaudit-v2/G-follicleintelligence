@@ -32,6 +32,7 @@ import {
   buildSurgerySidebarSubItems,
   isFiOsSurgeryConsolidatedPath,
   isSurgeryTabActive,
+  resolveSurgeryTabFromPath,
   surgerySubItemUsesStaffFriendlyLabel,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 
@@ -123,6 +124,8 @@ test("surgery tab active-state matches its own href and not siblings", () => {
   const workspaceBase = buildFiOsSurgeryBase(tenantId);
   assert.equal(isSurgeryTabActive(`${base}/surgery`, workspaceBase, ""), false);
   assert.equal(isSurgeryTabActive(`${base}/surgery`, tenantBase, ""), true);
+  assert.equal(resolveSurgeryTabFromPath(`${base}/surgery/cases`, tenantBase), "cases");
+  assert.equal(resolveSurgeryTabFromPath(`${base}/surgery/review`, tenantBase), "review");
 });
 
 test("legacy Surgery routes remain in nav catalog; staff More hides direct links", () => {

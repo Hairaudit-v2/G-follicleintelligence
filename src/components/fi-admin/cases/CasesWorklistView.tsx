@@ -28,6 +28,7 @@ export function CasesWorklistView({
   pagination,
   worklistQueryString,
   firstCaseWizardHref,
+  worklistBasePath,
 }: {
   tenantId: string;
   query: CasesIndexQuery;
@@ -40,6 +41,8 @@ export function CasesWorklistView({
   worklistQueryString?: string;
   /** When the tenant has zero cases, empty-state CTA for the first-case wizard. */
   firstCaseWizardHref?: string;
+  /** Keep filter/pagination under Surgery Cases (or other workspace path). */
+  worklistBasePath?: string;
 }) {
   const hasActiveFilters =
     !!query.q.trim() ||
@@ -57,7 +60,12 @@ export function CasesWorklistView({
 
   return (
     <div className="space-y-4">
-      <CasesWorklistFilters tenantId={tenantId} query={query} filterOptions={filterOptions} />
+      <CasesWorklistFilters
+        tenantId={tenantId}
+        query={query}
+        filterOptions={filterOptions}
+        worklistBasePath={worklistBasePath}
+      />
       {totalMatching === 0 && emptyTenantNoFilters && firstCaseWizardHref ? (
         <DashboardCard className="border-dashed border-[#22C1FF]/25 bg-[#0F1629]/90 p-8 text-center shadow-[0_0_40px_rgba(34,193,255,0.06)]">
           <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">
@@ -118,7 +126,12 @@ export function CasesWorklistView({
           />
         </>
       ) : null}
-      <CasesWorklistPagination tenantId={tenantId} query={query} totalMatching={totalMatching} />
+      <CasesWorklistPagination
+        tenantId={tenantId}
+        query={query}
+        totalMatching={totalMatching}
+        worklistBasePath={worklistBasePath}
+      />
     </div>
   );
 }

@@ -23,8 +23,10 @@ export default async function SurgeryLayout({
   const showProcedureDayNav = readFiProcedureDayEnabled();
 
   return (
-    <div className={cn(fiOsChromeClasses.pageScrollContent, "px-4 pt-8")}>
-      <SurgerySubNav tenantId={tid} showProcedureDayNav={showProcedureDayNav} />
+    <div className={cn(fiOsChromeClasses.pageScrollContent)}>
+      <div className="px-4 pt-6 sm:px-6">
+        <SurgerySubNav tenantId={tid} showProcedureDayNav={showProcedureDayNav} />
+      </div>
       {children}
     </div>
   );

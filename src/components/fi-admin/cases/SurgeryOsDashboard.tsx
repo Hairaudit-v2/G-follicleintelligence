@@ -107,25 +107,39 @@ export function SurgeryOsDashboard({
   tenantId,
   rows,
   worklistQueryString,
+  worklistBasePath,
 }: {
   tenantId: string;
   rows: CaseWorklistRow[];
   worklistQueryString?: string;
+  /** When set, dashboard KPI links stay under this worklist path. */
+  worklistBasePath?: string;
 }) {
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}`;
   const model = deriveSurgeryOsDashboardModel(rows);
   const dq = defaultCasesQuery();
+  const listBase = (worklistBasePath?.trim() || `${base}/cases`).replace(/\/+$/, "");
 
-  const readinessHref = casesWorklistHref(tid, dq, {
-    readiness: "needs_attention",
-    sort: "readiness_attention_desc",
-  });
-  const planningHref = casesWorklistHref(tid, dq, {
-    planning_status: CASES_INDEX_NONE_VALUE,
-    sort: "readiness_attention_desc",
-  });
-  const worklistAnchor = `${base}/cases#surgeryos-case-worklist`;
+  const readinessHref = casesWorklistHref(
+    tid,
+    dq,
+    {
+      readiness: "needs_attention",
+      sort: "readiness_attention_desc",
+    },
+    worklistBasePath
+  );
+  const planningHref = casesWorklistHref(
+    tid,
+    dq,
+    {
+      planning_status: CASES_INDEX_NONE_VALUE,
+      sort: "readiness_attention_desc",
+    },
+    worklistBasePath
+  );
+  const worklistAnchor = `${listBase}#surgeryos-case-worklist`;
 
   return (
     <div className="space-y-6">
@@ -361,7 +375,7 @@ export function SurgeryOsDashboard({
                 ·
               </span>
               <Link
-                href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" })}
+                href={casesWorklistHref(tid, dq, { sort: "readiness_attention_desc" }, worklistBasePath)}
                 className="font-medium text-cyan-300 hover:underline"
               >
                 Full worklist (readiness sort)

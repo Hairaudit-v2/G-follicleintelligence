@@ -69,12 +69,15 @@ export function CasesWorklistFilters({
   tenantId,
   query,
   filterOptions,
+  worklistBasePath,
 }: {
   tenantId: string;
   query: CasesIndexQuery;
   filterOptions: CasesIndexFilterOptions;
+  /** When set, filter submit/clear stay on this path (e.g. `/fi-admin/{id}/surgery/cases`). */
+  worklistBasePath?: string;
 }) {
-  const basePath = `/fi-admin/${tenantId}/cases`;
+  const basePath = (worklistBasePath?.trim() || `/fi-admin/${tenantId}/cases`).replace(/\/+$/, "");
   const planningOpts = mergeOptions(
     SURGERY_PLANNING_STATUS_VALUES,
     filterOptions.planning_statuses

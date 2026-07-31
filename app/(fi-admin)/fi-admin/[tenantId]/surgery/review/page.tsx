@@ -1,16 +1,16 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
-import { SurgeryIntelligenceDashboard } from "@/src/components/fi-admin/surgery-os/SurgeryIntelligenceDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { SurgeryReviewHub } from "@/src/components/fi-os/surgery/SurgeryReviewHub";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { loadSurgeryIntelligenceDashboard } from "@/src/lib/outcomeIntelligence/surgeryIntelligenceDashboardLoader.server";
+import { buildSurgeryReviewHubModel } from "@/src/lib/fiOs/surgery/surgeryReviewHubCore";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 import { resolveSurgeryOsViewerContext } from "@/src/lib/surgeryOs/surgeryOsAccess.server";
 
 export const metadata = {
   title: "Surgery review",
-  description: "Graft tray, case facts, and outcome review for surgical workflows.",
+  description: "Review surgical records, graft documentation, imaging and outcomes requiring attention.",
   robots: { index: false, follow: false },
 };
 
@@ -18,17 +18,16 @@ export const dynamic = "force-dynamic";
 
 export default async function FiAdminSurgeryReviewPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  await assertFiTenantPortalAccessUnlessStaffPinSession(tenantId);
-  await assertStaffModuleAccess(tenantId, "surgery_os", "read");
+  const tid = tenantId.trim();
+  await assertFiTenantPortalAccessUnlessStaffPinSession(tid);
+  await assertStaffModuleAccess(tid, "surgery_os", "read");
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
@@ -41,33 +40,22 @@ export default async function FiAdminSurgeryReviewPage({
     );
   }
 
-  const viewer = await resolveSurgeryOsViewerContext(tenantId.trim());
+  const viewer = await resolveSurgeryOsViewerContext(tid);
   if (!viewer.canAccessSurgeryOs) {
-    redirect(`/fi-admin/${tenantId.trim()}/calendar`);
+    redirect(`/fi-admin/${tid}/calendar`);
   }
 
-  const sp = (await searchParams) ?? {};
-  let data: Awaited<ReturnType<typeof loadSurgeryIntelligenceDashboard>>;
-  try {
-    data = await loadSurgeryIntelligenceDashboard({ tenantId: tenantId.trim(), searchParams: sp });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "";
-    console.error("[FiAdminSurgeryReviewPage]", msg || "load failed");
-    return (
-      <div className="p-4 sm:p-6">
-        <InfoNotice variant="danger" title="Surgery review could not load">
-          <p className="text-sm">
-            Published surgery outcome facts could not be loaded from the analytics event store.
-          </p>
-          {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
-        </InfoNotice>
-      </div>
-    );
-  }
+  const canAccessAdvancedOutcomeView = viewer.surgeryOsRole === "admin";
 
-  return (
-    <div className="p-4 sm:p-6">
-      <SurgeryIntelligenceDashboard data={data} />
-    </div>
-  );
+  const model = buildSurgeryReviewHubModel({
+    tenantId: tid,
+    access: {
+      canAccessCases: true,
+      canAccessSurgeryWorkspace: viewer.canAccessSurgeryOs,
+      canAccessAdvancedOutcomeView,
+      canAccessGraftCounting: canAccessAdvancedOutcomeView,
+    },
+  });
+
+  return <SurgeryReviewHub model={model} />;
 }

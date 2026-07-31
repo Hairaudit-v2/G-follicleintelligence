@@ -7,15 +7,19 @@ export function CasesWorklistPagination({
   tenantId,
   query,
   totalMatching,
+  worklistBasePath,
 }: {
   tenantId: string;
   query: CasesIndexQuery;
   totalMatching: number;
+  worklistBasePath?: string;
 }) {
   const { page, pageSize } = query;
   const totalPages = totalMatching === 0 ? 1 : Math.ceil(totalMatching / pageSize);
   const canPrev = page > 1;
   const canNext = page < totalPages;
+  const href = (patch: Partial<CasesIndexQuery>) =>
+    casesWorklistHref(tenantId, query, patch, worklistBasePath);
 
   const btnClass =
     "inline-flex items-center rounded border px-3 py-1.5 text-xs font-medium transition-colors";
@@ -30,20 +34,14 @@ export function CasesWorklistPagination({
           <span className="font-medium text-slate-100">{totalPages}</span>
         </span>
         {canPrev ? (
-          <Link
-            href={casesWorklistHref(tenantId, query, { page: page - 1 })}
-            className={activeLink}
-          >
+          <Link href={href({ page: page - 1 })} className={activeLink}>
             Previous
           </Link>
         ) : (
           <span className={disabled}>Previous</span>
         )}
         {canNext ? (
-          <Link
-            href={casesWorklistHref(tenantId, query, { page: page + 1 })}
-            className={activeLink}
-          >
+          <Link href={href({ page: page + 1 })} className={activeLink}>
             Next
           </Link>
         ) : (
@@ -58,7 +56,7 @@ export function CasesWorklistPagination({
             return (
               <Link
                 key={ps}
-                href={casesWorklistHref(tenantId, query, { pageSize: ps, page: 1 })}
+                href={href({ pageSize: ps, page: 1 })}
                 className={`rounded border px-2.5 py-1 text-xs font-medium ${
                   active
                     ? "border-gray-900 bg-gray-900 text-white"

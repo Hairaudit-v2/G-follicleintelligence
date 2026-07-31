@@ -85,8 +85,14 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
                 />
                 Refresh
               </button>
-              <Link href={`${base}/procedure-day`} className={surgeryLinkButtonClass}>
+              <Link href={`${base}/surgery/cases`} className={surgeryLinkButtonClass}>
+                Cases
+              </Link>
+              <Link href={`${base}/surgery/procedure-day`} className={surgeryLinkButtonClass}>
                 Surgery day
+              </Link>
+              <Link href={`${base}/surgery/review`} className={surgeryLinkButtonClass}>
+                Review
               </Link>
               <Link href={`${base}/surgery-readiness`} className={surgeryLinkButtonClass}>
                 Readiness Board
@@ -145,7 +151,7 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
             {attentionItems.map((item) => (
               <li key={item.id}>
                 <Link
-                  href={item.href ?? `${base}/surgery-os`}
+                  href={item.href ?? `${base}/surgery`}
                   className={`flex items-start justify-between gap-4 rounded-xl border px-4 py-4 transition hover:border-[#22C1FF]/30 ${surgicalAttentionSeverityClass(item.severity)}`}
                 >
                   <div className="min-w-0">

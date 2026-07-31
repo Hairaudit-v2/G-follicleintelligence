@@ -66,14 +66,30 @@ export function buildCasesWorklistQueryString(q: CasesIndexQuery): string {
   return p.toString();
 }
 
+export function defaultCasesWorklistBasePath(tenantId: string): string {
+  return `/fi-admin/${tenantId.trim()}/cases`;
+}
+
+export function surgeryCasesWorklistBasePath(tenantId: string): string {
+  return `/fi-admin/${tenantId.trim()}/surgery/cases`;
+}
+
+/**
+ * Build a cases worklist URL. Defaults to legacy `/cases`; pass `worklistBasePath`
+ * to keep filters/pagination inside a consolidated workspace (e.g. Surgery Cases).
+ */
 export function casesWorklistHref(
   tenantId: string,
   q: CasesIndexQuery,
-  patch: Partial<CasesIndexQuery> = {}
+  patch: Partial<CasesIndexQuery> = {},
+  worklistBasePath?: string
 ): string {
   const merged: CasesIndexQuery = { ...q, ...patch };
   const qs = buildCasesWorklistQueryString(merged);
-  const base = `/fi-admin/${tenantId.trim()}/cases`;
+  const base = (worklistBasePath?.trim() || defaultCasesWorklistBasePath(tenantId)).replace(
+    /\/+$/,
+    ""
+  );
   return qs ? `${base}?${qs}` : base;
 }
 

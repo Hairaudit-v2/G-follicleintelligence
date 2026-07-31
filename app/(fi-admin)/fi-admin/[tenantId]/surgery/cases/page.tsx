@@ -11,9 +11,10 @@ import {
 } from "@/src/lib/cases/casesIndexBuild";
 import {
   buildCasesWorklistQueryString,
+  casesWorklistHref,
   parseCasesIndexQuery,
+  surgeryCasesWorklistBasePath,
 } from "@/src/lib/cases/casesIndexFilters";
-import type { CasesIndexQuery } from "@/src/lib/cases/casesIndexTypes";
 import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
 import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
@@ -24,17 +25,6 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-function surgeryCasesWorklistHref(
-  tenantId: string,
-  q: CasesIndexQuery,
-  patch: Partial<CasesIndexQuery> = {}
-): string {
-  const merged: CasesIndexQuery = { ...q, ...patch };
-  const qs = buildCasesWorklistQueryString(merged);
-  const base = `/fi-admin/${tenantId.trim()}/surgery/cases`;
-  return qs ? `${base}?${qs}` : base;
-}
 
 export default async function FiAdminSurgeryCasesPage({
   params,
@@ -70,8 +60,10 @@ export default async function FiAdminSurgeryCasesPage({
   const sorted = sortCaseWorklistRows(filtered, query.sort);
   const pagination = paginateCaseWorklistRows(sorted, query.page, query.pageSize);
 
+  const worklistBasePath = surgeryCasesWorklistBasePath(tenantId);
+
   if (pagination.total > 0 && pagination.page !== query.page) {
-    redirect(surgeryCasesWorklistHref(tenantId, { ...query, page: pagination.page }));
+    redirect(casesWorklistHref(tenantId, { ...query, page: pagination.page }, {}, worklistBasePath));
   }
 
   const rows = pagination.pageRows;
@@ -79,11 +71,12 @@ export default async function FiAdminSurgeryCasesPage({
   const worklistQueryString = buildCasesWorklistQueryString(effectiveQuery) || undefined;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 py-2 lg:max-w-[1200px]">
+    <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6 lg:max-w-[1200px]">
       <SurgeryOsDashboard
         tenantId={tenantId}
         rows={enriched}
         worklistQueryString={worklistQueryString}
+        worklistBasePath={worklistBasePath}
       />
 
       <section id="surgeryos-case-worklist" aria-labelledby="cases-index-heading">
@@ -98,6 +91,7 @@ export default async function FiAdminSurgeryCasesPage({
           totalBeforeFilters={enriched.length}
           totalMatching={pagination.total}
           worklistQueryString={worklistQueryString}
+          worklistBasePath={worklistBasePath}
           firstCaseWizardHref={`/fi-admin/${tenantId}/cases/new`}
           pagination={{
             page: pagination.page,

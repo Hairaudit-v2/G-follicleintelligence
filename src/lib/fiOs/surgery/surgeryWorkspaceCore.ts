@@ -105,11 +105,38 @@ export function isFiOsSurgeryConsolidatedPath(pathname: string, tenantBase: stri
 
 export function isSurgeryTabActive(pathname: string, tenantBase: string, segment: string): boolean {
   const base = tenantBase.replace(/\/+$/, "");
-  const path = pathname.replace(/\/+$/, "") || "/";
+  const path = stripQueryAndHash(pathname).replace(/\/+$/, "") || "/";
   if (!segment) {
     return path === `${base}/surgery` || path === `${base}/surgery/`;
   }
   return path === `${base}/surgery/${segment}` || path.startsWith(`${base}/surgery/${segment}/`);
+}
+
+function stripQueryAndHash(pathname: string): string {
+  const noHash = pathname.split("#")[0] ?? pathname;
+  const noQuery = noHash.split("?")[0] ?? noHash;
+  return noQuery;
+}
+
+/**
+ * Resolve the Surgery workspace tab from a consolidated path under `/surgery`.
+ * Expects `tenantBase` = `/fi-admin/{tenantId}` (Team workspace pattern).
+ * Does not map legacy routes (`/surgery-os`, `/cases`, …) — those keep their own sidebar ids.
+ */
+export function resolveSurgeryTabFromPath(
+  pathname: string,
+  tenantBase: string
+): FiOsSurgeryTabId | null {
+  const base = tenantBase.replace(/\/+$/, "");
+  const path = stripQueryAndHash(pathname).replace(/\/+$/, "") || "/";
+  if (path === `${base}/surgery` || path === `${base}/surgery/`) {
+    return "command";
+  }
+  if (!path.startsWith(`${base}/surgery/`)) return null;
+  const segment = path.slice(`${base}/surgery/`.length).split("/")[0] ?? "";
+  if (!segment) return "command";
+  const tab = FI_OS_SURGERY_TABS.find((t) => t.segment === segment);
+  return tab?.id ?? null;
 }
 
 export type FiOsSurgerySidebarSubItem = {

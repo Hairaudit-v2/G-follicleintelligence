@@ -51,7 +51,7 @@ export default async function FiAdminSurgeryHubPage({
     if (msg === "Tenant not found") notFound();
     console.error("[FiAdminSurgeryHubPage]", msg || "load failed");
     return (
-      <div className="p-4 sm:p-6">
+      <div className="px-4 py-4 sm:px-6 sm:py-5">
         <InfoNotice variant="danger" title="Surgery could not load">
           <p className="text-sm">
             The surgical command centre failed to load. Check production Supabase migrations and
@@ -64,7 +64,7 @@ export default async function FiAdminSurgeryHubPage({
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="px-4 py-4 sm:px-6 sm:py-5">
       <SurgeryOsDashboard data={data} />
     </div>
   );
