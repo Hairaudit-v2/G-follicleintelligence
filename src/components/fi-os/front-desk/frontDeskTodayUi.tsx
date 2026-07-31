@@ -173,8 +173,8 @@ export function FrontDeskTodaySummaryTiles(props: { summary: FrontDeskTodaySumma
 // --- prep risk strip (Smart Scheduling) ---------------------------------------
 
 /**
- * Compact strip for today's open scheduling_prep checklist items.
- * Non-intrusive: empty when no bookings carry prep metadata yet.
+ * Card grid for today's open scheduling_prep checklist items.
+ * Warm, actionable — operational only.
  */
 export function FrontDeskPrepRiskStrip(props: {
   items: FrontDeskPrepRiskItem[];
@@ -182,76 +182,177 @@ export function FrontDeskPrepRiskStrip(props: {
   onLocateCard: (bookingId: string) => void;
 }) {
   if (props.loadTier === "shell") return null;
+
   if (props.items.length === 0) {
     return (
       <section
         aria-label="Prep checklist"
-        className="rounded-2xl border border-white/[0.06] bg-[#0f1729]/40 px-4 py-3"
+        className="rounded-2xl border border-dashed border-white/[0.1] bg-[#0b1220]/80 px-4 py-4 sm:px-5"
         data-testid="front-desk-prep-risk-strip"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-200">Prep for today</h2>
-          <p className="text-[11px] text-slate-500">Smart Scheduling</p>
+        <div className="flex items-start gap-3">
+          <span
+            className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-200/90"
+            aria-hidden
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 11l3 3L22 4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" strokeLinecap="round" />
+            </svg>
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-slate-100">Prep for today</h2>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                All clear
+              </span>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              No open prep items on today’s bookings. When you book with Smart Scheduling, gentle
+              reminders (photos, consent, forms) show up here.
+            </p>
+          </div>
         </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
-          No open prep checklists on today’s bookings yet. New appointments save gentle prep
-          reminders (photos, consent, forms) when you book.
-        </p>
       </section>
     );
   }
 
+  const attentionN = props.items.filter((i) => i.severity === "action_needed").length;
+  const visible = props.items.slice(0, 6);
+
   return (
     <section
-      aria-label={`Prep for today, ${props.items.length} bookings`}
-      className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-4 sm:px-5"
+      aria-label={`Prep for today, ${props.items.length} bookings with open items`}
+      className="rounded-2xl border border-cyan-500/25 bg-gradient-to-b from-cyan-950/35 to-[#0b1220]/90 px-4 py-4 shadow-lg shadow-black/20 sm:px-5"
       data-testid="front-desk-prep-risk-strip"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-50">Prep for today</h2>
-          <p className="mt-0.5 text-xs text-slate-400">
-            Operational checklist from booking — never clinical advice.
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-400/90">
+            Smart Scheduling
+          </p>
+          <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-50">
+            Prep for today
+          </h2>
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-slate-400">
+            Open operational checklists before the visit — photos, consent, forms. Not clinical
+            advice.
           </p>
         </div>
-        <p className="text-xs font-medium tabular-nums text-cyan-200/90">
-          {props.items.length} booking{props.items.length === 1 ? "" : "s"}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {attentionN > 0 ? (
+            <span className="rounded-full border border-amber-400/35 bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-amber-100">
+              {attentionN} need a look
+            </span>
+          ) : null}
+          <span className="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-cyan-100">
+            {props.items.length} booking{props.items.length === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
-      <ul className="mt-3 space-y-2">
-        {props.items.slice(0, 8).map((item) => (
-          <li key={item.id}>
-            <button
-              type="button"
-              onClick={() => props.onLocateCard(item.bookingId)}
-              className={cn(
-                "flex w-full min-h-11 flex-col gap-0.5 rounded-xl border px-3 py-2.5 text-left transition hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
-                item.severity === "action_needed"
-                  ? "border-amber-400/30 bg-amber-950/25"
-                  : "border-white/[0.08] bg-white/[0.03]"
-              )}
-              data-testid={`front-desk-prep-risk-${item.bookingId}`}
-            >
-              <span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-100">
-                <span className="tabular-nums text-cyan-200/90">{item.startTimeLabel}</span>
-                <span>{item.patientName}</span>
-                <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                  {item.openCount} open
-                </span>
-              </span>
-              <span className="text-[11px] leading-snug text-slate-400">
-                {item.topLabels.join(" · ")}
-              </span>
-            </button>
+
+      <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+        {visible.map((item) => (
+          <li key={item.id} className="min-w-0">
+            <PrepRiskCard item={item} onLocate={() => props.onLocateCard(item.bookingId)} />
           </li>
         ))}
       </ul>
-      {props.items.length > 8 ? (
-        <p className="mt-2 text-[11px] text-slate-500">
-          Showing 8 of {props.items.length}. Use Needs attention for the full list.
+
+      {props.items.length > 6 ? (
+        <p className="mt-3 text-[11px] leading-snug text-slate-500">
+          Showing 6 of {props.items.length}. Scroll the board or use{" "}
+          <span className="text-slate-400">Needs attention</span> for the rest.
         </p>
-      ) : null}
+      ) : (
+        <p className="mt-3 text-[11px] text-slate-500">
+          Tap a card to jump to that patient on the board.
+        </p>
+      )}
     </section>
+  );
+}
+
+function PrepRiskCard(props: {
+  item: FrontDeskPrepRiskItem;
+  onLocate: () => void;
+}) {
+  const { item } = props;
+  const needsLook = item.severity === "action_needed";
+  const chips = item.topLabels.slice(0, 4);
+  const extra = Math.max(0, item.openCount - chips.length);
+
+  return (
+    <button
+      type="button"
+      onClick={props.onLocate}
+      className={cn(
+        "group flex h-full w-full min-h-[5.5rem] flex-col rounded-2xl border p-3 text-left transition",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]",
+        "hover:border-cyan-400/35 hover:bg-white/[0.04] active:scale-[0.99]",
+        needsLook
+          ? "border-amber-400/35 bg-amber-950/30 shadow-[inset_0_1px_0_0_rgba(251,191,36,0.08)]"
+          : "border-white/[0.1] bg-[#0f1729]/80"
+      )}
+      data-testid={`front-desk-prep-risk-${item.bookingId}`}
+      aria-label={`${item.startTimeLabel}, ${item.patientName}, ${item.openCount} prep items open. Locate on board.`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex min-h-7 items-center rounded-lg px-2 text-xs font-bold tabular-nums",
+                needsLook
+                  ? "bg-amber-500/20 text-amber-50"
+                  : "bg-cyan-500/15 text-cyan-100"
+              )}
+            >
+              {item.startTimeLabel}
+            </span>
+            <span className="truncate text-sm font-semibold text-slate-50">
+              {item.patientName}
+            </span>
+          </div>
+        </div>
+        <span
+          className={cn(
+            "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+            needsLook
+              ? "bg-amber-500/20 text-amber-100"
+              : "bg-white/[0.06] text-slate-400"
+          )}
+        >
+          {item.openCount} open
+        </span>
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
+        {chips.map((label) => (
+          <span
+            key={label}
+            className={cn(
+              "inline-flex max-w-full items-center truncate rounded-lg border px-2 py-1 text-[11px] font-medium",
+              needsLook
+                ? "border-amber-400/25 bg-amber-500/10 text-amber-50/95"
+                : "border-white/[0.08] bg-white/[0.04] text-slate-300"
+            )}
+            title={label}
+          >
+            {label}
+          </span>
+        ))}
+        {extra > 0 ? (
+          <span className="inline-flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] font-medium text-slate-500">
+            +{extra} more
+          </span>
+        ) : null}
+      </div>
+
+      <span className="mt-auto pt-2 text-[10px] font-medium text-cyan-300/70 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+        Locate on board →
+      </span>
+    </button>
   );
 }
 
