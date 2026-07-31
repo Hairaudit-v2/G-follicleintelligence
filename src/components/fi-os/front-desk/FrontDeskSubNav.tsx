@@ -7,15 +7,15 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   FI_OS_FRONT_DESK_TABS,
-  buildFiOsFrontDeskBase,
   buildFiOsFrontDeskTabHref,
+  buildFiOsFrontDeskTenantBase,
   isFrontDeskTabActive,
 } from "@/src/lib/fiOs/frontDesk/frontDeskWorkspaceCore";
 import { FRONT_DESK_PATIENT_MESSAGE_POLL_MS } from "@/src/lib/fiOs/frontDesk/frontDeskPatientMessagesCore";
 
 export function FrontDeskSubNav({ tenantId }: { tenantId: string }) {
   const pathname = usePathname();
-  const base = buildFiOsFrontDeskBase(tenantId);
+  const tenantBase = buildFiOsFrontDeskTenantBase(tenantId);
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function FrontDeskSubNav({ tenantId }: { tenantId: string }) {
     >
       {FI_OS_FRONT_DESK_TABS.map((tab) => {
         const href = buildFiOsFrontDeskTabHref(tenantId, tab);
-        const active = isFrontDeskTabActive(pathname, base, tab.segment);
+        const active = isFrontDeskTabActive(pathname, tenantBase, tab.segment);
         const showBadge = tab.id === "messages" && unreadCount != null && unreadCount > 0;
         return (
           <Link

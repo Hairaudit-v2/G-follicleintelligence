@@ -77,9 +77,14 @@ export type BuildSurgerySidebarSubItemsOptions = {
   casesBlocked?: boolean;
 };
 
-export function buildFiOsSurgeryBase(tenantId: string): string {
+/** Tenant shell base — use with {@link isSurgeryTabActive} (Team workspace pattern). */
+export function buildFiOsSurgeryTenantBase(tenantId: string): string {
   const tid = tenantId.trim().replace(/\/+$/, "");
-  return `/fi-admin/${tid}/surgery`;
+  return `/fi-admin/${tid}`;
+}
+
+export function buildFiOsSurgeryBase(tenantId: string): string {
+  return `${buildFiOsSurgeryTenantBase(tenantId)}/surgery`;
 }
 
 export function buildFiOsSurgeryTabHref(tenantId: string, tab: FiOsSurgeryTab): string {

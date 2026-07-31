@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   FI_OS_SURGERY_TABS,
-  buildFiOsSurgeryBase,
   buildFiOsSurgeryTabHref,
+  buildFiOsSurgeryTenantBase,
   isSurgeryTabActive,
   type FiOsSurgeryTab,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
@@ -20,7 +20,7 @@ export function SurgerySubNav({
   showProcedureDayNav?: boolean;
 }) {
   const pathname = usePathname();
-  const base = buildFiOsSurgeryBase(tenantId);
+  const tenantBase = buildFiOsSurgeryTenantBase(tenantId);
   const tabs = FI_OS_SURGERY_TABS.filter(
     (tab) => tab.id !== "procedure-day" || showProcedureDayNav
   );
@@ -32,7 +32,7 @@ export function SurgerySubNav({
     >
       {tabs.map((tab: FiOsSurgeryTab) => {
         const href = buildFiOsSurgeryTabHref(tenantId, tab);
-        const active = isSurgeryTabActive(pathname, base, tab.segment);
+        const active = isSurgeryTabActive(pathname, tenantBase, tab.segment);
         return (
           <Link
             key={tab.id}

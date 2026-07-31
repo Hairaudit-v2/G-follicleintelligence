@@ -47,9 +47,14 @@ export const FI_OS_FRONT_DESK_LEGACY_ROUTES = [
   { id: "tomorrow-board", label: "Tomorrow board", suffix: "tomorrow" },
 ] as const;
 
-export function buildFiOsFrontDeskBase(tenantId: string): string {
+/** Tenant shell base — use with {@link isFrontDeskTabActive} (Team workspace pattern). */
+export function buildFiOsFrontDeskTenantBase(tenantId: string): string {
   const tid = tenantId.trim().replace(/\/+$/, "");
-  return `/fi-admin/${tid}/front-desk`;
+  return `/fi-admin/${tid}`;
+}
+
+export function buildFiOsFrontDeskBase(tenantId: string): string {
+  return `${buildFiOsFrontDeskTenantBase(tenantId)}/front-desk`;
 }
 
 export function buildFiOsFrontDeskTabHref(tenantId: string, tab: FiOsFrontDeskTab): string {

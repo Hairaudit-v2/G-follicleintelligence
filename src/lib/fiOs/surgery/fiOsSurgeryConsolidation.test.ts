@@ -28,8 +28,10 @@ import {
   buildFiOsSurgeryBase,
   buildFiOsSurgeryLegacyHref,
   buildFiOsSurgeryTabHref,
+  buildFiOsSurgeryTenantBase,
   buildSurgerySidebarSubItems,
   isFiOsSurgeryConsolidatedPath,
+  isSurgeryTabActive,
   surgerySubItemUsesStaffFriendlyLabel,
 } from "@/src/lib/fiOs/surgery/surgeryWorkspaceCore";
 
@@ -100,6 +102,27 @@ test("Surgery workspace exposes command, cases, procedure day, and review tabs",
     assert.ok(isFiOsSurgeryConsolidatedPath(buildFiOsSurgeryTabHref(tenantId, tab), base));
   }
   assert.equal(buildFiOsSurgeryBase(tenantId), `${base}/surgery`);
+});
+
+test("surgery tab active-state matches its own href and not siblings", () => {
+  const tenantBase = buildFiOsSurgeryTenantBase(tenantId);
+  assert.equal(tenantBase, base);
+  for (const tab of FI_OS_SURGERY_TABS) {
+    const href = buildFiOsSurgeryTabHref(tenantId, tab);
+    assert.equal(isSurgeryTabActive(href, tenantBase, tab.segment), true, tab.id);
+    for (const other of FI_OS_SURGERY_TABS) {
+      if (other.id === tab.id) continue;
+      assert.equal(
+        isSurgeryTabActive(href, tenantBase, other.segment),
+        false,
+        `${other.id} must not be active on ${tab.id}`
+      );
+    }
+  }
+  // Regression: workspace base must not be passed (would always be inactive).
+  const workspaceBase = buildFiOsSurgeryBase(tenantId);
+  assert.equal(isSurgeryTabActive(`${base}/surgery`, workspaceBase, ""), false);
+  assert.equal(isSurgeryTabActive(`${base}/surgery`, tenantBase, ""), true);
 });
 
 test("legacy Surgery routes remain in nav catalog; staff More hides direct links", () => {
