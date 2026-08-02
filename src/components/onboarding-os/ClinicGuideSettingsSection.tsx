@@ -248,15 +248,24 @@ export function ClinicGuideSettingsSection({
           />
         </div>
         {!state.assistEnabled ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => setPersonal(true)}
-            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-4 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50 sm:w-auto"
-            data-testid="clinic-guide-settings-turn-on"
-          >
-            Turn on Clinic guide
-          </button>
+          <div className="mt-4 space-y-3">
+            <p
+              className="rounded-lg border border-white/[0.06] bg-black/25 px-3 py-2 text-xs leading-relaxed text-slate-400"
+              data-testid="clinic-guide-off-notice"
+            >
+              Clinic guide is off for you. The floating help dock is fully hidden on every page.
+              Turn it back on here whenever you want tips and tours again — no clinical impact.
+            </p>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setPersonal(true)}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-4 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50 sm:w-auto"
+              data-testid="clinic-guide-settings-turn-on"
+            >
+              Turn on Clinic guide
+            </button>
+          </div>
         ) : (
           <button
             type="button"
@@ -264,7 +273,7 @@ export function ClinicGuideSettingsSection({
             onClick={() => setPersonal(false)}
             className="mt-4 text-xs font-medium text-slate-500 hover:text-slate-300"
           >
-            Turn off for me
+            Turn off for me (hide dock completely)
           </button>
         )}
       </div>
@@ -443,9 +452,10 @@ export function ClinicGuideSettingsSection({
       ) : null}
 
       <p className="mt-4 text-[10px] leading-relaxed text-slate-500">
-        Tip: when the floating guide is off, use the dock “Turn on Clinic Guide” chip or this page
-        anytime. Preference is stored per user in this clinic (tenant-isolated). Thumbs on tips help
-        improve operational guidance — never used for clinical decisions.
+        Tip: turning the guide off hides the floating dock completely. Come back to{" "}
+        <span className="text-slate-400">Settings → Clinic guide</span> anytime to turn it on again.
+        Preference is stored per user in this clinic (tenant-isolated). Thumbs on tips help improve
+        operational guidance — never used for clinical decisions.
       </p>
     </section>
   );

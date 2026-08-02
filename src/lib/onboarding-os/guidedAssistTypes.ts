@@ -425,8 +425,9 @@ export type GuidedAssistSessionPayload = {
    */
   clinicalQuickActions: GuidedAssistQuickActionView[];
   /**
-   * Always show a dock affordance so users can re-enable from the UI
-   * (even when assist is off and setup is complete).
+   * True when preference is off and force-show is not active.
+   * Dock is fully hidden in this case; re-enable via Settings → Clinic guide.
+   * Kept for settings/debug telemetry (not used to render floating re-enable chrome).
    */
   showReenableChrome: boolean;
   /** Settings → Clinic Guide path for this tenant. */

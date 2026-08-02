@@ -28,6 +28,11 @@ import {
 } from "@/lib/actions/fi-onboarding-os-guided-assist-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
+import {
+  readGuidedAssistCollapsedPreference,
+  resolveGuidedAssistInitialCollapsed,
+  writeGuidedAssistCollapsedPreference,
+} from "@/src/lib/onboarding-os/guidedAssistCollapse";
 import { isGuidedAssistDebugQueryActive } from "@/src/lib/onboarding-os/guidedAssistForceShow";
 import { guidedAssistDevLog } from "@/src/lib/onboarding-os/guidedAssistLog";
 import {
@@ -446,7 +451,11 @@ function SuggestionSourceBadge({ tip }: { tip: GuidedAssistTipView }) {
 
 /** Prefer collapsed clinic guide on narrow phones so it does not compete with bottom nav. */
 function usePrefersCollapsedAssistDefault(): boolean {
-  const [prefersCollapsed, setPrefersCollapsed] = useState(false);
+  // Initialize from matchMedia on the client so the first hydrate does not briefly treat phones as desktop.
+  const [prefersCollapsed, setPrefersCollapsed] = useState(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+    return window.matchMedia("(max-width: 639px)").matches;
+  });
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
@@ -495,23 +504,35 @@ export function GuidedAssistWidget({
     setTourStepIndex(null);
   }, [initialPayload]);
 
-  // Initial collapse: calendar always; phones prefer collapsed; desktop can open after hydrate.
+  const guideVisible =
+    payload.guideVisible ?? (payload.assistEnabled || Boolean(payload.forceShowActive));
+
+  // Initial collapse: calendar / guide-off / stored pref / narrow viewport; never auto-pop when off.
   useEffect(() => {
     if (hydratedCollapseRef.current && !onCalendarSurface) return;
     hydratedCollapseRef.current = true;
-    if (onCalendarSurface || prefersCollapsedDefault) {
-      setCollapsed(true);
-    } else {
-      setCollapsed(false);
-    }
-  }, [onCalendarSurface, prefersCollapsedDefault, pathname]);
+    const stored =
+      typeof window !== "undefined"
+        ? readGuidedAssistCollapsedPreference(window.localStorage, tenantId)
+        : null;
+    setCollapsed(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: stored,
+        guideVisible,
+        onCalendarSurface,
+        prefersNarrowViewport: prefersCollapsedDefault,
+      })
+    );
+  }, [onCalendarSurface, prefersCollapsedDefault, pathname, tenantId, guideVisible]);
+
+  // Turning the guide off should put the dock away immediately (do not leave the re-enable panel open).
+  useEffect(() => {
+    if (!guideVisible) setCollapsed(true);
+  }, [guideVisible]);
 
   useEffect(() => {
     if (onCalendarSurface) setCollapsed(true);
   }, [onCalendarSurface, pathname]);
-
-  const guideVisible =
-    payload.guideVisible ?? (payload.assistEnabled || Boolean(payload.forceShowActive));
 
   useEffect(() => {
     if (!guideVisible) return;
@@ -751,6 +772,9 @@ export function GuidedAssistWidget({
   const toggleCollapsed = () => {
     const next = !collapsed;
     setCollapsed(next);
+    if (typeof window !== "undefined") {
+      writeGuidedAssistCollapsedPreference(window.localStorage, tenantId, next);
+    }
     void recordGuidedAssistClientEventAction(tenantId, {
       eventKind: next ? "widget_collapsed" : "widget_expanded",
       pageKey: payload.pageKey,
@@ -851,33 +875,16 @@ export function GuidedAssistWidget({
     });
   };
 
-  const turnGuideOn = () => {
-    setMessage(null);
-    startTransition(async () => {
-      const res = await setGuidedAssistEnabledAction(tenantId, true);
-      if (!res.ok) {
-        setMessage(res.error);
-        return;
-      }
-      setPayload((prev) => ({
-        ...prev,
-        assistEnabled: true,
-        showReenableChrome: false,
-        userAssistOverride: true,
-      }));
-      setCollapsed(false);
-      router.refresh();
-    });
-  };
-
   const tourStep =
     tourActive && payload.emptyStateTour
       ? payload.emptyStateTour.steps[tourStepIndex!] ?? null
       : null;
   const tourTotal = payload.emptyStateTour?.steps.length ?? 0;
 
-  // Always mount a dock so users (especially admins) can re-enable after turning off.
-  // Tips / tours only render when assistEnabled is true.
+  // When off (and not force-shown), hide completely — re-enable via Settings → Clinic guide.
+  if (!guideVisible) {
+    return null;
+  }
 
   return (
     <aside
@@ -894,7 +901,7 @@ export function GuidedAssistWidget({
       aria-label="Clinic guide"
       data-testid="guided-assist-widget"
       data-guided-assist-collapsed={collapsed ? "true" : "false"}
-      data-guided-assist-enabled={guideVisible ? "true" : "false"}
+      data-guided-assist-enabled="true"
       data-guided-assist-force={payload.forceShowActive ? "true" : "false"}
       data-guided-assist-surface={onCalendarSurface ? "calendar" : "default"}
     >
@@ -919,14 +926,10 @@ export function GuidedAssistWidget({
             className={cn("truncate font-medium text-slate-100", collapsed ? "text-xs" : "text-sm")}
           >
             {collapsed
-              ? guideVisible
-                ? "Help"
-                : "Guide"
+              ? "Help"
               : tourActive
                 ? "Tour — one step at a time"
-                : guideVisible
-                  ? "Here to help next"
-                  : "Clinic guide is off"}
+                : "Here to help next"}
           </h2>
           {!collapsed && payload.roleModeLabel ? (
             <p
@@ -936,7 +939,7 @@ export function GuidedAssistWidget({
               {payload.roleModeLabel}
             </p>
           ) : null}
-          {collapsed && guideVisible && engagement.progress ? (
+          {collapsed && engagement.progress ? (
             <p
               className="truncate text-[10px] text-slate-500"
               data-testid="guided-assist-progress-collapsed"
@@ -950,7 +953,7 @@ export function GuidedAssistWidget({
               {engagement.streakDays >= 2 ? ` · ${engagement.streakDays}d` : ""}
             </p>
           ) : null}
-          {!collapsed && guideVisible && engagement.streakMessage ? (
+          {!collapsed && engagement.streakMessage ? (
             <p
               className="mt-0.5 text-[10px] font-medium text-cyan-300/80"
               data-testid="guided-assist-streak"
@@ -962,33 +965,25 @@ export function GuidedAssistWidget({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {collapsed && !guideVisible ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={turnGuideOn}
-              className="max-w-[11rem] truncate rounded-full border border-cyan-400/40 bg-cyan-500/20 px-2.5 py-1 text-[11px] font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50"
-              data-testid="guided-assist-collapsed-turn-on"
-              title="Clinic Guide is off — turn it back on anytime"
-            >
-              Guide off — turn on?
-            </button>
-          ) : (
-            <GuidedAssistToggle
-              tenantId={tenantId}
-              assistEnabled={Boolean(payload.assistEnabled)}
-              compact
-              onChanged={(enabled) =>
-                setPayload((prev) => ({
-                  ...prev,
-                  assistEnabled: enabled,
-                  guideVisible: enabled || Boolean(prev.forceShowActive),
-                  showReenableChrome: !enabled && !prev.forceShowActive,
-                  userAssistOverride: enabled,
-                }))
+          <GuidedAssistToggle
+            tenantId={tenantId}
+            assistEnabled={Boolean(payload.assistEnabled)}
+            compact
+            onChanged={(enabled) => {
+              const nextVisible = enabled || Boolean(payload.forceShowActive);
+              setPayload((prev) => ({
+                ...prev,
+                assistEnabled: enabled,
+                guideVisible: nextVisible,
+                showReenableChrome: !enabled && !prev.forceShowActive,
+                userAssistOverride: enabled,
+              }));
+              // Hide dock immediately when turned off (settings is the re-enable path).
+              if (!nextVisible && typeof window !== "undefined") {
+                writeGuidedAssistCollapsedPreference(window.localStorage, tenantId, true);
               }
-            />
-          )}
+            }}
+          />
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -1005,50 +1000,46 @@ export function GuidedAssistWidget({
         <div className={fiOsChromeClasses.guidedAssistBodyScroll}>
           <p className="text-xs leading-relaxed text-slate-400">{payload.safetyNotice}</p>
 
-          {guideVisible ? (
-            <p className="text-[11px] leading-relaxed text-slate-400" data-testid="guided-assist-warm-intro">
-              {payload.isOnboardingPhase
-                ? "No worries if this is new — we’ll point you to the next operational step only."
-                : "Think of this as a helpful colleague beside you while you learn the system."}
-            </p>
-          ) : null}
+          <p className="text-[11px] leading-relaxed text-slate-400" data-testid="guided-assist-warm-intro">
+            {payload.isOnboardingPhase
+              ? "No worries if this is new — we’ll point you to the next operational step only."
+              : "Think of this as a helpful colleague beside you while you learn the system."}
+          </p>
 
-          {guideVisible ? (
-            <div
-              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 sm:p-3"
-              data-testid="guided-assist-engagement-summary"
+          <div
+            className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 sm:p-3"
+            data-testid="guided-assist-engagement-summary"
+          >
+            <p
+              className="text-[10px] text-slate-400"
+              data-testid="guided-assist-progress"
+              role="status"
             >
+              {engagement.progress.label}
+            </p>
+            <p className="mt-0.5 text-[10px] font-medium text-cyan-300/80">
+              {engagement.progress.percentLabel}
+            </p>
+            <ProgressBar
+              percent={engagement.progress.percent}
+              label={engagement.progress.percentLabel}
+            />
+            {engagement.teamHighlight ? (
               <p
-                className="text-[10px] text-slate-400"
-                data-testid="guided-assist-progress"
-                role="status"
+                className="mt-1.5 text-[10px] text-slate-500"
+                data-testid="guided-assist-team-highlight"
+                title="Anonymized clinic-wide usage this week"
               >
-                {engagement.progress.label}
+                {engagement.teamHighlight.label}
               </p>
-              <p className="mt-0.5 text-[10px] font-medium text-cyan-300/80">
-                {engagement.progress.percentLabel}
-              </p>
-              <ProgressBar
-                percent={engagement.progress.percent}
-                label={engagement.progress.percentLabel}
-              />
-              {engagement.teamHighlight ? (
-                <p
-                  className="mt-1.5 text-[10px] text-slate-500"
-                  data-testid="guided-assist-team-highlight"
-                  title="Anonymized clinic-wide usage this week"
-                >
-                  {engagement.teamHighlight.label}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
+            ) : null}
+          </div>
 
-          {guideVisible && payload.showWhatsNew ? (
+          {payload.showWhatsNew ? (
             <WhatsNewCard onDismiss={dismissWhatsNew} pending={pending} />
           ) : null}
 
-          {guideVisible && (payload.clinicalQuickActions?.length ?? 0) > 0 ? (
+          {(payload.clinicalQuickActions?.length ?? 0) > 0 ? (
             <ClinicalQuickActionsSection
               actions={payload.clinicalQuickActions}
               onActionClick={(action) => {
@@ -1068,38 +1059,6 @@ export function GuidedAssistWidget({
             />
           ) : null}
 
-          {!guideVisible ? (
-            <section
-              className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
-              data-testid="guided-assist-reenable"
-            >
-              <p className="text-sm font-medium text-slate-100">
-                Clinic Guide is off — turn back on anytime
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                No pressure. When you want a friendly hand with Front desk, Pipeline, Money,
-                Surgery, Team, or clinical navigation, we&apos;re right here. Operational only —
-                never clinical advice.
-              </p>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={turnGuideOn}
-                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/20 px-3 text-sm font-semibold text-cyan-50 hover:bg-cyan-500/30 disabled:opacity-50"
-                data-testid="guided-assist-turn-on"
-              >
-                Turn Clinic Guide back on
-              </button>
-              <Link
-                href={settingsHref}
-                className="mt-2 inline-flex min-h-10 w-full items-center justify-center text-xs font-medium text-cyan-300/90 hover:text-cyan-200"
-                data-testid="guided-assist-settings-link"
-              >
-                Open Clinic guide settings
-              </Link>
-            </section>
-          ) : null}
-
           {payload.roleFirstActive && !tourActive ? (
             <p className="text-[10px] font-medium uppercase tracking-wide text-cyan-400/90">
               Getting started · visit{" "}
@@ -1109,7 +1068,7 @@ export function GuidedAssistWidget({
           ) : null}
 
           {/* Empty-state tour offer */}
-          {guideVisible && payload.emptyStateTour && !tourActive ? (
+          {payload.emptyStateTour && !tourActive ? (
             <section
               className="rounded-lg border border-cyan-500/30 bg-cyan-950/40 p-3"
               data-testid="guided-assist-tour-offer"
@@ -1201,7 +1160,7 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive && guideVisible && payload.nextAction ? (
+          {!tourActive && payload.nextAction ? (
             <section className="rounded-lg border border-cyan-500/25 bg-cyan-950/30 p-3">
               <div className="mb-2 flex items-center gap-2 text-cyan-200">
                 <Compass className="h-4 w-4 shrink-0" aria-hidden />
@@ -1223,7 +1182,7 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive && (payload.nextBestActions?.length ?? 0) > 0 && guideVisible ? (
+          {!tourActive && (payload.nextBestActions?.length ?? 0) > 0 ? (
             <section data-testid="guided-assist-next-best-actions">
               <div className="mb-1.5 flex items-center gap-1.5 text-amber-100/90">
                 <Zap className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -1242,14 +1201,13 @@ export function GuidedAssistWidget({
             </section>
           ) : null}
 
-          {!tourActive && guideVisible && payload.tips.length > 0 ? (
+          {!tourActive && payload.tips.length > 0 ? (
             <ul className="space-y-2" data-testid="guided-assist-tips">
               {payload.tips.map((tip) => renderTipCard(tip))}
             </ul>
           ) : null}
 
           {!tourActive &&
-          guideVisible &&
           payload.tips.length === 0 &&
           (payload.nextBestActions?.length ?? 0) === 0 &&
           !payload.nextAction &&
@@ -1269,22 +1227,19 @@ export function GuidedAssistWidget({
 
           {message ? <p className="text-xs text-amber-300">{message}</p> : null}
 
-          {guideVisible ? (
-            <p className="text-[10px] text-slate-500">
-              <Link href={settingsHref} className="text-cyan-400/80 hover:text-cyan-300">
-                Clinic guide settings
-              </Link>
-              {payload.forceShowActive
-                ? " · force show is on (admin session)"
-                : payload.isOnboardingPhase
-                  ? " · defaults to on while setup is incomplete"
-                  : " · turn off anytime"}
-            </p>
-          ) : null}
+          <p className="text-[10px] text-slate-500">
+            <Link href={settingsHref} className="text-cyan-400/80 hover:text-cyan-300">
+              Clinic guide settings
+            </Link>
+            {payload.forceShowActive
+              ? " · force show is on (admin session)"
+              : " · turn off to hide completely; re-enable anytime in settings"}
+          </p>
 
           {payload.isOnboardingPhase && payload.assistEnabled ? (
             <p className="text-[10px] text-slate-500">
-              The clinic guide defaults to on while setup is incomplete. You can turn it off anytime.
+              The clinic guide defaults to on while setup is incomplete. You can turn it off anytime
+              — it stays hidden until you turn it back on in settings.
             </p>
           ) : null}
         </div>

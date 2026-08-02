@@ -5,9 +5,12 @@ import { GuidedAssistWidget } from "@/src/components/onboarding-os/GuidedAssistW
 import { loadGuidedAssistSessionPayload } from "@/src/lib/onboarding-os/guidedAssist.server";
 
 /**
- * Mounts the Clinic guide dock for every authenticated tenant session.
- * When the guide is off, the widget still renders a compact re-enable control
- * (and links to Settings → Clinic guide). Admins can force-show via cookie or `?debug=guide`.
+ * Mounts the Clinic guide dock for authenticated tenant sessions when the guide is on
+ * (or admin force-show / `?debug=guide` is active).
+ *
+ * When the guide is off, nothing is rendered — no floating chip or panel.
+ * Staff turn it back on anytime via Settings → Clinic guide (per-user preference).
+ * Collapse preference (while on) is remembered per tenant in localStorage.
  */
 export async function GuidedAssistMount({ tenantId }: { tenantId: string }) {
   const h = headers();
@@ -23,6 +26,9 @@ export async function GuidedAssistMount({ tenantId }: { tenantId: string }) {
   });
 
   if (!result.ok || !result.payload) return null;
+
+  // Fully hide when preference is off (and not force-shown). Re-enable via settings.
+  if (!result.payload.guideVisible) return null;
 
   return (
     <Suspense

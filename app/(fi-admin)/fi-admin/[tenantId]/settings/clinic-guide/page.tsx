@@ -111,8 +111,8 @@ export default async function ClinicGuideSettingsPage({
           Clinic guide
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
-          Control the floating day-of tips and empty-screen tours. Safe to turn off or on anytime —
-          no impact on clinical charts or money records.
+          Control the floating day-of tips and empty-screen tours. Turn off to hide the dock
+          completely; turn back on here anytime. No impact on clinical charts or money records.
         </p>
       </div>
 

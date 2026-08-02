@@ -14,23 +14,30 @@ const patientId = () => process.env.FI_E2E_PATIENT_ID?.trim() || "";
 test.describe("FI prod feature smoke @authenticated @smoke", () => {
   test.skip(!hasDemoCredentials(), "Need admin credentials + FI_E2E_TENANT_ID");
 
-  test("tenant home loads and clinic guide dock mounts", async ({ page }) => {
+  test("tenant home loads and clinic guide dock mounts when enabled", async ({ page }) => {
     const tid = tenantId();
     await page.goto(`/fi-admin/${tid}`, { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(new RegExp(`/fi-admin/${tid}`));
-    // Guide dock should appear for members (collapsed or expanded).
+    // Dock only mounts when guide is on (or admin force-show). When off, nothing floats.
     const guide = page.getByTestId("guided-assist-widget");
-    await expect(guide).toBeVisible({ timeout: 45_000 });
-    // Toggle control present when expanded or as compact switch
-    const toggle = page.getByTestId("guided-assist-toggle");
-    // May be hidden if collapsed chrome uses different control — expand first if needed
-    const expand = page.getByRole("button", { name: /expand clinic guide/i });
-    if (await expand.isVisible().catch(() => false)) {
-      await expand.click();
+    const guideVisible = await guide.isVisible({ timeout: 45_000 }).catch(() => false);
+    if (guideVisible) {
+      const toggle = page.getByTestId("guided-assist-toggle");
+      const expand = page.getByRole("button", { name: /expand clinic guide/i });
+      if (await expand.isVisible().catch(() => false)) {
+        await expand.click();
+      }
+      await expect(toggle).toBeVisible({ timeout: 15_000 });
+    } else {
+      // Preference off: re-enable path is Settings → Clinic guide (no floating chrome).
+      await page.goto(`/fi-admin/${tid}/settings/clinic-guide`, {
+        waitUntil: "domcontentloaded",
+      });
+      await expect(page.getByTestId("clinic-guide-settings")).toBeVisible({ timeout: 45_000 });
+      await expect(
+        page.getByTestId("guided-assist-toggle").or(page.getByTestId("clinic-guide-settings-turn-on"))
+      ).toBeVisible({ timeout: 15_000 });
     }
-    await expect(toggle.or(page.getByTestId("guided-assist-collapsed-turn-on"))).toBeVisible({
-      timeout: 15_000,
-    });
   });
 
   test("clinic guide settings page loads for admin", async ({ page }) => {

@@ -447,7 +447,7 @@ export function buildGuidedAssistSessionPayload(opts: {
     experienceLevel,
     nextBestActions,
     clinicalQuickActions,
-    // Re-enable chrome when preference is off (even if force-show is temporarily on).
+    // Preference off + no force-show → dock fully hidden; re-enable via settings.
     showReenableChrome: !opts.resolved.assistEnabled && !forceShowActive,
     settingsHref,
     userAssistOverride: opts.userPreferences.assistEnabled,

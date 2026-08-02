@@ -62,6 +62,12 @@ import {
   isClinicalTodayRole,
 } from "../src/lib/onboarding-os/guidedAssistRoleMode";
 import {
+  guidedAssistCollapseStorageKey,
+  readGuidedAssistCollapsedPreference,
+  resolveGuidedAssistInitialCollapsed,
+  writeGuidedAssistCollapsedPreference,
+} from "../src/lib/onboarding-os/guidedAssistCollapse";
+import {
   isGuidedAssistDebugQueryActive,
   isGuidedAssistForceShowCookieActive,
 } from "../src/lib/onboarding-os/guidedAssistForceShow";
@@ -205,12 +211,91 @@ describe("OnboardingOS Phase D — guided assist core", () => {
     assert.equal(payload.nextBestActions.length, 0);
     assert.ok(payload.experienceLevel);
     assert.equal(payload.showReenableChrome, true);
+    assert.equal(payload.guideVisible, false);
     assert.match(payload.settingsHref, /settings\/clinic-guide$/);
     assert.equal(payload.userAssistOverride, false);
     assert.equal(payload.canManageTenantDefaults, true);
     // Guide off → no What’s new card
     assert.equal(payload.showWhatsNew, false);
     assert.ok(payload.whatsNewVersion);
+  });
+
+  it("resolveGuidedAssistInitialCollapsed keeps dock away when guide is off", () => {
+    // Desktop, guide on, no stored pref → expand
+    assert.equal(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: null,
+        guideVisible: true,
+        onCalendarSurface: false,
+        prefersNarrowViewport: false,
+      }),
+      false
+    );
+    // Guide off → collapsed (mount also returns null so dock is fully hidden)
+    assert.equal(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: false,
+        guideVisible: false,
+        onCalendarSurface: false,
+        prefersNarrowViewport: false,
+      }),
+      true
+    );
+    // Calendar always collapsed even when guide on
+    assert.equal(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: false,
+        guideVisible: true,
+        onCalendarSurface: true,
+        prefersNarrowViewport: false,
+      }),
+      true
+    );
+    // Stored collapse preference honored when guide is on
+    assert.equal(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: true,
+        guideVisible: true,
+        onCalendarSurface: false,
+        prefersNarrowViewport: false,
+      }),
+      true
+    );
+    // Narrow viewport prefers collapsed when no stored pref
+    assert.equal(
+      resolveGuidedAssistInitialCollapsed({
+        storedCollapsed: null,
+        guideVisible: true,
+        onCalendarSurface: false,
+        prefersNarrowViewport: true,
+      }),
+      true
+    );
+  });
+
+  it("collapsed preference storage is tenant-scoped", () => {
+    const tid = BASE_CTX.tenantId;
+    assert.match(guidedAssistCollapseStorageKey(tid), new RegExp(tid.slice(0, 8)));
+    const mem = new Map<string, string>();
+    const storage = {
+      getItem: (k: string) => mem.get(k) ?? null,
+      setItem: (k: string, v: string) => {
+        mem.set(k, v);
+      },
+      removeItem: (k: string) => {
+        mem.delete(k);
+      },
+    };
+    assert.equal(readGuidedAssistCollapsedPreference(storage, tid), null);
+    writeGuidedAssistCollapsedPreference(storage, tid, true);
+    assert.equal(readGuidedAssistCollapsedPreference(storage, tid), true);
+    writeGuidedAssistCollapsedPreference(storage, tid, false);
+    assert.equal(readGuidedAssistCollapsedPreference(storage, tid), false);
+    // Other tenant does not inherit
+    assert.equal(
+      readGuidedAssistCollapsedPreference(storage, "11111111-1111-4111-8111-111111111111"),
+      null
+    );
   });
 
   it("user override false forces assist off after setup; true forces on", () => {

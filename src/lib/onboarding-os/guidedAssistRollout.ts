@@ -20,7 +20,8 @@ export const GUIDED_ASSIST_ROLLOUT_ITEMS = [
   {
     id: "trained_reception",
     label: "Trained reception",
-    description: "Front desk has tried the guide on Today and Front desk — and knows how to re-enable it.",
+    description:
+      "Front desk has tried the guide on Today and Front desk — and knows Settings → Clinic guide turns it back on.",
   },
   {
     id: "checked_nurse_flow",
