@@ -199,7 +199,7 @@ function useCompactNavExpandedGroups({
     } catch {
       /* ignore */
     }
-  }, [compactExpandable, storageKey]);
+  }, [compactExpandable, storageKey, activeGroupId]);
 
   const toggleGroup = useCallback(
     (groupId: FiOsD6gWorkflowGroupId) => {

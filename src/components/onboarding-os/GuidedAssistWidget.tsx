@@ -21,7 +21,6 @@ import {
   markGuidedAssistWhatsNewSeenAction,
   recordGuidedAssistClientEventAction,
   recordGuidedAssistTipFeedbackAction,
-  setGuidedAssistEnabledAction,
   setGuidedAssistForceShowAction,
   snoozeGuidedAssistTipAction,
   touchGuidedAssistEngagementAction,
@@ -566,6 +565,7 @@ export function GuidedAssistWidget({
     payload.nextBestActions,
     payload.experienceLevel,
     payload.forceShowActive,
+    payload.todayRole,
     tenantId,
   ]);
 

@@ -199,7 +199,7 @@ export function TenantConfigurationPanel({
   const brandingRevisionKey = buildTenantBrandingRevisionKey(tenantSettings);
   const formInitial = useMemo(
     () => buildTenantBrandingFormInitialState(tenantSettings),
-    [brandingRevisionKey, tenantSettings]
+    [tenantSettings]
   );
   const hasUploadedLogo = tenantBrandingHasUploadedLogo(tenantSettings);
 
