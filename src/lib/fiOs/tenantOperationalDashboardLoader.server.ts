@@ -1051,8 +1051,10 @@ export async function loadTenantOperationalDashboard(
   const supabase = supabaseAdmin();
 
   const authUserId = await resolveAuthUserId(null);
-  const clinicAccess = await resolveDevelopmentClinicAccessForTenant(tid, authUserId);
-  const viewer = await loadFiUserDashboard(tid, authUserId);
+  const [clinicAccess, viewer] = await Promise.all([
+    resolveDevelopmentClinicAccessForTenant(tid, authUserId),
+    loadFiUserDashboard(tid, authUserId),
+  ]);
   const viewerFiUserId = clinicAccess.fiUserId ?? viewer?.id ?? null;
   const canQuickCallIn = clinicAccess.allowed;
 

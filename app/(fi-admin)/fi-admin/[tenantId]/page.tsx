@@ -89,18 +89,25 @@ export default async function FiAdminTenantHomePage({
     );
   }
 
-  const [showCrmNav, showBookingsBoard, featureAccess, workspaceProfile, showSystemDiagnostics] =
-    await Promise.all([
-      getCrmShellNavAllowed(tenantId),
-
-      getBookingsBoardNavAllowed(tenantId),
-
-      loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
-
-      loadWorkspaceProfileKeyForViewer(tenantId),
-
-      canViewDashboardSystemDiagnostics(tenantId),
-    ]);
+  const [
+    showCrmNav,
+    showBookingsBoard,
+    featureAccess,
+    workspaceProfile,
+    showSystemDiagnostics,
+    data,
+  ] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
+    loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
+    loadWorkspaceProfileKeyForViewer(tenantId),
+    canViewDashboardSystemDiagnostics(tenantId),
+    loadTenantOperationalDashboard(tenantId, { includeReceptionBoard: true }).catch((e) => {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg === "Tenant not found") notFound();
+      throw e;
+    }),
+  ]);
 
   const base = `/fi-admin/${tenantId.trim()}`;
 
@@ -108,21 +115,8 @@ export default async function FiAdminTenantHomePage({
 
   const quickActionItems = filterResolvedQuickActionsByFeatureAccess(
     composeWorkspaceQuickActionsOrder({ workspaceProfile, resolvedItems: resolvedQuickBase }),
-
     featureAccess
   );
-
-  let data;
-
-  try {
-    data = await loadTenantOperationalDashboard(tenantId, { includeReceptionBoard: true });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "";
-
-    if (msg === "Tenant not found") notFound();
-
-    throw e;
-  }
 
   // P0B shadow mode: always compute + compare (never affects which surface renders below).
   runTodayFeedShadowValidation({ dashboard: data, showCrmNav, profileKey: workspaceProfile });
@@ -131,15 +125,16 @@ export default async function FiAdminTenantHomePage({
   // a slug — so FI_TODAY_SURFACE_TENANT_IDS must be populated with tenant UUIDs.
   // See src/lib/fiOs/todaySurfaceRollout.server.ts for allowlist/slug details.
   const todaySurfaceTenantEnabled = isTodaySurfaceEnabledForTenant(tenantId);
-  const todaySurfaceBakeAllowed = todaySurfaceTenantEnabled
-    ? await resolveTodaySurfaceStaffBakeAccess(tenantId)
-    : false;
+  const [todaySurfaceBakeAllowed, viewerDisplayName] = await Promise.all([
+    todaySurfaceTenantEnabled
+      ? resolveTodaySurfaceStaffBakeAccess(tenantId)
+      : Promise.resolve(false),
+    authUserId
+      ? resolveFiOsAuthUserDisplayNameForTenant(authUserId, tenantId)
+      : Promise.resolve(null),
+  ]);
 
   if (todaySurfaceTenantEnabled && todaySurfaceBakeAllowed) {
-    const authUserId = await resolveEffectiveTenantAuthUserIdFromSession();
-    const viewerDisplayName = authUserId
-      ? await resolveFiOsAuthUserDisplayNameForTenant(authUserId, tenantId)
-      : null;
 
     return (
       <CalendarToastProvider>

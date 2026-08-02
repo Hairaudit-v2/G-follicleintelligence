@@ -83,7 +83,11 @@ export function PatientDirectoryTable({
                 {row.displayName}
               </PatientSlideOverTrigger>
             ) : (
-              <Link href={profileHref} className="font-medium text-blue-300 hover:underline">
+              <Link
+                href={profileHref}
+                prefetch
+                className="font-medium text-blue-300 hover:underline"
+              >
                 {row.displayName}
               </Link>
             );
@@ -117,6 +121,7 @@ export function PatientDirectoryTable({
                   {apptHref ? (
                     <Link
                       href={apptHref}
+                      prefetch
                       className="text-xs text-blue-300 hover:underline"
                       title={row.nextAppointmentTitle ?? undefined}
                     >

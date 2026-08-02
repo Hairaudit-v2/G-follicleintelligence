@@ -75,7 +75,7 @@ export function CrmLeadListTable({
                       {title}
                     </button>
                   ) : (
-                    <Link href={href} className="font-medium text-blue-300 hover:underline">
+                    <Link href={href} prefetch className="font-medium text-blue-300 hover:underline">
                       {title}
                     </Link>
                   )}

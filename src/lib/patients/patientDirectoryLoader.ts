@@ -347,55 +347,55 @@ export async function loadPatientDirectoryPage(
     return emptyResult();
   }
 
-  let restrictPatientIds: string[] | null = null;
+  // Independent filter ID sets — load in parallel, then intersect (no sequential waterfalls).
+  const [
+    activeCaseRestrict,
+    futureBookingRestrict,
+    norwoodRestrict,
+    lastVisitRestrict,
+    leadSourceRestrict,
+    legacyRestrict,
+    excludeActiveCase,
+    excludeFutureBooking,
+  ] = await Promise.all([
+    query.hasActiveCase === true
+      ? loadPatientIdsWithActiveCases(supabase, tid)
+      : Promise.resolve(null as string[] | null),
+    query.hasFutureBooking === true
+      ? loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
+      : Promise.resolve(null as string[] | null),
+    query.norwoodMin || query.norwoodMax
+      ? loadPatientIdsInNorwoodRange(supabase, tid, query)
+      : Promise.resolve(null as string[] | null),
+    query.lastVisitFrom || query.lastVisitTo
+      ? loadPatientIdsWithLastVisitInRange(supabase, tid, query)
+      : Promise.resolve(null as string[] | null),
+    query.leadSource
+      ? loadPatientIdsWithLeadSource(supabase, tid, query.leadSource)
+      : Promise.resolve(null as string[] | null),
+    patientDirectoryHasLegacyFilters(query)
+      ? loadPatientIdsMatchingLegacyDirectoryFilters(tid, query, supabase)
+      : Promise.resolve(null as string[] | null),
+    query.hasActiveCase === false
+      ? loadPatientIdsWithActiveCases(supabase, tid)
+      : Promise.resolve([] as string[]),
+    query.hasFutureBooking === false
+      ? loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
+      : Promise.resolve([] as string[]),
+  ]);
 
-  if (query.hasActiveCase === true) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsWithActiveCases(supabase, tid)
-    );
-  }
-  if (query.hasFutureBooking === true) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
-    );
-  }
-  if (query.norwoodMin || query.norwoodMax) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsInNorwoodRange(supabase, tid, query)
-    );
-  }
-  if (query.lastVisitFrom || query.lastVisitTo) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsWithLastVisitInRange(supabase, tid, query)
-    );
-  }
-  if (query.leadSource) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsWithLeadSource(supabase, tid, query.leadSource)
-    );
-  }
-  if (patientDirectoryHasLegacyFilters(query)) {
-    restrictPatientIds = intersectSets(
-      restrictPatientIds,
-      await loadPatientIdsMatchingLegacyDirectoryFilters(tid, query, supabase)
-    );
-  }
+  let restrictPatientIds: string[] | null = null;
+  if (activeCaseRestrict) restrictPatientIds = intersectSets(restrictPatientIds, activeCaseRestrict);
+  if (futureBookingRestrict)
+    restrictPatientIds = intersectSets(restrictPatientIds, futureBookingRestrict);
+  if (norwoodRestrict) restrictPatientIds = intersectSets(restrictPatientIds, norwoodRestrict);
+  if (lastVisitRestrict) restrictPatientIds = intersectSets(restrictPatientIds, lastVisitRestrict);
+  if (leadSourceRestrict) restrictPatientIds = intersectSets(restrictPatientIds, leadSourceRestrict);
+  if (legacyRestrict) restrictPatientIds = intersectSets(restrictPatientIds, legacyRestrict);
 
   if (restrictPatientIds && restrictPatientIds.length === 0) {
     return emptyResult();
   }
-
-  const excludeActiveCase =
-    query.hasActiveCase === false ? await loadPatientIdsWithActiveCases(supabase, tid) : [];
-  const excludeFutureBooking =
-    query.hasFutureBooking === false
-      ? await loadPatientIdsWithFutureBookings(supabase, tid, nowIso)
-      : [];
 
   const ascending = query.sort === "created_asc";
   const from = (query.page - 1) * query.pageSize;

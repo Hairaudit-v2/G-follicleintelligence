@@ -85,14 +85,12 @@ export default async function PatientsHomeRoutePage({
     resolveAuthUserId(null),
   ]);
 
-  let overview;
-  try {
-    overview = await loadPatientOsOverview(tid, { summary: data.summary });
-  } catch {
-    overview = buildPatientOsOverviewFallback(data.summary);
-  }
-
-  const os = authId ? await loadFiOsIdentity(authId) : null;
+  const [overview, os] = await Promise.all([
+    loadPatientOsOverview(tid, { summary: data.summary }).catch(() =>
+      buildPatientOsOverviewFallback(data.summary)
+    ),
+    authId ? loadFiOsIdentity(authId) : Promise.resolve(null),
+  ]);
   const sessionLabel = os?.osRole ?? undefined;
 
   return (

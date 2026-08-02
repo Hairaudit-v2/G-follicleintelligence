@@ -209,27 +209,46 @@ export async function loadPatientProfile(
   const foundationPatientId = resolved.data.patientId;
   const personId = resolved.data.personId;
 
-  const { data: patRow, error: pe } = await supabase
-    .from("fi_patients")
-    .select(
-      "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, reminder_consent, preferred_contact_method, created_at, updated_at"
-    )
-    .eq("tenant_id", tid)
-    .eq("id", foundationPatientId)
-    .maybeSingle();
-  if (pe) throw new Error(pe.message);
-  if (!patRow) return { ok: false, error: "not_found" };
+  const [patRes, personRes, clinicalRow, patientImages, vieImagingCompleteness, leadRes] =
+    await Promise.all([
+      supabase
+        .from("fi_patients")
+        .select(
+          "id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, reminder_consent, preferred_contact_method, created_at, updated_at"
+        )
+        .eq("tenant_id", tid)
+        .eq("id", foundationPatientId)
+        .maybeSingle(),
+      supabase
+        .from("fi_persons")
+        .select("id, metadata, created_at, updated_at")
+        .eq("tenant_id", tid)
+        .eq("id", personId)
+        .maybeSingle(),
+      loadPatientClinicalDetails(tid, foundationPatientId, supabase),
+      loadPatientImagesProfileBundle(tid, foundationPatientId, supabase),
+      loadViePatientImagingCompleteness(tid, foundationPatientId, supabase),
+      supabase
+        .from("fi_crm_leads")
+        .select(
+          "id, tenant_id, organisation_id, clinic_id, person_id, patient_id, case_id, current_stage_id, primary_owner_user_id, status, priority, summary, metadata, converted_person_id, converted_case_id, converted_at, converted_by_user_id, created_at, updated_at"
+        )
+        .eq("tenant_id", tid)
+        .eq("patient_id", foundationPatientId)
+        .order("updated_at", { ascending: false })
+        .limit(50),
+    ]);
 
+  if (patRes.error) throw new Error(patRes.error.message);
+  if (!patRes.data) return { ok: false, error: "not_found" };
+  if (personRes.error) throw new Error(personRes.error.message);
+  if (!personRes.data) return { ok: false, error: "not_found" };
+  if (leadRes.error) throw new Error(leadRes.error.message);
+
+  const patRow = patRes.data;
+  const personRow = personRes.data;
+  const leadRows = leadRes.data;
   const pr = patRow as Record<string, unknown>;
-
-  const { data: personRow, error: perr } = await supabase
-    .from("fi_persons")
-    .select("id, metadata, created_at, updated_at")
-    .eq("tenant_id", tid)
-    .eq("id", personId)
-    .maybeSingle();
-  if (perr) throw new Error(perr.message);
-  if (!personRow) return { ok: false, error: "not_found" };
 
   const patient: PatientProfilePatientRow = {
     id: String(pr.id),
@@ -252,13 +271,6 @@ export async function loadPatientProfile(
 
   const person = mapPerson(personRow as Record<string, unknown>);
 
-  const clinicalRow = await loadPatientClinicalDetails(tid, foundationPatientId, supabase);
-  const patientImages = await loadPatientImagesProfileBundle(tid, foundationPatientId, supabase);
-  const vieImagingCompleteness = await loadViePatientImagingCompleteness(
-    tid,
-    foundationPatientId,
-    supabase
-  );
   let clinicalDetailsUpdatedByLabel: string | null = null;
   if (clinicalRow?.updated_by_user_id) {
     const { data: updater, error: ueUp } = await supabase
@@ -272,14 +284,6 @@ export async function loadPatientProfile(
       clinicalDetailsUpdatedByLabel = em || clinicalRow.updated_by_user_id.slice(0, 8);
     }
   }
-
-  const { data: leadRows, error: le } = await supabase
-    .from("fi_crm_leads")
-    .select("*")
-    .eq("tenant_id", tid)
-    .eq("patient_id", foundationPatientId)
-    .order("updated_at", { ascending: false });
-  if (le) throw new Error(le.message);
 
   const leadsMapped = (leadRows ?? []).map((r) => mapFiCrmLeadRow(r as Record<string, unknown>));
   const stageIds = Array.from(
@@ -331,7 +335,8 @@ export async function loadPatientProfile(
     .eq("tenant_id", tid)
     .eq("foundation_patient_id", foundationPatientId)
     .is("deleted_at", null)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(50);
   if (ce) throw new Error(ce.message);
 
   const caseIds = (caseRows ?? []).map((c) => String((c as { id: string }).id));
@@ -387,7 +392,8 @@ export async function loadPatientProfile(
     )
     .eq("tenant_id", tid)
     .eq("patient_id", foundationPatientId)
-    .order("start_at", { ascending: false });
+    .order("start_at", { ascending: false })
+    .limit(75);
   if (be) throw new Error(be.message);
 
   const bookingsRaw: PatientProfileBookingCard[] = (bookingRows ?? []).map((b) => ({

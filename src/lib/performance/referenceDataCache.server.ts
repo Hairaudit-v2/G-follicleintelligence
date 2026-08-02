@@ -165,24 +165,78 @@ async function loadCalendarShellBootstrapCrossRequest(
 /** Calendar shell bootstrap — tenant metadata + timezone in one query (no `fi_calendar_settings`). */
 export const loadCalendarShellBootstrapCached = cache(loadCalendarShellBootstrapCrossRequest);
 
+async function loadTenantCalendarSettingsCrossRequest(
+  tenantId: string,
+  clinicId: string | null
+): Promise<Awaited<ReturnType<typeof loadTenantOperationalCalendarSettings>>> {
+  const tid = tenantId.trim();
+  const cid = clinicId?.trim() || "";
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => loadTenantOperationalCalendarSettings(tid, cid || null),
+      ["fi-tenant-calendar-settings", tid, cid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return loadTenantOperationalCalendarSettings(tid, cid || null);
+}
+
+/** Per-request dedup + cross-request cache for tenant calendar settings (stable). */
 export const loadTenantCalendarSettingsCached = cache(
   (tenantId: string, clinicId?: string | null) =>
-    loadTenantOperationalCalendarSettings(tenantId.trim(), clinicId?.trim() || null)
+    loadTenantCalendarSettingsCrossRequest(tenantId, clinicId?.trim() || null)
 );
 
+async function loadClinicalStaffPickerCrossRequest(tenantId: string) {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => loadClinicalStaffPickerOptions(tid),
+      ["fi-clinical-staff-picker", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return loadClinicalStaffPickerOptions(tid);
+}
+
+/** Per-request dedup + cross-request cache for clinical staff picker (stable roster). */
 export const loadClinicalStaffPickerCached = cache((tenantId: string) =>
-  loadClinicalStaffPickerOptions(tenantId.trim())
+  loadClinicalStaffPickerCrossRequest(tenantId)
 );
+
+async function loadCrmShellUsersCrossRequest(tenantId: string) {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => loadCrmShellUserPickerOptions(tid),
+      ["fi-crm-shell-users", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return loadCrmShellUserPickerOptions(tid);
+}
 
 export const loadCrmShellUsersCached = cache((tenantId: string) =>
-  loadCrmShellUserPickerOptions(tenantId.trim())
+  loadCrmShellUsersCrossRequest(tenantId)
 );
+
+async function loadFiServicesCatalogCrossRequest(tenantId: string) {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => loadFiServicesForTenant(tid),
+      ["fi-services-catalog", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return loadFiServicesForTenant(tid);
+}
 
 export const loadFiServicesCatalogCached = cache((tenantId: string) =>
-  loadFiServicesForTenant(tenantId.trim())
+  loadFiServicesCatalogCrossRequest(tenantId)
 );
 
-export const loadTenantClinicsCached = cache(async (tenantId: string) => {
+async function fetchTenantClinics(tenantId: string) {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const { data, error } = await supabaseAdmin()
     .from("fi_clinics")
@@ -191,10 +245,38 @@ export const loadTenantClinicsCached = cache(async (tenantId: string) => {
     .order("display_name");
   if (error) throw new Error(error.message);
   return data ?? [];
-});
+}
+
+async function loadTenantClinicsCrossRequest(tenantId: string) {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => fetchTenantClinics(tid),
+      ["fi-tenant-clinics", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return fetchTenantClinics(tid);
+}
+
+export const loadTenantClinicsCached = cache((tenantId: string) =>
+  loadTenantClinicsCrossRequest(tenantId)
+);
+
+async function loadTenantRoomsCrossRequest(tenantId: string) {
+  const tid = tenantId.trim();
+  if (isNextServerRuntime()) {
+    return unstable_cache(
+      () => loadClinicRoomsForTenant(tid),
+      ["fi-tenant-rooms", tid],
+      { revalidate: REFERENCE_DATA_REVALIDATE_SEC, tags: [`fi-tenant-${tid}`, "fi-reference-data"] }
+    )();
+  }
+  return loadClinicRoomsForTenant(tid);
+}
 
 export const loadTenantRoomsCached = cache((tenantId: string) =>
-  loadClinicRoomsForTenant(tenantId.trim())
+  loadTenantRoomsCrossRequest(tenantId)
 );
 
 /** Service catalog + appointment-type labels (safe to cache per request). */
