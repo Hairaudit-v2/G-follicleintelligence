@@ -47,10 +47,12 @@ describe("patientJourneyState.server safety", () => {
   });
 
   it("missing_consent attention chip must not target a non-existent patient/consultations path", () => {
-    // Mirrors loadPatientJourneySnapshot href map — Surgery readiness is the live consent proxy surface.
-    const missingConsentHref = `/fi-admin/${TENANT}/surgery-readiness`;
+    // Mirrors loadPatientJourneySnapshot href map — patient Documents required-consents panel.
+    const missingConsentHref = `/fi-admin/${TENANT}/patients/${PATIENT}?tab=documents#required-consents`;
     assert.ok(missingConsentHref.includes(TENANT));
-    assert.ok(missingConsentHref.endsWith("/surgery-readiness"));
+    assert.ok(missingConsentHref.includes(`/patients/${PATIENT}`));
+    assert.ok(missingConsentHref.includes("tab=documents"));
+    assert.ok(missingConsentHref.includes("#required-consents"));
     assert.ok(!missingConsentHref.includes(`/patients/${PATIENT}/consultations`));
   });
 

@@ -30,3 +30,8 @@ export function buildPatientDocumentsTabHref(tenantId: string, patientId: string
   const pid = patientId.trim();
   return `/fi-admin/${encodeURIComponent(tid)}/patients/${encodeURIComponent(pid)}?tab=documents`;
 }
+
+/** Staff required-consents panel (Documents tab anchor). Never a 404. */
+export function buildPatientRequiredConsentsHref(tenantId: string, patientId: string): string {
+  return `${buildPatientDocumentsTabHref(tenantId, patientId)}#required-consents`;
+}

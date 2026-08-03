@@ -24,6 +24,7 @@ import { loadPatientJourneySnapshot } from "@/src/lib/patientJourney/patientJour
 import { loadClinicJourneyReadiness } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
 import { canViewPatientSystemAudit } from "@/src/lib/systemAudit/systemAuditAccess.server";
 import { listSystemAuditEventsForPatient } from "@/src/lib/systemAudit/systemAuditLoaders.server";
+import { loadPatientRequiredConsentsPanelData } from "@/src/lib/consents/consentRequirementResolver.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -89,6 +90,7 @@ export default async function PatientProfileRoutePage({
     imagingCaptureCap,
     patientJourney,
     journeyReadiness,
+    requiredConsents,
   ] = await Promise.all([
     loadFiServicesForTenant(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
@@ -102,6 +104,15 @@ export default async function PatientProfileRoutePage({
       tenantId: tenantId.trim(),
       patientId: canonicalPatientId,
     }).catch(() => null),
+    loadPatientRequiredConsentsPanelData(tenantId.trim(), canonicalPatientId).catch(
+      (): import("@/src/lib/consents/consentTypes").PatientRequiredConsentsPanelData => ({
+        ok: false,
+        unavailable: true,
+        message: "Could not load required consents.",
+        items: [],
+        allRequiredSigned: false,
+      })
+    ),
   ]);
   const operationalTodayYmd = calendarDateStringFromInstant(
     new Date(),
@@ -149,6 +160,7 @@ export default async function PatientProfileRoutePage({
           patientJourney={patientJourney}
           journeyReadiness={journeyReadiness}
           systemAuditEvents={systemAuditEvents}
+          requiredConsents={requiredConsents}
           prescriptionsTab={
             activeTab === "prescriptions" ? (
               <Suspense

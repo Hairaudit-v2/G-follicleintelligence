@@ -28,9 +28,14 @@ export const PATIENT_DETAIL_TAB_LABELS: Record<PatientDetailTabId, string> = {
   payments: "Payments",
 };
 
+/**
+ * Parse `?tab=` for patient profile.
+ * Aliases `consent` / `consents` → documents (Required consents panel lives there).
+ */
 export function parsePatientDetailTab(raw: string | string[] | undefined): PatientDetailTabId {
   const v = Array.isArray(raw) ? raw[0] : raw;
   const t = v?.trim().toLowerCase();
+  if (t === "consent" || t === "consents") return "documents";
   if (t && TAB_SET.has(t)) return t as PatientDetailTabId;
   return "overview";
 }

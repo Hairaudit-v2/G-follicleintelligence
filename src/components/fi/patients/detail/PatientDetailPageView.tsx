@@ -37,6 +37,7 @@ import { LegacyPatientProfileBanner } from "@/src/components/fi-admin/patients/L
 import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
 import { PatientActivityTab } from "./PatientActivityTab";
 import type { SystemAuditEventRow } from "@/src/lib/systemAudit/systemAuditTypes";
+import type { PatientRequiredConsentsPanelData } from "@/src/lib/consents/consentTypes";
 
 export function PatientDetailPageView({
   tenantId,
@@ -54,6 +55,7 @@ export function PatientDetailPageView({
   patientJourney = null,
   journeyReadiness = null,
   systemAuditEvents = [],
+  requiredConsents = null,
 }: {
   tenantId: string;
   patientId: string;
@@ -69,6 +71,7 @@ export function PatientDetailPageView({
   patientJourney?: PatientJourneySnapshot | null;
   journeyReadiness?: ClinicJourneyReadinessItem | null;
   systemAuditEvents?: SystemAuditEventRow[];
+  requiredConsents?: PatientRequiredConsentsPanelData | null;
 }) {
   const { profile } = initialPayload;
 
@@ -243,7 +246,11 @@ export function PatientDetailPageView({
       ) : null}
 
       {activeTab === "documents" ? (
-        <PatientDocumentsTab tenantId={tenantId} data={profile} />
+        <PatientDocumentsTab
+          tenantId={tenantId}
+          data={profile}
+          requiredConsents={requiredConsents}
+        />
       ) : null}
 
       <StaffUatClarityFeedback screenKey="patient_profile" />

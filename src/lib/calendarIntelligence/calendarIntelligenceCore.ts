@@ -38,7 +38,9 @@ export function buildCalendarBlockerFixHref(
     case "unpaid_deposit":
       return pid ? `${base}/patients/${pid}?tab=payments` : `${base}/appointments/${bid}`;
     case "missing_consent":
-      return pid ? `${base}/patients/${pid}?tab=consent` : `${base}/appointments/${bid}`;
+      return pid
+        ? `${base}/patients/${pid}?tab=documents#required-consents`
+        : `${base}/appointments/${bid}`;
     case "incomplete_pre_op":
       return cid
         ? `${base}/cases/${cid}`
