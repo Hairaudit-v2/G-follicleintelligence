@@ -33,7 +33,7 @@ describe("HOME_V5_CONTENT (FI-WEB-REFRESH-1E)", () => {
     assert.equal(HOME_V5_CONTENT.ecosystemArchitecture.layerPreview.length, 12);
     const sub = getHomeV5PlatformSystemsSubtext();
     assert.match(sub, /8 core clinic systems/i);
-    assert.match(sub, /22 systems/i);
+    assert.match(sub, /23 systems/i);
     assert.match(sub, /Platform Progress/i);
   });
 

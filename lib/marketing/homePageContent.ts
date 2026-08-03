@@ -1511,7 +1511,7 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Strategic architecture",
     headline: "Twelve Intelligence Layers. One Operating System.",
     description:
-      "Architecture map (12 intelligence layers) for the hair restoration operating system — complementary to the 22 systems tracked with honest delivery status on Platform Progress. Acquisition, consultation, clinical intelligence, imaging, surgery, workforce, operations, finance, outcomes, education, deployment, and executive analytics in one connected ecosystem.",
+      "Architecture map (12 intelligence layers) for the hair restoration operating system — complementary to the 23 systems tracked with honest delivery status on Platform Progress. Acquisition, consultation, clinical intelligence, imaging, trichoscopy, surgery, workforce, operations, finance, outcomes, education, deployment, and executive analytics in one connected ecosystem.",
     layerPreview: [
       "Acquisition Intelligence",
       "Consultation Intelligence",
@@ -1648,7 +1648,7 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Enterprise infrastructure",
     headline: "This Is Not Clinic Software",
     subheadline: "This is infrastructure for an entire medical industry.",
-    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine — adopted progressively, with 22 systems tracked and delivery status you can review on Platform Progress.",
+    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine — adopted progressively, with 23 systems tracked and delivery status you can review on Platform Progress.",
     primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
     secondaryCta: {
       label: "Request a Platform and Migration Review",

@@ -16,16 +16,16 @@ import {
 } from "@/lib/marketing/platformProgressPageContent";
 
 describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
-  it("tracks 22 systems with derived Operational Pilot counts", () => {
+  it("tracks 23 systems with derived Operational Pilot counts", () => {
     const snapshot = getPlatformProgressSnapshot();
-    assert.equal(snapshot.activeModuleCount, 22);
+    assert.equal(snapshot.activeModuleCount, 23);
     assert.equal(snapshot.statusCounts.Deployed, 3);
     assert.equal(snapshot.statusCounts["Operational Pilot"], 12);
     assert.equal(snapshot.statusCounts["Advanced Build"], 6);
-    assert.equal(snapshot.statusCounts["In Development"], 0);
+    assert.equal(snapshot.statusCounts["In Development"], 1);
     assert.equal(snapshot.statusCounts["Research and Future Development"], 1);
     assert.equal(snapshot.deployableSurfaceCount, 15);
-    assert.equal(snapshot.lastUpdated, "2026-08-04");
+    assert.equal(snapshot.lastUpdated, "2026-08-06");
   });
 
   it("includes FI Patient App as Operational Pilot after PatientOS", () => {
@@ -37,7 +37,7 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     const patientApp = PLATFORM_PROGRESS_MODULES[patientAppIndex];
     assert.equal(patientApp?.name, "FI Patient App");
     assert.equal(patientApp?.status, "Operational Pilot");
-    assert.match(patientApp?.latestMilestone ?? "", /Phase 1 Journey Control/i);
+    assert.match(patientApp?.latestMilestone ?? "", /Remote progress photo capture/i);
     assert.equal(patientApp?.learnMoreHref, "/platform/patient-app");
 
     const operational = getModulesByStatuses(["Deployed", "Operational Pilot"]);
@@ -59,22 +59,25 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     const pilot = bars.find((b) => b.status === "Operational Pilot");
     assert.ok(pilot);
     assert.equal(pilot.count, 12);
-    assert.equal(pilot.total, 22);
-    assert.equal(pilot.widthFraction, 12 / 22);
-    assert.equal(pilot.accessibleValue, "12 of 22 systems are in Operational Pilot.");
+    assert.equal(pilot.total, 23);
+    assert.equal(pilot.widthFraction, 12 / 23);
+    assert.equal(pilot.accessibleValue, "12 of 23 systems are in Operational Pilot.");
     assert.doesNotMatch(pilot.accessibleValue, /% complete|platform completion/i);
 
     const metrics = getPlatformProgressMetrics();
-    assert.equal(metrics.find((m) => m.label === "Systems tracked")?.value, "22");
+    assert.equal(metrics.find((m) => m.label === "Systems tracked")?.value, "23");
     assert.equal(
       getOperationalOrPilotSummary(),
-      "15 of 22 systems are deployed or operating in controlled pilot scope."
+      "15 of 23 systems are deployed or operating in controlled pilot scope."
     );
   });
 
-  it("features FinancialOS trial readiness as the newest verified milestone", () => {
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "financial-os-trial-ready");
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-08-04");
+  it("features Trichoscopy Intelligence as the newest verified milestone", () => {
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "trichoscopy-intelligence-layer");
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-08-06");
+    assert.ok(
+      PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "financial-os-trial-ready")
+    );
     assert.ok(
       PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "clinic-inbox-staged-approvals")
     );
@@ -84,7 +87,18 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     assert.ok(
       PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "controlled-crm-migration")
     );
-    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-08-04");
+    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-08-06");
+  });
+
+  it("lists Trichoscopy Intelligence as In Development with controlled-validation status", () => {
+    const trichoscopy = PLATFORM_PROGRESS_MODULES.find((m) => m.id === "trichoscopy-intelligence");
+    assert.equal(trichoscopy?.name, "Trichoscopy Intelligence");
+    assert.equal(trichoscopy?.status, "In Development");
+    assert.match(trichoscopy?.statusLabel ?? "", /Active development/i);
+    assert.match(trichoscopy?.description ?? "", /USB microscope/i);
+    assert.match(trichoscopy?.description ?? "", /HLI-to-FiOS/i);
+    assert.match(trichoscopy?.description ?? "", /clinician oversight/i);
+    assert.match(trichoscopy?.latestMilestone ?? "", /controlled validation/i);
   });
 
   it("lists FinancialOS as Operational Pilot with trial payment notes", () => {

@@ -137,7 +137,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "How Follicle Intelligence is becoming the operating system for hair restoration clinics",
     subtext:
       "Follicle Intelligence is progressing from a connected product ecosystem into a unified operating system for hair restoration clinics — expanding operational workflow depth, connected patient intelligence, and deployment and migration maturity.",
-    lastUpdated: "2026-08-04",
+    lastUpdated: "2026-08-06",
   },
 
   currentPosition: {
@@ -148,6 +148,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       "Follicle Intelligence is purpose-built for modern hair restoration clinics — connecting patient acquisition, clinical decision-making, surgery, imaging, outcomes, workforce and business performance in one longitudinal record.",
       "Core operational layers are already usable in defined scopes. Clinics can connect existing systems, adopt selected FI workflows, and transition in stages rather than replacing everything on day one.",
       "Recent operator surfaces deepen day-to-day use: a clinic Inbox for staged CRM approvals, typed clinical notes on the patient chart, and personal Clinic guide control for every staff role.",
+      "FiOS is also extending a structured trichoscopy intelligence layer for clinical capture, treatment monitoring, donor assessment and longitudinal outcome review — now in active development and controlled validation.",
       "Progress is measured by real workflow depth, patient-record continuity, and controlled deployment — not by speculative completion percentages.",
     ] as const,
     dimensions: [
@@ -437,6 +438,13 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 /** Public-safe verified milestones (no internal phase codes). */
 export const PLATFORM_PROGRESS_VERIFIED_MILESTONES: PlatformProgressDeploymentMilestone[] = [
   {
+    id: "trichoscopy-intelligence-layer",
+    date: "2026-08-06",
+    tag: "Trichoscopy Intelligence · ImagingOS · HairIntel · HLI",
+    title:
+      "Trichoscopy Intelligence layer registered for active development and controlled validation",
+  },
+  {
     id: "patient-app-remote-progress-photos",
     date: "2026-08-05",
     tag: "FI Patient App · PatientOS · ImagingOS",
@@ -619,6 +627,18 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     latestMilestone: "Protocol capture and imaging intelligence in controlled operational use",
     learnMoreHref: "/platform/imaging-os",
     evidenceNote: "Imaging sessions, AI execution framework, surgery imaging summary linkage.",
+  },
+  {
+    id: "trichoscopy-intelligence",
+    name: "Trichoscopy Intelligence",
+    description:
+      "Structured trichoscopy intelligence for clinical capture, treatment monitoring, donor assessment and longitudinal outcome review. Current development includes USB microscope and still-image capture, standardised scalp-site protocols, capture-quality and calibration controls, AI-assisted observation drafts, clinician-reviewed hair and follicular-unit metrics, structured donor and recipient-area evidence, repeat-site longitudinal comparison, versioned clinical records and audit trails, and HLI-to-FiOS clinical signal integration — designed to strengthen documentation and decision support while preserving clinician oversight.",
+    status: "In Development",
+    statusLabel: "Active development · controlled validation",
+    latestMilestone:
+      "Active development and controlled validation — capture protocols, quality controls, AI-assisted drafts and clinician-reviewed metrics",
+    evidenceNote:
+      "Public progress registry addition; USB/still capture, site protocols, calibration, AI observation drafts, FU metrics, donor/recipient evidence, longitudinal repeat-site comparison, versioned records, HLI→FiOS signals under controlled validation.",
   },
   buildViePlatformProgressModule(),
   {
@@ -865,7 +885,7 @@ export const PLATFORM_ARCHITECTURE_STACK: PlatformArchitectureStackLayer[] = [
   {
     id: "clinical",
     label: "Clinical Layer",
-    systems: ["HairIntel", "ImagingOS", "VIE", "SurgeryOS", "AuditOS"],
+    systems: ["HairIntel", "ImagingOS", "Trichoscopy Intelligence", "VIE", "SurgeryOS", "AuditOS"],
   },
   {
     id: "intelligence",
@@ -911,7 +931,14 @@ export const PLATFORM_SYSTEM_ARCHITECTURE_GROUPS: PlatformSystemArchitectureGrou
     id: "intelligence",
     heading: "Intelligence systems",
     description: "Diagnostics, imaging intelligence, audit and analytics.",
-    moduleNames: ["HairIntel", "VIE", "AuditOS", "AnalyticsOS", "AI Intelligence Layer"],
+    moduleNames: [
+      "HairIntel",
+      "Trichoscopy Intelligence",
+      "VIE",
+      "AuditOS",
+      "AnalyticsOS",
+      "AI Intelligence Layer",
+    ],
   },
   {
     id: "operational",
@@ -938,6 +965,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 
 /** Internal recent releases (may retain engineering titles for admin). */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-08-06-trichoscopy-intelligence",
+    title: "Trichoscopy Intelligence layer — active development and controlled validation",
+    module: "Trichoscopy Intelligence",
+    date: "2026-08-06",
+  },
   {
     id: "2026-08-05-patient-app-progress-photos",
     title: "Remote progress photo capture in the FI Patient App",
@@ -1011,6 +1044,15 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
  * Extended engineering detail remains in internal runbooks and git history.
  */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-08-06-trichoscopy-intelligence",
+    date: "2026-08-06",
+    tag: "In Development",
+    title: "Trichoscopy Intelligence layer for structured clinical capture and monitoring",
+    summary:
+      "FiOS is extending a trichoscopy intelligence layer for clinical capture, treatment monitoring, donor assessment and longitudinal outcome review. Active development covers USB and still-image capture, scalp-site protocols, quality and calibration controls, AI-assisted observation drafts with clinician review, follicular-unit metrics, donor and recipient evidence, repeat-site comparison, versioned records, and HLI-to-FiOS clinical signal integration — under controlled validation with clinician oversight preserved.",
+    modules: ["Trichoscopy Intelligence", "ImagingOS", "HairIntel"],
+  },
   {
     id: "2026-08-04-financial-os-trial-ready",
     date: "2026-08-04",
