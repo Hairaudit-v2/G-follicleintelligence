@@ -77,17 +77,21 @@ function flattenMoreIds(sections = moreSections()) {
   return new Set([...top, ...subs]);
 }
 
-test("primary rail has six slots; Reports is More-only (not on rail)", () => {
+test("primary rail has six slots and Reports sits on the rail", () => {
   assert.deepEqual(
     [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
-    ["today", "calendar", "patients", "front-desk", "team", "more"]
+    ["today", "calendar", "patients", "team", "reports", "more"]
   );
   assert.equal(primaryRailSlotIds().length, 6);
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find(
     (i) => (i.id as string) === "reports"
   );
-  assert.equal(reportsRail, undefined);
-  assert.ok(!isPrimaryRailNavId(FI_OS_REPORTS_NAV_ID));
+  assert.equal(reportsRail?.kind, "link");
+  if (reportsRail?.kind === "link") {
+    assert.equal(reportsRail.href, `${base}/reports`);
+    assert.equal(reportsRail.label, "Reports");
+  }
+  assert.ok(isPrimaryRailNavId(FI_OS_REPORTS_NAV_ID));
   assert.ok(!isPrimaryRailNavId("analytics"));
   assert.ok(fullSidebar().some((i) => i.id === "reports" && i.href.endsWith("/reports")));
 });
@@ -202,11 +206,10 @@ test("platform admin retains D6 intelligence legacy direct links", () => {
   assert.ok(adminMore.has("d6-presence"));
 });
 
-test("reports routes do not activate a primary rail slot (More-only)", () => {
-  // Reports is More-only (FI-TRUST-LANDING-AND-SPINE-1) — no primary-rail active id
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/presence`, base), null);
+test("reports routes activate the Reports primary rail slot", () => {
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/presence`, base), "reports");
 });
 
 test("Calendar, Front Desk, Surgery, and Team routes remain unchanged", () => {

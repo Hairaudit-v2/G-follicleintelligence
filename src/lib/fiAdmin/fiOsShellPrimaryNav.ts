@@ -188,7 +188,7 @@ export function resolveFiOsPrimarySidebarItems(
       featureKey: "dashboard",
       label: "Today",
       shortLabel: "Today",
-      href: b,
+      href: hrefFor(b, "today"),
       disabled: false,
     },
     ...(showInbox

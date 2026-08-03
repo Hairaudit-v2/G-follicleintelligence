@@ -108,18 +108,18 @@ describe("S4.5D one Pipeline door", () => {
     }
   });
 
-  it("17 More drawer contains one Pipeline entry", () => {
+  it("17 More drawer contains Inbox and Pipeline entries", () => {
     const pipeline = morePipelineItems();
     assert.deepEqual(
       pipeline.map((i) => i.id),
-      ["crm"]
+      ["inbox", "crm"]
     );
-    assert.equal(pipeline[0]!.label, "Pipeline");
+    assert.equal(pipeline.find((i) => i.id === "crm")!.label, "Pipeline");
   });
 
   it("20 primary rail count unchanged at six slots", () => {
     assert.equal(primaryRailSlotIds().length, 6);
-    const railIds = new Set(["today", "calendar", "patients", "front-desk", "team", "more"]);
+    const railIds = new Set(["today", "calendar", "patients", "team", "reports", "more"]);
     assert.deepEqual([...primaryRailSlotIds()].sort(), [...railIds].sort());
   });
 

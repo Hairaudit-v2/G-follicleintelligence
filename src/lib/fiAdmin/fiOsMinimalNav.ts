@@ -44,7 +44,14 @@ function linkFromRailSlot(
   const target = resolvePrimaryRailSidebarTarget(slotId, sidebarItems);
 
   if (slotId === "today") {
-    return { id: "today", kind: "link", label: "Today", href: b };
+    return {
+      id: "today",
+      kind: "link",
+      label: "Today",
+      href: target?.href ?? `${b}/today`,
+      disabled: target?.disabled ?? false,
+      hint: target?.hint,
+    };
   }
 
   const fallbackHref =
@@ -52,9 +59,9 @@ function linkFromRailSlot(
       ? `${b}/calendar`
       : slotId === "patients"
         ? `${b}/patients`
-        : slotId === "front-desk"
-          ? `${b}/front-desk`
-          : `${b}/team`;
+        : slotId === "team"
+          ? `${b}/team`
+          : `${b}/reports`;
 
   const missingFromSidebar = target == null;
 
@@ -69,9 +76,8 @@ function linkFromRailSlot(
 }
 
 /**
- * D6G-B / FI-TRUST-LANDING-AND-SPINE-1 six-slot primary rail.
- * Today · Calendar · Patients · Front desk · Team · More
- * Search/New live in the top bar only; Reports lives in More.
+ * D6G primary rail: Today · Calendar · Patients · Team · Reports · More
+ * Search/New live in the top bar only. Front Desk / Surgery / Clinical live in More.
  */
 export function resolveFiOsMinimalNavItems(
   base: string,
@@ -81,8 +87,8 @@ export function resolveFiOsMinimalNavItems(
     linkFromRailSlot(base, "today", "Today", sidebarItems),
     linkFromRailSlot(base, "calendar", "Calendar", sidebarItems),
     linkFromRailSlot(base, "patients", "Patients", sidebarItems),
-    linkFromRailSlot(base, "front-desk", "Front desk", sidebarItems),
     linkFromRailSlot(base, "team", "Team", sidebarItems),
+    linkFromRailSlot(base, "reports", "Reports", sidebarItems),
     { id: "more", kind: "action", label: "More" },
   ];
 }
@@ -100,7 +106,7 @@ export function getFiOsMinimalNavActiveId(
   const nb = normalizeBase(base);
   const np = normalizePath(pathname);
 
-  if (np === nb || np === `${nb}/`) {
+  if (np === nb || np === `${nb}/` || np === `${nb}/today` || np.startsWith(`${nb}/today/`)) {
     return "today";
   }
 
@@ -113,16 +119,6 @@ export function getFiOsMinimalNavActiveId(
   }
 
   if (
-    np.startsWith(`${nb}/front-desk`) ||
-    np.startsWith(`${nb}/reception`) ||
-    np.startsWith(`${nb}/reception-board`) ||
-    np.startsWith(`${nb}/operations`) ||
-    np.startsWith(`${nb}/tomorrow`)
-  ) {
-    return "front-desk";
-  }
-
-  if (
     np.startsWith(`${nb}/team`) ||
     np.startsWith(`${nb}/workforce-os`) ||
     np.startsWith(`${nb}/hr-os`) ||
@@ -130,6 +126,15 @@ export function getFiOsMinimalNavActiveId(
     np.startsWith(`${nb}/staff/`)
   ) {
     return "team";
+  }
+
+  if (
+    np.startsWith(`${nb}/reports`) ||
+    np.startsWith(`${nb}/analytics`) ||
+    np.startsWith(`${nb}/audit`) ||
+    np.startsWith(`${nb}/intelligence`)
+  ) {
+    return "reports";
   }
 
   return null;

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import {
+  BarChart3,
   Calendar,
-  ClipboardList,
   LayoutGrid,
   Loader2,
   MoreHorizontal,
@@ -33,10 +33,10 @@ function iconFor(id: FiOsMinimalNavItemId) {
       return Calendar;
     case "patients":
       return Users;
-    case "front-desk":
-      return ClipboardList;
     case "team":
       return UsersRound;
+    case "reports":
+      return BarChart3;
     case "more":
       return MoreHorizontal;
   }

@@ -32,9 +32,9 @@ test("receptionist: six-slot rail, staff-safe More, no admin routes", () => {
   const report = buildFiOsRolePermissionPreflightReport(tenantId, scenario);
 
   assert.match(report.matrixRow.primaryRail, /Today/);
-  assert.match(report.matrixRow.primaryRail, /Front desk/);
   assert.match(report.matrixRow.primaryRail, /Team\(off\)/);
-  assert.doesNotMatch(report.matrixRow.primaryRail, /Reports/);
+  assert.match(report.matrixRow.primaryRail, /Reports\(off\)/);
+  assert.doesNotMatch(report.matrixRow.primaryRail, /Front desk/);
   assert.equal(report.matrixRow.adminIntelligenceAccess, "none");
   assert.equal(report.matrixRow.teamAccess, "no");
   assert.equal(report.matrixRow.surgeryAccess, "no");
@@ -68,12 +68,11 @@ test("receptionist: team rail slot disabled when feature-filtered", () => {
 
   const rail = resolveFiOsMinimalNavItems(base, sidebar);
   const teamRail = rail.find((i) => i.id === "team");
-  const frontRail = rail.find((i) => i.id === "front-desk");
+  const reportsRail = rail.find((i) => i.id === "reports");
   assert.equal(teamRail?.kind, "link");
-  assert.equal(frontRail?.kind, "link");
+  assert.equal(reportsRail?.kind, "link");
   if (teamRail?.kind === "link") assert.equal(teamRail.disabled, true);
-  // Front desk stays available on rail when still present in sidebar
-  if (frontRail?.kind === "link") assert.equal(frontRail.disabled, false);
+  if (reportsRail?.kind === "link") assert.equal(reportsRail.disabled, true);
 });
 
 test("receptionist: SA-1 blocks workforce and analytics modules", () => {
@@ -182,10 +181,8 @@ test("primary rail slots disabled when sidebar item filtered by feature access",
 
   const team = rail.find((i) => i.id === "team");
   if (team?.kind === "link") assert.equal(team.disabled, true);
-  assert.equal(
-    rail.find((i) => (i.id as string) === "reports"),
-    undefined
-  );
+  const reports = rail.find((i) => i.id === "reports");
+  if (reports?.kind === "link") assert.equal(reports.disabled, true);
 });
 
 test("mutation guards: reception cannot edit roster or staff access", () => {

@@ -95,15 +95,15 @@ test("go-live audit notes document scope and six-slot rail", () => {
   assert.match(GO_LIVE_NAVIGATION_AUDIT_NOTES, /six slots/i);
   assert.match(
     GO_LIVE_NAVIGATION_AUDIT_NOTES,
-    /Today · Calendar · Patients · Front desk · Team · More/
+    /Today · Calendar · Patients · Team · Reports · More/
   );
   assert.match(GO_LIVE_NAVIGATION_AUDIT_NOTES, /Search\/New/);
 });
 
-test("primary rail exactly equals Today · Calendar · Patients · Front desk · Team · More", () => {
+test("primary rail exactly equals Today · Calendar · Patients · Team · Reports · More", () => {
   assert.deepEqual(
     [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
-    ["today", "calendar", "patients", "front-desk", "team", "more"]
+    ["today", "calendar", "patients", "team", "reports", "more"]
   );
   assert.equal(primaryRailSlotIds().length, 6);
 
@@ -248,10 +248,10 @@ test("quick-create actions remain unchanged", () => {
 
 test("active group mapping works for consolidated workspace child routes and legacy routes", () => {
   assert.equal(getFiOsMinimalNavActiveId(`${base}/team/roster`, base), "team");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports/quality`, base), null);
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports/quality`, base), "reports");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os/roster`, base), "team");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/presence`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk/clinic-flow`, base), "front-desk");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/presence`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk/clinic-flow`, base), null);
   assert.equal(getFiOsMinimalNavActiveId(`${base}/surgery/cases`, base), null);
 });
 

@@ -76,7 +76,7 @@ function flattenMoreIds(sections = moreSections()) {
 test("primary rail still has exactly six slots and Team remains on rail", () => {
   assert.deepEqual(
     [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
-    ["today", "calendar", "patients", "front-desk", "team", "more"]
+    ["today", "calendar", "patients", "team", "reports", "more"]
   );
   assert.equal(primaryRailSlotIds().length, 6);
   const teamRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "team");

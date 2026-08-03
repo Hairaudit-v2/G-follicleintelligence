@@ -15,15 +15,15 @@ import { FI_OS_TEAM_LEGACY_ROUTES } from "@/src/lib/fiOs/team/teamWorkspaceCore"
 
 /**
  * Six-slot collapsed primary rail link ids (More is an action).
- * FI-TRUST-LANDING-AND-SPINE-1: Front desk on rail for frontline day work;
- * Reports moves to More only (still linked from Reports hub).
+ * D6G tidy-up: Today · Calendar · Patients · Team · Reports · More
+ * Front Desk, Surgery, Clinical live in More only (legacy routes stay live).
  */
 export const FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS = [
   "today",
   "calendar",
   "patients",
-  "front-desk",
   "team",
+  "reports",
   "more",
 ] as const;
 
@@ -34,8 +34,8 @@ export const FI_OS_D6G_PRIMARY_RAIL_NAV_IDS = new Set([
   "dashboard",
   "calendar",
   "patients",
-  "front-desk",
   "team",
+  "reports",
 ]);
 
 /** 1B workflow sections for the All areas / More drawer (no module-language buckets). */
@@ -420,10 +420,10 @@ export function resolvePrimaryRailSidebarTarget(
       return sidebarItems.find((i) => i.id === "calendar") ?? null;
     case "patients":
       return sidebarItems.find((i) => i.id === "patients") ?? null;
-    case "front-desk":
-      return sidebarItems.find((i) => i.id === "front-desk") ?? null;
     case "team":
       return sidebarItems.find((i) => i.id === "team") ?? null;
+    case "reports":
+      return sidebarItems.find((i) => i.id === "reports") ?? null;
     default:
       return null;
   }

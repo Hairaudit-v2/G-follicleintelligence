@@ -11,13 +11,17 @@ import { resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrima
 const base = "/fi-admin/t-1";
 
 describe("resolveFiOsMinimalNavItems", () => {
-  it("returns six slots: Today, Calendar, Patients, Front desk, Team, More", () => {
+  it("returns six slots: Today, Calendar, Patients, Team, Reports, More", () => {
     const sidebarItems = resolveFiOsPrimarySidebarItems(base, true, true);
     const items = resolveFiOsMinimalNavItems(base, sidebarItems);
     assert.equal(items.length, 6);
     assert.deepEqual(
       items.map((item) => item.id),
-      ["today", "calendar", "patients", "front-desk", "team", "more"]
+      ["today", "calendar", "patients", "team", "reports", "more"]
+    );
+    assert.deepEqual(
+      items.map((item) => item.label),
+      ["Today", "Calendar", "Patients", "Team", "Reports", "More"]
     );
     assert.equal(primaryRailSlotIds().length, 6);
   });
@@ -36,38 +40,49 @@ describe("resolveFiOsMinimalNavItems", () => {
     }
   });
 
-  it("disables front desk and team rail when filtered from sidebar", () => {
+  it("disables team and reports rail when filtered from sidebar", () => {
     const sidebarWithout = resolveFiOsPrimarySidebarItems(base, true, true).filter(
-      (item) => item.id !== "team" && item.id !== "front-desk"
+      (item) => item.id !== "team" && item.id !== "reports"
     );
     const items = resolveFiOsMinimalNavItems(base, sidebarWithout);
     const team = items.find((i) => i.id === "team");
-    const front = items.find((i) => i.id === "front-desk");
+    const reports = items.find((i) => i.id === "reports");
     if (team?.kind === "link") {
       assert.equal(team.disabled, true);
       assert.match(team.hint ?? "", /not available/i);
     }
-    if (front?.kind === "link") {
-      assert.equal(front.disabled, true);
+    if (reports?.kind === "link") {
+      assert.equal(reports.disabled, true);
     }
   });
 
-  it("links Front desk to /front-desk", () => {
+  it("links Reports to /reports", () => {
     const sidebarItems = resolveFiOsPrimarySidebarItems(base, true, true);
-    const front = resolveFiOsMinimalNavItems(base, sidebarItems).find((i) => i.id === "front-desk");
-    assert.equal(front?.kind, "link");
-    if (front?.kind === "link") {
-      assert.equal(front.href, `${base}/front-desk`);
-      assert.equal(front.label, "Front desk");
-      assert.equal(front.disabled, false);
+    const reports = resolveFiOsMinimalNavItems(base, sidebarItems).find((i) => i.id === "reports");
+    assert.equal(reports?.kind, "link");
+    if (reports?.kind === "link") {
+      assert.equal(reports.href, `${base}/reports`);
+      assert.equal(reports.label, "Reports");
+      assert.equal(reports.disabled, false);
+    }
+  });
+
+  it("links Today to /today", () => {
+    const sidebarItems = resolveFiOsPrimarySidebarItems(base, true, true);
+    const today = resolveFiOsMinimalNavItems(base, sidebarItems).find((i) => i.id === "today");
+    assert.equal(today?.kind, "link");
+    if (today?.kind === "link") {
+      assert.equal(today.href, `${base}/today`);
+      assert.equal(today.label, "Today");
     }
   });
 });
 
 describe("getFiOsMinimalNavActiveId", () => {
-  it("marks tenant home as today", () => {
+  it("marks tenant home and /today as today", () => {
     assert.equal(getFiOsMinimalNavActiveId(base, base), "today");
     assert.equal(getFiOsMinimalNavActiveId(`${base}/`, base), "today");
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/today`, base), "today");
   });
 
   it("marks calendar routes as calendar", () => {
@@ -75,15 +90,16 @@ describe("getFiOsMinimalNavActiveId", () => {
     assert.equal(getFiOsMinimalNavActiveId(`${base}/calendar/week`, base), "calendar");
   });
 
-  it("marks front desk and team routes", () => {
-    assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), "front-desk");
-    assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk/tomorrow`, base), "front-desk");
+  it("marks team and reports routes; front desk is More-only", () => {
     assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os`, base), "team");
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), "reports");
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), null);
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk/tomorrow`, base), null);
   });
 
-  it("returns null for routes grouped only under More (reports, surgery)", () => {
-    assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), null);
-    assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), null);
+  it("returns null for surgery (More-only)", () => {
     assert.equal(getFiOsMinimalNavActiveId(`${base}/surgery-os`, base), null);
+    assert.equal(getFiOsMinimalNavActiveId(`${base}/surgery`, base), null);
   });
 });

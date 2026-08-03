@@ -66,19 +66,19 @@ import {
   teamSubItemUsesStaffFriendlyLabel,
 } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
-/** Canonical six-slot primary rail labels for staff-facing shell (FI-TRUST-LANDING-AND-SPINE-1). */
+/** Canonical six-slot primary rail labels for staff-facing shell (D6G tidy-up). */
 export const GO_LIVE_PRIMARY_RAIL_LABELS = [
   "Today",
   "Calendar",
   "Patients",
-  "Front desk",
   "Team",
+  "Reports",
   "More",
 ] as const;
 
 /** Module-heavy labels that must not appear on the primary rail. */
 export const GO_LIVE_FORBIDDEN_PRIMARY_RAIL_LABEL_RE =
-  /\b(surgery|analytics|intelligence|hr os|workforce|auditos|academy|procedure day|quality review|reception board|tomorrow)\b/i;
+  /\b(surgery|analytics|intelligence|hr os|workforce|auditos|academy|procedure day|quality review|reception board|tomorrow|front desk|pipeline)\b/i;
 
 /** Top-level nav ids that must not appear as primary rail rows. */
 export const GO_LIVE_FORBIDDEN_PRIMARY_RAIL_NAV_IDS = [
@@ -86,6 +86,7 @@ export const GO_LIVE_FORBIDDEN_PRIMARY_RAIL_NAV_IDS = [
   "reception-os",
   "reception-board",
   "tomorrow-board",
+  "front-desk",
   "surgery",
   "surgery-os",
   "cases",
@@ -94,7 +95,11 @@ export const GO_LIVE_FORBIDDEN_PRIMARY_RAIL_NAV_IDS = [
   "hr-os",
   "workforce-os-hub",
   "academyos",
-  "reports",
+  "patient-twin",
+  "doctor-workspace",
+  "consultations",
+  "prescriptions",
+  "pathology-nav",
   "d6-presence",
   "d6-signal-learning",
   "d6-bake",
@@ -166,19 +171,20 @@ export const GO_LIVE_MINIMAL_NAV_ACTIVE_EXPECTATIONS: ReadonlyArray<{
   { suffix: "workforce-os", expected: "team" },
   { suffix: "hr-os", expected: "team" },
   { suffix: "staff", expected: "team" },
-  // Reports is More-only (not a primary-rail active id)
-  { suffix: "reports", expected: null },
-  { suffix: "reports/analytics", expected: null },
-  { suffix: "analytics", expected: null },
-  { suffix: "audit", expected: null },
-  { suffix: "intelligence/navigation-audit", expected: null },
-  { suffix: "front-desk", expected: "front-desk" },
-  { suffix: "front-desk/clinic-flow", expected: "front-desk" },
-  { suffix: "front-desk/tomorrow", expected: "front-desk" },
+  // Reports is on the primary rail (D6G tidy-up)
+  { suffix: "reports", expected: "reports" },
+  { suffix: "reports/analytics", expected: "reports" },
+  { suffix: "analytics", expected: "reports" },
+  { suffix: "audit", expected: "reports" },
+  { suffix: "intelligence/navigation-audit", expected: "reports" },
+  // Front desk is More-only (not a primary-rail active id)
+  { suffix: "front-desk", expected: null },
+  { suffix: "front-desk/clinic-flow", expected: null },
+  { suffix: "front-desk/tomorrow", expected: null },
   { suffix: "surgery", expected: null },
   { suffix: "surgery/cases", expected: null },
-  { suffix: "operations", expected: "front-desk" },
-  { suffix: "reception-os", expected: "front-desk" },
+  { suffix: "operations", expected: null },
+  { suffix: "reception-os", expected: null },
   { suffix: "surgery-os", expected: null },
   { suffix: "calendar", expected: "calendar" },
 ] as const;
@@ -290,9 +296,9 @@ export type FiOsNavigationGoLiveAuditSummary = {
 export const GO_LIVE_NAVIGATION_AUDIT_NOTES = `
 FI-UX-REBUILD D6G-G — Staff go-live navigation smoke audit
 
-Primary rail: Today · Calendar · Patients · Front desk · Team · More (six slots)
+Primary rail: Today · Calendar · Patients · Team · Reports · More (six slots)
 Search/New: top bar only — not on primary rail
-Consolidated workspaces: Front Desk (rail + More), Surgery, Team, Reports (More drawer + tabs)
+Consolidated workspaces: Front Desk / Surgery (More only), Team + Reports (rail + More tabs)
 Staff More drawer: legacy direct links and admin/intelligence surfaces hidden
 Admin More drawer: D6 intelligence, legacy direct links, and gated tabs visible
 Legacy deep links: preserved in nav catalog; routes remain live
@@ -394,7 +400,7 @@ function auditPrimaryRail(
     check(
       "primary_rail_canonical_labels",
       JSON.stringify(labels) === JSON.stringify([...GO_LIVE_PRIMARY_RAIL_LABELS]),
-      "Primary rail labels are Today · Calendar · Patients · Front desk · Team · More"
+      "Primary rail labels are Today · Calendar · Patients · Team · Reports · More"
     )
   );
 

@@ -70,22 +70,22 @@ function allMoreItemIds(sections = moreSections()) {
 test("primary rail has exactly six slots in canonical order", () => {
   assert.deepEqual(
     [...FI_OS_D6G_PRIMARY_RAIL_SLOT_IDS],
-    ["today", "calendar", "patients", "front-desk", "team", "more"]
+    ["today", "calendar", "patients", "team", "reports", "more"]
   );
   assert.equal(primaryRailSlotIds().length, 6);
 });
 
-test("minimal nav exposes Today, Calendar, Patients, Front desk, Team, More", () => {
+test("minimal nav exposes Today, Calendar, Patients, Team, Reports, More", () => {
   const sidebar = fullSidebar();
   const items = resolveFiOsMinimalNavItems(base, sidebar);
   assert.equal(items.length, 6);
   assert.deepEqual(
     items.map((i) => i.id),
-    ["today", "calendar", "patients", "front-desk", "team", "more"]
+    ["today", "calendar", "patients", "team", "reports", "more"]
   );
   assert.deepEqual(
     items.map((i) => i.label),
-    ["Today", "Calendar", "Patients", "Front desk", "Team", "More"]
+    ["Today", "Calendar", "Patients", "Team", "Reports", "More"]
   );
 });
 
@@ -116,11 +116,13 @@ function flattenMoreSubLabels(sections = moreSections()) {
 test("secondary workflow routes remain in More drawer after regrouping", () => {
   const ids = flattenMoreIds();
   assert.ok(ids.has("front-desk"));
+  assert.ok(ids.has("inbox"));
   for (const expected of [
     "crm",
     "consultations",
     "surgery",
     "reports",
+    "team",
     "doctor-workspace",
     "prescriptions",
     "pathology-nav",
@@ -170,52 +172,45 @@ test("platform admin More drawer retains legacy direct and D6 admin links", () =
 
 test("primary rail destinations are excluded from collapsed More drawer", () => {
   const ids = new Set(allMoreItemIds());
+  // Pure rail destinations (no deeper More tabs) drop from collapsed More.
   for (const railId of ["dashboard", "calendar", "patients"]) {
     assert.ok(!ids.has(railId), `${railId} should not duplicate on More when collapsed`);
     assert.ok(isPrimaryRailNavId(railId));
   }
-  assert.ok(ids.has("team"));
-  assert.ok(ids.has("reports"));
+  // Team + Reports stay in More for deeper tab discovery while also on the rail.
+  assert.ok(ids.has("team"), "Team deeper items remain in More when collapsed");
+  assert.ok(ids.has("reports"), "Reports deeper items remain in More when collapsed");
   assert.ok(isPrimaryRailNavId("team"));
-  assert.ok(!isPrimaryRailNavId("reports"));
-  assert.ok(isPrimaryRailNavId("front-desk"));
+  assert.ok(isPrimaryRailNavId("reports"));
+  assert.ok(ids.has("front-desk"), "Front desk should live in More when collapsed");
+  assert.ok(ids.has("surgery"), "Surgery should live in More when collapsed");
+  assert.ok(!isPrimaryRailNavId("front-desk"));
+  assert.ok(!isPrimaryRailNavId("surgery"));
 });
 
-test("exactly one Front desk row on primary rail; no Surgery rows", () => {
+test("Front desk and Surgery are More-only; no Surgery on primary rail", () => {
   const labels = resolveFiOsMinimalNavItems(base, fullSidebar()).map((i) => i.label);
   const frontDeskLabels = labels.filter((l) => /^front desk$/i.test(l));
   const surgeryLabels = labels.filter((l) => /surgery|cases|procedure/i.test(l));
-  assert.equal(frontDeskLabels.length, 1);
+  assert.equal(frontDeskLabels.length, 0);
   assert.equal(surgeryLabels.length, 0);
   assert.ok(!labels.some((l) => /clinic flow|reception board|tomorrow/i.test(l)));
 });
 
-test("Team grouping in More consolidates under one team destination on primary rail", () => {
-  const team = moreSections().find((s) => s.groupId === "TEAM");
-  assert.ok(team);
-  assert.deepEqual(
-    team!.items.map((i) => i.id),
-    ["team"]
-  );
-  const subIds = team!.items.flatMap((i) => i.subItems?.map((s) => s.id) ?? []);
-  assert.ok(subIds.includes("team-overview"));
-  assert.ok(subIds.includes("team-staff"));
-  assert.ok(!subIds.includes("workforce-os-hub"));
-  assert.ok(!subIds.includes("onboarding-centre"));
-  assert.ok(!subIds.includes("academyos"));
-
+test("Team sits on primary rail with consolidated href", () => {
   const teamRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find((i) => i.id === "team");
   assert.equal(teamRail?.kind, "link");
   if (teamRail?.kind === "link") {
-    assert.ok(teamRail.href.endsWith("/team"));
+    assert.ok(teamRail.href.endsWith("/team") || teamRail.href.includes("/team/"));
   }
 });
 
-test("Reports grouping consolidates under More only; D6 admin when allowed", () => {
+test("Reports sits on primary rail; D6 admin deeper items when allowed", () => {
   const reportsRail = resolveFiOsMinimalNavItems(base, fullSidebar()).find(
     (i) => (i.id as string) === "reports"
   );
-  assert.equal(reportsRail, undefined);
+  assert.ok(reportsRail);
+  assert.equal(reportsRail?.kind, "link");
 
   const staffSections = moreSections({ showNavigationAdminSurfaces: false });
   const staffReports = staffSections.find((s) => s.groupId === "REPORTS");
@@ -247,15 +242,17 @@ test("Reports grouping consolidates under More only; D6 admin when allowed", () 
   }
 });
 
-test("Pipeline workflow group consolidates to one door in More drawer", () => {
+test("Pipeline workflow group exposes Inbox and Pipeline doors in More drawer", () => {
   const pipeline = moreSections().find((s) => s.groupId === "PIPELINE");
   assert.ok(pipeline);
   assert.deepEqual(
     pipeline!.items.map((i) => i.id),
-    ["crm"]
+    ["inbox", "crm"]
   );
-  assert.equal(pipeline!.items[0]!.label, "Pipeline");
-  assert.ok(pipeline!.items[0]!.href.endsWith("/crm"));
+  assert.equal(pipeline!.items[0]!.label, "Inbox");
+  assert.ok(pipeline!.items[0]!.href.endsWith("/inbox"));
+  assert.equal(pipeline!.items[1]!.label, "Pipeline");
+  assert.ok(pipeline!.items[1]!.href.endsWith("/crm"));
 });
 
 test("Front Desk and Surgery workflow groups consolidate duplicate surfaces in More only", () => {
@@ -309,12 +306,14 @@ test("hidden sub-items stay out of More unless procedure day is explicitly enabl
   assert.ok(subIdsWithDay.includes("procedure-day-board"));
 });
 
-test("minimal nav active ids cover team and front desk deep links", () => {
+test("minimal nav active ids cover team and reports deep links", () => {
   assert.equal(getFiOsMinimalNavActiveId(`${base}/team`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/workforce-os`, base), "team");
   assert.equal(getFiOsMinimalNavActiveId(`${base}/staff`, base), "team");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), "front-desk");
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), null);
-  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/navigation-audit`, base), null);
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/reports`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/analytics`, base), "reports");
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/intelligence/navigation-audit`, base), "reports");
+  // Front desk / surgery live in More only — no primary-rail active slot
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/front-desk`, base), null);
+  assert.equal(getFiOsMinimalNavActiveId(`${base}/surgery`, base), null);
 });
