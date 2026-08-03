@@ -13,6 +13,7 @@ import { normalizeEffectiveBrandingForShell } from "@/src/lib/fi/foundation/tena
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { emptyNormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadHubspotInboxSummary } from "@/src/lib/onboarding-os/hubspotInboxSummary.server";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import {
   resolveFiOsAuthUserDisplayNameById,
@@ -235,6 +236,10 @@ export default async function TenantAdminLayout({
         allowed: false as const,
         reason: "forbidden" as const,
       }))).allowed;
+  const inboxSummary =
+    pinFloorMode || !showCrmNav
+      ? { isConnected: false, pendingCount: 0, integrationId: null }
+      : await loadHubspotInboxSummary(tenantId);
   const teamWorkspaceAccess = pinFloorMode
     ? null
     : await resolveTeamWorkspaceAccessForViewer(tenantId);
@@ -317,6 +322,7 @@ export default async function TenantAdminLayout({
         navCollapseActive={navCollapseActive}
         showNavigationAdminSurfaces={showNavigationAdminSurfaces}
         showPilotControlNav={showPilotControlNav}
+        inboxPendingCount={inboxSummary.pendingCount}
       >
         {mainSurface}
         {!pinFloorMode && !isCommandCentrePresentation ? (

@@ -8,7 +8,9 @@ import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { ConfigurationTabNav } from "@/src/components/fi/ConfigurationTabNav";
 import { TenantConfigurationPanel } from "@/src/components/fi/TenantConfigurationPanel";
 import { CalendarSettingsSection } from "@/src/components/fi-admin/settings/CalendarSettingsSection";
+import { HubSpotSummaryCard } from "@/src/components/settings/HubSpotSummaryCard";
 import { ClinicGuideSettingsSection } from "@/src/components/onboarding-os/ClinicGuideSettingsSection";
+import { loadHubspotInboxSummary } from "@/src/lib/onboarding-os/hubspotInboxSummary.server";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
 import { TenantConnectExistingSystemsPanel } from "@/src/components/onboarding-os/TenantConnectExistingSystemsPanel";
 import { TenantDeploymentIntelligencePanel } from "@/src/components/onboarding-os/TenantDeploymentIntelligencePanel";
@@ -143,14 +145,21 @@ export default async function TenantConfigurationPage({
       : null;
 
   const showCascadePreview = Boolean(previewCtx.organisationId || previewCtx.clinicId);
-  const [showGuidedAssistUsage, clinicGuideSettings, showGoLiveReadiness, showDeploymentIntelligence, showExternalConnectors] =
-    await Promise.all([
-      canViewGuidedAssistUsageSummary(tenantId),
-      loadGuidedAssistSettingsState(tenantId),
-      canViewTenantGoLiveReadiness(tenantId),
-      canViewTenantDeploymentIntelligence(tenantId),
-      canViewTenantExternalConnectors(tenantId),
-    ]);
+  const [
+    showGuidedAssistUsage,
+    clinicGuideSettings,
+    showGoLiveReadiness,
+    showDeploymentIntelligence,
+    showExternalConnectors,
+    hubspotSummary,
+  ] = await Promise.all([
+    canViewGuidedAssistUsageSummary(tenantId),
+    loadGuidedAssistSettingsState(tenantId),
+    canViewTenantGoLiveReadiness(tenantId),
+    canViewTenantDeploymentIntelligence(tenantId),
+    canViewTenantExternalConnectors(tenantId),
+    loadHubspotInboxSummary(tenantId),
+  ]);
 
   return (
     <div className="space-y-4">
@@ -193,6 +202,11 @@ export default async function TenantConfigurationPage({
         />
       ) : (
         <>
+          <HubSpotSummaryCard
+            tenantId={tenantId}
+            isConnected={hubspotSummary.isConnected}
+            pendingCount={hubspotSummary.pendingCount}
+          />
           {showDeploymentIntelligence ? (
             <TenantDeploymentIntelligencePanel tenantId={tenantId} />
           ) : null}

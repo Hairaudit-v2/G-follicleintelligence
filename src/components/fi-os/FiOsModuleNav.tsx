@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   Dna,
   GraduationCap,
+  Inbox,
   LayoutDashboard,
   LineChart,
   Loader2,
@@ -44,6 +45,8 @@ function iconFor(id: string) {
   switch (id) {
     case "dashboard":
       return LayoutDashboard;
+    case "inbox":
+      return Inbox;
     case "calendar":
       return Calendar;
     case "patients":
@@ -153,6 +156,14 @@ function RowLink(props: {
           aria-hidden
         />
         <span className="min-w-0 flex-1 leading-snug break-words">{item.label}</span>
+        {item.badgeCount != null && item.badgeCount > 0 && !navPending ? (
+          <span
+            className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-cyan-200"
+            aria-label={`${item.badgeCount} pending`}
+          >
+            {item.badgeCount > 99 ? "99+" : item.badgeCount}
+          </span>
+        ) : null}
         {navPending ? (
           <Loader2
             className="h-3.5 w-3.5 shrink-0 text-cyan-300 motion-safe:animate-spin motion-reduce:animate-none"

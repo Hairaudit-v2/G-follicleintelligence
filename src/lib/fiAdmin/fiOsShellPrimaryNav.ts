@@ -45,6 +45,8 @@ export type FiOsPrimarySidebarItem = {
   featureKey?: FiFeatureKey;
   /** When set, row stays visible if any listed feature is enabled (Stage 2 UI only). */
   anyOfFeatures?: readonly FiFeatureKey[];
+  /** Optional live count badge (e.g. Inbox pending approvals). */
+  badgeCount?: number;
 };
 
 function normalizeBase(base: string): string {
@@ -171,13 +173,15 @@ export function resolveFiOsPrimarySidebarItems(
   showTeamAdminSurfaces: boolean = false,
   visibleTeamTabIds?: readonly FiOsTeamTabId[],
   showSettingsAdminSurfaces: boolean = false,
-  showPilotControlNav: boolean = false
+  showPilotControlNav: boolean = false,
+  inboxPendingCount: number = 0
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
   const auditDisabled = tenantBackendAdminRole != null ? !showAuditOsNav : blocks.audit;
   const calendarEligible =
     showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
+  const showInbox = showCrmNav;
   const items: FiOsPrimarySidebarItem[] = [
     {
       id: "dashboard",
@@ -187,6 +191,20 @@ export function resolveFiOsPrimarySidebarItems(
       href: b,
       disabled: false,
     },
+    ...(showInbox
+      ? [
+          {
+            id: "inbox",
+            featureKey: "crm" as const,
+            label: "Inbox",
+            shortLabel: "Inbox",
+            href: hrefFor(b, "inbox"),
+            disabled: false,
+            hint: "Leads and contacts waiting for approval before they enter the clinic system.",
+            badgeCount: inboxPendingCount > 0 ? inboxPendingCount : undefined,
+          } satisfies FiOsPrimarySidebarItem,
+        ]
+      : []),
     {
       id: "doctor-workspace",
       featureKey: "consultations",
@@ -383,14 +401,17 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "settings",
-      featureKey: "settings",
+      // No featureKey: every role must reach Clinic guide for personal tips on/off.
+      // Full configuration hub stays optional via landing href / admin sub-routes.
       label: "Settings",
       shortLabel: "Settings",
-      href: hrefFor(b, "configuration"),
-      disabled: !showConfigurationHubNav,
-      hint: !showConfigurationHubNav
-        ? "Configuration requires clinic, finance, operations, or admin-user management access."
-        : undefined,
+      href: showConfigurationHubNav
+        ? hrefFor(b, "configuration")
+        : hrefFor(b, "settings/clinic-guide"),
+      disabled: false,
+      hint: showConfigurationHubNav
+        ? undefined
+        : "Clinic guide and personal preferences. Full configuration needs clinic admin access.",
       subItems: buildSettingsSidebarSubItems(b.split("/").filter(Boolean).pop() ?? "", {
         showSettingsAdminSurfaces,
       }),
@@ -465,6 +486,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     ) {
       return "crm";
     }
+    if (firstEarly === "inbox") return "inbox";
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;

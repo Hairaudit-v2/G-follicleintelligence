@@ -12,7 +12,9 @@ import { GoogleCalendarSyncReviewCard } from "@/src/components/fi-admin/settings
 import { LiveDataHealthDiagnosticsCard } from "@/src/components/fi-admin/settings/LiveDataHealthDiagnosticsCard";
 import { OtherIntegrationsSection } from "@/src/components/fi-admin/settings/OtherIntegrationsSection";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
+import { HubSpotSummaryCard } from "@/src/components/settings/HubSpotSummaryCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadHubspotInboxSummary } from "@/src/lib/onboarding-os/hubspotInboxSummary.server";
 import { resolveFiOsPublicOrigin } from "@/src/lib/fiOs/fiOsPublicOrigin.server";
 import { loadGoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
 import {
@@ -127,9 +129,10 @@ export default async function TenantIntegrationsSettingsPage({
     canManage: canManageCalendarLinks,
   });
 
-  const [liveDataHealth, appOrigin] = await Promise.all([
+  const [liveDataHealth, appOrigin, hubspotSummary] = await Promise.all([
     loadLiveDataHealthSummary(tenantId),
     resolveFiOsPublicOrigin(),
+    loadHubspotInboxSummary(tenantId),
   ]);
 
   const hubSpotWebhookSecretConfigured = Boolean(process.env.FI_HUBSPOT_WEBHOOK_SECRET?.trim());
@@ -173,6 +176,12 @@ export default async function TenantIntegrationsSettingsPage({
           status only is shown here.
         </p>
       </div>
+
+      <HubSpotSummaryCard
+        tenantId={tenantId}
+        isConnected={hubspotSummary.isConnected}
+        pendingCount={hubspotSummary.pendingCount}
+      />
 
       <GoogleCalendarIntegrationCard
         tenantId={tenantId}

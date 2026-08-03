@@ -120,6 +120,8 @@ type FiOsAppShellProps = {
   showNavigationAdminSurfaces?: boolean;
   /** Controlled Pilot Control Centre — hidden unless overview.read permission. */
   showPilotControlNav?: boolean;
+  /** Approved HubSpot staging rows waiting for inbox import (nav badge). */
+  inboxPendingCount?: number;
   children: ReactNode;
 };
 
@@ -154,6 +156,7 @@ function FiOsAppShellBody({
   navCollapseActive = false,
   showNavigationAdminSurfaces = false,
   showPilotControlNav = false,
+  inboxPendingCount = 0,
   children,
   navigationPendingEnabled = true,
 }: FiOsAppShellProps & { navigationPendingEnabled?: boolean }) {
@@ -201,7 +204,8 @@ function FiOsAppShellBody({
       showNavigationAdminSurfaces,
       visibleTeamTabIds,
       showNavigationAdminSurfaces,
-      showPilotControlNav
+      showPilotControlNav,
+      inboxPendingCount
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -215,6 +219,7 @@ function FiOsAppShellBody({
     showHrOsNav,
     showProcedureDayNav,
     showNavigationAdminSurfaces,
+    inboxPendingCount,
     visibleTeamTabIds,
     showPilotControlNav,
     featureAccessMap,

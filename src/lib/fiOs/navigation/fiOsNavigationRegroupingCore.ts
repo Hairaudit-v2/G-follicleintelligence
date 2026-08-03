@@ -79,6 +79,7 @@ export const FI_OS_D6G_SIDEBAR_ITEM_GROUP: Record<string, FiOsD6gWorkflowGroupId
   patients: "PATIENTS",
   "patient-twin": "PATIENTS",
   crm: "PIPELINE",
+  inbox: "PIPELINE",
   consultations: "CLINICAL",
   surgery: "SURGERY",
   cases: "SURGERY",
@@ -213,7 +214,7 @@ export const FI_OS_D6_ADMIN_MORE_NAV_IDS = new Set(
 
 const GROUP_MEMBER_ORDER: Record<FiOsD6gWorkflowGroupId, readonly string[]> = {
   FRONT_DESK: ["front-desk"],
-  PIPELINE: ["crm"],
+  PIPELINE: ["inbox", "crm"],
   PATIENTS: ["patient-twin"],
   CLINICAL: ["doctor-workspace", "consultations", "prescriptions", "pathology-nav"],
   SURGERY: ["surgery"],
