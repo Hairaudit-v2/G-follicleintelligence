@@ -6,6 +6,7 @@ import {
   loadConsultationForTenant,
   loadConsultationWorkspaceDisplay,
 } from "@/src/lib/consultations/consultationLoaders.server";
+import { ensureConsultationPatientFromLead } from "@/src/lib/consultations/consultationMutations.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
@@ -29,11 +30,18 @@ export default async function ConsultationOsEditRoutePage({
 
   await assertFiTenantPortalAccess(tenantId);
 
-  const row = await loadConsultationForTenant(tenantId, consultationId);
-  if (!row) notFound();
-
   const tid = tenantId.trim();
   const cid = consultationId.trim();
+
+  // F-PILOT-08: backfill patient_id from linked lead when missing (tenant-scoped, no overwrite).
+  let row = await loadConsultationForTenant(tid, cid);
+  if (!row) notFound();
+  try {
+    row = await ensureConsultationPatientFromLead(tid, cid);
+  } catch (e) {
+    console.error("[ConsultationOsEditRoutePage] ensureConsultationPatientFromLead", e);
+  }
+
   const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, formInstances] =
     await Promise.all([
       getCrmShellNavAllowed(tid),

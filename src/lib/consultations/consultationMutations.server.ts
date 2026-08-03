@@ -2,15 +2,19 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-import { loadConsultationForTenant } from "./consultationLoaders.server";
+import { loadConsultationForTenant, mapFiConsultationRow } from "./consultationLoaders.server";
 import { consultationTypeForBookingType } from "./consultationBookingLink";
+import {
+  isConsultationEditableStatus,
+  isConsultationPatientLinkableStatus,
+  isPatientLinkOnlyConsultationPatch,
+} from "./consultationPatientLinkCore";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { assertFiStaffBelongsToTenant } from "@/src/lib/staff/staff.server";
 import {
-  CONSULTATION_EDITABLE_STATUSES,
   type ConsultationCreateDraftBody,
   type ConsultationRow,
   type ConsultationUpsertBody,
@@ -18,8 +22,8 @@ import {
   consultationTypeIdSchema,
 } from "./consultationTypes";
 
-function isEditableStatus(s: string): s is (typeof CONSULTATION_EDITABLE_STATUSES)[number] {
-  return (CONSULTATION_EDITABLE_STATUSES as readonly string[]).includes(s);
+function isEditableStatus(s: string): boolean {
+  return isConsultationEditableStatus(s);
 }
 
 function normalizeDateInput(v: string | null | undefined): string | null {
@@ -191,6 +195,54 @@ export type UpdateConsultationDraftInput = ConsultationUpsertBody & {
   updatedByFiUserId?: string | null;
 };
 
+/**
+ * F-PILOT-08: when consultation.patient_id is null and the linked lead has patient_id,
+ * backfill patient_id (and person_id) on the consultation. Never overwrites an existing patient_id.
+ */
+export async function ensureConsultationPatientFromLead(
+  tenantId: string,
+  consultationId: string
+): Promise<ConsultationRow> {
+  const tid = tenantId.trim();
+  const cid = consultationId.trim();
+  const existing = await loadConsultationForTenant(tid, cid);
+  if (!existing) throw new Error("Consultation not found.");
+  if (existing.patient_id?.trim()) return existing;
+
+  const leadId = existing.lead_id?.trim();
+  if (!leadId) return existing;
+
+  const supabase = supabaseAdmin();
+  const { data: lead, error: le } = await supabase
+    .from("fi_crm_leads")
+    .select("patient_id")
+    .eq("tenant_id", tid)
+    .eq("id", leadId)
+    .maybeSingle();
+  if (le) throw new Error(le.message);
+  const leadPatientId = (lead as { patient_id: string | null } | null)?.patient_id?.trim() || null;
+  if (!leadPatientId) return existing;
+
+  const p = await assertFoundationPatient(tid, leadPatientId);
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .update({
+      patient_id: p.id,
+      person_id: p.person_id,
+    })
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .is("patient_id", null)
+    .select("*")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (data && typeof data === "object") {
+    return mapFiConsultationRow(data as Record<string, unknown>);
+  }
+  // Race: another writer set patient_id — re-load.
+  return (await loadConsultationForTenant(tid, cid)) ?? existing;
+}
+
 export async function updateConsultationDraft(
   tenantId: string,
   consultationId: string,
@@ -203,7 +255,13 @@ export async function updateConsultationDraft(
   const existing = await loadConsultationForTenant(tid, cid);
   if (!existing) throw new Error("Consultation not found.");
 
-  if (!isEditableStatus(existing.status)) {
+  const patchRecord = patch as Record<string, unknown>;
+  const patientLinkOnly = isPatientLinkOnlyConsultationPatch(patchRecord);
+  const fullEdit = isEditableStatus(existing.status);
+  const canPatientLink =
+    patientLinkOnly && isConsultationPatientLinkableStatus(existing.status);
+
+  if (!fullEdit && !canPatientLink) {
     throw new Error(
       "This consultation can no longer be edited (only draft or in-progress rows are mutable in this stage)."
     );
@@ -212,6 +270,43 @@ export async function updateConsultationDraft(
   const updatePayload: Record<string, unknown> = {
     updated_by: patch.updatedByFiUserId ?? null,
   };
+
+  // Completed (and other non-draft) rows: only patient_id / person_id may be patched.
+  if (!fullEdit && canPatientLink) {
+    let patientBranchSetPerson = false;
+    if (patch.patient_id !== undefined) {
+      if (patch.patient_id === null) {
+        updatePayload.patient_id = null;
+      } else {
+        const p = await assertFoundationPatient(tid, patch.patient_id);
+        updatePayload.patient_id = p.id;
+        updatePayload.person_id = p.person_id;
+        patientBranchSetPerson = true;
+      }
+    }
+    if (patch.person_id !== undefined && !patientBranchSetPerson) {
+      if (patch.person_id === null) {
+        updatePayload.person_id = null;
+      } else {
+        await assertPersonInTenant(tid, patch.person_id);
+        updatePayload.person_id = patch.person_id.trim();
+      }
+    }
+
+    const supabase = supabaseAdmin();
+    const { data, error } = await supabase
+      .from("fi_consultations")
+      .update(updatePayload)
+      .eq("tenant_id", tid)
+      .eq("id", cid)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Update failed.");
+    const loaded = await loadConsultationForTenant(tid, cid);
+    if (!loaded) throw new Error("Could not load consultation after update.");
+    return loaded;
+  }
 
   if (patch.consultation_type !== undefined) {
     const t = consultationTypeIdSchema.safeParse(patch.consultation_type);

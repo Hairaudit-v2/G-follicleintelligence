@@ -6,6 +6,7 @@ import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 
 import { resolveConsultationConsultantDisplayName } from "./consultationConsultantDisplay";
+import { resolveConsultationPatientId } from "./consultationPatientLinkCore";
 import { CONSULTATION_TYPE_DEFINITIONS } from "./consultationTypeConfig";
 import type { ConsultationRow, ConsultationStatus, ConsultationTypeId } from "./consultationTypes";
 
@@ -102,12 +103,58 @@ export type ConsultationIndexRow = ConsultationRow & {
 };
 
 export type ConsultationWorkspaceDisplay = {
+  /** Effective patient id (consultation.patient_id, else lead.patient_id). */
+  patientId: string | null;
   patientName: string | null;
   leadName: string | null;
   leadStage: string | null;
 };
 
-/** Labels for linked patient / CRM lead on the consultation workspace shell. */
+async function loadPatientDisplayName(
+  tenantId: string,
+  patientId: string
+): Promise<string | null> {
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  if (!tid || !pid) return null;
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("metadata, person_id")
+    .eq("tenant_id", tid)
+    .eq("id", pid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  const row = data as { metadata: unknown; person_id: string | null };
+  const fromMeta = readPatientMetadataLabel(row.metadata);
+  if (fromMeta) return fromMeta;
+  if (row.person_id?.trim()) {
+    const { data: person, error: pe } = await supabase
+      .from("fi_persons")
+      .select("metadata")
+      .eq("tenant_id", tid)
+      .eq("id", row.person_id.trim())
+      .maybeSingle();
+    if (!pe && person) {
+      const meta =
+        (person as { metadata: unknown }).metadata &&
+        typeof (person as { metadata: unknown }).metadata === "object" &&
+        !Array.isArray((person as { metadata: unknown }).metadata)
+          ? ((person as { metadata: unknown }).metadata as Record<string, unknown>)
+          : {};
+      const { name } = displayFromPersonMetadata(meta);
+      if (name && name !== "—") return name;
+    }
+  }
+  return `Patient ${pid.slice(0, 8)}…`;
+}
+
+/**
+ * Labels for linked patient / CRM lead on the consultation workspace shell.
+ * F-PILOT-08: when consultation.patient_id is null but the linked lead has patient_id,
+ * resolve the patient name from the lead so the hub is honest.
+ */
 export async function loadConsultationWorkspaceDisplay(
   tenantId: string,
   row: ConsultationRow
@@ -115,33 +162,27 @@ export async function loadConsultationWorkspaceDisplay(
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
 
-  let patientName: string | null = null;
-  if (row.patient_id?.trim()) {
-    const { data, error } = await supabase
-      .from("fi_patients")
-      .select("metadata")
-      .eq("tenant_id", tid)
-      .eq("id", row.patient_id.trim())
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    const lab = data ? readPatientMetadataLabel((data as { metadata: unknown }).metadata) : null;
-    patientName = lab ?? `Patient ${row.patient_id.trim().slice(0, 8)}…`;
-  }
-
+  let leadPatientId: string | null = null;
   let leadName: string | null = null;
   let leadStage: string | null = null;
   if (row.lead_id?.trim()) {
     const lid = row.lead_id.trim();
     const { data, error } = await supabase
       .from("fi_crm_leads")
-      .select("id, summary, current_stage_id")
+      .select("id, summary, current_stage_id, patient_id")
       .eq("tenant_id", tid)
       .eq("id", lid)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (data) {
-      const lr = data as { id: string; summary: string | null; current_stage_id: string | null };
+      const lr = data as {
+        id: string;
+        summary: string | null;
+        current_stage_id: string | null;
+        patient_id: string | null;
+      };
       leadName = leadTitleFromRow(lr.summary, lr.id);
+      leadPatientId = lr.patient_id?.trim() || null;
       if (lr.current_stage_id?.trim()) {
         const { data: st, error: se } = await supabase
           .from("fi_crm_pipeline_stages")
@@ -156,7 +197,17 @@ export async function loadConsultationWorkspaceDisplay(
     }
   }
 
-  return { patientName, leadName, leadStage };
+  const effectivePatientId = resolveConsultationPatientId({
+    consultationPatientId: row.patient_id,
+    leadPatientId,
+  });
+
+  let patientName: string | null = null;
+  if (effectivePatientId) {
+    patientName = await loadPatientDisplayName(tid, effectivePatientId);
+  }
+
+  return { patientId: effectivePatientId, patientName, leadName, leadStage };
 }
 
 async function resolveConsultationSubjectLines(

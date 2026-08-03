@@ -34,10 +34,10 @@ import type { ConsultationPathwayLauncherViewModel } from "@/src/lib/consultatio
 import type { ConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { getConsultationTypeDefinition } from "@/src/lib/consultations/consultationTypeConfig";
 import {
-  CONSULTATION_EDITABLE_STATUSES,
-  type ConsultationRow,
-  type ConsultationStatus,
-} from "@/src/lib/consultations/consultationTypes";
+  isConsultationEditableStatus,
+  isConsultationPatientLinkableStatus,
+} from "@/src/lib/consultations/consultationPatientLinkCore";
+import type { ConsultationRow, ConsultationStatus } from "@/src/lib/consultations/consultationTypes";
 
 const PATHWAY_HERO_CARD_CLASS =
   "border-cyan-500/20 bg-gradient-to-b from-sky-50/95 via-white to-white shadow-md ring-2 ring-sky-300/40 dark:border-sky-800/60 dark:from-sky-950/45 dark:via-slate-950/50 dark:to-slate-950/40 dark:ring-sky-800/50";
@@ -101,7 +101,10 @@ export function ConsultationOsWorkspace({
   const [consultationDate, setConsultationDate] = useState(initialRow.consultation_date ?? "");
 
   const [linkedPatientId, setLinkedPatientId] = useState<string | null>(
-    () => initialRow.patient_id?.trim() ?? null
+    () =>
+      initialRow.patient_id?.trim() ||
+      initialWorkspaceDisplay?.patientId?.trim() ||
+      null
   );
   const [linkedPersonId, setLinkedPersonId] = useState<string | null>(
     () => initialRow.person_id?.trim() ?? null
@@ -109,6 +112,7 @@ export function ConsultationOsWorkspace({
   const [linkedLeadId, setLinkedLeadId] = useState<string | null>(
     () => initialRow.lead_id?.trim() ?? null
   );
+  // Display may resolve from lead.patient_id even before row.patient_id is set (F-PILOT-08).
   const [linkedPatientLabel, setLinkedPatientLabel] = useState<string | null>(
     () => initialWorkspaceDisplay?.patientName ?? null
   );
@@ -143,22 +147,52 @@ export function ConsultationOsWorkspace({
     [pathwayCompletionSummary]
   );
 
-  const canEdit = useMemo(
-    () => (CONSULTATION_EDITABLE_STATUSES as readonly string[]).includes(status),
-    [status]
+  const canEdit = useMemo(() => isConsultationEditableStatus(status), [status]);
+  /** F-PILOT-08: allow patient link correction on completed (and other linkable) statuses. */
+  const canLinkPatient = useMemo(() => isConsultationPatientLinkableStatus(status), [status]);
+
+  const persistPatientLink = useCallback(
+    async (patientId: string | null, personId: string | null) => {
+      setError(null);
+      const res = await updateConsultationDraftAction(
+        tenantId,
+        cid,
+        withAdmin({
+          patient_id: patientId,
+          person_id: personId,
+        })
+      );
+      if (!res.ok) {
+        setError(res.error);
+        return false;
+      }
+      router.refresh();
+      return true;
+    },
+    [tenantId, cid, withAdmin, router]
   );
 
-  const onLinkPatientHit = useCallback((hit: ConsultationLinkSearchPatientHit) => {
-    setLinkedPatientId(hit.id);
-    setLinkedPersonId(hit.person_id);
-    setLinkedPatientLabel(hit.name);
-  }, []);
+  const onLinkPatientHit = useCallback(
+    (hit: ConsultationLinkSearchPatientHit) => {
+      setLinkedPatientId(hit.id);
+      setLinkedPersonId(hit.person_id);
+      setLinkedPatientLabel(hit.name);
+      // Autosave only runs when canEdit; completed needs an immediate patient-link save.
+      if (!canEdit && canLinkPatient) {
+        void persistPatientLink(hit.id, hit.person_id);
+      }
+    },
+    [canEdit, canLinkPatient, persistPatientLink]
+  );
 
   const onClearPatient = useCallback(() => {
     setLinkedPatientId(null);
     setLinkedPersonId(null);
     setLinkedPatientLabel(null);
-  }, []);
+    if (!canEdit && canLinkPatient) {
+      void persistPatientLink(null, null);
+    }
+  }, [canEdit, canLinkPatient, persistPatientLink]);
 
   const onLinkLeadHit = useCallback((hit: ConsultationLinkSearchLeadHit) => {
     setLinkedLeadId(hit.id);
@@ -351,7 +385,7 @@ export function ConsultationOsWorkspace({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <ConsultationPatientLinkField
                     tenantId={tenantId}
-                    disabled={!canEdit}
+                    disabled={!canLinkPatient}
                     patientId={linkedPatientId}
                     patientLabel={linkedPatientLabel}
                     onLinkPatient={onLinkPatientHit}
