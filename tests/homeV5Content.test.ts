@@ -1,21 +1,40 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { HOME_PAGE_CONTENT, HOME_V5_CONTENT } from "../lib/marketing/homePageContent";
+import {
+  getHomeV5HeroMetrics,
+  getHomeV5PlatformSystemsSubtext,
+  HOME_PAGE_CONTENT,
+  HOME_V5_CONTENT,
+} from "../lib/marketing/homePageContent";
+import { getPlatformProgressSnapshot } from "../lib/marketing/platformProgressPageContent";
 
 describe("HOME_V5_CONTENT (FI-WEB-REFRESH-1E)", () => {
   it("does not publish completion percentages in hero metrics", () => {
-    for (const metric of HOME_V5_CONTENT.hero.metrics) {
+    for (const metric of getHomeV5HeroMetrics()) {
       assert.doesNotMatch(metric.value ?? "", /%/);
-      assert.doesNotMatch(metric.label, /deployment/i);
+      assert.doesNotMatch(metric.label, /completion/i);
     }
   });
 
-  it("aligns curated system and layer counts", () => {
+  it("aligns hero metrics with Platform Progress registry", () => {
+    const snapshot = getPlatformProgressSnapshot();
+    const metrics = getHomeV5HeroMetrics();
+    assert.equal(metrics[0]?.value, String(snapshot.activeModuleCount));
+    assert.match(metrics[0]?.label ?? "", /Platform Progress/i);
+    assert.equal(metrics[1]?.value, String(snapshot.deployableSurfaceCount));
+    assert.match(metrics[1]?.label ?? "", /Operational Pilot/i);
+    assert.ok(metrics.some((m) => /Operational Pilot Underway/i.test(m.label)));
+    assert.ok(metrics.some((m) => /Hair Restoration/i.test(m.label)));
+  });
+
+  it("keeps curated system cards and architecture layers as subsets of the full story", () => {
     assert.equal(HOME_V5_CONTENT.platformSystems.systems.length, 8);
     assert.equal(HOME_V5_CONTENT.ecosystemArchitecture.layerPreview.length, 12);
-    assert.ok(HOME_V5_CONTENT.hero.metrics.some((m) => m.value === "8"));
-    assert.ok(HOME_V5_CONTENT.hero.metrics.some((m) => m.value === "12"));
+    const sub = getHomeV5PlatformSystemsSubtext();
+    assert.match(sub, /8 core clinic systems/i);
+    assert.match(sub, /22 systems/i);
+    assert.match(sub, /Platform Progress/i);
   });
 
   it("avoids world’s-first surgery superlative", () => {

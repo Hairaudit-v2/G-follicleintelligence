@@ -7,7 +7,12 @@ import { FiOsHomeProductShowcase } from "@/components/marketing/FiOsHomeProductS
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import { HOME_V5_CONTENT } from "@/lib/marketing/homePageContent";
+import {
+  getHomeV5HeroMetrics,
+  getHomeV5PlatformSystemsSubtext,
+  getHomeV5ProgressCtaLabel,
+  HOME_V5_CONTENT,
+} from "@/lib/marketing/homePageContent";
 import {
   MARKETING_CTA_PRIMARY_CLASS,
   MARKETING_CTA_SECONDARY_CLASS,
@@ -34,9 +39,11 @@ const PLATFORM_SYSTEM_ECOSYSTEM_ANCHOR: Record<string, string> = {
 };
 
 function HeroMetricsRow() {
+  // Live from Platform Progress registry (same source as /platform/progress).
+  const metrics = getHomeV5HeroMetrics();
   return (
     <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {c.hero.metrics.map((metric, index) => (
+      {metrics.map((metric, index) => (
         <GlassCard key={metric.label} className="border-white/[0.07] !p-5 sm:!p-6">
           <FadeIn delay={0.03 * index}>
             {metric.value ? (
@@ -443,7 +450,7 @@ export function FiMarketingHomeView() {
             id={`${c.platformSystems.id}-heading`}
             eyebrow={c.platformSystems.eyebrow}
             title={c.platformSystems.headline}
-            description={c.platformSystems.subtext}
+            description={getHomeV5PlatformSystemsSubtext(c.platformSystems.systems.length)}
           />
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {c.platformSystems.systems.map((system, index) => (
@@ -469,7 +476,7 @@ export function FiMarketingHomeView() {
               className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[14rem]")}
             >
               <Link href={c.platformSystems.progressCta.href}>
-                {c.platformSystems.progressCta.label}
+                {getHomeV5ProgressCtaLabel()}
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
               </Link>
             </Button>

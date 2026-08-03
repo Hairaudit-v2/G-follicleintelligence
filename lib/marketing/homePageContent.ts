@@ -4,7 +4,16 @@
  *
  * Active homepage (`/`) uses `HOME_V5_CONTENT` via `FiMarketingHomeView`.
  * `HOME_PAGE_CONTENT` is legacy and not mounted — see deprecation note below (FI-WEB-REFRESH-1E).
+ *
+ * Hero metrics and systems framing are derived from the Platform Progress registry so `/`
+ * and `/platform/progress` stay aligned.
  */
+
+import {
+  getPlatformProgressSnapshot,
+  PLATFORM_PROGRESS_MODULES,
+  type PlatformProgressModule,
+} from "@/lib/marketing/platformProgressPageContent";
 
 export type HomeOrbitModule = {
   label: string;
@@ -1225,6 +1234,48 @@ export type HomeV5MetricCard = {
   label: string;
 };
 
+/**
+ * Homepage hero metrics — derived from the same registry as `/platform/progress`.
+ * Keeps “8 / 12” architecture storytelling from drifting away from live delivery status.
+ */
+export function getHomeV5HeroMetrics(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): readonly HomeV5MetricCard[] {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  return [
+    {
+      value: String(snapshot.activeModuleCount),
+      label: "Systems Tracked On Platform Progress",
+    },
+    {
+      value: String(snapshot.deployableSurfaceCount),
+      label: "Deployed Or Operational Pilot",
+    },
+    {
+      label: "Operational Pilot Underway",
+    },
+    {
+      label: "Built Exclusively For Hair Restoration Medicine",
+    },
+  ];
+}
+
+/** Curated homepage system cards vs full progress registry. */
+export function getHomeV5PlatformSystemsSubtext(
+  curatedCount = 8,
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): string {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  return `${curatedCount} core clinic systems highlighted below — a curated subset of ${snapshot.activeModuleCount} systems in the public progress registry (${snapshot.deployableSurfaceCount} deployed or in operational pilot). Full delivery status by module is on Platform Progress.`;
+}
+
+export function getHomeV5ProgressCtaLabel(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): string {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  return `View platform progress (${snapshot.activeModuleCount} systems)`;
+}
+
 export type HomeV5FragmentationCard = {
   category: string;
   items: readonly string[];
@@ -1255,12 +1306,8 @@ export const HOME_V5_CONTENT = {
       "Most clinics operate across disconnected software never designed for hair restoration medicine.",
     subheadline2:
       "Follicle Intelligence connects consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinical operations into one purpose-built operating system — with progressive adoption so day-to-day clinic work is protected.",
-    metrics: [
-      { value: "8", label: "Core Clinic Systems Shown Below" },
-      { value: "12", label: "Intelligence Layers In The Architecture" },
-      { label: "Operational Pilot Underway" },
-      { label: "Built Exclusively For Hair Restoration Medicine" },
-    ] satisfies readonly HomeV5MetricCard[],
+    /** Prefer `getHomeV5HeroMetrics()` in UI — kept in sync with Platform Progress. */
+    metrics: getHomeV5HeroMetrics() satisfies readonly HomeV5MetricCard[],
     primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
     secondaryCta: {
       label: "Request a Platform and Migration Review",
@@ -1344,14 +1391,14 @@ export const HOME_V5_CONTENT = {
     id: "platform-systems",
     eyebrow: "Connected infrastructure",
     headline: "One Connected Platform Managing The Entire Clinic",
-    subtext:
-      "Eight core clinic systems shown here — a curated subset of the connected clinical and operational architecture. The FI Patient App is an additional patient-facing surface. Full delivery status by module is on Platform Progress.",
+    /** Prefer `getHomeV5PlatformSystemsSubtext()` in UI when possible. */
+    subtext: getHomeV5PlatformSystemsSubtext(),
     architectureCta: {
-      label: "View all 12 intelligence layers",
+      label: "Explore architecture (12 intelligence layers)",
       href: "/platform/ecosystem" as const,
     },
     progressCta: {
-      label: "View platform progress",
+      label: getHomeV5ProgressCtaLabel(),
       href: "/platform/progress" as const,
     },
     systems: [
@@ -1464,7 +1511,7 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Strategic architecture",
     headline: "Twelve Intelligence Layers. One Operating System.",
     description:
-      "This is not clinic software. Follicle Intelligence is infrastructure for the future of hair restoration medicine — acquisition, consultation, clinical intelligence, imaging, surgery, workforce, operations, finance, outcomes, education, deployment, and executive analytics in one connected ecosystem.",
+      "Architecture map (12 intelligence layers) for the hair restoration operating system — complementary to the 22 systems tracked with honest delivery status on Platform Progress. Acquisition, consultation, clinical intelligence, imaging, surgery, workforce, operations, finance, outcomes, education, deployment, and executive analytics in one connected ecosystem.",
     layerPreview: [
       "Acquisition Intelligence",
       "Consultation Intelligence",
@@ -1601,7 +1648,7 @@ export const HOME_V5_CONTENT = {
     eyebrow: "Enterprise infrastructure",
     headline: "This Is Not Clinic Software",
     subheadline: "This is infrastructure for an entire medical industry.",
-    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine — adopted progressively, with delivery status you can review.",
+    body: "See how twelve intelligence layers connect acquisition, clinical decision support, surgical execution, workforce competency, and long-term outcomes into one operating system built exclusively for hair restoration medicine — adopted progressively, with 22 systems tracked and delivery status you can review on Platform Progress.",
     primaryCta: { label: "Explore The Operating System", href: "/platform/ecosystem" as const },
     secondaryCta: {
       label: "Request a Platform and Migration Review",
