@@ -37,6 +37,7 @@ import { resolveTeamWorkspaceAccessForViewer } from "@/src/lib/staffAccess/staff
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { loadTrichoscopyNavVisibleForViewer } from "@/src/lib/platform/entitlements/trichoscopyRouteGate.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { readFiProcedureDayEnabled } from "@/src/lib/procedureDay/procedureDayEnv.server";
 import { readFiStaffUatModeEnabled } from "@/src/lib/fiOs/staffUatEnv.server";
@@ -174,6 +175,7 @@ export default async function TenantAdminLayout({
     featureAccessMap,
     workspaceProfileKey,
     showHrOsNav,
+    showTrichoscopyNav,
   ] = pinFloorMode
     ? [
         false,
@@ -187,6 +189,7 @@ export default async function TenantAdminLayout({
         false,
         null,
         "default" as const,
+        false,
         false,
       ]
     : await Promise.all([
@@ -204,6 +207,7 @@ export default async function TenantAdminLayout({
         loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
         loadWorkspaceProfileKeyForViewer(tenantId),
         loadHrOsNavVisibleForViewer(tenantId),
+        loadTrichoscopyNavVisibleForViewer(tenantId),
       ]);
   const tenantBackendAdminRole = pinFloorMode ? null : (adminProf?.adminRole ?? null);
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
@@ -307,6 +311,7 @@ export default async function TenantAdminLayout({
         showFiPaymentsInboxNav={showFiPaymentsInboxNav}
         showProcedureDayNav={showProcedureDayNav}
         showHrOsNav={showHrOsNav}
+        showTrichoscopyNav={showTrichoscopyNav}
         visibleTeamTabIds={visibleTeamTabIds}
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}

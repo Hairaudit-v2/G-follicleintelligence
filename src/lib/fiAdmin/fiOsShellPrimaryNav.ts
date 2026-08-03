@@ -174,7 +174,8 @@ export function resolveFiOsPrimarySidebarItems(
   visibleTeamTabIds?: readonly FiOsTeamTabId[],
   showSettingsAdminSurfaces: boolean = false,
   showPilotControlNav: boolean = false,
-  inboxPendingCount: number = 0
+  inboxPendingCount: number = 0,
+  showTrichoscopyNav: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -278,6 +279,19 @@ export function resolveFiOsPrimarySidebarItems(
           ? "Requires bookings operator access for this tenant."
           : undefined,
     },
+    ...(showTrichoscopyNav
+      ? [
+          {
+            id: "trichoscopy",
+            featureKey: "imaging" as const,
+            label: "Trichoscopy",
+            shortLabel: "Tricho",
+            href: hrefFor(b, "trichoscopy"),
+            disabled: false,
+            hint: "HLI trichoscopy episodes, capture status, and confirmed evidence.",
+          } satisfies FiOsPrimarySidebarItem,
+        ]
+      : []),
     {
       id: "crm",
       featureKey: "crm",
@@ -487,6 +501,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
       return "crm";
     }
     if (firstEarly === "inbox") return "inbox";
+    if (firstEarly === "trichoscopy") return "trichoscopy";
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "front-desk") return FI_OS_FRONT_DESK_NAV_ID;
     if (firstEarly === "surgery") return FI_OS_SURGERY_NAV_ID;

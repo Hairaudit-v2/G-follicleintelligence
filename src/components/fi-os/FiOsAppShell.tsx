@@ -98,6 +98,8 @@ type FiOsAppShellProps = {
   showProcedureDayNav?: boolean;
   /** HR OS primary nav when tenant entitlement + role allow. */
   showHrOsNav?: boolean;
+  /** Trichoscopy Intelligence primary nav when entitlement + module config allow. */
+  showTrichoscopyNav?: boolean;
   /** D6G-G0B: capability-scoped Team tab ids for sidebar/More drawer (overrides showHrOsNav). */
   visibleTeamTabIds?: readonly FiOsTeamTabId[];
   /** Stage UI activation — workspace persona for nav emphasis (does not bypass Stage 2). */
@@ -141,6 +143,7 @@ function FiOsAppShellBody({
   showFiPaymentsInboxNav = false,
   showProcedureDayNav = false,
   showHrOsNav = false,
+  showTrichoscopyNav = false,
   visibleTeamTabIds,
   workspaceProfileKey = "default",
   featureAccess = null,
@@ -205,7 +208,8 @@ function FiOsAppShellBody({
       visibleTeamTabIds,
       showNavigationAdminSurfaces,
       showPilotControlNav,
-      inboxPendingCount
+      inboxPendingCount,
+      showTrichoscopyNav
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -222,6 +226,7 @@ function FiOsAppShellBody({
     inboxPendingCount,
     visibleTeamTabIds,
     showPilotControlNav,
+    showTrichoscopyNav,
     featureAccessMap,
   ]);
 
