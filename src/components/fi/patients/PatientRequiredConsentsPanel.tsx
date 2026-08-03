@@ -2,10 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ClipboardCheck, FileUp } from "lucide-react";
+import { ClipboardCheck, Copy, ExternalLink, FileUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { recordStaffAssistedConsentAction } from "@/src/lib/actions/fi-consent-actions";
+import {
+  issuePatientConsentLinkAction,
+  recordStaffAssistedConsentAction,
+} from "@/src/lib/actions/fi-consent-actions";
 import type { PatientRequiredConsentsPanelData } from "@/src/lib/consents/consentTypes";
 import { buildPatientDocumentsTabHref } from "@/src/lib/patients/patientTrialConsentShared";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
@@ -36,6 +39,18 @@ function formatSignedAt(iso: string | null): string {
   });
 }
 
+function formatExpiry(iso: string): string {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return iso.slice(0, 10);
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function PatientRequiredConsentsPanel({
   tenantId,
   patientId,
@@ -50,12 +65,14 @@ export function PatientRequiredConsentsPanel({
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [linkNote, setLinkNote] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const documentsHref = buildPatientDocumentsTabHref(tenantId, patientId);
 
   const onRecordStaffAssisted = (instanceId: string) => {
     setError(null);
+    setLinkNote(null);
     setPendingId(instanceId);
     startTransition(async () => {
       const res = await recordStaffAssistedConsentAction({
@@ -69,6 +86,52 @@ export function PatientRequiredConsentsPanel({
         return;
       }
       router.refresh();
+    });
+  };
+
+  const onCopyPatientLink = (instanceId: string) => {
+    setError(null);
+    setLinkNote(null);
+    setPendingId(`link:${instanceId}`);
+    startTransition(async () => {
+      const res = await issuePatientConsentLinkAction({
+        tenantId,
+        patientId,
+        instanceId,
+        clinicDevice: false,
+      });
+      setPendingId(null);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(res.url);
+        setLinkNote(`Patient link copied. Expires ${formatExpiry(res.expiresAt)}.`);
+      } catch {
+        setLinkNote(`Link ready (copy manually): ${res.url} — expires ${formatExpiry(res.expiresAt)}.`);
+      }
+    });
+  };
+
+  const onOpenClinicDevice = (instanceId: string) => {
+    setError(null);
+    setLinkNote(null);
+    setPendingId(`clinic:${instanceId}`);
+    startTransition(async () => {
+      const res = await issuePatientConsentLinkAction({
+        tenantId,
+        patientId,
+        instanceId,
+        clinicDevice: true,
+      });
+      setPendingId(null);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setLinkNote(`Clinic device link opens in a new tab. Expires ${formatExpiry(res.expiresAt)}.`);
+      window.open(res.url, "_blank", "noopener,noreferrer");
     });
   };
 
@@ -99,7 +162,7 @@ export function PatientRequiredConsentsPanel({
           <p className="mt-1 text-sm text-slate-400">
             Treatment-driven forms for this patient. Draft template text is marked{" "}
             <span className="font-medium text-amber-200/90">DRAFT — not legal-final</span> until
-            counsel approves. Patient e-sign links arrive in Sprint B.
+            counsel approves. Send a patient link or record staff-assisted sign-off.
           </p>
         </div>
         <span
@@ -121,6 +184,11 @@ export function PatientRequiredConsentsPanel({
           {error}
         </p>
       ) : null}
+      {linkNote ? (
+        <p className="mt-3 text-sm text-cyan-100/90" role="status">
+          {linkNote}
+        </p>
+      ) : null}
 
       {data.items.length === 0 || data.allRequiredSigned ? (
         <p className="mt-4 text-sm text-emerald-100/90" role="status">
@@ -134,8 +202,7 @@ export function PatientRequiredConsentsPanel({
         <ul className="mt-4 divide-y divide-white/[0.06] rounded-lg border border-white/[0.08]">
           {data.items.map((item) => {
             const badge = statusBadge(item.status);
-            const canRecord =
-              item.status === "outstanding" && Boolean(item.instanceId);
+            const canAct = item.status === "outstanding" && Boolean(item.instanceId);
             return (
               <li key={item.formKey} className="space-y-2 px-3 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -169,13 +236,35 @@ export function PatientRequiredConsentsPanel({
                   </p>
                 ) : null}
 
-                {canRecord ? (
+                {canAct ? (
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     <button
                       type="button"
                       disabled={pending}
+                      onClick={() => onCopyPatientLink(item.instanceId!)}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 text-xs font-semibold text-cyan-100 hover:bg-cyan-500/20 disabled:opacity-50"
+                    >
+                      <Copy className="h-3.5 w-3.5" aria-hidden />
+                      {pending && pendingId === `link:${item.instanceId}`
+                        ? "Creating…"
+                        : "Copy patient link"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => onOpenClinicDevice(item.instanceId!)}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-600 px-3 text-xs font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                      {pending && pendingId === `clinic:${item.instanceId}`
+                        ? "Opening…"
+                        : "Open for clinic device"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending}
                       onClick={() => onRecordStaffAssisted(item.instanceId!)}
-                      className="inline-flex min-h-[36px] items-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 text-xs font-semibold text-cyan-100 hover:bg-cyan-500/20 disabled:opacity-50"
+                      className="inline-flex min-h-[36px] items-center rounded-lg border border-slate-600 px-3 text-xs font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                     >
                       {pending && pendingId === item.instanceId
                         ? "Recording…"

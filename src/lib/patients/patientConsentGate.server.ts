@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getTenantConfigResolvedById } from "@/lib/fi/tenantConfig";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { patientHasSignedConsentFormKey } from "@/src/lib/consents/consentAccessToken.server";
+import { photographyConsentGateSatisfied } from "./patientConsentGateCore";
 import { isGlobalTrialConsentGateEnabled } from "./patientTrialConsentShared";
 
 export { isGlobalTrialConsentGateEnabled };
@@ -50,6 +52,43 @@ export async function patientHasRecordedConsentDocument(
   return (count ?? 0) > 0;
 }
 
+/**
+ * Photo/trial gate satisfaction: prefer signed photo_clinical instance when framework
+ * tables exist; fall back to vault document_type=consent (Sprint A vault path).
+ */
+export async function patientHasPhotographyConsentSatisfied(
+  tenantId: string,
+  patientId: string,
+  client?: SupabaseClient
+): Promise<boolean> {
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  if (!tid || !pid) return false;
+
+  let photoClinicalSigned = false;
+  try {
+    photoClinicalSigned = await patientHasSignedConsentFormKey(
+      tid,
+      pid,
+      "photo_clinical",
+      client
+    );
+  } catch {
+    photoClinicalSigned = false;
+  }
+
+  const vaultConsentDocumentPresent = await patientHasRecordedConsentDocument(
+    tid,
+    pid,
+    client
+  );
+
+  return photographyConsentGateSatisfied({
+    photoClinicalSigned,
+    vaultConsentDocumentPresent,
+  });
+}
+
 export type TrialConsentGateStatus = {
   required: boolean;
   satisfied: boolean;
@@ -66,7 +105,7 @@ export async function loadTrialConsentGateStatus(
   if (!required || !pid) {
     return { required, satisfied: !required || Boolean(pid), patientId: pid };
   }
-  const satisfied = await patientHasRecordedConsentDocument(tenantId, pid, client);
+  const satisfied = await patientHasPhotographyConsentSatisfied(tenantId, pid, client);
   return { required, satisfied, patientId: pid };
 }
 
@@ -84,7 +123,7 @@ export async function assertPatientTrialConsentRecorded(
   }
   if (!status.satisfied) {
     throw new PatientTrialConsentRequiredError(
-      "Upload a signed consent document on the patient profile (Documents tab) before clinical photography or consultation completion."
+      "Record photography consent on the patient profile (Required consents or Documents tab) before clinical photography or consultation completion."
     );
   }
 }

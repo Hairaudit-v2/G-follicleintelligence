@@ -479,8 +479,7 @@ export async function recordStaffAssistedConsentSignature(input: {
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
   const signedName =
-    input.signedName?.trim() ||
-    "Staff-assisted record (interim — patient e-sign pending Sprint B)";
+    input.signedName?.trim() || "Staff-assisted record";
 
   const { data, error } = await supabase
     .from("fi_patient_consent_instances")

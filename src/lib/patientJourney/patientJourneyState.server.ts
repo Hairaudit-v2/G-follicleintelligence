@@ -28,6 +28,7 @@ import {
   loadPatientJourneyStateRow,
   type PatientJourneyStateRow,
 } from "./patientJourneyStateMutations.server";
+import { loadPatientConsentInstances } from "@/src/lib/consents/consentRequirementResolver.server";
 
 export type PatientJourneySnapshot = {
   tenantId: string;
@@ -232,7 +233,7 @@ export async function loadPatientJourneySignals(
     reviewFlags = reviewDueFromProcedureDate(procYmd, todayYmd);
   }
 
-  const consentSigned = hasConsultationConsentSignal(
+  const consentProxy = hasConsultationConsentSignal(
     consults.map((c) => ({
       status: c.status,
       quote_data:
@@ -241,6 +242,23 @@ export async function loadPatientJourneySignals(
           : {},
     }))
   );
+
+  // Dual-run with FI consent framework (Sprint B): signed surgery_procedure and/or
+  // baseline photo+privacy clear missing_consent without breaking consultation proxy.
+  let frameworkConsent = false;
+  try {
+    const instances = await loadPatientConsentInstances(tid, pid, supabase);
+    const signed = new Set(
+      instances.filter((i) => i.status === "signed").map((i) => i.form_key)
+    );
+    frameworkConsent =
+      signed.has("surgery_procedure") ||
+      (signed.has("photo_clinical") && signed.has("privacy_treatment"));
+  } catch {
+    frameworkConsent = false;
+  }
+
+  const consentSigned = consentProxy || frameworkConsent;
 
   const imagingComplete = (imagesRes.data ?? []).length > 0;
 

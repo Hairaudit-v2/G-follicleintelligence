@@ -25,3 +25,19 @@ export {
   type ConsentResolverBookingSignal,
   type ConsentResolverInput,
 } from "./consentRequirementResolver";
+
+export {
+  buildConsentAccessPath,
+  channelFromDeviceFlag,
+  classifyConsentTokenAccess,
+  CONSENT_ACCESS_TOKEN_EXPIRY_DAYS,
+  CONSENT_TOKEN_ERRORS,
+  generateConsentAccessToken,
+  hashConsentAccessToken,
+  isDraftConsentBody,
+  patientSafeMessageForTokenOutcome,
+  renderConsentBodyMarkdownSafe,
+  surgeryConsentKeysSatisfied,
+  validateConsentSignInput,
+  type ConsentTokenResolveOutcome,
+} from "./consentAccessTokenCore";
