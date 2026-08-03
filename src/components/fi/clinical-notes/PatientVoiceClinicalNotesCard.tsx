@@ -26,14 +26,15 @@ export function PatientVoiceClinicalNotesCard({
   return (
     <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-100">Clinical notes (voice)</h2>
+        <h2 className="text-sm font-semibold text-slate-100">Clinical notes</h2>
       </div>
       <p className="mt-1 text-xs text-gray-500">
-        AI-generated entries stay in <strong>AI draft</strong> until a clinician approves them. Use
-        the <strong>Voice note</strong> button in the Actions bar above to record or upload audio.
+        Use <strong>Typed note</strong> or <strong>Voice note</strong> in the Clinical actions row.
+        Voice AI entries stay in <strong>AI draft</strong> until approved; typed notes are saved
+        immediately.
       </p>
       {items.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-400">No voice clinical notes yet.</p>
+        <p className="mt-3 text-sm text-slate-400">No clinical notes yet.</p>
       ) : (
         <ul className="mt-3 divide-y divide-white/[0.06]">
           {items.map((row) => (
@@ -43,6 +44,9 @@ export function PatientVoiceClinicalNotesCard({
                   className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${statusClass(row.record_status)}`}
                 >
                   {statusLabel(row.record_status)}
+                </span>
+                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-400">
+                  {row.source === "typed_note" ? "Typed" : "Voice"}
                 </span>
                 <span className="font-mono text-[10px] text-gray-400">{row.id.slice(0, 8)}…</span>
                 <span className="text-xs text-gray-500">

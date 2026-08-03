@@ -100,15 +100,18 @@ test("CRM-read sessions reach Import Review via Integrations without temporary p
     showSecurity: false,
     showHubspotImport: true,
   });
-  assert.equal(groups.length, 1);
-  assert.equal(groups[0]!.id, "integrations");
-  assert.equal(groups[0]!.destinations[0]?.id, "integrations-hubspot");
+  // Clinic guide is always present (personal on/off); HubSpot remains Integrations-only.
+  assert.equal(groups.length, 2);
+  assert.equal(groups[0]!.id, "clinic");
+  assert.equal(groups[0]!.destinations[0]?.id, "clinic-guide");
+  const integrations = groups.find((g) => g.id === "integrations")!;
+  assert.equal(integrations.destinations[0]?.id, "integrations-hubspot");
   assert.equal(
-    groups[0]!.destinations[0]?.href,
+    integrations.destinations[0]?.href,
     `${base}/settings/integrations/hubspot?tab=import-review`
   );
   assert.ok(
-    !groups[0]!.destinations.some((item) => item.id === "integrations-hubspot-import")
+    !integrations.destinations.some((item) => item.id === "integrations-hubspot-import")
   );
 
   assert.deepEqual(

@@ -47,13 +47,26 @@ export function buildSettingsSidebarSubItems(
   tenantId: string,
   opts?: BuildSettingsSidebarSubItemsOptions
 ): FiOsSettingsSidebarSubItem[] {
-  if (opts?.showSettingsAdminSurfaces !== true) return [];
-
   const tid = tenantId.trim();
-  return FI_OS_SETTINGS_ADMIN_LEGACY_ROUTES.map((route) => ({
-    id: route.id,
-    label: `${route.label} (direct)`,
-    href: buildFiOsSettingsLegacyHref(tid, route.suffix),
-    featureKey: "settings" as const,
-  }));
+  /** Personal preference — available to every staff member (not admin-only). */
+  const personal: FiOsSettingsSidebarSubItem[] = [
+    {
+      id: "clinic-guide",
+      label: "Clinic guide",
+      href: buildFiOsSettingsLegacyHref(tid, "settings/clinic-guide"),
+      // No featureKey: doctors/nurses/reception must reach their on/off toggle.
+    },
+  ];
+
+  if (opts?.showSettingsAdminSurfaces !== true) return personal;
+
+  return [
+    ...personal,
+    ...FI_OS_SETTINGS_ADMIN_LEGACY_ROUTES.map((route) => ({
+      id: route.id,
+      label: `${route.label} (direct)`,
+      href: buildFiOsSettingsLegacyHref(tid, route.suffix),
+      featureKey: "settings" as const,
+    })),
+  ];
 }

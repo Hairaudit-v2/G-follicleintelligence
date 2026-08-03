@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Camera } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { TypedNoteEntryButton } from "@/src/components/fi/clinical-notes/TypedNoteEntryButton";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
 import { StartCaptureProtocolButton } from "@/src/components/fi/vie/StartCaptureProtocolButton";
 import {
@@ -75,12 +76,18 @@ export function PatientPhotoCaptureActions({
               Start Capture Protocol
             </span>
           )}
-          <div className="flex min-h-[44px] flex-1 items-center justify-center [&_button]:min-h-[44px] [&_button]:w-full [&_button]:justify-center">
+          <div className="flex min-h-[44px] flex-1 flex-col gap-1.5 sm:flex-row [&_button]:min-h-[44px] [&_button]:w-full [&_button]:justify-center">
+            <TypedNoteEntryButton
+              tenantId={tenantId}
+              patientId={patientId}
+              label="Typed note"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-violet-300 bg-violet-500/10 px-2 text-xs font-semibold text-violet-200 hover:bg-violet-500/15"
+            />
             <VoiceNoteEntryButton
               tenantId={tenantId}
               patientId={patientId}
-              label="Add Note"
-              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-violet-300 bg-violet-500/10 px-3 text-xs font-semibold text-violet-200 hover:bg-violet-500/15"
+              label="Voice note"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-2 text-xs font-semibold text-slate-200 hover:bg-white/[0.08]"
             />
           </div>
         </div>

@@ -33,10 +33,12 @@ function mapSummary(raw: Record<string, unknown>): PatientClinicalNoteSummary {
   const status: FiClinicalNoteRecordStatus =
     st === "approved" || st === "archived" || st === "ai_draft" ? st : "ai_draft";
   const sections = parseClinicalNoteSections(raw.sections);
+  const transcript = String(raw.transcript_raw ?? "").trim();
   const preview =
     sections.presenting_concern?.trim() ||
     sections.assessment?.trim() ||
     sections.plan?.trim() ||
+    transcript ||
     "(no preview)";
   const slice = preview.length > 140 ? `${preview.slice(0, 137)}…` : preview;
   return {
@@ -74,7 +76,7 @@ export async function loadClinicalNotesForPatient(
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_clinical_notes")
-    .select("id, record_status, created_at, source, sections, case_id, consultation_id")
+    .select("id, record_status, created_at, source, sections, case_id, consultation_id, transcript_raw")
     .eq("tenant_id", tenantId.trim())
     .eq("patient_id", patientId.trim())
     .order("created_at", { ascending: false })

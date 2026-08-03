@@ -208,8 +208,8 @@ export function ClinicGuideSettingsSection({
           </p>
           <h2 className="mt-1 text-lg font-semibold text-slate-50">Clinic guide</h2>
           <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Shows daily tips and tours to help staff work faster. Operational steps only — never
-            clinical advice.
+            Your personal floating tips and tours. Every staff member can turn this on or off for
+            themselves. Operational steps only — never clinical advice.
           </p>
         </div>
         <div

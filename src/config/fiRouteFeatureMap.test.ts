@@ -33,6 +33,15 @@ test("resolve: payments inbox → settings feature gate", () => {
   assert.equal(resolveRequiredFiFeatureForTenantSuffix("payments"), "settings");
 });
 
+test("resolve: clinic inbox → crm feature gate", () => {
+  assert.equal(resolveRequiredFiFeatureForTenantSuffix("inbox"), "crm");
+});
+
+test("resolve: Clinic guide personal page is not settings-gated", () => {
+  assert.equal(resolveRequiredFiFeatureForTenantSuffix("settings/clinic-guide"), null);
+  assert.equal(resolveRequiredFiFeatureForTenantSuffix("settings/admin-users"), "settings");
+});
+
 test("resolve: procedure day nested under cases", () => {
   assert.equal(resolveRequiredFiFeatureForTenantSuffix("cases/u1/procedure-day"), "procedure_day");
 });

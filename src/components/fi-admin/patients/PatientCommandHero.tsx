@@ -5,6 +5,7 @@ import type { PatientProfileFoundationData } from "@/src/lib/patients/patientPro
 import type { PatientDetailNextAppointment } from "@/src/lib/patients/patientDetailLoader";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { PatientStatusBadge } from "@/src/components/fi/patients/PatientStatusBadge";
+import { TypedNoteEntryButton } from "@/src/components/fi/clinical-notes/TypedNoteEntryButton";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
 import { StartCaptureProtocolButton } from "@/src/components/fi/vie/StartCaptureProtocolButton";
 import { PatientImagingCompletenessSummary } from "@/src/components/fi/vie/PatientImagingCompletenessSummary";
@@ -121,7 +122,18 @@ export function PatientCommandHero({
           <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
             Clinical
           </span>
-          <VoiceNoteEntryButton tenantId={tenantId} patientId={patientId} className={chipViolet} />
+          <TypedNoteEntryButton
+            tenantId={tenantId}
+            patientId={patientId}
+            label="Typed note"
+            className={chipViolet}
+          />
+          <VoiceNoteEntryButton
+            tenantId={tenantId}
+            patientId={patientId}
+            label="Voice note"
+            className={chipGhost}
+          />
           <StartCaptureProtocolButton
             tenantId={tenantId}
             patientId={patientId}

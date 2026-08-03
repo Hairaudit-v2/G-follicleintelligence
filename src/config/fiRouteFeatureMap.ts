@@ -15,7 +15,7 @@ export function normalizeFiAdminTenantPathSuffix(pathname: string, tenantBase: s
   return pathOnly.replace(/\/+$/, "");
 }
 
-const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }[] = [
+const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey | null }[] = [
   { test: (f) => f === "" || f === "dashboard", feature: "dashboard" },
   { test: (f) => /^patients\/[^/]+\/twin(\/|$)/.test(f), feature: "patient_twin" },
   { test: (f) => /^patients\/[^/]+\/imaging(\/|$)/.test(f), feature: "imaging" },
@@ -33,6 +33,8 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "crm" || f.startsWith("crm/"), feature: "crm" },
   { test: (f) => f === "leadflow" || f.startsWith("leadflow/"), feature: "crm" },
   { test: (f) => f === "leads" || f.startsWith("leads/"), feature: "crm" },
+  /** Staged leads/contacts inbox (import review) */
+  { test: (f) => f === "inbox" || f.startsWith("inbox/"), feature: "crm" },
   { test: (f) => f === "calendar" || f.startsWith("calendar/"), feature: "calendar" },
   { test: (f) => f === "appointments" || f.startsWith("appointments/"), feature: "calendar" },
   { test: (f) => f === "bookings" || f.startsWith("bookings/"), feature: "calendar" },
@@ -62,6 +64,12 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "surgery-os" || f.startsWith("surgery-os/"), feature: "surgery_pipeline" },
   { test: (f) => f === "system-status" || f.startsWith("system-status/"), feature: "settings" },
   { test: (f) => f === "configuration" || f.startsWith("configuration/"), feature: "settings" },
+  // Personal Clinic guide on/off — every tenant member (not admin-settings gated).
+  // Must stay above the general `settings/*` rule so staff without the settings module can toggle.
+  {
+    test: (f) => f === "settings/clinic-guide" || f.startsWith("settings/clinic-guide/"),
+    feature: null,
+  },
   { test: (f) => f === "settings" || f.startsWith("settings/"), feature: "settings" },
   { test: (f) => f === "services" || f.startsWith("services/"), feature: "settings" },
   { test: (f) => f === "rooms" || f.startsWith("rooms/"), feature: "settings" },

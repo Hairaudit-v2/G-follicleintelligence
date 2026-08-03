@@ -37,7 +37,7 @@ test("Settings IA follows the approved six-group order", () => {
   );
 });
 
-test("Clinic group maps configuration destinations and keeps Clinic guide contextual", () => {
+test("Clinic group maps configuration destinations and includes Clinic guide for all staff", () => {
   const clinic = fullGroups().find((group) => group.id === "clinic")!;
   const labels = clinic.destinations.map((item) => item.label);
   assert.deepEqual(labels, [
@@ -49,8 +49,28 @@ test("Clinic group maps configuration destinations and keeps Clinic guide contex
     "Clinic guide",
   ]);
   const guide = clinic.destinations.find((item) => item.id === "clinic-guide")!;
-  assert.equal(guide.contextual, true);
-  assert.ok(!primaryFiOsSettingsDestinations(clinic).some((item) => item.id === "clinic-guide"));
+  assert.ok(guide);
+  assert.ok(!guide.contextual);
+  // Personal preference is a primary Settings destination (not admin-only contextual).
+  assert.ok(primaryFiOsSettingsDestinations(clinic).some((item) => item.id === "clinic-guide"));
+});
+
+test("Clinic guide alone is available when staff have no admin clinic destinations", () => {
+  const groups = buildFiOsClinicSettingsGroups(base, {
+    showConfiguration: false,
+    showClinicOperations: false,
+    showTemplates: false,
+    showTaxLocalisation: false,
+    showBilling: false,
+    showSecurity: false,
+    showHubspotImport: false,
+  });
+  const clinic = groups.find((group) => group.id === "clinic");
+  assert.ok(clinic);
+  assert.deepEqual(
+    clinic!.destinations.map((item) => item.id),
+    ["clinic-guide"]
+  );
 });
 
 test("Integrations owns HairAudit discovery without temporary HubSpot import peer", () => {
@@ -97,16 +117,19 @@ test("CRM-read HubSpot reaches canonical workspace via Integrations without Conf
     showSecurity: false,
     showHubspotImport: true,
   });
+  // Clinic guide is always present for personal on/off; HubSpot is Integrations-only.
   assert.deepEqual(
     groups.map((group) => group.id),
-    ["integrations"]
+    ["clinic", "integrations"]
   );
-  assert.equal(groups[0]!.destinations[0]?.id, "integrations-hubspot");
+  assert.equal(groups[0]!.destinations[0]?.id, "clinic-guide");
+  const integrations = groups.find((g) => g.id === "integrations")!;
+  assert.equal(integrations.destinations[0]?.id, "integrations-hubspot");
   assert.equal(
-    groups[0]!.destinations[0]?.href,
+    integrations.destinations[0]?.href,
     `${base}/settings/integrations/hubspot?tab=import-review`
   );
-  assert.ok(!groups[0]!.destinations.some((item) => item.id === "integrations-hubspot-import"));
+  assert.ok(!integrations.destinations.some((item) => item.id === "integrations-hubspot-import"));
 });
 
 test("nested Settings routes mark their group active", () => {

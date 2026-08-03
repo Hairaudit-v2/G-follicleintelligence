@@ -83,13 +83,8 @@ export function buildFiOsClinicSettingsGroups(
       )
     );
   }
-  if (clinic.length > 0) {
-    clinic.push(
-      destination(base, "clinic-guide", "Clinic guide", "settings/clinic-guide", {
-        contextual: true,
-      })
-    );
-  }
+  // Personal on/off for every staff member — always present, not admin-only.
+  clinic.push(destination(base, "clinic-guide", "Clinic guide", "settings/clinic-guide"));
 
   const integrations: FiOsSettingsDestination[] = [];
   if (options.showConfiguration) {

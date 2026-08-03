@@ -87,6 +87,92 @@ function mapClinicalNoteRow(raw: Record<string, unknown>): FiClinicalNoteRow {
   };
 }
 
+/**
+ * Staff-authored typed clinical note (no AI). Saved as approved immediately.
+ * Same table as voice notes (`fi_clinical_notes`), tenant + patient scoped.
+ */
+export async function insertTypedClinicalNote(params: {
+  tenantId: string;
+  patientId: string;
+  caseId?: string | null;
+  consultationId?: string | null;
+  body: string;
+  createdByFiUserId: string;
+  metadata?: Record<string, unknown>;
+}): Promise<{ note: FiClinicalNoteRow; timelineEventId: string }> {
+  const supabase = supabaseAdmin();
+  const tid = params.tenantId.trim();
+  const pid = params.patientId.trim();
+  const body = params.body.trim();
+  if (!body) throw new Error("Note text is required.");
+  if (body.length > 16000) throw new Error("Note is too long (max 16,000 characters).");
+
+  await assertPatientInTenant(supabase, tid, pid);
+  const caseId = params.caseId?.trim() || null;
+  if (caseId) {
+    await assertCaseBelongsToPatient(supabase, tid, caseId, pid);
+  }
+
+  const now = new Date().toISOString();
+  const sections = parseClinicalNoteSections({
+    presenting_concern: body,
+  });
+  const meta = {
+    ...(params.metadata ?? {}),
+    pipeline: "doctoros_typed_note",
+    entry_mode: "typed",
+  };
+
+  const { data: ins, error: insErr } = await supabase
+    .from("fi_clinical_notes")
+    .insert({
+      tenant_id: tid,
+      patient_id: pid,
+      case_id: caseId,
+      consultation_id: params.consultationId?.trim() || null,
+      source: "typed_note",
+      record_status: "approved",
+      transcript_raw: body,
+      sections: sections as unknown as Record<string, unknown>,
+      ai_model: null,
+      created_by_fi_user_id: params.createdByFiUserId.trim(),
+      approved_by_fi_user_id: params.createdByFiUserId.trim(),
+      approved_at: now,
+      metadata: meta,
+    })
+    .select("*")
+    .single();
+  if (insErr || !ins) {
+    throw new Error(insErr?.message ?? "Could not create clinical note.");
+  }
+  const note = mapClinicalNoteRow(ins as Record<string, unknown>);
+
+  const { data: tev, error: teErr } = await supabase
+    .from("fi_patient_timeline_events")
+    .insert({
+      tenant_id: tid,
+      patient_id: pid,
+      case_id: caseId,
+      event_kind: "clinical_typed_note",
+      title: "Typed clinical note",
+      detail: {
+        clinical_note_id: note.id,
+        record_status: "approved",
+        source: "typed_note",
+      },
+      occurred_at: now,
+      clinical_note_id: note.id,
+    })
+    .select("id")
+    .single();
+  if (teErr || !tev) {
+    await supabase.from("fi_clinical_notes").delete().eq("tenant_id", tid).eq("id", note.id);
+    throw new Error(teErr?.message ?? "Could not create patient timeline event.");
+  }
+
+  return { note, timelineEventId: String((tev as { id: string }).id) };
+}
+
 export async function insertVoiceClinicalNoteDraft(params: {
   tenantId: string;
   patientId: string;
