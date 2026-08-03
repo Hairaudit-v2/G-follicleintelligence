@@ -276,14 +276,14 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Patient experience",
     headline: "The operating system continues with the patient.",
     intro:
-      "Clinic workflows are only effective when patients know what happens next. The FI Patient App turns the clinic’s journey plan into a clear, mobile action centre for the patient.",
+      "Clinic workflows are only effective when patients know what happens next. The FI Patient App turns the clinic’s journey plan into a clear, mobile action centre for the patient — including remote progress photo updates when a clinic visit is not possible.",
     positioning:
-      "The FI Patient App extends the operating system beyond the clinic. Patients can see what they need to do next, follow their milestones, review documents and quotes, and respond to important actions from one connected mobile experience.",
+      "The FI Patient App extends the operating system beyond the clinic. Patients can see what they need to do next, follow their milestones, review documents and quotes, submit progress photos and respond to important actions from one connected mobile experience.",
     distinction: {
       patientOs:
         "PatientOS is the clinic-facing longitudinal patient record and operational chart shared across FI modules.",
       patientApp:
-        "The FI Patient App is the patient-facing mobile surface that gives each patient a secure view of actions, milestones, quotes, documents, pathology and the next step in their journey.",
+        "The FI Patient App is the patient-facing mobile surface that gives each patient a secure view of actions, milestones, quotes, documents, pathology, remote progress photo capture and the next step in their journey.",
     },
     principles: [
       {
@@ -293,6 +293,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
           "Review a quote",
           "Upload or sign a document",
           "Complete pathology requirements",
+          "Capture a progress photo update",
           "Prepare for the next milestone",
           "Contact the clinic when attention is required",
         ],
@@ -328,6 +329,16 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
         ],
       },
       {
+        title: "Remote progress photo capture",
+        body: "Patients can submit visual progress updates from their phone so the clinical team can review healing and density between visits.",
+        examples: [
+          "Supports continuity of care when travel is difficult",
+          "Helps patients stay within treatment guarantee guidelines",
+          "Photos join the connected clinical record",
+          "Visible only to the authorised clinical team",
+        ],
+      },
+      {
         title: "Relevant notifications",
         body: "Push notifications should take the patient to the correct action or screen rather than merely announcing that something changed.",
         examples: [
@@ -339,7 +350,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       },
     ] as const,
     honestyNote:
-      "Phase 1 journey workflows are usable in controlled pilot scope. Wider journey coverage, store distribution and routine multi-clinic rollout continue.",
+      "Journey workflows and remote progress photo capture are usable in controlled pilot scope. Wider journey coverage, store distribution and routine multi-clinic rollout continue.",
   },
 
   patientAppClinicBenefits: {
@@ -347,9 +358,9 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Clinic operating system",
     headline: "Why a patient app matters to the clinic operating system",
     clinicOwnerValue:
-      "For clinics, the app reduces manual chasing, clarifies responsibility and keeps patient activity connected to the same journey staff manage inside FI.",
+      "For clinics, the app reduces manual chasing, clarifies responsibility and keeps patient activity — including authorised progress photos — connected to the same journey staff manage inside FI.",
     strategicValue:
-      "The Patient App closes the loop between clinic workflows and patient participation, creating a more complete longitudinal record of actions, communication, readiness and outcomes.",
+      "The Patient App closes the loop between clinic workflows and patient participation, creating a more complete longitudinal record of actions, communication, visual progress, readiness and outcomes.",
     benefits: [
       {
         title: "Reduced administrative chasing",
@@ -357,7 +368,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       },
       {
         title: "Improved readiness",
-        body: "Quotes, documents, pathology and milestones can be completed earlier and tracked against the same operational journey.",
+        body: "Quotes, documents, pathology, milestones and requested progress photos can be completed earlier and tracked against the same operational journey.",
       },
       {
         title: "Clearer accountability",
@@ -369,11 +380,11 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
       },
       {
         title: "Connected longitudinal record",
-        body: "Patient actions, completion events and journey milestones contribute to the same record used by clinic teams.",
+        body: "Patient actions, completion events, progress photos and journey milestones contribute to the same record used by clinic teams.",
       },
       {
         title: "Stronger outcome engagement",
-        body: "The same patient surface can support future follow-up capture, imaging reminders and long-term outcome review.",
+        body: "Broader long-term outcome programmes and imaging reminder suites remain planned expansions of the same patient surface beyond current pilot photo capture.",
         future: true,
       },
     ] as const,
@@ -425,6 +436,13 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Public-safe verified milestones (no internal phase codes). */
 export const PLATFORM_PROGRESS_VERIFIED_MILESTONES: PlatformProgressDeploymentMilestone[] = [
+  {
+    id: "patient-app-remote-progress-photos",
+    date: "2026-08-05",
+    tag: "FI Patient App · PatientOS · ImagingOS",
+    title:
+      "Remote progress photo capture in the FI Patient App for between-visit clinical updates",
+  },
   {
     id: "financial-os-trial-ready",
     date: "2026-08-04",
@@ -571,12 +589,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     id: "patient-app",
     name: "FI Patient App",
     description:
-      "A secure patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology and journey communication — connected directly to the clinic’s FI workflows.",
+      "A secure patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology, remote progress photo capture and journey communication — connected directly to the clinic’s FI workflows.",
     status: "Operational Pilot",
-    latestMilestone: "Phase 1 Journey Control completed across FI and the patient app",
+    latestMilestone:
+      "Remote progress photo capture — patients submit visual updates between clinic visits",
     learnMoreHref: "/platform/patient-app",
     evidenceNote:
-      "Action Centre, home next-step CTAs, journey timeline, quotes/documents/pathology screens, push deep-link routing, mirrored gateway DTOs; app.follicleintelligence.ai web pilot; store distribution not claimed.",
+      "Action Centre, home next-step CTAs, journey timeline, quotes/documents/pathology screens, remote progress photo capture, push deep-link routing, mirrored gateway DTOs; app.follicleintelligence.ai web pilot; store distribution not claimed.",
   },
   {
     id: "leadflow",
@@ -919,6 +938,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 
 /** Internal recent releases (may retain engineering titles for admin). */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-08-05-patient-app-progress-photos",
+    title: "Remote progress photo capture in the FI Patient App",
+    module: "FI Patient App",
+    date: "2026-08-05",
+  },
   {
     id: "2026-08-04-financial-os-trial",
     title: "FinancialOS rolled out for live trial testing — manual payments ready",

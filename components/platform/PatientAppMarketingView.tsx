@@ -248,6 +248,37 @@ export function PatientAppMarketingView() {
       </Section>
 
       <Section
+        id={c.remoteProgressUpdates.id}
+        className="scroll-mt-28 border-b border-border/40 bg-[radial-gradient(ellipse_at_20%_0%,rgb(42_168_220_/0.08),transparent_45%),rgb(4_8_16)] py-20 sm:py-24"
+        aria-labelledby="remote-progress-heading"
+      >
+        <FadeIn>
+          <SectionHeading
+            id="remote-progress-heading"
+            eyebrow={c.remoteProgressUpdates.eyebrow}
+            title={c.remoteProgressUpdates.headline}
+            description={c.remoteProgressUpdates.body}
+          />
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {c.remoteProgressUpdates.points.map((item, index) => (
+              <GlassCard key={item.title} variant="os" className="h-full !p-5 sm:!p-6">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-200/60">
+                  {String(index + 1).padStart(2, "0")}
+                </p>
+                <h3 className="mt-3 font-display text-lg font-semibold text-foreground">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+              </GlassCard>
+            ))}
+          </div>
+          <p className="mt-8 max-w-3xl text-sm text-muted-foreground">
+            {c.remoteProgressUpdates.honestyNote}
+          </p>
+        </FadeIn>
+      </Section>
+
+      <Section
         id={c.actionCentre.id}
         className="scroll-mt-28 border-b border-border/40 bg-background py-20 sm:py-24"
         aria-labelledby="action-centre-heading"

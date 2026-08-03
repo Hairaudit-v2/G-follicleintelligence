@@ -7,16 +7,17 @@ export const PATIENT_APP_PAGE_CONTENT = {
   seo: {
     title: "FI Patient App | Connected Hair Restoration Patient Journey",
     description:
-      "Give patients one clear place for next steps, milestones, quotes, documents and pathology through a mobile experience connected to Follicle Intelligence clinic workflows.",
+      "Give patients one clear place for next steps, milestones, quotes, documents, pathology and remote progress photo capture — a mobile experience connected to Follicle Intelligence clinic workflows.",
     ogTitle: "FI Patient App — the patient journey, in the patient’s hands",
     ogDescription:
-      "One clear place for next steps, milestones, quotes, documents and pathology — connected to clinic workflows. Available within controlled clinic pilots.",
+      "Next steps, milestones, documents and remote progress photo updates — connected to clinic workflows. Available within controlled clinic pilots.",
     path: "/platform/patient-app" as const,
     keywords: [
       "FI Patient App",
       "hair restoration patient app",
       "patient journey mobile app",
       "clinic patient actions",
+      "progress photo capture",
       "Follicle Intelligence patient experience",
     ] as const,
   },
@@ -28,7 +29,7 @@ export const PATIENT_APP_PAGE_CONTENT = {
     patientOsDefinition:
       "The clinic-facing longitudinal patient record shared across FI workflows.",
     patientAppDefinition:
-      "The patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology and journey communication.",
+      "The patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology, remote progress photo capture and journey communication.",
   },
 
   hero: {
@@ -36,16 +37,16 @@ export const PATIENT_APP_PAGE_CONTENT = {
     eyebrow: "FI Patient App · Patient surface of Follicle Intelligence",
     headline: "The patient journey, in the patient’s hands.",
     subheadline:
-      "See the next step, complete important actions, follow milestones and keep quotes, documents and pathology requirements connected to one coordinated journey.",
+      "See the next step, complete important actions, follow milestones, keep quotes and documents connected — and submit progress photos when a clinic visit is not possible.",
     supporting:
-      "The FI Patient App gives patients one clear place to understand what happens next, complete important actions, follow milestones and access the information connected to their care.",
+      "The FI Patient App gives patients one clear place to understand what happens next, complete important actions, follow milestones, share visual progress updates and access the information connected to their care.",
     clinicLine:
-      "The clinic manages the journey in FI. The patient follows and completes it through the Patient App.",
+      "The clinic manages the journey in FI. The patient follows, completes actions and contributes progress photos through the Patient App.",
     strategicLine:
-      "The Patient App closes the loop between clinic workflows and patient participation, creating a more complete record of readiness, communication and long-term engagement.",
+      "The Patient App closes the loop between clinic workflows and patient participation, creating a more complete record of readiness, communication, visual progress and long-term engagement.",
     maturityLabel: "Operational Pilot",
     maturityBody:
-      "Core patient journey workflows are implemented and available within controlled pilot scope. Wider patient deployment, support validation and distribution readiness are continuing.",
+      "Core patient journey workflows — including remote progress photo capture — are implemented and available within controlled pilot scope. Wider patient deployment, support validation and distribution readiness are continuing.",
     availabilityNote:
       "Available within approved clinic pilot programmes. Public app-store distribution is not yet available.",
     primaryCta: {
@@ -103,28 +104,62 @@ export const PATIENT_APP_PAGE_CONTENT = {
       { label: "Review a quote", status: "current" as const },
       { label: "Complete a document", status: "current" as const },
       { label: "Upload required information", status: "current" as const },
+      { label: "Capture a progress photo update", status: "current" as const },
       { label: "Complete pathology requirements", status: "current" as const },
       { label: "Prepare for the next milestone", status: "current" as const },
       { label: "Contact the clinic when attention is needed", status: "current" as const },
     ],
   },
 
+  remoteProgressUpdates: {
+    id: "remote-progress-updates",
+    eyebrow: "Remote Progress Updates",
+    headline: "Capture progress photos when you cannot return to the clinic.",
+    body: "Patients can capture and submit progress photos directly in the FI Patient App. Visual updates help patients stay within treatment guarantee guidelines and keep the clinical team informed of healing and density progress between visits.",
+    points: [
+      {
+        title: "Remote photo capture",
+        body: "Submit progress photos from the patient’s phone when a clinic visit is not practical.",
+      },
+      {
+        title: "Continuity of care",
+        body: "Visual updates support follow-up between appointments without fragmenting the record across messaging apps.",
+      },
+      {
+        title: "Guarantee compliance support",
+        body: "Structured photo submissions help patients remain compliant with treatment guarantee requirements where the clinic pathway requires them.",
+      },
+      {
+        title: "Connected clinical record",
+        body: "Photos become part of the same longitudinal patient record clinic teams use in FI — not a disconnected album.",
+      },
+      {
+        title: "Authorised clinical access",
+        body: "Submissions are secured and visible only to the authorised clinical team for that patient and tenant.",
+      },
+    ] as const,
+    honestyNote:
+      "Available within approved clinic pilot programmes and configured pathways. Not a claim of public app-store distribution or full multi-clinic outcome programmes.",
+  },
+
   actionCentre: {
     id: "action-centre",
     eyebrow: "Action Centre",
     headline: "Outstanding work, clearly prioritised.",
-    body: "Patients can see outstanding actions, priority, due state, completion status and unfinished work — and return directly from notifications.",
+    body: "Patients can see outstanding actions, priority, due state, completion status and unfinished work — including progress photo requests — and return directly from notifications.",
     patientBenefits: [
       "Less uncertainty about what to do next",
       "Clearer responsibility",
       "Faster completion",
       "Easier return to pending tasks",
+      "A clear path to submit progress photos when requested",
     ] as const,
     clinicBenefits: [
       "Reduced chasing",
       "Better readiness visibility",
       "Fewer missed actions",
       "More consistent patient communication",
+      "Visual progress updates without ad-hoc photo channels",
     ] as const,
   },
 
@@ -240,11 +275,15 @@ export const PATIENT_APP_PAGE_CONTENT = {
       },
       {
         title: "Continuity",
-        body: "Instructions, documents and actions remain connected to the same journey.",
+        body: "Instructions, documents, actions and progress photos remain connected to the same journey.",
       },
       {
         title: "Participation",
-        body: "Patients can complete their part of the process without relying on repeated calls or email threads.",
+        body: "Patients can complete their part of the process — including remote visual updates — without relying on repeated calls or email threads.",
+      },
+      {
+        title: "Progress between visits",
+        body: "When a clinic return is not possible, patients can still provide structured photo updates that support guarantee compliance and clinical follow-up.",
       },
     ] as const,
   },
@@ -261,7 +300,7 @@ export const PATIENT_APP_PAGE_CONTENT = {
       },
       {
         title: "Improved readiness",
-        body: "Quotes, documents and pathology requirements can be tracked before the next appointment or procedure.",
+        body: "Quotes, documents, pathology requirements and requested progress photos can be tracked before the next appointment or procedure.",
         future: false,
       },
       {
@@ -276,12 +315,17 @@ export const PATIENT_APP_PAGE_CONTENT = {
       },
       {
         title: "Connected patient record",
-        body: "Patient activity contributes to the longitudinal journey rather than sitting in a disconnected communication channel.",
+        body: "Patient activity and progress photos contribute to the longitudinal journey rather than sitting in a disconnected messaging channel.",
+        future: false,
+      },
+      {
+        title: "Remote progress visibility",
+        body: "Clinical teams can review authorised patient-submitted progress photos inside the connected FI record when pathways request them.",
         future: false,
       },
       {
         title: "Future outcome engagement",
-        body: "The same patient surface can progressively support follow-up capture, imaging reminders and long-term outcome review.",
+        body: "Broader long-term outcome programmes, imaging reminders and outcome analytics remain planned expansions of the same patient surface — beyond current pilot photo capture.",
         future: true,
       },
     ] as const,
@@ -310,7 +354,7 @@ export const PATIENT_APP_PAGE_CONTENT = {
     eyebrow: "Inside the Patient App",
     headline: "A clear mobile surface for the journey ahead.",
     description:
-      "Demonstration screens from Phase 1 Journey Control — next step, Action Centre, timeline, quotes and pathology.",
+      "Demonstration screens from Phase 1 Journey Control — next step, Action Centre, timeline, quotes, pathology and structured patient actions. Remote progress photo capture is part of the same pilot patient surface.",
     demoNote: "Interface shown with demonstration data.",
   },
 
@@ -329,11 +373,11 @@ export const PATIENT_APP_PAGE_CONTENT = {
       },
       {
         q: "Is the Patient App the same as PatientOS?",
-        a: "No. PatientOS is the clinic-facing longitudinal patient record shared across FI workflows. The FI Patient App is the patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology and journey communication.",
+        a: "No. PatientOS is the clinic-facing longitudinal patient record shared across FI workflows. The FI Patient App is the patient-facing mobile experience for actions, milestones, next steps, quotes, documents, pathology, remote progress photo capture and journey communication.",
       },
       {
         q: "What can patients currently do?",
-        a: "Within Phase 1 Journey Control, patients can see their next step, use Action Centre, follow the Journey Timeline, review quotes, complete documents, track pathology requirements and open relevant notification destinations.",
+        a: "Within controlled pilot scope, patients can see their next step, use Action Centre, follow the Journey Timeline, review quotes, complete documents, track pathology requirements, capture and submit progress photos when the pathway requests them, and open relevant notification destinations.",
       },
       {
         q: "Can patients message the clinic?",
@@ -349,7 +393,7 @@ export const PATIENT_APP_PAGE_CONTENT = {
       },
       {
         q: "Is patient information secure?",
-        a: "Patient access uses authenticated sessions with server-side tenant and ownership checks. Public marketing screens use demonstration data only. Broader security validation continues as part of pilot readiness.",
+        a: "Patient access uses authenticated sessions with server-side tenant and ownership checks. Progress photos are stored on the connected clinical record and visible only to the authorised clinical team for that patient. Public marketing screens use demonstration data only. Broader security validation continues as part of pilot readiness.",
       },
       {
         q: "Can the clinic decide which actions appear?",
@@ -360,8 +404,8 @@ export const PATIENT_APP_PAGE_CONTENT = {
         a: "Completion updates the shared journey state so clinic staff can see readiness progress in FI.",
       },
       {
-        q: "Will the app support follow-up photos and outcome tracking?",
-        a: "Progress photo capture already exists as a related patient surface. Broader long-term outcome engagement is a future expansion of the same patient surface, not a claim of full Deployed outcome programmes today.",
+        q: "Can patients submit follow-up or progress photos?",
+        a: "Yes — within approved pilot pathways, patients can capture and submit progress photos from their phone so the clinic can review healing and density updates between visits. Photos join the connected clinical record rather than remaining in personal messaging threads. Broader long-term outcome programmes and multi-clinic outcome analytics remain future expansions, not a claim of fully Deployed outcome suites today.",
       },
       {
         q: "How can a clinic join the pilot?",

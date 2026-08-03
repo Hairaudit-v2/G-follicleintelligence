@@ -77,6 +77,23 @@ describe("FI-PATIENT-APP-2A patient app product page", () => {
     assert.match(medical?.a ?? "", /does not provide medical advice/i);
   });
 
+  it("features remote progress photo capture without claiming full deployment", () => {
+    assert.match(PATIENT_APP_PAGE_CONTENT.remoteProgressUpdates.headline, /progress photos/i);
+    assert.match(PATIENT_APP_PAGE_CONTENT.remoteProgressUpdates.body, /treatment guarantee/i);
+    assert.ok(
+      PATIENT_APP_PAGE_CONTENT.remoteProgressUpdates.points.some((p) =>
+        /Authorised clinical access/i.test(p.title)
+      )
+    );
+    const photoFaq = PATIENT_APP_PAGE_CONTENT.faq.items.find((item) =>
+      /progress photos|follow-up/i.test(item.q)
+    );
+    assert.ok(photoFaq);
+    assert.match(photoFaq?.a ?? "", /progress photos/i);
+    assert.match(photoFaq?.a ?? "", /clinical record/i);
+    assert.doesNotMatch(photoFaq?.a ?? "", /Fully launched|Available on the App Store/i);
+  });
+
   it("is included in the public sitemap", () => {
     assert.ok(getSitemapPaths().includes("/platform/patient-app"));
   });
