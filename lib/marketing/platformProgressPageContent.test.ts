@@ -25,7 +25,7 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     assert.equal(snapshot.statusCounts["In Development"], 1);
     assert.equal(snapshot.statusCounts["Research and Future Development"], 1);
     assert.equal(snapshot.deployableSurfaceCount, 14);
-    assert.equal(snapshot.lastUpdated, "2026-07-30");
+    assert.equal(snapshot.lastUpdated, "2026-08-03");
   });
 
   it("includes FI Patient App as Operational Pilot after PatientOS", () => {
@@ -72,12 +72,25 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     );
   });
 
-  it("features Journey Control as the newest verified milestone", () => {
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "patient-journey-control");
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-07-30");
+  it("features Clinic Inbox as the newest verified milestone", () => {
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "clinic-inbox-staged-approvals");
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-08-03");
+    assert.ok(
+      PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "typed-clinical-notes")
+    );
+    assert.ok(
+      PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "clinic-guide-staff-preference")
+    );
     assert.ok(
       PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "controlled-crm-migration")
     );
-    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-07-30");
+    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-08-03");
+  });
+
+  it("updates LeadFlow and PatientOS latest milestones for Aug 2026 operator surfaces", () => {
+    const leadflow = PLATFORM_PROGRESS_MODULES.find((m) => m.id === "leadflow");
+    const patientOs = PLATFORM_PROGRESS_MODULES.find((m) => m.id === "patient-os");
+    assert.match(leadflow?.latestMilestone ?? "", /Inbox/i);
+    assert.match(patientOs?.latestMilestone ?? "", /Typed clinical notes/i);
   });
 });

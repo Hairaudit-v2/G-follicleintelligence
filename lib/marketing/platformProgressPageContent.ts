@@ -137,7 +137,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "How Follicle Intelligence is becoming the operating system for hair restoration clinics",
     subtext:
       "Follicle Intelligence is progressing from a connected product ecosystem into a unified operating system for hair restoration clinics — expanding operational workflow depth, connected patient intelligence, and deployment and migration maturity.",
-    lastUpdated: "2026-07-30",
+    lastUpdated: "2026-08-03",
   },
 
   currentPosition: {
@@ -147,6 +147,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     body: [
       "Follicle Intelligence is purpose-built for modern hair restoration clinics — connecting patient acquisition, clinical decision-making, surgery, imaging, outcomes, workforce and business performance in one longitudinal record.",
       "Core operational layers are already usable in defined scopes. Clinics can connect existing systems, adopt selected FI workflows, and transition in stages rather than replacing everything on day one.",
+      "Recent operator surfaces deepen day-to-day use: a clinic Inbox for staged CRM approvals, typed clinical notes on the patient chart, and personal Clinic guide control for every staff role.",
       "Progress is measured by real workflow depth, patient-record continuity, and controlled deployment — not by speculative completion percentages.",
     ] as const,
     dimensions: [
@@ -425,6 +426,24 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 /** Public-safe verified milestones (no internal phase codes). */
 export const PLATFORM_PROGRESS_VERIFIED_MILESTONES: PlatformProgressDeploymentMilestone[] = [
   {
+    id: "clinic-inbox-staged-approvals",
+    date: "2026-08-03",
+    tag: "LeadFlow · OnboardingOS · Integration Layer",
+    title: "Clinic Inbox for staged HubSpot lead and contact approvals",
+  },
+  {
+    id: "typed-clinical-notes",
+    date: "2026-08-03",
+    tag: "PatientOS · ClinicOS",
+    title: "Typed clinical notes alongside voice capture on the patient chart",
+  },
+  {
+    id: "clinic-guide-staff-preference",
+    date: "2026-08-03",
+    tag: "ClinicOS · OnboardingOS",
+    title: "Clinic guide personal on/off for every staff member",
+  },
+  {
     id: "patient-journey-control",
     date: "2026-07-30",
     tag: "Patient App · PatientOS · ClinicOS · Event Bus",
@@ -511,13 +530,14 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "clinic-os",
     name: "ClinicOS",
-    completionPercent: 91,
+    completionPercent: 92,
     description:
       "Calendars, services, appointment lifecycle and day-to-day clinic rhythm for operators — designed for multi-site groups as they standardise.",
     status: "Operational Pilot",
-    latestMilestone: "Scheduling and clinic-day operations in controlled clinical use",
+    latestMilestone: "Clinic guide personal on/off for every staff role in controlled pilot scope",
     learnMoreHref: "/platform/clinic-os",
-    evidenceNote: "CalendarOS, bookings, clinic shell, multi-site scheduling; Evolved operational pilot docs.",
+    evidenceNote:
+      "CalendarOS, bookings, clinic shell, multi-site scheduling, Clinic guide prefs; Evolved operational pilot docs.",
   },
   {
     id: "consultation-os",
@@ -532,13 +552,14 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "patient-os",
     name: "PatientOS",
-    completionPercent: 81,
+    completionPercent: 83,
     description:
       "Longitudinal patient records, journey continuity and the operational chart clinicians and staff share across modules.",
     status: "Operational Pilot",
-    latestMilestone: "Longitudinal records integrated with Patient Twin in pilot operations",
+    latestMilestone: "Typed clinical notes on the patient chart alongside voice capture",
     learnMoreHref: "/platform/patient-os",
-    evidenceNote: "Patient routes, twin linkage, portal surfaces in operational pilot scope.",
+    evidenceNote:
+      "Patient routes, twin linkage, portal surfaces, fi_clinical_notes typed + voice entry in operational pilot scope.",
   },
   {
     id: "patient-app",
@@ -554,14 +575,14 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "leadflow",
     name: "LeadFlow",
-    completionPercent: 68,
+    completionPercent: 74,
     description:
-      "Native enquiry, pipeline, assignment and follow-up workflows are active within FI. Controlled HubSpot migration and coexistence pathways are operational, while wider communication automation and reporting depth continue to expand.",
+      "Native enquiry, pipeline, assignment and follow-up workflows are active within FI. Controlled HubSpot migration and coexistence pathways are operational, with a dedicated clinic Inbox for staged lead and contact approvals before records enter FI.",
     status: "Operational Pilot",
-    latestMilestone: "Native pipeline operations with controlled HubSpot transition pathways",
+    latestMilestone: "Clinic Inbox for staged HubSpot lead and contact approvals",
     learnMoreHref: "/platform/leadflow",
     evidenceNote:
-      "fi-admin CRM/pipeline, lead ownership, HubSpot webhook + event drain, staged import, contact-lead pilots 1D/1E, e2e pipeline coverage.",
+      "fi-admin CRM/pipeline, lead ownership, HubSpot webhook + event drain, staged import, /inbox pending approvals UI, contact-lead pilots 1D/1E, e2e pipeline coverage.",
   },
   {
     id: "imaging-os",
@@ -643,12 +664,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "onboarding-os",
     name: "OnboardingOS",
-    completionPercent: 86,
+    completionPercent: 88,
     description:
-      "Clinic deployment, provisioning templates and staged import tools that support controlled go-live and migration.",
+      "Clinic deployment, provisioning templates and staged import tools that support controlled go-live and migration — including operator review queues for approved staging records.",
     status: "Operational Pilot",
-    latestMilestone: "Staged import and deployment tooling operational for controlled transitions",
-    evidenceNote: "Staged HubSpot import engine, tenant provisioning, demo/seeding packs.",
+    latestMilestone: "Operator Inbox and Clinic guide preference controls for controlled go-live",
+    evidenceNote:
+      "Staged HubSpot import engine, tenant provisioning, demo/seeding packs, clinic guide prefs, inbox approval surface.",
   },
   buildGoogleCalendarPlatformProgressModule(),
   {
@@ -685,12 +707,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "integration-layer",
     name: "Integration Layer",
-    completionPercent: 80,
+    completionPercent: 82,
     description:
       "Connector framework for calendars, CRM, practice tools and APIs — so clinics can connect before they fully transition.",
     status: "Operational Pilot",
-    latestMilestone: "Enterprise connector authentication and verification pathways active",
-    evidenceNote: "HubSpot, Google Calendar, connector auth/verification; live OAuth breadth still expanding.",
+    latestMilestone: "HubSpot staged records surface in clinic Inbox for operator approval",
+    evidenceNote:
+      "HubSpot, Google Calendar, connector auth/verification, inbox staging review; live OAuth breadth still expanding.",
   },
   {
     id: "ai-intelligence-layer",
@@ -888,6 +911,24 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 /** Internal recent releases (may retain engineering titles for admin). */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
   {
+    id: "2026-08-03-clinic-inbox",
+    title: "Clinic Inbox for staged HubSpot lead and contact approvals",
+    module: "LeadFlow",
+    date: "2026-08-03",
+  },
+  {
+    id: "2026-08-03-typed-clinical-notes",
+    title: "Typed clinical notes on the patient chart",
+    module: "PatientOS",
+    date: "2026-08-03",
+  },
+  {
+    id: "2026-08-03-clinic-guide-staff",
+    title: "Clinic guide personal on/off for every staff member",
+    module: "ClinicOS",
+    date: "2026-08-03",
+  },
+  {
     id: "2026-07-30-patient-journey-control",
     title: "Patient Journey Control completed across FI and the Patient App",
     module: "FI Patient App",
@@ -930,6 +971,33 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
  * Extended engineering detail remains in internal runbooks and git history.
  */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-08-03-clinic-inbox-approvals",
+    date: "2026-08-03",
+    tag: "leadflow",
+    title: "Clinic Inbox for staged HubSpot lead and contact approvals",
+    summary:
+      "Operators can review staged HubSpot leads and contacts in a dedicated Inbox — with name-first cards, bulk approve/reject, and detail panels — before records enter the clinic system. Full HubSpot workspace remains available for advanced import review.",
+    modules: ["LeadFlow", "OnboardingOS", "Integration Layer"],
+  },
+  {
+    id: "2026-08-03-typed-clinical-notes",
+    date: "2026-08-03",
+    tag: "patient-os",
+    title: "Typed clinical notes on the patient chart",
+    summary:
+      "Clinical staff can add typed notes from the patient profile alongside existing voice capture. Notes persist to the same clinical notes record as voice entries, scoped to tenant and patient.",
+    modules: ["PatientOS", "ClinicOS"],
+  },
+  {
+    id: "2026-08-03-clinic-guide-staff-preference",
+    date: "2026-08-03",
+    tag: "clinic-os",
+    title: "Clinic guide personal on/off for every staff member",
+    summary:
+      "Every staff role can hide or restore the floating Clinic guide from Settings. When off, the dock stays fully hidden until the user turns it back on — without affecting clinical or commercial records.",
+    modules: ["ClinicOS", "OnboardingOS"],
+  },
   {
     id: "2026-07-30-patient-journey-control",
     date: "2026-07-30",
