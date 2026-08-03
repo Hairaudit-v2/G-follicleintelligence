@@ -503,6 +503,29 @@ export async function completePatientGatewayUpload(
       });
     }
 
+    try {
+      const { emitAuditEventBackground } = await import(
+        "@/src/lib/systemAudit/emitAuditEvent.server"
+      );
+      emitAuditEventBackground({
+        tenantId: ctx.tenantId,
+        action: "image.submitted_by_patient",
+        entityType: "patient_image",
+        entityId: registered.row.id,
+        parentEntityType: "patient",
+        parentEntityId: ctx.patientId,
+        summary: "Patient submitted progress photo via Patient App",
+        metadata: {
+          capture_source: mapping.captureSource,
+          upload_intent_id: intent.intentId,
+        },
+        actorUserId: ctx.authUserId,
+        actorType: "patient",
+      });
+    } catch {
+      /* audit must not fail upload */
+    }
+
     return { ok: true, imageId: registered.row.id, status: "held" };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Could not register upload.";

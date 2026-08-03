@@ -16,6 +16,7 @@ import {
   mergeHubspotContactWithExisting,
   type ImportReviewItem,
 } from "@/src/lib/onboarding-os/hubspotImport.server";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 
 export type ImportReviewActionResult =
   | { ok: true; items?: ImportReviewItem[]; integrationId?: string; integrationLabel?: string }
@@ -104,6 +105,21 @@ export async function importHubspotContactAction(
     });
     if (!result.ok) return result;
 
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "lead.approved",
+      entityType: "hubspot_staging",
+      entityId: sid,
+      summary: "HubSpot contact approved and imported into FI",
+      metadata: {
+        integration_id: iid,
+        kind: "contact",
+        result: "imported",
+      },
+      actorUserId: authId,
+      actorType: "staff",
+    });
+
     revalidateImportPaths(tid);
     return { ok: true, integrationId: iid };
   } catch (e) {
@@ -133,6 +149,17 @@ export async function importHubspotDealAction(
       skipAuthCheck: isPlatform,
     });
     if (!result.ok) return result;
+
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "lead.approved",
+      entityType: "hubspot_staging",
+      entityId: sid,
+      summary: "HubSpot deal approved and imported into FI",
+      metadata: { integration_id: iid, kind: "deal", result: "imported" },
+      actorUserId: authId,
+      actorType: "staff",
+    });
 
     revalidateImportPaths(tid);
     return { ok: true, integrationId: iid };
@@ -165,6 +192,17 @@ export async function cancelHubspotImportAction(
       skipAuthCheck: isPlatform,
     });
     if (!result.ok) return result;
+
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "lead.rejected",
+      entityType: "hubspot_staging",
+      entityId: sid,
+      summary: `HubSpot ${kind} import cancelled / rejected`,
+      metadata: { integration_id: iid, kind },
+      actorUserId: authId,
+      actorType: "staff",
+    });
 
     revalidateImportPaths(tid);
     return { ok: true, integrationId: iid };

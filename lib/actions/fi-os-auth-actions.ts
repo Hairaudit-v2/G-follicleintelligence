@@ -14,6 +14,7 @@ import {
   redactAuthUrlForLog,
   safeInternalPath,
 } from "@/src/lib/supabase/authLinkBootstrap";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 /** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
 function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
   console.info("[fi-os-auth]", stage, JSON.stringify(details));
@@ -79,6 +80,23 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
       code: error?.code ?? "no_user",
       message: error?.message ?? "signInWithPassword returned no user",
     });
+    // Tenant-scoped table: only audit when a tenant can be inferred from next/errorReturn path.
+    const pathHint = next ?? readNextPath(formData.get("errorReturn"));
+    const tenantHint = pathHint?.match(/\/fi-admin\/([0-9a-f-]{36})/i)?.[1] ?? null;
+    if (tenantHint) {
+      emitAuditEventBackground({
+        tenantId: tenantHint,
+        action: "auth.login_failed",
+        entityType: "session",
+        summary: "Login failed",
+        metadata: {
+          email_domain: email.includes("@") ? email.split("@")[1] : null,
+          code: error?.code ?? "no_user",
+        },
+        actorType: "system",
+        actorUserId: null,
+      });
+    }
     logFiOsSignIn("redirect", {
       reason: "invalid_credentials",
       target: "/follicle-intelligence/login?error=invalid_credentials",
@@ -88,6 +106,21 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
 
   const dest = next ?? (await resolveFiOsPostLoginRedirect(data.user.id, next));
   const osIdentity = await loadFiOsIdentity(data.user.id);
+  // Best-effort: resolve a tenant from post-login path for tenant-scoped audit.
+  const tenantFromPath = dest.match(/\/fi-admin\/([0-9a-f-]{36})/i)?.[1] ?? null;
+  if (tenantFromPath) {
+    emitAuditEventBackground({
+      tenantId: tenantFromPath,
+      action: "auth.login",
+      entityType: "session",
+      entityId: null,
+      summary: "Staff login success",
+      metadata: { os_role: osIdentity?.osRole ?? null, dest },
+      actorUserId: data.user.id,
+      actorRole: osIdentity?.osRole ?? null,
+      actorType: "staff",
+    });
+  }
   logFiOsSignIn("membership", {
     hasOsIdentity: Boolean(osIdentity),
     osRole: osIdentity?.osRole ?? null,

@@ -38,6 +38,12 @@ export default async function FiAdminReportsAdminAuditPage({
         </p>
       </div>
       <div className="flex flex-wrap gap-3">
+        <Link
+          href={`/fi-admin/${tid}/reports/system-audit`}
+          className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-100 transition-colors hover:bg-cyan-500/15"
+        >
+          System audit trail
+        </Link>
         {FI_OS_REPORTS_ADMIN_LEGACY_ROUTES.map((route) => (
           <Link
             key={route.id}

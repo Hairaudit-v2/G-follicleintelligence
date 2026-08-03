@@ -35,6 +35,8 @@ import { StaffUatClarityFeedback } from "@/src/components/fi-admin/staff-uat/Sta
 import { StaffUatScreenGuide } from "@/src/components/fi-admin/staff-uat/StaffUatScreenGuide";
 import { LegacyPatientProfileBanner } from "@/src/components/fi-admin/patients/LegacyPatientProfileBanner";
 import { LegacyPatientBadges } from "@/src/components/fi-admin/patients/LegacyPatientBadges";
+import { PatientActivityTab } from "./PatientActivityTab";
+import type { SystemAuditEventRow } from "@/src/lib/systemAudit/systemAuditTypes";
 
 export function PatientDetailPageView({
   tenantId,
@@ -51,6 +53,7 @@ export function PatientDetailPageView({
   canCapturePatientPhotos = false,
   patientJourney = null,
   journeyReadiness = null,
+  systemAuditEvents = [],
 }: {
   tenantId: string;
   patientId: string;
@@ -65,6 +68,7 @@ export function PatientDetailPageView({
   canCapturePatientPhotos?: boolean;
   patientJourney?: PatientJourneySnapshot | null;
   journeyReadiness?: ClinicJourneyReadinessItem | null;
+  systemAuditEvents?: SystemAuditEventRow[];
 }) {
   const { profile } = initialPayload;
 
@@ -217,6 +221,14 @@ export function PatientDetailPageView({
         <PatientTreatmentTimelineCard
           patientTimeline={profile.patientTimeline}
           patientImages={profile.patientImages}
+        />
+      ) : null}
+
+      {activeTab === "activity" ? (
+        <PatientActivityTab
+          tenantId={tenantId}
+          patientId={patientId}
+          events={systemAuditEvents}
         />
       ) : null}
 

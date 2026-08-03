@@ -9,6 +9,7 @@ import {
 } from "@/src/lib/clinicalNotes/clinicalNotesMutations.server";
 import { loadLatestVoiceClinicalNoteForPatient } from "@/src/lib/clinicalNotes/clinicalNotesLoaders.server";
 import { requireClinicalNoteApproverActor } from "@/src/lib/clinicalNotes/clinicalNoteApproverAccess.server";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 
 const approveBodySchema = z.object({
   tenantId: z.string().uuid(),
@@ -53,6 +54,23 @@ export async function createTypedClinicalNoteAction(
 
     const tid = parsed.tenantId.trim();
     const pid = parsed.patientId.trim();
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "note.created",
+      entityType: "clinical_note",
+      entityId: note.id,
+      parentEntityType: "patient",
+      parentEntityId: pid,
+      summary: "Typed clinical note created",
+      metadata: {
+        source: "typed_note",
+        case_id: note.case_id,
+        body_length: parsed.body.trim().length,
+      },
+      actorUserId: actor.authUserId,
+      actorRole: actor.fiUserRole,
+      actorType: "staff",
+    });
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     if (note.case_id?.trim()) {
       revalidatePath(`/fi-admin/${tid}/cases/${note.case_id.trim()}`);
@@ -86,6 +104,22 @@ export async function approveClinicalVoiceNoteAction(
     });
 
     const tid = parsed.tenantId.trim();
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "note.updated",
+      entityType: "clinical_note",
+      entityId: updated.id,
+      parentEntityType: "patient",
+      parentEntityId: updated.patient_id,
+      summary: "Voice clinical note approved",
+      metadata: {
+        source: "voice_consultation",
+        record_status: "approved",
+      },
+      actorUserId: actor.authUserId,
+      actorRole: actor.fiUserRole,
+      actorType: "staff",
+    });
     revalidatePath(`/fi-admin/${tid}/patients/${updated.patient_id.trim()}`);
     if (updated.case_id?.trim()) {
       revalidatePath(`/fi-admin/${tid}/cases/${updated.case_id.trim()}`);

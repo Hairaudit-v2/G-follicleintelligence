@@ -18,6 +18,7 @@ import {
   updatePaymentRecordStatusBodySchema,
 } from "@/src/lib/payments/paymentRecordSchemas";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -54,8 +55,24 @@ export async function createPaymentRecordAction(
     const parsed = createPaymentRecordBodySchema.parse(body);
     const { actorFiUserId } = await assertPaymentRecordWriteAllowed(tenantId, parsed.adminKey);
     const row = await createPaymentRecord(tenantId.trim(), parsed, actorFiUserId);
-    revalidatePaymentSurfaces(tenantId);
     const tid = tenantId.trim();
+    const kind = String((row as { kind?: string; payment_kind?: string }).kind ?? (parsed as { kind?: string }).kind ?? "payment").toLowerCase();
+    const isDeposit = kind.includes("deposit");
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: isDeposit ? "deposit.recorded" : "payment.recorded",
+      entityType: "payment_record",
+      entityId: row.id,
+      parentEntityType: row.patient_id ? "patient" : null,
+      parentEntityId: row.patient_id,
+      summary: isDeposit ? "Deposit payment record created" : "Payment record created",
+      metadata: {
+        status: row.status ?? null,
+        amount: (row as { amount?: unknown }).amount ?? null,
+        kind,
+      },
+    });
+    revalidatePaymentSurfaces(tenantId);
     if (row.consultation_id?.trim()) {
       revalidatePath(
         `/fi-admin/${tid}/consultations/${encodeURIComponent(row.consultation_id.trim())}`
@@ -105,8 +122,22 @@ export async function recordManualPaymentAction(
       parsed.payment_amount,
       parsed.notes
     );
+    const tid = tenantId.trim();
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "payment.recorded",
+      entityType: "payment_record",
+      entityId: updated.id ?? parsed.payment_record_id,
+      parentEntityType: updated.patient_id ? "patient" : null,
+      parentEntityId: updated.patient_id,
+      summary: "Manual payment recorded",
+      metadata: {
+        payment_amount: parsed.payment_amount,
+        has_notes: Boolean(parsed.notes?.trim()),
+      },
+    });
     revalidatePaymentSurfaces(tenantId);
-    revalidatePatientPaymentSurface(tenantId.trim(), updated.patient_id);
+    revalidatePatientPaymentSurface(tid, updated.patient_id);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

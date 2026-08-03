@@ -14,6 +14,7 @@ import { assertGuidedSessionUploadPreconditions } from "@/src/lib/imagingOs/imag
 import { applyGuidedCaptureToSession } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { assertPatientTrialConsentRecorded } from "@/src/lib/patients/patientConsentGate.server";
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 import {
   APPOINTMENT_PROCEDURE_ADMIN_FALLBACK_SOURCE,
@@ -291,6 +292,23 @@ export async function POST(
       imageWidth: parseDim(imageWidthRaw),
       imageHeight: parseDim(imageHeightRaw),
       protocolSessionId: protocolSessionIdResolved || null,
+    });
+
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "image.uploaded",
+      entityType: "patient_image",
+      entityId: result.row.id,
+      parentEntityType: "patient",
+      parentEntityId: pid,
+      summary: "Patient image uploaded",
+      metadata: {
+        image_category: result.row.image_category ?? imageCategory,
+        capture_source: captureSourceStr,
+        case_id: caseId == null ? null : String(caseId),
+      },
+      request: req,
+      actorType: "staff",
     });
 
     const qualityNeedsReview =

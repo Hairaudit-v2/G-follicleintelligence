@@ -24,6 +24,7 @@ import { updatePatientClinicalDetails } from "@/src/lib/patients/clinicalDetails
 import { updatePatientAdminDetails } from "@/src/lib/patients/server";
 import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
+import { emitAuditEventBackground } from "@/src/lib/systemAudit/emitAuditEvent.server";
 import { ZodError } from "zod";
 
 function errMsg(e: unknown): string {
@@ -54,8 +55,31 @@ export async function updatePatientAdminDetailsAction(
       preferred_contact_method: parsed.preferred_contact_method,
     });
 
-    revalidatePath(`/fi-admin/${tenantId.trim()}/patients`);
-    revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`);
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    const statusChanged = parsed.patient_status != null;
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: statusChanged ? "patient.status_changed" : "patient.updated",
+      entityType: "patient",
+      entityId: pid,
+      parentEntityType: "patient",
+      parentEntityId: pid,
+      summary: statusChanged
+        ? `Patient status updated to ${String(parsed.patient_status)}`
+        : "Patient admin details updated",
+      metadata: {
+        changed: {
+          patient_status: parsed.patient_status ?? null,
+          admin_note: parsed.admin_note != null,
+          reminder_consent: parsed.reminder_consent ?? null,
+          preferred_contact_method: parsed.preferred_contact_method ?? null,
+        },
+      },
+    });
+
+    revalidatePath(`/fi-admin/${tid}/patients`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
@@ -81,8 +105,21 @@ export async function updatePatientClinicalDetailsAction(
       request: undefined,
     });
 
-    revalidatePath(`/fi-admin/${tenantId.trim()}/patients`);
-    revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`);
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    emitAuditEventBackground({
+      tenantId: tid,
+      action: "patient.updated",
+      entityType: "patient",
+      entityId: pid,
+      parentEntityType: "patient",
+      parentEntityId: pid,
+      summary: "Patient clinical details updated",
+      metadata: { surface: "clinical_details" },
+    });
+
+    revalidatePath(`/fi-admin/${tid}/patients`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
@@ -255,6 +292,34 @@ export async function createDirectPatientAction(
       },
       undefined
     );
+
+    if (patientCreated) {
+      emitAuditEventBackground({
+        tenantId: tid,
+        action: "patient.created",
+        entityType: "patient",
+        entityId: patient.id,
+        parentEntityType: "patient",
+        parentEntityId: patient.id,
+        summary: `Patient created: ${displayName}`,
+        metadata: {
+          person_id: person.id,
+          person_created: personCreated,
+          source: "fi_direct_patient_create",
+        },
+      });
+    } else {
+      emitAuditEventBackground({
+        tenantId: tid,
+        action: "patient.updated",
+        entityType: "patient",
+        entityId: patient.id,
+        parentEntityType: "patient",
+        parentEntityId: patient.id,
+        summary: `Existing patient resolved: ${displayName}`,
+        metadata: { person_id: person.id, source: "fi_direct_patient_create" },
+      });
+    }
 
     revalidatePath(`/fi-admin/${tid}/patients`);
     revalidatePath(`/fi-admin/${tid}/patients/${patient.id}`);

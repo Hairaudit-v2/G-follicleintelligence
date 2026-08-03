@@ -22,6 +22,8 @@ import { loadPatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoa
 import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";
 import { loadPatientJourneySnapshot } from "@/src/lib/patientJourney/patientJourneyState.server";
 import { loadClinicJourneyReadiness } from "@/src/lib/patientJourneyControl/clinicJourneyReadiness.server";
+import { canViewPatientSystemAudit } from "@/src/lib/systemAudit/systemAuditAccess.server";
+import { listSystemAuditEventsForPatient } from "@/src/lib/systemAudit/systemAuditLoaders.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -106,6 +108,11 @@ export default async function PatientProfileRoutePage({
     calendarSettings.calendarTimezone
   );
 
+  const systemAuditEvents =
+    activeTab === "activity" && (await canViewPatientSystemAudit(tenantId.trim()))
+      ? await listSystemAuditEventsForPatient(tenantId.trim(), canonicalPatientId, 80)
+      : [];
+
   return (
     <AppointmentSlideOverProvider
       tenantId={tenantId}
@@ -141,6 +148,7 @@ export default async function PatientProfileRoutePage({
           canCapturePatientPhotos={imagingCaptureCap.canCapture}
           patientJourney={patientJourney}
           journeyReadiness={journeyReadiness}
+          systemAuditEvents={systemAuditEvents}
           prescriptionsTab={
             activeTab === "prescriptions" ? (
               <Suspense
