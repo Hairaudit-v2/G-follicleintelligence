@@ -10,12 +10,14 @@ import {
   channelFromDeviceFlag,
   classifyConsentTokenAccess,
   consentAccessTokenExpiresAt,
-  generateConsentAccessToken,
-  hashConsentAccessToken,
   patientSafeMessageForTokenOutcome,
   validateConsentSignInput,
   type ConsentTokenResolveOutcome,
 } from "./consentAccessTokenCore";
+import {
+  generateConsentAccessToken,
+  hashConsentAccessToken,
+} from "./consentAccessTokenCrypto";
 import type {
   ConsentChannel,
   ConsentFormKey,

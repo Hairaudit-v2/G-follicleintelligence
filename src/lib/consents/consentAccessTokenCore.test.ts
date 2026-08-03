@@ -6,14 +6,16 @@ import {
   channelFromDeviceFlag,
   classifyConsentTokenAccess,
   consentAccessTokenExpiresAt,
-  generateConsentAccessToken,
-  hashConsentAccessToken,
   isDraftConsentBody,
   patientSafeMessageForTokenOutcome,
   renderConsentBodyMarkdownSafe,
   surgeryConsentKeysSatisfied,
   validateConsentSignInput,
 } from "./consentAccessTokenCore";
+import {
+  generateConsentAccessToken,
+  hashConsentAccessToken,
+} from "./consentAccessTokenCrypto";
 
 describe("consentAccessTokenCore", () => {
   it("issues opaque tokens and stores only hash equality", () => {

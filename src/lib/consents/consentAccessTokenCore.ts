@@ -1,8 +1,8 @@
 /**
- * Pure helpers for consent e-sign access tokens (no I/O).
+ * Pure helpers for consent e-sign access tokens (no I/O, no Node builtins).
+ * Safe to import from client components. Crypto helpers live in
+ * consentAccessTokenCrypto.ts (server/node only).
  */
-
-import { createHash, randomBytes } from "node:crypto";
 
 import type { ConsentChannel, ConsentFormKey, ConsentInstanceStatus } from "./consentTypes";
 
@@ -25,14 +25,6 @@ export type ConsentTokenResolveOutcome =
   | "expired"
   | "already_signed"
   | "not_outstanding";
-
-export function generateConsentAccessToken(): string {
-  return randomBytes(32).toString("base64url");
-}
-
-export function hashConsentAccessToken(rawToken: string): string {
-  return createHash("sha256").update(rawToken.trim(), "utf8").digest("hex");
-}
 
 export function consentAccessTokenExpiresAt(
   from: Date = new Date(),

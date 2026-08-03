@@ -32,8 +32,6 @@ export {
   classifyConsentTokenAccess,
   CONSENT_ACCESS_TOKEN_EXPIRY_DAYS,
   CONSENT_TOKEN_ERRORS,
-  generateConsentAccessToken,
-  hashConsentAccessToken,
   isDraftConsentBody,
   patientSafeMessageForTokenOutcome,
   renderConsentBodyMarkdownSafe,
@@ -41,3 +39,6 @@ export {
   validateConsentSignInput,
   type ConsentTokenResolveOutcome,
 } from "./consentAccessTokenCore";
+
+// generateConsentAccessToken / hashConsentAccessToken: import from
+// ./consentAccessTokenCrypto or ./consentAccessToken.server (Node only).
