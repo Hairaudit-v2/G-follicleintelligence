@@ -58,7 +58,7 @@ export async function emitAuditEvent(
 
     let actorUserId = asUuidOrNull(input.actorUserId);
     let actorRole = input.actorRole?.trim() || null;
-    let actorType: SystemAuditActorType = input.actorType ?? "staff";
+    const actorType: SystemAuditActorType = input.actorType ?? "staff";
 
     // Resolve session actor when not provided.
     if (actorUserId == null && actorType === "staff") {
