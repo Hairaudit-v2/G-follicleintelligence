@@ -1320,7 +1320,11 @@ async function logHubspotImportAudit(params: {
   if (error) throw new Error(error.message);
 }
 
-/** Cancel a pending import (logs audit; staging stays approved for retry). */
+/**
+ * Cancel / dismiss a pending import from Inbox review.
+ * Marks staging import_status = rejected so loadImportReviewQueue (approved-only) drops it.
+ * Works for approved duplicates without requiring a prior approve step.
+ */
 export async function cancelHubspotImport(
   kind: "contact" | "deal",
   stagingId: string,
@@ -1334,30 +1338,75 @@ export async function cancelHubspotImport(
   const supabase = opts?.supabaseClientForTests ?? supabaseAdmin();
   const tid = tenantId.trim();
   const iid = integrationId.trim();
+  const sid = stagingId.trim();
+  const table =
+    kind === "contact"
+      ? "fi_external_hubspot_contact_staging"
+      : "fi_external_hubspot_deal_staging";
+
+  const { data: existing, error: loadErr } = await supabase
+    .from(table)
+    .select("id, import_status")
+    .eq("id", sid)
+    .eq("integration_id", iid)
+    .eq("tenant_id", tid)
+    .maybeSingle();
+
+  if (loadErr) return { ok: false, error: loadErr.message };
+  if (!existing) {
+    return {
+      ok: false,
+      error: kind === "contact" ? "Staged contact not found." : "Staged deal not found.",
+    };
+  }
+
+  const currentStatus = String(
+    (existing as { import_status?: string | null }).import_status ?? ""
+  ).trim();
+  if (currentStatus === "imported") {
+    return { ok: false, error: "Already imported — cannot cancel." };
+  }
+
+  // Idempotent when already rejected; otherwise dismiss from the approved review queue.
+  if (currentStatus !== "rejected") {
+    const now = new Date().toISOString();
+    const { error: updateErr } = await supabase
+      .from(table)
+      .update({
+        import_status: "rejected",
+        imported_at: null,
+        updated_at: now,
+      })
+      .eq("id", sid)
+      .eq("integration_id", iid)
+      .eq("tenant_id", tid);
+
+    if (updateErr) return { ok: false, error: updateErr.message };
+  }
 
   await logImportAuditEvent({
     tenantId: tid,
     integrationId: iid,
     stagingRecordType: kind === "contact" ? "hubspot_contact" : "hubspot_deal",
-    stagingRecordId: stagingId,
+    stagingRecordId: sid,
     eventKind: "import_cancelled",
     actorAuthUserId: auth.actorAuthUserId,
     actorFiUserId: auth.fiUserId,
     actorLabel: auth.actorLabel,
-    detail: { kind },
+    detail: { kind, previous_import_status: currentStatus || null },
     supabase,
   });
 
   await logHubspotImportAudit({
     integrationId: iid,
     tenantId: tid,
-    stagingContactId: kind === "contact" ? stagingId : null,
-    stagingDealId: kind === "deal" ? stagingId : null,
+    stagingContactId: kind === "contact" ? sid : null,
+    stagingDealId: kind === "deal" ? sid : null,
     action: kind === "contact" ? "contact_import_cancelled" : "deal_import_cancelled",
     actorAuthUserId: auth.actorAuthUserId,
     actorFiUserId: auth.fiUserId,
     actorLabel: auth.actorLabel,
-    detail: {},
+    detail: { previous_import_status: currentStatus || null },
     supabase,
   });
 
