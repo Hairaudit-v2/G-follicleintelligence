@@ -622,12 +622,12 @@ export const STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS: Record<string, RoleFieldTemplat
     "surgery.outcome_metrics": "read",
   },
   /**
-   * Reception — operational front-desk field boundaries (SA-2B calibrated).
+   * Reception — operational front-desk field boundaries (SA-2B + D6G finance).
    *
-   * Module ceiling is `patient_os` → edit (SA-1). Field grants here define what reception may
-   * actually touch inside PatientOS: contact details and documents for intake, identity for
-   * verification, photos for check-in — while clinical, financial, and governance fields stay
-   * hidden. Field access never exceeds module access; these entries sit below the edit ceiling.
+   * Module ceiling: patient_os edit + financial_os edit (SA-1). Field grants define what
+   * reception may touch: intake/identity/docs, plus **payment status** (and invoice status)
+   * for taking payments and chasing deposits. Clinical notes, margin, revenue, and commission
+   * stay hidden. Field access never exceeds module access.
    */
   reception: {
     "patient.identity": "read",
@@ -636,9 +636,12 @@ export const STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS: Record<string, RoleFieldTemplat
     "patient.documents": "read",
     "patient.audit_reports": "hidden",
     // patient.medical_history, patient.medications, patient.financial_summary,
-    // patient.internal_notes omitted → hidden by default (clinical / financial / governance).
+    // patient.internal_notes omitted → hidden (clinical / P&L / governance).
     "consultation.quote": "read",
-    "financial.payment_status": "read",
+    /** Operational money: take payment / deposit / outstanding chase (not full ledger). */
+    "financial.payment_status": "edit",
+    "financial.invoice": "read",
+    // financial.revenue / margin / practitioner_commission omitted → hidden.
   },
   consultant: {
     "patient.identity": "read",

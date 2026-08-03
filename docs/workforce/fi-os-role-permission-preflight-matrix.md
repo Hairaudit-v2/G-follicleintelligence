@@ -146,8 +146,37 @@ Persona `receptionist_roster_override` in `PREFLIGHT_ROLE_SCENARIOS` — PASS.
 
 - **Three role vocabularies:** OS roles (`fi_doctor`), workspace profiles (`surgeon`), SA-1 keys (`doctor`/`reception`). `normalizeStaffRoleKey("surgeon")` → `doctor`.
 - **Dual enforcement:** Stage 2 feature keys + SA-1 modules both affect nav; layout merges SA-1 onto Stage 2 via `computeStaffAccessNavFeatureOverrides`.
-- **SA-1 nav overlay gap:** `financial_os`, `platform_progress`, `investor_dashboard` not mapped to feature keys — finance routes rely on template + tenant admin blocks.
+- **SA-1 nav overlay:** `financial_os` maps to feature key `settings` so Money hub (`/financial-os`, payments) is not force-hidden when staff have financial module access without generic settings.
 - **Admin intelligence routes** (`/intelligence/*`, `/reports/admin`): page-level `canViewFiOsNavigationAudit` gate in addition to feature map.
+
+---
+
+## D6G role visibility matrix (product)
+
+Canonical TypeScript config:
+
+`src/lib/fiOs/navigation/fiOsD6gRoleVisibilityMatrix.ts`
+
+### Finance rule (authoritative)
+
+| Role | Finance / Money |
+| --- | --- |
+| front_desk | ✅ Yes — take payments, record deposits, chase outstanding balances |
+| consultant | ❌ No |
+| clinical | ❌ No |
+| surgery | ❌ No |
+| manager | ✅ Yes — full |
+| admin | ✅ Yes — full |
+| auditor | ❌ No (read-only reserved for later) |
+
+### Primary rail
+
+All roles: **Today · Calendar · Patients · Team · Reports · More** (same six slots).
+
+### Future split (recommended)
+
+- **Front Desk:** simplified Payments / Deposits / Outstanding chase  
+- **Manager / Admin:** full Money hub (ledger, margin, clearance automation)
 - **SA-1 route guards:** production-only (`NODE_ENV !== "production"` → noop in dev).
 
 ## Out of scope (unchanged)

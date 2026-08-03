@@ -64,7 +64,8 @@ const ROLE_MODULE_LEVELS: Record<
     lead_flow: "edit",
     patient_os: "edit",
     consultation_os: "read",
-    financial_os: "read",
+    // D6G: Front Desk Money (payments / deposits) — edit module ceiling
+    financial_os: "edit",
   },
   investor: {
     analytics_os: "read",
@@ -402,10 +403,22 @@ test("SA-2B Test C: reception cannot access medications", () => {
   assert.equal(canViewField(levelOf(access, "patient.medications")), false);
 });
 
-test("SA-2B Test D: reception cannot access financial summary", () => {
+test("SA-2B Test D: reception cannot access patient P&L financial summary", () => {
   const access = fieldAccessForRole("reception");
+  // High-level patient financial summary stays hidden; operational payment_status is allowed.
   assert.equal(levelOf(access, "patient.financial_summary"), "hidden");
   assert.equal(canViewField(levelOf(access, "patient.financial_summary")), false);
+});
+
+test("D6G finance: reception can edit payment status and read invoice status", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "financial.payment_status"), "edit");
+  assert.equal(canEditField(levelOf(access, "financial.payment_status")), true);
+  assert.equal(levelOf(access, "financial.invoice"), "read");
+  assert.equal(canViewField(levelOf(access, "financial.invoice")), true);
+  // Margin / revenue still hidden for Front Desk.
+  assert.equal(levelOf(access, "financial.margin"), "hidden");
+  assert.equal(levelOf(access, "financial.revenue"), "hidden");
 });
 
 test("SA-2B Test E: reception cannot access internal notes", () => {

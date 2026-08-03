@@ -68,9 +68,11 @@ test("nurse assigned-case-only scope", () => {
   assert.equal(canViewModule(access, "financial_os"), false);
 });
 
-test("receptionist has no financial module access but can edit patient_os (SA-2B)", () => {
+test("receptionist has financial_os for payments/deposits and can edit patient_os (D6G + SA-2B)", () => {
   const access = computeEffectiveAccess({ roleKey: "reception", grants: [] });
-  assert.equal(canViewModule(access, "financial_os"), false);
+  // Front Desk takes payments, records deposits, chases balances (Money hub).
+  assert.equal(canViewModule(access, "financial_os"), true);
+  assert.equal(canEditModule(access, "financial_os"), true);
   assert.equal(canViewModule(access, "investor_dashboard"), false);
   // Reception still operates the front desk.
   assert.equal(canEditModule(access, "lead_flow"), true);
@@ -134,14 +136,16 @@ test("computeStaffAccessNavFeatureOverrides hides blocked module feature keys", 
   assert.equal(managerOverrides.analytics, undefined);
 });
 
-test("server guard decision blocks direct URL access (moduleSatisfies)", () => {
-  // A receptionist hitting the FinancialOS URL directly.
-  const access = computeEffectiveAccess({ roleKey: "reception", grants: [] });
-  assert.equal(moduleSatisfies(access, "financial_os", "read"), false);
-  // Same person on a module they hold.
-  assert.equal(moduleSatisfies(access, "lead_flow", "edit"), true);
-  // Approve gate denies an editor.
+test("server guard decision allows Front Desk Money; blocks clinical finance (moduleSatisfies)", () => {
+  // Front Desk may open FinancialOS / Money for payments and deposits.
+  const reception = computeEffectiveAccess({ roleKey: "reception", grants: [] });
+  assert.equal(moduleSatisfies(reception, "financial_os", "read"), true);
+  assert.equal(moduleSatisfies(reception, "financial_os", "edit"), true);
+  assert.equal(moduleSatisfies(reception, "lead_flow", "edit"), true);
+
+  // Clinical roles still blocked from finance by default.
   const doctor = computeEffectiveAccess({ roleKey: "doctor", grants: [] });
+  assert.equal(moduleSatisfies(doctor, "financial_os", "read"), false);
   assert.equal(moduleSatisfies(doctor, "patient_os", "approve"), false);
   assert.equal(moduleSatisfies(doctor, "surgery_os", "approve"), true);
 });

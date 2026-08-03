@@ -256,19 +256,24 @@ export const STAFF_ROLE_TEMPLATE_DEFAULTS: Record<
     academy_os: { level: "read", scope: "tenant" },
   },
   /**
-   * Reception — operational front-desk staff (SA-2B calibrated).
+   * Reception — operational front-desk staff (SA-2B calibrated + D6G finance).
    *
    * Reception requires administrative access to patient records for workflow continuity
    * (contact updates, document intake, identity verification). Module access provides the
    * operational ceiling (`patient_os` → edit). Field permissions (SA-2) enforce protected-data
-   * boundaries — reception must never access clinical decision data, financial summaries, or
-   * internal practitioner notes even though the module ceiling is edit.
+   * boundaries — clinical decision data and internal practitioner notes stay hidden.
+   *
+   * **Finance / Money:** Front desk records payments, deposits, and chases outstanding balances
+   * (Evolved and similar tenants). Module `financial_os` is edit for operational money tasks;
+   * margin / revenue / commission remain field-hidden. Manager/admin retain full finance depth.
    */
   reception: {
     clinic_os: { level: "edit", scope: "tenant" },
     lead_flow: { level: "edit", scope: "tenant" },
     patient_os: { level: "edit", scope: "tenant" },
     consultation_os: { level: "read", scope: "tenant" },
+    /** Payments, deposits, outstanding balances (Money hub). */
+    financial_os: { level: "edit", scope: "tenant" },
     academy_os: { level: "read", scope: "tenant" },
   },
   consultant: {

@@ -256,6 +256,12 @@ export const STAFF_MODULE_TO_FEATURE_KEYS: Partial<
   analytics_os: ["analytics"],
   workforce_os: ["staff"],
   settings: ["settings"],
+  /**
+   * Money hub routes use `featureKey: "settings"` today (`financial-os`, `payments`).
+   * Mapping financial_os here prevents SA-1 from force-hiding Money for Front Desk when they
+   * have financial_os but not the generic `settings` SA-1 module.
+   */
+  financial_os: ["settings"],
 };
 
 /**
