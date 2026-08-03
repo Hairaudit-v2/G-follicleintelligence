@@ -137,7 +137,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "How Follicle Intelligence is becoming the operating system for hair restoration clinics",
     subtext:
       "Follicle Intelligence is progressing from a connected product ecosystem into a unified operating system for hair restoration clinics — expanding operational workflow depth, connected patient intelligence, and deployment and migration maturity.",
-    lastUpdated: "2026-08-03",
+    lastUpdated: "2026-08-04",
   },
 
   currentPosition: {
@@ -426,6 +426,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 /** Public-safe verified milestones (no internal phase codes). */
 export const PLATFORM_PROGRESS_VERIFIED_MILESTONES: PlatformProgressDeploymentMilestone[] = [
   {
+    id: "financial-os-trial-ready",
+    date: "2026-08-04",
+    tag: "FinancialOS · ClinicOS",
+    title: "FinancialOS live for trial testing — manual payments & deposits ready",
+  },
+  {
     id: "clinic-inbox-staged-approvals",
     date: "2026-08-03",
     tag: "LeadFlow · OnboardingOS · Integration Layer",
@@ -676,13 +682,16 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "financial-os",
     name: "FinancialOS",
-    completionPercent: 64,
+    completionPercent: 78,
     description:
-      "Payments, revenue integrity, clearance pathways and executive finance views for hair restoration operations.",
-    status: "In Development",
-    latestMilestone: "Financial clearance and ledger foundations in active development",
+      "Money workspace for hair restoration clinics: manual payment and deposit records for live trial use, with clearance automation, full ledger depth and live card payments ready to enable when the clinic turns them on.",
+    status: "Operational Pilot",
+    statusLabel: "Operational Pilot",
+    latestMilestone:
+      "Evolved trial: manual payments & deposits ready · Live payments enablement pending · Clearance automation & full ledger in development",
     learnMoreHref: "/platform/progress#progress-financial-os",
-    evidenceNote: "Phase-based financial architecture; not ready for full operational claims.",
+    evidenceNote:
+      "Money / financial-os surfaces, fi_payment_records manual path, pathway inbox foundations; FI_PAYMENTS_ENABLED gates live card checkout; clearance automation and full ledger still expanding.",
   },
   {
     id: "security-layer",
@@ -911,6 +920,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 /** Internal recent releases (may retain engineering titles for admin). */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
   {
+    id: "2026-08-04-financial-os-trial",
+    title: "FinancialOS rolled out for live trial testing — manual payments ready",
+    module: "FinancialOS",
+    date: "2026-08-04",
+  },
+  {
     id: "2026-08-03-clinic-inbox",
     title: "Clinic Inbox for staged HubSpot lead and contact approvals",
     module: "LeadFlow",
@@ -971,6 +986,15 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
  * Extended engineering detail remains in internal runbooks and git history.
  */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-08-04-financial-os-trial-ready",
+    date: "2026-08-04",
+    tag: "financial-os",
+    title: "FinancialOS live for trial testing — manual payments & deposits ready",
+    summary:
+      "FinancialOS is rolled out for controlled live testing: clinics can record manual payments and deposits in the Money workspace. Live card payments are product-ready and enabled by configuration. Clearance automation and full ledger depth continue in development alongside broader platform finance.",
+    modules: ["FinancialOS", "ClinicOS"],
+  },
   {
     id: "2026-08-03-clinic-inbox-approvals",
     date: "2026-08-03",

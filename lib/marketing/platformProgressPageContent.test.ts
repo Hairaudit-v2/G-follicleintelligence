@@ -20,12 +20,12 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     const snapshot = getPlatformProgressSnapshot();
     assert.equal(snapshot.activeModuleCount, 22);
     assert.equal(snapshot.statusCounts.Deployed, 3);
-    assert.equal(snapshot.statusCounts["Operational Pilot"], 11);
+    assert.equal(snapshot.statusCounts["Operational Pilot"], 12);
     assert.equal(snapshot.statusCounts["Advanced Build"], 6);
-    assert.equal(snapshot.statusCounts["In Development"], 1);
+    assert.equal(snapshot.statusCounts["In Development"], 0);
     assert.equal(snapshot.statusCounts["Research and Future Development"], 1);
-    assert.equal(snapshot.deployableSurfaceCount, 14);
-    assert.equal(snapshot.lastUpdated, "2026-08-03");
+    assert.equal(snapshot.deployableSurfaceCount, 15);
+    assert.equal(snapshot.lastUpdated, "2026-08-04");
   });
 
   it("includes FI Patient App as Operational Pilot after PatientOS", () => {
@@ -58,33 +58,41 @@ describe("FI-WEB-REFRESH-1J platform progress Patient App registry", () => {
     assert.equal(bars.length, 5);
     const pilot = bars.find((b) => b.status === "Operational Pilot");
     assert.ok(pilot);
-    assert.equal(pilot.count, 11);
+    assert.equal(pilot.count, 12);
     assert.equal(pilot.total, 22);
-    assert.equal(pilot.widthFraction, 11 / 22);
-    assert.equal(pilot.accessibleValue, "11 of 22 systems are in Operational Pilot.");
+    assert.equal(pilot.widthFraction, 12 / 22);
+    assert.equal(pilot.accessibleValue, "12 of 22 systems are in Operational Pilot.");
     assert.doesNotMatch(pilot.accessibleValue, /% complete|platform completion/i);
 
     const metrics = getPlatformProgressMetrics();
     assert.equal(metrics.find((m) => m.label === "Systems tracked")?.value, "22");
     assert.equal(
       getOperationalOrPilotSummary(),
-      "14 of 22 systems are deployed or operating in controlled pilot scope."
+      "15 of 22 systems are deployed or operating in controlled pilot scope."
     );
   });
 
-  it("features Clinic Inbox as the newest verified milestone", () => {
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "clinic-inbox-staged-approvals");
-    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-08-03");
+  it("features FinancialOS trial readiness as the newest verified milestone", () => {
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.id, "financial-os-trial-ready");
+    assert.equal(PLATFORM_PROGRESS_VERIFIED_MILESTONES[0]?.date, "2026-08-04");
+    assert.ok(
+      PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "clinic-inbox-staged-approvals")
+    );
     assert.ok(
       PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "typed-clinical-notes")
     );
     assert.ok(
-      PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "clinic-guide-staff-preference")
-    );
-    assert.ok(
       PLATFORM_PROGRESS_VERIFIED_MILESTONES.some((m) => m.id === "controlled-crm-migration")
     );
-    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-08-03");
+    assert.equal(PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated, "2026-08-04");
+  });
+
+  it("lists FinancialOS as Operational Pilot with trial payment notes", () => {
+    const financial = PLATFORM_PROGRESS_MODULES.find((m) => m.id === "financial-os");
+    assert.equal(financial?.status, "Operational Pilot");
+    assert.match(financial?.latestMilestone ?? "", /manual payments/i);
+    assert.match(financial?.latestMilestone ?? "", /Live payments/i);
+    assert.match(financial?.description ?? "", /manual payment/i);
   });
 
   it("updates LeadFlow and PatientOS latest milestones for Aug 2026 operator surfaces", () => {
