@@ -313,7 +313,8 @@ export async function loadPatientJourneySnapshot(
     state,
     signals,
     hrefs: {
-      missing_consent: `${basePath}/consultations`,
+      // No patient-scoped e-sign UI yet — route to Surgery readiness (consent proxy), never a 404.
+      missing_consent: `/fi-admin/${tid}/surgery-readiness`,
       unpaid_deposit: `/fi-admin/${tid}/financial/dashboard`,
       no_surgery_date: `/fi-admin/${tid}/surgery-booking`,
       missing_images: `${basePath}/imaging`,

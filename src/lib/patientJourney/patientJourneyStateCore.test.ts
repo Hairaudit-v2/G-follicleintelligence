@@ -140,6 +140,28 @@ describe("patientJourneyStateCore", () => {
     assert.ok(blockers.some((b) => b.kind === "unpaid_deposit"));
   });
 
+  it("missing_consent blocker uses provided href and never invents a dead path", () => {
+    const blockers = detectPatientJourneyBlockers({
+      state: "pre_op_incomplete",
+      signals: baseSignals({ consentSigned: false, depositPaid: true }),
+      hrefs: { missing_consent: "/fi-admin/t/surgery-readiness" },
+    });
+    const consent = blockers.find((b) => b.kind === "missing_consent");
+    assert.ok(consent);
+    assert.equal(consent!.href, "/fi-admin/t/surgery-readiness");
+    assert.ok(!consent!.href?.includes("/patients/") || !consent!.href?.endsWith("/consultations"));
+  });
+
+  it("missing_consent without href is status-only (no link)", () => {
+    const blockers = detectPatientJourneyBlockers({
+      state: "quote_accepted",
+      signals: baseSignals({ consentSigned: false, depositPaid: true }),
+    });
+    const consent = blockers.find((b) => b.kind === "missing_consent");
+    assert.ok(consent);
+    assert.equal(consent!.href, null);
+  });
+
   it("picks higher ranked lifecycle state", () => {
     assert.equal(pickHigherJourneyState("consult_completed", "quote_sent"), "quote_sent");
   });

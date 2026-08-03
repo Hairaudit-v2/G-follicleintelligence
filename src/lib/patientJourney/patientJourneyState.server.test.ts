@@ -46,6 +46,14 @@ describe("patientJourneyState.server safety", () => {
     assert.ok(basePath.includes(PATIENT));
   });
 
+  it("missing_consent attention chip must not target a non-existent patient/consultations path", () => {
+    // Mirrors loadPatientJourneySnapshot href map — Surgery readiness is the live consent proxy surface.
+    const missingConsentHref = `/fi-admin/${TENANT}/surgery-readiness`;
+    assert.ok(missingConsentHref.includes(TENANT));
+    assert.ok(missingConsentHref.endsWith("/surgery-readiness"));
+    assert.ok(!missingConsentHref.includes(`/patients/${PATIENT}/consultations`));
+  });
+
   it("manual transition policy requires allowed graph for automatic moves", () => {
     assert.equal(
       isPatientJourneyTransitionAllowed("consult_booked", "consult_completed", false),
