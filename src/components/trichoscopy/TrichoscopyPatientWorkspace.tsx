@@ -10,6 +10,7 @@ import type { TrichoscopyCapability } from "@/src/lib/platform/entitlements/tric
 export function TrichoscopyPatientWorkspace(props: {
   tenantId: string;
   patientId: string;
+  consultationId?: string | null;
   links: Array<{
     id: string;
     purpose: string;
@@ -126,6 +127,7 @@ export function TrichoscopyPatientWorkspace(props: {
       <TrichoscopyRequestModal
         tenantId={props.tenantId}
         patientId={props.patientId}
+        consultationId={props.consultationId}
         open={requestOpen}
         onClose={() => setRequestOpen(false)}
         hasActiveRequest={props.links.some((l) =>

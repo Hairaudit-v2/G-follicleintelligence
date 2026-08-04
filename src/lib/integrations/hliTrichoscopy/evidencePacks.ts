@@ -155,6 +155,34 @@ export async function importConfirmedEvidencePack(
     .eq("id", input.linkId)
     .eq("tenant_id", tenantId);
 
+  // FI-TRICHOSCOPY-1B: sync normalised findings into any linked consultation that is not finalised.
+  const { data: consultLinks } = await supabase
+    .from("fi_hli_trichoscopy_consultation_links")
+    .select("id, consultation_id, consultation_finalised_at")
+    .eq("tenant_id", tenantId)
+    .eq("link_id", input.linkId)
+    .is("consultation_finalised_at", null);
+
+  if (consultLinks?.length) {
+    const { syncConsultationFindingsFromPack } = await import("./consultation/service.server");
+    for (const cl of consultLinks as Array<{ consultation_id: string }>) {
+      await syncConsultationFindingsFromPack({
+        tenantId,
+        consultationId: String(cl.consultation_id),
+        linkId: input.linkId,
+        evidencePackId: packId,
+        packVersion,
+        hliAssessmentId: packPayload.assessmentId
+          ? String(packPayload.assessmentId)
+          : packPayload.hli_assessment_id
+            ? String(packPayload.hli_assessment_id)
+            : null,
+        packPayload,
+        supabaseClientForTests: input.supabaseClientForTests,
+      }).catch(() => undefined);
+    }
+  }
+
   await recordTrichoscopyUsage({
     tenantId,
     capability: "trichoscopy.confirmed_evidence",

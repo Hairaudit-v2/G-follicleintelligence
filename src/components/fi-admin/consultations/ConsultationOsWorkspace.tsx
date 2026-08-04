@@ -13,8 +13,10 @@ import { ConsultationPatientLinkField } from "@/src/components/fi-admin/consulta
 import { ConsultationOsHubRoutingActions } from "@/src/components/fi-admin/consultations/ConsultationOsHubRoutingActions";
 import { ConsultationPreparationChecklistPanel } from "@/src/components/fi-admin/consultations/ConsultationPreparationChecklistPanel";
 import { ConsultationVoiceCapturePanel } from "@/src/components/fi-admin/consultations/ConsultationVoiceCapturePanel";
+import { ConsultationTrichoscopySection } from "@/src/components/trichoscopy/ConsultationTrichoscopySection";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ConsultationTrichoscopyHubInitial } from "@/src/lib/integrations/hliTrichoscopy/consultation/hubInitial";
 import {
   stableConsultationPayloadSignature,
   useConsultationAutosave,
@@ -67,6 +69,7 @@ export type ConsultationOsWorkspaceProps = {
   clinicalStaffOptions?: ClinicalStaffPickerOption[];
   initialConsultationChecklistPreview?: PatientTwinConsultationChecklistRow | null;
   pathwayLauncher: ConsultationPathwayLauncherViewModel;
+  trichoscopyInitial?: ConsultationTrichoscopyHubInitial | null;
 };
 
 export function ConsultationOsWorkspace({
@@ -78,6 +81,7 @@ export function ConsultationOsWorkspace({
   clinicalStaffOptions = [],
   initialConsultationChecklistPreview = null,
   pathwayLauncher,
+  trichoscopyInitial = null,
 }: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -342,6 +346,26 @@ export function ConsultationOsWorkspace({
               patientId={linkedPatientId}
             />
           </FiCard>
+        );
+      case "trichoscopy":
+        if (!trichoscopyInitial) return null;
+        return (
+          <ConsultationTrichoscopySection
+            key="trichoscopy"
+            tenantId={tenantId}
+            consultationId={cid}
+            patientId={linkedPatientId}
+            initialAvailable={trichoscopyInitial.available}
+            initialCard={trichoscopyInitial.card}
+            initialIndication={trichoscopyInitial.indication}
+            initialFindings={trichoscopyInitial.findings}
+            initialReviews={trichoscopyInitial.reviews}
+            patientSafeSummaryText={trichoscopyInitial.patientSafeSummaryText}
+            canRequest={trichoscopyInitial.canRequest}
+            canReview={trichoscopyInitial.canReview}
+            canAccept={trichoscopyInitial.canAccept}
+            historicalReadOnly={trichoscopyInitial.historicalReadOnly}
+          />
         );
       case "pathway_launcher":
         return pathwayLauncherEl;

@@ -12,6 +12,7 @@
 export const CONSULTATION_HUB_SECTION_IDS = [
   "intelligence_summary",
   "routing",
+  "trichoscopy",
   "pathway_launcher",
   "intake",
   "checklist",
@@ -33,14 +34,20 @@ export function buildConsultationHubLayoutPlan(
   if (!hasPathwayCompletionSummary) {
     return {
       hasPathwayCompletionSummary: false,
-      orderedSections: ["pathway_launcher", "intake"],
+      orderedSections: ["pathway_launcher", "trichoscopy", "intake"],
       showRoutingTiles: false,
       showIntelligenceSummary: false,
     };
   }
   return {
     hasPathwayCompletionSummary: true,
-    orderedSections: ["intelligence_summary", "routing", "pathway_launcher", "intake"],
+    orderedSections: [
+      "intelligence_summary",
+      "routing",
+      "trichoscopy",
+      "pathway_launcher",
+      "intake",
+    ],
     showRoutingTiles: true,
     showIntelligenceSummary: true,
   };

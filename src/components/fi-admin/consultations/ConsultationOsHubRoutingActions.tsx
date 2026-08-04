@@ -65,6 +65,14 @@ export function ConsultationOsHubRoutingActions({
       cta: pid ? "Patient labs" : "Pathology pathway form",
     },
     {
+      title: "Open Trichoscopy",
+      body: "Request or review HLI trichoscopy evidence for this consultation without leaving FiOS.",
+      href: pid
+        ? `/fi-admin/${tid}/patients/${pid}/trichoscopy?consultationId=${cid}`
+        : null,
+      cta: pid ? "Patient trichoscopy" : "Link a patient first",
+    },
+    {
       title: "Schedule follow-up",
       body: "Operational calendar for booking the next visit.",
       href: `/fi-admin/${tid}/calendar`,

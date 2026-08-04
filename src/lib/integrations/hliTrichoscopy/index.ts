@@ -1,8 +1,3 @@
-/**
- * Canonical FiOS ↔ HLI trichoscopy adapter.
- * Do not call HLI directly from page components or business modules.
- */
-
 export { loadHliTrichoscopyConfig, FI_ENABLE_HLI_TRICHOSCOPY } from "./config";
 export { hliTrichoscopyFetchJson } from "./client";
 export { requestTrichoscopy } from "./commands";
@@ -36,3 +31,31 @@ export { TRICHOSCOPY_PERMISSIONS } from "./permissions";
 export { emitTrichoscopyTelemetry } from "./telemetry";
 export * from "./types";
 export * from "./errors";
+
+// FI-TRICHOSCOPY-1B consultation integration (pure + types)
+export {
+  resolveConsultationTrichoscopyStatus,
+  resolveConsultationTrichoscopyReadiness,
+  HLI_OUTAGE_USER_MESSAGE,
+  isTrichoscopyIndicationCode,
+} from "./consultation/status";
+export {
+  assertDiagnosisAcceptanceGuard,
+  assertFindingReviewAllowed,
+  canTransitionAcknowledgement,
+  isAcceptanceAcknowledgement,
+} from "./consultation/acknowledgement";
+export {
+  normaliseTrichoscopyFindingsFromPack,
+  groupFindingsByDomain,
+} from "./consultation/findings";
+export {
+  buildPatientSafeTrichoscopySummary,
+  formatPatientSafeTrichoscopySummaryText,
+} from "./consultation/patientSafeSummary";
+export {
+  buildConsultationTrichoscopyIdempotencyKey,
+  buildFiOsToHliConsultationContext,
+  sanitiseFreeText,
+} from "./consultation/idempotency";
+export * from "./consultation/types";

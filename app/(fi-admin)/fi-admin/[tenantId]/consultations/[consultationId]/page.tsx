@@ -12,6 +12,10 @@ import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/pa
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadConsultationFormInstances } from "@/src/lib/consultationForms/consultationFormLoad.server";
 import { buildConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
+import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadConsultationTrichoscopyWorkspace } from "@/src/lib/integrations/hliTrichoscopy/consultation/service.server";
+import type { ConsultationTrichoscopyHubInitial } from "@/src/lib/integrations/hliTrichoscopy/consultation/hubInitial";
 
 export const metadata = {
   title: "Consultation",
@@ -63,6 +67,42 @@ export default async function ConsultationOsEditRoutePage({
         )
       : null;
 
+  let trichoscopyInitial: ConsultationTrichoscopyHubInitial | null = null;
+  try {
+    const authUserId = await resolveAuthUserId(null);
+    if (authUserId) {
+      const { data: fiUser } = await supabaseAdmin()
+        .from("fi_users")
+        .select("id")
+        .eq("tenant_id", tid)
+        .eq("auth_user_id", authUserId)
+        .maybeSingle();
+      if (fiUser) {
+        const workspace = await loadConsultationTrichoscopyWorkspace({
+          tenantId: tid,
+          consultationId: cid,
+          userId: String((fiUser as { id: string }).id),
+        });
+        if (workspace.available || workspace.card.failureKind) {
+          trichoscopyInitial = {
+            available: workspace.available,
+            card: workspace.card,
+            indication: workspace.indication,
+            findings: workspace.findings,
+            reviews: workspace.reviews,
+            patientSafeSummaryText: workspace.patientSafeSummaryText,
+            canRequest: workspace.canRequest,
+            canReview: workspace.canReview,
+            canAccept: workspace.canAccept,
+            historicalReadOnly: workspace.historicalReadOnly,
+          };
+        }
+      }
+    }
+  } catch (e) {
+    console.error("[ConsultationOsEditRoutePage] trichoscopy workspace load", e);
+  }
+
   return (
     <ConsultationOsEditPage
       tenantId={tid}
@@ -73,6 +113,7 @@ export default async function ConsultationOsEditRoutePage({
       clinicalStaffOptions={clinicalStaffOptions}
       initialConsultationChecklistPreview={initialConsultationChecklistPreview}
       pathwayLauncher={pathwayLauncher}
+      trichoscopyInitial={trichoscopyInitial}
     />
   );
 }

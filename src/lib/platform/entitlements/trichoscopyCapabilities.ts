@@ -18,6 +18,16 @@ export const TRICHOSCOPY_CAPABILITIES = [
   "trichoscopy.procedure_day",
   "trichoscopy.patient_reports",
   "trichoscopy.fios_integration",
+  // FI-TRICHOSCOPY-1B consultation integration
+  "trichoscopy.view_status",
+  "trichoscopy.view_evidence",
+  "trichoscopy.review_findings",
+  "trichoscopy.accept_findings",
+  "trichoscopy.request_additional_evidence",
+  "trichoscopy.escalate",
+  "trichoscopy.withdraw",
+  "trichoscopy.configure_consultation_rules",
+  "trichoscopy.view_audit_history",
 ] as const;
 
 export type TrichoscopyCapability = (typeof TRICHOSCOPY_CAPABILITIES)[number];
@@ -46,15 +56,23 @@ export type TrichoscopyEntitlementStatus = (typeof TRICHOSCOPY_ENTITLEMENT_STATU
 
 const CAPTURE_CAPABILITIES: readonly TrichoscopyCapability[] = [
   "trichoscopy.view",
+  "trichoscopy.view_status",
   "trichoscopy.request",
   "trichoscopy.capture",
   "trichoscopy.confirmed_evidence",
+  "trichoscopy.view_evidence",
   "trichoscopy.fios_integration",
 ];
 
 const CLINICAL_CAPABILITIES: readonly TrichoscopyCapability[] = [
   ...CAPTURE_CAPABILITIES,
   "trichoscopy.review",
+  "trichoscopy.review_findings",
+  "trichoscopy.accept_findings",
+  "trichoscopy.request_additional_evidence",
+  "trichoscopy.escalate",
+  "trichoscopy.withdraw",
+  "trichoscopy.view_audit_history",
   "trichoscopy.quantitative_metrics",
   "trichoscopy.patient_reports",
 ];
@@ -66,9 +84,14 @@ const LONGITUDINAL_CAPABILITIES: readonly TrichoscopyCapability[] = [
 ];
 
 const SURGICAL_CAPABILITIES: readonly TrichoscopyCapability[] = [
-  ...CLINICAL_CAPABILITIES,
+  ...CAPTURE_CAPABILITIES,
+  "trichoscopy.review",
+  "trichoscopy.review_findings",
+  "trichoscopy.view_audit_history",
+  "trichoscopy.quantitative_metrics",
   "trichoscopy.surgical_planning",
   "trichoscopy.procedure_day",
+  // Surgical tier does NOT grant clinical acceptance of consultation findings.
 ];
 
 const COMPLETE_CAPABILITIES: readonly TrichoscopyCapability[] = [...TRICHOSCOPY_CAPABILITIES];
@@ -86,7 +109,10 @@ export const TRICHOSCOPY_TIER_CAPABILITIES: Readonly<
 /** Capabilities that remain readable after expiry/cancellation (historical evidence). */
 export const TRICHOSCOPY_HISTORICAL_READ_CAPABILITIES: readonly TrichoscopyCapability[] = [
   "trichoscopy.view",
+  "trichoscopy.view_status",
   "trichoscopy.confirmed_evidence",
+  "trichoscopy.view_evidence",
+  "trichoscopy.view_audit_history",
 ];
 
 /** Capabilities that create new billable / clinical work. */
@@ -94,6 +120,12 @@ export const TRICHOSCOPY_NEW_USAGE_CAPABILITIES: readonly TrichoscopyCapability[
   "trichoscopy.request",
   "trichoscopy.capture",
   "trichoscopy.review",
+  "trichoscopy.review_findings",
+  "trichoscopy.accept_findings",
+  "trichoscopy.request_additional_evidence",
+  "trichoscopy.escalate",
+  "trichoscopy.withdraw",
+  "trichoscopy.configure_consultation_rules",
   "trichoscopy.quantitative_metrics",
   "trichoscopy.longitudinal",
   "trichoscopy.treatment_response",
@@ -157,9 +189,18 @@ export function capabilitiesFromModuleSettings(
   if (!settings) return [...TRICHOSCOPY_CAPABILITIES];
   const out = new Set<TrichoscopyCapability>([
     "trichoscopy.view",
+    "trichoscopy.view_status",
     "trichoscopy.request",
     "trichoscopy.review",
+    "trichoscopy.review_findings",
+    "trichoscopy.accept_findings",
+    "trichoscopy.request_additional_evidence",
+    "trichoscopy.escalate",
+    "trichoscopy.withdraw",
+    "trichoscopy.view_audit_history",
+    "trichoscopy.configure_consultation_rules",
     "trichoscopy.confirmed_evidence",
+    "trichoscopy.view_evidence",
     "trichoscopy.quantitative_metrics",
     "trichoscopy.fios_integration",
   ]);
@@ -172,6 +213,22 @@ export function capabilitiesFromModuleSettings(
   if (settings.allowProcedureDayCapture) out.add("trichoscopy.procedure_day");
   if (settings.allowPatientReports) out.add("trichoscopy.patient_reports");
   return TRICHOSCOPY_CAPABILITIES.filter((c) => out.has(c));
+}
+
+/** Map 1B capability aliases onto equivalent 1A gates when only legacy caps are entitled. */
+export function resolveTrichoscopyCapabilityAlias(
+  capability: TrichoscopyCapability
+): TrichoscopyCapability {
+  switch (capability) {
+    case "trichoscopy.view_status":
+      return "trichoscopy.view";
+    case "trichoscopy.view_evidence":
+      return "trichoscopy.confirmed_evidence";
+    case "trichoscopy.review_findings":
+      return "trichoscopy.review";
+    default:
+      return capability;
+  }
 }
 
 export function isEntitlementStatusUsableForNewWork(
@@ -337,7 +394,10 @@ export function evaluateTrichoscopyAccessLayers(input: {
     return { ...base, denialReason: "tenant_module_disabled" };
   }
 
-  const capabilityIncluded = hasCapability(enabledCapabilities, input.requestedCapability);
+  const requestedAlias = resolveTrichoscopyCapabilityAlias(input.requestedCapability);
+  const capabilityIncluded =
+    hasCapability(enabledCapabilities, input.requestedCapability) ||
+    hasCapability(enabledCapabilities, requestedAlias);
   base.capabilityIncluded = capabilityIncluded;
 
   if (!capabilityIncluded) {

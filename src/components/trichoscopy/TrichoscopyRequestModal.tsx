@@ -22,6 +22,7 @@ const PURPOSES: { value: FiosTrichoscopyPurpose; label: string }[] = [
 export function TrichoscopyRequestModal(props: {
   tenantId: string;
   patientId: string;
+  consultationId?: string | null;
   open: boolean;
   onClose: () => void;
   hasActiveRequest?: boolean;
@@ -54,6 +55,7 @@ export function TrichoscopyRequestModal(props: {
             clinicalQuestion: clinicalQuestion.trim() || undefined,
             targetDate: targetDate || undefined,
             urgency,
+            consultationId: props.consultationId?.trim() || undefined,
           }),
         });
         const json = (await res.json().catch(() => ({}))) as { error?: string };

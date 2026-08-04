@@ -62,6 +62,10 @@ export default async function PatientTrichoscopyPage({
     (Array.isArray(sp.action) ? sp.action[0] : sp.action) === "request" &&
     access.enabledCapabilities.includes("trichoscopy.request") &&
     !routeAccess.historicalReadOnly;
+  const consultationIdRaw = Array.isArray(sp.consultationId)
+    ? sp.consultationId[0]
+    : sp.consultationId;
+  const consultationId = consultationIdRaw?.trim() || null;
 
   const profileHref = `/fi-admin/${tid}/patients/${canonicalPatientId}`;
 
@@ -91,6 +95,7 @@ export default async function PatientTrichoscopyPage({
       <TrichoscopyPatientWorkspace
         tenantId={tid}
         patientId={canonicalPatientId}
+        consultationId={consultationId}
         links={links.map((l) => ({
           id: l.id,
           purpose: l.purpose,
