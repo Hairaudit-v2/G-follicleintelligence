@@ -1,14 +1,10 @@
 import "server-only";
 
-import { logStructured } from "@/src/lib/server/structuredLog";
+import { logStructured, type StructuredLogFields } from "@/src/lib/server/structuredLog";
 
 export function emitTrichoscopyTelemetry(
   event: string,
-  fields: Record<string, unknown>
+  fields: StructuredLogFields = {}
 ): void {
-  logStructured({
-    level: "info",
-    event: `hli_trichoscopy.${event}`,
-    ...fields,
-  });
+  logStructured("info", `hli_trichoscopy.${event}`, fields);
 }
