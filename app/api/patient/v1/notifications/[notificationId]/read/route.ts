@@ -18,7 +18,7 @@ function envReady(): boolean {
 
 export async function PATCH(
   req: Request,
-  ctx: { params: Promise<{ notificationId: string }> | { notificationId: string } }
+  ctx: { params: Promise<{ notificationId: string }> }
 ) {
   try {
     if (!envReady()) {

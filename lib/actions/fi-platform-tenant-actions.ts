@@ -36,7 +36,7 @@ export async function createPlatformTenantAction(
       return { ok: false, error: "Platform administrator access is required." };
     }
 
-    const h = headers();
+    const h = await headers();
     const getHeader = (name: string) => h.get(name);
     const result = await provisionPlatformTenant(
       {

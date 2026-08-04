@@ -50,10 +50,10 @@ export default async function CrmShellPage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
-  const sp = searchParams ?? {};
+  const sp = (await searchParams) ?? {};
   const resolvedSearchParams = { ...sp };
 
   // S4.5A — allowlisted Pipeline mount (default off). Legacy path unchanged otherwise.

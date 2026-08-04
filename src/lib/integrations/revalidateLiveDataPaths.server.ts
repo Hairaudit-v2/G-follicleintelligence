@@ -17,8 +17,8 @@ export function revalidateLiveDataSurfacesForTenant(
   const tid = tenantId.trim();
   if (!tid) return;
 
-  revalidateTag(`${FI_TENANT_REFERENCE_TAG_PREFIX}${tid}`);
-  revalidateTag(FI_REFERENCE_DATA_TAG);
+  revalidateTag(`${FI_TENANT_REFERENCE_TAG_PREFIX}${tid}`, "max");
+  revalidateTag(FI_REFERENCE_DATA_TAG, "max");
 
   const paths = [
     `/fi-admin/${tid}`,

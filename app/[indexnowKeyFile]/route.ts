@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(
   _req: Request,
-  context: { params: { indexnowKeyFile: string } }
+  context: { params: Promise<{ indexnowKeyFile: string }> }
 ): Promise<NextResponse> {
-  const fileName = context.params.indexnowKeyFile;
+  const { indexnowKeyFile: fileName } = await context.params;
   if (!fileName.endsWith(".txt") || !isIndexNowKeyFileRequest(fileName)) {
     return new NextResponse("Not Found", { status: 404 });
   }

@@ -83,7 +83,7 @@ export async function emitAuditEvent(
       userAgent = userAgent ?? userAgentFromHeaders(input.request.headers);
     } else if (!ipAddress || !userAgent) {
       try {
-        const h = headers();
+        const h = await headers();
         ipAddress = ipAddress ?? clientIpFromHeaders(h);
         userAgent = userAgent ?? userAgentFromHeaders(h);
       } catch {

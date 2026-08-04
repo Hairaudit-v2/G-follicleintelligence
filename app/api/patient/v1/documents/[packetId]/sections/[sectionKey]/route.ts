@@ -31,9 +31,7 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
 export async function PATCH(
   req: Request,
   ctx: {
-    params:
-      | Promise<{ packetId: string; sectionKey: string }>
-      | { packetId: string; sectionKey: string };
+    params: Promise<{ packetId: string; sectionKey: string }>;
   }
 ) {
   try {

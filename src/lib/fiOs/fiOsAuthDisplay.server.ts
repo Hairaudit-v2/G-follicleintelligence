@@ -33,7 +33,7 @@ export async function resolveFiOsAuthUserEmail(): Promise<string | null> {
   if (!url || !anon) return null;
 
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(url, anon, {
       cookies: {
         getAll() {

@@ -85,7 +85,7 @@ export async function createStaffPinClinicSession(opts: {
     detail: { expires_at: expiresAt },
   });
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set(FI_STAFF_PIN_SESSION_COOKIE, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -108,7 +108,7 @@ export async function getStaffPinClinicSessionIfValid(
   tenantId?: string
 ): Promise<StaffPinClinicSession | null> {
   try {
-    const raw = cookies().get(FI_STAFF_PIN_SESSION_COOKIE)?.value?.trim() ?? "";
+    const raw = (await cookies()).get(FI_STAFF_PIN_SESSION_COOKIE)?.value?.trim() ?? "";
     if (!raw || !isUuid(raw)) return null;
     const row = await loadActiveSessionRow(raw);
     if (!row) return null;
@@ -147,7 +147,7 @@ export async function endStaffPinClinicSession(
   }
 
   try {
-    cookies().delete(FI_STAFF_PIN_SESSION_COOKIE);
+    (await cookies()).delete(FI_STAFF_PIN_SESSION_COOKIE);
   } catch {
     // ignore when called outside request context
   }
@@ -160,7 +160,7 @@ export async function clearStaffPinClinicSessionCookie(): Promise<void> {
     return;
   }
   try {
-    cookies().delete(FI_STAFF_PIN_SESSION_COOKIE);
+    (await cookies()).delete(FI_STAFF_PIN_SESSION_COOKIE);
   } catch {
     // ignore
   }

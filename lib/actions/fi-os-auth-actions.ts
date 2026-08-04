@@ -56,7 +56,7 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
     redirect(signInErrorRedirect(formData, "server_misconfigured"));
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient(url, anon, {
     cookies: {
       getAll() {
@@ -177,7 +177,7 @@ export async function fiOsSignOutAction(): Promise<void> {
     redirect("/follicle-intelligence/login");
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient(url, anon, {
     cookies: {
       getAll() {
@@ -207,7 +207,7 @@ export async function repairStaffTenantLinkOnAuthConfirmAction(input: {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url || !anon) return { ok: false };
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient(url, anon, {
     cookies: {
       getAll() {

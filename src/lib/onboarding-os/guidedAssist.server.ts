@@ -914,9 +914,9 @@ export async function recordGuidedAssistTipFeedback(
   }
 }
 
-function readForceShowCookieActive(tenantId: string): boolean {
+async function readForceShowCookieActive(tenantId: string): Promise<boolean> {
   try {
-    const raw = cookies().get(GUIDED_ASSIST_FORCE_SHOW_COOKIE)?.value;
+    const raw = (await cookies()).get(GUIDED_ASSIST_FORCE_SHOW_COOKIE)?.value;
     return isGuidedAssistForceShowCookieActive(raw, tenantId);
   } catch {
     return false;
@@ -944,7 +944,7 @@ export async function setGuidedAssistForceShow(
     }
 
     const tid = tenantId.trim();
-    const store = cookies();
+    const store = await cookies();
     if (forceShow) {
       store.set(GUIDED_ASSIST_FORCE_SHOW_COOKIE, tid, {
         httpOnly: true,
@@ -1020,7 +1020,7 @@ export async function loadGuidedAssistSessionPayload(
 
     const canManage =
       adminProf?.adminRole === "clinic_admin" || adminProf?.adminRole === "operations_admin";
-    const forceFromCookie = readForceShowCookieActive(tid);
+    const forceFromCookie = await readForceShowCookieActive(tid);
     const debugQuery = isGuidedAssistDebugQueryActive(serverOpts.search);
     // Force-show cookie only honored for admins (or explicit serverOpts override in tests).
     const forceShowActive =
@@ -1643,7 +1643,7 @@ export async function loadGuidedAssistSettingsState(
       isOnboardingPhase,
     });
 
-    const forceShowActive = canManage && readForceShowCookieActive(tid);
+    const forceShowActive = canManage && (await readForceShowCookieActive(tid));
     const todayRole = mapViewerToGuidedAssistTodayRole({
       workspaceProfileKey: workspaceProfileKey as FiWorkspaceProfileKey,
       tenantAdminRole: (adminProf?.adminRole ?? null) as FiTenantAdminRole | null,

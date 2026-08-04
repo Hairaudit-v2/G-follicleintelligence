@@ -30,15 +30,16 @@ export default async function PatientPortalSignInPage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { tenantId } = await params;
   const tid = tenantId?.trim();
   if (!tid) redirect("/");
 
+  const sp = await searchParams;
   const access = await resolvePatientPortalAccess(tid);
-  const returnPath = resolvePatientPortalReturnPath(tid, pickString(searchParams.next));
-  const errorCode = pickString(searchParams.error);
+  const returnPath = resolvePatientPortalReturnPath(tid, pickString(sp.next));
+  const errorCode = pickString(sp.error);
 
   if (access.status === "linked") {
     redirect(returnPath);

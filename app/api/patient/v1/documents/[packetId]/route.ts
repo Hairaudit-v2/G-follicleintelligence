@@ -17,7 +17,7 @@ function envReady(): boolean {
 
 export async function GET(
   req: Request,
-  ctx: { params: Promise<{ packetId: string }> | { packetId: string } }
+  ctx: { params: Promise<{ packetId: string }> }
 ) {
   try {
     if (!envReady()) {

@@ -20,14 +20,15 @@ function sanitizeNextPath(raw: string | undefined): string {
   return s;
 }
 
-export default function FollicleIntelligenceOsLoginPage({
+export default async function FollicleIntelligenceOsLoginPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const errorCode = pickString(searchParams.error);
-  const noticeCode = pickString(searchParams.notice);
-  const safeNextPath = sanitizeNextPath(pickString(searchParams.next));
+  const sp = await searchParams;
+  const errorCode = pickString(sp.error);
+  const noticeCode = pickString(sp.notice);
+  const safeNextPath = sanitizeNextPath(pickString(sp.next));
 
   return (
     <>

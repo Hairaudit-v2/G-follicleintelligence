@@ -15,7 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function FiAdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = headers().get("x-pathname") ?? "";
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") ?? "";
   const isPublicFiAdminEntry = isFiAdminPublicSubpath(pathname);
 
   if (!isPublicFiAdminEntry) {

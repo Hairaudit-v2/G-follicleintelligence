@@ -80,8 +80,8 @@ function firstForwardedValue(raw: string | null): string | null {
   return first && first.length > 0 ? first : null;
 }
 
-function getRequestOrigin(): string {
-  const h = headers();
+async function getRequestOrigin(): Promise<string> {
+  const h = await headers();
   const host = firstForwardedValue(h.get("x-forwarded-host")) ?? h.get("host")?.trim() ?? null;
   const protoRaw = firstForwardedValue(h.get("x-forwarded-proto")) ?? "http";
   const proto = protoRaw.split("/")[0]?.trim() || "http";
@@ -668,7 +668,7 @@ export async function sendStaffLoginInvite(input: {
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
   const tenantName = await loadTenantDisplayName(tid, supabase);
 
-  const origin = getRequestOrigin();
+  const origin = await getRequestOrigin();
   const {
     authUserId,
     inviteLink: authInviteLink,
@@ -778,7 +778,7 @@ export async function resendStaffLoginInvite(input: {
 
   const { fiStaffId, email, fullName } = await assertEligibleForLoginInvite(tid, mid, supabase);
   const tenantName = await loadTenantDisplayName(tid, supabase);
-  const origin = getRequestOrigin();
+  const origin = await getRequestOrigin();
   const {
     authUserId,
     inviteLink: authInviteLink,

@@ -18,7 +18,7 @@ function envReady(): boolean {
 
 export async function GET(
   req: Request,
-  ctx: { params: Promise<{ actionId: string }> | { actionId: string } }
+  ctx: { params: Promise<{ actionId: string }> }
 ) {
   try {
     if (!envReady()) {

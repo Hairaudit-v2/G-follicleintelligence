@@ -69,6 +69,8 @@ When API credentials are absent, the adapter uses an in-process stub (CI / local
 
 ## Verdict guidance
 
-- **GREEN**: staging FiOS↔HLI round-trip proven + entitlement denial for unentitled tenants on UI and API.
-- **AMBER**: foundations + stub tests pass; staging round-trip pending.
+- **GREEN**: staging FiOS↔HLI round-trip proven + entitlement denial for unentitled tenants on UI and API. Evidence committed under [`evidence/`](./evidence/FI-TRICHOSCOPY-1A.1-LIVE-STAGING-CERTIFICATION.md).
+- **AMBER**: foundations + stub tests pass; staging round-trip pending (**current** as of 1A.1 harness scaffold).
 - **RED**: any RED condition in the phase brief (cross-tenant leak, unsigned events accepted, packs overwritten, etc.).
+
+Phase follow-ons: **1A.1** live staging cert → **1A.2** browser/failure E2E → **[1B consultation](./FI_TRICHOSCOPY_1B_CONSULTATION_INTEGRATION.md)** → **1C** longitudinal/treatment → **1D** commercial automation.

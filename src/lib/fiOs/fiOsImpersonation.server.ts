@@ -28,7 +28,7 @@ export async function getFiOsImpersonationTargetAuthUserId(
   const os = await loadFiOsIdentity(sid);
   if (!os || !isFiOsPlatformAdminRole(os.osRole)) return null;
   try {
-    const raw = cookies().get(FI_OS_IMPERSONATION_COOKIE)?.value?.trim() ?? "";
+    const raw = (await cookies()).get(FI_OS_IMPERSONATION_COOKIE)?.value?.trim() ?? "";
     if (!raw || !isUuid(raw)) return null;
     return raw.toLowerCase();
   } catch {

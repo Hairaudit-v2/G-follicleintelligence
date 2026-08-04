@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
@@ -6,24 +5,9 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { FadeIn } from "@/components/ui/fade-in";
 import { AnimatedDivider } from "@/components/ui/animated-divider";
+import { ModulesArchitectureDiagram } from "@/src/components/modules/ModulesArchitectureDiagram";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ArrowUpRight } from "lucide-react";
-
-const ArchitectureDiagramDynamic = dynamic(
-  () =>
-    import("@/components/ui/architecture-diagram").then((m) => ({
-      default: m.ArchitectureDiagram,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="min-h-[320px] w-full rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-fi-panel"
-        aria-hidden
-      />
-    ),
-  }
-);
 
 export const metadata = buildPageMetadata({
   title: "Modules: Reusable Intelligence Primitives | Follicle Intelligence",
@@ -245,7 +229,7 @@ export default function ModulesPage() {
           <div className="mb-2 font-mono text-xs font-medium uppercase tracking-wider text-primary/80">
             Pipeline architecture
           </div>
-          <ArchitectureDiagramDynamic />
+          <ModulesArchitectureDiagram />
         </FadeIn>
         <AnimatedDivider />
         <div className="space-y-0">

@@ -30,7 +30,7 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
 
 export async function POST(
   req: Request,
-  ctx: { params: Promise<{ packetId: string }> | { packetId: string } }
+  ctx: { params: Promise<{ packetId: string }> }
 ) {
   try {
     if (!envReady()) {

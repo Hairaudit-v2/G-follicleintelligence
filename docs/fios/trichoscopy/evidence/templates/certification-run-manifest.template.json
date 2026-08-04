@@ -1,0 +1,147 @@
+{
+  "$schema_comment": "Copy to docs/fios/trichoscopy/evidence/runs/<run-id>/manifest.json and fill during FI-TRICHOSCOPY-1A.1",
+  "phase": "FI-TRICHOSCOPY-1A.1",
+  "runId": "REPLACE_YYYYMMDD-HHMM-staging",
+  "verdict": "AMBER",
+  "executedAt": null,
+  "operator": null,
+  "deployment": {
+    "fiosBaseUrl": null,
+    "fiosCommitSha": null,
+    "fiosDeploymentId": null,
+    "hliApiBaseUrlHostOnly": null,
+    "migrationsApplied": [
+      "20261108120001_fi_hli_trichoscopy_entitlements_1a.sql",
+      "20261108120002_fi_hli_trichoscopy_integration_1a.sql"
+    ],
+    "platformFlag": "FI_ENABLE_HLI_TRICHOSCOPY=1",
+    "stubTransportInvoked": null
+  },
+  "actors": {
+    "entitledTenantId": null,
+    "negativeControlTenantId": null,
+    "syntheticPatientId": null,
+    "authorisedStaffUserId": null,
+    "actorAuditNote": "manual_grant audited; no billing webhook required for pilot"
+  },
+  "identifiers": {
+    "linkId": null,
+    "requestRowId": null,
+    "hliRequestId": null,
+    "hliEpisodeId": null,
+    "hliPatientReference": null,
+    "idempotencyKey": null,
+    "firstEvidencePackId": null,
+    "supersedingEvidencePackId": null,
+    "reconciliationRunId": null
+  },
+  "fiosRequestPayloadRedacted": {
+    "tenantId": null,
+    "fiosPatientId": null,
+    "purpose": "consultation",
+    "urgency": "routine",
+    "requestedSites": ["vertex", "frontal", "left_temporal", "right_temporal"],
+    "clinicalQuestion": "[REDACTED]",
+    "requestedByUserId": null
+  },
+  "hliReceipt": {
+    "status": null,
+    "createdAt": null,
+    "captureProtocolVersion": null,
+    "notes": "Paste HLI-side receipt / episode ids only; no PHI"
+  },
+  "signatureVerification": {
+    "outboundFiosToHli": { "result": null, "httpStatus": null, "notes": null },
+    "inboundHliToFios": { "result": null, "httpStatus": null, "notes": null }
+  },
+  "eventSequence": [
+    {
+      "eventType": "trichoscopy.session_created",
+      "eventId": null,
+      "occurredAt": null,
+      "receiptId": null,
+      "duplicate": false
+    },
+    {
+      "eventType": "trichoscopy.session_captured",
+      "eventId": null,
+      "occurredAt": null,
+      "receiptId": null,
+      "duplicate": false
+    },
+    {
+      "eventType": "trichoscopy.analysis_ready",
+      "eventId": null,
+      "occurredAt": null,
+      "receiptId": null,
+      "duplicate": false
+    },
+    {
+      "eventType": "trichoscopy.observation_confirmed",
+      "eventId": null,
+      "occurredAt": null,
+      "receiptId": null,
+      "duplicate": false,
+      "evidencePackId": null
+    }
+  ],
+  "evidencePackVersionHistory": [
+    {
+      "localPackId": null,
+      "hliEvidencePackId": null,
+      "packVersion": null,
+      "localState": "active",
+      "confirmedAt": null
+    },
+    {
+      "localPackId": null,
+      "hliEvidencePackId": null,
+      "packVersion": null,
+      "localState": "superseded",
+      "confirmedAt": null
+    }
+  ],
+  "uiEvidence": {
+    "timelineScreenshot": "attachments/REPLACE_timeline.png",
+    "activePackScreenshot": "attachments/REPLACE_active_pack.png",
+    "notes": "Authorised staff only; no patient PII visible in committed screenshots"
+  },
+  "reconciliation": {
+    "runId": null,
+    "status": null,
+    "changes": [],
+    "discrepancies": [],
+    "balanced": null
+  },
+  "usageMetering": {
+    "usageRowsForIdempotencyKey": null,
+    "duplicateBillingEvents": 0,
+    "queryNotes": "Count usage rows for usage:<idempotencyKey>; expect exactly 1 after request + replay"
+  },
+  "replay": {
+    "requestReplay": { "duplicateClinicalRows": null, "returnedSameEpisodeId": null },
+    "eventReplay": { "duplicateReceipts": null, "httpDuplicateFlag": null }
+  },
+  "securityProbes": {
+    "invalidSignature": { "httpStatus": null, "reason": null, "pass": null },
+    "expiredTimestamp": { "httpStatus": null, "reason": null, "pass": null },
+    "crossTenant": { "httpStatus": null, "reason": null, "pass": null }
+  },
+  "teardownOrRetention": {
+    "declaration": null,
+    "syntheticDataRetentionUntil": null,
+    "destroyedAt": null
+  },
+  "acceptance": {
+    "A1_complete_round_trip": false,
+    "A2_no_stub_transport": false,
+    "A3_messages_authenticated": false,
+    "A4_no_duplicate_clinical_or_commercial": false,
+    "A5_reconciliation_balanced": false,
+    "A6_pack_supersession_preserves_history": false,
+    "A7_cross_tenant_denied": false,
+    "A8_invalid_expired_signatures_rejected": false,
+    "A9_ui_reflects_hli_state": false,
+    "A10_evidence_committed": false
+  }
+}

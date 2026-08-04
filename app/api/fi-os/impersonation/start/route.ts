@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       userAgent: req.headers.get("user-agent"),
     });
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set(FI_OS_IMPERSONATION_COOKIE, target.toLowerCase(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

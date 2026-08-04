@@ -823,7 +823,7 @@ async function executeStepLogic(
       if (session.tenant_id) {
         return { ok: true, output: { tenant_id: session.tenant_id, skipped: true } };
       }
-      const h = headers();
+      const h = await headers();
       const getHeader = (name: string) => h.get(name);
       const result = await provisionPlatformTenant(
         {
@@ -1021,6 +1021,7 @@ async function executeStepLogic(
         };
       }
       const completedAt = new Date().toISOString();
+      const finalizeHeaders = await headers();
       await supabase
         .from("fi_tenant_provisioning_sessions")
         .update({
@@ -1029,7 +1030,7 @@ async function executeStepLogic(
           result_snapshot: {
             tenant_id: tenantId,
             finalized_at: completedAt,
-            origin: getRequestOriginFromHeaders((name) => headers().get(name)),
+            origin: getRequestOriginFromHeaders((name) => finalizeHeaders.get(name)),
           },
           updated_at: completedAt,
         })

@@ -14,11 +14,12 @@ export default async function BookingsOperatorRoutePage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
   await assertBookingsOperatorPageAccess(tenantId);
-  const data = await loadBookingsOperatorPageData(tenantId, searchParams ?? {});
+  const sp = (await searchParams) ?? {};
+  const data = await loadBookingsOperatorPageData(tenantId, sp);
 
   return <BookingOperatorPage data={data} />;
 }

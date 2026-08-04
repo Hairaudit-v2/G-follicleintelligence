@@ -11,15 +11,15 @@ export default async function FiOsModuleUnavailablePage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: { featureDenied?: string };
+  searchParams: Promise<{ featureDenied?: string }>;
 }) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
 
-  const raw =
-    typeof searchParams.featureDenied === "string" ? searchParams.featureDenied.trim() : "";
+  const sp = await searchParams;
+  const raw = typeof sp.featureDenied === "string" ? sp.featureDenied.trim() : "";
   const featureKey = raw && isFiFeatureKey(raw) ? raw : null;
 
   return <FiFeatureAccessDenied tenantId={tenantId} featureKey={featureKey} />;

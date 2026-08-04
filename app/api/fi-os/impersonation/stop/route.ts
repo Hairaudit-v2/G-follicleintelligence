@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 401 });
     }
     await endOpenFiOsImpersonationSessions(sessionId);
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.delete(FI_OS_IMPERSONATION_COOKIE);
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {

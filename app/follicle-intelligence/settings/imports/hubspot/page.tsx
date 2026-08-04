@@ -8,12 +8,13 @@ export const metadata = {
 /**
  * Alias route requested for FI OS settings. Requires `?tenantId=<uuid>` to redirect into the FI Admin shell.
  */
-export default function FollicleIntelligenceHubspotImportRedirectPage({
+export default async function FollicleIntelligenceHubspotImportRedirectPage({
   searchParams,
 }: {
-  searchParams: { tenantId?: string };
+  searchParams: Promise<{ tenantId?: string }>;
 }) {
-  const tenantId = typeof searchParams.tenantId === "string" ? searchParams.tenantId.trim() : "";
+  const sp = await searchParams;
+  const tenantId = typeof sp.tenantId === "string" ? sp.tenantId.trim() : "";
   if (tenantId) {
     redirect(`/fi-admin/${tenantId}/settings/integrations/hubspot?tab=import-review`);
   }

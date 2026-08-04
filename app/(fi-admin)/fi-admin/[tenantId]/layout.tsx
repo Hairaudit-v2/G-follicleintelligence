@@ -87,7 +87,8 @@ export default async function TenantAdminLayout({
 }) {
   const { tenantId } = await params;
   const base = `/fi-admin/${tenantId}`;
-  const pathname = headers().get("x-pathname") ?? "";
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") ?? "";
   const isStaffPinLogin =
     pathname.includes("/staff-pin-login") || pathname.includes("/staff-time-clock");
   const isTokenPublicRoute = isFiAdminTokenPublicRoute(pathname);

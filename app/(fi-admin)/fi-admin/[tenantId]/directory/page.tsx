@@ -26,7 +26,7 @@ export default async function FoundationDirectoryPage({
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: { q?: string; type?: string; limit?: string };
+  searchParams: Promise<{ q?: string; type?: string; limit?: string }>;
 }) {
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
@@ -47,13 +47,14 @@ export default async function FoundationDirectoryPage({
     .maybeSingle();
   if (te || !tenant) notFound();
 
-  const q = typeof searchParams.q === "string" ? searchParams.q : "";
+  const sp = await searchParams;
+  const q = typeof sp.q === "string" ? sp.q : "";
   const [result, orgListRes, clinicCountRes] = await Promise.all([
     searchFoundationRecords({
       tenantId,
       query: q.trim() ? q : null,
-      type: parseFilter(searchParams.type),
-      limit: parseLimit(searchParams.limit),
+      type: parseFilter(sp.type),
+      limit: parseLimit(sp.limit),
     }),
     supabase
       .from("fi_organisations")

@@ -38,7 +38,29 @@ Also ensure tenant verification + `fi_tenant_modules` / billing status allow `re
 
 ## Staging round-trip evidence (current)
 
-As of FI-TRICHOSCOPY-1A delivery, CI uses the stub adapter (no live HLI credentials in default env). **Verdict: AMBER** until a staging round-trip is recorded here with episode id + receipt id + pack id.
+As of FI-TRICHOSCOPY-1A delivery, CI uses the stub adapter (no live HLI credentials in default env). **Verdict: AMBER** until a staging round-trip is recorded under [`docs/fios/trichoscopy/evidence/`](./evidence/FI-TRICHOSCOPY-1A.1-LIVE-STAGING-CERTIFICATION.md) with episode id + receipt id + pack id.
+
+### FI-TRICHOSCOPY-1A.1 certification
+
+Canonical runbook + GREEN gate: [evidence/FI-TRICHOSCOPY-1A.1-LIVE-STAGING-CERTIFICATION.md](./evidence/FI-TRICHOSCOPY-1A.1-LIVE-STAGING-CERTIFICATION.md)
+
+```bash
+npm run certify:trichoscopy-1a1 -- --preflight
+npm run certify:trichoscopy-1a1 -- --init-run
+npm run certify:trichoscopy-1a1 -- --execute-security-probes
+```
+
+Move to GREEN only after a complete live run folder is committed under `evidence/runs/` and acceptance A1–A10 all PASS. Do not claim GREEN while `useStub=true`.
+
+### Manual operations (pilot treatment)
+
+| Operation | Pilot | Before broad clinic self-service |
+|-----------|-------|----------------------------------|
+| `activateTenantModule` | Audited ops command — keep | Remain ops-gated |
+| `grantTrichoscopySubscription` | Allowed with `source: manual_grant` + audited actor | Wire to commercial entitlement / billing webhooks |
+| `setTrichoscopyModuleConfiguration` | Module settings UI (subscription-limited) | Same UI; enforce tier limits |
+
+Controlled pilot is not blocked solely by missing billing webhooks. General clinic self-service is blocked until subscription activation and suspension are connected to the billing or contract system.
 
 ## Troubleshooting
 

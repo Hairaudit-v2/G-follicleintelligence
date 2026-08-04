@@ -6,15 +6,16 @@ function pickString(v: string | string[] | undefined): string | undefined {
   return undefined;
 }
 
-export default function FiLoginAliasPage({
+export default async function FiLoginAliasPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const sp = await searchParams;
   const q = new URLSearchParams();
   const keys = ["next", "error", "notice"] as const;
   for (const k of keys) {
-    const v = pickString(searchParams[k]);
+    const v = pickString(sp[k]);
     if (v) q.set(k, v);
   }
   const suffix = q.toString() ? `?${q.toString()}` : "";

@@ -22,8 +22,8 @@ function firstForwardedValue(raw: string | null): string | null {
   return first && first.length > 0 ? first : null;
 }
 
-function getRequestOrigin(): string {
-  const h = headers();
+async function getRequestOrigin(): Promise<string> {
+  const h = await headers();
   const host = firstForwardedValue(h.get("x-forwarded-host")) ?? h.get("host")?.trim() ?? null;
   const protoRaw = firstForwardedValue(h.get("x-forwarded-proto")) ?? "http";
   const proto = protoRaw.split("/")[0]?.trim() || "http";
@@ -141,7 +141,7 @@ export async function inviteTenantAdminUserAction(
     }
 
     if (!authUserId) {
-      const origin = getRequestOrigin().replace(/\/$/, "");
+      const origin = (await getRequestOrigin()).replace(/\/$/, "");
       const nextPath = `/fi-admin/${tid}`;
       const redirectTo = buildFiOsAuthConfirmUrl(origin, nextPath);
       const { data: inv, error: invErr } = await supabase.auth.admin.inviteUserByEmail(email, {

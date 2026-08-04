@@ -83,7 +83,7 @@ export async function resolveAuthUserId(request?: Request | null): Promise<strin
   }
 
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(url, anon, {
       cookies: {
         getAll() {

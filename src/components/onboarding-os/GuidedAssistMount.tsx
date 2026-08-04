@@ -13,7 +13,7 @@ import { loadGuidedAssistSessionPayload } from "@/src/lib/onboarding-os/guidedAs
  * Collapse preference (while on) is remembered per tenant in localStorage.
  */
 export async function GuidedAssistMount({ tenantId }: { tenantId: string }) {
-  const h = headers();
+  const h = await headers();
   const pathname = h.get("x-pathname") ?? h.get("x-invoke-path") ?? `/fi-admin/${tenantId}`;
   const search =
     h.get("x-search") ??

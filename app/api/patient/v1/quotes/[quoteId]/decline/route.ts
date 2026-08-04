@@ -30,7 +30,7 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
 
 export async function POST(
   req: Request,
-  ctx: { params: Promise<{ quoteId: string }> | { quoteId: string } }
+  ctx: { params: Promise<{ quoteId: string }> }
 ) {
   try {
     if (!envReady()) {
