@@ -1,0 +1,6 @@
+{
+  "consultationId": null,
+  "packVersion": null,
+  "findings": [],
+  "notes": "Normalised finding ids/codes/domains only; no raw clinician-only payloads"
+}

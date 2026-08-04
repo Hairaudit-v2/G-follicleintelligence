@@ -500,6 +500,17 @@ export async function completeConsultationDraft(
   const loaded = await loadConsultationForTenant(tid, cid);
   if (!loaded) throw new Error("Could not load consultation after completion.");
   await syncPostConsultReminderJobs(loaded, supabase);
+  // FI-TRICHOSCOPY-1B: pin freeze — completed consultations remain immutable under supersession.
+  await import("@/src/lib/integrations/hliTrichoscopy/consultation/service.server")
+    .then(({ finaliseConsultationTrichoscopyLink }) =>
+      finaliseConsultationTrichoscopyLink({
+        tenantId: tid,
+        consultationId: cid,
+        actorUserId: opts?.updatedByFiUserId ?? null,
+        supabaseClientForTests: supabase,
+      })
+    )
+    .catch(() => undefined);
   const { advanceCrmLeadOnConsultationComplete } =
     await import("./advanceCrmLeadOnConsultationComplete.server");
   await advanceCrmLeadOnConsultationComplete(tid, loaded, supabase);

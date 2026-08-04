@@ -1,0 +1,4 @@
+{
+  "events": [],
+  "notes": "Ordered HLI→FiOS signed events with eventId, type, occurredAt, receiptId, duplicate flag"
+}

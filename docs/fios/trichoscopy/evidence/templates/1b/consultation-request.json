@@ -1,0 +1,14 @@
+{
+  "tenantId": null,
+  "consultationId": null,
+  "patientId": null,
+  "requestMode": "new_assessment",
+  "idempotencyKey": null,
+  "hliRequestId": null,
+  "hliEpisodeId": null,
+  "indicationCodes": [],
+  "consent": { "capture": null, "transfer": null },
+  "urgency": "routine",
+  "submittedAt": null,
+  "notes": "Redact clinician free text and any PHI before commit"
+}

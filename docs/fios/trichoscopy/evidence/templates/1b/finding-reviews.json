@@ -1,0 +1,4 @@
+{
+  "reviews": [],
+  "notes": "findingId, acknowledgementState, reviewedAt, reviewingUserId (synthetic)"
+}

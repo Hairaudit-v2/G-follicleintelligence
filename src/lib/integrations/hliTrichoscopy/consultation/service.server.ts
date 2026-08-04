@@ -15,7 +15,7 @@ import { requestTrichoscopy } from "../commands";
 import { listEvidencePacksForLink, getTrichoscopyLinkById } from "../queries";
 import { normaliseTrichoscopyFindingsFromPack } from "./findings";
 import {
-  assertDiagnosisAcceptanceGuard,
+  assertDecisionLinkAllowed,
   assertFindingReviewAllowed,
   canTransitionAcknowledgement,
   isAcceptanceAcknowledgement,
@@ -25,6 +25,12 @@ import {
   buildFiOsToHliConsultationContext,
   sanitiseFreeText,
 } from "./idempotency";
+import {
+  assertConsentForTrichoscopyRequest,
+  assertConsultationMutationAllowed,
+  resolvePackSupersessionDisposition,
+  resolvePinnedPackVersion,
+} from "./packPinning";
 import {
   buildPatientSafeTrichoscopySummary,
   formatPatientSafeTrichoscopySummaryText,
@@ -625,11 +631,22 @@ export async function requestConsultationTrichoscopy(opts: {
     clinicianQuestion: opts.clinicalQuestion ?? (indication?.clinician_question ? String(indication.clinician_question) : null),
   };
 
-  if (!indicationInput.patientConsentCapture || !indicationInput.patientConsentTransfer) {
-    throw new HliTrichoscopyValidationError(
-      "Patient consent for capture and transfer is required before requesting trichoscopy."
-    );
-  }
+  const consentGate = assertConsentForTrichoscopyRequest({
+    patientConsentCapture: indicationInput.patientConsentCapture,
+    patientConsentTransfer: indicationInput.patientConsentTransfer,
+  });
+  if (!consentGate.ok) throw new HliTrichoscopyValidationError(consentGate.reason);
+
+  const existingLinkForRequest = await getConsultationTrichoscopyLink({
+    tenantId: opts.tenantId,
+    consultationId: opts.consultationId,
+    supabaseClientForTests: opts.supabaseClientForTests,
+  });
+  const finalisedGate = assertConsultationMutationAllowed({
+    consultationFinalised: Boolean(existingLinkForRequest?.consultation_finalised_at),
+    mutationKind: "request",
+  });
+  if (!finalisedGate.ok) throw new HliTrichoscopyValidationError(finalisedGate.reason);
 
   const hliContext = buildFiOsToHliConsultationContext({
     tenantId: opts.tenantId,
@@ -1068,22 +1085,29 @@ export async function reviewConsultationTrichoscopyFinding(opts: {
     reviewId = String((data as { id: string }).id);
   }
 
-  // Pin evidence version on first acceptance into assessment
-  if (isAcceptanceAcknowledgement(opts.acknowledgementState) && clink && !clink.pinned_pack_version) {
-    await supabase
-      .from("fi_hli_trichoscopy_consultation_links")
-      .update({
-        pinned_evidence_pack_id: evidencePackId,
-        pinned_pack_version: packVersion,
-        pinned_hli_assessment_id: (finding as { hli_assessment_id?: string | null }).hli_assessment_id ?? null,
-        pinned_findings_schema_version: String(
-          (finding as { findings_schema_version?: string }).findings_schema_version ?? "1b.1"
-        ),
-        pinned_at: new Date().toISOString(),
-        pinned_by_user_id: opts.userId,
-        consultation_status: "reviewed",
-      })
-      .eq("id", clink.id);
+  // Pin evidence version on first acceptance into assessment (immutable thereafter).
+  if (isAcceptanceAcknowledgement(opts.acknowledgementState) && clink) {
+    const pin = resolvePinnedPackVersion({
+      existingPinnedVersion: clink.pinned_pack_version,
+      candidatePackVersion: packVersion,
+    });
+    if (pin.newlyPinned) {
+      await supabase
+        .from("fi_hli_trichoscopy_consultation_links")
+        .update({
+          pinned_evidence_pack_id: evidencePackId,
+          pinned_pack_version: pin.packVersion,
+          pinned_hli_assessment_id:
+            (finding as { hli_assessment_id?: string | null }).hli_assessment_id ?? null,
+          pinned_findings_schema_version: String(
+            (finding as { findings_schema_version?: string }).findings_schema_version ?? "1b.1"
+          ),
+          pinned_at: new Date().toISOString(),
+          pinned_by_user_id: opts.userId,
+          consultation_status: "reviewed",
+        })
+        .eq("id", clink.id);
+    }
   }
 
   await writeConsultationTrichoscopyAudit({
@@ -1138,6 +1162,12 @@ export async function createConsultationTrichoscopyAction(opts: {
     env: opts.env,
   });
 
+  const decisionClink = await getConsultationTrichoscopyLink({
+    tenantId: opts.tenantId,
+    consultationId: opts.consultationId,
+    supabaseClientForTests: opts.supabaseClientForTests,
+  });
+
   let acknowledgementState: TrichoscopyAcknowledgementState | null = null;
   let evidencePackId: string | null = null;
   let packVersion: string | null = null;
@@ -1159,7 +1189,8 @@ export async function createConsultationTrichoscopyAction(opts: {
     }
   }
 
-  const guard = assertDiagnosisAcceptanceGuard({
+  const guard = assertDecisionLinkAllowed({
+    consultationFinalised: Boolean(decisionClink?.consultation_finalised_at),
     decisionKind: opts.decisionKind,
     acknowledgementState,
   });
@@ -1392,4 +1423,104 @@ export async function syncConsultationFindingsFromPack(opts: {
   }
 
   return { imported };
+}
+
+/**
+ * Freeze consultation trichoscopy evidence when the FiOS consultation is marked completed.
+ * Idempotent: subsequent calls leave an existing finalisation timestamp unchanged.
+ */
+export async function finaliseConsultationTrichoscopyLink(opts: {
+  tenantId: string;
+  consultationId: string;
+  actorUserId?: string | null;
+  supabaseClientForTests?: SupabaseClient;
+}): Promise<{ finalised: boolean; consultationLinkId: string | null }> {
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const clink = await getConsultationTrichoscopyLink({
+    tenantId: opts.tenantId,
+    consultationId: opts.consultationId,
+    supabaseClientForTests: opts.supabaseClientForTests,
+  });
+  if (!clink) {
+    return { finalised: false, consultationLinkId: null };
+  }
+  if (clink.consultation_finalised_at) {
+    return { finalised: true, consultationLinkId: clink.id };
+  }
+
+  const nowIso = new Date().toISOString();
+  const { error } = await supabase
+    .from("fi_hli_trichoscopy_consultation_links")
+    .update({ consultation_finalised_at: nowIso })
+    .eq("id", clink.id)
+    .eq("tenant_id", opts.tenantId.trim())
+    .is("consultation_finalised_at", null);
+
+  if (error) {
+    throw new HliTrichoscopyValidationError(error.message);
+  }
+
+  await writeConsultationTrichoscopyAudit({
+    tenantId: opts.tenantId,
+    consultationId: opts.consultationId,
+    patientId: clink.fios_patient_id,
+    actorUserId: opts.actorUserId ?? null,
+    action: "consultation_finalised",
+    evidencePackId: clink.pinned_evidence_pack_id ?? clink.evidence_pack_id,
+    packVersion: clink.pinned_pack_version,
+    payload: {
+      pinned_pack_version: clink.pinned_pack_version,
+      finalised_at: nowIso,
+    },
+    supabaseClientForTests: opts.supabaseClientForTests,
+  });
+
+  return { finalised: true, consultationLinkId: clink.id };
+}
+
+/**
+ * When a superseding pack arrives for a completed consultation: audit only, leave pin.
+ * When open: allow finding sync (caller performs sync separately).
+ */
+export async function recordSupersedingPackAgainstConsultation(opts: {
+  tenantId: string;
+  consultationId: string;
+  patientId?: string | null;
+  evidencePackId: string;
+  packVersion: string;
+  linkId: string;
+  supabaseClientForTests?: SupabaseClient;
+}): Promise<{ disposition: ReturnType<typeof resolvePackSupersessionDisposition> }> {
+  const clink = await getConsultationTrichoscopyLink({
+    tenantId: opts.tenantId,
+    consultationId: opts.consultationId,
+    supabaseClientForTests: opts.supabaseClientForTests,
+  });
+  const disposition = resolvePackSupersessionDisposition({
+    consultationFinalised: Boolean(clink?.consultation_finalised_at),
+    pinnedPackVersion: clink?.pinned_pack_version,
+    incomingPackVersion: opts.packVersion,
+  });
+
+  if (disposition === "audit_only_leave_pin") {
+    await writeConsultationTrichoscopyAudit({
+      tenantId: opts.tenantId,
+      consultationId: opts.consultationId,
+      patientId: opts.patientId ?? clink?.fios_patient_id ?? null,
+      action: "superseding_pack_received_completed_consultation",
+      source: "hli",
+      evidencePackId: opts.evidencePackId,
+      packVersion: opts.packVersion,
+      payload: {
+        disposition,
+        pinned_pack_version: clink?.pinned_pack_version ?? null,
+        incoming_pack_version: opts.packVersion,
+        link_id: opts.linkId,
+        note: "Completed consultation pin retained; history not rewritten.",
+      },
+      supabaseClientForTests: opts.supabaseClientForTests,
+    });
+  }
+
+  return { disposition };
 }

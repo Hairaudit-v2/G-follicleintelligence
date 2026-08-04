@@ -91,3 +91,21 @@ export function assertFindingReviewAllowed(input: {
   }
   return { ok: true };
 }
+
+export function assertDecisionLinkAllowed(input: {
+  consultationFinalised: boolean;
+  decisionKind: TrichoscopyDecisionKind;
+  acknowledgementState: TrichoscopyAcknowledgementState | null | undefined;
+}): { ok: true } | { ok: false; reason: string } {
+  if (input.consultationFinalised) {
+    return {
+      ok: false,
+      reason:
+        "Completed consultations freeze decision links. Document new clinical decisions on a new consultation or follow-up assessment.",
+    };
+  }
+  return assertDiagnosisAcceptanceGuard({
+    decisionKind: input.decisionKind,
+    acknowledgementState: input.acknowledgementState,
+  });
+}

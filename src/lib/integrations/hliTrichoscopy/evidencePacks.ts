@@ -155,17 +155,35 @@ export async function importConfirmedEvidencePack(
     .eq("id", input.linkId)
     .eq("tenant_id", tenantId);
 
-  // FI-TRICHOSCOPY-1B: sync normalised findings into any linked consultation that is not finalised.
+  // FI-TRICHOSCOPY-1B: sync findings into open consultation links; audit-only for finalised.
   const { data: consultLinks } = await supabase
     .from("fi_hli_trichoscopy_consultation_links")
-    .select("id, consultation_id, consultation_finalised_at")
+    .select("id, consultation_id, consultation_finalised_at, fios_patient_id")
     .eq("tenant_id", tenantId)
-    .eq("link_id", input.linkId)
-    .is("consultation_finalised_at", null);
+    .eq("link_id", input.linkId);
 
   if (consultLinks?.length) {
-    const { syncConsultationFindingsFromPack } = await import("./consultation/service.server");
-    for (const cl of consultLinks as Array<{ consultation_id: string }>) {
+    const {
+      syncConsultationFindingsFromPack,
+      recordSupersedingPackAgainstConsultation,
+    } = await import("./consultation/service.server");
+    for (const cl of consultLinks as Array<{
+      consultation_id: string;
+      consultation_finalised_at: string | null;
+      fios_patient_id: string | null;
+    }>) {
+      if (cl.consultation_finalised_at) {
+        await recordSupersedingPackAgainstConsultation({
+          tenantId,
+          consultationId: String(cl.consultation_id),
+          patientId: cl.fios_patient_id,
+          evidencePackId: packId,
+          packVersion,
+          linkId: input.linkId,
+          supabaseClientForTests: input.supabaseClientForTests,
+        }).catch(() => undefined);
+        continue;
+      }
       await syncConsultationFindingsFromPack({
         tenantId,
         consultationId: String(cl.consultation_id),

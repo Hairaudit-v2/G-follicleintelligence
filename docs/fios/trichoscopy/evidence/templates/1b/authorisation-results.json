@@ -1,0 +1,12 @@
+{
+  "N1_surgical_cannot_accept": { "pass": null, "httpStatus": null, "detail": null },
+  "N2_reception_denied_clinical_findings": { "pass": null, "httpStatus": null, "detail": null },
+  "N3_patient_safe_boundary": { "pass": null, "detail": null },
+  "N4_cross_tenant_denied": { "pass": null, "httpStatus": null, "detail": null },
+  "N5_diagnosis_requires_acceptance": { "pass": null, "detail": null },
+  "N6_invalid_signature": { "pass": null, "httpStatus": null, "reason": null },
+  "N7_expired_signature": { "pass": null, "httpStatus": null, "reason": null },
+  "N10_outage_non_blocking": { "pass": null, "detail": null },
+  "N11_completed_immutable": { "pass": null, "detail": null },
+  "N12_historical_pack_visibility": { "pass": null, "detail": null }
+}

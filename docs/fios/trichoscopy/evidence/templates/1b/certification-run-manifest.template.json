@@ -1,0 +1,89 @@
+{
+  "$schema_comment": "Copy to docs/fios/trichoscopy/evidence/runs/<run-id>/ during FI-TRICHOSCOPY-1B-CERT",
+  "phase": "FI-TRICHOSCOPY-1B-CERT",
+  "runId": "REPLACE_YYYYMMDD-HHMM-staging",
+  "verdict": "AMBER",
+  "executedAt": null,
+  "operator": null,
+  "deployment": {
+    "fiosBaseUrl": null,
+    "fiosCommitSha": null,
+    "fiosDeploymentId": null,
+    "hliApiBaseUrlHostOnly": null,
+    "migrationsApplied": [
+      "20261108120001_fi_hli_trichoscopy_entitlements_1a.sql",
+      "20261108120002_fi_hli_trichoscopy_integration_1a.sql",
+      "20261109120001_fi_hli_trichoscopy_consultation_1b.sql"
+    ],
+    "platformFlag": "FI_ENABLE_HLI_TRICHOSCOPY=1",
+    "stubTransportInvoked": null
+  },
+  "actors": {
+    "entitledTenantId": null,
+    "negativeControlTenantId": null,
+    "syntheticPatientId": null,
+    "consultationId": null,
+    "authorisedClinicianUserId": null,
+    "surgicalOnlyUserId": null,
+    "receptionUserId": null,
+    "actorAuditNote": "synthetic staging patient; no PHI"
+  },
+  "identifiers": {
+    "consultationLinkId": null,
+    "linkId": null,
+    "requestRowId": null,
+    "hliRequestId": null,
+    "hliAssessmentId": null,
+    "hliEpisodeId": null,
+    "idempotencyKey": null,
+    "originalPackId": null,
+    "originalPackVersion": null,
+    "pinnedPackVersion": null,
+    "supersedingPackId": null,
+    "supersedingPackVersion": null,
+    "findingIds": [],
+    "reviewIds": [],
+    "decisionLinkIds": [],
+    "followUpId": null,
+    "reconciliationRunId": null,
+    "consultationFinalisedAt": null
+  },
+  "artifactPaths": {
+    "consultationRequest": "consultation-request.json",
+    "hliEventSequence": "hli-event-sequence.json",
+    "importedFindings": "imported-findings.json",
+    "findingReviews": "finding-reviews.json",
+    "decisionLinks": "decision-links.json",
+    "evidencePackLineage": "evidence-pack-lineage.json",
+    "reconciliation": "reconciliation.json",
+    "authorisationResults": "authorisation-results.json",
+    "replayResults": "replay-results.json",
+    "screenshotsDir": "screenshots/"
+  },
+  "securityProbes": {
+    "invalidSignature": { "httpStatus": null, "reason": null, "pass": null },
+    "expiredTimestamp": { "httpStatus": null, "reason": null, "pass": null },
+    "crossTenant": { "httpStatus": null, "reason": null, "pass": null }
+  },
+  "acceptance": {
+    "G1_migration_applied": false,
+    "G2_request_reaches_hli": false,
+    "G3_authenticated_findings": false,
+    "G4_ui_review": false,
+    "G5_explicit_acceptance": false,
+    "G6_decision_followup_persist": false,
+    "G7_completed_immutable": false,
+    "G8_supersession_no_rewrite": false,
+    "G9_duplicate_ooo_safe": false,
+    "G10_role_tenant_boundaries": false,
+    "G11_outage_demonstrated": false,
+    "G12_reconciliation_balanced": false,
+    "G13_automated_browser_pass": false,
+    "G14_evidence_committed": false
+  },
+  "teardownOrRetention": {
+    "declaration": null,
+    "syntheticDataRetentionUntil": null,
+    "destroyedAt": null
+  }
+}

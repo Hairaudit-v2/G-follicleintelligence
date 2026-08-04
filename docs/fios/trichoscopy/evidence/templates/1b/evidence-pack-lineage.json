@@ -1,0 +1,17 @@
+{
+  "original": {
+    "localPackId": null,
+    "packVersion": null,
+    "localState": "superseded",
+    "pinnedToConsultation": true
+  },
+  "superseding": {
+    "localPackId": null,
+    "packVersion": null,
+    "localState": "active",
+    "rewroteCompletedConsultation": false,
+    "auditAction": "superseding_pack_received_completed_consultation"
+  },
+  "pinnedPackVersionAfterSupersession": null,
+  "notes": "Completed consultation must remain pinned to original reviewed version"
+}

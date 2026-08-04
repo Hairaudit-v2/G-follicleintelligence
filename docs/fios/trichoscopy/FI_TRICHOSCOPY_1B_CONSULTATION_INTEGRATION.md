@@ -10,7 +10,9 @@ No HLI finding silently becomes a FiOS diagnosis, treatment, investigation, or p
 
 ## Verdict
 
-**AMBER** — consultation foundation, findings review, clinical action linkage, patient-safe summary, and follow-up scheduling are implemented in-repo with unit coverage. Live staging FiOS↔HLI consultation round-trip and browser certification remain pending (1B.6).
+**AMBER** — consultation foundation, findings review, clinical action linkage, patient-safe summary, follow-up scheduling, pack-pin immutability, and certification scaffolding are implemented in-repo. Live staging FiOS↔HLI consultation round-trip and committed browser evidence remain pending (1B.6 / FI-TRICHOSCOPY-1B-CERT).
+
+Canonical cert runbook: [`docs/fios/trichoscopy/evidence/FI-TRICHOSCOPY-1B-CERT.md`](../evidence/FI-TRICHOSCOPY-1B-CERT.md)
 
 ## Migration
 
@@ -79,6 +81,9 @@ Pure logic is unit-tested; server orchestration in `service.server.ts`.
 
 ```bash
 npm run test:trichoscopy-1b
+npm run certify:trichoscopy-1b:preflight
+npm run certify:trichoscopy-1b:init-run
+npm run test:e2e:trichoscopy-1b
 ```
 
 ## Rollback
@@ -97,13 +102,17 @@ npm run test:trichoscopy-1b
 | 1B.3 Clinical Actions | Implemented (AMBER) |
 | 1B.4 Patient Communication | Implemented (AMBER) |
 | 1B.5 Longitudinal Follow-Up | Implemented (AMBER) |
-| 1B.6 Live Certification | Pending |
+| 1B.6 Live Certification | Scaffolded (AMBER) — live run pending |
 
 ## GREEN criteria (pending)
 
+See G1–G14 in [`evidence/FI-TRICHOSCOPY-1B-CERT.md`](../evidence/FI-TRICHOSCOPY-1B-CERT.md). Summary:
+
 - Live staging consultation round-trip with signed events
-- Clinician review + evidence-version pin
-- Clinical action linkage
+- Clinician review + evidence-version pin; completed consultation immutability
+- Clinical action linkage + follow-up persistence
+- Supersession audits without rewriting completed history
 - Replay / duplicate safety
 - Browser evidence of principal clinician workflow
 - HLI outage does not block base consultation documentation
+- Evidence packet committed under `docs/fios/trichoscopy/evidence/runs/`

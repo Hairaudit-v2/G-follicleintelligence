@@ -1,11 +1,13 @@
 /**
  * FI-TRICHOSCOPY-1B — unit tests for consultation integration pure logic.
+ * Covers mandatory cert suite areas that are expressible without live staging.
  */
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  assertDecisionLinkAllowed,
   assertDiagnosisAcceptanceGuard,
   assertFindingReviewAllowed,
   canTransitionAcknowledgement,
@@ -18,6 +20,14 @@ import {
   sanitiseFreeText,
 } from "./idempotency";
 import {
+  assertConsentForTrichoscopyRequest,
+  assertConsultationMutationAllowed,
+  buildFindingUniquenessKey,
+  isEvidencePackHistoricallyVisible,
+  resolvePackSupersessionDisposition,
+  resolvePinnedPackVersion,
+} from "./packPinning";
+import {
   buildPatientSafeTrichoscopySummary,
   formatPatientSafeTrichoscopySummaryText,
 } from "./patientSafeSummary";
@@ -26,7 +36,18 @@ import {
   resolveConsultationTrichoscopyStatus,
   HLI_OUTAGE_USER_MESSAGE,
 } from "./status";
-import { capabilitiesForTier, hasCapability } from "@/src/lib/platform/entitlements/trichoscopyCapabilities";
+import {
+  capabilitiesForTier,
+  evaluateTrichoscopyAccessLayers,
+  hasCapability,
+} from "@/src/lib/platform/entitlements/trichoscopyCapabilities";
+import {
+  buildOutboundHliHeaders,
+  HDR_SIGNATURE,
+  verifyHliTrichoscopySignature,
+  verifyHliTrichoscopyTimestamp,
+} from "@/src/lib/integrations/hliTrichoscopy/eventVerifier";
+import { processHliTrichoscopyEvent } from "@/src/lib/integrations/hliTrichoscopy/events";
 
 describe("consultation trichoscopy status", () => {
   it("marks not required when clinician opts out", () => {
@@ -77,7 +98,7 @@ describe("consultation trichoscopy status", () => {
   });
 });
 
-describe("consultation readiness", () => {
+describe("consultation readiness / outage fallback", () => {
   it("does not block when trichoscopy is not required", () => {
     const r = resolveConsultationTrichoscopyReadiness({
       consultationStatus: "not_required",
@@ -113,6 +134,32 @@ describe("consultation readiness", () => {
   });
 });
 
+describe("indication and consent rules", () => {
+  it("requires capture and transfer consent before request", () => {
+    assert.equal(
+      assertConsentForTrichoscopyRequest({
+        patientConsentCapture: false,
+        patientConsentTransfer: true,
+      }).ok,
+      false
+    );
+    assert.equal(
+      assertConsentForTrichoscopyRequest({
+        patientConsentCapture: true,
+        patientConsentTransfer: false,
+      }).ok,
+      false
+    );
+    assert.equal(
+      assertConsentForTrichoscopyRequest({
+        patientConsentCapture: true,
+        patientConsentTransfer: true,
+      }).ok,
+      true
+    );
+  });
+});
+
 describe("acknowledgement and diagnosis guard", () => {
   it("allows transitions from not_reviewed", () => {
     assert.equal(canTransitionAcknowledgement("not_reviewed", "acknowledged"), true);
@@ -134,12 +181,133 @@ describe("acknowledgement and diagnosis guard", () => {
     assert.equal(isAcceptanceAcknowledgement("accepted_with_qualification"), true);
   });
 
+  it("allows investigation without acceptance acknowledgement", () => {
+    const ok = assertDiagnosisAcceptanceGuard({
+      decisionKind: "investigation",
+      acknowledgementState: "acknowledged",
+    });
+    assert.equal(ok.ok, true);
+  });
+
   it("freezes completed consultation reviews", () => {
     const gate = assertFindingReviewAllowed({
       consultationFinalised: true,
       acknowledgementState: "accepted_into_assessment",
     });
     assert.equal(gate.ok, false);
+  });
+
+  it("blocks decision links on completed consultations", () => {
+    const gate = assertDecisionLinkAllowed({
+      consultationFinalised: true,
+      decisionKind: "investigation",
+      acknowledgementState: "accepted_into_assessment",
+    });
+    assert.equal(gate.ok, false);
+  });
+});
+
+describe("pack pinning and completed-consultation immutability", () => {
+  it("pins on first acceptance and refuses silent re-pin", () => {
+    const first = resolvePinnedPackVersion({
+      existingPinnedVersion: null,
+      candidatePackVersion: "v1",
+    });
+    assert.equal(first.newlyPinned, true);
+    assert.equal(first.packVersion, "v1");
+
+    const second = resolvePinnedPackVersion({
+      existingPinnedVersion: "v1",
+      candidatePackVersion: "v2",
+    });
+    assert.equal(second.newlyPinned, false);
+    assert.equal(second.packVersion, "v1");
+  });
+
+  it("finalised consultations audit-only on superseding packs", () => {
+    assert.equal(
+      resolvePackSupersessionDisposition({
+        consultationFinalised: true,
+        pinnedPackVersion: "v1",
+        incomingPackVersion: "v2",
+      }),
+      "audit_only_leave_pin"
+    );
+    assert.equal(
+      resolvePackSupersessionDisposition({
+        consultationFinalised: false,
+        pinnedPackVersion: "v1",
+        incomingPackVersion: "v2",
+      }),
+      "sync_findings"
+    );
+  });
+
+  it("blocks clinical mutations after finalise except follow-up", () => {
+    assert.equal(
+      assertConsultationMutationAllowed({
+        consultationFinalised: true,
+        mutationKind: "review",
+      }).ok,
+      false
+    );
+    assert.equal(
+      assertConsultationMutationAllowed({
+        consultationFinalised: true,
+        mutationKind: "sync_findings",
+      }).ok,
+      false
+    );
+    assert.equal(
+      assertConsultationMutationAllowed({
+        consultationFinalised: true,
+        mutationKind: "follow_up",
+      }).ok,
+      true
+    );
+  });
+
+  it("keeps superseded and withdrawn packs historically visible", () => {
+    assert.equal(isEvidencePackHistoricallyVisible("active"), true);
+    assert.equal(isEvidencePackHistoricallyVisible("superseded"), true);
+    assert.equal(isEvidencePackHistoricallyVisible("withdrawn"), true);
+    assert.equal(isEvidencePackHistoricallyVisible("deleted"), false);
+  });
+});
+
+describe("data constraints and uniqueness", () => {
+  it("builds stable finding uniqueness keys for duplicate import safety", () => {
+    const a = buildFindingUniquenessKey({
+      tenantId: "t1",
+      evidencePackId: "pack-1",
+      findingCode: "miniaturisation_indicators",
+      observedRegion: "vertex",
+    });
+    const b = buildFindingUniquenessKey({
+      tenantId: "t1",
+      evidencePackId: "pack-1",
+      findingCode: "miniaturisation_indicators",
+      observedRegion: "vertex",
+    });
+    assert.equal(a, b);
+    const otherRegion = buildFindingUniquenessKey({
+      tenantId: "t1",
+      evidencePackId: "pack-1",
+      findingCode: "miniaturisation_indicators",
+      observedRegion: "frontal",
+    });
+    assert.notEqual(a, otherRegion);
+  });
+
+  it("treats missing region as '-' for uniqueness", () => {
+    const a = buildFindingUniquenessKey({
+      tenantId: "t1",
+      evidencePackId: "p",
+      findingCode: "x",
+      observedRegion: null,
+    });
+    assert.ok(a.endsWith(":-") || a.endsWith(": -") === false);
+    assert.equal(a, "t1:p:x:-");
   });
 });
 
@@ -163,9 +331,18 @@ describe("finding normalisation", () => {
     assert.ok(grouped.hair_follicular.length >= 1);
     assert.ok(grouped.safety_escalation.length >= 1);
   });
+
+  it("replay of same pack payload yields identical finding codes", () => {
+    const payload = {
+      findings: [{ findingCode: "diffuse_thinning", findingDomain: "distribution_pattern" }],
+    };
+    const first = normaliseTrichoscopyFindingsFromPack(payload).map((f) => f.findingCode);
+    const second = normaliseTrichoscopyFindingsFromPack(payload).map((f) => f.findingCode);
+    assert.deepEqual(first, second);
+  });
 });
 
-describe("idempotency and payload sanitisation", () => {
+describe("idempotency / duplicate request safety", () => {
   it("builds stable consultation idempotency keys", () => {
     const a = buildConsultationTrichoscopyIdempotencyKey({
       tenantId: "t1",
@@ -208,7 +385,7 @@ describe("idempotency and payload sanitisation", () => {
   });
 });
 
-describe("patient-safe summary", () => {
+describe("patient-safe visibility boundaries", () => {
   it("omits clinician-only fields", () => {
     const summary = buildPatientSafeTrichoscopySummary({
       performed: true,
@@ -232,10 +409,140 @@ describe("patient-safe summary", () => {
   });
 });
 
-describe("1B capability packaging", () => {
+describe("1B capability packaging and role / tenant guards", () => {
   it("clinical tier includes accept_findings; surgical does not", () => {
     assert.equal(hasCapability(capabilitiesForTier("clinical"), "trichoscopy.accept_findings"), true);
     assert.equal(hasCapability(capabilitiesForTier("surgical"), "trichoscopy.accept_findings"), false);
     assert.equal(hasCapability(capabilitiesForTier("clinical"), "trichoscopy.review_findings"), true);
+  });
+
+  it("surgical-only user cannot accept findings via access layers", () => {
+    const result = evaluateTrichoscopyAccessLayers({
+      platformEnabled: true,
+      entitlementStatus: "active",
+      capabilityTier: "surgical",
+      subscribedCapabilities: [...capabilitiesForTier("surgical")],
+      tenantModuleEnabled: true,
+      tenantConfigCapabilities: [...capabilitiesForTier("surgical")],
+      platformCapabilities: [...capabilitiesForTier("complete")],
+      userPermitted: true,
+      resourceAccessible: true,
+      requestedCapability: "trichoscopy.accept_findings",
+    });
+    assert.equal(result.allowed, false);
+    assert.equal(result.denialReason, "capability_not_included");
+  });
+
+  it("reception / unpermitted user cannot access clinical findings review", () => {
+    const result = evaluateTrichoscopyAccessLayers({
+      platformEnabled: true,
+      entitlementStatus: "active",
+      capabilityTier: "clinical",
+      subscribedCapabilities: [...capabilitiesForTier("clinical")],
+      tenantModuleEnabled: true,
+      tenantConfigCapabilities: [...capabilitiesForTier("clinical")],
+      platformCapabilities: [...capabilitiesForTier("complete")],
+      userPermitted: false,
+      resourceAccessible: true,
+      requestedCapability: "trichoscopy.review_findings",
+    });
+    assert.equal(result.allowed, false);
+    assert.equal(result.denialReason, "user_not_permitted");
+  });
+
+  it("cross-tenant consultation resource access is denied", () => {
+    const result = evaluateTrichoscopyAccessLayers({
+      platformEnabled: true,
+      entitlementStatus: "active",
+      capabilityTier: "clinical",
+      subscribedCapabilities: [...capabilitiesForTier("clinical")],
+      tenantModuleEnabled: true,
+      tenantConfigCapabilities: [...capabilitiesForTier("clinical")],
+      platformCapabilities: [...capabilitiesForTier("complete")],
+      userPermitted: true,
+      resourceAccessible: false,
+      requestedCapability: "trichoscopy.view_evidence",
+    });
+    assert.equal(result.allowed, false);
+    assert.equal(result.denialReason, "resource_not_accessible");
+  });
+
+  it("capture tier (patient-facing adjacent) cannot review clinical findings", () => {
+    const result = evaluateTrichoscopyAccessLayers({
+      platformEnabled: true,
+      entitlementStatus: "active",
+      capabilityTier: "capture",
+      subscribedCapabilities: [...capabilitiesForTier("capture")],
+      tenantModuleEnabled: true,
+      tenantConfigCapabilities: [...capabilitiesForTier("capture")],
+      platformCapabilities: [...capabilitiesForTier("complete")],
+      userPermitted: true,
+      resourceAccessible: true,
+      requestedCapability: "trichoscopy.review_findings",
+    });
+    assert.equal(result.allowed, false);
+    assert.equal(result.denialReason, "capability_not_included");
+  });
+});
+
+describe("HLI signature gates before clinical writes (1B cert negatives)", () => {
+  function headersFromRecord(rec: Record<string, string>): Headers {
+    const h = new Headers();
+    for (const [k, v] of Object.entries(rec)) h.set(k, v);
+    return h;
+  }
+
+  it("rejects invalid HLI signature before clinical writes", async () => {
+    const secret = "test-hli-trichoscopy-webhook-secret-32!";
+    const tenantId = "11111111-1111-4111-8111-111111111111";
+    const body = JSON.stringify({
+      eventId: "evt-1b-inv",
+      eventType: "trichoscopy.session_created",
+      eventVersion: "1",
+      occurredAt: new Date().toISOString(),
+      tenantReference: tenantId,
+      patientReference: "hli-pt-1",
+      idempotencyKey: "idem-1b-inv",
+    });
+    const signed = buildOutboundHliHeaders({ tenantId, secret, body });
+    signed[HDR_SIGNATURE] = "00".repeat(32);
+
+    const result = await processHliTrichoscopyEvent({
+      headers: headersFromRecord(signed),
+      rawBody: body,
+      env: {
+        FI_ENABLE_HLI_TRICHOSCOPY: "1",
+        HLI_TRICHOSCOPY_WEBHOOK_SECRET: secret,
+        HLI_TRICHOSCOPY_SIGNING_SECRET: secret,
+        HLI_TRICHOSCOPY_API_BASE_URL: "https://hli.example",
+        HLI_TRICHOSCOPY_SERVICE_KEY: "svc",
+      },
+    });
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.reason, "signature_invalid");
+  });
+
+  it("rejects expired / skewed timestamps", () => {
+    const stale = String(Date.now() - 15 * 60 * 1000);
+    assert.equal(verifyHliTrichoscopyTimestamp(stale), false);
+    assert.equal(verifyHliTrichoscopyTimestamp(String(Date.now())), true);
+  });
+
+  it("builds signatures that verify (replay foundation)", () => {
+    const secret = "test-hli-trichoscopy-webhook-secret-32!";
+    const tenantId = "tenant-1b";
+    const body = '{"ok":true}';
+    const headers = buildOutboundHliHeaders({ tenantId, secret, body });
+    assert.equal(
+      verifyHliTrichoscopySignature({
+        secret,
+        timestamp: headers["x-fi-timestamp"],
+        requestId: headers["x-fi-request-id"],
+        tenantId,
+        body,
+        signature: headers[HDR_SIGNATURE],
+      }),
+      true
+    );
   });
 });

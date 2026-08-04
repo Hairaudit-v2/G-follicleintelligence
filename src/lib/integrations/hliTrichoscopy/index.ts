@@ -41,6 +41,7 @@ export {
 } from "./consultation/status";
 export {
   assertDiagnosisAcceptanceGuard,
+  assertDecisionLinkAllowed,
   assertFindingReviewAllowed,
   canTransitionAcknowledgement,
   isAcceptanceAcknowledgement,
@@ -58,4 +59,12 @@ export {
   buildFiOsToHliConsultationContext,
   sanitiseFreeText,
 } from "./consultation/idempotency";
+export {
+  assertConsentForTrichoscopyRequest,
+  assertConsultationMutationAllowed,
+  buildFindingUniquenessKey,
+  isEvidencePackHistoricallyVisible,
+  resolvePackSupersessionDisposition,
+  resolvePinnedPackVersion,
+} from "./consultation/packPinning";
 export * from "./consultation/types";

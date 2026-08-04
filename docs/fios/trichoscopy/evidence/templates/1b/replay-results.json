@@ -1,0 +1,19 @@
+{
+  "duplicateEvent": {
+    "eventId": null,
+    "duplicateFindingsCreated": null,
+    "duplicateActionsCreated": null,
+    "pass": null
+  },
+  "duplicateRequest": {
+    "idempotencyKey": null,
+    "usageRows": null,
+    "duplicateUsageEvents": null,
+    "pass": null
+  },
+  "outOfOrderEvents": {
+    "sequence": [],
+    "finalStatus": null,
+    "pass": null
+  }
+}
