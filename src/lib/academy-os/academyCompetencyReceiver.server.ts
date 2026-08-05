@@ -7,16 +7,16 @@ import type {
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { WORKFORCE_IDENTITY_SOURCE_SYSTEMS } from "@/src/lib/workforce-os/workforceIdentitySources";
+import { WORKFORCE_IDENTITY_SOURCE_SYSTEMS } from "@/src/lib/team/identity/workforceIdentitySources";
 import {
   getStaffIdentityLinksByExternalId,
   linkAcademyProfileToFiStaff,
   upsertStaffIdentityLink,
-} from "@/src/lib/workforce-os/workforceIdentityLinks.server";
+} from "@/src/lib/team/identity/server";
 import {
   mergeWorkforceIdentityMetadata,
   sanitizeWorkforceIdentityMetadata,
-} from "@/src/lib/workforce-os/workforceIdentityMetadata";
+} from "@/src/lib/team/identity/workforceIdentityMetadata";
 
 import { publishAcademyCompetencyAnalytics } from "./academyAnalyticsPublisher.server";
 import type {

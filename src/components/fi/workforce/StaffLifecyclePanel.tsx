@@ -3,11 +3,11 @@
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
   resolveStaffLifecycleOperationalState,
   STAFF_LIFECYCLE_OPERATIONAL_STATES,
-} from "@/src/lib/workforce-os/staffLifecyclePresentation";
+} from "@/src/lib/team/identity/staffLifecyclePresentation";
 
 export function StaffLifecyclePanel({
   lifecycle,

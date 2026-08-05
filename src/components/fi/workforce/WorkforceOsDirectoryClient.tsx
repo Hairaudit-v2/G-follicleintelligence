@@ -4,8 +4,8 @@ import { WorkspaceFeedLink } from "@/src/components/fi-os/workspace/WorkspaceFee
 import { useMemo, useState } from "react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { resolveIdentitySourceBadge } from "@/src/lib/workforce-os/staffLifecycleCore";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
+import { resolveIdentitySourceBadge } from "@/src/lib/team/identity/staffLifecycleCore";
 
 export type WorkforceDirectoryFilter =
   | "all"

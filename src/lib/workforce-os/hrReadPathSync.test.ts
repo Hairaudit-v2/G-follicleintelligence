@@ -37,7 +37,7 @@ test("loadWorkforceOsHrReconciliationPage does not call syncAllStaffProjectionsF
 });
 
 test("runStaffIdentityReadinessAudit does not call syncAllStaffProjectionsForTenant", () => {
-  const source = readRepoFile("src/lib/workforce-os/staffIdentityReadinessAudit.server.ts");
+  const source = readRepoFile("src/lib/team/identity/staffIdentityReadinessAudit.server.ts");
   const body = extractExportedFunctionBody(source, "runStaffIdentityReadinessAudit");
   assert.equal(body.includes("syncAllStaffProjectionsForTenant"), false);
 });

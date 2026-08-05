@@ -8,7 +8,7 @@ import {
   WORKFORCE_READINESS_BLOCKING_LABELS,
   WORKFORCE_READINESS_WARNING_LABELS,
   type WorkforceReadinessScoreResult,
-} from "@/src/lib/workforce-os/workforceReadinessEngine";
+} from "@/src/lib/team/identity/workforceReadinessEngine";
 
 function scoreBarColor(score: number, maxScore: number): string {
   const ratio = maxScore > 0 ? score / maxScore : 0;

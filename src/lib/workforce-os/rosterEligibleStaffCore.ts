@@ -11,8 +11,8 @@ import { isStaffArchived } from "@/src/lib/workforce-os/hrReconciliationEligible
 import {
   isOperationallyIneligible,
   parseStaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleCore";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 import type { AvailabilityBlockType } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
   staffHasConfiguredStandardHours,

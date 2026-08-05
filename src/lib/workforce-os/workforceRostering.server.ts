@@ -21,7 +21,7 @@ import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompli
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { assertStaffMeetsClinicalEligibilityForAssignment } from "@/src/lib/workforce/clinicalEligibilityGate.server";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 import {
   assignStaffToClinicalEvent,
   detectStaffSchedulingConflicts,

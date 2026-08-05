@@ -16,12 +16,12 @@ import { StaffLifecyclePanel } from "@/src/components/fi/workforce/StaffLifecycl
 import { StaffHrTaskMapEntryBanner } from "@/src/components/fi/workforce/StaffHrTaskMapEntryBanner";
 import { StaffProfileOverviewPanel } from "@/src/components/fi/workforce/StaffProfileOverviewPanel";
 import type { StaffProfileOverviewModel } from "@/src/lib/workforce/staffProfileHubCore";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
   isExternallyManagedStaff,
   resolveIdentitySourceBadge,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
-import { resolveStaffLifecycleOperationalPresentation } from "@/src/lib/workforce-os/staffLifecyclePresentation";
+} from "@/src/lib/team/identity/staffLifecycleCore";
+import { resolveStaffLifecycleOperationalPresentation } from "@/src/lib/team/identity/staffLifecyclePresentation";
 import { cn } from "@/lib/utils";
 
 type ProfileTab = "overview" | "details" | "lifecycle" | "audit";

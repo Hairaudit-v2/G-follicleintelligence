@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { StaffAccessCentreClient } from "@/src/components/fi/workforce/StaffAccessCentreClient";
 import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre.server";
-import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
+import { resolveStaffIdentityAuditAccess } from "@/src/lib/team/identity/server";
 import { assertTeamTabAccessOrNotFound } from "@/src/lib/staffAccess/staffTeamTabRouteGate.server";
 import { resolveWorkforceHrManageCapability } from "@/src/lib/workforce/workforceHrManageGate.server";
 import { buildStaffIdentityAuditHref } from "@/src/lib/workforce/staffLifecycleCopy";

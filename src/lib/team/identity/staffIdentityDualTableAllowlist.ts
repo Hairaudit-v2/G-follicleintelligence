@@ -3,11 +3,12 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.8A — Payroll identity proof.
+ * Snapshot: FI-TEAM-COHESION-B2.1b — Identity server consolidation.
  *
- * Allowlist before B1.8A: 17
- * Entries removed: 1 (`src/lib/crm/crmAssigneeEligibility.ts` comment tokens)
- * Allowlist after: 16
+ * Allowlist before B2.1b: 16
+ * Entries removed: 1 (`src/lib/workforce-os/staffIdentityReadinessAudit.server.ts`
+ *   moved into `team/identity`, which is exempt from the dual-table debt scan)
+ * Allowlist after: 15
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -21,7 +22,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/staffImport/iiohrStaffDepartureAlignment.server.ts",
   "src/lib/workforce-os/hrReconciliation.server.ts",
   "src/lib/workforce-os/projectionHealth.server.ts",
-  "src/lib/workforce-os/staffIdentityReadinessAudit.server.ts",
   "src/lib/workforce-os/staffLifecycle.server.ts",
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
   "src/lib/workforce/staffAccessAccept.server.ts",

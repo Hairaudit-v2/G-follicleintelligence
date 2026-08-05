@@ -2,8 +2,8 @@
  * Clinical workforce eligibility engine (WorkforceOS Sprint 3).
  */
 
-import { isOperationallyIneligible } from "@/src/lib/workforce-os/staffLifecycleCore";
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { isOperationallyIneligible } from "@/src/lib/team/identity/staffLifecycleCore";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 import type {
   ClinicalEligibilityStatus,
   ComplianceAlertRecord,

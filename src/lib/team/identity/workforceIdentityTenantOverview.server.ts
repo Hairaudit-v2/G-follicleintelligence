@@ -3,7 +3,7 @@ import "server-only";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
+import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/team/identity/workforceIdentitySummary";
 
 export type TenantWorkforceIdentityOverview = {
   activeStaffCount: number;

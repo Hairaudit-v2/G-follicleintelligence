@@ -4,8 +4,9 @@
  * Server resolvers: `@/src/lib/team/identity/server`
  * Do not import from `@/src/lib/team/identity/internal/**` outside this package.
  *
- * B2.1a: canonical lifecycle / readiness pure modules live here.
- * Temporary re-exports remain at `src/lib/workforce-os/<same-basename>.ts` until consumers migrate.
+ * B2.1a–B2.1b: canonical lifecycle / readiness pure modules and identity
+ * server loaders (links, audit, tenant overview) live under this package.
+ * Prefer this barrel for pure symbols; use `./server` for privileged loaders.
  */
 
 export type {

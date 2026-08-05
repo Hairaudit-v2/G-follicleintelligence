@@ -2,8 +2,10 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { StaffIdentityReadinessAuditClient } from "@/src/components/fi/workforce/StaffIdentityReadinessAuditClient";
-import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
-import { runStaffIdentityReadinessAudit } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
+import {
+  resolveStaffIdentityAuditAccess,
+  runStaffIdentityReadinessAudit,
+} from "@/src/lib/team/identity/server";
 
 export const metadata = {
   title: "Identity readiness · Team",

@@ -9,8 +9,8 @@ import "server-only";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadStaffProfileHubBundle } from "@/src/lib/team/profile/server";
 import { toStaffProfileOverviewModel } from "@/src/lib/team/profile";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
+import { resolveStaffIdentityAuditAccess } from "@/src/lib/team/identity/server";
 import type { StaffProfileOverviewModel } from "@/src/lib/workforce/staffProfileHubCore";
 
 export type StaffProfileHubOverviewData = StaffProfileOverviewModel;

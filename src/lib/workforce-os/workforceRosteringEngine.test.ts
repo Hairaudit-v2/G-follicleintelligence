@@ -29,7 +29,7 @@ function workingHours(): Record<string, unknown> {
 
 function freshReadinessInput(
   overrides: Partial<
-    import("@/src/lib/workforce-os/workforceReadinessEngine").WorkforceReadinessScoreInput
+    import("@/src/lib/team/identity/workforceReadinessEngine").WorkforceReadinessScoreInput
   > = {}
 ) {
   const hr = buildStaffHrNotificationSummary(

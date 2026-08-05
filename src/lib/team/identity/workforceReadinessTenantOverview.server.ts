@@ -8,8 +8,8 @@ import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompli
 import {
   calculateWorkforceReadinessScore,
   type WorkforceReadinessScoreResult,
-} from "@/src/lib/workforce-os/workforceReadinessEngine";
-import type { WorkforceReadinessBandId } from "@/src/lib/workforce-os/workforceReadinessBands";
+} from "@/src/lib/team/identity/workforceReadinessEngine";
+import type { WorkforceReadinessBandId } from "@/src/lib/team/identity/workforceReadinessBands";
 
 export type TenantWorkforceReadinessOverview = {
   totalStaff: number;

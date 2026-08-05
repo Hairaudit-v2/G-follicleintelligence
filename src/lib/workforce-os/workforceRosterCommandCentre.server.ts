@@ -9,7 +9,7 @@ import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { parseStaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleCore";
+import { parseStaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleCore";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
@@ -40,7 +40,7 @@ import {
   rosterDisplayStatusMatchesFilter,
   type RosterStaffingStatusFilter,
 } from "@/src/lib/workforce-os/workforceRosterQueryParams";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 import {
   detectStaffSchedulingConflicts,
   type StaffAvailabilityBlockRecord,

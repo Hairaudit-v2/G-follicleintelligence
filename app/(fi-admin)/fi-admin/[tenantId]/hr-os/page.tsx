@@ -5,8 +5,10 @@ import { HrOsClinicalRosteringSection } from "@/src/components/fi/hr-os/HrOsClin
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
-import { buildTenantWorkforceReadinessOverview } from "@/src/lib/workforce-os/workforceReadinessTenantOverview.server";
+import {
+  buildTenantWorkforceIdentityOverview,
+  buildTenantWorkforceReadinessOverview,
+} from "@/src/lib/team/identity/server";
 import {
   loadWorkforceRosterOverview,
   seedDefaultClinicalStaffingTemplatesForTenant,

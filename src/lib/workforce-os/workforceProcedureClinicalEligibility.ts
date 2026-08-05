@@ -4,7 +4,7 @@
 
 import type { ProcedurePrivilegeEligibilityResult } from "@/src/lib/academy-os/procedurePrivilegeTypes";
 import { formatMissingProcedurePrivilegeReason } from "@/src/lib/academy-os/procedurePrivilegeEngine";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 import {
   canStaffBeAssignedClinically,

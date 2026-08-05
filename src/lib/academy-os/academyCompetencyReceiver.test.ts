@@ -10,8 +10,8 @@ import {
   resolveStaffByIiohrUserId,
 } from "./academyCompetencyReceiver.server";
 import { buildAcademyCompetencySignalsFromProjections } from "./academyWorkforceSignalAdapter";
-import { buildWorkforceIdentityReadinessSignals } from "@/src/lib/workforce-os/workforceIdentityReadinessSignals";
-import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import { buildWorkforceIdentityReadinessSignals } from "@/src/lib/team/identity/workforceIdentityReadinessSignals";
+import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workforceReadinessEngine";
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 
