@@ -1,10 +1,10 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B1.5 — Compliance and Credentials Identity Proof (GREEN) · B1.4 roster proof intact · B1.3 onboarding proof intact · B1.2 access proof intact · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
+**Phase:** B1.6 — Staff Profile Hub (GREEN) · B1.5 compliance proof intact · B1.4 roster proof intact · B1.3 onboarding proof intact · B1.2 access proof intact · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
 **Date:** 2026-08-05  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
-B0 was discovery and architecture-lock only. **B1–B1.4** proved identity through directory, access, onboarding, and roster. **B1.5** proved compliance/credentials — see [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md).
+B0 was discovery and architecture-lock only. **B1–B1.5** proved identity through directory, access, onboarding, roster, and compliance. **B1.6** makes the staff profile the canonical person-level composition surface — see [b1.6-staff-profile-hub-proof.md](./b1.6-staff-profile-hub-proof.md).
 
 ## Documents
 
@@ -24,6 +24,7 @@ B0 was discovery and architecture-lock only. **B1–B1.4** proved identity throu
 | [b1.3-onboarding-identity-proof.md](./b1.3-onboarding-identity-proof.md) | B1.3 onboarding batch-resolver proof |
 | [b1.4-roster-identity-proof.md](./b1.4-roster-identity-proof.md) | B1.4 roster batch-resolver proof |
 | [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md) | B1.5 compliance/credentials batch-resolver proof |
+| [b1.6-staff-profile-hub-proof.md](./b1.6-staff-profile-hub-proof.md) | B1.6 staff profile composition proof |
 
 ## Generated artifacts
 
@@ -53,11 +54,12 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 | Raw identity refs (`src`+`scripts`+`supabase`) | 615 (was 595 pre-B1; +canonical module refs) |
 | Raw identity refs (`src/lib` only) | see regenerate `identityBaseline.srcLibOnly` |
 | Canonical identity package | `src/lib/team/identity` (B1 GREEN) |
+| Canonical profile composition | `src/lib/team/profile` (B1.6 GREEN) |
 
 ## Recommended next slice
 
-**FI-TEAM-COHESION-B1.5** is GREEN — see [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md).
+**FI-TEAM-COHESION-B1.6** is GREEN — see [b1.6-staff-profile-hub-proof.md](./b1.6-staff-profile-hub-proof.md).
 
-Dual-table allowlist: **20** (was 21; HR task-map dual-table classifier removed).
+Dual-table allowlist: **19** (was 20; `staffLifecycleCopy` documentation tokens retired).
 
-**Next:** B1.6 — Staff profile hub. Then command centre (B1.7), payroll/planning (B1.8).
+**Next:** B1.7 — Command Centre (compose many people with the same projections). Then payroll/planning (B1.8).

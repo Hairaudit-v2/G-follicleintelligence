@@ -34,10 +34,28 @@ test("StaffProfileOverviewPanel wires action menu in sidebar layout", () => {
   assert.doesNotMatch(src, /Next actions/);
 });
 
+test("StaffProfileActionMenu accepts canonical domain action flags", () => {
+  const src = readFileSync(ACTION_MENU, "utf8");
+  assert.match(src, /accessActions\?:/);
+  assert.match(src, /onboardingActions\?:/);
+  assert.match(src, /complianceActions\?:/);
+  assert.match(src, /identityActions\?:/);
+  assert.match(src, /identityActions\?\.readOnly/);
+});
+
+test("StaffProfileOverviewPanel wires domain action flags into action menu", () => {
+  const src = readFileSync(OVERVIEW, "utf8");
+  assert.match(src, /accessActions=\{domainActions\?\.access\}/);
+  assert.match(src, /onboardingActions=\{domainActions\?\.onboarding\}/);
+  assert.match(src, /complianceActions=\{domainActions\?\.compliance\}/);
+  assert.match(src, /identityActions=\{domainActions\?\.identity\}/);
+});
+
 test("WorkforceOsStaffProfileClient passes action menu props to overview", () => {
   const src = readFileSync(PROFILE_CLIENT, "utf8");
   assert.match(src, /actionMenu=\{overview\.actionMenu\}/);
   assert.match(src, /actionContext=\{overview\.actionContext\}/);
+  assert.match(src, /domainActions=\{overview\.domainActions\}/);
 });
 
 test("Staff profile action menu dangerous actions require confirmation", () => {

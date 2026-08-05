@@ -11,6 +11,7 @@ import type {
   StaffProfileActionContext,
   StaffProfileActionMenuModel,
   StaffProfileExtendedStatus,
+  StaffProfileOverviewModel,
 } from "@/src/lib/workforce/staffProfileHubCore";
 import { cn } from "@/lib/utils";
 
@@ -134,6 +135,7 @@ export function StaffProfileOverviewPanel({
   tenantId,
   progressStages,
   onModalAction,
+  domainActions,
 }: {
   name: string;
   roleLabel?: string | null;
@@ -144,6 +146,7 @@ export function StaffProfileOverviewPanel({
   tenantId: string;
   progressStages: StaffLifecycleProgressStage[];
   onModalAction?: (actionId: string) => void;
+  domainActions?: StaffProfileOverviewModel["domainActions"];
 }) {
   return (
     <div className="space-y-4" data-testid="staff-profile-overview">
@@ -163,6 +166,10 @@ export function StaffProfileOverviewPanel({
               context={actionContext}
               tenantId={tenantId}
               onModalAction={onModalAction}
+              accessActions={domainActions?.access}
+              onboardingActions={domainActions?.onboarding}
+              complianceActions={domainActions?.compliance}
+              identityActions={domainActions?.identity}
             />
           </div>
           <div className="lg:hidden">
@@ -172,6 +179,10 @@ export function StaffProfileOverviewPanel({
               tenantId={tenantId}
               compact
               onModalAction={onModalAction}
+              accessActions={domainActions?.access}
+              onboardingActions={domainActions?.onboarding}
+              complianceActions={domainActions?.compliance}
+              identityActions={domainActions?.identity}
             />
           </div>
         </aside>

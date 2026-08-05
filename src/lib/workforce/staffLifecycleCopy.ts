@@ -97,7 +97,7 @@ export function buildStaffProfileHref(tenantId: string, staffId: string): string
   return `${tenantAdminBase(tenantId)}/workforce-os/staff/${staffId.trim()}`;
 }
 
-/** Canonical profile href when only fi_staff id is known (loader accepts fi_staff or fi_staff_members id). */
+/** Canonical profile href when only the scheduling staff id is known. */
 export function buildStaffProfileHrefFromFiStaff(tenantId: string, fiStaffId: string): string {
   return buildStaffProfileHref(tenantId, fiStaffId);
 }

@@ -3,17 +3,16 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.5 — compliance HR task-map classifier removed.
+ * Snapshot: FI-TEAM-COHESION-B1.6 — profile hub composition; staffLifecycleCopy retired.
  *
- * Allowlist before B1.5: 21
- * Compliance entries removed: 1 (`src/lib/workforce/staffHrTaskMapCore.ts`)
- * Allowlist after: 20
+ * Allowlist before B1.6: 20
+ * Profile entries removed: 1 (`src/lib/workforce/staffLifecycleCopy.ts`)
+ * Allowlist after: 19
  *
- * Credentials aggregation (`credentialsPage.server.ts`) now uses
- * `resolveStaffIdentities({ by: "staffMemberId" })` with a bounded credentials batch.
- * The HR task map core was allowlisted for dual-table identifier tokens in lifecycle
- * copy; with compliance on identity, those comments were rewritten to domain language
- * and the entry retired.
+ * Staff profile hub now composes via `src/lib/team/profile` + `resolveStaffIdentity`
+ * (discriminated by staffId | staffMemberId). `staffLifecycleCopy` was allowlisted solely
+ * for documentation tokens naming both staff tables; comments were rewritten to domain
+ * language (scheduling staff id) and the entry retired.
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -35,7 +34,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
   "src/lib/workforce/staffAccessAccept.server.ts",
   "src/lib/workforce/staffAccessPinLayer.server.ts",
-  "src/lib/workforce/staffLifecycleCopy.ts",
   "src/lib/workforce/staffOffboarding.server.ts",
   "src/lib/workforce/staffTenantLinkRepair.server.ts",
 ] as const;

@@ -154,6 +154,39 @@ export type StaffProfileOverviewModel = {
   progressStages: StaffLifecycleProgressStage[];
   actionMenu: StaffProfileActionMenuModel;
   actionContext: StaffProfileActionContext;
+  /**
+   * Canonical domain action flags for StaffProfileActionMenu (B1.6).
+   * Presentation only — server mutations remain authoritative.
+   */
+  domainActions?: {
+    access?: {
+      canInvite: boolean;
+      canResend: boolean;
+      canSuspend: boolean;
+      canRevoke: boolean;
+    };
+    onboarding?: {
+      canResendOnboardingInvite: boolean;
+      canCancelOnboarding: boolean;
+      canContinueSetup: boolean;
+      canCreateSchedulingRecord: boolean;
+      canRepairIdentityLink: boolean;
+      canSendOnboardingInvite: boolean;
+      canCopyOnboardingInviteLink: boolean;
+    };
+    compliance?: {
+      canUploadCredential: boolean;
+      canVerifyCredential: boolean;
+      canRejectCredential: boolean;
+      canRequestReplacement: boolean;
+      canResolveIdentity: boolean;
+    };
+    identity?: {
+      canRepairIdentityLink: boolean;
+      canCreateSchedulingRecord: boolean;
+      readOnly: boolean;
+    };
+  };
 };
 
 function onboardingStatusLabel(status: OnboardingInviteDisplayStatus | null): string | null {

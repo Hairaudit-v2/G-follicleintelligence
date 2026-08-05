@@ -46,14 +46,23 @@ export async function loadWorkforceOsStaffProfilePage(
   audit: Awaited<ReturnType<typeof loadStaffMemberAuditTimeline>>;
   canManage: boolean;
   iiohrCandidates: { id: string; full_name: string | null; email: string | null }[];
+  /** Which table id the route param resolved as — never conflated inside the hub loader. */
+  resolvedBy: "staffMemberId" | "staffId";
 } | null> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) return null;
 
   const tid = tenantId.trim();
-  let lifecycle = await loadStaffMemberLifecycle(tid, staffId).catch(() => null);
+  const routeId = staffId.trim();
+
+  // Explicit dual-route support: try lifecycle id first, then scheduling id.
+  // Each attempt is a dedicated load — the profile hub still receives a
+  // discriminated `by: "staffMemberId"` input after lifecycle is known.
+  let lifecycle = await loadStaffMemberLifecycle(tid, routeId).catch(() => null);
+  let resolvedBy: "staffMemberId" | "staffId" = "staffMemberId";
   if (!lifecycle) {
-    lifecycle = await loadStaffLifecycleForFiStaff(tid, staffId);
+    lifecycle = await loadStaffLifecycleForFiStaff(tid, routeId);
+    resolvedBy = "staffId";
   }
 
   const audit = await loadStaffMemberAuditTimeline(tid, lifecycle.id);
@@ -64,7 +73,7 @@ export async function loadWorkforceOsStaffProfilePage(
   // Placeholder candidates — production loads from IIOHR feed API.
   const iiohrCandidates: { id: string; full_name: string | null; email: string | null }[] = [];
 
-  return { lifecycle, audit, canManage, iiohrCandidates };
+  return { lifecycle, audit, canManage, iiohrCandidates, resolvedBy };
 }
 
 export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Promise<{

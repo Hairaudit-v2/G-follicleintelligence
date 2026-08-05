@@ -236,12 +236,47 @@ export function StaffProfileActionMenu({
   tenantId,
   compact = false,
   onModalAction,
+  accessActions,
+  onboardingActions,
+  complianceActions,
+  identityActions,
 }: {
   menu: StaffProfileActionMenuModel;
   context: StaffProfileActionContext;
   tenantId: string;
   compact?: boolean;
   onModalAction?: (actionId: string) => void;
+  /** Canonical access flags from StaffAccessEntry — presentation only. */
+  accessActions?: {
+    canInvite: boolean;
+    canResend: boolean;
+    canSuspend: boolean;
+    canRevoke: boolean;
+  } | null;
+  /** Canonical onboarding flags from StaffOnboardingEntry.actions. */
+  onboardingActions?: {
+    canResendOnboardingInvite: boolean;
+    canCancelOnboarding: boolean;
+    canContinueSetup: boolean;
+    canCreateSchedulingRecord: boolean;
+    canRepairIdentityLink: boolean;
+    canSendOnboardingInvite: boolean;
+    canCopyOnboardingInviteLink: boolean;
+  } | null;
+  /** Canonical compliance flags from StaffComplianceEntry.actions. */
+  complianceActions?: {
+    canUploadCredential: boolean;
+    canVerifyCredential: boolean;
+    canRejectCredential: boolean;
+    canRequestReplacement: boolean;
+    canResolveIdentity: boolean;
+  } | null;
+  /** Profile identity gate flags — suppress unsafe mutations when readOnly. */
+  identityActions?: {
+    canRepairIdentityLink: boolean;
+    canCreateSchedulingRecord: boolean;
+    readOnly: boolean;
+  } | null;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -252,6 +287,84 @@ export function StaffProfileActionMenu({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { staffMemberId } = context;
+
+  const gatedMenu = useMemo(() => {
+    const readOnly = Boolean(identityActions?.readOnly);
+    const actions = menu.actions.map((action) => {
+      let disabled = action.disabled;
+      let disabledReason = action.disabledReason;
+
+      if (readOnly && (action.actionKind === "server-action" || action.actionKind === "danger")) {
+        disabled = true;
+        disabledReason = disabledReason ?? "Identity requires reconciliation before this action.";
+      }
+
+      if (accessActions) {
+        if (action.id === "send_login_invite" && !accessActions.canInvite) {
+          disabled = true;
+          disabledReason = disabledReason ?? "Login invite is not available for this identity.";
+        }
+        if (action.id === "resend_login_invite" && !accessActions.canResend) {
+          disabled = true;
+          disabledReason = disabledReason ?? "Resend invite is not available for this identity.";
+        }
+        if (action.id === "suspend_access" && !accessActions.canSuspend) {
+          disabled = true;
+          disabledReason = disabledReason ?? "Suspend is not available for this identity.";
+        }
+        if (action.id === "revoke_access" && !accessActions.canRevoke) {
+          disabled = true;
+          disabledReason = disabledReason ?? "Revoke is not available for this identity.";
+        }
+      }
+
+      if (onboardingActions) {
+        if (action.id === "send_onboarding_invite" && !onboardingActions.canSendOnboardingInvite) {
+          disabled = true;
+          disabledReason =
+            disabledReason ?? "Onboarding invite is not available for this identity.";
+        }
+        if (
+          action.id === "resend_onboarding_invite" &&
+          !onboardingActions.canResendOnboardingInvite
+        ) {
+          disabled = true;
+          disabledReason =
+            disabledReason ?? "Resend onboarding invite is not available for this identity.";
+        }
+        if (
+          action.id === "copy_onboarding_invite_link" &&
+          !onboardingActions.canCopyOnboardingInviteLink
+        ) {
+          disabled = true;
+          disabledReason =
+            disabledReason ?? "Onboarding invite link is not available for this identity.";
+        }
+      }
+
+      void complianceActions;
+
+      return { ...action, disabled, disabledReason };
+    });
+
+    const primaryAction =
+      actions.find((a) => a.id === menu.primaryAction?.id) ??
+      actions.find((a) => a.section === "primary" && !a.disabled) ??
+      null;
+
+    return {
+      ...menu,
+      actions,
+      primaryAction,
+      recommendedStep: primaryAction,
+    };
+  }, [
+    menu,
+    accessActions,
+    onboardingActions,
+    complianceActions,
+    identityActions,
+  ]);
 
   const sections = useMemo(() => {
     const grouped: Record<Exclude<StaffProfileActionSection, "primary">, StaffProfileAction[]> = {
@@ -264,15 +377,15 @@ export function StaffProfileActionMenu({
       advanced: [],
     };
 
-    for (const action of menu.actions) {
+    for (const action of gatedMenu.actions) {
       if (action.section === "primary") continue;
       grouped[action.section as Exclude<StaffProfileActionSection, "primary">]?.push(action);
     }
 
     return grouped;
-  }, [menu.actions]);
+  }, [gatedMenu.actions]);
 
-  const primaryAction = menu.primaryAction;
+  const primaryAction = gatedMenu.primaryAction;
 
   const runAction = useCallback(
     (action: StaffProfileAction) => {
@@ -372,9 +485,9 @@ export function StaffProfileActionMenu({
 
   const menuBody = (
     <div className="space-y-4">
-      {menu.guidance ? (
+      {gatedMenu.guidance ? (
         <p className="text-xs text-rose-200/90" data-testid="staff-profile-action-guidance">
-          {menu.guidance}
+          {gatedMenu.guidance}
         </p>
       ) : null}
 

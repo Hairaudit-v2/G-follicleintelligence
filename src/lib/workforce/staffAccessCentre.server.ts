@@ -138,6 +138,11 @@ async function expireStaleLoginInvitations(
 export type LoadStaffAccessCentrePageOptions = {
   staffMemberId?: string;
   supabaseClientForTests?: SupabaseClient;
+  /**
+   * Shared identity map from a parent composer (e.g. profile hub).
+   * When set, this loader does not call resolveStaffIdentities again.
+   */
+  preresolvedIdentitiesByMemberId?: ReadonlyMap<string, StaffIdentity | null>;
 };
 
 export async function loadStaffAccessCentrePage(
@@ -187,15 +192,21 @@ export async function loadStaffAccessCentrePage(
    * (not one query per staff member). See resolveStaffIdentities.
    * Collects staffId / staffMemberId / userId via the canonical resolver —
    * no raw dual-table join in this loader.
+   * Profile / composers may inject a shared identity map to avoid a second resolve.
    */
-  const identityBatch = await resolveStaffIdentities(
-    {
-      tenantId: tid,
-      by: "staffMemberId",
-      staffMemberIds: memberIds,
-    },
-    { client: supabase }
-  );
+  const identityBatch = normalizedOptions.preresolvedIdentitiesByMemberId
+    ? {
+        byKey: new Map(normalizedOptions.preresolvedIdentitiesByMemberId),
+        unresolved: [] as { key: string; reason: "missing" }[],
+      }
+    : await resolveStaffIdentities(
+        {
+          tenantId: tid,
+          by: "staffMemberId",
+          staffMemberIds: memberIds,
+        },
+        { client: supabase }
+      );
 
   const fiUserIds = [
     ...new Set(
@@ -400,10 +411,21 @@ export async function loadStaffAccessCentrePage(
 /** Single staff member access snapshot — avoids full-tenant sync on profile pages. */
 export async function loadStaffAccessCentreRowForMember(
   tenantId: string,
-  staffMemberId: string
+  staffMemberId: string,
+  options?: {
+    identity?: StaffIdentity | null;
+    supabaseClientForTests?: SupabaseClient;
+  }
 ): Promise<StaffAccessCentreRow | null> {
+  const mid = staffMemberId.trim();
+  const preresolved =
+    options && "identity" in options
+      ? new Map<string, StaffIdentity | null>([[mid, options.identity ?? null]])
+      : undefined;
   const page = await loadStaffAccessCentrePage(tenantId, {
-    staffMemberId: staffMemberId.trim(),
+    staffMemberId: mid,
+    supabaseClientForTests: options?.supabaseClientForTests,
+    preresolvedIdentitiesByMemberId: preresolved,
   });
   return page.rows[0] ?? null;
 }

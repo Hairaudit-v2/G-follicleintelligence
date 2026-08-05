@@ -1,108 +1,23 @@
+/**
+ * Compatibility adapter for the legacy profile overview loader.
+ * Canonical composition lives in `@/src/lib/team/profile` (FI-TEAM-COHESION-B1.6).
+ * Do not maintain a parallel identity / readiness composition path here.
+ */
+
 import "server-only";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
-import { loadWorkforceCommandCentreIntelligence } from "@/src/lib/staff/workforceCommandCentre.server";
-import {
-  resolveStaffIdentity,
-  toStaffProfileHubIdentityGate,
-} from "@/src/lib/team/identity/server";
+import { loadStaffProfileHubBundle } from "@/src/lib/team/profile/server";
+import { toStaffProfileOverviewModel } from "@/src/lib/team/profile";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { runStaffIdentityReadinessAuditForMember } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
-import { mapOnboardingInviteDisplayStatus } from "@/src/lib/workforce/onboarding/onboardingCentreCore";
-import { loadOnboardingChecklist } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
-import {
-  loadStaffAccessCentreRowForMember,
-  type StaffAccessCentreRow,
-} from "@/src/lib/workforce/staffAccessCentre.server";
-import type { StaffIdentityReadinessAuditRow } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
-import {
-  buildStaffProfileOverviewModel,
-  type StaffProfileAccessSnapshot,
-  type StaffProfileIdentityAuditSnapshot,
-  type StaffProfileLeaveContext,
-  type StaffProfileOverviewModel,
-} from "@/src/lib/workforce/staffProfileHubCore";
-import { loadStaffLeaveContext } from "@/src/lib/workforce/staffLeaveWorkflow.server";
+import type { StaffProfileOverviewModel } from "@/src/lib/workforce/staffProfileHubCore";
 
 export type StaffProfileHubOverviewData = StaffProfileOverviewModel;
 
-function mapAccessSnapshot(
-  row: StaffAccessCentreRow | null | undefined
-): StaffProfileAccessSnapshot | null {
-  if (!row) return null;
-  return {
-    authLoginStatus: row.authLoginStatus,
-    inviteStatus: row.inviteStatus,
-    pinStatus: row.pinStatus,
-    canSendInvite: row.canSendInvite,
-    canResendInvite: row.canResendInvite,
-    canCopyInviteLink: row.canCopyInviteLink,
-    canResetPin: row.canResetPin,
-    canSuspendAccess: row.canSuspendAccess,
-    canRevokeAccess: row.canRevokeAccess,
-  };
-}
-
-function mapIdentityAuditSnapshot(
-  row: StaffIdentityReadinessAuditRow | null | undefined
-): StaffProfileIdentityAuditSnapshot | null {
-  if (!row) return null;
-  return {
-    workspaceProfileStatus: row.workspaceProfileStatus,
-    loginStatus: row.loginStatus,
-    pinStatus: row.pinStatus,
-    onboardingStatus: row.onboardingStatus,
-    issues: row.issues,
-  };
-}
-
-async function loadOnboardingInviteStatus(
-  tenantId: string,
-  staffMemberId: string
-): Promise<{ status: ReturnType<typeof mapOnboardingInviteDisplayStatus>; hasInviteUrl: boolean }> {
-  const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const mid = assertNonEmptyUuid(staffMemberId, "staffMemberId");
-  const supabase = supabaseAdmin();
-
-  const { data, error } = await supabase
-    .from("fi_staff_onboarding_invitations")
-    .select("status, expires_at, accepted_at, invite_token")
-    .eq("tenant_id", tid)
-    .eq("staff_member_id", mid)
-    .order("invited_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-
-  if (!data) {
-    return { status: "none", hasInviteUrl: false };
-  }
-
-  const raw = data as {
-    status: string;
-    expires_at: string;
-    accepted_at: string | null;
-    invite_token: string | null;
-  };
-
-  const status = mapOnboardingInviteDisplayStatus({
-    rawStatus: raw.status,
-    expiresAt: raw.expires_at,
-    acceptedAt: raw.accepted_at,
-  });
-
-  const token = raw.invite_token?.trim() ?? "";
-  const hasInviteUrl = Boolean(token) && (status === "pending" || status === "expired");
-
-  return { status, hasInviteUrl };
-}
-
 /**
  * Aggregates cross-domain staff state for the WorkforceOS profile Overview tab.
+ * Delegates identity resolution + domain composition to `loadStaffProfileHubBundle`.
  */
 export async function loadStaffProfileHubOverview(
   tenantId: string,
@@ -110,73 +25,111 @@ export async function loadStaffProfileHubOverview(
   options?: { canManage?: boolean }
 ): Promise<StaffProfileHubOverviewData> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const staffMemberId = lifecycle.id;
+  const staffMemberId = assertNonEmptyUuid(lifecycle.id, "staffMemberId");
   const canManage = options?.canManage ?? false;
 
-  const [accessRow, checklist, onboardingInvite, identityAuditRow, identityAuditAccess, resolvedIdentity] =
-    await Promise.all([
-      loadStaffAccessCentreRowForMember(tid, staffMemberId),
-      loadOnboardingChecklist(tid, staffMemberId),
-      loadOnboardingInviteStatus(tid, staffMemberId),
-      runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
-      resolveStaffIdentityAuditAccess(tid),
-      resolveStaffIdentity(
-        { tenantId: tid, by: "staffMemberId", staffMemberId },
-        { throwOnCrossTenant: false }
-      ),
-    ]);
+  const [result, identityAuditAccess] = await Promise.all([
+    loadStaffProfileHubBundle(
+      { tenantId: tid, by: "staffMemberId", staffMemberId },
+      { canManage, throwOnCrossTenant: false }
+    ),
+    resolveStaffIdentityAuditAccess(tid),
+  ]);
 
-  let workforceIntelligence = null;
-  let leaveContext: StaffProfileLeaveContext | null = null;
-
-  const identityGate = toStaffProfileHubIdentityGate(resolvedIdentity, {
-    staffMemberId,
-    fiStaffId: lifecycle.fi_staff_id,
-    staffName: lifecycle.full_name,
-    employmentStatus: lifecycle.employment_status,
-    email: lifecycle.email,
-  });
-
-  if (identityGate.mayUseSchedulingProjection && identityGate.staffId) {
-    try {
-      const fiStaff = await loadStaffMemberForTenant(tid, identityGate.staffId);
-      if (fiStaff) {
-        const [hrByStaffId, leaveData] = await Promise.all([
-          loadHrNotificationByStaffId(tid, [fiStaff.id]),
-          loadStaffLeaveContext({ tenantId: tid, fiStaffId: fiStaff.id }),
-        ]);
-        leaveContext = leaveData;
-        const intel = await loadWorkforceCommandCentreIntelligence(tid, [fiStaff], hrByStaffId);
-        workforceIntelligence = intel.perStaff[fiStaff.id] ?? null;
-      }
-    } catch {
-      workforceIntelligence = null;
-      leaveContext = null;
-    }
+  if (result.status !== "ok") {
+    // Preserve a safe empty-ish overview for rejected identities rather than inventing policy.
+    return toStaffProfileOverviewModel({
+      profile: {
+        identity: {
+          tenantId: tid,
+          personKey: `sm:${staffMemberId}`,
+          staffId: lifecycle.fi_staff_id,
+          staffMemberId,
+          userId: null,
+          displayName: lifecycle.full_name,
+          email: lifecycle.email,
+          employmentStatus: lifecycle.employment_status as never,
+          accessStatus: "unknown",
+          readinessStatus: "unknown",
+          archivedAt: lifecycle.archived_at,
+          hrLinked: false,
+          primaryClinicId: null,
+          clinicIds: [],
+          roles: [],
+          capabilities: [],
+          integrity: {
+            linkStatus:
+              result.reason === "cross_tenant"
+                ? "cross_tenant_mismatch"
+                : result.reason === "invalid"
+                  ? "invalid"
+                  : "invalid",
+            hasSchedulingRecord: Boolean(lifecycle.fi_staff_id),
+            hasLifecycleRecord: true,
+            hasAuthIdentity: false,
+            warnings: [],
+          },
+        },
+        overview: {
+          displayName: lifecycle.full_name,
+          employmentStatus: lifecycle.employment_status as never,
+          accessStatus: "unknown",
+          onboardingStatus: null,
+          readinessStatus: "unknown",
+          primaryClinicId: null,
+          clinicIds: [],
+        },
+        directory: null,
+        access: null,
+        onboarding: null,
+        roster: null,
+        compliance: null,
+        attentionReasons: [],
+        actions: {
+          identity: {
+            readOnly: true,
+            canCreateSchedulingRecord: false,
+            canRepairIdentityLink: false,
+          },
+        },
+      },
+      tenantId: tid,
+      checklist: {
+        accountCreated: false,
+        pinChosen: false,
+        permissionsAssigned: false,
+        trainingPending: true,
+      },
+      systemAccessRevoked: true,
+      viewerCanManageAccess: false,
+      viewerCanManageOnboarding: false,
+      viewerCanManageReadiness: false,
+      viewerCanViewIdentityAudit: identityAuditAccess.allowed,
+    });
   }
 
-  const systemAccessRevoked = Boolean(accessRow?.systemAccessRevoked);
+  const { profile, supplements } = result.bundle;
+  const checklist = supplements.checklist ?? {
+    accountCreated: true,
+    pinChosen: false,
+    permissionsAssigned: false,
+    trainingPending: true,
+  };
 
-  return buildStaffProfileOverviewModel({
+  return toStaffProfileOverviewModel({
+    profile,
     tenantId: tid,
-    staffMemberId,
-    fiStaffId: lifecycle.fi_staff_id,
-    staffName: lifecycle.full_name,
-    employmentStatus: lifecycle.employment_status,
-    archivedAt: lifecycle.archived_at,
-    email: lifecycle.email,
-    systemAccessRevoked,
-    onboardingInviteStatus: onboardingInvite.status,
-    hasOnboardingInviteUrl: onboardingInvite.hasInviteUrl,
     checklist,
-    accessRow: mapAccessSnapshot(accessRow),
-    workforceIntelligence,
-    identityAuditRow: mapIdentityAuditSnapshot(identityAuditRow),
-    pinStatus: accessRow?.pinStatus ?? null,
+    pinStatus: supplements.accessRow?.pinStatus ?? null,
+    loginInviteStatus: supplements.accessRow?.inviteStatus ?? null,
+    canCopyLoginInviteLink: supplements.accessRow?.canCopyInviteLink ?? false,
+    canResetPin: supplements.accessRow?.canResetPin ?? false,
+    systemAccessRevoked: supplements.systemAccessRevoked,
+    workforceIntelligence: supplements.workforceIntelligence,
+    leaveContext: supplements.leaveContext,
     viewerCanManageAccess: canManage,
     viewerCanManageOnboarding: canManage,
     viewerCanManageReadiness: canManage,
     viewerCanViewIdentityAudit: identityAuditAccess.allowed,
-    leaveContext,
   });
 }

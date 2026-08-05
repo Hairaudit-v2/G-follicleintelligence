@@ -26,6 +26,7 @@ src/lib/team/
 ├── onboarding/index.ts
 ├── access/index.ts
 ├── compliance/index.ts
+├── profile/index.ts             # B1.6 person-level composition
 ├── payroll/index.ts
 ├── planning/index.ts
 ├── commandCentre/index.ts
@@ -64,6 +65,7 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 | onboarding | invite URL builders, page model types | token hashing, invite row writes |
 | access | centre DTO types, manage-gate result types | invite token generation, revoke mutations |
 | compliance | expiry helpers, page DTO types | cron runners |
+| profile | `StaffProfileHubModel`, attention aggregation, overview adapter | raw dual-table joins, domain policy engines |
 | payroll | pay period pure helpers, wage DTO types | wage writes, timesheet transitions |
 | planning | recruitment stage helpers, engine DTO types | planners’ write paths |
 | commandCentre | KPI/attention DTO types, href builders | data assembly servers |

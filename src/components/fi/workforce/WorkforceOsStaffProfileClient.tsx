@@ -143,6 +143,7 @@ export function WorkforceOsStaffProfileClient({
           actionContext={overview.actionContext}
           tenantId={tenantId}
           progressStages={overview.progressStages}
+          domainActions={overview.domainActions}
           onModalAction={(actionId) => {
             if (actionId === "set_maternity_leave" || actionId === "manage_leave") {
               setMaternityLeaveOpen(true);
