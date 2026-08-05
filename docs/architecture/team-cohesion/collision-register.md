@@ -30,7 +30,7 @@ No competing engines — split is organizational, not semantic duplication of th
 
 | Cluster | Disposition |
 |---------|-------------|
-| `workforce-os/workforceIdentity*`, `workforceReadiness*`, `staffIdentityReadinessAudit*`, `staffCanonicalLifecycle`, `staffLifecycle*` | **KEEP_CANONICAL** → `team/identity/` (B1) |
+| `workforce-os/workforceIdentity*`, `workforceReadiness*`, `staffIdentityReadinessAudit*`, `staffCanonicalLifecycle`, `staffLifecycle*` | Pure modules **KEEP_CANONICAL** under `team/identity/` (B2.1a); servers still under `workforce-os` until B2.1b. Temporary basename shims in `workforce-os/`. |
 | `workforce/workforceStaffMemberResolve.server.ts` | **MERGE** into identity resolve API |
 | `workforce/identityReconciliation*`, `staffCanonicalDecision*`, duplicate/merge/repair | **MERGE** into identity reconciliation submodule |
 | `staff/hrStaffReadinessMetadata.ts` | **MERGE** or thin adapter over readiness engine — **NEEDS_BEHAVIOUR_REVIEW** if scores diverge |

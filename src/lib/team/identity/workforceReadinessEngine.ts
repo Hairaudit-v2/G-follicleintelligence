@@ -16,17 +16,17 @@ import type {
 import {
   buildWorkforceIdentityReadinessSignals,
   type WorkforceIdentityReadinessSignals,
-} from "@/src/lib/workforce-os/workforceIdentityReadinessSignals";
-import type { WorkforceIdentitySourceRowInput } from "@/src/lib/workforce-os/workforceIdentitySummary";
+} from "@/src/lib/team/identity/workforceIdentityReadinessSignals";
+import type { WorkforceIdentitySourceRowInput } from "@/src/lib/team/identity/workforceIdentitySummary";
 import type { AcademyCompetencySignals } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { isOperationallyIneligible } from "@/src/lib/workforce-os/staffLifecycleCore";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
+import { isOperationallyIneligible } from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
 import {
   clampWorkforceReadinessScore,
   resolveWorkforceReadinessBand,
   type WorkforceReadinessBand,
   type WorkforceReadinessBandId,
-} from "@/src/lib/workforce-os/workforceReadinessBands";
+} from "@/src/lib/team/identity/workforceReadinessBands";
 
 export type WorkforceReadinessFactorKey =
   | "onboarding"

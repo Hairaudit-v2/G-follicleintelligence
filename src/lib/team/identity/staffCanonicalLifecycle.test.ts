@@ -7,7 +7,7 @@ import {
   resolveCanonicalStaffLifecycleStatus,
   resolveStaffDuplicateGroups,
   resolveStaffLifecycleIsActive,
-} from "@/src/lib/workforce-os/staffCanonicalLifecycle";
+} from "@/src/lib/team/identity/staffCanonicalLifecycle";
 
 test("terminated employment status never resolves active, even when is_active drifted true", () => {
   const status = resolveCanonicalStaffLifecycleStatus({

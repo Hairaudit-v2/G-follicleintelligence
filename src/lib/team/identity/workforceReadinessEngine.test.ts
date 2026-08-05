@@ -8,18 +8,18 @@ import {
   STAFF_HR_SYNC_STALE_DAYS,
 } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
-import { canStaffBeAssignedClinically } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
+import { canStaffBeAssignedClinically } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 import {
   clampWorkforceReadinessScore,
   resolveWorkforceReadinessBand,
   WORKFORCE_CLINICAL_ASSIGNMENT_MIN_SCORE,
-} from "@/src/lib/workforce-os/workforceReadinessBands";
+} from "@/src/lib/team/identity/workforceReadinessBands";
 import {
   calculateWorkforceReadinessScore,
   WORKFORCE_READINESS_FACTOR_WEIGHTS,
   WORKFORCE_READINESS_RAW_MAX,
   type WorkforceReadinessScoreInput,
-} from "@/src/lib/workforce-os/workforceReadinessEngine";
+} from "@/src/lib/team/identity/workforceReadinessEngine";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 

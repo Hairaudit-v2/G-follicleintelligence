@@ -3,7 +3,7 @@
  * Pure — does not replace access-centre or readiness-engine scoring.
  */
 
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 import type {
   StaffAccessStatus,
   StaffIdentityLinkStatus,

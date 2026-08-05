@@ -1,57 +1,57 @@
 {
-  "generatedAt": "2026-08-05T04:51:23.317Z",
-  "currentFiles": 303,
+  "generatedAt": "2026-08-05T10:26:15.311Z",
+  "currentFiles": 389,
   "trees": {
-    "workforce-os": 103,
-    "workforce": 140,
-    "staff": 40
+    "workforce-os": 95,
+    "workforce": 142,
+    "staff": 41
   },
   "domainCounts": {
-    "shared": 27,
-    "roster": 62,
-    "identity": 104,
-    "directory": 25,
-    "compliance": 9,
-    "onboarding": 12,
-    "payroll": 23,
-    "planning": 14,
-    "access": 20,
-    "commandCentre": 4,
+    "shared": 35,
+    "roster": 69,
+    "identity": 116,
+    "directory": 30,
+    "compliance": 18,
+    "onboarding": 21,
+    "payroll": 33,
+    "planning": 23,
+    "access": 26,
+    "commandCentre": 15,
     "delete": 3
   },
   "riskCounts": {
-    "low": 117,
-    "medium": 55,
-    "high": 131
+    "low": 151,
+    "medium": 60,
+    "high": 178
   },
   "identity": {
-    "fi_staff": 371,
-    "fi_staff_members": 244,
-    "total": 615,
-    "files": 261,
+    "fi_staff": 372,
+    "fi_staff_members": 234,
+    "total": 606,
+    "files": 255,
     "byClassification": {
-      "scheduling read": 91,
+      "scheduling read": 89,
       "suspected duplicate identity logic": 36,
-      "lifecycle read": 59,
+      "lifecycle read": 47,
       "cross-domain join": 46,
       "test or fixture": 90,
       "mutation": 1,
-      "reporting": 8,
-      "canonical identity resolution": 60,
+      "reporting": 10,
+      "canonical identity resolution": 63,
       "migration script": 224
     }
   },
   "importGraph": {
-    "interTreeEdgeCount": 100,
-    "cycleCount": 2,
-    "deepImportViolationCount": 252,
-    "clientImportingServerCount": 23,
+    "interTreeEdgeCount": 144,
+    "cycleCount": 1,
+    "deepImportViolationCount": 253,
+    "clientImportingServerCount": 22,
     "externalIntoTreeCounts": {
       "workforce-os": 67,
-      "workforce": 67,
+      "workforce": 68,
       "staff": 126
     }
   },
-  "basenameCollisionCount": 1,
+  "basenameCollisionCount": 12,
   "actionFiles": 11
 }

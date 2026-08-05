@@ -37,7 +37,7 @@ When edges are labelled by proposed domain (see regenerate), the dominant **cros
 
 | Cycle | Domains | Disposition |
 |-------|---------|-------------|
-| `staffLifecycleCore.ts` ↔ `hrReconciliationEligibleCore.ts` | identity ↔ identity | Break during B1: extract shared eligibility predicate to a leaf pure module both import. |
+| ~~`staffLifecycleCore.ts` ↔ `hrReconciliationEligibleCore.ts`~~ | identity ↔ identity | **BROKEN in B2.1a** — leaf `team/identity/staffEmploymentStatusPredicates.ts`; HR eligible imports leaf; lifecycle core may import HR one-way. |
 | `onboardingInvitation.server.ts` ↔ `onboardingPinLayer.server.ts` | onboarding ↔ onboarding | Break when moving onboarding: pin layer should depend on invitation types/tokens via a one-way core module, not mutual server imports. |
 
 No multi-tree cycles were found (cycles stay inside a single tree).

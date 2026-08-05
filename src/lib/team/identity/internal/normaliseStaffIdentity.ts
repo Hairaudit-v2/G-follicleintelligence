@@ -7,7 +7,7 @@ import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
   STAFF_EMPLOYMENT_STATUSES,
   type StaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 import { buildStaffPersonKey } from "@/src/lib/team/identity/staffIdentityKeys";
 import { classifyStaffIdentityIntegrity } from "@/src/lib/team/identity/staffIdentityIntegrity";
 import {

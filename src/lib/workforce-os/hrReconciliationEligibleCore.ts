@@ -3,8 +3,11 @@ import type {
   HrReconciliationArchivedRecord,
   HrReconciliationMetrics,
   StaffMemberLifecycleRow,
-} from "./staffLifecycleTypes";
-import { isOperationallyIneligible, parseStaffEmploymentStatus } from "./staffLifecycleCore";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
+import {
+  isOperationallyIneligible,
+  parseStaffEmploymentStatus,
+} from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
 
 export function isStaffArchived(member: Pick<StaffMemberLifecycleRow, "archived_at">): boolean {
   return member.archived_at != null && String(member.archived_at).trim() !== "";

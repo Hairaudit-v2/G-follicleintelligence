@@ -6,7 +6,7 @@
  * whether a transitional/partial link is acceptable.
  */
 
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export type { StaffEmploymentStatus };
 

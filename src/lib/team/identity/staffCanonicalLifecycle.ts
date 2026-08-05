@@ -17,8 +17,8 @@
 import {
   isOperationallyIneligible,
   parseStaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export type CanonicalStaffLifecycleStatus =
   | "active"

@@ -7,12 +7,12 @@ import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/staff/staffHrNotificationSum
 import {
   canonicaliseWorkforceSourceSystem,
   WORKFORCE_IDENTITY_SOURCE_SYSTEMS,
-} from "@/src/lib/workforce-os/workforceIdentitySources";
-import { parseWorkforceIdentitySyncStatus } from "@/src/lib/workforce-os/workforceIdentityMetadata";
+} from "@/src/lib/team/identity/workforceIdentitySources";
+import { parseWorkforceIdentitySyncStatus } from "@/src/lib/team/identity/workforceIdentityMetadata";
 import {
   buildWorkforceIdentitySummaryFromSourceRows,
   type WorkforceIdentitySourceRowInput,
-} from "@/src/lib/workforce-os/workforceIdentitySummary";
+} from "@/src/lib/team/identity/workforceIdentitySummary";
 import type { AcademyCompetencySignals } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 
 export type WorkforceIdentityReadinessSignals = {

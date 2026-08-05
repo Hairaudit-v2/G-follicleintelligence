@@ -1,19 +1,29 @@
-import type { EvolvedStaffRecord } from "./iiohrStaffHrLinkReconciliationTypes";
-import { normaliseStaffEmail } from "./iiohrStaffHrLinkReconciliationCore";
-import { isStaffArchived, isStaffHrLinkedForReconciliation } from "./hrReconciliationEligibleCore";
+import type { EvolvedStaffRecord } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
+import { normaliseStaffEmail } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationCore";
+import {
+  isStaffArchived,
+  isStaffHrLinkedForReconciliation,
+} from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
 import type {
   HrReconciliationSuggestion,
-  StaffEmploymentStatus,
   StaffIdentitySource,
   StaffMemberLifecycleRow,
   StaffProfileEditInput,
-} from "./staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
+import { IIOHR_MANAGED_IDENTITY_SOURCES } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
-  IIOHR_MANAGED_IDENTITY_SOURCES,
-  OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES,
-  SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES,
-  STAFF_EMPLOYMENT_STATUSES,
-} from "./staffLifecycleTypes";
+  isOperationallyIneligible,
+  isSchedulingExcluded,
+  parseStaffEmploymentStatus,
+  shouldDeactivateOnEmploymentChange,
+} from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
+
+export {
+  isOperationallyIneligible,
+  isSchedulingExcluded,
+  parseStaffEmploymentStatus,
+  shouldDeactivateOnEmploymentChange,
+} from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
 
 export const EXTERNALLY_LOCKED_PROFILE_FIELDS = [
   "first_name",
@@ -85,16 +95,6 @@ export function filterProfilePatchForSource(
   return out;
 }
 
-export function parseStaffEmploymentStatus(raw: unknown): StaffEmploymentStatus {
-  const value = String(raw ?? "active")
-    .trim()
-    .toLowerCase();
-  if ((STAFF_EMPLOYMENT_STATUSES as readonly string[]).includes(value)) {
-    return value as StaffEmploymentStatus;
-  }
-  return "active";
-}
-
 export function parseStaffIdentitySource(raw: unknown): StaffIdentitySource {
   const value = String(raw ?? "local")
     .trim()
@@ -119,22 +119,6 @@ export function composeFullName(
   lastName: string | null | undefined
 ): string {
   return [firstName?.trim(), lastName?.trim()].filter(Boolean).join(" ").trim();
-}
-
-export function isOperationallyIneligible(status: StaffEmploymentStatus): boolean {
-  return OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES.has(status);
-}
-
-export function isSchedulingExcluded(status: StaffEmploymentStatus): boolean {
-  return SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES.has(status);
-}
-
-export function shouldDeactivateOnEmploymentChange(
-  status: StaffEmploymentStatus,
-  archiveFromActive?: boolean
-): boolean {
-  if (archiveFromActive) return true;
-  return isOperationallyIneligible(status) || status === "inactive";
 }
 
 export function resolveIdentitySourceBadge(source: StaffIdentitySource): {

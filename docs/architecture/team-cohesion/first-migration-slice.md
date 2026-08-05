@@ -81,7 +81,7 @@ Without a stable identity package, every later domain move re-homes fragmentatio
 Focused delivery (see [b1-identity-foundation.md](./b1-identity-foundation.md)) — full pure-module relocation deferred:
 
 - [x] `src/lib/team/identity` exists with documented public exports (`index.ts` + `server.ts`)
-- [ ] Canonical lifecycle + readiness pure modules live only under `team/identity` (deferred — still under `workforce-os` with later shim plan)
+- [x] Canonical lifecycle + readiness pure modules live under `team/identity` (B2.1a — legacy paths are temporary shims)
 - [x] Profile hub imports identity server API
 - [x] Directory loader imports identity batch API (B1.1 — see b1.1-directory-identity-proof.md)
 - [x] Identity unit + architecture tests green

@@ -3,6 +3,9 @@
  *
  * Server resolvers: `@/src/lib/team/identity/server`
  * Do not import from `@/src/lib/team/identity/internal/**` outside this package.
+ *
+ * B2.1a: canonical lifecycle / readiness pure modules live here.
+ * Temporary re-exports remain at `src/lib/workforce-os/<same-basename>.ts` until consumers migrate.
  */
 
 export type {
@@ -60,3 +63,32 @@ export {
   toStaffProfileHubIdentityGate,
   type StaffProfileHubIdentityGate,
 } from "@/src/lib/team/identity/adapters";
+
+/** Canonical employment lifecycle types / constants (B2.1a). */
+export {
+  IIOHR_MANAGED_IDENTITY_SOURCES,
+  OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
+  OPERATIONALLY_INELIGIBLE_EMPLOYMENT_STATUSES,
+  SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES,
+  STAFF_EMPLOYMENT_STATUSES,
+  STAFF_IDENTITY_SOURCES,
+  STAFF_LIFECYCLE_AUDIT_EVENTS,
+  type StaffIdentitySource,
+  type StaffLifecycleAuditEventType,
+  type StaffMemberLifecycleRow,
+} from "@/src/lib/team/identity/staffLifecycleTypes";
+
+/** Leaf employment-status predicates (cycle-safe). */
+export {
+  isOperationallyIneligible,
+  isSchedulingExcluded,
+  parseStaffEmploymentStatus,
+  shouldDeactivateOnEmploymentChange,
+} from "@/src/lib/team/identity/staffEmploymentStatusPredicates";
+
+/** Canonical status combiner for directory / roster / command-centre signals. */
+export {
+  resolveCanonicalStaffLifecycleStatus,
+  type CanonicalStaffLifecycleStatus,
+  type StaffLifecycleSignal,
+} from "@/src/lib/team/identity/staffCanonicalLifecycle";

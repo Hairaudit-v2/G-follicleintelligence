@@ -5,13 +5,13 @@
 import {
   WORKFORCE_CLINICAL_ASSIGNMENT_MIN_SCORE,
   type WorkforceReadinessBandId,
-} from "@/src/lib/workforce-os/workforceReadinessBands";
+} from "@/src/lib/team/identity/workforceReadinessBands";
 import {
   calculateWorkforceReadinessScore,
   type WorkforceReadinessScoreInput,
   type WorkforceReadinessScoreResult,
   type WorkforceReadinessWarning,
-} from "@/src/lib/workforce-os/workforceReadinessEngine";
+} from "@/src/lib/team/identity/workforceReadinessEngine";
 
 export type StaffClinicalAssignmentResult = {
   eligible: boolean;

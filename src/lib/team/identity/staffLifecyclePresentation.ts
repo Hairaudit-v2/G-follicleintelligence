@@ -1,4 +1,7 @@
-import type { StaffEmploymentStatus, StaffMemberLifecycleRow } from "./staffLifecycleTypes";
+import type {
+  StaffEmploymentStatus,
+  StaffMemberLifecycleRow,
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 
 /** System-only statuses — never shown in admin employment dropdowns. */
 export const ADMIN_HIDDEN_EMPLOYMENT_STATUSES: ReadonlySet<StaffEmploymentStatus> = new Set([

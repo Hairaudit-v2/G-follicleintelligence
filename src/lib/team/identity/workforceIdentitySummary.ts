@@ -7,11 +7,11 @@ import {
   canonicaliseWorkforceSourceSystem,
   WORKFORCE_IDENTITY_SOURCE_SYSTEMS,
   workforceIdentitySourceSystemLabel,
-} from "@/src/lib/workforce-os/workforceIdentitySources";
+} from "@/src/lib/team/identity/workforceIdentitySources";
 import {
   parseWorkforceIdentitySyncStatus,
   type WorkforceIdentitySyncStatus,
-} from "@/src/lib/workforce-os/workforceIdentityMetadata";
+} from "@/src/lib/team/identity/workforceIdentityMetadata";
 
 export type WorkforceIdentityLinkStatus = {
   sourceSystem: string;
