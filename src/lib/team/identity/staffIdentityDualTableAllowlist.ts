@@ -3,11 +3,17 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.2 — access centre loader removed from allowlist.
+ * Snapshot: FI-TEAM-COHESION-B1.4 — roster lifecycle join classifier removed.
  *
- * Allowlist before B1.2: 24
- * Access entries removed: 1 (`src/lib/workforce/staffAccessCentre.server.ts`)
- * Allowlist after: 23
+ * Allowlist before B1.4: 22
+ * Roster entries removed: 1 (`src/lib/workforce-os/staffCanonicalLifecycle.ts`)
+ * Allowlist after: 21
+ *
+ * Roster eligibility aggregation (`rosterEligibleStaff.server.ts`) now uses
+ * `resolveStaffIdentities({ by: "staffId" })` and no longer loads lifecycle via
+ * `hrReconciliation.loadAllTenantStaffMembers`. The pure lifecycle status helper
+ * was allowlisted only for dual-table identifier tokens; with roster on identity,
+ * those comments were rewritten to domain language and the entry retired.
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -23,12 +29,10 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/staffImport/iiohrStaffDepartureAlignment.server.ts",
   "src/lib/workforce-os/hrReconciliation.server.ts",
   "src/lib/workforce-os/projectionHealth.server.ts",
-  "src/lib/workforce-os/staffCanonicalLifecycle.ts",
   "src/lib/workforce-os/staffIdentityReadinessAudit.server.ts",
   "src/lib/workforce-os/staffLifecycle.server.ts",
   "src/lib/workforce/identityReconciliation.server.ts",
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-  "src/lib/workforce/onboarding/onboardingPage.server.ts",
   "src/lib/workforce/staffAccessAccept.server.ts",
   "src/lib/workforce/staffAccessPinLayer.server.ts",
   "src/lib/workforce/staffHrTaskMapCore.ts",

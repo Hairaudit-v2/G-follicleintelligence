@@ -4,9 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { updateFiStaff } from "@/src/lib/staff/staff.server";
+import { insertFiStaff, updateFiStaff } from "@/src/lib/staff/staff.server";
 import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
 import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
+import { splitFullName } from "@/src/lib/workforce-os/staffLifecycleCore";
 
 import {
   extractTenantIdFromFiAdminPath,
@@ -559,4 +560,187 @@ export async function markSchedulingStaffSuspendedForAccess(input: {
     .eq("tenant_id", tid)
     .eq("id", sid);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Onboarding centre staff creation — dual-table write boundary.
+ * Callers own checklist / audit orchestration; this module owns fi_staff ↔ fi_staff_members
+ * so onboarding page loaders can stay off the dual-table allowlist.
+ */
+export type ProvisionOnboardingStaffPairInput = {
+  tenantId: string;
+  fullName: string;
+  email: string;
+  roleCode: string;
+  employmentType: string;
+  clinicId: string | null;
+  sourceSystem: string;
+  client: SupabaseClient;
+  now?: string;
+};
+
+export type ProvisionOnboardingStaffPairResult = {
+  fiStaffId: string;
+  staffMemberId: string;
+  createdFiStaff: boolean;
+};
+
+async function findReusableOrphanFiStaffIdByEmail(
+  tenantId: string,
+  email: string,
+  client: SupabaseClient
+): Promise<string | null> {
+  const { data: staffRows, error: staffError } = await client
+    .from("fi_staff")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("email", email)
+    .is("archived_at", null)
+    .limit(1);
+  if (staffError) throw new Error(staffError.message);
+  const fiStaffId = staffRows?.[0]?.id != null ? String(staffRows[0].id) : null;
+  if (!fiStaffId) return null;
+
+  const { data: activeMember, error: memberError } = await client
+    .from("fi_staff_members")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("fi_staff_id", fiStaffId)
+    .is("archived_at", null)
+    .is("merged_into", null)
+    .maybeSingle();
+  if (memberError) throw new Error(memberError.message);
+  if (activeMember) return null;
+
+  return fiStaffId;
+}
+
+export async function rollbackOnboardingStaffPair(input: {
+  tenantId: string;
+  fiStaffId: string;
+  staffMemberId?: string;
+  createdFiStaff: boolean;
+  client: SupabaseClient;
+}): Promise<void> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  if (input.staffMemberId) {
+    await input.client
+      .from("fi_staff_onboarding_checklists")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("staff_member_id", input.staffMemberId);
+    await input.client
+      .from("fi_staff_members")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", input.staffMemberId);
+  }
+  if (input.createdFiStaff) {
+    const { error } = await input.client
+      .from("fi_staff")
+      .delete()
+      .eq("tenant_id", tid)
+      .eq("id", input.fiStaffId);
+    if (error) throw new Error(error.message);
+  }
+}
+
+export async function provisionOnboardingStaffPair(
+  input: ProvisionOnboardingStaffPairInput
+): Promise<ProvisionOnboardingStaffPairResult> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const now = input.now ?? new Date().toISOString();
+  const fullName = input.fullName.trim();
+  const email = input.email.trim().toLowerCase();
+  const roleCode = input.roleCode.trim() || "consultant";
+  const names = splitFullName(fullName);
+
+  let fiStaffId = await findReusableOrphanFiStaffIdByEmail(tid, email, input.client);
+  let createdFiStaff = false;
+
+  if (fiStaffId) {
+    const { error: updateError } = await input.client
+      .from("fi_staff")
+      .update({
+        full_name: fullName,
+        staff_role: roleCode,
+        employment_status: "pending_onboarding",
+        identity_source: "local",
+        is_active: false,
+        updated_at: now,
+      })
+      .eq("tenant_id", tid)
+      .eq("id", fiStaffId);
+    if (updateError) throw new Error(updateError.message);
+  } else {
+    const fiStaff = await insertFiStaff(
+      tid,
+      {
+        full_name: fullName,
+        staff_role: roleCode,
+        email,
+        is_active: false,
+      },
+      input.client
+    );
+    fiStaffId = fiStaff.id;
+    createdFiStaff = true;
+
+    const { error: lifecycleError } = await input.client
+      .from("fi_staff")
+      .update({
+        employment_status: "pending_onboarding",
+        identity_source: "local",
+        updated_at: now,
+      })
+      .eq("tenant_id", tid)
+      .eq("id", fiStaffId);
+    if (lifecycleError) {
+      await rollbackOnboardingStaffPair({
+        tenantId: tid,
+        fiStaffId,
+        createdFiStaff: true,
+        client: input.client,
+      });
+      throw new Error(lifecycleError.message);
+    }
+  }
+
+  const rollbackState = { fiStaffId, createdFiStaff };
+
+  const { data: member, error: memberError } = await input.client
+    .from("fi_staff_members")
+    .insert({
+      tenant_id: tid,
+      fi_staff_id: fiStaffId,
+      full_name: fullName,
+      first_name: names.first_name || null,
+      last_name: names.last_name || null,
+      email,
+      role_code: roleCode,
+      employment_type: input.employmentType,
+      employment_status: "pending_onboarding",
+      clinic_id: input.clinicId?.trim() || null,
+      identity_source: "local",
+      source_system: input.sourceSystem,
+      source_snapshot: { created_via: input.sourceSystem },
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
+  if (memberError) {
+    await rollbackOnboardingStaffPair({
+      tenantId: tid,
+      ...rollbackState,
+      client: input.client,
+    });
+    throw new Error(memberError.message);
+  }
+
+  return {
+    fiStaffId,
+    staffMemberId: String((member as { id: string }).id),
+    createdFiStaff,
+  };
 }

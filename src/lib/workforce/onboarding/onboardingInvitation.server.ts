@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveStaffIdentity } from "@/src/lib/team/identity/server";
+import type { StaffIdentity } from "@/src/lib/team/identity/types";
 
 import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
 import { buildOnboardingInviteUrl } from "./onboardingInviteUrlCore";
@@ -24,6 +26,36 @@ export type SendOnboardingInviteResult = {
   status: OnboardingInvitationStatus;
   emailSent: boolean;
 };
+
+const ONBOARDING_IDENTITY_TARGET_UNCERTAIN =
+  "Staff identity requires reconciliation before this onboarding action can run.";
+
+function assertUsableOnboardingIdentityTarget(identity: StaffIdentity | null): StaffIdentity {
+  if (!identity) {
+    throw new Error(ONBOARDING_IDENTITY_TARGET_UNCERTAIN);
+  }
+  const { linkStatus } = identity.integrity;
+  if (
+    linkStatus === "ambiguous" ||
+    linkStatus === "cross_tenant_mismatch" ||
+    linkStatus === "invalid"
+  ) {
+    throw new Error(ONBOARDING_IDENTITY_TARGET_UNCERTAIN);
+  }
+  return identity;
+}
+
+async function assertEligibleOnboardingInviteTarget(
+  tenantId: string,
+  staffMemberId: string,
+  client: SupabaseClient
+): Promise<StaffIdentity> {
+  const identity = await resolveStaffIdentity(
+    { tenantId, by: "staffMemberId", staffMemberId },
+    { client }
+  );
+  return assertUsableOnboardingIdentityTarget(identity);
+}
 
 async function loadTenantName(tenantId: string, client: SupabaseClient): Promise<string> {
   // tenant-guard-allow: fi_tenants registry lookup by URL/invitation tenant id
@@ -160,6 +192,8 @@ export async function sendOnboardingInvite(input: {
 
   await expireStaleOnboardingInvitations(tid, supabase);
 
+  await assertEligibleOnboardingInviteTarget(tid, mid, supabase);
+
   const member = await loadStaffMemberForInvite(tid, mid, supabase);
   const email = member.email?.trim().toLowerCase();
   if (!email) throw new Error("Staff member must have an email before sending an invite.");
@@ -242,6 +276,8 @@ export async function resendOnboardingInvite(input: {
   ).toISOString();
 
   await expireStaleOnboardingInvitations(tid, supabase);
+
+  await assertEligibleOnboardingInviteTarget(tid, mid, supabase);
 
   const { data: existing, error: findErr } = await supabase
     .from("fi_staff_onboarding_invitations")

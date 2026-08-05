@@ -35,6 +35,7 @@ import {
   type ValidateClinicalEventStaffingResult,
 } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import type { StandardHoursShiftSource } from "@/src/lib/workforce-os/staffStandardHoursCore";
+import { assertEligibleRosterIdentityTarget } from "@/src/lib/workforce-os/rosterIdentityMutationGate.server";
 
 export type FiStaffAvailabilityBlockRow = StaffAvailabilityBlockRecord & {
   tenant_id: string;
@@ -544,13 +545,15 @@ export async function createStaffShift(input: {
   client?: SupabaseClient;
 }): Promise<FiStaffShiftRow> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(input.staffId, "staffId");
   const supabase = input.client ?? supabaseAdmin();
+  await assertEligibleRosterIdentityTarget(tid, sid, supabase);
   const { data, error } = await supabase
     .from("fi_staff_shifts")
     .insert({
       tenant_id: tid,
       clinic_id: input.clinicId?.trim() || null,
-      staff_id: assertNonEmptyUuid(input.staffId, "staffId"),
+      staff_id: sid,
       shift_type: input.shiftType,
       starts_at: input.startsAt,
       ends_at: input.endsAt,
@@ -580,12 +583,14 @@ export async function createAvailabilityBlock(input: {
   client?: SupabaseClient;
 }): Promise<FiStaffAvailabilityBlockRow> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(input.staffId, "staffId");
   const supabase = input.client ?? supabaseAdmin();
+  await assertEligibleRosterIdentityTarget(tid, sid, supabase);
   const { data, error } = await supabase
     .from("fi_staff_availability_blocks")
     .insert({
       tenant_id: tid,
-      staff_id: assertNonEmptyUuid(input.staffId, "staffId"),
+      staff_id: sid,
       clinic_id: input.clinicId?.trim() || null,
       block_type: input.blockType,
       starts_at: input.startsAt,
@@ -699,6 +704,8 @@ export async function assignStaffToClinicalEventAction(input: {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const sid = assertNonEmptyUuid(input.staffId, "staffId");
   const supabase = supabaseAdmin();
+
+  await assertEligibleRosterIdentityTarget(tid, sid, supabase);
 
   const staff = await loadStaffMemberForTenant(tid, sid);
   if (!staff) throw new Error("Staff member not found.");

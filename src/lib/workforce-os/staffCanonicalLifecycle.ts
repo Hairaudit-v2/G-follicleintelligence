@@ -2,12 +2,16 @@
  * Canonical staff lifecycle resolver (pure, no I/O).
  *
  * One place that combines the two staff status sources —
- * `fi_staff.is_active` (scheduling/directory flag) and
- * `fi_staff_members.employment_status` / `archived_at` (WorkforceOS HR
- * lifecycle) — into a single canonical status. Staff Directory, Workforce
+ * scheduling `is_active` (directory / roster flag) and
+ * lifecycle `employment_status` / `archived_at` (WorkforceOS HR) —
+ * into a single canonical status. Staff Directory, Workforce
  * Command Centre, roster eligibility, and readiness surfaces must derive
  * "active" from this resolver rather than reading `is_active` directly, so a
  * terminated-but-not-deactivated record can never present as Active.
+ *
+ * Roster eligibility (B1.4) now obtains lifecycle fields via
+ * `resolveStaffIdentities` rather than ad hoc dual-table joins; this helper
+ * remains the pure status combiner for directory / command-centre signals.
  */
 
 import {
@@ -26,11 +30,11 @@ export type CanonicalStaffLifecycleStatus =
   | "archived";
 
 export type StaffLifecycleSignal = {
-  /** `fi_staff.is_active` */
+  /** Scheduling record active flag. */
   isActive: boolean;
-  /** `fi_staff_members.employment_status` — null/undefined when no HR row exists. */
+  /** Lifecycle employment status — null/undefined when no HR row exists. */
   employmentStatus?: string | null;
-  /** `fi_staff_members.archived_at` */
+  /** Lifecycle archive timestamp. */
   archivedAt?: string | null;
 };
 

@@ -13,8 +13,8 @@ import {
 } from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
 import {
   createOnboardingStaffMember,
-  expireStaleOnboardingInvitations,
-} from "@/src/lib/workforce/onboarding/onboardingPage.server";
+} from "@/src/lib/workforce/onboarding/onboardingStaffCreate.server";
+import { expireStaleOnboardingInvitations } from "@/src/lib/workforce/onboarding/onboardingPage.server";
 import {
   ONBOARDING_EMPLOYMENT_TYPES,
   type OnboardingEmploymentType,

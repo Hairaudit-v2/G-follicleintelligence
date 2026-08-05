@@ -23,6 +23,7 @@ import {
   type OnboardingEmploymentType,
   type OnboardingStaffRow,
 } from "@/src/lib/workforce/onboarding/onboardingTypes";
+import { STAFF_ONBOARDING_ATTENTION_LABELS } from "@/src/lib/team/onboarding";
 
 function inviteStatusClass(status: string): string {
   if (status === "accepted") return "text-emerald-400";
@@ -348,6 +349,15 @@ export function OnboardingCentreClient({
                       >
                         {row.fullName}
                       </Link>
+                      {row.attentionReasons.length > 0 ? (
+                        <ul className="mt-1 space-y-0.5">
+                          {row.attentionReasons.map((reason) => (
+                            <li key={reason} className="text-xs text-amber-300/90">
+                              {STAFF_ONBOARDING_ATTENTION_LABELS[reason]}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-slate-300">{row.email ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">{row.roleCode ?? "—"}</td>

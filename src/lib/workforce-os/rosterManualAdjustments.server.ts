@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant, loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { loadRosterStaffEligibilityContext } from "@/src/lib/workforce-os/rosterEligibleStaff.server";
+import { ROSTER_IDENTITY_TARGET_UNCERTAIN } from "@/src/lib/workforce-os/rosterIdentityMutationGate.server";
 import type { RosterStaffEligibilitySnapshot } from "@/src/lib/workforce-os/rosterEligibleStaffCore";
 import {
   ROSTER_SHIFT_AUDIT_ACTION_TYPES,
@@ -128,6 +129,16 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
   };
 
   const warnings: RosterShiftValidationWarning[] = [];
+
+  const rosterEntry = ctx.rosterStaffEntries.find((e) => e.scheduling.staffId === sid) ?? null;
+  if (rosterEntry && rosterEntry.actions.requiresReconciliation) {
+    warnings.push({
+      code: "staff_not_roster_eligible",
+      message: ROSTER_IDENTITY_TARGET_UNCERTAIN,
+      blocking: !input.allowOverride,
+    });
+  }
+
   if (!eligibility.eligible) {
     warnings.push({
       code: "staff_not_roster_eligible",

@@ -1,3 +1,5 @@
+import type { StaffOnboardingAttentionReason } from "@/src/lib/team/onboarding/types";
+
 /** WorkforceOS staff onboarding invitation statuses. */
 export const ONBOARDING_INVITATION_STATUSES = [
   "pending",
@@ -66,6 +68,8 @@ export type OnboardingStaffRow = {
   canResendInvite: boolean;
   canCopyInviteLink: boolean;
   checklist: OnboardingChecklistState;
+  /** Identity integrity / onboarding attention — never invents invite decisions. */
+  attentionReasons: StaffOnboardingAttentionReason[];
 };
 
 export type OnboardingClinicOption = {
