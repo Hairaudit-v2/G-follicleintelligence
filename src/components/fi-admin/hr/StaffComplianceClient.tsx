@@ -8,6 +8,7 @@ import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-u
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { runComplianceAuditAction } from "@/src/lib/actions/workforce-phase-1c-sprint-3-actions";
 import type { CompliancePageAlertRow } from "@/src/lib/workforce/compliancePage.server";
+import { STAFF_COMPLIANCE_ATTENTION_LABELS } from "@/src/lib/team/compliance";
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: "text-slate-400",
@@ -100,6 +101,15 @@ export function StaffComplianceClient({
                     {a.severity}
                   </span>
                 </div>
+                {a.attentionReasons.length > 0 ? (
+                  <ul className="mt-1 space-y-0.5">
+                    {a.attentionReasons.map((reason) => (
+                      <li key={reason} className="text-xs text-amber-300/90">
+                        {STAFF_COMPLIANCE_ATTENTION_LABELS[reason]}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p className="mt-1 text-slate-400">{a.message ?? a.alertType}</p>
               </li>
             ))}

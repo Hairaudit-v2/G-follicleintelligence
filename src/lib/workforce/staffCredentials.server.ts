@@ -13,6 +13,7 @@ import {
   WORKFORCE_PHASE_1C_AUDIT_EVENTS,
   WORKFORCE_PHASE_1C_AUDIT_SOURCE,
 } from "@/src/lib/workforce/workforcePhase1cAudit";
+import { assertEligibleComplianceIdentityTarget } from "@/src/lib/workforce/complianceIdentityMutationGate.server";
 
 function mapCredentialRow(raw: Record<string, unknown>): StaffCredentialRecord {
   const credentialType = String(raw.credential_type);
@@ -82,6 +83,41 @@ export async function loadStaffCredentials(
   return ((data ?? []) as Record<string, unknown>[]).map(mapCredentialRow);
 }
 
+/**
+ * Batch-load credentials for many lifecycle members (bounded `.in(...)` — no N+1).
+ */
+export async function loadStaffCredentialsForMembers(
+  tenantId: string,
+  staffMemberIds: string[],
+  client?: SupabaseClient
+): Promise<Map<string, StaffCredentialRecord[]>> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const supabase = client ?? supabaseAdmin();
+  const out = new Map<string, StaffCredentialRecord[]>();
+  const ids = [
+    ...new Set(staffMemberIds.map((id) => String(id ?? "").trim()).filter(Boolean)),
+  ];
+  for (const id of ids) out.set(id, []);
+  if (!ids.length) return out;
+
+  const { data, error } = await supabase
+    .from("fi_staff_credentials")
+    .select("*")
+    .eq("tenant_id", tid)
+    .in("staff_member_id", ids)
+    .is("archived_at", null)
+    .order("expires_at", { ascending: true, nullsFirst: false });
+  if (error) throw new Error(error.message);
+
+  for (const raw of (data ?? []) as Record<string, unknown>[]) {
+    const row = mapCredentialRow(raw);
+    const list = out.get(row.staffMemberId) ?? [];
+    list.push(row);
+    out.set(row.staffMemberId, list);
+  }
+  return out;
+}
+
 /** @deprecated Use loadStaffCredentials */
 export const loadStaffCredentialsForMember = loadStaffCredentials;
 
@@ -107,6 +143,9 @@ export async function createStaffCredential(
   const credentialKey = credentialTypeToKey(input.credentialType);
   const displayName = input.credentialType.trim();
 
+  const identity = await assertEligibleComplianceIdentityTarget(tid, sid, supabase);
+  const fiStaffId = input.fiStaffId?.trim() || identity.staffId || null;
+
   const evaluation = evaluateCredentialExpiry({
     expiresAt: input.expiresAt ?? null,
     blocksClinicalWork: input.blocksClinicalWork ?? true,
@@ -115,7 +154,7 @@ export async function createStaffCredential(
   const row = {
     tenant_id: tid,
     staff_member_id: sid,
-    fi_staff_id: input.fiStaffId ?? null,
+    fi_staff_id: fiStaffId,
     credential_type: displayName,
     credential_key: credentialKey,
     display_name: displayName,
@@ -142,7 +181,13 @@ export async function createStaffCredential(
     tenant_id: tid,
     staff_member_id: sid,
     event_type: WORKFORCE_PHASE_1C_AUDIT_EVENTS.CREDENTIAL_UPSERTED,
-    metadata: { credential_id: String((data as { id: string }).id), action: "create" },
+    metadata: {
+      credential_id: String((data as { id: string }).id),
+      action: "create",
+      staff_member_id: sid,
+      fi_staff_id: fiStaffId,
+      person_key: identity.personKey,
+    },
   });
 
   return mapCredentialRow(data as Record<string, unknown>);
@@ -178,6 +223,9 @@ export async function updateStaffCredential(
   if (!existing) throw new Error("Credential not found.");
 
   const raw = existing as Record<string, unknown>;
+  const staffMemberId = String(raw.staff_member_id);
+  const identity = await assertEligibleComplianceIdentityTarget(tid, staffMemberId, supabase);
+
   const revoked = String(raw.status) === "revoked";
   const suspended = String(raw.status) === "suspended";
   const expiresAt =
@@ -221,9 +269,15 @@ export async function updateStaffCredential(
 
   await insertCredentialAudit(supabase, {
     tenant_id: tid,
-    staff_member_id: String((data as { staff_member_id: string }).staff_member_id),
+    staff_member_id: staffMemberId,
     event_type: WORKFORCE_PHASE_1C_AUDIT_EVENTS.CREDENTIAL_UPSERTED,
-    metadata: { credential_id: cid, action: "update" },
+    metadata: {
+      credential_id: cid,
+      action: "update",
+      staff_member_id: staffMemberId,
+      fi_staff_id: identity.staffId,
+      person_key: identity.personKey,
+    },
   });
 
   return mapCredentialRow(data as Record<string, unknown>);

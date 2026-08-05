@@ -2,12 +2,20 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveStaffIdentities } from "@/src/lib/team/identity/server";
+import type { StaffComplianceAttentionReason } from "@/src/lib/team/compliance";
+import { projectStaffComplianceEntry } from "@/src/lib/team/compliance";
 import type { ComplianceAlertRecord } from "@/src/lib/workforce/workforceClinicalTypes";
 
 export type CompliancePageAlertRow = ComplianceAlertRecord & {
   staffName: string;
+  attentionReasons: StaffComplianceAttentionReason[];
 };
 
+/**
+ * Compliance alerts page — batch-resolves alert subjects by staffMemberId
+ * so names and identity attention come from the canonical resolver.
+ */
 export async function loadCompliancePageModel(tenantId: string): Promise<{
   alerts: CompliancePageAlertRow[];
   recentRuns: Array<{
@@ -36,31 +44,42 @@ export async function loadCompliancePageModel(tenantId: string): Promise<{
       ((alertRows ?? []) as { staff_member_id: string }[]).map((r) => String(r.staff_member_id))
     ),
   ];
-  const nameById = new Map<string, string>();
-  if (memberIds.length) {
-    const { data: memberRows, error: memberErr } = await supabase
-      .from("fi_staff_members")
-      .select("id, full_name")
-      .eq("tenant_id", tid)
-      .in("id", memberIds);
-    if (memberErr) throw new Error(memberErr.message);
-    for (const m of memberRows ?? []) {
-      const row = m as { id: string; full_name: string };
-      nameById.set(String(row.id), String(row.full_name));
-    }
-  }
+
+  const identityBatch = await resolveStaffIdentities(
+    {
+      tenantId: tid,
+      by: "staffMemberId",
+      staffMemberIds: memberIds,
+    },
+    { client: supabase }
+  );
 
   const alerts: CompliancePageAlertRow[] = ((alertRows ?? []) as Record<string, unknown>[]).map(
-    (raw) => ({
-      id: String(raw.id),
-      staffMemberId: String(raw.staff_member_id),
-      alertType: String(raw.alert_type),
-      severity: String(raw.severity) as ComplianceAlertRecord["severity"],
-      message: raw.message != null ? String(raw.message) : null,
-      resolved: Boolean(raw.resolved ?? false),
-      createdAt: String(raw.created_at),
-      staffName: nameById.get(String(raw.staff_member_id)) ?? "Unknown",
-    })
+    (raw) => {
+      const mid = String(raw.staff_member_id);
+      const identity = identityBatch.byKey.get(mid) ?? null;
+      const entry = identity
+        ? projectStaffComplianceEntry(identity, {
+            credentials: [],
+            certifications: [],
+            canUpload: false,
+            canVerify: false,
+            canReject: false,
+            canRequestReplacement: false,
+          })
+        : null;
+      return {
+        id: String(raw.id),
+        staffMemberId: mid,
+        alertType: String(raw.alert_type),
+        severity: String(raw.severity) as ComplianceAlertRecord["severity"],
+        message: raw.message != null ? String(raw.message) : null,
+        resolved: Boolean(raw.resolved ?? false),
+        createdAt: String(raw.created_at),
+        staffName: identity?.displayName ?? "Unknown",
+        attentionReasons: entry?.attentionReasons ?? (["identity_invalid"] as StaffComplianceAttentionReason[]),
+      };
+    }
   );
 
   const { data: runs, error: runsErr } = await supabase

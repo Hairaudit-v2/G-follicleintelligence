@@ -102,7 +102,7 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
       requiredPermission: "hr_manager",
       doesNotChange: ["Does not provision login until invite is sent separately."],
       impact: {
-        lifecycle: "Creates fi_staff_members with pending_onboarding status.",
+        lifecycle: "Creates lifecycle staff members with pending_onboarding status.",
         roster: "Not roster-eligible until onboarding and hours are complete.",
         access: "No login until invite is sent.",
         readiness: "Onboarding checklist starts incomplete.",
@@ -343,7 +343,7 @@ export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHr
       requiredPermission: "hr_manager",
       doesNotChange: ["Does not delete profile or audit history."],
       impact: {
-        lifecycle: "Employment becomes inactive; fi_staff.is_active false.",
+        lifecycle: "Employment becomes inactive; scheduling active flag false.",
         roster: "Not roster-eligible.",
         access: "May deactivate operational access when selected.",
         readiness: "Historical readiness preserved.",

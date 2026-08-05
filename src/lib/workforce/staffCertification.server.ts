@@ -13,6 +13,7 @@ import {
   WORKFORCE_PHASE_1C_AUDIT_EVENTS,
   WORKFORCE_PHASE_1C_AUDIT_SOURCE,
 } from "@/src/lib/workforce/workforcePhase1cAudit";
+import { assertEligibleComplianceIdentityTarget } from "@/src/lib/workforce/complianceIdentityMutationGate.server";
 
 function mapCertificationRow(raw: Record<string, unknown>): StaffCertificationRecord {
   const name = String(raw.certification_name ?? raw.display_name ?? "Certification");
@@ -78,10 +79,13 @@ export async function createCertification(
   const key = certificationNameToKey(name);
   const expiry = evaluateCertificationExpiry({ expiresAt: input.expiresAt ?? null });
 
+  const identity = await assertEligibleComplianceIdentityTarget(tid, sid, supabase);
+  const fiStaffId = input.fiStaffId?.trim() || identity.staffId || null;
+
   const row = {
     tenant_id: tid,
     staff_member_id: sid,
-    fi_staff_id: input.fiStaffId ?? null,
+    fi_staff_id: fiStaffId,
     certification_name: name,
     certification_key: key,
     display_name: name,
@@ -106,7 +110,13 @@ export async function createCertification(
     tenant_id: tid,
     staff_member_id: sid,
     event_type: WORKFORCE_PHASE_1C_AUDIT_EVENTS.CERTIFICATION_UPSERTED,
-    metadata: { certification_id: String((data as { id: string }).id), action: "create" },
+    metadata: {
+      certification_id: String((data as { id: string }).id),
+      action: "create",
+      staff_member_id: sid,
+      fi_staff_id: fiStaffId,
+      person_key: identity.personKey,
+    },
   });
 
   return mapCertificationRow(data as Record<string, unknown>);
@@ -127,6 +137,18 @@ export async function verifyCertification(
   const supabase = client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
+  const { data: existing, error: loadErr } = await supabase
+    .from("fi_staff_certifications")
+    .select("staff_member_id")
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .is("archived_at", null)
+    .maybeSingle();
+  if (loadErr) throw new Error(loadErr.message);
+  if (!existing) throw new Error("Certification not found.");
+  const staffMemberId = String((existing as { staff_member_id: string }).staff_member_id);
+  const identity = await assertEligibleComplianceIdentityTarget(tid, staffMemberId, supabase);
+
   const patch: Record<string, unknown> = {
     verified: input.verified,
     updated_at: now,
@@ -145,9 +167,16 @@ export async function verifyCertification(
 
   await insertCertificationAudit(supabase, {
     tenant_id: tid,
-    staff_member_id: String((data as { staff_member_id: string }).staff_member_id),
+    staff_member_id: staffMemberId,
     event_type: WORKFORCE_PHASE_1C_AUDIT_EVENTS.CERTIFICATION_UPSERTED,
-    metadata: { certification_id: cid, action: "verify", verified: input.verified },
+    metadata: {
+      certification_id: cid,
+      action: "verify",
+      verified: input.verified,
+      staff_member_id: staffMemberId,
+      fi_staff_id: identity.staffId,
+      person_key: identity.personKey,
+    },
   });
 
   return mapCertificationRow(data as Record<string, unknown>);

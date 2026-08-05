@@ -1,10 +1,10 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B1.4 — Roster Identity Proof (GREEN) · B1.3 onboarding proof intact · B1.2 access proof intact · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
+**Phase:** B1.5 — Compliance and Credentials Identity Proof (GREEN) · B1.4 roster proof intact · B1.3 onboarding proof intact · B1.2 access proof intact · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
 **Date:** 2026-08-05  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
-B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/identity`. **B1.1–B1.3** proved directory, access, and onboarding. **B1.4** proved roster — see [b1.4-roster-identity-proof.md](./b1.4-roster-identity-proof.md).
+B0 was discovery and architecture-lock only. **B1–B1.4** proved identity through directory, access, onboarding, and roster. **B1.5** proved compliance/credentials — see [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md).
 
 ## Documents
 
@@ -23,6 +23,7 @@ B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/iden
 | [b1.2-access-identity-proof.md](./b1.2-access-identity-proof.md) | B1.2 access batch-resolver proof |
 | [b1.3-onboarding-identity-proof.md](./b1.3-onboarding-identity-proof.md) | B1.3 onboarding batch-resolver proof |
 | [b1.4-roster-identity-proof.md](./b1.4-roster-identity-proof.md) | B1.4 roster batch-resolver proof |
+| [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md) | B1.5 compliance/credentials batch-resolver proof |
 
 ## Generated artifacts
 
@@ -55,8 +56,8 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## Recommended next slice
 
-**FI-TEAM-COHESION-B1.4** is GREEN — see [b1.4-roster-identity-proof.md](./b1.4-roster-identity-proof.md).
+**FI-TEAM-COHESION-B1.5** is GREEN — see [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md).
 
-Dual-table allowlist: **21** (was 22; roster-linked lifecycle classifier removed).
+Dual-table allowlist: **20** (was 21; HR task-map dual-table classifier removed).
 
-**Next:** Compliance / credentials identity proof, then staff profile hub consolidation, command centre, payroll/planning. Keep B1.1.1 deferred.
+**Next:** B1.6 — Staff profile hub. Then command centre (B1.7), payroll/planning (B1.8).

@@ -28,10 +28,10 @@ export default async function HrOsCredentialsPage({
     const access = await resolveHrOsRouteAccess(tid);
     if (!access.ok) notFound();
 
-    const model = await loadCredentialsPageModel(tid);
     const canManage =
       access.platformAdminPreview ||
       WORKFORCE_HR_MANAGE_ROLES.some((r) => r === access.userRole.trim().toLowerCase());
+    const model = await loadCredentialsPageModel(tid, { canManage });
 
     return (
       <StaffCredentialsClient tenantId={tid} staffRows={model.staffRows} canManage={canManage} />

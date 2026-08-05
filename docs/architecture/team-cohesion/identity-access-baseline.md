@@ -66,6 +66,7 @@ Cross-domain leak confirmed: bookings, CRM, calendar, financial/clinic setup, Hu
 | **B1.2** | GREEN — access centre uses batch resolver; allowlist 24 → 23 (access centre removed). |
 | **B1.3** | GREEN — onboarding uses batch resolver; allowlist 23 → 22 (onboarding page loader removed). |
 | **B1.4** | GREEN — roster eligibility uses batch resolver; allowlist 22 → 21 (lifecycle classifier removed). |
+| **B1.5** | GREEN — credentials/compliance use batch resolver; allowlist 21 → 20 (HR task-map classifier removed). |
 | **C** | Drive down `suspected duplicate identity logic` + `cross-domain join` classifications; opportunistic migration when files are touched. |
 
 Track progress by re-running the generator and diffing `identityBaseline.srcLibOnly` and `byClassification`.

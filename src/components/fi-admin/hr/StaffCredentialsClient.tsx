@@ -9,6 +9,7 @@ import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { createStaffCredentialAction } from "@/src/lib/actions/workforce-phase-1c-sprint-3-actions";
 import type { CredentialsPageStaffRow } from "@/src/lib/workforce/credentialsPage.server";
 import { STAFF_CREDENTIAL_TYPES } from "@/src/lib/workforce/workforceClinicalTypes";
+import { STAFF_COMPLIANCE_ATTENTION_LABELS } from "@/src/lib/team/compliance";
 
 export function StaffCredentialsClient({
   tenantId,
@@ -80,7 +81,9 @@ export function StaffCredentialsClient({
               value={selectedStaff}
               onChange={(e) => setSelectedStaff(e.target.value)}
             >
-              {staffRows.map((s) => (
+              {staffRows
+                .filter((s) => s.canUploadCredential)
+                .map((s) => (
                 <option key={s.staffMemberId} value={s.staffMemberId}>
                   {s.fullName}
                 </option>
@@ -115,6 +118,15 @@ export function StaffCredentialsClient({
         {staffRows.map((staff) => (
           <DashboardCard key={staff.staffMemberId} className="p-5" elevated>
             <h3 className="font-medium text-slate-100">{staff.fullName}</h3>
+            {staff.attentionReasons.length > 0 ? (
+              <ul className="mt-1 space-y-0.5">
+                {staff.attentionReasons.map((reason) => (
+                  <li key={reason} className="text-xs text-amber-300/90">
+                    {STAFF_COMPLIANCE_ATTENTION_LABELS[reason]}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             {staff.credentials.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">No credentials on file.</p>
             ) : (
