@@ -7,7 +7,7 @@ import type {
   StaffIdentityReadinessAuditResult,
   StaffIdentityReadinessAuditRow,
   StaffTestingReadinessSummary,
-} from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
+} from "@/src/lib/team/identity/staffIdentityReadinessAudit.server";
 
 function readinessBadgeClass(status: StaffTestingReadinessSummary): string {
   if (status === "ready") return "border-emerald-500/40 bg-emerald-500/10 text-emerald-200";

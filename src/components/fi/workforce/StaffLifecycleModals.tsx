@@ -14,16 +14,16 @@ import {
   setStaffMaternityLeaveAction,
   updateStaffProfileAction,
 } from "@/lib/actions/workforce-os-staff-lifecycle-actions";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { STAFF_EMPLOYMENT_STATUSES } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
+import { STAFF_EMPLOYMENT_STATUSES } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
   MANAGE_EMPLOYMENT_STATUS_LABELS,
   MANAGE_EMPLOYMENT_VISIBLE_STATUSES,
-} from "@/src/lib/workforce-os/staffLifecyclePresentation";
+} from "@/src/lib/team/identity/staffLifecyclePresentation";
 import {
   isExternallyManagedStaff,
   resolveEditableProfileFields,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
+} from "@/src/lib/team/identity/staffLifecycleCore";
 import { buildMaternityLeaveConfirmationSummary } from "@/src/lib/workforce/staffLeaveWorkflowCore";
 
 const inputClassName =

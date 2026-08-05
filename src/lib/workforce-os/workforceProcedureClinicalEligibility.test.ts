@@ -5,7 +5,7 @@ import { DEFAULT_PROCEDURE_PRIVILEGE_REQUIREMENTS } from "@/src/lib/academy-os/p
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { canStaffBeAssignedToProcedure } from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 const NOW = new Date("2026-06-22T12:00:00.000Z");
 

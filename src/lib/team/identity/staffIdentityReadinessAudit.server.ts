@@ -17,7 +17,7 @@ import {
   resolveInviteStatus,
   type StaffAuthLoginStatus,
 } from "@/src/lib/workforce/staffAccessCentreCore";
-import { SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { SCHEDULING_EXCLUDED_EMPLOYMENT_STATUSES } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export type StaffIdentityReadinessAuditRow = {
   staffMemberId: string;

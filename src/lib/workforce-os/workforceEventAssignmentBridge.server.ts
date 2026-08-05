@@ -40,7 +40,7 @@ import {
   type FiClinicalStaffingTemplateRow,
   type FiStaffEventAssignmentRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 export type EnsureBookingStaffingAssignmentInput = {
   tenantId: string;

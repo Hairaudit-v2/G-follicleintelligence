@@ -2,7 +2,7 @@ import "server-only";
 
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { buildTenantWorkforceReadinessOverview } from "@/src/lib/workforce-os/workforceReadinessTenantOverview.server";
+import { buildTenantWorkforceReadinessOverview } from "@/src/lib/team/identity/server";
 
 import {
   getAnalyticsEvents,

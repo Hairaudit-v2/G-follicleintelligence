@@ -1,12 +1,12 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.1a IN PROGRESS (identity pure-layer move) · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.1b GREEN (identity server consolidation) · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-05  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
 B0 was discovery and architecture-lock only. **B1–B1.8** prove identity through directory, access, onboarding, roster, compliance, profile, command centre, payroll, and planning. Formal closure: [b1-identity-program-closure.md](./b1-identity-program-closure.md).
 
-**B2.1a** physically consolidates pure lifecycle / readiness modules under `src/lib/team/identity` with temporary `workforce-os` shims — see [b2.1a-identity-pure-consolidation.md](./b2.1a-identity-pure-consolidation.md).
+**B2.1a** moved pure lifecycle / readiness into `src/lib/team/identity`. **B2.1b** moved identity server loaders (links, audit, tenant overviews), deleted the 11 temporary shims, and exposed them via `team/identity/server` — see [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md).
 
 ## Documents
 
@@ -32,6 +32,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b1.8b-planning-identity-proof.md](./b1.8b-planning-identity-proof.md) | B1.8B planning identity proof |
 | [b1-identity-program-closure.md](./b1-identity-program-closure.md) | B1 program closure evidence |
 | [b2.1a-identity-pure-consolidation.md](./b2.1a-identity-pure-consolidation.md) | B2.1a pure lifecycle/readiness move |
+| [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md) | B2.1b identity server move + shim deletion |
 
 ## Generated artifacts
 
@@ -52,24 +53,24 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 | Metric | Value |
 |--------|------:|
 | Canonical Team domains delivered | identity, directory, access, onboarding, roster, compliance, profile, commandCentre, payroll, planning |
-| Dual-table allowlist | **16** (from 20 at B1.6 start) — must not grow |
+| Dual-table allowlist | **15** (from 20 at B1.6 start) — must not grow |
 | B1 program | **CLOSED** |
-| B2.1a temporary compatibility shims | **11** (`workforce-os` basename re-exports) |
+| B2.1a temporary compatibility shims | **0** (deleted in B2.1b) |
 
 ## B2 scorecard
 
 | Metric | B2 start | Current | Target |
 |--------|---------:|--------:|-------:|
-| Files in legacy lib trees | 283 | **278** | 0 |
+| Files in legacy lib trees | 283 | **260** | 0 |
 | Deep legacy imports | 252 | **253** | 0 |
 | Sprint-named action files | 7 | 7 | 0 |
 | Documented dependency cycles | 2 | **1** | 0 |
 | Duplicate implementations | 3 delete rows | 3 | 0 |
-| Temporary compatibility exports | 0 | **11** | 0 |
-| Identity allowlist | 16 | **16** | No increase |
+| Temporary compatibility exports | 0 | **0** | 0 |
+| Identity allowlist | 16 | **15** | No increase |
 
-Refresh “Current” from `generated/b0-summary.json` after each inventory regenerate. Cycle count: lifecycle↔HR eligibility broke in B2.1a; remaining onboarding invite↔pin cycle tracked in [import-graph.md](./import-graph.md).
+Refresh “Current” from `generated/b0-summary.json` after each inventory regenerate. Cycle count: lifecycle↔HR eligibility broke in B2.1a; remaining onboarding invite↔pin cycle tracked in [import-graph.md](./import-graph.md). Legacy tree count = `workforce-os` + `workforce` + `staff` file counts from summary.
 
 ## Recommended next slice
 
-**B2.1b** — Move identity server modules (links, readiness audit, tenant overview) behind the same public `team/identity/server` surface; delete shims as consumers re-point. Then Directory and Access physical consolidation. Do not start B3 sprint-action renames until identity pure + server homes are stable, unless imports already permit a parallel PR.
+**B2.1c** (if needed) — residual identity consumer cleanup, or start **B2.2** Directory / Access / Onboarding physical moves. Mutation servers (`staffLifecycle.server`, reconciliation, repair) stay deferred. Do not start B3 sprint-action renames until identity homes remain stable.

@@ -19,7 +19,7 @@ import {
 } from "@/src/lib/workforce/staffLifecycleUxCore";
 import { STAFF_LIFECYCLE_LABELS } from "@/src/lib/workforce/staffLifecycleCopy";
 import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
-import { canonicalStaffLifecyclePillClass } from "@/src/lib/workforce-os/staffCanonicalLifecycle";
+import { canonicalStaffLifecyclePillClass } from "@/src/lib/team/identity/staffCanonicalLifecycle";
 import {
   buildWorkforceAttentionQueue,
   buildWorkforceCommandCentreMetrics,

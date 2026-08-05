@@ -67,8 +67,8 @@ type ServerModules = {
   staffCapabilitySatisfies: typeof import("@/src/lib/staffAccess/staffCapabilityCore").staffCapabilitySatisfies;
   manageFiUserRoles: readonly string[];
   mergeStaffRecords: typeof import("@/src/lib/workforce/staffMerge.server").mergeStaffRecords;
-  resolveCanonicalStaffLifecycleStatus: typeof import("@/src/lib/workforce-os/staffCanonicalLifecycle").resolveCanonicalStaffLifecycleStatus;
-  resolveStaffDuplicateGroups: typeof import("@/src/lib/workforce-os/staffCanonicalLifecycle").resolveStaffDuplicateGroups;
+  resolveCanonicalStaffLifecycleStatus: typeof import("@/src/lib/team/identity/staffCanonicalLifecycle").resolveCanonicalStaffLifecycleStatus;
+  resolveStaffDuplicateGroups: typeof import("@/src/lib/team/identity/staffCanonicalLifecycle").resolveStaffDuplicateGroups;
 };
 
 let mods: ServerModules;
@@ -82,7 +82,7 @@ async function loadServerModules(): Promise<ServerModules> {
       import("@/src/lib/staffAccess/staffCapabilityCore"),
       import("@/src/lib/workforce-os/staffStandardHoursManageGate.server"),
       import("@/src/lib/workforce/staffMerge.server"),
-      import("@/src/lib/workforce-os/staffCanonicalLifecycle"),
+      import("@/src/lib/team/identity/staffCanonicalLifecycle"),
     ]);
   return {
     supabaseAdmin: supabase.supabaseAdmin,

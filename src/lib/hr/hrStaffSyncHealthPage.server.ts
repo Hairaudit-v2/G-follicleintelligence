@@ -11,7 +11,7 @@ import {
   type HrSyncLatestRunSummary,
 } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
 import { buildHrStaffAutomationStatus } from "@/src/lib/hr/hrStaffAutomationStatus";
-import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
+import { buildTenantWorkforceIdentityOverview } from "@/src/lib/team/identity/server";
 import type { WorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
 import { loadWorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";

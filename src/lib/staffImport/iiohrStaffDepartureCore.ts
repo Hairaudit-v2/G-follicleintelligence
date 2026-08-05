@@ -1,8 +1,8 @@
 import {
   OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
   type StaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
-import { parseStaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleCore";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
+import { parseStaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleCore";
 
 /** Maps IIOHR HR feed `employment_status` to FI workforce employment status. */
 export function mapHrEmploymentToFiDepartureStatus(

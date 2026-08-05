@@ -15,8 +15,8 @@ import { StaffWorkforceRosterPanel } from "@/src/components/fi/staff/StaffWorkfo
 import { StaffAcademyCompetencyProjectionPanel } from "@/src/components/fi/staff/StaffAcademyCompetencyProjectionPanel";
 import { StaffProcedurePrivilegePanel } from "@/src/components/fi/staff/StaffProcedurePrivilegePanel";
 import { loadStaffRosterProfile } from "@/src/lib/workforce-os/workforceRostering.server";
-import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
-import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/team/identity/workforceIdentitySummary";
+import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workforceReadinessEngine";
 import { buildAcademyCompetencySignalsFromProjections } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";

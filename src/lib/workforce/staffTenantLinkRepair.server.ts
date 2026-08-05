@@ -7,7 +7,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { insertFiStaff, updateFiStaff } from "@/src/lib/staff/staff.server";
 import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
 import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
-import { splitFullName } from "@/src/lib/workforce-os/staffLifecycleCore";
+import { splitFullName } from "@/src/lib/team/identity/staffLifecycleCore";
 
 import {
   extractTenantIdFromFiAdminPath,

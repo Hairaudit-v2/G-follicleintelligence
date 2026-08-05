@@ -10,7 +10,7 @@ import {
   canonicalStaffLifecycleLabel,
   resolveStaffDuplicateGroups,
   type CanonicalStaffLifecycleStatus,
-} from "@/src/lib/workforce-os/staffCanonicalLifecycle";
+} from "@/src/lib/team/identity/staffCanonicalLifecycle";
 
 export type StaffDirectoryFilterState = {
   staffRole: string | null;

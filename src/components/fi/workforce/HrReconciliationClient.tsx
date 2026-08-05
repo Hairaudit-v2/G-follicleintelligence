@@ -15,7 +15,7 @@ import type {
   HrReconciliationDiagnostics,
   HrReconciliationMetrics,
   HrReconciliationSuggestion,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 
 function formatTimestamp(value: string | null): string {
   if (!value) return "Never";

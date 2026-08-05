@@ -13,12 +13,12 @@ import {
 import {
   mergeWorkforceIdentityMetadata,
   sanitizeWorkforceIdentityMetadata,
-} from "@/src/lib/workforce-os/workforceIdentityMetadata";
-import { canonicaliseWorkforceSourceSystem } from "@/src/lib/workforce-os/workforceIdentitySources";
+} from "@/src/lib/team/identity/workforceIdentityMetadata";
+import { canonicaliseWorkforceSourceSystem } from "@/src/lib/team/identity/workforceIdentitySources";
 import {
   buildWorkforceIdentitySummaryFromSourceRows,
   type WorkforceIdentitySummary,
-} from "@/src/lib/workforce-os/workforceIdentitySummary";
+} from "@/src/lib/team/identity/workforceIdentitySummary";
 
 export type StaffIdentityLinkRow = {
   id: string;

@@ -28,7 +28,7 @@ import { setStaffMaternityLeave } from "@/src/lib/workforce/staffLeaveWorkflow.s
 import type {
   EmploymentStatusChangeInput,
   StaffProfileEditInput,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

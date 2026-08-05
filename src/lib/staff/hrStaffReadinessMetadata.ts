@@ -20,8 +20,8 @@ import {
   extractWorkforceIdentityMetadataFields,
   WORKFORCE_IDENTITY_METADATA_KEYS,
   WORKFORCE_IDENTITY_SAFE_METADATA_KEYS,
-} from "@/src/lib/workforce-os/workforceIdentityMetadata";
-import { canonicaliseWorkforceSourceSystem } from "@/src/lib/workforce-os/workforceIdentitySources";
+} from "@/src/lib/team/identity/workforceIdentityMetadata";
+import { canonicaliseWorkforceSourceSystem } from "@/src/lib/team/identity/workforceIdentitySources";
 
 /** Readiness keys surfaced by FI OS staff directory / HR notification UI. */
 export const HR_STAFF_READINESS_METADATA_KEYS = [
