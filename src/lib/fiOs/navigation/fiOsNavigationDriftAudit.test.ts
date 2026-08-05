@@ -27,10 +27,11 @@ test("domain mapping examples from D6G scope", () => {
 
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("reception-board")!), "Front Desk");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("tomorrow-board")!), "Front Desk");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("onboarding-centre")!), "Team");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("staff-directory-legacy")!), "Team");
-  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("hr-os-dashboard")!), "Team");
+  // A1: legacy Team direct links are no longer collected; consolidated tabs map to Team.
+  assert.equal(byId.get("onboarding-centre"), undefined);
+  assert.equal(byId.get("staff-directory-legacy"), undefined);
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("team-staff")!), "Team");
+  assert.equal(mapCurrentNavItemTo1BDomain(byId.get("team-onboarding")!), "Team");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("payments-inbox")!), "Finance");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("financial-os")!), "Finance");
   assert.equal(mapCurrentNavItemTo1BDomain(byId.get("reports")!), "Reports");
@@ -135,12 +136,11 @@ test("reports consolidated item maps to REPORTS group after D6G-F", () => {
 test("team consolidated item maps to TEAM group after D6G-E", () => {
   const items = collectFiOsCurrentNavigationModel(TENANT, { includeQuickCreate: false });
   const team = items.find((i) => i.id === "team" && i.source === "primary_sidebar")!;
-  const workforceHub = items.find((i) => i.id === "workforce-os-hub")!;
-  const staffLegacy = items.find((i) => i.id === "staff-directory-legacy")!;
   assert.equal(team.workflowGroupId, "TEAM");
-  assert.equal(workforceHub.workflowGroupId, "TEAM");
-  assert.equal(staffLegacy.workflowGroupId, "TEAM");
   assert.equal(mapCurrentNavItemTo1BDomain(team), "Team");
+  // A1: Team legacy direct links are out of the advertised nav model entirely.
+  assert.equal(items.find((i) => i.id === "workforce-os-hub"), undefined);
+  assert.equal(items.find((i) => i.id === "staff-directory-legacy"), undefined);
 });
 
 test("minimal rail catalog includes six D6G-B slots", () => {
@@ -155,7 +155,9 @@ test("minimal rail catalog includes six D6G-B slots", () => {
 test("buildNavigationDriftReport summarizes Team and Reports mappings", () => {
   const report = buildNavigationDriftReport(TENANT, { includeQuickCreate: false });
   assert.ok(report.byDomain1B.Team.some((i) => i.id === "team"));
-  assert.ok(report.byDomain1B.Team.some((i) => i.id === "onboarding-centre"));
+  assert.ok(report.byDomain1B.Team.some((i) => i.id === "team-staff"));
+  // A1: legacy onboarding-centre direct link no longer part of the nav model.
+  assert.ok(!report.byDomain1B.Team.some((i) => i.id === "onboarding-centre"));
   assert.ok(report.byDomain1B.Reports.some((i) => i.id === "reports"));
   assert.ok(report.byDomain1B.Finance.length >= 2);
   assert.ok(report.byDomain1B["Front Desk"].length >= 3);

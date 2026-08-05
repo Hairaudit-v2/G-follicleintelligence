@@ -163,7 +163,8 @@ test("platform admin More drawer retains legacy direct and D6 admin links", () =
   );
   assert.ok(adminSubIds.includes("reception-os"));
   assert.ok(adminSubIds.includes("surgery-os"));
-  assert.ok(adminSubIds.includes("workforce-os-hub"));
+  // A1: Team legacy direct links are never advertised, even for admins.
+  assert.ok(!adminSubIds.includes("workforce-os-hub"));
   assert.ok(adminSubIds.includes("analytics-legacy"));
   for (const d6Id of ["d6-presence", "d6-signal-learning", "d6-bake", "d6-navigation-audit"]) {
     assert.ok(adminSubIds.includes(d6Id), `admin More should include ${d6Id}`);

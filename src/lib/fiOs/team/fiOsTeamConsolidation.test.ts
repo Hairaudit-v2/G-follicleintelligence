@@ -16,6 +16,7 @@ import {
   isPrimaryRailNavId,
 } from "@/src/lib/fiOs/navigation/fiOsNavigationRegroupingCore";
 import { labelHasLegacyModuleLanguage } from "@/src/lib/fiOs/navigation/fiOsNavigation1BDomainMap";
+import { isFiAdminTokenPublicRoute } from "@/src/lib/fiOs/fiAdminPublicRoutesCore";
 import {
   FI_OS_FRONT_DESK_NAV_ID,
   buildFiOsFrontDeskBase,
@@ -118,18 +119,20 @@ test("Team workspace exposes overview, staff, roster, onboarding, compliance, tr
   assert.equal(buildFiOsTeamBase(tenantId), `${base}/team`);
 });
 
-test("legacy Team routes remain in nav catalog; staff More hides direct links", () => {
+test("A1: legacy Team routes stay live but are never advertised in the nav catalog", () => {
   const catalogIds = new Set(
     buildTeamSidebarSubItems(tenantId, { showHrOsNav: true }).map((s) => s.id)
   );
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
-    assert.ok(catalogIds.has(legacy.id), `${legacy.id} should remain in nav catalog`);
+    assert.ok(!catalogIds.has(legacy.id), `${legacy.id} must not be advertised in nav catalog`);
+    // Route catalog itself is preserved for deep links, telemetry, and A2 redirects.
     assert.equal(buildFiOsTeamLegacyHref(tenantId, legacy.suffix), `${base}/${legacy.suffix}`);
   }
   const staffMoreIds = flattenMoreIds();
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
     assert.ok(!staffMoreIds.has(legacy.id), `${legacy.id} should be hidden from staff More`);
   }
+  // Active-nav mapping for legacy URLs is unchanged in A1 (removed in A2 with redirects).
   assert.equal(getFiOsShellActiveSidebarId(`${base}/workforce-os`, base), "workforce-os-hub");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "onboarding-centre");
@@ -137,6 +140,36 @@ test("legacy Team routes remain in nav catalog; staff More hides direct links", 
     getFiOsShellActiveSidebarId(`${base}/workforce-os/staff-identity-audit`, base),
     "staff-identity-audit"
   );
+});
+
+test("A1: token accept / PIN-setup routes are public and never treated as legacy redirect targets", () => {
+  const tokenPaths = [
+    `${base}/workforce-os/staff-access/accept/tok-123`,
+    `${base}/workforce-os/staff-access/pin-setup/setup-456`,
+    `${base}/onboarding/invite/tok-789`,
+  ];
+  for (const path of tokenPaths) {
+    assert.ok(isFiAdminTokenPublicRoute(path), `${path} must stay token-public`);
+  }
+
+  // Token routes live *underneath* legacy prefixes (e.g. /workforce-os/staff-access/accept/…),
+  // so a prefix-based A2 redirect would capture live invite links. The token-public exemption
+  // is what prevents that: assert it covers every legacy prefix that overlaps a token route.
+  const legacyHrefs = [...FI_OS_TEAM_LEGACY_ROUTES, ...FI_OS_TEAM_ADMIN_LEGACY_ROUTES].map(
+    (r) => `${base}/${r.suffix}`
+  );
+  let overlaps = 0;
+  for (const path of tokenPaths) {
+    for (const legacyHref of legacyHrefs) {
+      if (!path.startsWith(`${legacyHref}/`)) continue;
+      overlaps += 1;
+      assert.ok(
+        isFiAdminTokenPublicRoute(path),
+        `${legacyHref} captures ${path} — token exemption must cover it before A2 redirects`
+      );
+    }
+  }
+  assert.ok(overlaps > 0, "expected legacy prefixes to overlap token routes");
 });
 
 test("consolidated team paths activate the team nav item", () => {
@@ -162,18 +195,20 @@ test("staff-facing team sub-items avoid module-heavy HR and audit labels", () =>
   assert.equal(identity?.label, "Identity & access");
 });
 
-test("platform admin retains identity audit and staff access legacy direct links", () => {
+test("A1: admin direct links are no longer advertised; admin legacy routes stay live", () => {
   const adminSubs = buildTeamSidebarSubItems(tenantId, {
     showHrOsNav: true,
     showTeamAdminSurfaces: true,
   });
   const adminIds = new Set(adminSubs.map((s) => s.id));
   for (const route of FI_OS_TEAM_ADMIN_LEGACY_ROUTES) {
-    assert.ok(adminIds.has(route.id), `admin should see ${route.id}`);
+    assert.ok(!adminIds.has(route.id), `admin should no longer see ${route.id} in nav`);
+    // Deep-link href builder still resolves — routes stay live for direct access.
+    assert.equal(buildFiOsTeamLegacyHref(tenantId, route.suffix), `${base}/${route.suffix}`);
   }
   const adminMore = flattenMoreIds(moreSections(true));
-  assert.ok(adminMore.has("staff-identity-audit"));
-  assert.ok(adminMore.has("staff-access-legacy"));
+  assert.ok(!adminMore.has("staff-identity-audit"));
+  assert.ok(!adminMore.has("staff-access-legacy"));
 });
 
 test("team routes activate primary team rail slot", () => {

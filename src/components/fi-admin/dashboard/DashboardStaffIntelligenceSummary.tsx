@@ -11,7 +11,7 @@ type Props = {
  */
 export function DashboardStaffIntelligenceSummary(props: Props) {
   const b = props.tenantBase.replace(/\/+$/, "");
-  const staffHref = `${b}/staff`;
+  const staffHref = `${b}/team/staff`;
 
   return (
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-staff-intel-heading">

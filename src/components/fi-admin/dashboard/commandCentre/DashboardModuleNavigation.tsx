@@ -68,9 +68,9 @@ export function DashboardModuleNavigation(props: {
     },
     {
       id: "workforceos",
-      label: "Workforce",
-      description: "Command centre, roster, access, onboarding, and readiness.",
-      href: `${base}/workforce-os`,
+      label: "Team",
+      description: "Staff operations, roster, onboarding, compliance, and access.",
+      href: `${base}/team`,
       icon: Users,
     },
   ];

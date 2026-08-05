@@ -177,14 +177,13 @@ test("platform admin still sees permitted admin, audit, and intelligence surface
     assert.ok(subIds.includes(d6Id), `admin More should include ${d6Id}`);
   }
 
-  for (const legacyId of [
-    "reception-os",
-    "surgery-os",
-    "workforce-os-hub",
-    "analytics-legacy",
-    "staff-identity-audit",
-  ]) {
+  for (const legacyId of ["reception-os", "surgery-os", "analytics-legacy"]) {
     assert.ok(subIds.includes(legacyId), `admin More should include ${legacyId}`);
+  }
+
+  // A1: Team legacy direct links are unadvertised for everyone, admins included.
+  for (const teamLegacyId of ["workforce-os-hub", "staff-identity-audit", "staff-access-legacy"]) {
+    assert.ok(!subIds.includes(teamLegacyId), `admin More should not include ${teamLegacyId}`);
   }
 });
 

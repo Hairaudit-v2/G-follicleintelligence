@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FiModuleAccessDenied } from "@/src/components/fi-os/FiModuleAccessDenied";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
+import { logLegacyWorkforceRouteAccess } from "@/src/lib/workforce/legacyRouteTelemetry.server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,9 @@ export default async function HrOsLayout({
   await assertFiTenantPortalAccessUnlessStaffPinSession(tenantId);
 
   const access = await resolveHrOsRouteAccess(tenantId.trim());
+  await logLegacyWorkforceRouteAccess("hr-os", tenantId.trim(), {
+    viewerRole: access.ok ? access.userRole : null,
+  });
   if (!access.ok) {
     return (
       <FiModuleAccessDenied

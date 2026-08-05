@@ -75,7 +75,14 @@ export const FI_OS_TEAM_TABS: readonly FiOsTeamTab[] = [
   },
 ] as const;
 
-/** Legacy deep-link routes that must remain live (not redirected). */
+/**
+ * Legacy deep-link routes that must remain live (not redirected).
+ *
+ * Phase A1 (workforce cohesion): these are NO LONGER emitted as sidebar/More
+ * "(direct)" links — /team/* is the only advertised surface. The catalog is
+ * retained for active-nav mapping, go-live deep-link smoke checks, legacy-use
+ * telemetry, and the Phase A2 redirect map.
+ */
 export const FI_OS_TEAM_LEGACY_ROUTES = [
   { id: "workforce-os-hub", label: "Team overview", suffix: "workforce-os" },
   { id: "hr-os-dashboard", label: "Team overview", suffix: "hr-os" },
@@ -87,7 +94,7 @@ export const FI_OS_TEAM_LEGACY_ROUTES = [
   { id: "credentials-legacy", label: "Credentials", suffix: "hr-os/credentials" },
 ] as const;
 
-/** Admin-only legacy routes — omitted from staff More unless admin surfaces are on. */
+/** Admin-only legacy routes — live but unadvertised since Phase A1 (see note above). */
 export const FI_OS_TEAM_ADMIN_LEGACY_ROUTES = [
   {
     id: "staff-identity-audit",
@@ -99,18 +106,11 @@ export const FI_OS_TEAM_ADMIN_LEGACY_ROUTES = [
   { id: "hr-os-sync-health", label: "Sync health", suffix: "hr-os/sync-health" },
 ] as const;
 
-export const FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
-  "staff-identity-audit",
-  "staff-access-legacy",
-  "hr-task-map-legacy",
-  "hr-os-sync-health",
-  "roster-command-legacy",
-]);
-
 export type BuildTeamSidebarSubItemsOptions = {
   showHrOsNav?: boolean;
   /** When set, overrides showHrOsNav for consolidated tab filtering. */
   visibleTabIds?: readonly FiOsTeamTabId[];
+  /** @deprecated Phase A1: legacy "(direct)" links are never emitted; flag is ignored. */
   showTeamAdminSurfaces?: boolean;
 };
 
@@ -195,14 +195,17 @@ export type FiOsTeamSidebarSubItem = {
   featureKey?: FiFeatureKey;
 };
 
+/**
+ * Phase A1: emits ONLY consolidated /team tab links. Legacy routes stay live
+ * (see FI_OS_TEAM_LEGACY_ROUTES) but are never advertised in nav.
+ */
 export function buildTeamSidebarSubItems(
   tenantId: string,
   opts?: BuildTeamSidebarSubItemsOptions
 ): FiOsTeamSidebarSubItem[] {
   const tid = tenantId.trim();
-  const showAdmin = opts?.showTeamAdminSurfaces === true;
 
-  const consolidated = FI_OS_TEAM_TABS.filter((tab) => {
+  return FI_OS_TEAM_TABS.filter((tab) => {
     if (opts?.visibleTabIds) {
       return opts.visibleTabIds.includes(tab.id);
     }
@@ -214,24 +217,6 @@ export function buildTeamSidebarSubItems(
     href: buildFiOsTeamTabHref(tid, tab),
     featureKey: tab.featureKey,
   }));
-
-  const legacy = FI_OS_TEAM_LEGACY_ROUTES.map((route) => ({
-    id: route.id,
-    label: `${route.label} (direct)`,
-    href: buildFiOsTeamLegacyHref(tid, route.suffix),
-    featureKey: "staff" as FiFeatureKey,
-  }));
-
-  const adminLegacy = showAdmin
-    ? FI_OS_TEAM_ADMIN_LEGACY_ROUTES.map((route) => ({
-        id: route.id,
-        label: `${route.label} (direct)`,
-        href: buildFiOsTeamLegacyHref(tid, route.suffix),
-        featureKey: "staff" as const,
-      }))
-    : [];
-
-  return [...consolidated, ...legacy, ...adminLegacy];
 }
 
 const TEAM_MODULE_LANGUAGE_RE =

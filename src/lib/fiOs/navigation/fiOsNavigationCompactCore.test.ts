@@ -160,7 +160,8 @@ test("compact nav: staff legacy sidebar hides direct links; admin retains them",
   const adminSubIds = admin.flatMap((s) =>
     s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
   );
-  assert.ok(adminSubIds.includes("workforce-os-hub"));
+  // A1: Team legacy direct links are never advertised, even for admins.
+  assert.ok(!adminSubIds.includes("workforce-os-hub"));
   assert.ok(adminSubIds.includes("d6-navigation-audit"));
 });
 
@@ -183,7 +184,8 @@ test("compact nav 1B: All areas drawer applies staff-safe direct-link filtering"
   const adminSubIds = admin.flatMap((s) =>
     s.items.flatMap((i) => i.subItems?.map((sub) => sub.id) ?? [])
   );
-  assert.ok(adminSubIds.includes("workforce-os-hub"));
+  // A1: Team legacy direct links are never advertised, even for admins.
+  assert.ok(!adminSubIds.includes("workforce-os-hub"));
   assert.ok(adminSubIds.includes("d6-navigation-audit"));
 });
 

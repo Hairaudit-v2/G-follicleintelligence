@@ -547,13 +547,9 @@ function auditAdminMoreDrawer(sections: FiOsSidebarWorkflowSection[]): FiOsNavig
     );
   }
 
-  const adminLegacyIds = [
-    "reception-os",
-    "surgery-os",
-    "workforce-os-hub",
-    "analytics-legacy",
-    "staff-identity-audit",
-  ];
+  // Phase A1: Team legacy direct links are no longer advertised anywhere,
+  // including the admin More drawer — only non-team surfaces retain them.
+  const adminLegacyIds = ["reception-os", "surgery-os", "analytics-legacy"];
   const missing = adminLegacyIds.filter((id) => !subIds.includes(id));
   checks.push(
     check(
@@ -561,6 +557,18 @@ function auditAdminMoreDrawer(sections: FiOsSidebarWorkflowSection[]): FiOsNavig
       missing.length === 0,
       "Admin More drawer retains key legacy direct links",
       missing.length ? missing : undefined
+    )
+  );
+
+  const teamLegacyLeaks = ["workforce-os-hub", "staff-identity-audit", "staff-access-legacy"].filter(
+    (id) => subIds.includes(id)
+  );
+  checks.push(
+    check(
+      "admin_more_excludes_team_legacy_direct",
+      teamLegacyLeaks.length === 0,
+      "Admin More drawer no longer advertises Team legacy direct links (A1)",
+      teamLegacyLeaks.length ? teamLegacyLeaks : undefined
     )
   );
 
@@ -648,11 +656,6 @@ function auditLegacyRouteCatalog(tenantId: string, base: string): FiOsNavigation
       legacy: FI_OS_SURGERY_LEGACY_ROUTES,
     },
     {
-      name: "team",
-      subs: buildTeamSidebarSubItems(tenantId, { showHrOsNav: true }),
-      legacy: FI_OS_TEAM_LEGACY_ROUTES,
-    },
-    {
       name: "reports",
       subs: buildReportsSidebarSubItems(tenantId, {
         showAuditOsNav: true,
@@ -674,6 +677,23 @@ function auditLegacyRouteCatalog(tenantId: string, base: string): FiOsNavigation
       )
     );
   }
+
+  // Phase A1 (workforce cohesion): Team legacy routes stay live but must NOT be
+  // advertised in the nav catalog — /team/* is the only advertised surface.
+  const teamSubIds = new Set(
+    buildTeamSidebarSubItems(tenantId, { showHrOsNav: true }).map((s) => s.id)
+  );
+  const leakedTeamLegacy = [...FI_OS_TEAM_LEGACY_ROUTES, ...FI_OS_TEAM_ADMIN_LEGACY_ROUTES]
+    .filter((r) => teamSubIds.has(r.id))
+    .map((r) => r.id);
+  checks.push(
+    check(
+      "legacy_catalog_team_unadvertised",
+      leakedTeamLegacy.length === 0,
+      "Team legacy routes stay out of the nav catalog (A1: /team is the only advertised surface)",
+      leakedTeamLegacy.length ? leakedTeamLegacy : undefined
+    )
+  );
 
   const unresolved: string[] = [];
   for (const suffix of GO_LIVE_LEGACY_ROUTE_SUFFIXES) {

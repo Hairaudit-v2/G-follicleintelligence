@@ -10,7 +10,6 @@ import { FI_OS_SURGERY_LEGACY_ROUTES } from "@/src/lib/fiOs/surgery/surgeryWorks
 import { FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
 import { FI_OS_REPORTS_LEGACY_ROUTES } from "@/src/lib/fiOs/reports/reportsWorkspaceCore";
 import { FI_OS_SETTINGS_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/settings/settingsWorkspaceCore";
-import { FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 import { FI_OS_TEAM_LEGACY_ROUTES } from "@/src/lib/fiOs/team/teamWorkspaceCore";
 
 /**
@@ -165,12 +164,11 @@ export const FI_OS_PIPELINE_LEGACY_MORE_SUB_ITEM_IDS = new Set([
   "consultation-conversion-board",
 ]);
 
-/** Sub-items hidden from More drawer (routes remain live). */
+/** Sub-items hidden from More drawer (routes remain live). Team legacy links are no longer emitted at all (Phase A1). */
 export const FI_OS_HIDDEN_MORE_SUB_ITEM_IDS = new Set([
   "pathology-email-routes",
   ...FI_OS_PIPELINE_LEGACY_MORE_SUB_ITEM_IDS,
   ...FI_OS_SURGERY_HIDDEN_MORE_SUB_ITEM_IDS,
-  ...FI_OS_TEAM_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_REPORTS_HIDDEN_MORE_SUB_ITEM_IDS,
   ...FI_OS_SETTINGS_HIDDEN_MORE_SUB_ITEM_IDS,
 ]);
@@ -335,15 +333,6 @@ function shouldShowHiddenMoreSubItem(
   if (
     (subId === "surgery-intelligence-dashboard" || subId === "graft-counting-legacy") &&
     (opts.showSurgeryAdminSurfaces || opts.showReportsAdminSurfaces)
-  ) {
-    return true;
-  }
-  if (
-    (subId === "staff-identity-audit" ||
-      subId === "staff-access-legacy" ||
-      subId === "hr-task-map-legacy" ||
-      subId === "hr-os-sync-health") &&
-    opts.showTeamAdminSurfaces
   ) {
     return true;
   }

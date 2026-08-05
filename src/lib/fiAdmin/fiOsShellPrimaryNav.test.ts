@@ -215,15 +215,15 @@ test("resolveFiOsPrimarySidebarItems: consolidated reports entry with preserved 
   assert.ok(!subIds.has("d6-navigation-audit"));
 });
 
-test("resolveFiOsPrimarySidebarItems: consolidated team entry with preserved legacy sub-links", () => {
+test("resolveFiOsPrimarySidebarItems: consolidated team entry advertises only /team tabs (A1)", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true, null, true, true, false, true);
   const team = items.find((i) => i.id === "team");
   assert.ok(team?.subItems?.length);
   const subIds = new Set(team!.subItems!.map((s) => s.id));
   assert.ok(subIds.has("team-overview"));
   assert.ok(subIds.has("team-staff"));
-  assert.ok(subIds.has("workforce-os-hub"));
-  assert.ok(subIds.has("onboarding-centre"));
+  assert.ok(!subIds.has("workforce-os-hub"));
+  assert.ok(!subIds.has("onboarding-centre"));
   assert.ok(!subIds.has("staff-identity-audit"));
 });
 test("filterFiOsPrimarySidebarItemsByFeatureAccess: patient twin row respects imaging OR patient_twin", () => {

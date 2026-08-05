@@ -69,7 +69,7 @@ export function DashboardQuickStats(props: { tenantId: string; stats: TenantQuic
         for detail.{" "}
         <Link
           className="text-[#22C1FF] underline-offset-2 hover:underline"
-          href={`/fi-admin/${tenantId}/staff`}
+          href={`/fi-admin/${tenantId}/team/staff`}
         >
           Staff
         </Link>{" "}
