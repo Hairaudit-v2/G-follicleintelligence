@@ -173,6 +173,15 @@ export function BookingCalendarDrawer({
   calendarOsWritebackStatus,
   calendarOsFiosAppointmentId,
   patientNotLinked,
+  identityState,
+  identityKindLabel,
+  identityStatusLabel,
+  displayName,
+  googleHydratedDisplayName,
+  googleHydratedEmail,
+  googleHydratedPhone,
+  googleHydratedLocation,
+  googleHydratedAppointmentType,
   calendarCapabilities,
   googleWritebackReady = true,
   onQuickEdit,
@@ -214,6 +223,15 @@ export function BookingCalendarDrawer({
   calendarOsWritebackStatus?: string | null;
   calendarOsFiosAppointmentId?: string | null;
   patientNotLinked?: boolean;
+  identityState?: string | null;
+  identityKindLabel?: string | null;
+  identityStatusLabel?: string | null;
+  displayName?: string | null;
+  googleHydratedDisplayName?: string | null;
+  googleHydratedEmail?: string | null;
+  googleHydratedPhone?: string | null;
+  googleHydratedLocation?: string | null;
+  googleHydratedAppointmentType?: string | null;
   calendarCapabilities?: CalendarAppointmentCapability[];
   googleWritebackReady?: boolean;
   onQuickEdit?: (b: FiBookingRow, policy: CalendarEventEditPolicy) => void;
@@ -257,9 +275,24 @@ export function BookingCalendarDrawer({
     fiosAppointmentId: calendarOsFiosAppointmentId,
   });
   const notLinked = Boolean(
-    patientNotLinked ||
-      (calendarOsEvent && !row.patient_id?.trim() && !row.lead_id?.trim())
+    identityState === "external_identity_only" ||
+      (patientNotLinked &&
+        identityState !== "consultation_identity_linked" &&
+        identityState !== "enquiry_identity_linked" &&
+        identityState !== "patient_linked" &&
+        identityState !== "patient_creation_pending" &&
+        !row.patient_id?.trim() &&
+        !row.lead_id?.trim() &&
+        !(typeof row.metadata?.consultation_id === "string" && row.metadata.consultation_id.trim()) &&
+        !row.person_id?.trim())
   );
+  const consultationIdentity =
+    identityState === "consultation_identity_linked" ||
+    (!notLinked &&
+      !row.patient_id?.trim() &&
+      (Boolean(identityKindLabel) ||
+        typeof row.metadata?.consultation_id === "string" ||
+        Boolean(row.person_id?.trim())));
 
   const cancelled = isBookingCancelled(row);
   const completed = row.booking_status === "completed";
@@ -282,8 +315,14 @@ export function BookingCalendarDrawer({
     procedureLabel?.trim() ||
     humanizeBookingType(row.booking_type);
   const headerName = notLinked
-    ? PATIENT_NOT_LINKED_LABEL
-    : patientSummary?.trim() || row.title?.trim() || typeLabel;
+    ? googleHydratedDisplayName?.trim() ||
+      displayName?.trim() ||
+      PATIENT_NOT_LINKED_LABEL
+    : displayName?.trim() ||
+      googleHydratedDisplayName?.trim() ||
+      patientSummary?.trim() ||
+      row.title?.trim() ||
+      typeLabel;
   const locationLabel = row.location?.trim() || "—";
   const sourceLabel = calendarOsSourceLabel?.trim() || "—";
   const eventStatusLabel = calendarOsStatus?.trim() || row.booking_status;
@@ -449,6 +488,16 @@ export function BookingCalendarDrawer({
                         Patient not linked
                       </span>
                     ) : null}
+                    {consultationIdentity && !row.patient_id?.trim() ? (
+                      <span className="rounded border border-cyan-500/35 bg-cyan-950/40 px-1.5 py-0.5 text-[10px] font-medium text-cyan-100">
+                        {identityKindLabel?.trim() || "New consultation"}
+                      </span>
+                    ) : null}
+                    {identityStatusLabel?.trim() && !row.patient_id?.trim() ? (
+                      <span className="rounded border border-sky-500/30 bg-sky-950/35 px-1.5 py-0.5 text-[10px] text-sky-100">
+                        {identityStatusLabel.trim()}
+                      </span>
+                    ) : null}
                     {editPolicy.showSyncStatus && calendarOsWritebackStatus ? (
                       <span className="rounded border border-sky-500/30 bg-sky-950/35 px-1.5 py-0.5 text-[10px] text-sky-100">
                         Sync: {calendarOsWritebackStatus}
@@ -460,6 +509,46 @@ export function BookingCalendarDrawer({
                       External title: {calendarOsExternalTitle.trim()}
                     </p>
                   ) : null}
+                  {(googleHydratedEmail ||
+                    googleHydratedPhone ||
+                    googleHydratedLocation ||
+                    googleHydratedAppointmentType ||
+                    patientContactEmail ||
+                    patientContactPhone) && (
+                    <div
+                      className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 text-[11px] text-slate-200"
+                      data-testid="calendar-google-hydration-panel"
+                    >
+                      <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                        Google event details
+                      </p>
+                      {(googleHydratedDisplayName || displayName) && notLinked ? (
+                        <p className="font-medium text-slate-100">
+                          {googleHydratedDisplayName?.trim() || displayName}
+                        </p>
+                      ) : null}
+                      {(googleHydratedEmail || patientContactEmail) && (
+                        <p className="text-slate-300">
+                          {googleHydratedEmail?.trim() || patientContactEmail}
+                        </p>
+                      )}
+                      {(googleHydratedAppointmentType || typeLabel) && (
+                        <p className="text-slate-400">
+                          {googleHydratedAppointmentType?.trim() || typeLabel}
+                        </p>
+                      )}
+                      {(googleHydratedLocation || row.location) && (
+                        <p className="text-slate-400">
+                          {googleHydratedLocation?.trim() || row.location}
+                        </p>
+                      )}
+                      {(googleHydratedPhone || patientContactPhone) && (
+                        <p className="text-slate-400">
+                          {googleHydratedPhone?.trim() || patientContactPhone}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {editPolicy.readOnlyExplanation ? (
                     <p className="rounded-md border border-amber-500/20 bg-amber-950/30 px-2.5 py-2 text-[11px] leading-snug text-amber-100/90">
                       {editPolicy.readOnlyExplanation}

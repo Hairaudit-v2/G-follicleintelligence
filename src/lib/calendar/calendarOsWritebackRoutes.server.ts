@@ -18,6 +18,8 @@ import {
   loadCalendarOsPatientMatchSuggestions,
 } from "@/src/lib/calendar/calendarOsPatientLink.server";
 import { convertExternalCalendarEventToFiosAppointment } from "@/src/lib/calendar/calendarOsConvertExternal.server";
+import { searchCalendarIdentityLinkCandidates } from "@/src/lib/calendar/calendarPersonIdentityResolve.server";
+import { createAndLinkPatientFromGoogleHydration } from "@/src/lib/calendar/calendarOsCreatePatientFromGoogle.server";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import {
   resolveCalendarAppointmentCapabilities,
@@ -146,15 +148,22 @@ export async function handleLinkCalendarOsPatient(
     const result = await linkCalendarOsEventPatient({
       tenantId,
       eventId,
-      patientId: String(body.patientId ?? ""),
+      patientId: body.patientId != null ? String(body.patientId) : null,
+      consultationId: body.consultationId != null ? String(body.consultationId) : null,
+      enquiryId: body.enquiryId != null ? String(body.enquiryId) : null,
       confirmed: Boolean(body.confirmed),
+      promoteToPatient: Boolean(body.promoteToPatient),
+      reviewPossibleDuplicate: Boolean(body.reviewPossibleDuplicate),
       actingUserId: actorAuthUserId,
       actingUserLabel: body.actingUserLabel != null ? String(body.actingUserLabel) : null,
     });
 
     if (!result.ok) {
       const status =
-        result.code === "not_confirmed" || result.code === "invalid_patient"
+        result.code === "not_confirmed" ||
+        result.code === "invalid_patient" ||
+        result.code === "invalid_consultation" ||
+        result.code === "identity_conflict"
           ? 400
           : result.code === "not_found"
             ? 404
@@ -177,9 +186,68 @@ export async function handleCalendarOsPatientSuggestions(
   try {
     const adminKey = extractAdminKeyFromRequest(request, {});
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request });
-    const result = await loadCalendarOsPatientMatchSuggestions({ tenantId, eventId });
-    if (!result.ok) return crmJsonError(404, result.error);
-    return crmJsonOk({ suggestions: result.suggestions });
+    const url = new URL(request.url);
+    const query = url.searchParams.get("q")?.trim() || "";
+
+    const [legacy, search] = await Promise.all([
+      loadCalendarOsPatientMatchSuggestions({ tenantId, eventId }),
+      searchCalendarIdentityLinkCandidates({ tenantId, eventId, query }),
+    ]);
+
+    if (!legacy.ok) return crmJsonError(404, legacy.error);
+    if (!search.ok) return crmJsonError(404, search.error);
+
+    return crmJsonOk({
+      suggestions: legacy.suggestions,
+      hydration: legacy.hydration,
+      patients: search.patients,
+      consultations: search.consultations,
+      enquiries: search.enquiries,
+      verifiedMatches: search.verifiedMatches,
+    });
+  } catch (e) {
+    return mapCrmRouteError(e);
+  }
+}
+
+/** POST /api/tenants/[tenantId]/calendar/appointments/[eventId]/create-patient-from-google */
+export async function handleCreatePatientFromGoogleHydration(
+  tenantId: string,
+  eventId: string,
+  request: Request
+): Promise<NextResponse> {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const adminKey = extractAdminKeyFromRequest(request, body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request });
+
+    const { caps, actorAuthUserId } = await resolveActorCaps(tenantId);
+    if (!calendarCapabilitySatisfies(caps, "appointment.link_patient")) {
+      return crmJsonError(403, "No patient link permission.");
+    }
+
+    const result = await createAndLinkPatientFromGoogleHydration({
+      tenantId,
+      eventId,
+      confirmed: Boolean(body.confirmed),
+      actingUserId: actorAuthUserId,
+      actingUserLabel: body.actingUserLabel != null ? String(body.actingUserLabel) : null,
+    });
+
+    if (!result.ok) {
+      const status =
+        result.code === "not_confirmed" || result.code === "missing_hydration"
+          ? 400
+          : result.code === "not_found"
+            ? 404
+            : 500;
+      return NextResponse.json(
+        { ok: false, error: result.error, code: result.code, patientId: result.patientId },
+        { status }
+      );
+    }
+
+    return crmJsonOk(result);
   } catch (e) {
     return mapCrmRouteError(e);
   }
@@ -208,7 +276,18 @@ export async function handleConvertExternalCalendarEvent(
       actingUserLabel: body.actingUserLabel != null ? String(body.actingUserLabel) : null,
       clinicId: body.clinicId !== undefined ? (body.clinicId as string | null) : undefined,
       assignedStaffId:
-        body.assignedStaffId !== undefined ? (body.assignedStaffId as string | null) : undefined,
+        body.assignedStaffId !== undefined
+          ? (body.assignedStaffId as string | null)
+          : body.staffId !== undefined
+            ? (body.staffId as string | null)
+            : undefined,
+      promoteConsultationIfNeeded: body.promoteConsultationIfNeeded !== false,
+      selectedPatientId: body.selectedPatientId != null ? String(body.selectedPatientId) : null,
+      selectedConsultationId:
+        body.selectedConsultationId != null ? String(body.selectedConsultationId) : null,
+      createNewPatient: Boolean(body.createNewPatient),
+      newPatientPersonId: body.newPatientPersonId != null ? String(body.newPatientPersonId) : null,
+      idempotencyKey: body.idempotencyKey != null ? String(body.idempotencyKey) : null,
     });
 
     if (!result.ok) {
@@ -217,8 +296,19 @@ export async function handleConvertExternalCalendarEvent(
           ? 409
           : result.code === "not_found"
             ? 404
-            : 400;
-      return NextResponse.json({ ok: false, error: result.error, code: result.code }, { status });
+            : result.code === "ambiguous_identity" || result.code === "identity_conflict"
+              ? 409
+              : 400;
+      return NextResponse.json(
+        {
+          ok: false,
+          error: result.error,
+          code: result.code,
+          suggestions: result.suggestions,
+          identityState: result.identityState,
+        },
+        { status }
+      );
     }
 
     return crmJsonOk(result);

@@ -6,7 +6,6 @@ import { describe, it } from "node:test";
 
 import {
   classifyCalendarEvent,
-  PATIENT_NOT_LINKED_LABEL,
   calendarEventClassificationLabel,
 } from "@/src/lib/calendar/calendarEventClassification";
 import {
@@ -203,12 +202,23 @@ describe("FI-CALENDAR-WRITEBACK-1A drop intent", () => {
 });
 
 describe("FI-CALENDAR-WRITEBACK-1A patient labels + match", () => {
-  it("maps unlinked CalendarOS display to Patient not linked", () => {
+  it("maps unlinked CalendarOS display to Google title with patientNotLinked", () => {
     const display = mapFiCalendarEventToBookingDisplay(sampleOverlap());
-    assert.equal(display.anchorLabel, PATIENT_NOT_LINKED_LABEL);
+    // FI-CALENDAR-PATIENT-LINK-1A: show Google-hydrated title before link, keep unlinked flag.
+    assert.equal(display.anchorLabel, "Consult — Mystery Name");
     assert.equal(display.patientNotLinked, true);
     assert.equal(display.calendarOsExternalTitle, "Consult — Mystery Name");
+    assert.equal(display.identityState, "external_identity_only");
     assert.equal(display.calendarEventClassification, "google_external_unlinked");
+  });
+
+  it("preserves external title after patient link for audit", () => {
+    const display = mapFiCalendarEventToBookingDisplay(
+      sampleOverlap({ patient_id: "p1", title: "Consult — Mystery Name" }),
+      { anchorLabel: "Jane Doe" }
+    );
+    assert.equal(display.calendarOsExternalTitle, "Consult — Mystery Name");
+    assert.equal(display.patientNotLinked, false);
   });
 
   it("stores classification on booking metadata", () => {
@@ -225,16 +235,27 @@ describe("FI-CALENDAR-WRITEBACK-1A patient labels + match", () => {
 
   it("suggests only exact email/phone/verified mapping — never name alone", () => {
     const suggestions = suggestCalendarPatientMatches({
-      eventEmail: "jane@example.com",
+      eventEmail: "jane@clinic.example",
       eventPhone: null,
       patients: [
-        { id: "1", displayName: "Jane Doe", email: "jane@example.com" },
-        { id: "2", displayName: "Jane Doe", email: "other@example.com" },
+        { id: "1", displayName: "Jane Doe", email: "jane@clinic.example" },
+        { id: "2", displayName: "Jane Doe", email: "other@clinic.example" },
       ],
     });
     assert.equal(suggestions.length, 1);
     assert.equal(suggestions[0].patientId, "1");
     assert.deepEqual(suggestions[0].signals, ["exact_email"]);
+    assert.equal(suggestions[0].confidence, "high");
+
+    const nameOnly = suggestCalendarPatientMatches({
+      eventDisplayName: "Jane Doe",
+      patients: [
+        { id: "1", displayName: "Jane Doe", email: null },
+        { id: "2", displayName: "Jane Doe", email: null },
+      ],
+    });
+    assert.ok(nameOnly.every((s) => s.confidence === "low"));
+    assert.ok(nameOnly.every((s) => s.signals.includes("exact_normalised_name")));
   });
 });
 

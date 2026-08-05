@@ -13,10 +13,14 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
-  PATIENT_NOT_LINKED_LABEL,
   classifyFiCalendarEventOverlapRow,
   withCalendarEventClassificationMeta,
 } from "@/src/lib/calendar/calendarEventClassification";
+import {
+  calendarIdentityDisplayFields,
+  resolveCalendarPersonIdentity,
+} from "@/src/lib/calendar/calendarPersonIdentity";
+import { readPersistedGooglePatientHydration } from "@/src/lib/calendar/calendarGooglePatientHydration";
 import {
   buildStaffCalendarLinkIndex,
   resolveCalendarEventStaffAssignment,
@@ -55,13 +59,15 @@ export type FiCalendarEventOverlapRow = {
   google_meet_url: string | null;
   patient_id: string | null;
   lead_id: string | null;
+  consultation_id?: string | null;
+  person_id?: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };
 
 export const FI_CALENDAR_EVENTS_OVERLAP_SELECT =
-  "id, tenant_id, external_event_id, provider, calendar_id, title, description, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, metadata, created_at, updated_at";
+  "id, tenant_id, external_event_id, provider, calendar_id, title, description, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, consultation_id, person_id, metadata, created_at, updated_at";
 
 /** Hard cap for CalendarOS overlap reads — month grid should stay well under this after range scoping. */
 export const CALENDAR_OS_EVENTS_OVERLAP_CAP = 1000;
@@ -204,7 +210,7 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
     id: row.id,
     tenant_id: row.tenant_id,
     lead_id: row.lead_id,
-    person_id: null,
+    person_id: row.person_id?.trim() || null,
     patient_id: row.patient_id,
     case_id: null,
     clinic_id: clinicId,
@@ -229,6 +235,9 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
       external_event_id: clientFields.externalEventId,
       event_type: clientFields.eventType,
       calendar_os_status: clientFields.calendarOsStatus,
+      ...(row.consultation_id?.trim()
+        ? { consultation_id: row.consultation_id.trim() }
+        : {}),
       ...(googleHtmlLink ? { google_html_link: googleHtmlLink } : {}),
       ...(writebackStatus ? { writeback_status: writebackStatus } : {}),
       ...(clientFields.googleMeetUrl ? { is_virtual: true } : {}),
@@ -248,6 +257,9 @@ export function mapFiCalendarEventToBookingDisplay(
     anchorLabel?: string;
     procedureCatalogName?: string | null;
     procedureCatalogHex?: string | null;
+    /** Optional consultation display name when consultation_id is known. */
+    consultationDisplayName?: string | null;
+    enquiryDisplayName?: string | null;
   }
 ): OperationalCalendarBookingDisplay {
   const clientFields = calendarOsClientFieldsFromEvent(row);
@@ -260,14 +272,75 @@ export function mapFiCalendarEventToBookingDisplay(
       : 30;
 
   const eventTypeLabel = humanizeEventType(clientFields.eventType ?? row.event_type ?? "event");
-  const hasPatientLink = Boolean(row.patient_id?.trim() || row.lead_id?.trim());
   const externalTitle = row.title?.trim() || null;
-  const resolvedAnchor = opts?.anchorLabel?.trim() || null;
-  const anchorLabel = !hasPatientLink
-    ? PATIENT_NOT_LINKED_LABEL
-    : resolvedAnchor || externalTitle || eventTypeLabel;
-
   const meta = row.metadata ?? {};
+  const hydration = readPersistedGooglePatientHydration(meta, {
+    title: row.title,
+    description: row.description,
+    location: row.location,
+  });
+  const consultationId =
+    row.consultation_id?.trim() ||
+    (typeof meta.consultation_id === "string" ? meta.consultation_id.trim() : "") ||
+    null;
+  const enquiryId =
+    row.lead_id?.trim() ||
+    (typeof meta.enquiry_id === "string" ? meta.enquiry_id.trim() : "") ||
+    null;
+  const contactId =
+    row.person_id?.trim() ||
+    (typeof meta.person_id === "string" ? meta.person_id.trim() : "") ||
+    null;
+  const appointmentPatientId =
+    typeof meta.appointment_patient_id === "string"
+      ? meta.appointment_patient_id.trim()
+      : null;
+
+  const resolution = resolveCalendarPersonIdentity({
+    tenantId: row.tenant_id,
+    explicitPatientId: row.patient_id,
+    explicitConsultationId: consultationId,
+    explicitEnquiryId: enquiryId,
+    explicitContactId: contactId,
+    appointmentPatientId,
+    consultation: consultationId
+      ? {
+          id: consultationId,
+          tenantId: row.tenant_id,
+          patientId: row.patient_id,
+          contactId,
+          enquiryId,
+          displayName: opts?.consultationDisplayName ?? opts?.anchorLabel ?? null,
+        }
+      : null,
+    enquiry: enquiryId && !consultationId
+      ? {
+          id: enquiryId,
+          tenantId: row.tenant_id,
+          patientId: row.patient_id,
+          contactId,
+          displayName: opts?.enquiryDisplayName ?? opts?.anchorLabel ?? null,
+        }
+      : null,
+    verifiedEmail: hydration.email,
+    verifiedPhone: hydration.phone,
+    externalDisplayTitle: externalTitle,
+  });
+
+  const identityDisplay = calendarIdentityDisplayFields(resolution);
+  const resolvedAnchor = opts?.anchorLabel?.trim() || null;
+  // Unlinked external events: prefer Google-hydrated display name over "Patient not linked".
+  const hydratedName = hydration.displayName?.trim() || null;
+  const anchorLabel =
+    identityDisplay.identityState === "patient_linked" && resolvedAnchor
+      ? resolvedAnchor
+      : identityDisplay.identityState === "consultation_identity_linked" ||
+          identityDisplay.identityState === "enquiry_identity_linked"
+        ? identityDisplay.anchorLabel
+        : identityDisplay.patientNotLinked
+          ? hydratedName || identityDisplay.anchorLabel
+          : resolvedAnchor || identityDisplay.anchorLabel || hydratedName || externalTitle || eventTypeLabel;
+
   const googleHtmlLink =
     typeof meta.google_html_link === "string" ? meta.google_html_link.trim() : null;
   const writebackStatus =
@@ -287,9 +360,14 @@ export function mapFiCalendarEventToBookingDisplay(
     procedureCatalogName: opts?.procedureCatalogName ?? eventTypeLabel,
     procedureCatalogHex: opts?.procedureCatalogHex ?? null,
     suggestedPrice: null,
-    patientEmail: null,
-    patientPhone: null,
-    roomLabel: row.location?.trim() || null,
+    patientEmail: resolution.verifiedEmail ?? hydration.email,
+    patientPhone: resolution.verifiedPhone ?? hydration.phone,
+    googleHydratedDisplayName: hydration.displayName,
+    googleHydratedEmail: hydration.email,
+    googleHydratedPhone: hydration.phone,
+    googleHydratedLocation: hydration.location ?? row.location?.trim() ?? null,
+    googleHydratedAppointmentType: hydration.appointmentTypeHint,
+    roomLabel: (hydration.location ?? row.location)?.trim() || null,
     resourceRoomLine: null,
     resourceTeamLine: null,
     clinicalStaffing: null,
@@ -301,11 +379,25 @@ export function mapFiCalendarEventToBookingDisplay(
     calendarOsExternalEventId: clientFields.externalEventId,
     calendarOsStatus: clientFields.calendarOsStatus,
     calendarEventClassification: classification,
-    calendarOsExternalTitle: !hasPatientLink ? externalTitle : null,
+    /** Always preserve original Google title separately for audit / reconciliation. */
+    calendarOsExternalTitle: externalTitle,
     calendarOsGoogleHtmlLink: googleHtmlLink,
     calendarOsWritebackStatus: writebackStatus,
     calendarOsFiosAppointmentId: fiosAppointmentId,
-    patientNotLinked: !hasPatientLink,
+    patientNotLinked: identityDisplay.patientNotLinked,
+    identityState: identityDisplay.identityState,
+    patientId: resolution.patientId,
+    consultationId: resolution.consultationId,
+    enquiryId: resolution.enquiryId,
+    contactId: resolution.contactId,
+    displayName: identityDisplay.displayName ?? hydration.displayName,
+    externalDisplayTitle: identityDisplay.externalDisplayTitle,
+    verifiedEmail: resolution.verifiedEmail,
+    verifiedPhone: resolution.verifiedPhone,
+    matchEvidence: resolution.matchEvidence,
+    promotionRequired: identityDisplay.promotionRequired,
+    identityKindLabel: identityDisplay.identityKindLabel,
+    identityStatusLabel: identityDisplay.identityStatusLabel,
   };
 }
 
@@ -328,7 +420,7 @@ export function calendarOsOverlapRowsForDisplayContext(
     id: row.id,
     tenant_id: row.tenant_id,
     lead_id: row.lead_id,
-    person_id: null,
+    person_id: row.person_id?.trim() || null,
     patient_id: row.patient_id,
     case_id: null,
     clinic_id: null,
@@ -391,10 +483,23 @@ export function mapFiCalendarEventsToOperationalCalendar(
 
     const cat = serviceForBookingType(opts.services, mapped.booking_type);
     const anchorLabel = anchorLabelForBookingRow(mapped, opts.displayMaps);
+    const consultationId =
+      row.consultation_id?.trim() ||
+      (typeof row.metadata?.consultation_id === "string"
+        ? row.metadata.consultation_id.trim()
+        : "") ||
+      null;
+    const consultationDisplayName = consultationId
+      ? anchorLabel && anchorLabel !== mapped.title
+        ? anchorLabel
+        : null
+      : null;
     bookingDisplay[mapped.id] = mapFiCalendarEventToBookingDisplay(row, {
       anchorLabel,
       procedureCatalogName: cat?.name ?? null,
       procedureCatalogHex: cat?.color ?? null,
+      consultationDisplayName,
+      enquiryDisplayName: row.lead_id ? anchorLabel : null,
     });
     bookings.push(mapped);
   }

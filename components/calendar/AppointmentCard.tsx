@@ -193,6 +193,7 @@ export function appointmentCardDataFromBooking(
     calendarOsEventTypeLabel?: string | null;
     calendarEventClassification?: string | null;
     patientNotLinked?: boolean;
+    identityState?: string | null;
     operational?: {
       isSurgery?: boolean;
       riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
@@ -218,8 +219,17 @@ export function appointmentCardDataFromBooking(
     (isCalendarOsEventRow(booking) ? classifyBookingRow(booking) : "fios_native");
   const isExternalUnlinked = classification === "google_external_unlinked";
   const patientNotLinked =
-    Boolean(display?.patientNotLinked) ||
-    (isCalendarOsEventRow(booking) && !booking.patient_id?.trim() && !booking.lead_id?.trim());
+    display?.identityState === "external_identity_only" ||
+    (Boolean(display?.patientNotLinked) &&
+      display?.identityState !== "consultation_identity_linked" &&
+      display?.identityState !== "enquiry_identity_linked" &&
+      display?.identityState !== "patient_linked") ||
+    (!display?.identityState &&
+      isCalendarOsEventRow(booking) &&
+      !booking.patient_id?.trim() &&
+      !booking.lead_id?.trim() &&
+      !(typeof booking.metadata?.consultation_id === "string" && booking.metadata.consultation_id.trim()) &&
+      !booking.person_id?.trim());
 
   return {
     id: booking.id,
@@ -913,6 +923,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
     calendarOsEventTypeLabel?: string | null;
     calendarEventClassification?: string | null;
     patientNotLinked?: boolean;
+    identityState?: string | null;
     operational?: {
       isSurgery?: boolean;
       riskStatus?: "ready" | "attention" | "at_risk" | "blocked";

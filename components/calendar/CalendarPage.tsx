@@ -785,6 +785,29 @@ function CalendarPageImpl({
         patientNotLinked={
           drawer ? Boolean(data.bookingDisplay[drawer.id]?.patientNotLinked) : false
         }
+        identityState={drawer ? (data.bookingDisplay[drawer.id]?.identityState ?? null) : null}
+        identityKindLabel={
+          drawer ? (data.bookingDisplay[drawer.id]?.identityKindLabel ?? null) : null
+        }
+        identityStatusLabel={
+          drawer ? (data.bookingDisplay[drawer.id]?.identityStatusLabel ?? null) : null
+        }
+        displayName={drawer ? (data.bookingDisplay[drawer.id]?.displayName ?? null) : null}
+        googleHydratedDisplayName={
+          drawer ? (data.bookingDisplay[drawer.id]?.googleHydratedDisplayName ?? null) : null
+        }
+        googleHydratedEmail={
+          drawer ? (data.bookingDisplay[drawer.id]?.googleHydratedEmail ?? null) : null
+        }
+        googleHydratedPhone={
+          drawer ? (data.bookingDisplay[drawer.id]?.googleHydratedPhone ?? null) : null
+        }
+        googleHydratedLocation={
+          drawer ? (data.bookingDisplay[drawer.id]?.googleHydratedLocation ?? null) : null
+        }
+        googleHydratedAppointmentType={
+          drawer ? (data.bookingDisplay[drawer.id]?.googleHydratedAppointmentType ?? null) : null
+        }
         operationalIntelligence={
           drawer ? (data.bookingDisplay[drawer.id]?.operational ?? null) : null
         }
@@ -810,6 +833,24 @@ function CalendarPageImpl({
           googleHtmlLink={data.bookingDisplay[quickEdit.booking.id]?.calendarOsGoogleHtmlLink}
           fiosAppointmentId={data.bookingDisplay[quickEdit.booking.id]?.calendarOsFiosAppointmentId}
           patientNotLinked={Boolean(data.bookingDisplay[quickEdit.booking.id]?.patientNotLinked)}
+          identityState={data.bookingDisplay[quickEdit.booking.id]?.identityState ?? null}
+          identityKindLabel={data.bookingDisplay[quickEdit.booking.id]?.identityKindLabel ?? null}
+          identityStatusLabel={
+            data.bookingDisplay[quickEdit.booking.id]?.identityStatusLabel ?? null
+          }
+          displayName={data.bookingDisplay[quickEdit.booking.id]?.displayName ?? null}
+          googleHydratedEmail={
+            data.bookingDisplay[quickEdit.booking.id]?.googleHydratedEmail ?? null
+          }
+          googleHydratedPhone={
+            data.bookingDisplay[quickEdit.booking.id]?.googleHydratedPhone ?? null
+          }
+          googleHydratedLocation={
+            data.bookingDisplay[quickEdit.booking.id]?.googleHydratedLocation ?? null
+          }
+          googleHydratedAppointmentType={
+            data.bookingDisplay[quickEdit.booking.id]?.googleHydratedAppointmentType ?? null
+          }
           onClose={() => setQuickEdit(null)}
           onSaved={refresh}
           onOpenFull={(b) => setEditing(b)}

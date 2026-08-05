@@ -10,6 +10,10 @@ export const CALENDAR_INTERACTION_SOURCES = [
   "patient_link",
   "external_conversion",
   "google_sync",
+  "calendar_identity_resolution",
+  "calendar_patient_link",
+  "consultation_patient_promotion",
+  "external_event_conversion",
 ] as const;
 
 export type CalendarInteractionSource = (typeof CALENDAR_INTERACTION_SOURCES)[number];

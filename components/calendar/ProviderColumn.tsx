@@ -553,6 +553,7 @@ export function ProviderColumn({
                   calendarOsEventTypeLabel: d?.calendarOsEventTypeLabel,
                   calendarEventClassification: d?.calendarEventClassification,
                   patientNotLinked: d?.patientNotLinked,
+                  identityState: d?.identityState,
                   operational: d?.operational
                     ? {
                         ...d.operational,

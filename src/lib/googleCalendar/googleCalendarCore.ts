@@ -4,6 +4,10 @@
 
 import { classifyExternalCalendarEventType } from "@/src/lib/onboarding-os/googleCalendarConnectorCore";
 import type { GoogleCalendarApiEvent } from "@/src/lib/onboarding-os/googleCalendarConnectorTypes";
+import {
+  googlePatientHydrationToMetadata,
+  hydratePatientFromGoogleEvent,
+} from "@/src/lib/calendar/calendarGooglePatientHydration";
 
 import type {
   FiCalendarEvent,
@@ -289,8 +293,32 @@ export function detectDeletedExternalEvents(
 export function buildGoogleSyncUpdateMetadata(
   existing: Record<string, unknown>,
   syncNow: string,
-  sourceCalendar?: { calendarId: string; summary: string | null }
+  sourceCalendar?: { calendarId: string; summary: string | null },
+  googleEvent?: GoogleCalendarApiEvent | null,
+  clinicAccountEmail?: string | null
 ): Record<string, unknown> {
+  const hydrationMeta =
+    googleEvent != null
+      ? googlePatientHydrationToMetadata(
+          hydratePatientFromGoogleEvent({
+            summary: googleEvent.summary,
+            description: googleEvent.description,
+            location: googleEvent.location,
+            attendees: googleEvent.attendees,
+            organizerEmail: googleEvent.organizer?.email,
+            creatorEmail: googleEvent.creator?.email,
+            calendarId: sourceCalendar?.calendarId ?? googleEvent.organizer?.email,
+            clinicAccountEmail,
+          })
+        )
+      : {};
+
+  // Do not overwrite linked patient contact with stale Google fields when already patient-linked.
+  const alreadyLinked = Boolean(
+    (typeof existing.patient_linked_at === "string" && existing.patient_linked_at) ||
+      existing.ownership === "fi_system"
+  );
+
   return {
     ...existing,
     deleted_from_provider: false,
@@ -303,6 +331,8 @@ export function buildGoogleSyncUpdateMetadata(
           ...(sourceCalendar.summary ? { google_calendar_summary: sourceCalendar.summary } : {}),
         }
       : {}),
+    ...(alreadyLinked ? {} : hydrationMeta),
+    ...(googleEvent?.htmlLink ? { google_html_link: googleEvent.htmlLink } : {}),
   };
 }
 
@@ -310,14 +340,32 @@ export function buildGoogleSyncUpdateMetadata(
 export function buildGoogleSyncInsertMetadata(
   integrationId: string,
   syncNow: string,
-  sourceCalendar: { calendarId: string; summary: string | null }
+  sourceCalendar: { calendarId: string; summary: string | null },
+  googleEvent?: GoogleCalendarApiEvent | null,
+  clinicAccountEmail?: string | null
 ): Record<string, unknown> {
+  const hydration =
+    googleEvent != null
+      ? hydratePatientFromGoogleEvent({
+          summary: googleEvent.summary,
+          description: googleEvent.description,
+          location: googleEvent.location,
+          attendees: googleEvent.attendees,
+          organizerEmail: googleEvent.organizer?.email,
+          creatorEmail: googleEvent.creator?.email,
+          calendarId: sourceCalendar.calendarId,
+          clinicAccountEmail,
+        })
+      : null;
+
   return {
     source: "google_sync",
     integration_id: integrationId,
     last_synced_at: syncNow,
     google_calendar_id: sourceCalendar.calendarId,
     ...(sourceCalendar.summary ? { google_calendar_summary: sourceCalendar.summary } : {}),
+    ...(hydration ? googlePatientHydrationToMetadata(hydration) : {}),
+    ...(googleEvent?.htmlLink ? { google_html_link: googleEvent.htmlLink } : {}),
   };
 }
 

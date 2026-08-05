@@ -10,7 +10,9 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
   convertExternalCalendarEventRequest,
+  createPatientFromGoogleHydrationRequest,
   linkCalendarOsPatientRequest,
+  searchCalendarIdentityLinkRequest,
   quickEditCalendarOsEventRequest,
 } from "@/lib/calendar/appointmentsApiClient";
 import { rescheduleCalendarAppointmentRequest } from "@/lib/calendar/appointmentsApiClient";
@@ -24,6 +26,16 @@ import type { CalendarEventEditPolicy } from "@/src/lib/calendar/calendarEventEd
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
+
+type IdentityHit = {
+  kind: string;
+  id: string;
+  displayName?: string | null;
+  label?: string | null;
+  patientId?: string | null;
+  consultationId?: string | null;
+  enquiryId?: string | null;
+};
 
 function toLocalInputValue(iso: string, tz: string): string {
   try {
@@ -56,6 +68,14 @@ export function CalendarQuickEditDrawer({
   googleHtmlLink,
   fiosAppointmentId,
   patientNotLinked,
+  identityState,
+  identityKindLabel,
+  identityStatusLabel,
+  displayName,
+  googleHydratedEmail,
+  googleHydratedPhone,
+  googleHydratedLocation,
+  googleHydratedAppointmentType,
   onClose,
   onSaved,
   onOpenFull,
@@ -71,6 +91,14 @@ export function CalendarQuickEditDrawer({
   googleHtmlLink?: string | null;
   fiosAppointmentId?: string | null;
   patientNotLinked?: boolean;
+  identityState?: string | null;
+  identityKindLabel?: string | null;
+  identityStatusLabel?: string | null;
+  displayName?: string | null;
+  googleHydratedEmail?: string | null;
+  googleHydratedPhone?: string | null;
+  googleHydratedLocation?: string | null;
+  googleHydratedAppointmentType?: string | null;
   onClose: () => void;
   onSaved: () => void;
   onOpenFull: (b: FiBookingRow) => void;
@@ -85,7 +113,15 @@ export function CalendarQuickEditDrawer({
 
   const [patientSearch, setPatientSearch] = useState("");
   const [patientId, setPatientId] = useState(booking.patient_id ?? "");
+  const [consultationId, setConsultationId] = useState(
+    typeof booking.metadata?.consultation_id === "string"
+      ? booking.metadata.consultation_id
+      : ""
+  );
+  const [selectedHit, setSelectedHit] = useState<IdentityHit | null>(null);
+  const [hits, setHits] = useState<IdentityHit[]>([]);
   const [confirmLink, setConfirmLink] = useState(false);
+  const [promoteToPatient, setPromoteToPatient] = useState(false);
   const [appointmentType, setAppointmentType] = useState(booking.booking_type);
   const [clinicId, setClinicId] = useState(booking.clinic_id ?? "");
   const [staffId, setStaffId] = useState(booking.assigned_staff_id ?? "");
@@ -97,6 +133,9 @@ export function CalendarQuickEditDrawer({
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  const actions = new Set(policy.drawerActions);
+  const editable = policy.canQuickEdit;
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -105,8 +144,45 @@ export function CalendarQuickEditDrawer({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const actions = new Set(policy.drawerActions);
-  const editable = policy.canQuickEdit;
+  useEffect(() => {
+    if (!policy.drawerActions.includes("link_patient")) return;
+    const q = patientSearch.trim();
+    const handle = window.setTimeout(() => {
+      void (async () => {
+        const r = await searchCalendarIdentityLinkRequest({
+          tenantId,
+          eventId: booking.id,
+          query: q,
+        });
+        if (!r.ok) return;
+        const next: IdentityHit[] = [
+          ...r.consultations.map((c) => ({
+            kind: "consultation",
+            id: c.id,
+            displayName: c.displayName,
+            label: c.label,
+            consultationId: c.consultationId ?? c.id,
+            enquiryId: c.enquiryId,
+          })),
+          ...r.patients.map((p) => ({
+            kind: "patient",
+            id: p.id,
+            displayName: p.displayName,
+            patientId: p.patientId ?? p.id,
+          })),
+          ...r.enquiries.map((e) => ({
+            kind: "enquiry",
+            id: e.id,
+            displayName: e.displayName,
+            enquiryId: e.enquiryId ?? e.id,
+            patientId: e.patientId,
+          })),
+        ];
+        setHits(next);
+      })();
+    }, 250);
+    return () => window.clearTimeout(handle);
+  }, [patientSearch, tenantId, booking.id, policy.drawerActions]);
 
   async function onSave() {
     if (!editable) return;
@@ -165,9 +241,17 @@ export function CalendarQuickEditDrawer({
     }
   }
 
-  async function onLinkPatient() {
-    if (!patientId.trim() || !confirmLink) {
-      setFeedback("Select a patient and confirm before linking.");
+  async function onLinkPatient(mode: "patient" | "consultation" | "promote") {
+    const hit = selectedHit;
+    const nextPatientId =
+      mode === "patient" ? (hit?.patientId ?? patientId).trim() : patientId.trim();
+    const nextConsultationId =
+      mode === "consultation" || mode === "promote"
+        ? (hit?.consultationId ?? consultationId).trim()
+        : consultationId.trim();
+
+    if ((!nextPatientId && !nextConsultationId) || !confirmLink) {
+      setFeedback("Select an identity and confirm before linking.");
       return;
     }
     setBusy(true);
@@ -176,13 +260,40 @@ export function CalendarQuickEditDrawer({
       const r = await linkCalendarOsPatientRequest({
         tenantId,
         eventId: booking.id,
-        patientId: patientId.trim(),
+        patientId: nextPatientId || null,
+        consultationId: nextConsultationId || null,
+        enquiryId: hit?.enquiryId ?? null,
+        confirmed: true,
+        promoteToPatient: mode === "promote" || promoteToPatient,
+      });
+      if (!r.ok) {
+        setFeedback(r.error);
+        return;
+      }
+      onSaved();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onCreateFromGoogle() {
+    if (!confirmLink) {
+      setFeedback("Confirm before creating a patient from Google event details.");
+      return;
+    }
+    setBusy(true);
+    setFeedback(null);
+    try {
+      const r = await createPatientFromGoogleHydrationRequest({
+        tenantId,
+        eventId: booking.id,
         confirmed: true,
       });
       if (!r.ok) {
         setFeedback(r.error);
         return;
       }
+      setPatientId(r.patientId);
       onSaved();
     } finally {
       setBusy(false);
@@ -238,12 +349,28 @@ export function CalendarQuickEditDrawer({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 space-y-1">
               <p className="truncate text-[15px] font-semibold text-slate-50">
-                {patientNotLinked ? PATIENT_NOT_LINKED_LABEL : booking.title}
+                {patientNotLinked
+                  ? displayName?.trim() || externalTitle || PATIENT_NOT_LINKED_LABEL
+                  : displayName?.trim() || booking.title}
               </p>
               <p className="text-[11px] text-slate-500">
                 {calendarEventClassificationLabel(classification)}
                 {policy.showSyncStatus ? " · sync visible" : ""}
               </p>
+              {identityKindLabel ? (
+                <p className="text-[11px] text-cyan-200/90">{identityKindLabel}</p>
+              ) : null}
+              {identityStatusLabel ? (
+                <p className="text-[11px] text-sky-200/90">{identityStatusLabel}</p>
+              ) : null}
+              {(googleHydratedEmail || googleHydratedPhone || googleHydratedLocation) && (
+                <div className="space-y-0.5 text-[11px] text-slate-400">
+                  {googleHydratedEmail ? <p>{googleHydratedEmail}</p> : null}
+                  {googleHydratedAppointmentType ? <p>{googleHydratedAppointmentType}</p> : null}
+                  {googleHydratedLocation ? <p>{googleHydratedLocation}</p> : null}
+                  {googleHydratedPhone ? <p>{googleHydratedPhone}</p> : null}
+                </div>
+              )}
               {externalTitle ? (
                 <p className="truncate text-[11px] text-slate-400">External title: {externalTitle}</p>
               ) : null}
@@ -351,32 +478,109 @@ export function CalendarQuickEditDrawer({
 
           {actions.has("link_patient") ? (
             <div className="space-y-2 rounded-md border border-white/[0.08] p-2">
-              <p className={labelClass}>Link patient</p>
+              <p className={labelClass}>Link identity</p>
               <input
                 className={fieldClass}
-                placeholder="Patient UUID (search UI hooks to CRM next)"
-                value={patientSearch || patientId}
+                placeholder="Search patients, consultations, enquiries…"
+                value={patientSearch}
                 onChange={(e) => {
                   setPatientSearch(e.target.value);
-                  setPatientId(e.target.value);
                 }}
               />
+              {hits.length > 0 ? (
+                <ul className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-white/[0.06] p-1">
+                  {hits.map((hit) => {
+                    const label =
+                      hit.label?.trim() ||
+                      (hit.kind === "consultation"
+                        ? `${hit.displayName ?? "Consultation"} — New consultation — Patient record pending`
+                        : hit.displayName?.trim() || hit.id);
+                    const selected = selectedHit?.id === hit.id && selectedHit?.kind === hit.kind;
+                    return (
+                      <li key={`${hit.kind}:${hit.id}`}>
+                        <button
+                          type="button"
+                          className={cn(
+                            "w-full rounded px-2 py-1.5 text-left text-[11px] text-slate-200 hover:bg-white/[0.06]",
+                            selected && "bg-cyan-950/40 text-cyan-100"
+                          )}
+                          onClick={() => {
+                            setSelectedHit(hit);
+                            if (hit.kind === "patient") {
+                              setPatientId(hit.patientId ?? hit.id);
+                              setConsultationId("");
+                            } else if (hit.kind === "consultation") {
+                              setConsultationId(hit.consultationId ?? hit.id);
+                              setPatientId(hit.patientId ?? "");
+                            } else {
+                              setPatientId(hit.patientId ?? "");
+                              setConsultationId("");
+                            }
+                          }}
+                        >
+                          <span className="block font-medium">{label}</span>
+                          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                            {hit.kind}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
               <label className="flex items-center gap-2 text-[11px] text-slate-300">
                 <input
                   type="checkbox"
                   checked={confirmLink}
                   onChange={(e) => setConfirmLink(e.target.checked)}
                 />
-                I confirm this patient link (no name-only auto-match)
+                I confirm this identity link (no name-only auto-match)
               </label>
-              <button
-                type="button"
-                className={btnClass}
-                disabled={busy}
-                onClick={() => void onLinkPatient()}
-              >
-                Link patient
-              </button>
+              <label className="flex items-center gap-2 text-[11px] text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={promoteToPatient}
+                  onChange={(e) => setPromoteToPatient(e.target.checked)}
+                />
+                Promote consultation to canonical patient when linking
+              </label>
+              <div className="grid grid-cols-1 gap-1.5">
+                <button
+                  type="button"
+                  className={btnClass}
+                  disabled={busy || selectedHit?.kind !== "patient"}
+                  onClick={() => void onLinkPatient("patient")}
+                >
+                  Link existing patient
+                </button>
+                <button
+                  type="button"
+                  className={btnClass}
+                  disabled={busy || selectedHit?.kind !== "consultation"}
+                  onClick={() => void onLinkPatient("consultation")}
+                >
+                  Use consultation identity
+                </button>
+                <button
+                  type="button"
+                  className={btnClass}
+                  disabled={busy || selectedHit?.kind !== "consultation"}
+                  onClick={() => void onLinkPatient("promote")}
+                >
+                  Promote to patient and link
+                </button>
+                <button
+                  type="button"
+                  className={btnClass}
+                  disabled={busy}
+                  onClick={() => void onCreateFromGoogle()}
+                >
+                  Create patient from Google details
+                </button>
+                <button type="button" className={btnClass} disabled={busy} onClick={onClose}>
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : null}
 

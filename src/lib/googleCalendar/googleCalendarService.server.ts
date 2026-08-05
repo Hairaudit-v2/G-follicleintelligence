@@ -856,6 +856,7 @@ async function syncGoogleCalendarEventsForCalendar(
 
   const discoveredIds = new Set<string>();
   const sourceCalendar = { calendarId, summary: calendarSummary };
+  const clinicAccountEmail = integration.googleAccountEmail ?? null;
 
   for (let eventIndex = 0; eventIndex < discovered.length; eventIndex += 1) {
     const raw = discovered[eventIndex]!;
@@ -1058,7 +1059,13 @@ async function syncGoogleCalendarEventsForCalendar(
         end_time: mapped.endTime,
         event_type: mapped.eventType,
         google_meet_url: mapped.googleMeetUrl,
-        metadata: buildGoogleSyncInsertMetadata(integration.id, syncNow, sourceCalendar),
+        metadata: buildGoogleSyncInsertMetadata(
+          integration.id,
+          syncNow,
+          sourceCalendar,
+          raw,
+          clinicAccountEmail
+        ),
       });
 
       if (error) {
@@ -1103,7 +1110,13 @@ async function syncGoogleCalendarEventsForCalendar(
           googleMeetUrl: mapped.googleMeetUrl,
           patientId: null,
           leadId: null,
-          metadata: buildGoogleSyncInsertMetadata(integration.id, syncNow, sourceCalendar),
+          metadata: buildGoogleSyncInsertMetadata(
+            integration.id,
+            syncNow,
+            sourceCalendar,
+            raw,
+            clinicAccountEmail
+          ),
           createdAt: syncNow,
           updatedAt: syncNow,
         });
@@ -1158,7 +1171,13 @@ async function syncGoogleCalendarEventsForCalendar(
           event_type: mapped.eventType,
           google_meet_url: mapped.googleMeetUrl ?? existing.googleMeetUrl,
           calendar_id: calendarId,
-          metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow, sourceCalendar),
+          metadata: buildGoogleSyncUpdateMetadata(
+            existing.metadata ?? {},
+            syncNow,
+            sourceCalendar,
+            raw,
+            clinicAccountEmail
+          ),
           updated_at: syncNow,
         })
         .eq("id", existing.id)

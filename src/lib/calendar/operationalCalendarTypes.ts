@@ -24,6 +24,12 @@ export type OperationalCalendarBookingDisplay = {
   /** From `fi_patients.metadata` when the booking is anchored to a patient. */
   patientEmail?: string | null;
   patientPhone?: string | null;
+  /** FI-CALENDAR-PATIENT-LINK-1A — Google-hydrated candidate fields (shown before link). */
+  googleHydratedDisplayName?: string | null;
+  googleHydratedEmail?: string | null;
+  googleHydratedPhone?: string | null;
+  googleHydratedLocation?: string | null;
+  googleHydratedAppointmentType?: string | null;
   /** Assigned room display name when `room_id` is set. */
   roomLabel?: string | null;
   /** Compact multi-room line from `fi_booking_resource_assignments` (includes primary label). */
@@ -51,13 +57,42 @@ export type OperationalCalendarBookingDisplay = {
     | "calendaros_test"
     | "blocked_or_unsupported"
     | null;
-  /** Original Google / external title when patient is not linked. */
+  /** Original Google / external title preserved for audit / reconciliation. */
   calendarOsExternalTitle?: string | null;
   calendarOsGoogleHtmlLink?: string | null;
   calendarOsWritebackStatus?: string | null;
   calendarOsFiosAppointmentId?: string | null;
-  /** True when clinical event has no patient/lead link. */
+  /**
+   * True only for external_identity_only (no FiOS patient/consultation/enquiry identity).
+   * Consultation identities must NOT use this flag.
+   */
   patientNotLinked?: boolean;
+  /** FI-CALENDAR-IDENTITY-LINK-1B */
+  identityState?:
+    | "patient_linked"
+    | "consultation_identity_linked"
+    | "enquiry_identity_linked"
+    | "patient_creation_pending"
+    | "external_identity_only"
+    | "ambiguous_identity"
+    | "identity_conflict"
+    | null;
+  patientId?: string | null;
+  consultationId?: string | null;
+  enquiryId?: string | null;
+  contactId?: string | null;
+  displayName?: string | null;
+  externalDisplayTitle?: string | null;
+  verifiedEmail?: string | null;
+  verifiedPhone?: string | null;
+  matchEvidence?: {
+    method: string;
+    confidence: "high" | "medium" | "low" | "none";
+    detail?: string | null;
+  } | null;
+  promotionRequired?: boolean;
+  identityKindLabel?: string | null;
+  identityStatusLabel?: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {

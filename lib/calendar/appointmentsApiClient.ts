@@ -243,8 +243,12 @@ export async function rescheduleCalendarOsEventRequest(
 export async function linkCalendarOsPatientRequest(input: {
   tenantId: string;
   eventId: string;
-  patientId: string;
+  patientId?: string | null;
+  consultationId?: string | null;
+  enquiryId?: string | null;
   confirmed: boolean;
+  promoteToPatient?: boolean;
+  reviewPossibleDuplicate?: boolean;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const res = await fetch(`${calendarOsEventBase(input.tenantId, input.eventId)}/link-patient`, {
     method: "POST",
@@ -252,7 +256,11 @@ export async function linkCalendarOsPatientRequest(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       patientId: input.patientId,
+      consultationId: input.consultationId,
+      enquiryId: input.enquiryId,
       confirmed: input.confirmed,
+      promoteToPatient: input.promoteToPatient,
+      reviewPossibleDuplicate: input.reviewPossibleDuplicate,
     }),
   });
   const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as {
@@ -261,6 +269,101 @@ export async function linkCalendarOsPatientRequest(input: {
   };
   if (res.ok && json.ok) return { ok: true };
   return { ok: false, error: json.error ?? `Request failed (${res.status}).` };
+}
+
+export async function createPatientFromGoogleHydrationRequest(input: {
+  tenantId: string;
+  eventId: string;
+  confirmed: boolean;
+}): Promise<
+  | { ok: true; patientId: string; created: boolean; classification: string }
+  | { ok: false; error: string }
+> {
+  const res = await fetch(
+    `${calendarOsEventBase(input.tenantId, input.eventId)}/create-patient-from-google`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmed: input.confirmed }),
+    }
+  );
+  const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as {
+    ok?: boolean;
+    error?: string;
+    patientId?: string;
+    created?: boolean;
+    classification?: string;
+  };
+  if (res.ok && json.ok && json.patientId) {
+    return {
+      ok: true,
+      patientId: json.patientId,
+      created: Boolean(json.created),
+      classification: String(json.classification ?? "google_linked_fios"),
+    };
+  }
+  return { ok: false, error: json.error ?? `Request failed (${res.status}).` };
+}
+
+export async function searchCalendarIdentityLinkRequest(input: {
+  tenantId: string;
+  eventId: string;
+  query?: string;
+}): Promise<
+  | {
+      ok: true;
+      suggestions: unknown[];
+      patients: Array<{
+        id: string;
+        displayName?: string | null;
+        patientId?: string | null;
+        consultationId?: string | null;
+        enquiryId?: string | null;
+        label?: string | null;
+      }>;
+      consultations: Array<{
+        id: string;
+        displayName?: string | null;
+        patientId?: string | null;
+        consultationId?: string | null;
+        enquiryId?: string | null;
+        label?: string | null;
+      }>;
+      enquiries: Array<{
+        id: string;
+        displayName?: string | null;
+        patientId?: string | null;
+        consultationId?: string | null;
+        enquiryId?: string | null;
+        label?: string | null;
+      }>;
+      verifiedMatches: unknown[];
+    }
+  | { ok: false; error: string }
+> {
+  const sp = new URLSearchParams();
+  if (input.query?.trim()) sp.set("q", input.query.trim());
+  const qs = sp.toString();
+  const res = await fetch(
+    `${calendarOsEventBase(input.tenantId, input.eventId)}/patient-suggestions${qs ? `?${qs}` : ""}`,
+    { credentials: "include" }
+  );
+  const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as Record<
+    string,
+    unknown
+  >;
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: typeof json.error === "string" ? json.error : `Request failed (${res.status}).` };
+  }
+  return {
+    ok: true,
+    suggestions: Array.isArray(json.suggestions) ? json.suggestions : [],
+    patients: Array.isArray(json.patients) ? (json.patients as never[]) : [],
+    consultations: Array.isArray(json.consultations) ? (json.consultations as never[]) : [],
+    enquiries: Array.isArray(json.enquiries) ? (json.enquiries as never[]) : [],
+    verifiedMatches: Array.isArray(json.verifiedMatches) ? json.verifiedMatches : [],
+  };
 }
 
 export async function convertExternalCalendarEventRequest(input: {

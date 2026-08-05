@@ -1,5 +1,6 @@
 /**
- * FI-CALENDAR-WRITEBACK-1A — link patient to CalendarOS event (audited, confirmation required).
+ * FI-CALENDAR-WRITEBACK-1A / FI-CALENDAR-IDENTITY-LINK-1B —
+ * link patient or consultation identity to a CalendarOS event (audited, confirmation required).
  */
 import "server-only";
 
@@ -21,6 +22,8 @@ import {
   type CalendarPatientMatchCandidate,
 } from "@/src/lib/calendar/calendarPatientMatchSuggestions";
 import { deriveCalendarEventOwnershipSource } from "@/src/lib/calendar/providers/calendarProviderAdapter";
+import { promoteConsultationToPatient } from "@/src/lib/calendar/consultationPatientPromotion.server";
+import { readPersistedGooglePatientHydration } from "@/src/lib/calendar/calendarGooglePatientHydration";
 import { logStructured } from "@/src/lib/server/structuredLog";
 
 type ServerOpts = {
@@ -30,22 +33,49 @@ type ServerOpts = {
 export type LinkCalendarOsPatientInput = {
   tenantId: string;
   eventId: string;
-  patientId: string;
+  /** Canonical patient id when linking an existing patient. */
+  patientId?: string | null;
+  /** Consultation identity to link (and optionally promote). */
+  consultationId?: string | null;
+  /** Enquiry / CRM lead identity. */
+  enquiryId?: string | null;
   /** Must be true — never auto-link. */
   confirmed: boolean;
+  /**
+   * When consultation has no patient: promote to patient then link.
+   * When false, attach consultation_id only (consultation_identity_linked).
+   */
+  promoteToPatient?: boolean;
   actingUserId?: string | null;
   actingUserLabel?: string | null;
+  /** Explicit acknowledgment of ambiguous/duplicate review. */
+  reviewPossibleDuplicate?: boolean;
 };
 
 export type LinkCalendarOsPatientResult =
   | {
       ok: true;
       eventId: string;
-      patientId: string;
+      patientId: string | null;
+      consultationId: string | null;
+      enquiryId: string | null;
+      identityState: string;
       classification: CalendarEventClassification;
       auditId: string;
+      promoted: boolean;
     }
-  | { ok: false; error: string; code: "not_found" | "not_confirmed" | "invalid_patient" | "update_failed" };
+  | {
+      ok: false;
+      error: string;
+      code:
+        | "not_found"
+        | "not_confirmed"
+        | "invalid_patient"
+        | "invalid_consultation"
+        | "identity_conflict"
+        | "update_failed"
+        | "promote_failed";
+    };
 
 /** Load optional match suggestions for the link-patient drawer. */
 export async function loadCalendarOsPatientMatchSuggestions(
@@ -54,30 +84,33 @@ export async function loadCalendarOsPatientMatchSuggestions(
     eventId: string;
   },
   opts: ServerOpts = {}
-): Promise<{ ok: true; suggestions: CalendarPatientMatchCandidate[] } | { ok: false; error: string }> {
+): Promise<
+  | {
+      ok: true;
+      suggestions: CalendarPatientMatchCandidate[];
+      hydration: import("@/src/lib/calendar/calendarGooglePatientHydration").GooglePatientHydration;
+    }
+  | { ok: false; error: string }
+> {
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const tenantId = input.tenantId.trim();
   const { data: event, error } = await supabase
     .from("fi_calendar_events")
-    .select("id, external_event_id, title, description, metadata, patient_id")
+    .select("id, external_event_id, title, description, location, metadata, patient_id")
     .eq("id", input.eventId.trim())
     .eq("tenant_id", tenantId)
     .maybeSingle();
   if (error || !event) return { ok: false, error: error?.message ?? "Event not found." };
 
   const meta = (event.metadata ?? {}) as Record<string, unknown>;
-  const eventEmail =
-    typeof meta.attendee_email === "string"
-      ? meta.attendee_email
-      : typeof meta.patient_email === "string"
-        ? meta.patient_email
-        : null;
-  const eventPhone =
-    typeof meta.attendee_phone === "string"
-      ? meta.attendee_phone
-      : typeof meta.patient_phone === "string"
-        ? meta.patient_phone
-        : null;
+  const hydration = readPersistedGooglePatientHydration(meta, {
+    title: (event as { title?: string }).title,
+    description: (event as { description?: string | null }).description,
+    location: (event as { location?: string | null }).location,
+  });
+  const eventEmail = hydration.email;
+  const eventPhone = hydration.phone;
+  const eventDisplayName = hydration.displayName;
 
   const { data: patients } = await supabase
     .from("fi_patients")
@@ -109,6 +142,7 @@ export async function loadCalendarOsPatientMatchSuggestions(
   const suggestions = suggestCalendarPatientMatches({
     eventEmail,
     eventPhone,
+    eventDisplayName,
     externalEventId: (event as { external_event_id: string | null }).external_event_id,
     patients: candidates,
     verifiedMappings: verifiedRaw
@@ -122,11 +156,11 @@ export async function loadCalendarOsPatientMatchSuggestions(
       .filter((m) => m.externalId && m.patientId),
   });
 
-  return { ok: true, suggestions };
+  return { ok: true, suggestions, hydration };
 }
 
 /**
- * Link a CalendarOS event to a FiOS patient after explicit confirmation.
+ * Link a CalendarOS event to a FiOS patient and/or consultation identity after confirmation.
  * Does not auto-match on name. Audits who linked the patient.
  */
 export async function linkCalendarOsEventPatient(
@@ -143,27 +177,25 @@ export async function linkCalendarOsEventPatient(
 
   const tenantId = input.tenantId.trim();
   const eventId = input.eventId.trim();
-  const patientId = input.patientId.trim();
-  if (!patientId) {
-    return { ok: false, error: "Patient id is required.", code: "invalid_patient" };
+  let patientId = input.patientId?.trim() || null;
+  let consultationId = input.consultationId?.trim() || null;
+  const enquiryId = input.enquiryId?.trim() || null;
+  const promoteToPatient = Boolean(input.promoteToPatient);
+
+  if (!patientId && !consultationId && !enquiryId) {
+    return {
+      ok: false,
+      error: "Select a patient, consultation, or enquiry identity.",
+      code: "invalid_patient",
+    };
   }
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const auditId = randomUUID();
 
-  const { data: patient, error: patientErr } = await supabase
-    .from("fi_patients")
-    .select("id")
-    .eq("id", patientId)
-    .eq("tenant_id", tenantId)
-    .maybeSingle();
-  if (patientErr || !patient) {
-    return { ok: false, error: "Patient not found for this tenant.", code: "invalid_patient" };
-  }
-
   const { data: event, error: eventErr } = await supabase
     .from("fi_calendar_events")
-    .select("id, external_event_id, patient_id, lead_id, metadata")
+    .select("id, external_event_id, patient_id, lead_id, consultation_id, person_id, metadata")
     .eq("id", eventId)
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -176,24 +208,130 @@ export async function linkCalendarOsEventPatient(
     external_event_id: string | null;
     patient_id: string | null;
     lead_id: string | null;
+    consultation_id: string | null;
+    person_id: string | null;
     metadata: Record<string, unknown>;
   };
 
   const previousPatientId = row.patient_id;
+  const previousConsultationId = row.consultation_id;
+  let promoted = false;
+  let personId: string | null = row.person_id;
+
+  // Do not silently overwrite an existing explicit patient mapping with a different patient.
+  if (
+    previousPatientId?.trim() &&
+    patientId &&
+    previousPatientId.trim() !== patientId &&
+    !input.reviewPossibleDuplicate
+  ) {
+    return {
+      ok: false,
+      error: "Event already has an explicit patient mapping. Confirm override to continue.",
+      code: "identity_conflict",
+    };
+  }
+
+  if (consultationId) {
+    const { data: consultation, error: cErr } = await supabase
+      .from("fi_consultations")
+      .select("id, patient_id, person_id, lead_id")
+      .eq("id", consultationId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (cErr || !consultation) {
+      return { ok: false, error: "Consultation not found for this tenant.", code: "invalid_consultation" };
+    }
+    const cr = consultation as {
+      id: string;
+      patient_id: string | null;
+      person_id: string | null;
+      lead_id: string | null;
+    };
+    personId = cr.person_id?.trim() || personId;
+
+    if (promoteToPatient || patientId) {
+      if (!patientId && cr.patient_id?.trim()) {
+        patientId = cr.patient_id.trim();
+      } else if (!patientId && promoteToPatient) {
+        const promo = await promoteConsultationToPatient(
+          {
+            tenantId,
+            consultationId,
+            calendarEventId: eventId,
+            actingUserId: input.actingUserId,
+            actingUserLabel: input.actingUserLabel,
+          },
+          opts
+        );
+        if (!promo.ok) {
+          return { ok: false, error: promo.error, code: "promote_failed" };
+        }
+        patientId = promo.patientId;
+        personId = promo.personId;
+        promoted = promo.created || true;
+      }
+    } else if (cr.patient_id?.trim()) {
+      patientId = cr.patient_id.trim();
+    }
+  }
+
+  if (patientId) {
+    const { data: patient, error: patientErr } = await supabase
+      .from("fi_patients")
+      .select("id, person_id")
+      .eq("id", patientId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (patientErr || !patient) {
+      return { ok: false, error: "Patient not found for this tenant.", code: "invalid_patient" };
+    }
+    personId = (patient as { person_id: string }).person_id?.trim() || personId;
+  }
+
+  if (enquiryId) {
+    const { data: lead } = await supabase
+      .from("fi_crm_leads")
+      .select("id, person_id, patient_id")
+      .eq("id", enquiryId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (!lead) {
+      return { ok: false, error: "Enquiry/lead not found for this tenant.", code: "invalid_patient" };
+    }
+    const lr = lead as { person_id: string | null; patient_id: string | null };
+    personId = lr.person_id?.trim() || personId;
+    if (!patientId && lr.patient_id?.trim()) patientId = lr.patient_id.trim();
+  }
+
   const now = new Date().toISOString();
+  const identityState = patientId
+    ? "patient_linked"
+    : consultationId
+      ? "consultation_identity_linked"
+      : enquiryId
+        ? "enquiry_identity_linked"
+        : "external_identity_only";
+
   const nextMeta: Record<string, unknown> = {
     ...(row.metadata ?? {}),
     patient_linked_at: now,
     patient_linked_by_user_id: input.actingUserId ?? null,
     patient_linked_by_label: input.actingUserLabel ?? null,
-    ownership: "fi_system",
+    ownership: patientId || consultationId ? "fi_system" : (row.metadata ?? {}).ownership,
+    person_identity_state: identityState,
+    ...(consultationId ? { consultation_id: consultationId } : {}),
+    ...(enquiryId ? { enquiry_id: enquiryId } : {}),
+    ...(promoted ? { consultation_promoted_to_patient: true } : {}),
   };
 
-  // Patient presence moves ownership toward FI — reclassify after update.
   const { error: updateErr } = await supabase
     .from("fi_calendar_events")
     .update({
       patient_id: patientId,
+      lead_id: enquiryId ?? row.lead_id,
+      consultation_id: consultationId,
+      person_id: personId,
       metadata: nextMeta,
       updated_at: now,
     })
@@ -207,38 +345,43 @@ export async function linkCalendarOsEventPatient(
   const classification = classifyFiCalendarEventOverlapRow({
     metadata: nextMeta,
     patient_id: patientId,
-    lead_id: row.lead_id,
+    lead_id: enquiryId ?? row.lead_id,
     external_event_id: row.external_event_id,
   });
-
-  // Persist classification on the row.
-  await supabase
-    .from("fi_calendar_events")
-    .update({
-      metadata: { ...nextMeta, calendar_event_classification: classification },
-      updated_at: now,
-    })
-    .eq("id", eventId)
-    .eq("tenant_id", tenantId);
 
   const audit = buildCalendarMutationAuditRecord({
     id: auditId,
     tenantId,
     actingUserId: input.actingUserId,
     actingUserLabel: input.actingUserLabel,
-    interactionSource: "patient_link",
+    interactionSource: "calendar_patient_link",
     classification,
     googleEventId: row.external_event_id,
     localCalendarEventId: eventId,
-    previousValues: { patient_id: previousPatientId },
-    nextValues: { patient_id: patientId },
+    previousValues: {
+      patient_id: previousPatientId,
+      consultation_id: previousConsultationId,
+      identity_state: (row.metadata ?? {}).person_identity_state ?? null,
+    },
+    nextValues: {
+      patient_id: patientId,
+      consultation_id: consultationId,
+      identity_state: identityState,
+    },
     writebackStatus: "not_required",
     metadata: {
       ownership_after: deriveCalendarEventOwnershipSource({
         metadata: nextMeta,
         patientId,
-        leadId: row.lead_id,
+        leadId: enquiryId ?? row.lead_id,
       }),
+      promoted,
+      match_method: promoted
+        ? "consultation_to_patient_promotion"
+        : patientId
+          ? "manual_override"
+          : "consultation_contact",
+      interaction_source: "calendar_patient_link",
     },
   });
 
@@ -262,10 +405,25 @@ export async function linkCalendarOsEventPatient(
     tenantId,
     eventId,
     patientId,
+    consultationId,
+    enquiryId,
+    identityState,
+    promoted,
     actingUserId: input.actingUserId,
     auditId,
     classification,
+    interactionSource: "calendar_patient_link",
   });
 
-  return { ok: true, eventId, patientId, classification, auditId };
+  return {
+    ok: true,
+    eventId,
+    patientId,
+    consultationId,
+    enquiryId,
+    identityState,
+    classification,
+    auditId,
+    promoted,
+  };
 }
