@@ -1,0 +1,284 @@
+currentPath,proposedDomain,proposedPath,runtimeConsumerCount,testConsumerCount,tablesReferenced,serverOnly,mutationBearing,duplicateOf,deletionReason,migrationRisk,proposeReason
+src/lib/workforce-os/WORKFORCE_CLINICAL_INTEGRATION_MAP.ts,shared,src/lib/team/shared/WORKFORCE_CLINICAL_INTEGRATION_MAP.ts,0,0,,false,false,,,low,clinical integration registry
+src/lib/workforce-os/clinicalStaffingStatusDisplay.test.ts,roster,src/lib/team/roster/clinicalStaffingStatusDisplay.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/clinicalStaffingStatusDisplay.ts,roster,src/lib/team/roster/clinicalStaffingStatusDisplay.ts,3,0,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/clinicalStaffingSummary.types.ts,roster,src/lib/team/roster/clinicalStaffingSummary.types.ts,14,0,,false,false,,,high,roster/ops scheduling
+src/lib/workforce-os/hrReadPathSync.test.ts,shared,src/lib/team/shared/hrReadPathSync.test.ts,0,0,,false,false,,,low,nav/sync integration test
+src/lib/workforce-os/hrReconciliation.server.ts,identity,src/lib/team/identity/hrReconciliation.server.ts,3,0,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationCandidateCore.test.ts,identity,src/lib/team/identity/hrReconciliationCandidateCore.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationCandidateCore.ts,identity,src/lib/team/identity/hrReconciliationCandidateCore.ts,1,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationCandidateLoader.server.ts,identity,src/lib/team/identity/hrReconciliationCandidateLoader.server.ts,0,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationEligibleCore.test.ts,identity,src/lib/team/identity/hrReconciliationEligibleCore.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationEligibleCore.ts,identity,src/lib/team/identity/hrReconciliationEligibleCore.ts,5,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationFilter.test.ts,identity,src/lib/team/identity/hrReconciliationFilter.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/hrReconciliationFilterCore.ts,identity,src/lib/team/identity/hrReconciliationFilterCore.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/iiohrStaffHrLinkReconciliation.server.ts,identity,src/lib/team/identity/iiohrStaffHrLinkReconciliation.server.ts,0,1,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/iiohrStaffHrLinkReconciliation.test.ts,identity,src/lib/team/identity/iiohrStaffHrLinkReconciliation.test.ts,0,0,fi_staff_members,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/iiohrStaffHrLinkReconciliationCore.ts,identity,src/lib/team/identity/iiohrStaffHrLinkReconciliationCore.ts,4,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes.ts,identity,src/lib/team/identity/iiohrStaffHrLinkReconciliationTypes.ts,7,2,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/nexusFiStaffBridge.server.ts,identity,src/lib/team/identity/nexusFiStaffBridge.server.ts,0,0,fi_staff,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/projectionHealth.server.ts,identity,src/lib/team/identity/projectionHealth.server.ts,1,0,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/projectionHealthCore.test.ts,identity,src/lib/team/identity/projectionHealthCore.test.ts,0,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/projectionHealthCore.ts,identity,src/lib/team/identity/projectionHealthCore.ts,3,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/resolveCurrentTenantFiUserId.server.ts,shared,src/lib/team/shared/resolveCurrentTenantFiUserId.server.ts,0,0,,true,false,,,medium,tenant/actor resolution shared by roster+mutations
+src/lib/workforce-os/resolveWorkforceActorFiUserId.server.test.ts,shared,src/lib/team/shared/resolveWorkforceActorFiUserId.server.test.ts,0,0,,false,false,,,low,tenant/actor resolution shared by roster+mutations
+src/lib/workforce-os/resolveWorkforceActorFiUserId.server.ts,shared,src/lib/team/shared/resolveWorkforceActorFiUserId.server.ts,3,0,,true,false,,,medium,tenant/actor resolution shared by roster+mutations
+src/lib/workforce-os/rosterCommandCentrePageLoader.server.ts,roster,src/lib/team/roster/rosterCommandCentrePageLoader.server.ts,0,1,,true,false,,,medium,roster command centre (ops surface)
+src/lib/workforce-os/rosterCommandCentrePageLoader.types.ts,roster,src/lib/team/roster/rosterCommandCentrePageLoader.types.ts,0,0,,false,false,,,low,roster command centre (ops surface)
+src/lib/workforce-os/rosterCommandCentreUxCore.test.ts,roster,src/lib/team/roster/rosterCommandCentreUxCore.test.ts,0,0,,false,false,,,low,roster command centre (ops surface)
+src/lib/workforce-os/rosterCommandCentreUxCore.ts,roster,src/lib/team/roster/rosterCommandCentreUxCore.ts,2,0,,false,false,,,high,roster command centre (ops surface)
+src/lib/workforce-os/rosterEligibleStaff.server.ts,roster,src/lib/team/roster/rosterEligibleStaff.server.ts,1,0,,true,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/rosterEligibleStaff.test.ts,roster,src/lib/team/roster/rosterEligibleStaff.test.ts,0,0,fi_staff,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterEligibleStaffCore.ts,roster,src/lib/team/roster/rosterEligibleStaffCore.ts,3,0,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/rosterGeneration.server.ts,roster,src/lib/team/roster/rosterGeneration.server.ts,0,3,,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/rosterGeneration.test.ts,roster,src/lib/team/roster/rosterGeneration.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterGenerationCore.ts,roster,src/lib/team/roster/rosterGenerationCore.ts,2,5,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterGridEligibility.test.ts,roster,src/lib/team/roster/rosterGridEligibility.test.ts,0,0,,false,false,,,high,roster/ops scheduling
+src/lib/workforce-os/rosterLifecycleDriftExclusion.test.ts,roster,src/lib/team/roster/rosterLifecycleDriftExclusion.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterManualAdjustments.server.ts,roster,src/lib/team/roster/rosterManualAdjustments.server.ts,0,0,,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/rosterManualAdjustments.test.ts,roster,src/lib/team/roster/rosterManualAdjustments.test.ts,0,0,fi_staff_members,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterManualAdjustmentsCore.ts,roster,src/lib/team/roster/rosterManualAdjustmentsCore.ts,2,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterShiftAudit.server.ts,roster,src/lib/team/roster/rosterShiftAudit.server.ts,1,1,,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/rosterShiftCreatedBy.test.ts,roster,src/lib/team/roster/rosterShiftCreatedBy.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterStandardHours.test.ts,roster,src/lib/team/roster/rosterStandardHours.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterStandardHoursRender.test.ts,roster,src/lib/team/roster/rosterStandardHoursRender.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/rosterTx.test.ts,roster,src/lib/team/roster/rosterTx.test.ts,0,0,fi_staff,false,false,,,high,roster/ops scheduling
+src/lib/workforce-os/rosterTxCore.ts,roster,src/lib/team/roster/rosterTxCore.ts,1,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/security/README.md,shared,src/lib/team/shared/README.md,0,0,,false,false,,,low,docs/security guard scaffolding
+src/lib/workforce-os/security/tenantScopedQuery.server.ts,shared,src/lib/team/shared/tenantScopedQuery.server.ts,2,0,,true,true,,,high,tenant/actor resolution shared by roster+mutations
+src/lib/workforce-os/security/tenantScopingGuard.test.ts,shared,src/lib/team/shared/tenantScopingGuard.test.ts,0,0,,false,false,,,high,tenant/actor resolution shared by roster+mutations
+src/lib/workforce-os/staffCanonicalLifecycle.test.ts,identity,src/lib/team/identity/staffCanonicalLifecycle.test.ts,0,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffCanonicalLifecycle.ts,identity,src/lib/team/identity/staffCanonicalLifecycle.ts,2,0,fi_staff_members,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffIdentityAuditAccess.server.ts,identity,src/lib/team/identity/staffIdentityAuditAccess.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffIdentityReadinessAudit.server.test.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffIdentityReadinessAudit.server.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.ts,1,0,fi_staff_members|fi_staff,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecycle.server.ts,identity,src/lib/team/identity/staffLifecycle.server.ts,1,0,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecycle.test.ts,identity,src/lib/team/identity/staffLifecycle.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecycleCore.ts,identity,src/lib/team/identity/staffLifecycleCore.ts,10,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecyclePresentation.test.ts,identity,src/lib/team/identity/staffLifecyclePresentation.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecyclePresentation.ts,identity,src/lib/team/identity/staffLifecyclePresentation.ts,3,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffLifecycleTypes.ts,identity,src/lib/team/identity/staffLifecycleTypes.ts,19,4,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/staffStandardHours.server.ts,roster,src/lib/team/roster/staffStandardHours.server.ts,2,1,fi_staff,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursAllocation.test.ts,roster,src/lib/team/roster/staffStandardHoursAllocation.test.ts,0,0,fi_staff,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursBulkDefault.test.ts,roster,src/lib/team/roster/staffStandardHoursBulkDefault.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursCore.ts,roster,src/lib/team/roster/staffStandardHoursCore.ts,11,3,fi_staff,false,false,,,high,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursManageGate.server.ts,roster,src/lib/team/roster/staffStandardHoursManageGate.server.ts,1,0,,true,false,,,high,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursPage.server.ts,roster,src/lib/team/roster/staffStandardHoursPage.server.ts,0,0,,true,false,,,high,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursRoutes.test.ts,roster,src/lib/team/roster/staffStandardHoursRoutes.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursRoutes.ts,roster,src/lib/team/roster/staffStandardHoursRoutes.ts,2,1,fi_staff,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/staffStandardHoursSave.test.ts,roster,src/lib/team/roster/staffStandardHoursSave.test.ts,0,0,fi_staff,false,false,,,high,roster/ops scheduling
+src/lib/workforce-os/workforceClinicalEventMapping.test.ts,roster,src/lib/team/roster/workforceClinicalEventMapping.test.ts,0,0,,false,false,,,low,clinical staffing eligibility bridge
+src/lib/workforce-os/workforceClinicalEventMapping.ts,roster,src/lib/team/roster/workforceClinicalEventMapping.ts,3,1,,false,false,,,medium,clinical staffing eligibility bridge
+src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults.ts,roster,src/lib/team/roster/workforceClinicalStaffingTemplateDefaults.ts,1,1,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/workforceEventAssignmentBridge.server.ts,roster,src/lib/team/roster/workforceEventAssignmentBridge.server.ts,6,0,,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/workforceIdentityLinks.pure.test.ts,identity,src/lib/team/identity/workforceIdentityLinks.pure.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityLinks.server.ts,identity,src/lib/team/identity/workforceIdentityLinks.server.ts,0,0,fi_staff,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityMetadata.test.ts,identity,src/lib/team/identity/workforceIdentityMetadata.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityMetadata.ts,identity,src/lib/team/identity/workforceIdentityMetadata.ts,2,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityReadinessSignals.test.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityReadinessSignals.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.ts,0,3,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentitySources.test.ts,identity,src/lib/team/identity/workforceIdentitySources.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentitySources.ts,identity,src/lib/team/identity/workforceIdentitySources.ts,4,1,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentitySummary.test.ts,identity,src/lib/team/identity/workforceIdentitySummary.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentitySummary.ts,identity,src/lib/team/identity/workforceIdentitySummary.ts,3,1,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceIdentityTenantOverview.server.ts,identity,src/lib/team/identity/workforceIdentityTenantOverview.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceMutationErrorsCore.test.ts,shared,src/lib/team/shared/workforceMutationErrorsCore.test.ts,0,0,,false,false,,,low,cross-domain mutation error mapping
+src/lib/workforce-os/workforceMutationErrorsCore.ts,shared,src/lib/team/shared/workforceMutationErrorsCore.ts,3,1,fi_staff,false,false,,,medium,cross-domain mutation error mapping
+src/lib/workforce-os/workforceOsDirectoryLoader.server.ts,directory,src/lib/team/directory/workforceOsDirectoryLoader.server.ts,1,0,fi_staff_members,true,false,,,high,directory/list projections
+src/lib/workforce-os/workforceProcedureClinicalEligibility.test.ts,roster,src/lib/team/roster/workforceProcedureClinicalEligibility.test.ts,0,0,,false,false,,,low,clinical staffing eligibility bridge
+src/lib/workforce-os/workforceProcedureClinicalEligibility.ts,roster,src/lib/team/roster/workforceProcedureClinicalEligibility.ts,1,1,,false,false,,,low,clinical staffing eligibility bridge
+src/lib/workforce-os/workforceReadinessBands.test.ts,identity,src/lib/team/identity/workforceReadinessBands.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceReadinessBands.ts,identity,src/lib/team/identity/workforceReadinessBands.ts,3,1,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceReadinessClinicalEligibility.ts,identity,src/lib/team/identity/workforceReadinessClinicalEligibility.ts,3,1,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceReadinessEngine.test.ts,identity,src/lib/team/identity/workforceReadinessEngine.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceReadinessEngine.ts,identity,src/lib/team/identity/workforceReadinessEngine.ts,8,4,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceReadinessTenantOverview.server.ts,identity,src/lib/team/identity/workforceReadinessTenantOverview.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce-os/workforceRosterCandidates.test.ts,roster,src/lib/team/roster/workforceRosterCandidates.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/workforceRosterCandidates.ts,roster,src/lib/team/roster/workforceRosterCandidates.ts,7,3,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/workforceRosterCommandCentre.server.ts,roster,src/lib/team/roster/workforceRosterCommandCentre.server.ts,9,0,fi_staff_members,true,false,,,high,roster command centre (ops surface)
+src/lib/workforce-os/workforceRosterQueryParams.test.ts,roster,src/lib/team/roster/workforceRosterQueryParams.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/workforceRosterQueryParams.ts,roster,src/lib/team/roster/workforceRosterQueryParams.ts,2,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/workforceRostering.server.ts,roster,src/lib/team/roster/workforceRostering.server.ts,5,2,,true,true,,,high,roster/ops scheduling
+src/lib/workforce-os/workforceRosteringEngine.test.ts,roster,src/lib/team/roster/workforceRosteringEngine.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce-os/workforceRosteringEngine.ts,roster,src/lib/team/roster/workforceRosteringEngine.ts,4,1,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/workforceSurgeryStaffingBridge.test.ts,roster,src/lib/team/roster/workforceSurgeryStaffingBridge.test.ts,0,0,,false,false,,,low,clinical staffing eligibility bridge
+src/lib/workforce/certificationsPage.server.ts,compliance,src/lib/team/compliance/certificationsPage.server.ts,1,0,fi_staff_members,true,false,,,medium,credentials/certs/audits
+src/lib/workforce/clinicalEligibility.server.ts,roster,src/lib/team/roster/clinicalEligibility.server.ts,1,0,fi_staff_members,true,false,,,medium,clinical staffing eligibility bridge
+src/lib/workforce/clinicalEligibilityCore.ts,roster,src/lib/team/roster/clinicalEligibilityCore.ts,0,1,,false,false,,,low,clinical staffing eligibility bridge
+src/lib/workforce/clinicalEligibilityGate.server.ts,roster,src/lib/team/roster/clinicalEligibilityGate.server.ts,1,0,,true,false,,,medium,clinical staffing eligibility bridge
+src/lib/workforce/complianceAutomation.server.ts,compliance,src/lib/team/compliance/complianceAutomation.server.ts,3,0,fi_staff_members|fi_staff_credentials|fi_staff_certifications,true,true,,,high,credentials/certs/audits
+src/lib/workforce/compliancePage.server.ts,compliance,src/lib/team/compliance/compliancePage.server.ts,1,0,fi_staff_members,true,false,,,medium,credentials/certs/audits
+src/lib/workforce/credentialExpiryCore.ts,compliance,src/lib/team/compliance/credentialExpiryCore.ts,2,0,,false,false,,,low,credentials/certs/audits
+src/lib/workforce/credentialsPage.server.ts,compliance,src/lib/team/compliance/credentialsPage.server.ts,1,0,fi_staff_members,true,false,,,medium,credentials/certs/audits
+src/lib/workforce/duplicateMergeRecommendation.server.ts,identity,src/lib/team/identity/duplicateMergeRecommendation.server.ts,2,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/duplicateMergeRecommendationCore.ts,identity,src/lib/team/identity/duplicateMergeRecommendationCore.ts,0,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/duplicateReview.server.ts,identity,src/lib/team/identity/duplicateReview.server.ts,0,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/hrSyncAudit.server.ts,identity,src/lib/team/identity/hrSyncAudit.server.ts,2,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/hrSyncAuditCore.ts,identity,src/lib/team/identity/hrSyncAuditCore.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/hrSyncAuditPage.server.ts,identity,src/lib/team/identity/hrSyncAuditPage.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/hrSyncAuditTypes.ts,identity,src/lib/team/identity/hrSyncAuditTypes.ts,2,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/identityReconciliation.server.ts,identity,src/lib/team/identity/identityReconciliation.server.ts,3,0,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/identityReconciliationCore.ts,identity,src/lib/team/identity/identityReconciliationCore.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/legacyRouteTelemetry.server.ts,shared,src/lib/team/shared/legacyRouteTelemetry.server.ts,0,0,,true,false,,,medium,legacy route telemetry (nav A1)
+src/lib/workforce/offboardingPage.server.ts,identity,src/lib/team/identity/offboardingPage.server.ts,0,0,fi_staff_members,true,false,,,medium,offboarding page loader (employment termination UI)
+src/lib/workforce/onboarding/onboardingCentre.test.ts,onboarding,src/lib/team/onboarding/onboardingCentre.test.ts,0,0,,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingCentreCore.test.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.test.ts,0,0,,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingCentreCore.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.ts,2,0,,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingChecklist.server.ts,onboarding,src/lib/team/onboarding/onboardingChecklist.server.ts,5,0,fi_staff_members,true,true,,,high,onboarding path/name
+src/lib/workforce/onboarding/onboardingInvitation.server.ts,onboarding,src/lib/team/onboarding/onboardingInvitation.server.ts,1,0,fi_staff_members,true,true,,,high,onboarding path/name
+src/lib/workforce/onboarding/onboardingInviteUrlCore.ts,onboarding,src/lib/team/onboarding/onboardingInviteUrlCore.ts,2,1,,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingPage.server.ts,onboarding,src/lib/team/onboarding/onboardingPage.server.ts,1,1,fi_staff_members,true,true,,,high,onboarding path/name
+src/lib/workforce/onboarding/onboardingPageModel.test.ts,onboarding,src/lib/team/onboarding/onboardingPageModel.test.ts,0,0,fi_staff_members,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingPinLayer.server.ts,onboarding,src/lib/team/onboarding/onboardingPinLayer.server.ts,2,0,fi_staff,true,true,,,high,onboarding path/name
+src/lib/workforce/onboarding/onboardingStaffCreate.test.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreate.test.ts,0,0,fi_staff_members|fi_staff,false,false,,,high,onboarding path/name
+src/lib/workforce/onboarding/onboardingStaffCreateCore.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreateCore.ts,0,0,,false,false,,,low,onboarding path/name
+src/lib/workforce/onboarding/onboardingTypes.ts,onboarding,src/lib/team/onboarding/onboardingTypes.ts,5,0,,false,false,,,medium,onboarding path/name
+src/lib/workforce/payPeriodCore.test.ts,payroll,src/lib/team/payroll/payPeriodCore.test.ts,0,0,,false,false,,,low,pay/time costing
+src/lib/workforce/payPeriodCore.ts,payroll,src/lib/team/payroll/payPeriodCore.ts,5,1,,false,false,,,medium,pay/time costing
+src/lib/workforce/payPeriodExport.server.ts,payroll,src/lib/team/payroll/payPeriodExport.server.ts,0,0,fi_staff_members,true,false,,,high,pay/time costing
+src/lib/workforce/payPeriodExportCore.test.ts,payroll,src/lib/team/payroll/payPeriodExportCore.test.ts,0,0,,false,false,,,high,pay/time costing
+src/lib/workforce/payPeriodExportCore.ts,payroll,src/lib/team/payroll/payPeriodExportCore.ts,0,0,,false,false,,,high,pay/time costing
+src/lib/workforce/procedureStaffingOptimizer.server.ts,planning,src/lib/team/planning/procedureStaffingOptimizer.server.ts,4,0,,true,true,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/procedureStaffingOptimizerCore.ts,planning,src/lib/team/planning/procedureStaffingOptimizerCore.ts,2,0,,false,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/procedureStaffingOptimizerPage.server.ts,planning,src/lib/team/planning/procedureStaffingOptimizerPage.server.ts,0,0,,true,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/recruitmentPipeline.server.ts,planning,src/lib/team/planning/recruitmentPipeline.server.ts,0,0,,true,true,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/recruitmentPipelineCore.ts,planning,src/lib/team/planning/recruitmentPipelineCore.ts,2,0,,false,false,,,low,demand/recruitment/procedure staffing
+src/lib/workforce/recruitmentPipelinePage.server.ts,planning,src/lib/team/planning/recruitmentPipelinePage.server.ts,0,0,,true,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/rosterActualVariance.server.ts,roster,src/lib/team/roster/rosterActualVariance.server.ts,1,0,fi_staff,true,false,,,medium,roster/ops scheduling
+src/lib/workforce/rosterActualVarianceCore.test.ts,roster,src/lib/team/roster/rosterActualVarianceCore.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce/rosterActualVarianceCore.ts,roster,src/lib/team/roster/rosterActualVarianceCore.ts,1,1,,false,false,,,low,roster/ops scheduling
+src/lib/workforce/rosterCadence.test.ts,roster,src/lib/team/roster/rosterCadence.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce/rosterCadencePolicy.server.ts,roster,src/lib/team/roster/rosterCadencePolicy.server.ts,4,0,,true,true,,,high,roster/ops scheduling
+src/lib/workforce/rosterCadencePolicyCore.ts,roster,src/lib/team/roster/rosterCadencePolicyCore.ts,7,0,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce/rosterOperationalEditing.test.ts,roster,src/lib/team/roster/rosterOperationalEditing.test.ts,0,0,,false,false,,,low,roster/ops scheduling
+src/lib/workforce/shiftCostIntelligence.server.ts,payroll,src/lib/team/payroll/shiftCostIntelligence.server.ts,3,0,fi_staff_members,true,false,,,high,pay/time costing
+src/lib/workforce/shiftCostIntelligenceCore.ts,payroll,src/lib/team/payroll/shiftCostIntelligenceCore.ts,7,0,,false,false,,,high,pay/time costing
+src/lib/workforce/shiftCostIntelligencePage.server.ts,payroll,src/lib/team/payroll/shiftCostIntelligencePage.server.ts,0,0,,true,false,,,high,pay/time costing
+src/lib/workforce/staffAccessAccept.server.ts,access,src/lib/team/access/staffAccessAccept.server.ts,2,2,fi_staff_members,true,true,,,high,login/PIN/entitlement
+src/lib/workforce/staffAccessAccept.test.ts,access,src/lib/team/access/staffAccessAccept.test.ts,0,0,fi_staff_members|fi_staff,false,false,,,high,login/PIN/entitlement
+src/lib/workforce/staffAccessAcceptCore.ts,access,src/lib/team/access/staffAccessAcceptCore.ts,0,0,fi_staff,false,false,,,low,login/PIN/entitlement
+src/lib/workforce/staffAccessCentre.server.ts,access,src/lib/team/access/staffAccessCentre.server.ts,2,1,fi_staff_members,true,true,,,high,login/PIN/entitlement
+src/lib/workforce/staffAccessCentreCore.test.ts,access,src/lib/team/access/staffAccessCentreCore.test.ts,0,0,,false,false,,,low,login/PIN/entitlement
+src/lib/workforce/staffAccessCentreCore.ts,access,src/lib/team/access/staffAccessCentreCore.ts,1,0,,false,false,,,low,login/PIN/entitlement
+src/lib/workforce/staffAccessInviteAudit.server.ts,access,src/lib/team/access/staffAccessInviteAudit.server.ts,0,1,,true,true,,,high,login/PIN/entitlement
+src/lib/workforce/staffAccessInviteCore.test.ts,access,src/lib/team/access/staffAccessInviteCore.test.ts,0,0,,false,false,,,low,login/PIN/entitlement
+src/lib/workforce/staffAccessInviteCore.ts,access,src/lib/team/access/staffAccessInviteCore.ts,1,2,,false,true,,,high,login/PIN/entitlement
+src/lib/workforce/staffAccessPinLayer.server.ts,access,src/lib/team/access/staffAccessPinLayer.server.ts,1,0,fi_staff_members,true,true,,,high,login/PIN/entitlement
+src/lib/workforce/staffCanonicalDecision.server.ts,identity,src/lib/team/identity/staffCanonicalDecision.server.ts,0,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffCanonicalDecisionCore.ts,identity,src/lib/team/identity/staffCanonicalDecisionCore.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffCertification.server.ts,compliance,src/lib/team/compliance/staffCertification.server.ts,3,0,fi_staff_certifications,true,true,,,high,credentials/certs/audits
+src/lib/workforce/staffCertifications.server.ts,compliance,src/lib/team/compliance/staffCertifications.server.ts,0,0,,true,false,,,medium,credentials/certs/audits
+src/lib/workforce/staffCredentials.server.ts,compliance,src/lib/team/compliance/staffCredentials.server.ts,2,0,fi_staff_credentials,true,true,,,high,credentials/certs/audits
+src/lib/workforce/staffDepartureSideEffects.server.ts,identity,src/lib/team/identity/staffDepartureSideEffects.server.ts,2,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffDuplicateDetection.server.ts,identity,src/lib/team/identity/staffDuplicateDetection.server.ts,1,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffDuplicateDetectionCore.ts,identity,src/lib/team/identity/staffDuplicateDetectionCore.ts,1,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffHrTaskMapBannerCore.test.ts,access,src/lib/team/access/staffHrTaskMapBannerCore.test.ts,0,0,,false,false,,,low,access task map (identity linkage UX)
+src/lib/workforce/staffHrTaskMapBannerCore.ts,access,src/lib/team/access/staffHrTaskMapBannerCore.ts,1,0,,false,false,,,low,access task map (identity linkage UX)
+src/lib/workforce/staffHrTaskMapCore.test.ts,access,src/lib/team/access/staffHrTaskMapCore.test.ts,0,0,,false,false,,,low,access task map (identity linkage UX)
+src/lib/workforce/staffHrTaskMapCore.ts,access,src/lib/team/access/staffHrTaskMapCore.ts,0,0,fi_staff_members,false,false,,,low,access task map (identity linkage UX)
+src/lib/workforce/staffLeaveWorkflow.server.test.ts,roster,src/lib/team/roster/staffLeaveWorkflow.server.test.ts,0,0,fi_staff_members,false,false,,,low,leave affects roster eligibility/availability
+src/lib/workforce/staffLeaveWorkflow.server.ts,roster,src/lib/team/roster/staffLeaveWorkflow.server.ts,1,1,fi_staff,true,true,,,high,leave affects roster eligibility/availability
+src/lib/workforce/staffLeaveWorkflowCore.test.ts,roster,src/lib/team/roster/staffLeaveWorkflowCore.test.ts,0,0,,false,false,,,low,leave affects roster eligibility/availability
+src/lib/workforce/staffLeaveWorkflowCore.ts,roster,src/lib/team/roster/staffLeaveWorkflowCore.ts,1,0,,false,false,,,low,leave affects roster eligibility/availability
+src/lib/workforce/staffLifecycleCopy.ts,shared,src/lib/team/shared/staffLifecycleCopy.ts,2,2,fi_staff_members|fi_staff,false,false,,,low,lifecycle UX/copy used across domains
+src/lib/workforce/staffLifecycleUxCore.test.ts,shared,src/lib/team/shared/staffLifecycleUxCore.test.ts,0,0,,false,false,,,low,lifecycle UX/copy used across domains
+src/lib/workforce/staffLifecycleUxCore.ts,shared,src/lib/team/shared/staffLifecycleUxCore.ts,1,0,,false,false,,,low,lifecycle UX/copy used across domains
+src/lib/workforce/staffMerge.server.ts,identity,src/lib/team/identity/staffMerge.server.ts,1,1,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffOffboarding.server.ts,identity,src/lib/team/identity/staffOffboarding.server.ts,3,1,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffOperationalHistory.server.ts,identity,src/lib/team/identity/staffOperationalHistory.server.ts,2,0,fi_staff_members|fi_staff_credentials|fi_staff_certifications,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffOperationalHistoryCore.ts,identity,src/lib/team/identity/staffOperationalHistoryCore.ts,7,1,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffProfileActionMenu.test.ts,shared,src/lib/team/shared/staffProfileActionMenu.test.ts,0,0,,false,false,,,low,cross-surface profile action menu test
+src/lib/workforce/staffProfileHub.server.ts,identity,src/lib/team/identity/staffProfileHub.server.ts,0,0,,true,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffProfileHubCore.test.ts,identity,src/lib/team/identity/staffProfileHubCore.test.ts,0,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffProfileHubCore.ts,identity,src/lib/team/identity/staffProfileHubCore.ts,1,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffReconciliationDataCore.ts,identity,src/lib/team/identity/staffReconciliationDataCore.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffReconciliationPage.server.ts,identity,src/lib/team/identity/staffReconciliationPage.server.ts,2,2,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffReconciliationRecommendation.server.ts,identity,src/lib/team/identity/staffReconciliationRecommendation.server.ts,2,0,,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffReconciliationRecommendationCore.ts,identity,src/lib/team/identity/staffReconciliationRecommendationCore.ts,1,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffTenantLinkRepair.server.ts,identity,src/lib/team/identity/staffTenantLinkRepair.server.ts,4,0,fi_staff_members|fi_staff,true,true,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffTenantLinkRepair.test.ts,identity,src/lib/team/identity/staffTenantLinkRepair.test.ts,0,0,fi_staff_members|fi_staff,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffTenantLinkRepairCore.ts,identity,src/lib/team/identity/staffTenantLinkRepairCore.ts,1,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/staffTimeClock.server.ts,payroll,src/lib/team/payroll/staffTimeClock.server.ts,3,0,fi_staff,true,true,,,high,pay/time costing
+src/lib/workforce/staffTimeClockCore.test.ts,payroll,src/lib/team/payroll/staffTimeClockCore.test.ts,0,0,,false,false,,,low,pay/time costing
+src/lib/workforce/staffTimeClockCore.ts,payroll,src/lib/team/payroll/staffTimeClockCore.ts,2,0,,false,false,,,high,pay/time costing
+src/lib/workforce/staffTimeClockPolicy.server.ts,payroll,src/lib/team/payroll/staffTimeClockPolicy.server.ts,5,0,,true,true,,,high,pay/time costing
+src/lib/workforce/staffTimeClockPolicyCore.test.ts,payroll,src/lib/team/payroll/staffTimeClockPolicyCore.test.ts,0,0,,false,false,,,low,pay/time costing
+src/lib/workforce/staffTimeClockPolicyCore.ts,payroll,src/lib/team/payroll/staffTimeClockPolicyCore.ts,2,0,,false,false,,,low,pay/time costing
+src/lib/workforce/surgicalWorkforceIntelligence.server.ts,planning,src/lib/team/planning/surgicalWorkforceIntelligence.server.ts,1,0,,true,false,,,medium,demand/recruitment/procedure staffing
+src/lib/workforce/surgicalWorkforceIntelligenceCore.test.ts,planning,src/lib/team/planning/surgicalWorkforceIntelligenceCore.test.ts,0,0,,false,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/surgicalWorkforceIntelligenceCore.ts,planning,src/lib/team/planning/surgicalWorkforceIntelligenceCore.ts,0,1,,false,false,,,low,demand/recruitment/procedure staffing
+src/lib/workforce/timesheetApprovalCore.test.ts,payroll,src/lib/team/payroll/timesheetApprovalCore.test.ts,0,0,,false,false,,,high,pay/time costing
+src/lib/workforce/timesheetApprovalCore.ts,payroll,src/lib/team/payroll/timesheetApprovalCore.ts,2,0,,false,false,,,high,pay/time costing
+src/lib/workforce/timesheetPunchSync.server.ts,payroll,src/lib/team/payroll/timesheetPunchSync.server.ts,1,0,,true,true,,,high,pay/time costing
+src/lib/workforce/wageProfile.server.ts,payroll,src/lib/team/payroll/wageProfile.server.ts,4,0,fi_staff_members,true,true,,,high,pay/time costing
+src/lib/workforce/wageProfileCore.ts,payroll,src/lib/team/payroll/wageProfileCore.ts,10,1,,false,false,,,high,pay/time costing
+src/lib/workforce/wageProfilePage.server.ts,payroll,src/lib/team/payroll/wageProfilePage.server.ts,0,0,,true,false,,,high,pay/time costing
+src/lib/workforce/workforceClinicalTypes.ts,shared,src/lib/team/shared/workforceClinicalTypes.ts,10,0,,false,false,,,high,cross-domain clinical integration map/types
+src/lib/workforce/workforceCommandCentre.test.ts,commandCentre,src/lib/team/commandCentre/workforceCommandCentre.test.ts,0,0,,false,false,,,high,KPI/attention composition
+src/lib/workforce/workforceCommandCentreCore.ts,commandCentre,src/lib/team/commandCentre/workforceCommandCentreCore.ts,1,2,,false,false,,,high,KPI/attention composition
+src/lib/workforce/workforceCommandCentrePage.server.ts,commandCentre,src/lib/team/commandCentre/workforceCommandCentrePage.server.ts,1,0,,true,false,,,high,KPI/attention composition
+src/lib/workforce/workforceComplianceAuditCron.server.ts,compliance,src/lib/team/compliance/workforceComplianceAuditCron.server.ts,0,0,,true,false,,,medium,credentials/certs/audits
+src/lib/workforce/workforceHrManageGate.server.ts,access,src/lib/team/access/workforceHrManageGate.server.ts,10,0,,true,false,,,high,login/PIN/entitlement
+src/lib/workforce/workforceHrManageGate.test.ts,access,src/lib/team/access/workforceHrManageGate.test.ts,0,0,,false,false,,,high,login/PIN/entitlement
+src/lib/workforce/workforceHrManageGateCore.ts,access,src/lib/team/access/workforceHrManageGateCore.ts,0,0,,false,false,,,high,login/PIN/entitlement
+src/lib/workforce/workforceHrStaffSyncOrchestrator.server.ts,identity,src/lib/team/identity/workforceHrStaffSyncOrchestrator.server.ts,0,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/workforceIntelligenceEngineCore.test.ts,planning,src/lib/team/planning/workforceIntelligenceEngineCore.test.ts,0,0,,false,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/workforceIntelligenceEngineCore.ts,planning,src/lib/team/planning/workforceIntelligenceEngineCore.ts,2,0,,false,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/workforceOperationalMetrics.server.ts,commandCentre,src/lib/team/commandCentre/workforceOperationalMetrics.server.ts,2,0,fi_staff_members|fi_staff_credentials|fi_staff_certifications,true,false,,,medium,operational metrics for CC composition
+src/lib/workforce/workforceOsSubNav.test.ts,shared,src/lib/team/shared/workforceOsSubNav.test.ts,0,0,,false,false,,,high,nav/sync integration test
+src/lib/workforce/workforcePhase1c.test.ts,shared,src/lib/team/shared/workforcePhase1c.test.ts,0,0,,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase1cAudit.ts,shared,src/lib/team/shared/workforcePhase1cAudit.ts,0,1,,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase1cReconciliationPipeline.test.ts,identity,src/lib/team/identity/workforcePhase1cReconciliationPipeline.test.ts,0,0,fi_staff_members,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/workforcePhase1cSprint2.test.ts,shared,src/lib/team/shared/workforcePhase1cSprint2.test.ts,0,0,fi_staff_members,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase1cSprint3.test.ts,shared,src/lib/team/shared/workforcePhase1cSprint3.test.ts,0,0,,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase1cSprint35.test.ts,shared,src/lib/team/shared/workforcePhase1cSprint35.test.ts,0,0,,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase2Sprint1.test.ts,shared,src/lib/team/shared/workforcePhase2Sprint1.test.ts,0,0,,false,false,,,low,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase2Sprint2.test.ts,shared,src/lib/team/shared/workforcePhase2Sprint2.test.ts,0,0,,false,false,,,high,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase2Sprint3.test.ts,shared,src/lib/team/shared/workforcePhase2Sprint3.test.ts,0,0,,false,false,,,high,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase2Sprint4.test.ts,shared,src/lib/team/shared/workforcePhase2Sprint4.test.ts,0,0,,false,false,,,high,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePhase2Sprint5.test.ts,shared,src/lib/team/shared/workforcePhase2Sprint5.test.ts,0,0,,false,false,,,high,sprint-era integration tests / audit helpers
+src/lib/workforce/workforcePlanningEngine.server.ts,planning,src/lib/team/planning/workforcePlanningEngine.server.ts,3,0,fi_staff_members|fi_staff_credentials|fi_staff_certifications,true,true,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/workforcePlanningEngineCore.ts,planning,src/lib/team/planning/workforcePlanningEngineCore.ts,3,3,,false,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/workforcePlanningEnginePage.server.ts,planning,src/lib/team/planning/workforcePlanningEnginePage.server.ts,0,0,,true,false,,,high,demand/recruitment/procedure staffing
+src/lib/workforce/workforceStaffMemberResolve.server.ts,identity,src/lib/team/identity/workforceStaffMemberResolve.server.ts,3,0,fi_staff_members,true,false,,,medium,identity/lifecycle/readiness/reconciliation
+src/lib/workforce/workforceTimeClockAutoCloseCron.server.ts,payroll,src/lib/team/payroll/workforceTimeClockAutoCloseCron.server.ts,0,0,,true,false,,,high,pay/time costing
+src/lib/staff/assertStaffClinicallyAvailable.server.ts,directory,src/lib/team/directory/assertStaffClinicallyAvailable.server.ts,3,0,fi_staff,true,false,,,medium,staff presentation/picker helpers
+src/lib/staff/calendarVisibleStaff.test.ts,directory,src/lib/team/directory/calendarVisibleStaff.test.ts,0,0,,false,false,,,low,directory/list projections
+src/lib/staff/calendarVisibleStaff.ts,directory,src/lib/team/directory/calendarVisibleStaff.ts,3,1,,false,false,,,medium,directory/list projections
+src/lib/staff/clinicalStaffAssignment.test.ts,directory,src/lib/team/directory/clinicalStaffAssignment.test.ts,0,0,,false,false,,,high,staff presentation/picker helpers
+src/lib/staff/clinicalStaffPicker.ts,directory,src/lib/team/directory/clinicalStaffPicker.ts,36,1,,false,false,,,high,directory/list projections
+src/lib/staff/clinicalStaffPickerLoader.server.ts,directory,src/lib/team/directory/clinicalStaffPickerLoader.server.ts,6,0,fi_staff,true,false,,,medium,directory/list projections
+src/lib/staff/hrStaffReadinessMetadata.test.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/staff/hrStaffReadinessMetadata.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.ts,4,1,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/staff/myHrPortalLoader.server.ts,directory,src/lib/team/directory/myHrPortalLoader.server.ts,0,0,fi_staff,true,false,,,medium,HR portal/directory adjacent loaders
+src/lib/staff/myHrPortalLoader.test.ts,directory,src/lib/team/directory/myHrPortalLoader.test.ts,0,0,fi_staff,false,false,,,low,HR portal/directory adjacent loaders
+src/lib/staff/myHrPortalSelection.ts,directory,src/lib/team/directory/myHrPortalSelection.ts,5,1,,false,false,,,medium,HR portal/directory adjacent loaders
+src/lib/staff/staff.server.ts,identity,src/lib/team/identity/staff.server.ts,43,7,fi_staff,true,true,,,high,canonical fi_staff CRUD
+src/lib/staff/staffApiSchemas.ts,identity,src/lib/team/identity/staffApiSchemas.ts,0,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffAssigneeDisplay.ts,directory,src/lib/team/directory/staffAssigneeDisplay.ts,10,2,,false,false,,,high,directory/list projections
+src/lib/staff/staffDirectoryFilters.ts,directory,src/lib/team/directory/staffDirectoryFilters.ts,2,1,fi_staff_members,false,false,,,high,directory/list projections
+src/lib/staff/staffDirectoryLifecycle.test.ts,directory,src/lib/team/directory/staffDirectoryLifecycle.test.ts,0,0,,false,false,,,high,directory/list projections
+src/lib/staff/staffDirectoryLoader.server.ts,directory,src/lib/team/directory/staffDirectoryLoader.server.ts,3,0,fi_staff_members|fi_staff,true,false,,,high,directory/list projections
+src/lib/staff/staffFiUserLink.server.ts,access,src/lib/team/access/staffFiUserLink.server.ts,2,0,fi_staff,true,true,,,high,login/PIN/entitlement
+src/lib/staff/staffFiUserLinkPlan.test.ts,access,src/lib/team/access/staffFiUserLinkPlan.test.ts,0,0,,false,false,,,low,login/PIN/entitlement
+src/lib/staff/staffFiUserLinkPlan.ts,access,src/lib/team/access/staffFiUserLinkPlan.ts,0,0,fi_staff,false,false,,,low,login/PIN/entitlement
+src/lib/staff/staffHrImportPage.server.ts,directory,src/lib/team/directory/staffHrImportPage.server.ts,2,0,,true,false,,,medium,HR portal/directory adjacent loaders
+src/lib/staff/staffHrNotificationLoader.server.ts,directory,src/lib/team/directory/staffHrNotificationLoader.server.ts,6,0,,true,false,,,medium,HR portal/directory adjacent loaders
+src/lib/staff/staffHrNotificationSummary.test.ts,directory,src/lib/team/directory/staffHrNotificationSummary.test.ts,0,0,,false,false,,,high,HR portal/directory adjacent loaders
+src/lib/staff/staffHrNotificationSummary.ts,directory,src/lib/team/directory/staffHrNotificationSummary.ts,14,8,,false,false,,,high,HR portal/directory adjacent loaders
+src/lib/staff/staffPayrollSourceDisplay.ts,payroll,src/lib/team/payroll/staffPayrollSourceDisplay.ts,5,2,,false,false,,,high,pay/time costing
+src/lib/staff/staffPayrollUx.test.ts,payroll,src/lib/team/payroll/staffPayrollUx.test.ts,0,0,,false,false,,,high,pay/time costing
+src/lib/staff/staffProfileExtras.ts,directory,src/lib/team/directory/staffProfileExtras.ts,5,0,fi_staff,false,false,,,medium,staff presentation/picker helpers
+src/lib/staff/staffRolePolicy.ts,directory,src/lib/team/directory/staffRolePolicy.ts,8,5,,false,false,,,high,staff presentation/picker helpers
+src/lib/staff/staffRoleReview.test.ts,directory,src/lib/team/directory/staffRoleReview.test.ts,0,0,,false,false,,,high,staff presentation/picker helpers
+src/lib/staff/staffRoleReviewApply.ts,directory,src/lib/team/directory/staffRoleReviewApply.ts,1,1,,false,false,,,high,staff presentation/picker helpers
+src/lib/staff/staffRoleReviewLoader.server.ts,directory,src/lib/team/directory/staffRoleReviewLoader.server.ts,0,0,,true,false,,,high,staff presentation/picker helpers
+src/lib/staff/staffSensitiveMetadataKeys.ts,identity,src/lib/team/identity/staffSensitiveMetadataKeys.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffSlotHours.server.ts,directory,src/lib/team/directory/staffSlotHours.server.ts,5,0,fi_staff,true,false,,,medium,staff presentation/picker helpers
+src/lib/staff/staffSourceIdsNormalize.test.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffSourceIdsNormalize.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.ts,12,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffTwinLoader.server.ts,identity,src/lib/team/identity/staffTwinLoader.server.ts,1,0,,true,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffWeeklyHours.ts,directory,src/lib/team/directory/staffWeeklyHours.ts,9,0,fi_staff,false,false,,,high,staff presentation/picker helpers
+src/lib/staff/workforceCommandCentre.server.ts,delete,,1,0,,true,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,medium,legacy staff CC vs workforce V2
+src/lib/staff/workforceCommandCentre.test.ts,delete,,0,0,,false,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,low,legacy staff CC vs workforce V2
+src/lib/staff/workforceCommandCentre.ts,delete,,1,1,,false,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,low,legacy staff CC vs workforce V2

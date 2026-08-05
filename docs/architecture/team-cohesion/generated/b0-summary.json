@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-08-05T04:35:12.007Z",
+  "currentFiles": 283,
+  "trees": {
+    "workforce-os": 103,
+    "workforce": 140,
+    "staff": 40
+  },
+  "domainCounts": {
+    "shared": 27,
+    "roster": 62,
+    "identity": 84,
+    "directory": 25,
+    "compliance": 9,
+    "onboarding": 12,
+    "payroll": 23,
+    "planning": 14,
+    "access": 20,
+    "commandCentre": 4,
+    "delete": 3
+  },
+  "riskCounts": {
+    "low": 112,
+    "medium": 55,
+    "high": 116
+  },
+  "identity": {
+    "fi_staff": 362,
+    "fi_staff_members": 233,
+    "total": 595,
+    "files": 251,
+    "byClassification": {
+      "scheduling read": 91,
+      "suspected duplicate identity logic": 36,
+      "lifecycle read": 59,
+      "cross-domain join": 46,
+      "test or fixture": 88,
+      "mutation": 1,
+      "reporting": 8,
+      "canonical identity resolution": 42,
+      "migration script": 224
+    }
+  },
+  "importGraph": {
+    "interTreeEdgeCount": 97,
+    "cycleCount": 2,
+    "deepImportViolationCount": 252,
+    "clientImportingServerCount": 23,
+    "externalIntoTreeCounts": {
+      "workforce-os": 67,
+      "workforce": 67,
+      "staff": 126
+    }
+  },
+  "basenameCollisionCount": 1,
+  "actionFiles": 11
+}
