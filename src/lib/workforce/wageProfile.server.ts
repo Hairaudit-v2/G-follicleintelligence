@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { resolveStaffMemberContext } from "@/src/lib/workforce/workforceStaffMemberResolve.server";
+import {
+  assertEligiblePayrollIdentityTarget,
+} from "@/src/lib/team/payroll/server";
+import { mergePayrollAuditIdentityMetadata } from "@/src/lib/team/payroll";
 
 import { resolveTimesheetTransition, type TimesheetApprovalAction } from "./timesheetApprovalCore";
 import {
@@ -244,8 +247,18 @@ export async function upsertWorkforceWageProfile(input: {
 }): Promise<WorkforceWageProfile> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const supabase = input.client ?? supabaseAdmin();
-  const ctx = await resolveStaffMemberContext(tid, input.staffMemberId.trim(), supabase);
-  if (!ctx) throw new Error("Staff member not found.");
+  // Discriminated staffMemberId resolve — no silent staffId fallback.
+  const identity = await assertEligiblePayrollIdentityTarget(
+    {
+      tenantId: tid,
+      by: "staffMemberId",
+      staffMemberId: input.staffMemberId.trim(),
+    },
+    supabase
+  );
+  const staffMemberId = identity.staffMemberId as string;
+  const fiStaffId = identity.staffId;
+  const fullName = identity.displayName;
 
   if (!Number.isFinite(input.baseRateCents) || input.baseRateCents <= 0) {
     throw new Error("baseRateCents must be positive.");
@@ -254,8 +267,8 @@ export async function upsertWorkforceWageProfile(input: {
   const now = new Date().toISOString();
   const payload = {
     tenant_id: tid,
-    staff_member_id: ctx.staffMemberId,
-    fi_staff_id: ctx.fiStaffId,
+    staff_member_id: staffMemberId,
+    fi_staff_id: fiStaffId,
     rate_type: input.rateType,
     base_rate_cents: Math.round(input.baseRateCents),
     currency: (input.currency ?? "AUD").trim() || "AUD",
@@ -265,6 +278,7 @@ export async function upsertWorkforceWageProfile(input: {
     is_active: true,
     notes: input.notes?.trim() || null,
     updated_at: now,
+    metadata: mergePayrollAuditIdentityMetadata({}, identity),
   };
 
   const wid = input.wageProfileId?.trim();
@@ -277,14 +291,14 @@ export async function upsertWorkforceWageProfile(input: {
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return mapWageProfile(data as Record<string, unknown>, ctx.fullName);
+    return mapWageProfile(data as Record<string, unknown>, fullName);
   }
 
   const { data: existing } = await supabase
     .from("fi_workforce_wage_profiles")
     .select("id")
     .eq("tenant_id", tid)
-    .eq("staff_member_id", ctx.staffMemberId)
+    .eq("staff_member_id", staffMemberId)
     .eq("is_active", true)
     .is("effective_to", null)
     .maybeSingle();
@@ -298,16 +312,16 @@ export async function upsertWorkforceWageProfile(input: {
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return mapWageProfile(data as Record<string, unknown>, ctx.fullName);
+    return mapWageProfile(data as Record<string, unknown>, fullName);
   }
 
   const { data, error } = await supabase
     .from("fi_workforce_wage_profiles")
-    .insert({ ...payload, metadata: {}, created_at: now })
+    .insert({ ...payload, created_at: now })
     .select("*")
     .single();
   if (error) throw new Error(error.message);
-  return mapWageProfile(data as Record<string, unknown>, ctx.fullName);
+  return mapWageProfile(data as Record<string, unknown>, fullName);
 }
 
 export async function listTimesheetEntries(
@@ -359,14 +373,23 @@ export async function createTimesheetEntry(input: {
 }): Promise<TimesheetEntry> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const supabase = input.client ?? supabaseAdmin();
-  const ctx = await resolveStaffMemberContext(tid, input.staffMemberId.trim(), supabase);
-  if (!ctx) throw new Error("Staff member not found.");
+  const identity = await assertEligiblePayrollIdentityTarget(
+    {
+      tenantId: tid,
+      by: "staffMemberId",
+      staffMemberId: input.staffMemberId.trim(),
+    },
+    supabase
+  );
+  const staffMemberId = identity.staffMemberId as string;
+  const fiStaffId = identity.staffId;
+  const fullName = identity.displayName;
 
   const workDate = input.workDate.trim();
   if (!workDate) throw new Error("workDate is required.");
 
   const profiles = await listWorkforceWageProfiles(tid, supabase);
-  const profile = profiles.find((p) => p.staffMemberId === ctx.staffMemberId) ?? null;
+  const profile = profiles.find((p) => p.staffMemberId === staffMemberId) ?? null;
   if (!profile) throw new Error("No active wage profile for staff member.");
 
   const placeholders = await listAwardLoadingPlaceholders(tid, supabase);
@@ -387,7 +410,7 @@ export async function createTimesheetEntry(input: {
     .from("fi_workforce_timesheet_entries")
     .insert({
       tenant_id: tid,
-      staff_member_id: ctx.staffMemberId,
+      staff_member_id: staffMemberId,
       wage_profile_id: profile.id,
       shift_id: input.shiftId?.trim() || null,
       work_date: workDate,
@@ -399,14 +422,14 @@ export async function createTimesheetEntry(input: {
       gross_cost_cents: grossCostCents,
       status: "draft",
       notes: input.notes?.trim() || null,
-      metadata: {},
+      metadata: mergePayrollAuditIdentityMetadata({}, identity),
       created_at: now,
       updated_at: now,
     })
     .select("*")
     .single();
   if (error) throw new Error(error.message);
-  return mapTimesheetEntry(data as Record<string, unknown>, ctx.fullName);
+  return mapTimesheetEntry(data as Record<string, unknown>, fullName);
 }
 
 export async function updateTimesheetEntryLabour(input: {
@@ -537,6 +560,14 @@ export async function transitionTimesheetEntry(input: {
   const supabase = input.client ?? supabaseAdmin();
 
   const { row, staffName } = await loadTimesheetEntryById(tid, entryId, supabase);
+  const identity = await assertEligiblePayrollIdentityTarget(
+    {
+      tenantId: tid,
+      by: "staffMemberId",
+      staffMemberId: String(row.staff_member_id),
+    },
+    supabase
+  );
   const current = String(row.status) as TimesheetStatus;
   const nextStatus = resolveTimesheetTransition(current, input.action);
   if (!nextStatus) {
@@ -547,11 +578,14 @@ export async function transitionTimesheetEntry(input: {
   }
 
   const now = new Date().toISOString();
-  const metadata = mergeApprovalMetadata(
-    asMetadataObject(row.metadata),
-    input.action,
-    input.actorFiUserId.trim(),
-    input.voidReason
+  const metadata = mergePayrollAuditIdentityMetadata(
+    mergeApprovalMetadata(
+      asMetadataObject(row.metadata),
+      input.action,
+      input.actorFiUserId.trim(),
+      input.voidReason
+    ),
+    identity
   );
 
   const { data, error } = await supabase

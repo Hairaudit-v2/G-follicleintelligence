@@ -135,6 +135,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - Payroll projections and exports
 - Time clock policy / punch sync / auto-close cron
 
+**Canonical identity:** `src/lib/team/payroll` (B1.8A) — financial engines remain under `workforce/wageProfile*` / shift-cost until Phase B moves.
+
 ---
 
 ## planning
@@ -145,6 +147,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - Workforce demand / planning engines
 - Recruitment pipeline
 - Capacity and workforce modelling / surgical workforce intelligence
+
+**Canonical identity:** `src/lib/team/planning` (B1.8B) — candidates/vacancies stay non-staff; engines remain under `workforce/*` until Phase B moves.
 
 ---
 
@@ -160,7 +164,7 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 Consumes other domains. Contains minimal underlying business logic.
 
 **Canonical:** `src/lib/team/commandCentre` (B1.7) — page loader shim remains at `workforce/workforceCommandCentrePage.server.ts`  
-**Compat composition helpers:** `workforce/workforceCommandCentreCore.ts` (planning tiles / health until B1.8)  
+**Compat composition helpers:** `workforce/workforceCommandCentreCore.ts` (tiles / health; payroll/planning identity owned by B1.8 packages)  
 **Delete after consumer migration:** `staff/workforceCommandCentre*`
 
 ---

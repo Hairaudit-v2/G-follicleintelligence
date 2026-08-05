@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveStaffIdentities } from "@/src/lib/team/identity/server";
+import { gateProcedureStaffingCandidates } from "@/src/lib/team/planning";
 import {
   DEFAULT_CLINICAL_STAFFING_TEMPLATES,
   normalizeRequiredRoles,
@@ -215,10 +217,12 @@ export async function loadProcedureStaffingOptimizer(
     );
 
     const roleCandidates: Record<string, OptimizerRankedCandidate[]> = {};
+    const rankedByRole: Record<string, Awaited<ReturnType<typeof loadRosterAssignableStaff>>> =
+      {};
 
     for (const [role, count] of Object.entries(requiredRoles)) {
       if ((count ?? 0) <= 0) continue;
-      const ranked = await loadRosterAssignableStaff({
+      rankedByRole[role] = await loadRosterAssignableStaff({
         tenantId: tid,
         clinicId: surgery.clinic_id,
         eventSource: "surgery",
@@ -228,15 +232,36 @@ export async function loadProcedureStaffingOptimizer(
         startsAt,
         endsAt,
       });
+    }
 
-      roleCandidates[role] = ranked.map((candidate) =>
-        enrichCandidateWithCost({
-          candidate,
-          assignedRole: role,
-          wage: wageByStaff.get(candidate.staffId) ?? null,
-          minutesWorked,
-        })
-      );
+    const candidateStaffIds = [
+      ...new Set(Object.values(rankedByRole).flatMap((rows) => rows.map((c) => c.staffId))),
+    ];
+    const identityBatch = candidateStaffIds.length
+      ? await resolveStaffIdentities(
+          { tenantId: tid, by: "staffId", staffIds: candidateStaffIds },
+          { client: supabase }
+        )
+      : { byKey: new Map() };
+    const assignmentGates = gateProcedureStaffingCandidates({
+      candidateStaffIds,
+      identitiesByStaffId: identityBatch.byKey,
+    });
+    const blockedStaffIds = new Set(
+      assignmentGates.filter((g) => !g.canAssign).map((g) => g.staffId)
+    );
+
+    for (const [role, ranked] of Object.entries(rankedByRole)) {
+      roleCandidates[role] = ranked
+        .filter((candidate) => !blockedStaffIds.has(candidate.staffId))
+        .map((candidate) =>
+          enrichCandidateWithCost({
+            candidate,
+            assignedRole: role,
+            wage: wageByStaff.get(candidate.staffId) ?? null,
+            minutesWorked,
+          })
+        );
     }
 
     const recommendation = buildProcedureStaffingRecommendation({

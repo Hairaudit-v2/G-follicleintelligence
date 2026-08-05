@@ -66,8 +66,8 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 | access | centre DTO types, manage-gate result types | invite token generation, revoke mutations |
 | compliance | expiry helpers, page DTO types | cron runners |
 | profile | `StaffProfileHubModel`, attention aggregation, overview adapter | raw dual-table joins, domain policy engines |
-| payroll | pay period pure helpers, wage DTO types | wage writes, timesheet transitions |
-| planning | recruitment stage helpers, engine DTO types | planners’ write paths |
+| payroll | `PayrollStaffEntry`, pay-basis aliases, identity mutation gate, audit identity refs | wage writes, timesheet transitions, rate math |
+| planning | `PlanningStaffEntry`, candidate/vacancy refs, procedure staffing identity bridge | planners’ write paths, optimizer ranking cores |
 | commandCentre | KPI/attention DTO types, href builders, `TeamCommandCentreModel` | data assembly servers (`loadTeamCommandCentre.server`) |
 
 ## Current deep imports that will violate the boundary

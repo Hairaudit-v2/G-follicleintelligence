@@ -3,23 +3,16 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.7 — Command Centre batch composition.
+ * Snapshot: FI-TEAM-COHESION-B1.8A — Payroll identity proof.
  *
- * Allowlist before B1.7: 19
- * Entries removed: 2
- *   - `src/lib/workforce/identityReconciliation.server.ts` (comment token only)
- *   - `src/lib/fiOs/fiOsAuthDisplay.server.ts` (comment token only)
- * Allowlist after: 17
- *
- * Command Centre composes via `src/lib/team/commandCentre` + `resolveStaffIdentities`
- * (batch). Documentation tokens naming both staff tables were rewritten to domain
- * language where that was the sole dual-table signal.
+ * Allowlist before B1.8A: 17
+ * Entries removed: 1 (`src/lib/crm/crmAssigneeEligibility.ts` comment tokens)
+ * Allowlist after: 16
  *
  * Paths use forward slashes relative to repo root.
  */
 export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/crm/crmAssignableOwners.server.ts",
-  "src/lib/crm/crmAssigneeEligibility.ts",
   "src/lib/crm/leadDetailsUpdate.ts",
   "src/lib/fiOs/todayStaffPersonHydration.server.ts",
   "src/lib/fiOs/workspaceAccessResolver.server.ts",

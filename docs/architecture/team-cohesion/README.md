@@ -1,10 +1,10 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B1.7 — Command Centre (GREEN) · B1.6 profile proof intact · B1.5 compliance proof intact · B1.4 roster proof intact · B1.3 onboarding proof intact · B1.2 access proof intact · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
+**Phase:** B1 CLOSED (B1.8A Payroll + B1.8B Planning GREEN) · prior slice proofs intact · B0 inventory operational  
 **Date:** 2026-08-05  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
-B0 was discovery and architecture-lock only. **B1–B1.5** proved identity through directory, access, onboarding, roster, and compliance. **B1.6** made the staff profile the canonical person-level composition surface. **B1.7** makes the Command Centre the many-person composition surface — see [b1.7-command-centre-identity-proof.md](./b1.7-command-centre-identity-proof.md).
+B0 was discovery and architecture-lock only. **B1–B1.8** prove identity through directory, access, onboarding, roster, compliance, profile, command centre, payroll, and planning. Formal closure: [b1-identity-program-closure.md](./b1-identity-program-closure.md).
 
 ## Documents
 
@@ -26,6 +26,9 @@ B0 was discovery and architecture-lock only. **B1–B1.5** proved identity throu
 | [b1.5-compliance-identity-proof.md](./b1.5-compliance-identity-proof.md) | B1.5 compliance/credentials batch-resolver proof |
 | [b1.6-staff-profile-hub-proof.md](./b1.6-staff-profile-hub-proof.md) | B1.6 staff profile composition proof |
 | [b1.7-command-centre-identity-proof.md](./b1.7-command-centre-identity-proof.md) | B1.7 Command Centre batch composition proof |
+| [b1.8a-payroll-identity-proof.md](./b1.8a-payroll-identity-proof.md) | B1.8A payroll identity proof |
+| [b1.8b-planning-identity-proof.md](./b1.8b-planning-identity-proof.md) | B1.8B planning identity proof |
+| [b1-identity-program-closure.md](./b1-identity-program-closure.md) | B1 program closure evidence |
 
 ## Generated artifacts
 
@@ -41,27 +44,14 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 | [generated/b0-inventory.csv](./generated/b0-inventory.csv) | Spreadsheet review of every file |
 | [generated/b0-summary.json](./generated/b0-summary.json) | Counts only |
 
-## Headline numbers (2026-08-05 regenerate)
+## Headline numbers (2026-08-05)
 
 | Metric | Value |
 |--------|------:|
-| Files in three legacy trees | **283** (audit cited 267; +16 since) |
-| Classified with proposed owner or delete | **283 / 283** |
-| `needsDecision` | **0** |
-| Inter-tree import edges | 97 |
-| Import cycles (legacy trees) | 2 |
-| External deep imports into trees | 252 |
-| Client components importing `.server` modules | 23 (mostly `import type`) |
-| Raw identity refs (`src`+`scripts`+`supabase`) | 615 (was 595 pre-B1; +canonical module refs) |
-| Raw identity refs (`src/lib` only) | see regenerate `identityBaseline.srcLibOnly` |
-| Canonical identity package | `src/lib/team/identity` (B1 GREEN) |
-| Canonical profile composition | `src/lib/team/profile` (B1.6 GREEN) |
-| Canonical command-centre composition | `src/lib/team/commandCentre` (B1.7 GREEN) |
+| Canonical Team domains delivered | identity, directory, access, onboarding, roster, compliance, profile, commandCentre, payroll, planning |
+| Dual-table allowlist | **16** (from 20 at B1.6 start) |
+| B1 program | **CLOSED** |
 
 ## Recommended next slice
 
-**FI-TEAM-COHESION-B1.7** is GREEN — see [b1.7-command-centre-identity-proof.md](./b1.7-command-centre-identity-proof.md).
-
-Dual-table allowlist: **17** (was 19; comment-token entries retired).
-
-**Next:** B1.8A Payroll and B1.8B Planning as separate proof slices (do not force into one commit).
+**Phase B** — broader domain folder moves and sprint-action renames per [action-rename-map.md](./action-rename-map.md), keeping B1 identity contracts intact.

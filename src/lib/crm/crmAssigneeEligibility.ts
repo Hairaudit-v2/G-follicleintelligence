@@ -27,11 +27,11 @@ export const CRM_ASSIGNMENT_EXCLUDED_EMPLOYMENT_STATUSES: ReadonlySet<string> = 
  * (assignment ≠ roster eligibility).
  */
 export type CrmAssigneeStaffSignal = {
-  /** fi_staff.is_active */
+  /** Scheduling staff is_active flag */
   isActive: boolean;
-  /** fi_staff_members.employment_status when known */
+  /** Lifecycle employment_status when known */
   employmentStatus?: string | null;
-  /** fi_staff_members.archived_at when known */
+  /** Lifecycle archived_at when known */
   archivedAt?: string | null;
 };
 
@@ -43,7 +43,7 @@ export type CrmAssigneeEligibilityInput = {
   email?: string | null;
   /**
    * Linked staff signal for this fi_user (single row convenience).
-   * Prefer `staffRows` when multiple fi_staff rows share one fi_user.
+   * Prefer `staffRows` when multiple scheduling staff rows share one fi_user.
    */
   staff?: CrmAssigneeStaffSignal | null;
   /** All staff rows linked to this fi_user (authoritative when present). */

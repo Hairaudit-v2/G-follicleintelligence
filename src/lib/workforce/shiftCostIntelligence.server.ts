@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveStaffIdentities } from "@/src/lib/team/identity/server";
+import type { StaffIdentity } from "@/src/lib/team/identity/types";
 import {
   listAwardLoadingPlaceholders,
   listWorkforceWageProfiles,
@@ -35,6 +37,8 @@ type WageCostContext = {
   profileByFiStaff: Map<string, WorkforceWageProfile>;
   profileByMember: Map<string, WorkforceWageProfile>;
   memberByFiStaff: Map<string, StaffMemberRow>;
+  /** Canonical identities keyed by scheduling staffId — attribution only. */
+  identityByStaffId: Map<string, StaffIdentity>;
 };
 
 async function loadWageCostContext(
@@ -53,9 +57,28 @@ async function loadWageCostContext(
   if (membersRes.error) throw new Error(membersRes.error.message);
 
   const memberByFiStaff = new Map<string, StaffMemberRow>();
+  const fiStaffIds: string[] = [];
   for (const raw of membersRes.data ?? []) {
     const m = raw as StaffMemberRow;
-    if (m.fi_staff_id) memberByFiStaff.set(String(m.fi_staff_id), m);
+    if (m.fi_staff_id) {
+      const fid = String(m.fi_staff_id);
+      memberByFiStaff.set(fid, m);
+      fiStaffIds.push(fid);
+    }
+  }
+
+  // One identity batch by scheduling staffId — no per-shift resolve loop.
+  const identityBatch =
+    fiStaffIds.length > 0
+      ? await resolveStaffIdentities(
+          { tenantId, by: "staffId", staffIds: fiStaffIds },
+          { client }
+        )
+      : { byKey: new Map<string, StaffIdentity | null>() };
+
+  const identityByStaffId = new Map<string, StaffIdentity>();
+  for (const [key, identity] of identityBatch.byKey) {
+    if (identity) identityByStaffId.set(key, identity);
   }
 
   return {
@@ -66,6 +89,7 @@ async function loadWageCostContext(
     ),
     profileByMember: new Map(profiles.map((p) => [p.staffMemberId, p])),
     memberByFiStaff,
+    identityByStaffId,
   };
 }
 
@@ -78,11 +102,16 @@ function resolveStaffWage(
   rateType: ReturnType<typeof normalizeWageRateType>;
   baseRateCents: number;
   awardLoadings: AwardLoadingSnapshot[];
+  personKey: string | null;
 } {
   const member = ctx.memberByFiStaff.get(fiStaffId);
+  const identity = ctx.identityByStaffId.get(fiStaffId) ?? null;
   const profile =
     ctx.profileByFiStaff.get(fiStaffId) ??
-    (member ? ctx.profileByMember.get(String(member.id)) : undefined);
+    (member ? ctx.profileByMember.get(String(member.id)) : undefined) ??
+    (identity?.staffMemberId
+      ? ctx.profileByMember.get(identity.staffMemberId)
+      : undefined);
 
   const awardLoadings = profile
     ? resolveAwardLoadingsForProfile({
@@ -92,12 +121,18 @@ function resolveStaffWage(
       })
     : [];
 
+  // Prefer lifecycle member id when known; preserve prior fallback for orphan shifts.
+  const staffMemberId =
+    identity?.staffMemberId ??
+    (member ? String(member.id) : fiStaffId);
+
   return {
-    staffMemberId: member ? String(member.id) : fiStaffId,
-    fullName: member?.full_name ?? "Unknown staff",
+    staffMemberId,
+    fullName: identity?.displayName ?? member?.full_name ?? "Unknown staff",
     rateType: profile?.rateType ?? "hourly",
     baseRateCents: profile?.baseRateCents ?? 0,
     awardLoadings,
+    personKey: identity?.personKey ?? null,
   };
 }
 

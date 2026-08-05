@@ -14,6 +14,7 @@ import {
   resolveTenantCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadPayrollStaffContext } from "@/src/lib/team/payroll/server";
 import {
   computeSurgeryDayStaffingCostForDate,
   ensureDefaultAwardLoadingPlaceholders,
@@ -65,6 +66,7 @@ export async function loadWorkforceOsPayrollPage(
     rosterVariance,
     autoClosedPunches,
     openPunches,
+    payrollIdentityContext,
   ] = await Promise.all([
     listWorkforceWageProfiles(tid),
     listAwardLoadingPlaceholders(tid),
@@ -83,6 +85,7 @@ export async function loadWorkforceOsPayrollPage(
     buildRosterActualVarianceForPeriod(tid, payPeriod.start, payPeriod.end, calendarTimezone),
     listWorkforceTimePunches(tid, { source: "auto_close", limit: 20 }),
     listWorkforceTimePunches(tid, { openOnly: true, limit: 20 }),
+    loadPayrollStaffContext(tid).catch(() => null),
   ]);
 
   const payPeriodStaffTotals = aggregatePayPeriodStaffTotals(
@@ -116,5 +119,13 @@ export async function loadWorkforceOsPayrollPage(
     autoClosedPunches,
     openPunches,
     calendarTimezone,
+    /** B1.8A identity composition — UI may ignore until Phase D. */
+    payrollStaffEntries: payrollIdentityContext?.staff ?? [],
+    payrollIdentityKpis: payrollIdentityContext
+      ? {
+          missingWageProfileCount: payrollIdentityContext.missingWageProfileCount,
+          payrollReadyCount: payrollIdentityContext.payrollReadyCount,
+        }
+      : null,
   };
 }

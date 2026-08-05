@@ -12,6 +12,7 @@ import {
 } from "@/src/lib/workforce/recruitmentPipeline.server";
 import { loadShiftCostIntelligence } from "@/src/lib/workforce/shiftCostIntelligence.server";
 import { listActiveStaffForWageProfiles } from "@/src/lib/workforce/wageProfile.server";
+import { loadPlanningStaffContext } from "@/src/lib/team/planning/server";
 import {
   buildWorkforcePlanningSnapshot,
   classifyCredentialRiskSeverity,
@@ -218,6 +219,7 @@ export async function loadWorkforcePlanningEngine(
     staffOptions,
     shiftIntel,
     activeStaffRes,
+    planningIdentity,
   ] = await Promise.all([
     loadCredentialExpiryRisks(tid, supabase),
     loadProcedureSignalsForHorizon(tid, horizonStart, horizonEnd, supabase),
@@ -231,6 +233,7 @@ export async function loadWorkforcePlanningEngine(
       .eq("tenant_id", tid)
       .eq("employment_status", "active")
       .is("archived_at", null),
+    loadPlanningStaffContext(tid, { client: supabase }).catch(() => null),
   ]);
 
   if (activeStaffRes.error) throw new Error(activeStaffRes.error.message);
@@ -275,6 +278,10 @@ export async function loadWorkforcePlanningEngine(
     weeklyWageExposureCents: shiftIntel.weeklyForecast.totalForecastGrossCostCents,
     missingWageProfileCount,
   });
+
+  // B1.8B: identity composition is warm-loaded for attestation / later UI;
+  // capacity math above stays behaviour-neutral (does not consume planningIdentity counts).
+  void planningIdentity;
 
   await persistPlanningSnapshot(tid, snapshot, supabase);
   return snapshot;
