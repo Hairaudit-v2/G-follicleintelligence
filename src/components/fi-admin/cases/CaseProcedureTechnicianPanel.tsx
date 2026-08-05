@@ -4,7 +4,7 @@ import {
   canSelectStaffForProcedureSlot,
   formatProcedureTeamPickerLabel,
   type ProcedureTeamPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 
 import { caseFormField } from "./caseFormFieldProps";

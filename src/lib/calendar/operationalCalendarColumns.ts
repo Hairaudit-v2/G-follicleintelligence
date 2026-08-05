@@ -5,7 +5,7 @@
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
 import {
   resourceColumnIdForBooking,

@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 
 import { PrescriptionEditorClient } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
 import type { PrescriptionEditorLine } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
-import { formatClinicalPickerOptionLabel } from "@/src/lib/staff/clinicalStaffPicker";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { formatClinicalPickerOptionLabel } from "@/src/lib/team/directory";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import {
   loadActiveCompoundPharmaciesForTenant,
   loadPharmacyTransmissionsForPrescription,

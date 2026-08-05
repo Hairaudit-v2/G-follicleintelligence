@@ -69,7 +69,7 @@ import {
 import {
   canSelectStaffForClinicalPicker,
   type ClinicalStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import {
   fiButtonVariantClassNames,

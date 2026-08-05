@@ -5,7 +5,7 @@ import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezo
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 
 export const metadata = {
   title: "New consultation",

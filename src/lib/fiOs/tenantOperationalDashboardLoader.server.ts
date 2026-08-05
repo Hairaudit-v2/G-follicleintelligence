@@ -47,7 +47,7 @@ import {
   RECEPTION_BOARD_COLUMN_IDS,
 } from "@/src/lib/fiOs/receptionBoardModel";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { normalizeEffectiveBrandingForShell } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";

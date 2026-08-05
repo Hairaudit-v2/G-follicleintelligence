@@ -73,8 +73,9 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 **Seed modules**
 
-- `team/directory/*` loaders / filters / calendar visibility (**canonical**, B2.2a)
-- Deferred hot cluster: `clinicalStaffPicker.ts`, HR notification / role-hours surfaces (B2.2d)
+- `team/directory/*` B1.1 projections + **clinical staff picker pure/loader (B2.2d)** via `index` / `server`
+- **B2.2a deferred:** directory loaders / filters / calendar visibility / `assertStaffClinicallyAvailable` still under `src/lib/staff/`
+- Remaining hot cluster: `staffHrNotificationSummary*`, role/hours surfaces
 
 ---
 

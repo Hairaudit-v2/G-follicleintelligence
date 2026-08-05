@@ -191,9 +191,6 @@ src/lib/workforce/workforceTimeClockAutoCloseCron.server.ts,payroll,src/lib/team
 src/lib/staff/assertStaffClinicallyAvailable.server.ts,directory,src/lib/team/directory/assertStaffClinicallyAvailable.server.ts,3,0,fi_staff,true,false,,,medium,staff presentation/picker helpers
 src/lib/staff/calendarVisibleStaff.test.ts,directory,src/lib/team/directory/calendarVisibleStaff.test.ts,0,0,,false,false,,,low,directory/list projections
 src/lib/staff/calendarVisibleStaff.ts,directory,src/lib/team/directory/calendarVisibleStaff.ts,3,1,,false,false,,,medium,directory/list projections
-src/lib/staff/clinicalStaffAssignment.test.ts,directory,src/lib/team/directory/clinicalStaffAssignment.test.ts,0,0,,false,false,,,high,staff presentation/picker helpers
-src/lib/staff/clinicalStaffPicker.ts,directory,src/lib/team/directory/clinicalStaffPicker.ts,36,1,,false,false,,,high,directory/list projections
-src/lib/staff/clinicalStaffPickerLoader.server.ts,directory,src/lib/team/directory/clinicalStaffPickerLoader.server.ts,6,0,fi_staff,true,false,,,medium,directory/list projections
 src/lib/staff/hrStaffReadinessMetadata.test.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/staff/hrStaffReadinessMetadata.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.ts,4,1,,false,false,,,high,identity/lifecycle/readiness/reconciliation
 src/lib/staff/myHrPortalLoader.server.ts,directory,src/lib/team/directory/myHrPortalLoader.server.ts,0,0,fi_staff,true,false,,,medium,HR portal/directory adjacent loaders
@@ -272,9 +269,13 @@ src/lib/team/compliance/projectStaffComplianceEntry.test.ts,compliance,src/lib/t
 src/lib/team/compliance/projectStaffComplianceEntry.ts,compliance,src/lib/team/compliance/projectStaffComplianceEntry.ts,0,0,,false,false,,,low,canonical team/compliance module
 src/lib/team/compliance/toCredentialsCentreRow.ts,compliance,src/lib/team/compliance/toCredentialsCentreRow.ts,0,0,,false,false,,,low,canonical team/compliance module
 src/lib/team/compliance/types.ts,compliance,src/lib/team/compliance/types.ts,8,0,,false,false,,,high,canonical team/compliance module
+src/lib/team/directory/clinicalStaffAssignment.test.ts,directory,src/lib/team/directory/clinicalStaffAssignment.test.ts,0,0,,false,false,,,high,canonical team/directory module
+src/lib/team/directory/clinicalStaffPicker.ts,directory,src/lib/team/directory/clinicalStaffPicker.ts,0,0,,false,false,,,low,canonical team/directory module
+src/lib/team/directory/clinicalStaffPickerLoader.server.ts,directory,src/lib/team/directory/clinicalStaffPickerLoader.server.ts,0,0,fi_staff,true,false,,,medium,canonical team/directory module
 src/lib/team/directory/index.ts,directory,src/lib/team/directory/index.ts,0,0,,false,false,,,low,canonical team/directory module
 src/lib/team/directory/projectStaffDirectoryEntry.test.ts,directory,src/lib/team/directory/projectStaffDirectoryEntry.test.ts,0,0,,false,false,,,low,canonical team/directory module
 src/lib/team/directory/projectStaffDirectoryEntry.ts,directory,src/lib/team/directory/projectStaffDirectoryEntry.ts,0,0,,false,false,,,high,canonical team/directory module
+src/lib/team/directory/server.ts,directory,src/lib/team/directory/server.ts,6,0,,true,false,,,medium,canonical team/directory module
 src/lib/team/directory/types.ts,directory,src/lib/team/directory/types.ts,3,0,,false,false,,,high,canonical team/directory module
 src/lib/team/identity/adapters/fromStaffProfileHub.ts,identity,src/lib/team/identity/fromStaffProfileHub.ts,0,0,fi_staff,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/adapters/fromWorkforceIdentityLink.ts,identity,src/lib/team/identity/fromWorkforceIdentityLink.ts,0,0,fi_staff,false,false,,,high,canonical team/identity module (B1)

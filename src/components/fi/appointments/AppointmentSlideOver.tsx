@@ -50,7 +50,7 @@ import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCre
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import { AppointmentCreateSlideOver } from "./AppointmentCreateSlideOver";

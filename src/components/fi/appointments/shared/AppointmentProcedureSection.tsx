@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import type { AppointmentProcedureMetadata } from "@/src/lib/bookings/appointmentMetadata";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { appointmentCardClass } from "./appointmentSharedStyles";
 
 export function AppointmentProcedureSection({

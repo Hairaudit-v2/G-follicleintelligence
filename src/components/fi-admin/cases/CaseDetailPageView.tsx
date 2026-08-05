@@ -23,7 +23,7 @@ import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
 import { CaseSummaryCard } from "./CaseSummaryCard";
 import { CaseTimelineCard } from "./CaseTimelineCard";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
-import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ProcedureTeamPickerOption } from "@/src/lib/team/directory";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";

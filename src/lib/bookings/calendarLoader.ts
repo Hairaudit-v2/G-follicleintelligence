@@ -22,8 +22,8 @@ import type { FiBookingRow } from "./types";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type CalendarResources = {

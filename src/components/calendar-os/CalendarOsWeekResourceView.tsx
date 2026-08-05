@@ -20,7 +20,7 @@ import type {
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import { monthEmptyDayQuickCreateLocalStart } from "@/src/lib/calendar/operationalCalendarLayout";

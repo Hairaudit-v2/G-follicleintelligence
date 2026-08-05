@@ -10,7 +10,7 @@ import {
   normalizeCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 
 const card =
   "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";

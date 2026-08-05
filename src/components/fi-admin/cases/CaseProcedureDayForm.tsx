@@ -11,7 +11,7 @@ import {
 } from "@/src/lib/cases/procedureDayMilestonesModel";
 import { PROCEDURE_STATUS_VALUES, isProcedureStatus } from "@/src/lib/cases/procedureDayTypes";
 import { ProcedureTeamSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ProcedureTeamPickerOption } from "@/src/lib/team/directory";
 import { CaseProcedureTeamPanel } from "./CaseProcedureTeamPanel";
 import { CaseProcedureTechnicianPanel } from "./CaseProcedureTechnicianPanel";
 import { caseFormField } from "./caseFormFieldProps";

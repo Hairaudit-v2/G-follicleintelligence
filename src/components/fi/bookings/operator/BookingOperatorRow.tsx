@@ -12,7 +12,7 @@ import {
   normalizeCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import { BookingTypeBadge } from "./BookingTypeBadge";
 

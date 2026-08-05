@@ -7,7 +7,7 @@
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {
   operationalResourceColumnIdForBooking,
   staffColumnId,

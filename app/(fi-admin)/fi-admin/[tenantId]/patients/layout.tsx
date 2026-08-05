@@ -4,7 +4,7 @@ import { SurgeryBookingWizardProvider } from "@/src/components/fi/surgery-bookin
 import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSlideOver";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";

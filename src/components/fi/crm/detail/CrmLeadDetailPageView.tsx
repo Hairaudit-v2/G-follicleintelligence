@@ -26,7 +26,7 @@ import {
   LeadTasksSection,
 } from "../shared";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { CrmLeadDetailTabNav } from "./CrmLeadDetailTabNav";
 import { CrmLeadDetailBreadcrumbs } from "./CrmLeadDetailBreadcrumbs";
 import { LeadClinicalDetailsPanel } from "./LeadClinicalDetailsPanel";

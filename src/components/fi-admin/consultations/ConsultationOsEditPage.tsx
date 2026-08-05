@@ -3,7 +3,7 @@
 import { ConsultationOsWorkspace } from "@/src/components/fi-admin/consultations/ConsultationOsWorkspace";
 import type { ConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { PatientTwinConsultationChecklistRow } from "@/src/lib/patientTwin/patientTwinTypes";
 import type { ConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
 import type { ConsultationTrichoscopyHubInitial } from "@/src/lib/integrations/hliTrichoscopy/consultation/hubInitial";

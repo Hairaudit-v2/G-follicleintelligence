@@ -3,7 +3,7 @@
  */
 
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { isBookingUnassignedForCalendarOs } from "@/src/lib/calendar-os/calendarResourceModel";
 

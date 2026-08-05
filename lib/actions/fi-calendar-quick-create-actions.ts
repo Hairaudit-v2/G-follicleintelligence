@@ -15,7 +15,7 @@ import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
 import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { createBooking } from "@/src/lib/bookings/server";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import {
   loadServiceResourceRequirements,
   suggestResourceAssignments,

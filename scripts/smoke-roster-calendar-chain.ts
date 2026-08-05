@@ -11,7 +11,7 @@ import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import {
   canSelectStaffForClinicalPicker,
   enrichCrmShellStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";

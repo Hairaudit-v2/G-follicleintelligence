@@ -28,7 +28,7 @@ import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,
 } from "@/src/lib/staff/calendarVisibleStaff";
-import { isSupportStaffRole } from "@/src/lib/staff/clinicalStaffPicker";
+import { isSupportStaffRole } from "@/src/lib/team/directory";
 
 import type {
   ClinicBookingSetupAutoFixApplied,

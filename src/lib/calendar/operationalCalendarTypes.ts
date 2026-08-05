@@ -3,7 +3,7 @@ import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiCalendarSettingsDocument } from "@/src/lib/calendar/calendarSettingsCore";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";

@@ -10,7 +10,7 @@ import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import {
   formatTimeRangeInTimezone,

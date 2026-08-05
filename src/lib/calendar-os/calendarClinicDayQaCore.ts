@@ -9,7 +9,7 @@ import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { buildCalendarOsSparseContext } from "@/src/lib/calendar-os/calendarSparseContext";
 import { buildCalendarOsOperationalPanelSummary } from "@/src/lib/calendar-os/calendarOperationalWarnings";

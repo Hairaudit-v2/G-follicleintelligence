@@ -40,23 +40,23 @@ When edges are labelled by proposed domain (see regenerate), the dominant **cros
 | ~~`staffLifecycleCore.ts` ↔ `hrReconciliationEligibleCore.ts`~~ | identity ↔ identity | **BROKEN in B2.1a** |
 | ~~`onboardingInvitation.server.ts` ↔ `onboardingPinLayer.server.ts`~~ | onboarding ↔ onboarding | **BROKEN in B2.2c** — `pinSetup` / `invitationAccept` leaves; DAG `invitation → pinSetup`, `pinLayer → invitationAccept`. |
 
-Inventory `cycleCount: 0` after B2.2c.
+Inventory `cycleCount: 0` after B2.2c (unchanged through B2.2d).
 
 ## External consumers into each tree
 
 Unique outside→inside import edges (runtime + tests outside the three trees):
 
-| Tree | External edges |
+| Tree | External edges (B2.2d) |
 |------|---------------:|
-| `staff` | 126 |
-| `workforce-os` | 67 |
-| `workforce` | 67 |
+| `staff` | 83 |
+| `workforce-os` | 49 |
+| `workforce` | 50 |
 
-`staff` is the hottest external surface (picker, `staff.server`, assignee display). That reinforces: stabilize identity/directory public APIs early; do not rename `staff.server` without a shim.
+`staff` remains hot (`staff.server`, assignee display); clinical picker consumers now enter via `@/src/lib/team/directory` / `.../server` (B2.2d).
 
 ## Deep imports that bypass future domain boundaries
 
-**252** non-test imports from outside the three trees into deep legacy paths. After `src/lib/team/<domain>/index.ts` exists, these become boundary violations unless updated to the domain index.
+**211** non-test deep legacy import violations after B2.2d (−36 from B2.2c). After `src/lib/team/<domain>/index.ts` exists, remaining deep imports become boundary violations unless updated to the domain index.
 
 Highest-pressure external areas (from inventory consumer lists and identity baseline):
 
@@ -70,13 +70,14 @@ Full list sample (200 rows) lives under `importGraph.deepImportViolationsSample`
 
 ## Unofficial barrels
 
-No `index.ts` barrels exist today. “Unofficial barrels” are high-export modules that act as de-facto APIs (12+ named exports). Notable:
+No legacy-tree `index.ts` barrels exist today. Domain barrels exist under `src/lib/team/*`. “Unofficial barrels” are high-export modules that act as de-facto APIs (12+ named exports). Notable:
 
 - `rosterCommandCentreUxCore.ts` (59 exports) — roster
 - `workforceRosteringEngine.ts`, `rosterManualAdjustmentsCore.ts`, `staffStandardHoursCore.ts` — roster
 - `workforceCommandCentreCore.ts` — commandCentre
 - `staffProfileHubCore.ts`, `staffLifecycleTypes.ts`, `staffCanonicalLifecycle.ts` — identity
-- `staff.server.ts`, `clinicalStaffPicker.ts` — identity / directory
+- `staff.server.ts` — identity
+- `team/directory/clinicalStaffPicker.ts` — directory (B2.2d; imported via domain index)
 
 These should become the **contents** behind domain `index.ts` re-exports, not remain deep-import targets forever.
 

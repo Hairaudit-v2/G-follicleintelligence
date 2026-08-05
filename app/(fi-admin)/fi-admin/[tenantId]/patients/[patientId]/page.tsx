@@ -13,7 +13,7 @@ import { loadPatientProfile } from "@/src/lib/patients/patientProfileLoader";
 import { resolvePatientProfile } from "@/src/lib/patients/resolvePatientProfile.server";
 import { patientProfileCacheKey } from "@/src/lib/patients/resolvePatientProfile";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";

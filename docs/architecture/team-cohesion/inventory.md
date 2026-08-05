@@ -6,14 +6,14 @@
 
 ## Scope count
 
-| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2c regenerate |
+| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2d regenerate |
 |------|-----------------:|---------------------------:|-----------------:|
 | `src/lib/workforce-os` | 100 | 103 | 77 |
 | `src/lib/workforce` | 127 | 140 | 112 |
-| `src/lib/staff` | 40 | 40 | 39 |
-| **Legacy total** | **267** | **283** | **228** |
+| `src/lib/staff` | 40 | 40 | 36 |
+| **Legacy total** | **267** | **283** | **225** |
 
-Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2c, directory / access / onboarding MUST-MOVE homes live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0` (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
+Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2d, access / onboarding MUST-MOVE homes and the clinical staff picker live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. Directory-core loaders remain under `src/lib/staff/` until B2.2a (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
 
 ## Domain ownership distribution
 
@@ -47,7 +47,7 @@ Highest fan-in runtime modules (move late or behind stable barrels):
 | Consumers | Path | Domain |
 |----------:|------|--------|
 | 43 | `staff/staff.server.ts` | identity |
-| 36 | `staff/clinicalStaffPicker.ts` | directory |
+| — | `team/directory/clinicalStaffPicker.ts` (B2.2d; was 36 consumers under `staff/`) | directory |
 | 19 | `workforce-os/staffLifecycleTypes.ts` | identity |
 | 14 | `workforce-os/clinicalStaffingSummary.types.ts` | roster |
 | 14 | `staff/staffHrNotificationSummary.ts` | directory |

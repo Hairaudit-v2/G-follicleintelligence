@@ -21,7 +21,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import { buildStaffBookingAvailabilityHint } from "@/src/lib/staff/staffWeeklyHours";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,

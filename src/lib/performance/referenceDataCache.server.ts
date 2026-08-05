@@ -5,7 +5,7 @@ import { cache } from "react";
 
 import { getCalendarTimeZone } from "@/src/lib/calendar/calendarTimezone";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";

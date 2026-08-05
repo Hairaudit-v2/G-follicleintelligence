@@ -6,14 +6,14 @@ import type {
   ClinicalStaffPickerOption,
   ProcedureTeamPickerOption,
   ProcedureTeamSlotKind,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import {
   canSelectStaffForClinicalPicker,
   canSelectStaffForProcedureSlot,
   formatClinicalPickerOptionLabel,
   formatProcedureTeamPickerLabel,
   staffReadinessDashboardPath,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 
 export function StaffClinicalSelect({

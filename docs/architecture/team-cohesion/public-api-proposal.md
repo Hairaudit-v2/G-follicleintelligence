@@ -75,7 +75,7 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 B0 measured **252** outside→legacy deep imports. Highest leverage violations to fix when indexes exist:
 
 1. Anything importing `@/src/lib/staff/staff.server` for `FiStaffRow` / loaders
-2. Anything importing `@/src/lib/staff/clinicalStaffPicker` for scheduling pickers
+2. ~~Anything importing `@/src/lib/staff/clinicalStaffPicker` for scheduling pickers~~ — **resolved in B2.2d** (`@/src/lib/team/directory` / `.../server`)
 3. Components importing `@/src/lib/workforce-os/staffCanonicalLifecycle` or readiness engines directly
 4. `staffProfileHub.server` importing `@/src/lib/staff/workforceCommandCentre.server` (delete path)
 5. Bookings/CRM/calendar joining `fi_staff` without going through identity resolve

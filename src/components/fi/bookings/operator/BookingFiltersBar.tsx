@@ -13,7 +13,7 @@ import { toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUt
 import {
   formatClinicalPickerOptionLabel,
   type ClinicalStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 
 export function BookingFiltersBar({
   tenantId,

@@ -56,8 +56,8 @@ import {
 } from "@/src/lib/staff/staffWeeklyHours";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {
   buildLegacyUserResourceColumns,
   buildStaffResourceColumns,

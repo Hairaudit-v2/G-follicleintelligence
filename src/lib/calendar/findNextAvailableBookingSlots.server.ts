@@ -36,7 +36,7 @@ import {
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
-import { isSupportStaffRole } from "@/src/lib/staff/clinicalStaffPicker";
+import { isSupportStaffRole } from "@/src/lib/team/directory";
 import {
   DEFAULT_STAFF_HOURS_FALLBACK_TZ,
   isUtcRangeWithinStaffWeeklyHours,

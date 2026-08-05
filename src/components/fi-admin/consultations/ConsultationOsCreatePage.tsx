@@ -1,7 +1,7 @@
 "use client";
 
 import { ConsultationOsPathwayCreateWizard } from "@/src/components/fi-admin/consultations/ConsultationOsPathwayCreateWizard";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 
 export function ConsultationOsCreatePage({
   tenantId,

@@ -26,8 +26,8 @@ import {
   zonedMidnightUtcMs,
   zonedNextDayUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadBookingsForOperatorView } from "./bookings";

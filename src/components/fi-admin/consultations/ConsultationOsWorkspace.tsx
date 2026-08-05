@@ -15,7 +15,7 @@ import { ConsultationPreparationChecklistPanel } from "@/src/components/fi-admin
 import { ConsultationVoiceCapturePanel } from "@/src/components/fi-admin/consultations/ConsultationVoiceCapturePanel";
 import { ConsultationTrichoscopySection } from "@/src/components/trichoscopy/ConsultationTrichoscopySection";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { ConsultationTrichoscopyHubInitial } from "@/src/lib/integrations/hliTrichoscopy/consultation/hubInitial";
 import {
   stableConsultationPayloadSignature,

@@ -12,7 +12,7 @@ import {
   buildClinicalStaffPickerReadiness,
   canSelectStaffForClinicalPicker,
   enrichCrmShellStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import {
   isUtcRangeWithinStaffWeeklyHours,

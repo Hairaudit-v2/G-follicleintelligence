@@ -10,7 +10,7 @@ import {
 } from "@/src/lib/bookings/calendarView";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCalendarEventCard } from "./BookingCalendarEventCard";

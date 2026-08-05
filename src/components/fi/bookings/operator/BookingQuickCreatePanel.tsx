@@ -15,7 +15,7 @@ import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPick
 import {
   canSelectStaffForClinicalPicker,
   type ClinicalStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import {
   defaultRangeIso,
   endLocalFromStartLocalAndProcedure,

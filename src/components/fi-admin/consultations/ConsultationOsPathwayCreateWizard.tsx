@@ -20,7 +20,7 @@ import {
   PATHWAY_DEFAULT_CONSULTATION_TYPE,
   type ConsultationPathwayCreateCard,
 } from "@/src/lib/consultations/consultationPathwayRouting";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 
 type Step = 1 | 2;
 

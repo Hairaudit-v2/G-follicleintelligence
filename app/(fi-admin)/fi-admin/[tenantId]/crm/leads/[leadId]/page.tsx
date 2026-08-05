@@ -8,7 +8,7 @@ import { parseCrmLeadDetailTab } from "@/src/lib/crm/crmLeadDetailTabs";
 import { parseCrmLeadPreviewSearchParam } from "@/src/lib/crm/crmLeadPreviewQuery";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";

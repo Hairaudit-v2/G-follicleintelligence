@@ -6,7 +6,7 @@ import {
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import { buildProcedureDayMismatchWarnings } from "@/src/lib/cases/procedureDayMismatchModel";
-import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ProcedureTeamPickerOption } from "@/src/lib/team/directory";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { CaseProcedureDayForm } from "./CaseProcedureDayForm";
 

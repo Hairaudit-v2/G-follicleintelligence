@@ -17,7 +17,7 @@ import {
 } from "@/src/lib/calendar/operationalCalendarColumns";
 import { buildCalendarDay } from "@/src/lib/bookings/calendarView";
 import { resolveDisplayResourceColumnId } from "@/src/lib/calendar/operationalCalendarLayout";
-import { buildClinicalStaffPickerReadiness } from "@/src/lib/staff/clinicalStaffPicker";
+import { buildClinicalStaffPickerReadiness } from "@/src/lib/team/directory";
 
 const STAFF_A = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 

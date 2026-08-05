@@ -9,8 +9,8 @@ import {
   loadCrmShellPipelineStages,
   loadCrmShellScopePickerOptions,
 } from "@/src/lib/crm/crmShellLoaders";
-import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,

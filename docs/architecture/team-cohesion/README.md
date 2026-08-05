@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.2 GREEN candidate (a–c) · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.2d GREEN · B2.2b–c GREEN · **B2.2a deferred** · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -8,7 +8,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 
 **B2.1a** moved pure lifecycle / readiness into `src/lib/team/identity`. **B2.1b** moved identity server loaders (links, audit, tenant overviews), deleted the 11 temporary shims, and exposed them via `team/identity/server` — see [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md).
 
-**B2.2** physically homes directory / access / onboarding — see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md). **B2.2c** homes onboarding under `team/onboarding`, breaks the invite↔PIN cycle (`cycleCount: 0`), and lands allowlist **12**. Optional **B2.2d** is the `clinicalStaffPicker` hotspot.
+**B2.2** physically homes directory / access / onboarding — see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md). **B2.2c** homes onboarding under `team/onboarding`, breaks the invite↔PIN cycle (`cycleCount: 0`), and lands allowlist **12**. **B2.2d** homes `clinicalStaffPicker` under `team/directory` (0 shims). **B2.2a** directory-core loaders remain deferred under `src/lib/staff/`.
 
 ## Documents
 
@@ -51,29 +51,29 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 | [generated/b0-inventory.csv](./generated/b0-inventory.csv) | Spreadsheet review of every file |
 | [generated/b0-summary.json](./generated/b0-summary.json) | Counts only |
 
-## Headline numbers (2026-08-05)
+## Headline numbers (2026-08-06)
 
 | Metric | Value |
 |--------|------:|
 | Canonical Team domains delivered | identity, directory, access, onboarding, roster, compliance, profile, commandCentre, payroll, planning |
-| Dual-table allowlist | **15** (from 20 at B1.6 start) — must not grow |
+| Dual-table allowlist | **12** — must not grow |
 | B1 program | **CLOSED** |
 | B2.1a temporary compatibility shims | **0** (deleted in B2.1b) |
+| Documented cycles | **0** |
 
 ## B2 scorecard
 
-| Metric | B2 start | Current | Target |
-|--------|---------:|--------:|-------:|
-| Files in legacy lib trees | 283 | **260** | 0 |
-| Deep legacy imports | 252 | **253** | 0 |
+| Metric | B2.2c | B2.2d now | Target |
+|--------|------:|----------:|-------:|
+| Files in legacy lib trees | 228 | **225** | 0 |
+| Deep legacy imports | 247 | **211** | 0 |
 | Sprint-named action files | 7 | 7 | 0 |
-| Documented dependency cycles | 2 | **1** | 0 |
-| Duplicate implementations | 3 delete rows | 3 | 0 |
+| Documented dependency cycles | 0 | **0** | 0 |
 | Temporary compatibility exports | 0 | **0** | 0 |
-| Identity allowlist | 16 | **15** | No increase |
+| Identity allowlist | 12 | **12** | No increase |
 
-Refresh “Current” from `generated/b0-summary.json` after each inventory regenerate. Cycle count: lifecycle↔HR eligibility broke in B2.1a; remaining onboarding invite↔pin cycle tracked in [import-graph.md](./import-graph.md). Legacy tree count = `workforce-os` + `workforce` + `staff` file counts from summary.
+Refresh “Current” from `generated/b0-summary.json` after each inventory regenerate. Legacy tree count = `workforce-os` + `workforce` + `staff` file counts from summary.
 
 ## Recommended next slice
 
-**B2.1c** (if needed) — residual identity consumer cleanup, or start **B2.2** Directory / Access / Onboarding physical moves. Mutation servers (`staffLifecycle.server`, reconciliation, repair) stay deferred. Do not start B3 sprint-action renames until identity homes remain stable.
+**B2.2a — Directory core** (staff directory loaders / filters / calendar visibility / clinical availability asserts still under `src/lib/staff/`), then remaining hot cluster (`staffHrNotification*`, role/hours), or B0-ordered next domain / B3 sprint-action renames once directory homes stabilize.

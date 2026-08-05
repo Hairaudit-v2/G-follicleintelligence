@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { isBookingUpcoming, sortBookingsByStartAt } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, FiCrmLeadRow } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCreatePanel } from "./BookingCreatePanel";
 import { BookingSummaryCard } from "./BookingSummaryCard";

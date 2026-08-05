@@ -4,7 +4,7 @@ import { test } from "node:test";
 import {
   buildClinicalStaffPickerReadiness,
   enrichCrmShellStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 import { bookingUpdateBodySchema } from "@/src/lib/bookings/bookingApiSchemas";

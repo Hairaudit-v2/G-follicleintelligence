@@ -4,7 +4,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { CalendarViewMode } from "@/src/lib/bookings/calendarQuery";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCalendarDayView } from "./BookingCalendarDayView";
 import { BookingCalendarWeekView } from "./BookingCalendarWeekView";

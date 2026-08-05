@@ -18,7 +18,7 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import {
   canSelectStaffForClinicalPicker,
   type ClinicalStaffPickerOption,
-} from "@/src/lib/staff/clinicalStaffPicker";
+} from "@/src/lib/team/directory";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import {
   QUICK_CALL_IN_DEFAULT_TIMEZONE,

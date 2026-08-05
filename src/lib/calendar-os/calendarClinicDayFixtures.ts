@@ -11,7 +11,7 @@ import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { staffColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
 

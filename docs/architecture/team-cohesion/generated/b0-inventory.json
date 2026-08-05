@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-08-05T21:00:28.478Z",
+  "generatedAt": "2026-08-05T21:35:20.732Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 385,
-  "growthSinceAudit": 118,
+  "currentFiles": 386,
+  "growthSinceAudit": 119,
   "trees": {
     "workforce-os": 77,
     "workforce": 112,
-    "staff": 39
+    "staff": 36
   },
   "domainCounts": {
     "shared": 35,
     "roster": 69,
     "identity": 105,
-    "directory": 30,
+    "directory": 31,
     "compliance": 18,
     "payroll": 33,
     "planning": 23,
@@ -22,9 +22,9 @@
     "onboarding": 27
   },
   "riskCounts": {
-    "low": 144,
-    "medium": 60,
-    "high": 181
+    "low": 145,
+    "medium": 61,
+    "high": 180
   },
   "inventory": [
     {
@@ -3287,96 +3287,6 @@
       "migrationRisk": "medium"
     },
     {
-      "currentPath": "src/lib/staff/clinicalStaffAssignment.test.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "staff presentation/picker helpers",
-      "proposedPath": "src/lib/team/directory/clinicalStaffAssignment.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/staff/clinicalStaffPicker.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "directory/list projections",
-      "proposedPath": "src/lib/team/directory/clinicalStaffPicker.ts",
-      "runtimeConsumers": [
-        "src/components/calendar-os/CalendarOsDayResourceView.tsx",
-        "src/components/calendar-os/CalendarOsWeekResourceView.tsx",
-        "src/components/fi-admin/cases/CaseDetailPageView.tsx",
-        "src/components/fi-admin/cases/CaseProcedureDayCard.tsx",
-        "src/components/fi-admin/cases/CaseProcedureDayForm.tsx",
-        "src/components/fi-admin/consultations/ConsultationOsCreatePage.tsx",
-        "src/components/fi-admin/consultations/ConsultationOsEditPage.tsx",
-        "src/components/fi-admin/consultations/ConsultationOsPathwayCreateWizard.tsx",
-        "src/components/fi-admin/consultations/ConsultationOsWorkspace.tsx",
-        "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-        "src/components/fi/appointments/AppointmentListTable.tsx",
-        "src/components/fi/appointments/AppointmentSlideOver.tsx",
-        "src/components/fi/appointments/AppointmentTodayView.tsx",
-        "src/components/fi/appointments/shared/AppointmentProcedureSection.tsx",
-        "src/components/fi/bookings/BookingSummaryCard.tsx",
-        "src/components/fi/bookings/LeadBookingPanel.tsx",
-        "src/components/fi/bookings/calendar/BookingCalendarDayView.tsx",
-        "src/components/fi/bookings/calendar/BookingCalendarEventCard.tsx",
-        "src/components/fi/bookings/calendar/BookingCalendarGrid.tsx",
-        "src/components/fi/bookings/calendar/BookingCalendarWeekView.tsx",
-        "src/components/fi/bookings/operator/BookingOperatorRow.tsx",
-        "src/components/fi/bookings/operator/BookingOperatorTable.tsx",
-        "src/components/fi/crm/detail/CrmLeadDetailPageView.tsx",
-        "src/lib/bookings/appointmentSlideOverLoader.ts",
-        "src/lib/bookings/bookingOperatorLoader.ts",
-        "src/lib/bookings/calendarLoader.ts",
-        "src/lib/calendar-os/calendarClinicDayFixtures.ts",
-        "src/lib/calendar-os/calendarClinicDayQaCore.ts",
-        "src/lib/calendar-os/calendarResourceModel.ts",
-        "src/lib/calendar-os/calendarSparseContext.ts",
-        "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-        "src/lib/calendar/operationalCalendarColumns.ts",
-        "src/lib/calendar/operationalCalendarLoader.server.ts",
-        "src/lib/calendar/operationalCalendarTypes.ts",
-        "src/lib/clinicSetup/clinicBookingSetupAutoFix.server.ts",
-        "src/lib/clinicSetup/clinicBookingSetupTest.server.ts"
-      ],
-      "testConsumers": [
-        "src/lib/calendar/calendarOsDisplayPipeline.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "directory/list projections",
-      "proposedPath": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
-      "runtimeConsumers": [
-        "src/lib/bookings/appointmentSlideOverLoader.ts",
-        "src/lib/bookings/bookingOperatorLoader.ts",
-        "src/lib/bookings/calendarLoader.ts",
-        "src/lib/calendar/operationalCalendarLoader.server.ts",
-        "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
-        "src/lib/performance/referenceDataCache.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
       "currentPath": "src/lib/staff/hrStaffReadinessMetadata.test.ts",
       "proposedDomain": "identity",
       "proposeReason": "identity/lifecycle/readiness/reconciliation",
@@ -3566,7 +3476,7 @@
         "src/components/fi/staff/StaffClinicalPickerFields.tsx",
         "src/lib/calendar/operationalCalendarColumns.ts",
         "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
-        "src/lib/staff/clinicalStaffPicker.ts"
+        "src/lib/team/directory/clinicalStaffPicker.ts"
       ],
       "testConsumers": [
         "src/lib/bookings/bookingStaffAssigneeAlignment.test.ts",
@@ -3688,9 +3598,9 @@
       "runtimeConsumers": [
         "src/lib/hr/hrStaffReadinessPage.server.ts",
         "src/lib/hr/hrStaffSyncHealthPage.server.ts",
-        "src/lib/staff/clinicalStaffPickerLoader.server.ts",
         "src/lib/staff/staffDirectoryLoader.server.ts",
         "src/lib/staff/staffRoleReviewLoader.server.ts",
+        "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
         "src/lib/team/profile/loadStaffProfileHub.server.ts"
       ],
       "testConsumers": [],
@@ -3833,7 +3743,7 @@
         "src/lib/bookings/bookingStaffAssigneeAlignment.test.ts",
         "src/lib/calendar/operationalCalendarStaffColumns.test.ts",
         "src/lib/hr/hrStaffReadinessDashboard.test.ts",
-        "src/lib/staff/clinicalStaffAssignment.test.ts"
+        "src/lib/team/directory/clinicalStaffAssignment.test.ts"
       ],
       "tablesReferenced": [],
       "serverOnly": false,
@@ -4781,6 +4691,50 @@
       "migrationRisk": "high"
     },
     {
+      "currentPath": "src/lib/team/directory/clinicalStaffAssignment.test.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/clinicalStaffAssignment.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/directory/clinicalStaffPicker.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/clinicalStaffPicker.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
       "currentPath": "src/lib/team/directory/index.ts",
       "proposedDomain": "directory",
       "proposeReason": "canonical team/directory module",
@@ -4821,6 +4775,27 @@
       "duplicateOf": null,
       "deletionReason": null,
       "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/directory/server.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/server.ts",
+      "runtimeConsumers": [
+        "src/lib/bookings/appointmentSlideOverLoader.ts",
+        "src/lib/bookings/bookingOperatorLoader.ts",
+        "src/lib/bookings/calendarLoader.ts",
+        "src/lib/calendar/operationalCalendarLoader.server.ts",
+        "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
+        "src/lib/performance/referenceDataCache.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
     },
     {
       "currentPath": "src/lib/team/directory/types.ts",
@@ -6693,7 +6668,7 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 147,
+    "interTreeEdgeCount": 150,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -7557,6 +7532,27 @@
         "spec": "@/src/lib/workforce/workforceCommandCentreCore"
       },
       {
+        "from": "src/lib/team/directory/clinicalStaffAssignment.test.ts",
+        "to": "src/lib/staff/staffRolePolicy.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffRolePolicy"
+      },
+      {
+        "from": "src/lib/team/directory/clinicalStaffPicker.ts",
+        "to": "src/lib/staff/staffAssigneeDisplay.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffAssigneeDisplay"
+      },
+      {
+        "from": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
+        "to": "src/lib/staff/staffHrNotificationLoader.server.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
+      },
+      {
         "from": "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
         "to": "src/lib/staff/staffProfileExtras.ts",
         "fromTree": "src/lib/team",
@@ -7884,11 +7880,6 @@
         "namedExports": 16
       },
       {
-        "file": "src/lib/staff/clinicalStaffPicker.ts",
-        "exportStar": 0,
-        "namedExports": 19
-      },
-      {
         "file": "src/lib/staff/hrStaffReadinessMetadata.ts",
         "exportStar": 0,
         "namedExports": 16
@@ -7932,6 +7923,11 @@
         "file": "src/lib/team/commandCentre/types.ts",
         "exportStar": 0,
         "namedExports": 14
+      },
+      {
+        "file": "src/lib/team/directory/clinicalStaffPicker.ts",
+        "exportStar": 0,
+        "namedExports": 19
       },
       {
         "file": "src/lib/team/identity/staffCanonicalLifecycle.ts",
@@ -8076,57 +8072,12 @@
         "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 247,
+    "deepImportViolationCount": 211,
     "deepImportViolationsSample": [
-      {
-        "consumer": "src/components/calendar-os/CalendarOsDayResourceView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/calendar-os/CalendarOsWeekResourceView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
       {
         "consumer": "src/components/fi-admin/calendar/OperationalCalendarFilters.tsx",
         "target": "src/lib/staff/staffAssigneeDisplay.ts",
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
-      },
-      {
-        "consumer": "src/components/fi-admin/cases/CaseDetailPageView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/cases/CaseProcedureDayCard.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/cases/CaseProcedureDayForm.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/consultations/ConsultationOsCreatePage.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/consultations/ConsultationOsEditPage.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/consultations/ConsultationOsPathwayCreateWizard.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi-admin/consultations/ConsultationOsWorkspace.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/components/fi-admin/hr/DuplicateReviewClient.tsx",
@@ -8209,29 +8160,9 @@
         "spec": "@/src/lib/staff/staffWeeklyHours"
       },
       {
-        "consumer": "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/components/fi/appointments/AppointmentListTable.tsx",
         "target": "src/lib/staff/staffAssigneeDisplay.ts",
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
-      },
-      {
-        "consumer": "src/components/fi/appointments/AppointmentListTable.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/appointments/AppointmentSlideOver.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/appointments/AppointmentTodayView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/components/fi/appointments/shared/AppointmentOperationalSummary.tsx",
@@ -8239,29 +8170,9 @@
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
       },
       {
-        "consumer": "src/components/fi/appointments/shared/AppointmentProcedureSection.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/components/fi/bookings/BookingSummaryCard.tsx",
         "target": "src/lib/staff/staffAssigneeDisplay.ts",
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
-      },
-      {
-        "consumer": "src/components/fi/bookings/BookingSummaryCard.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/bookings/LeadBookingPanel.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/bookings/calendar/BookingCalendarDayView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/components/fi/bookings/calendar/BookingCalendarDrawer.tsx",
@@ -8279,44 +8190,14 @@
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
       },
       {
-        "consumer": "src/components/fi/bookings/calendar/BookingCalendarEventCard.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/bookings/calendar/BookingCalendarGrid.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/bookings/calendar/BookingCalendarWeekView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/components/fi/bookings/operator/BookingOperatorRow.tsx",
         "target": "src/lib/staff/staffAssigneeDisplay.ts",
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
       },
       {
-        "consumer": "src/components/fi/bookings/operator/BookingOperatorRow.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/components/fi/bookings/operator/BookingOperatorTable.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/components/fi/calendar/CalendarQuickCreateDrawer.tsx",
         "target": "src/lib/staff/calendarVisibleStaff.ts",
         "spec": "@/src/lib/staff/calendarVisibleStaff"
-      },
-      {
-        "consumer": "src/components/fi/crm/detail/CrmLeadDetailPageView.tsx",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/components/fi/hr-os/HrOsClinicalRosteringSection.tsx",
@@ -8840,13 +8721,8 @@
       },
       {
         "consumer": "src/lib/bookings/appointmentSlideOverLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPickerLoader.server"
-      },
-      {
-        "consumer": "src/lib/bookings/appointmentSlideOverLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
       },
       {
         "consumer": "src/lib/bookings/appointmentSlideOverLoader.ts",
@@ -8870,13 +8746,8 @@
       },
       {
         "consumer": "src/lib/bookings/bookingOperatorLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/lib/bookings/bookingOperatorLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPickerLoader.server"
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
       },
       {
         "consumer": "src/lib/bookings/bookings.ts",
@@ -8890,13 +8761,8 @@
       },
       {
         "consumer": "src/lib/bookings/calendarLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPickerLoader.server"
-      },
-      {
-        "consumer": "src/lib/bookings/calendarLoader.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
       },
       {
         "consumer": "src/lib/calendar-os/calendarBookingCardModel.ts",
@@ -8904,29 +8770,9 @@
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
       },
       {
-        "consumer": "src/lib/calendar-os/calendarClinicDayFixtures.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/lib/calendar-os/calendarClinicDayQaCore.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/lib/calendar-os/calendarOperationalWarnings.ts",
         "target": "src/lib/workforce-os/clinicalStaffingSummary.types.ts",
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
-      },
-      {
-        "consumer": "src/lib/calendar-os/calendarResourceModel.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/lib/calendar-os/calendarSparseContext.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/lib/calendar-os/calendarWorkforceBlocks.ts",
@@ -8989,16 +8835,6 @@
         "spec": "@/src/lib/staff/staffRolePolicy"
       },
       {
-        "consumer": "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/lib/calendar/operationalCalendarColumns.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/lib/calendar/operationalCalendarColumns.ts",
         "target": "src/lib/staff/staffAssigneeDisplay.ts",
         "spec": "@/src/lib/staff/staffAssigneeDisplay"
@@ -9010,13 +8846,8 @@
       },
       {
         "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
-        "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPickerLoader.server"
-      },
-      {
-        "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
       },
       {
         "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
@@ -9027,11 +8858,6 @@
         "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
         "target": "src/lib/staff/calendarVisibleStaff.ts",
         "spec": "@/src/lib/staff/calendarVisibleStaff"
-      },
-      {
-        "consumer": "src/lib/calendar/operationalCalendarTypes.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
       },
       {
         "consumer": "src/lib/calendar/operationalCalendarTypes.ts",
@@ -9054,16 +8880,6 @@
         "spec": "@/src/lib/workforce-os/workforceEventAssignmentBridge.server"
       },
       {
-        "consumer": "src/lib/clinicSetup/clinicBookingSetupAutoFix.server.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
-        "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
-        "target": "src/lib/staff/clinicalStaffPicker.ts",
-        "spec": "@/src/lib/staff/clinicalStaffPicker"
-      },
-      {
         "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
         "target": "src/lib/staff/staffRolePolicy.ts",
         "spec": "@/src/lib/staff/staffRolePolicy"
@@ -9077,12 +8893,192 @@
         "consumer": "src/lib/consultations/consultationMutations.server.ts",
         "target": "src/lib/staff/assertStaffClinicallyAvailable.server.ts",
         "spec": "@/src/lib/staff/assertStaffClinicallyAvailable.server"
+      },
+      {
+        "consumer": "src/lib/consultations/consultationMutations.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/crm/crmAssigneeEligibility.ts",
+        "target": "src/lib/team/identity/staffLifecycleTypes.ts",
+        "spec": "@/src/lib/team/identity/staffLifecycleTypes"
+      },
+      {
+        "consumer": "src/lib/crm/crmShellLoaders.ts",
+        "target": "src/lib/staff/staffRolePolicy.ts",
+        "spec": "@/src/lib/staff/staffRolePolicy"
+      },
+      {
+        "consumer": "src/lib/fi-os/organisationalProfile.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/fi-os/staffIntelligence.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/fi-os/workspaceProfile.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/fiOs/fiOsPortalGate.server.ts",
+        "target": "src/lib/workforce/staffTenantLinkRepair.server.ts",
+        "spec": "@/src/lib/workforce/staffTenantLinkRepair.server"
+      },
+      {
+        "consumer": "src/lib/fiOs/fiOsRedirect.server.ts",
+        "target": "src/lib/workforce/staffTenantLinkRepair.server.ts",
+        "spec": "@/src/lib/workforce/staffTenantLinkRepair.server"
+      },
+      {
+        "consumer": "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
+        "target": "src/lib/staff/staffAssigneeDisplay.ts",
+        "spec": "@/src/lib/staff/staffAssigneeDisplay"
+      },
+      {
+        "consumer": "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
+      },
+      {
+        "consumer": "src/lib/fiOs/workspaceAccessResolverCore.ts",
+        "target": "src/lib/workforce/staffTenantLinkRepairCore.ts",
+        "spec": "@/src/lib/workforce/staffTenantLinkRepairCore"
+      },
+      {
+        "consumer": "src/lib/fiOs/workspaceShell/workspaceShellLoaders.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/fiOs/workspaceShell/workspaceShellLoaders.server.ts",
+        "target": "src/lib/staff/staffTwinLoader.server.ts",
+        "spec": "@/src/lib/staff/staffTwinLoader.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessDashboard.ts",
+        "target": "src/lib/staff/staffPayrollSourceDisplay.ts",
+        "spec": "@/src/lib/staff/staffPayrollSourceDisplay"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessDashboard.ts",
+        "target": "src/lib/staff/staffProfileExtras.ts",
+        "spec": "@/src/lib/staff/staffProfileExtras"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
+        "target": "src/lib/staff/staffHrNotificationLoader.server.ts",
+        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
+        "target": "src/lib/staff/staffPayrollSourceDisplay.ts",
+        "spec": "@/src/lib/staff/staffPayrollSourceDisplay"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
+        "target": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffRelink.ts",
+        "target": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffRelink.ts",
+        "target": "src/lib/staff/hrStaffReadinessMetadata.ts",
+        "spec": "@/src/lib/staff/hrStaffReadinessMetadata"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthDashboard.ts",
+        "target": "src/lib/staff/staffHrNotificationSummary.ts",
+        "spec": "@/src/lib/staff/staffHrNotificationSummary"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthDashboard.ts",
+        "target": "src/lib/staff/staffHrNotificationSummary.ts",
+        "spec": "@/src/lib/staff/staffHrNotificationSummary"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "target": "src/lib/team/identity/server.ts",
+        "spec": "@/src/lib/team/identity/server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "target": "src/lib/workforce/hrSyncAuditPage.server.ts",
+        "spec": "@/src/lib/workforce/hrSyncAuditPage.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "target": "src/lib/workforce/hrSyncAuditPage.server.ts",
+        "spec": "@/src/lib/workforce/hrSyncAuditPage.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "target": "src/lib/staff/staffHrNotificationLoader.server.ts",
+        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
+      },
+      {
+        "consumer": "src/lib/onboarding-os/guidedAssist.server.ts",
+        "target": "src/lib/workforce/staffTenantLinkRepair.server.ts",
+        "spec": "@/src/lib/workforce/staffTenantLinkRepair.server"
+      },
+      {
+        "consumer": "src/lib/onboarding-os/tenantProvisioning.server.ts",
+        "target": "src/lib/workforce/rosterCadencePolicy.server.ts",
+        "spec": "@/src/lib/workforce/rosterCadencePolicy.server"
+      },
+      {
+        "consumer": "src/lib/performance/referenceDataCache.server.ts",
+        "target": "src/lib/team/directory/server.ts",
+        "spec": "@/src/lib/team/directory/server"
+      },
+      {
+        "consumer": "src/lib/rooms/roomAvailability.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "consumer": "src/lib/staffCompliance/staffComplianceSummary.ts",
+        "target": "src/lib/staff/myHrPortalSelection.ts",
+        "spec": "@/src/lib/staff/myHrPortalSelection"
+      },
+      {
+        "consumer": "src/lib/staffImport/iiohrHrStaffImportPlan.ts",
+        "target": "src/lib/staff/myHrPortalSelection.ts",
+        "spec": "@/src/lib/staff/myHrPortalSelection"
+      },
+      {
+        "consumer": "src/lib/staffImport/iiohrHrStaffSync.ts",
+        "target": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
+        "consumer": "src/lib/staffImport/iiohrHrStaffSyncRowsParse.ts",
+        "target": "src/lib/staff/hrStaffReadinessMetadata.ts",
+        "spec": "@/src/lib/staff/hrStaffReadinessMetadata"
       }
     ],
     "externalIntoTreeCounts": {
       "workforce-os": 49,
       "workforce": 50,
-      "staff": 126
+      "staff": 83
     },
     "externalIntoTree": {
       "workforce-os": [
@@ -9507,178 +9503,6 @@
           "target": "src/lib/staff/calendarVisibleStaff.ts"
         },
         {
-          "consumer": "src/components/calendar-os/CalendarOsDayResourceView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/calendar-os/CalendarOsWeekResourceView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/cases/CaseDetailPageView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/cases/CaseProcedureDayCard.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/cases/CaseProcedureDayForm.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/consultations/ConsultationOsCreatePage.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/consultations/ConsultationOsEditPage.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/consultations/ConsultationOsPathwayCreateWizard.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/consultations/ConsultationOsWorkspace.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/AppointmentListTable.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/AppointmentSlideOver.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/AppointmentTodayView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/shared/AppointmentProcedureSection.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/BookingSummaryCard.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/LeadBookingPanel.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/calendar/BookingCalendarDayView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/calendar/BookingCalendarEventCard.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/calendar/BookingCalendarGrid.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/calendar/BookingCalendarWeekView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/operator/BookingOperatorRow.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/bookings/operator/BookingOperatorTable.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/components/fi/crm/detail/CrmLeadDetailPageView.tsx",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/appointmentSlideOverLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookingOperatorLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/calendarLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar-os/calendarClinicDayFixtures.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar-os/calendarClinicDayQaCore.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar-os/calendarResourceModel.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar-os/calendarSparseContext.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/operationalCalendarColumns.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/operationalCalendarTypes.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/clinicSetup/clinicBookingSetupAutoFix.server.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/calendarOsDisplayPipeline.test.ts",
-          "target": "src/lib/staff/clinicalStaffPicker.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/appointmentSlideOverLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookingOperatorLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/calendarLoader.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/fiOs/tenantOperationalDashboardLoader.server.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/performance/referenceDataCache.server.ts",
-          "target": "src/lib/staff/clinicalStaffPickerLoader.server.ts"
-        },
-        {
           "consumer": "src/lib/actions/fi-hr-sync-health-actions.ts",
           "target": "src/lib/staff/hrStaffReadinessMetadata.ts"
         },
@@ -10038,7 +9862,7 @@
         "fi_staff_members": 73
       },
       "src/lib/team": {
-        "fi_staff": 31,
+        "fi_staff": 32,
         "fi_staff_members": 43
       },
       "src/lib/workforce": {
@@ -10058,7 +9882,7 @@
         "fi_staff_members": 9
       },
       "src/lib/staff": {
-        "fi_staff": 21,
+        "fi_staff": 20,
         "fi_staff_members": 0
       },
       "src/components": {
@@ -10830,12 +10654,6 @@
         "classification": "scheduling read"
       },
       {
-        "file": "src/lib/staff/clinicalStaffPickerLoader.server.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "scheduling read"
-      },
-      {
         "file": "src/lib/staff/myHrPortalLoader.server.ts",
         "table": "fi_staff",
         "count": 2,
@@ -11056,6 +10874,12 @@
         "table": "fi_staff_members",
         "count": 2,
         "classification": "reporting"
+      },
+      {
+        "file": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
       },
       {
         "file": "src/lib/team/identity/adapters/fromStaffProfileHub.ts",
