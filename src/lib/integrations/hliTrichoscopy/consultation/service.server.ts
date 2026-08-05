@@ -632,8 +632,8 @@ export async function requestConsultationTrichoscopy(opts: {
   };
 
   const consentGate = assertConsentForTrichoscopyRequest({
-    patientConsentCapture: indicationInput.patientConsentCapture,
-    patientConsentTransfer: indicationInput.patientConsentTransfer,
+    patientConsentCapture: Boolean(indicationInput.patientConsentCapture),
+    patientConsentTransfer: Boolean(indicationInput.patientConsentTransfer),
   });
   if (!consentGate.ok) throw new HliTrichoscopyValidationError(consentGate.reason);
 
