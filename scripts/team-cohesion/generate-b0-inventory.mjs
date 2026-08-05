@@ -18,6 +18,8 @@ const LEGACY_TREES = [
   "src/lib/workforce-os",
   "src/lib/workforce",
   "src/lib/staff",
+  // Canonical Team tree (B1+) — inventoried alongside legacy trees for ownership tracking.
+  "src/lib/team",
 ];
 
 const ACTION_DIR = "src/lib/actions";
@@ -26,6 +28,33 @@ const ACTION_DIR = "src/lib/actions";
 function proposeDomain(relPath) {
   const p = relPath.replace(/\\/g, "/").toLowerCase();
   const base = path.basename(p);
+
+  // Canonical Team tree (B1+)
+  if (p.startsWith("src/lib/team/")) {
+    const seg = p.split("/")[3] || "shared";
+    if (seg === "identity") {
+      return { domain: "identity", reason: "canonical team/identity module (B1)" };
+    }
+    if (
+      [
+        "directory",
+        "roster",
+        "onboarding",
+        "access",
+        "compliance",
+        "payroll",
+        "planning",
+        "commandcentre",
+        "shared",
+      ].includes(seg)
+    ) {
+      return {
+        domain: seg === "commandcentre" ? "commandCentre" : seg,
+        reason: `canonical team/${seg} module`,
+      };
+    }
+    return { domain: "shared", reason: "team umbrella / unclassified domain folder" };
+  }
 
   if (base === "readme.md" || p.includes("/security/readme")) {
     return { domain: "shared", reason: "docs/security guard scaffolding" };

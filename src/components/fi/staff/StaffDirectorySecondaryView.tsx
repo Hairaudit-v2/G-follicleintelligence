@@ -11,6 +11,7 @@ import {
   type StaffDirectoryFilterState,
   type StaffDirectoryRowView,
 } from "@/src/lib/staff/staffDirectoryFilters";
+import { STAFF_DIRECTORY_ATTENTION_LABELS } from "@/src/lib/team/directory";
 import {
   buildStaffAccessCentreHref,
   buildStaffDirectoryPrimaryActionHref,
@@ -108,6 +109,15 @@ function StaffRowCard({
               Duplicate record
             </StatusPill>
           ) : null}
+          {row.attentionReasons.map((reason) => (
+            <StatusPill
+              key={reason}
+              className="bg-amber-500/15 text-amber-100 ring-amber-500/30"
+              title={STAFF_DIRECTORY_ATTENTION_LABELS[reason]}
+            >
+              {STAFF_DIRECTORY_ATTENTION_LABELS[reason]}
+            </StatusPill>
+          ))}
           <StatusPill className={readinessScorePillClass(intel.readinessScore)}>
             {formatReadinessScore(intel.readinessScore)}
           </StatusPill>

@@ -31,9 +31,14 @@ import {
   loadWorkforceCommandCentreIntelligence,
   type WorkforceCommandCentreIntelligence,
 } from "@/src/lib/staff/workforceCommandCentre.server";
-import { loadAllTenantStaffMembers } from "@/src/lib/workforce-os/hrReconciliation.server";
-import { isStaffHrLinkedForReconciliation } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
 import type { StaffDirectoryLifecycleSignal } from "@/src/lib/staff/staffDirectoryFilters";
+import {
+  projectStaffDirectoryEntry,
+  toStaffDirectoryLifecycleSignal,
+  type StaffDirectoryAttentionReason,
+  type StaffDirectoryEntry,
+} from "@/src/lib/team/directory";
+import { resolveStaffIdentities } from "@/src/lib/team/identity/server";
 import {
   loadWorkforceOperationalMetrics,
   type WorkforceOperationalMetrics,
@@ -46,8 +51,15 @@ export type StaffDirectoryClinicOption = {
 
 export type StaffDirectoryPageResult = {
   staff: FiStaffRow[];
-  /** HR lifecycle signals keyed by `fi_staff.id` (from `fi_staff_members`). */
+  /**
+   * HR lifecycle signals keyed by scheduling staff id.
+   * Derived from {@link resolveStaffIdentities} — not from a raw dual-table join.
+   */
   staffLifecycleByStaffId: Record<string, StaffDirectoryLifecycleSignal>;
+  /** Directory projection of canonical identity (search/filter still use staff + enrich). */
+  directoryEntries: StaffDirectoryEntry[];
+  /** Attention reasons keyed by scheduling staff id — partial identities stay visible. */
+  attentionByStaffId: Record<string, StaffDirectoryAttentionReason[]>;
   canManageStaff: boolean;
   /** Tenant admins / FI admins — can edit FI OS feature visibility per staff row. */
   canManageStaffFeatureVisibility: boolean;
@@ -60,7 +72,7 @@ export type StaffDirectoryPageResult = {
   /** Stage 3.75: manager intelligence snapshots per staff (same gate as feature visibility). */
   canViewStaffOrganisationalIntelligence: boolean;
   staffOrganisationalIntelligenceByStaffId: Record<string, StaffIntelligenceViewModel>;
-  /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
+  /** Staff profile id linked to the signed-in tenant user (scheduling staff → user link), if any. */
   viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
   pinMetadataByStaffId: Record<string, StaffPinMetadata>;
@@ -147,7 +159,7 @@ async function loadClinicsForTenant(tenantId: string): Promise<StaffDirectoryCli
 export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDirectoryPageResult> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const supabase = supabaseAdmin();
-  const [staffRes, usersRes, clinics, staffMembers] = await Promise.all([
+  const [staffRes, usersRes, clinics] = await Promise.all([
     loadAllStaffForTenant(tid),
     supabase
       .from("fi_users")
@@ -156,19 +168,38 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
       .order("email", { ascending: true })
       .limit(200),
     loadClinicsForTenant(tid),
-    loadAllTenantStaffMembers(tid).catch(() => []),
   ]);
   if (usersRes.error) throw new Error(usersRes.error.message);
 
+  const staffIds = staffRes.map((s) => s.id);
+
+  /**
+   * Fixed query budget for identity: batch resolve uses bounded `.in(...)` loads
+   * (not one query per staff member). See resolveStaffIdentities.
+   */
+  const identityBatch = await resolveStaffIdentities({
+    tenantId: tid,
+    by: "staffId",
+    staffIds,
+  });
+
   const staffLifecycleByStaffId: Record<string, StaffDirectoryLifecycleSignal> = {};
-  for (const member of staffMembers) {
-    const fiStaffId = member.fi_staff_id?.trim();
-    if (!fiStaffId) continue;
-    staffLifecycleByStaffId[fiStaffId] = {
-      employmentStatus: member.employment_status,
-      archivedAt: member.archived_at,
-      hrLinked: isStaffHrLinkedForReconciliation(member),
-    };
+  const attentionByStaffId: Record<string, StaffDirectoryAttentionReason[]> = {};
+  const directoryEntries: StaffDirectoryEntry[] = [];
+
+  for (const staffId of staffIds) {
+    const resolved = identityBatch.byKey.get(staffId) ?? null;
+    const signal = toStaffDirectoryLifecycleSignal(resolved);
+    if (signal) {
+      staffLifecycleByStaffId[staffId] = signal;
+    }
+    if (resolved) {
+      const entry = projectStaffDirectoryEntry(resolved);
+      directoryEntries.push(entry);
+      if (entry.attentionReasons.length) {
+        attentionByStaffId[staffId] = entry.attentionReasons;
+      }
+    }
   }
 
   const fiUsersForLink = ((usersRes.data ?? []) as { id: string; email: string | null }[]).map(
@@ -195,13 +226,9 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   }
 
   const pinMap = canManageStaff
-    ? await loadStaffPinMetadataMap(
-        tid,
-        staffRes.map((s) => s.id)
-      )
+    ? await loadStaffPinMetadataMap(tid, staffIds)
     : new Map<string, StaffPinMetadata>();
   const pinMetadataByStaffId = Object.fromEntries(pinMap.entries());
-  const staffIds = staffRes.map((s) => s.id);
   const canManageStaffFeatureVisibility = await resolveCanManageStaffFeatureAccessSettings(tid);
 
   const staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
@@ -290,6 +317,8 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   return {
     staff: staffRes,
     staffLifecycleByStaffId,
+    directoryEntries,
+    attentionByStaffId,
     canManageStaff,
     canManageStaffFeatureVisibility,
     staffFeatureAccessByStaffId,

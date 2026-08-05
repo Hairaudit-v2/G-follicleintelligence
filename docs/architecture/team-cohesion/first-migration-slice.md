@@ -78,13 +78,16 @@ Without a stable identity package, every later domain move re-homes fragmentatio
 
 ## Acceptance for B1
 
-- [ ] `src/lib/team/identity` exists with documented public exports
-- [ ] Canonical lifecycle + readiness pure modules live only under `team/identity` (old paths are shims)
-- [ ] Profile hub and directory loader import identity public/server API
-- [ ] Existing relevant unit tests green; typecheck at baseline
-- [ ] No behaviour change in invite/token/roster tx paths
-- [ ] Inventory regenerate still classifies files; identity baseline script unchanged in method
-- [ ] Note in register: first enforcement step chosen (doc-only vs eslint allowlist)
+Focused delivery (see [b1-identity-foundation.md](./b1-identity-foundation.md)) — full pure-module relocation deferred:
+
+- [x] `src/lib/team/identity` exists with documented public exports (`index.ts` + `server.ts`)
+- [ ] Canonical lifecycle + readiness pure modules live only under `team/identity` (deferred — still under `workforce-os` with later shim plan)
+- [x] Profile hub imports identity server API
+- [x] Directory loader imports identity batch API (B1.1 — see b1.1-directory-identity-proof.md)
+- [x] Identity unit + architecture tests green
+- [x] No invite/token/roster tx behaviour change in this slice
+- [x] Inventory generator classifies `src/lib/team/**`; baseline method unchanged
+- [x] Enforcement: frozen dual-table allowlist + static architecture test (not eslint ban yet)
 
 ## Suggested PR sequence inside B1
 

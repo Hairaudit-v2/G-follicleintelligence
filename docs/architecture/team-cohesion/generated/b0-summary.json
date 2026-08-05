@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-05T04:35:12.007Z",
-  "currentFiles": 283,
+  "generatedAt": "2026-08-05T04:51:23.317Z",
+  "currentFiles": 303,
   "trees": {
     "workforce-os": 103,
     "workforce": 140,
@@ -9,7 +9,7 @@
   "domainCounts": {
     "shared": 27,
     "roster": 62,
-    "identity": 84,
+    "identity": 104,
     "directory": 25,
     "compliance": 9,
     "onboarding": 12,
@@ -20,29 +20,29 @@
     "delete": 3
   },
   "riskCounts": {
-    "low": 112,
+    "low": 117,
     "medium": 55,
-    "high": 116
+    "high": 131
   },
   "identity": {
-    "fi_staff": 362,
-    "fi_staff_members": 233,
-    "total": 595,
-    "files": 251,
+    "fi_staff": 371,
+    "fi_staff_members": 244,
+    "total": 615,
+    "files": 261,
     "byClassification": {
       "scheduling read": 91,
       "suspected duplicate identity logic": 36,
       "lifecycle read": 59,
       "cross-domain join": 46,
-      "test or fixture": 88,
+      "test or fixture": 90,
       "mutation": 1,
       "reporting": 8,
-      "canonical identity resolution": 42,
+      "canonical identity resolution": 60,
       "migration script": 224
     }
   },
   "importGraph": {
-    "interTreeEdgeCount": 97,
+    "interTreeEdgeCount": 100,
     "cycleCount": 2,
     "deepImportViolationCount": 252,
     "clientImportingServerCount": 23,

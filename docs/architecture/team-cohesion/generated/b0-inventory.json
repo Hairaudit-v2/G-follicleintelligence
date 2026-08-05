@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-05T04:35:12.007Z",
+  "generatedAt": "2026-08-05T04:51:23.317Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 283,
-  "growthSinceAudit": 16,
+  "currentFiles": 303,
+  "growthSinceAudit": 36,
   "trees": {
     "workforce-os": 103,
     "workforce": 140,
@@ -11,7 +11,7 @@
   "domainCounts": {
     "shared": 27,
     "roster": 62,
-    "identity": 84,
+    "identity": 104,
     "directory": 25,
     "compliance": 9,
     "onboarding": 12,
@@ -22,9 +22,9 @@
     "delete": 3
   },
   "riskCounts": {
-    "low": 112,
+    "low": 117,
     "medium": 55,
-    "high": 116
+    "high": 131
   },
   "inventory": [
     {
@@ -996,6 +996,8 @@
         "src/components/fi/workforce/WorkforceOsDirectoryClient.tsx",
         "src/components/fi/workforce/WorkforceOsStaffProfileClient.tsx",
         "src/lib/crm/crmAssigneeEligibility.ts",
+        "src/lib/team/identity/staffIdentityReadiness.ts",
+        "src/lib/team/identity/types.ts",
         "src/lib/workforce-os/hrReconciliation.server.ts",
         "src/lib/workforce-os/hrReconciliationCandidateCore.ts",
         "src/lib/workforce-os/rosterEligibleStaff.server.ts",
@@ -4157,13 +4159,14 @@
       ],
       "testConsumers": [],
       "tablesReferenced": [
-        "fi_staff_members"
+        "fi_staff_members",
+        "fi_staff"
       ],
       "serverOnly": true,
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
-      "migrationRisk": "medium"
+      "migrationRisk": "high"
     },
     {
       "currentPath": "src/lib/workforce/workforceTimeClockAutoCloseCron.server.ts",
@@ -4766,6 +4769,7 @@
         "src/lib/calendar/operationalCalendarLoader.server.ts",
         "src/lib/hr/hrStaffReadinessDashboard.ts",
         "src/lib/staff/staffRoleReviewLoader.server.ts",
+        "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
         "src/lib/workforce-os/workforceRosterCommandCentre.server.ts"
       ],
       "testConsumers": [],
@@ -5023,10 +5027,344 @@
       "duplicateOf": "src/lib/workforce/workforceCommandCentreCore.ts",
       "deletionReason": "Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.",
       "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/adapters/fromStaffProfileHub.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/fromStaffProfileHub.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/adapters/fromWorkforceIdentityLink.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/fromWorkforceIdentityLink.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/adapters/index.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/index.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/constants.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/constants.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/adapters/fromStaffProfileHub.ts",
+        "src/lib/team/identity/staffIdentityAudit.ts",
+        "src/lib/team/identity/staffIdentityKeys.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/index.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/index.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/internal/identityResolutionErrors.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/identityResolutionErrors.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/resolveStaffIdentity.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/internal/loadStaffIdentityRows.server.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/loadStaffIdentityRows.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members",
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/normaliseStaffIdentity.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/resolveStaffIdentities.server.ts",
+        "src/lib/team/identity/resolveStaffIdentity.server.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/identity/staffIdentityIntegrity.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/internal/staffIdentityRowTypes.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityRowTypes.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/internal/loadStaffIdentityRows.server.ts",
+        "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
+        "src/lib/team/identity/resolveStaffIdentities.server.ts",
+        "src/lib/team/identity/resolveStaffIdentity.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/identity/resolveStaffIdentities.server.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/resolveStaffIdentities.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/resolveStaffIdentity.server.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/resolveStaffIdentity.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/server.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityArchitecture.static.test.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityArchitecture.static.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityAudit.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityAudit.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityDualTableAllowlist.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityDualTableAllowlist.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [
+        "src/lib/team/identity/staffIdentityArchitecture.static.test.ts"
+      ],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityIntegrity.test.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityIntegrity.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityIntegrity.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityIntegrity.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/internal/normaliseStaffIdentity.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/identity/staffIdentityIntegrity.test.ts"
+      ],
+      "tablesReferenced": [
+        "fi_staff_members",
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityKeys.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityKeys.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/internal/normaliseStaffIdentity.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/identity/staffIdentityIntegrity.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/staffIdentityReadiness.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/staffIdentityReadiness.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/identity/types.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/types.ts",
+      "runtimeConsumers": [
+        "src/lib/team/identity/adapters/fromStaffProfileHub.ts",
+        "src/lib/team/identity/adapters/fromWorkforceIdentityLink.ts",
+        "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
+        "src/lib/team/identity/resolveStaffIdentity.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members",
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 97,
+    "interTreeEdgeCount": 100,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/rosterCommandCentrePageLoader.server.ts",
@@ -5706,6 +6044,27 @@
         "fromTree": "src/lib/staff",
         "toTree": "src/lib/workforce-os",
         "spec": "@/src/lib/workforce-os/workforceReadinessBands"
+      },
+      {
+        "from": "src/lib/team/identity/internal/normaliseStaffIdentity.ts",
+        "to": "src/lib/staff/staffProfileExtras.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffProfileExtras"
+      },
+      {
+        "from": "src/lib/team/identity/staffIdentityReadiness.ts",
+        "to": "src/lib/workforce-os/staffLifecycleTypes.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/workforce-os",
+        "spec": "@/src/lib/workforce-os/staffLifecycleTypes"
+      },
+      {
+        "from": "src/lib/team/identity/types.ts",
+        "to": "src/lib/workforce-os/staffLifecycleTypes.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/workforce-os",
+        "spec": "@/src/lib/workforce-os/staffLifecycleTypes"
       }
     ],
     "cycles": [
@@ -5936,6 +6295,11 @@
         "file": "src/lib/staff/workforceCommandCentre.ts",
         "exportStar": 0,
         "namedExports": 18
+      },
+      {
+        "file": "src/lib/team/identity/types.ts",
+        "exportStar": 0,
+        "namedExports": 13
       }
     ],
     "clientImportingServer": [
@@ -8130,25 +8494,25 @@
       "supabase"
     ],
     "auditParityNote": "Aug 2026 audit cited 448 refs / 176 files in src/lib. Re-run produces srcLibOnly below for apples-to-apples.",
-    "fi_staff_reference_count": 362,
-    "fi_staff_members_reference_count": 233,
-    "total_raw_references": 595,
-    "files_with_any_reference": 251,
+    "fi_staff_reference_count": 371,
+    "fi_staff_members_reference_count": 244,
+    "total_raw_references": 615,
+    "files_with_any_reference": 261,
     "srcLibOnly": {
-      "fi_staff": 225,
-      "fi_staff_members": 127,
-      "total": 352,
-      "files": 173
+      "fi_staff": 234,
+      "fi_staff_members": 138,
+      "total": 372,
+      "files": 183
     },
     "byClassification": {
       "scheduling read": 91,
       "suspected duplicate identity logic": 36,
       "lifecycle read": 59,
       "cross-domain join": 46,
-      "test or fixture": 88,
+      "test or fixture": 90,
       "mutation": 1,
       "reporting": 8,
-      "canonical identity resolution": 42,
+      "canonical identity resolution": 60,
       "migration script": 224
     },
     "byArea": {
@@ -8157,8 +8521,8 @@
         "fi_staff_members": 73
       },
       "src/lib/workforce": {
-        "fi_staff": 30,
-        "fi_staff_members": 71
+        "fi_staff": 31,
+        "fi_staff_members": 69
       },
       "src/lib/workforce-os": {
         "fi_staff": 18,
@@ -8175,6 +8539,10 @@
       "src/lib/fiOs": {
         "fi_staff": 12,
         "fi_staff_members": 10
+      },
+      "src/lib/team": {
+        "fi_staff": 8,
+        "fi_staff_members": 13
       },
       "src/components": {
         "fi_staff": 18,
@@ -9161,6 +9529,84 @@
         "classification": "cross-domain join"
       },
       {
+        "file": "src/lib/team/identity/adapters/fromStaffProfileHub.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/adapters/fromWorkforceIdentityLink.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/internal/identityResolutionErrors.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/internal/loadStaffIdentityRows.server.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/internal/loadStaffIdentityRows.server.ts",
+        "table": "fi_staff_members",
+        "count": 2,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/resolveStaffIdentities.server.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/resolveStaffIdentity.server.ts",
+        "table": "fi_staff",
+        "count": 2,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/staffIdentityArchitecture.static.test.ts",
+        "table": "fi_staff_members",
+        "count": 2,
+        "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/identity/staffIdentityDualTableAllowlist.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/staffIdentityIntegrity.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/staffIdentityIntegrity.ts",
+        "table": "fi_staff_members",
+        "count": 5,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/types.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/identity/types.ts",
+        "table": "fi_staff_members",
+        "count": 2,
+        "classification": "canonical identity resolution"
+      },
+      {
         "file": "src/lib/tenantAdmin/tenantAdminRoles.ts",
         "table": "fi_staff",
         "count": 1,
@@ -9426,8 +9872,14 @@
       },
       {
         "file": "src/lib/workforce/workforceStaffMemberResolve.server.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/workforce/workforceStaffMemberResolve.server.ts",
         "table": "fi_staff_members",
-        "count": 3,
+        "count": 1,
         "classification": "canonical identity resolution"
       },
       {

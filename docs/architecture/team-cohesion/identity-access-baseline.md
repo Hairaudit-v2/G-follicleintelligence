@@ -61,7 +61,8 @@ Cross-domain leak confirmed: bookings, CRM, calendar, financial/clinic setup, Hu
 
 | Phase | Goal vs this baseline |
 |-------|------------------------|
-| **B1** | Introduce `team/identity` API; route profile + directory consumers through it; add enforcement for **new** ad hoc joins. Do **not** require total ref count → 0. |
+| **B1** | GREEN — `team/identity` API + profile hub proof + frozen dual-table allowlist / static test. |
+| **B1.1** | GREEN — directory uses batch resolver; allowlist 25 → 24 (directory loader removed). |
 | **C** | Drive down `suspected duplicate identity logic` + `cross-domain join` classifications; opportunistic migration when files are touched. |
 
 Track progress by re-running the generator and diffing `identityBaseline.srcLibOnly` and `byClassification`.

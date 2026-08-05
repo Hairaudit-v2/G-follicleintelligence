@@ -5,6 +5,10 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
 import { loadWorkforceCommandCentreIntelligence } from "@/src/lib/staff/workforceCommandCentre.server";
+import {
+  resolveStaffIdentity,
+  toStaffProfileHubIdentityGate,
+} from "@/src/lib/team/identity/server";
 import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
 import { runStaffIdentityReadinessAuditForMember } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
 import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
@@ -109,20 +113,33 @@ export async function loadStaffProfileHubOverview(
   const staffMemberId = lifecycle.id;
   const canManage = options?.canManage ?? false;
 
-  const [accessRow, checklist, onboardingInvite, identityAuditRow, identityAuditAccess] =
+  const [accessRow, checklist, onboardingInvite, identityAuditRow, identityAuditAccess, resolvedIdentity] =
     await Promise.all([
       loadStaffAccessCentreRowForMember(tid, staffMemberId),
       loadOnboardingChecklist(tid, staffMemberId),
       loadOnboardingInviteStatus(tid, staffMemberId),
       runStaffIdentityReadinessAuditForMember(tid, staffMemberId),
       resolveStaffIdentityAuditAccess(tid),
+      resolveStaffIdentity(
+        { tenantId: tid, by: "staffMemberId", staffMemberId },
+        { throwOnCrossTenant: false }
+      ),
     ]);
 
   let workforceIntelligence = null;
   let leaveContext: StaffProfileLeaveContext | null = null;
-  if (lifecycle.fi_staff_id) {
+
+  const identityGate = toStaffProfileHubIdentityGate(resolvedIdentity, {
+    staffMemberId,
+    fiStaffId: lifecycle.fi_staff_id,
+    staffName: lifecycle.full_name,
+    employmentStatus: lifecycle.employment_status,
+    email: lifecycle.email,
+  });
+
+  if (identityGate.mayUseSchedulingProjection && identityGate.staffId) {
     try {
-      const fiStaff = await loadStaffMemberForTenant(tid, lifecycle.fi_staff_id);
+      const fiStaff = await loadStaffMemberForTenant(tid, identityGate.staffId);
       if (fiStaff) {
         const [hrByStaffId, leaveData] = await Promise.all([
           loadHrNotificationByStaffId(tid, [fiStaff.id]),

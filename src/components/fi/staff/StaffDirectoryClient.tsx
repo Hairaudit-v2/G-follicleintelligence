@@ -106,9 +106,16 @@ export function StaffDirectoryClient({
         data.staff,
         data.payrollByStaffId,
         data.hrNotificationByStaffId,
-        data.staffLifecycleByStaffId
+        data.staffLifecycleByStaffId,
+        data.attentionByStaffId
       ),
-    [data.staff, data.payrollByStaffId, data.hrNotificationByStaffId, data.staffLifecycleByStaffId]
+    [
+      data.staff,
+      data.payrollByStaffId,
+      data.hrNotificationByStaffId,
+      data.staffLifecycleByStaffId,
+      data.attentionByStaffId,
+    ]
   );
 
   const visibleRows = useMemo(

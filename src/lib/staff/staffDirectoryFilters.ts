@@ -3,6 +3,7 @@ import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotifica
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import type { StaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
+import type { StaffDirectoryAttentionReason } from "@/src/lib/team/directory";
 import {
   resolveCanonicalStaffLifecycleStatus,
   isCanonicalStaffLifecycleActive,
@@ -17,7 +18,7 @@ export type StaffDirectoryFilterState = {
   activeFilter: "all" | "active" | "inactive";
 };
 
-/** HR lifecycle signal for one directory row (from `fi_staff_members`). */
+/** HR lifecycle signal for one directory row (from canonical identity resolution). */
 export type StaffDirectoryLifecycleSignal = {
   employmentStatus: string | null;
   archivedAt: string | null;
@@ -37,6 +38,8 @@ export type StaffDirectoryRowView = FiStaffRow & {
   /** Non-canonical duplicate of another staff record (same name/email). */
   isDuplicate: boolean;
   duplicateOfStaffId: string | null;
+  /** Identity integrity attention — partial/invalid links stay visible. */
+  attentionReasons: StaffDirectoryAttentionReason[];
 };
 
 export function parseStaffDirectoryFiltersFromSearchParams(sp: {
@@ -75,7 +78,8 @@ export function enrichStaffDirectoryRows(
   staff: FiStaffRow[],
   payrollByStaffId: Record<string, StaffPayrollSourceDisplay | null | undefined>,
   hrNotificationByStaffId?: Record<string, StaffHrNotificationSummary | null | undefined>,
-  lifecycleByStaffId?: Record<string, StaffDirectoryLifecycleSignal | null | undefined>
+  lifecycleByStaffId?: Record<string, StaffDirectoryLifecycleSignal | null | undefined>,
+  attentionByStaffId?: Record<string, StaffDirectoryAttentionReason[] | null | undefined>
 ): StaffDirectoryRowView[] {
   const lifecycleStatusById = new Map<string, CanonicalStaffLifecycleStatus>(
     staff.map((row) => {
@@ -116,6 +120,7 @@ export function enrichStaffDirectoryRows(
       isLifecycleActive: isCanonicalStaffLifecycleActive(lifecycleStatus),
       isDuplicate: duplicates.duplicateStaffIds.has(row.id),
       duplicateOfStaffId: duplicates.canonicalIdByDuplicateId.get(row.id) ?? null,
+      attentionReasons: attentionByStaffId?.[row.id] ?? [],
     };
   });
 }

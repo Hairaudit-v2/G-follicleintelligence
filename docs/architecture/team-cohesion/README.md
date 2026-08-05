@@ -1,10 +1,10 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B0 — Domain Ownership and Import Inventory (GREEN)  
+**Phase:** B1.1 — Directory Identity Proof (GREEN) · B1 foundation intact · B0 inventory operational  
 **Date:** 2026-08-05  
-**Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md) (Phases A1/A2 delivered; Phase B begins here)
+**Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
-This register is **discovery and architecture-lock only**. No mass file moves. Runtime behaviour is unchanged.
+B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/identity`. **B1.1** proved the batch resolver in the staff directory — see [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md).
 
 ## Documents
 
@@ -17,7 +17,9 @@ This register is **discovery and architecture-lock only**. No mass file moves. R
 | [identity-access-baseline.md](./identity-access-baseline.md) | Raw `fi_staff` / `fi_staff_members` reference baseline |
 | [action-rename-map.md](./action-rename-map.md) | Sprint action → domain action rename/split plan |
 | [public-api-proposal.md](./public-api-proposal.md) | Allowed external import surface |
-| [first-migration-slice.md](./first-migration-slice.md) | B1 Identity Foundation — first safe move |
+| [first-migration-slice.md](./first-migration-slice.md) | B1 Identity Foundation — plan |
+| [b1-identity-foundation.md](./b1-identity-foundation.md) | B1 delivery record + enforcement |
+| [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md) | B1.1 directory batch-resolver proof |
 
 ## Generated artifacts
 
@@ -44,11 +46,14 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 | Import cycles (legacy trees) | 2 |
 | External deep imports into trees | 252 |
 | Client components importing `.server` modules | 23 (mostly `import type`) |
-| Raw identity refs (`src`+`scripts`+`supabase`) | 595 |
-| Raw identity refs (`src/lib` only) | 352 across 173 files |
+| Raw identity refs (`src`+`scripts`+`supabase`) | 615 (was 595 pre-B1; +canonical module refs) |
+| Raw identity refs (`src/lib` only) | see regenerate `identityBaseline.srcLibOnly` |
+| Canonical identity package | `src/lib/team/identity` (B1 GREEN) |
 
 ## Recommended next slice
 
-**FI-TEAM-COHESION-B1 — Identity Foundation** — see [first-migration-slice.md](./first-migration-slice.md).
+**FI-TEAM-COHESION-B1.1** is GREEN — see [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md).
 
-Do not migrate all raw table references in B1. Establish `src/lib/team/identity` public API first.
+Dual-table allowlist: **24** (was 25; directory loader removed).
+
+**Next:** B1.2 — Access identity proof. Then onboarding (B1.3), roster (B1.4).

@@ -82,10 +82,9 @@ Full sample: `generated/b0-inventory.json` → `importGraph.deepImportViolations
 
 ## Enforcement (B1+)
 
-Recommended progressive enforcement (not all in B0):
+Progressive enforcement:
 
 1. Document convention in this register (done)
-2. ESLint `no-restricted-imports` patterns blocking new `@/src/lib/workforce-os/**`, `@/src/lib/workforce/**`, `@/src/lib/staff/**` once shims exist — allowlist test files + the `team/**` tree during migration
-3. Optional custom check in CI: forbid new `\bfi_staff_members\b` outside `src/lib/team/identity/**` and migrations/tests
-
-Do **not** turn on hard bans before B1 shims land.
+2. **B1 delivered:** static test `staffIdentityArchitecture.static.test.ts` + frozen allowlist `staffIdentityDualTableAllowlist.ts` — fails on **new** dual `fi_staff` + `fi_staff_members` references under `src/lib` outside `team/identity` and the allowlist; forbids external `identity/internal` imports
+3. Later: ESLint `no-restricted-imports` for legacy deep imports once more shims exist
+4. Do **not** blanket-ban all raw `fi_staff` reads — single-table domain use remains legitimate
