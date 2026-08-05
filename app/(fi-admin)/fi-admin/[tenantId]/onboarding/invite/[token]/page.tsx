@@ -3,7 +3,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { OnboardingInviteClient } from "@/src/components/fi-admin/hr/OnboardingInviteClient";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
-import { loadOnboardingInviteByToken } from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
+import { loadOnboardingInviteByToken } from "@/src/lib/team/onboarding/server";
 
 export const metadata = {
   title: "Staff onboarding invitation",

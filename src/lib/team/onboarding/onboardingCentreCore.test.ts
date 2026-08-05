@@ -7,7 +7,7 @@ import {
   canSendOnboardingInvite,
   mapOnboardingInviteDisplayStatus,
   onboardingInviteStatusLabel,
-} from "@/src/lib/workforce/onboarding/onboardingCentreCore";
+} from "@/src/lib/team/onboarding/onboardingCentreCore";
 
 const base = {
   email: "alex@clinic.com",

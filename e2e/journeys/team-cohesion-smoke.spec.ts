@@ -267,6 +267,19 @@ test.describe("Team cohesion authenticated smoke @authenticated @smoke", () => {
       .or(page.getByText(NOT_FOUND));
     await expect(pinFailure.first()).toBeVisible({ timeout });
 
+    const bogusOnboarding = tenantPath(
+      tenantId,
+      "onboarding/invite/e2e-invalid-onboarding-invite-cohesion-b22c",
+    );
+    await page.goto(bogusOnboarding, { waitUntil: "domcontentloaded" });
+    expect(normalizePathname(page.url())).toBe(bogusOnboarding);
+    expect(page.url()).not.toMatch(/\/team\/onboarding$/);
+    expect(page.url()).not.toMatch(/\/hr-os\/onboarding/);
+    const onboardingFailure = page
+      .getByText(/Invitation not found|expired|no longer active|not found|Ask your clinic/i)
+      .or(page.getByText(NOT_FOUND));
+    await expect(onboardingFailure.first()).toBeVisible({ timeout });
+
     await context.close();
   });
 

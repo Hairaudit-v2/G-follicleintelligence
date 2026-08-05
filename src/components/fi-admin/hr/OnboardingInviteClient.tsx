@@ -11,7 +11,7 @@ import {
   completeOnboardingPinSetupAction,
 } from "@/src/lib/actions/workforce-onboarding-actions";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
-import type { OnboardingInvitePageModel } from "@/src/lib/workforce/onboarding/onboardingTypes";
+import type { OnboardingInvitePageModel } from "@/src/lib/team/onboarding";
 
 export function OnboardingInviteClient({
   model,

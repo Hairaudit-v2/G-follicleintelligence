@@ -39,7 +39,7 @@ import {
   canResendOnboardingInvite,
   canSendOnboardingInvite,
   mapOnboardingInviteDisplayStatus,
-} from "@/src/lib/workforce/onboarding/onboardingCentreCore";
+} from "@/src/lib/team/onboarding/onboardingCentreCore";
 import {
   loadStaffAccessCentrePage,
   type StaffAccessCentreRow,

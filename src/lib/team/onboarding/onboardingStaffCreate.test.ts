@@ -4,13 +4,13 @@ import test from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/team/identity/staffLifecycleTypes";
-import { createOnboardingStaffMember } from "@/src/lib/workforce/onboarding/onboardingStaffCreate.server";
+import { createOnboardingStaffMember } from "@/src/lib/team/onboarding/onboardingStaffCreate.server";
 import {
   buildOnboardingInboundIdentity,
   evaluateOnboardingStaffCreation,
   ONBOARDING_STAFF_SOURCE,
   resolveOnboardingStaffCreationDecision,
-} from "@/src/lib/workforce/onboarding/onboardingStaffCreateCore";
+} from "@/src/lib/team/onboarding/onboardingStaffCreateCore";
 import type {
   IdentityLinkSnapshot,
   StaffMemberSnapshot,

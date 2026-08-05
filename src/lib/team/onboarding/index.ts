@@ -1,7 +1,9 @@
 /**
- * Public Team onboarding API — pure types and projection helpers.
- * Server loaders remain in `src/lib/workforce/onboarding/` until a later domain move;
- * they must import from this index (and identity/server), never from `team/identity/internal`.
+ * Public Team onboarding API — pure types, projection helpers, and hire-invite
+ * status helpers.
+ *
+ * Server loaders & mutations: `@/src/lib/team/onboarding/server`
+ * Hire invite ≠ login invite (collision C9) — login tokens live under team/access.
  */
 
 export type {
@@ -39,3 +41,49 @@ export {
   applyStaffOnboardingEntryFlags,
   type OnboardingCentreActionFlags,
 } from "@/src/lib/team/onboarding/toOnboardingCentreRow";
+
+export type {
+  OnboardingChecklistState,
+  OnboardingClinicOption,
+  OnboardingEmploymentType,
+  OnboardingInvitationStatus,
+  OnboardingInvitePageModel,
+  OnboardingPageModel,
+  OnboardingPinSetupStatus,
+  OnboardingStaffRow,
+  CreateOnboardingStaffInput,
+} from "@/src/lib/team/onboarding/onboardingTypes";
+
+export {
+  ONBOARDING_EMPLOYMENT_TYPES,
+  ONBOARDING_EMPLOYMENT_TYPE_LABELS,
+  ONBOARDING_INVITATION_STATUSES,
+  ONBOARDING_INVITE_EXPIRY_DAYS,
+  ONBOARDING_PIN_SETUP_STATUSES,
+} from "@/src/lib/team/onboarding/onboardingTypes";
+
+export { resolveOnboardingInvitationStatus } from "@/src/lib/team/onboarding/onboardingInviteStatusCore";
+
+export type { OnboardingInviteDisplayStatus } from "@/src/lib/team/onboarding/onboardingCentreCore";
+
+export {
+  canCopyOnboardingInviteLink,
+  canResendOnboardingInvite,
+  canSendOnboardingInvite,
+  mapOnboardingInviteDisplayStatus,
+  onboardingInviteStatusLabel,
+} from "@/src/lib/team/onboarding/onboardingCentreCore";
+
+export {
+  buildOnboardingInviteUrl,
+  tryBuildOnboardingInviteUrl,
+} from "@/src/lib/team/onboarding/onboardingInviteUrlCore";
+
+export {
+  ONBOARDING_AUDIT_SOURCE,
+  ONBOARDING_STAFF_SOURCE,
+  buildOnboardingInboundIdentity,
+  evaluateOnboardingStaffCreation,
+  resolveOnboardingStaffCreationDecision,
+  type OnboardingStaffCreationDecision,
+} from "@/src/lib/team/onboarding/onboardingStaffCreateCore";

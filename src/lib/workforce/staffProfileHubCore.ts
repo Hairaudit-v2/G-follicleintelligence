@@ -3,8 +3,8 @@
  * No server or database imports.
  */
 
-import type { OnboardingInviteDisplayStatus } from "@/src/lib/workforce/onboarding/onboardingCentreCore";
-import type { OnboardingChecklistState } from "@/src/lib/workforce/onboarding/onboardingTypes";
+import type { OnboardingInviteDisplayStatus } from "@/src/lib/team/onboarding/onboardingCentreCore";
+import type { OnboardingChecklistState } from "@/src/lib/team/onboarding/onboardingTypes";
 import type { StaffWorkforceIntelligence } from "@/src/lib/staff/workforceCommandCentre";
 import type {
   StaffAuthLoginStatus,

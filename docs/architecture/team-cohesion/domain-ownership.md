@@ -104,7 +104,14 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - Checklists and onboarding status progression
 - Onboarding PIN setup that is part of the onboarding invite chain
 
-**Must remain distinct** from access login invitations.
+**Must remain distinct** from access login invitations. Completing onboarding PIN does **not** activate login access.
+
+**Canonical home (B2.2c)**
+
+- `src/lib/team/onboarding` — pure types, centre helpers, invite status, invite URLs, staff-create plan
+- `src/lib/team/onboarding/server` — page loader, invite send/load/accept, PIN setup/complete, checklist, staff create
+
+**Cycle break:** `invitation → pinSetup`, `pinLayer → invitationAccept` (no mutual imports).
 
 ---
 

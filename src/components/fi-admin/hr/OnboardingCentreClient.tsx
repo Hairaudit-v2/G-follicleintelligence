@@ -19,11 +19,11 @@ import {
 import {
   ONBOARDING_EMPLOYMENT_TYPE_LABELS,
   ONBOARDING_EMPLOYMENT_TYPES,
+  STAFF_ONBOARDING_ATTENTION_LABELS,
   type OnboardingClinicOption,
   type OnboardingEmploymentType,
   type OnboardingStaffRow,
-} from "@/src/lib/workforce/onboarding/onboardingTypes";
-import { STAFF_ONBOARDING_ATTENTION_LABELS } from "@/src/lib/team/onboarding";
+} from "@/src/lib/team/onboarding";
 
 function inviteStatusClass(status: string): string {
   if (status === "accepted") return "text-emerald-400";

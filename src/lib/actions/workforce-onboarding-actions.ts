@@ -5,21 +5,20 @@ import { z } from "zod";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
-import { markOnboardingTrainingComplete } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
-import {
-  sendOnboardingInvite,
-  resendOnboardingInvite,
-  copyOnboardingInviteLink,
-} from "@/src/lib/workforce/onboarding/onboardingInvitation.server";
-import {
-  createOnboardingStaffMember,
-} from "@/src/lib/workforce/onboarding/onboardingStaffCreate.server";
-import { expireStaleOnboardingInvitations } from "@/src/lib/workforce/onboarding/onboardingPage.server";
 import {
   ONBOARDING_EMPLOYMENT_TYPES,
   type OnboardingEmploymentType,
-} from "@/src/lib/workforce/onboarding/onboardingTypes";
-import { completeOnboardingPinSetup } from "@/src/lib/workforce/onboarding/onboardingPinLayer.server";
+} from "@/src/lib/team/onboarding";
+import {
+  acceptOnboardingInvitation,
+  completeOnboardingPinSetup,
+  copyOnboardingInviteLink,
+  createOnboardingStaffMember,
+  expireStaleOnboardingInvitations,
+  markOnboardingTrainingComplete,
+  resendOnboardingInvite,
+  sendOnboardingInvite,
+} from "@/src/lib/team/onboarding/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -190,8 +189,6 @@ export async function acceptOnboardingInviteAction(
   inviteToken: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const { acceptOnboardingInvitation } =
-      await import("@/src/lib/workforce/onboarding/onboardingInvitation.server");
     await acceptOnboardingInvitation({ tenantId, inviteToken });
     revalidateOnboardingSurfaces(tenantId);
     return { ok: true };

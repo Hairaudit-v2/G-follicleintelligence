@@ -96,19 +96,6 @@ src/lib/workforce/identityReconciliation.server.ts,identity,src/lib/team/identit
 src/lib/workforce/identityReconciliationCore.ts,identity,src/lib/team/identity/identityReconciliationCore.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/workforce/legacyRouteTelemetry.server.ts,shared,src/lib/team/shared/legacyRouteTelemetry.server.ts,0,0,,true,false,,,medium,legacy route telemetry (nav A1)
 src/lib/workforce/offboardingPage.server.ts,identity,src/lib/team/identity/offboardingPage.server.ts,0,0,fi_staff_members,true,false,,,medium,offboarding page loader (employment termination UI)
-src/lib/workforce/onboarding/onboardingCentre.test.ts,onboarding,src/lib/team/onboarding/onboardingCentre.test.ts,0,0,,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingCentreCore.test.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.test.ts,0,0,,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingCentreCore.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.ts,1,0,,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingChecklist.server.ts,onboarding,src/lib/team/onboarding/onboardingChecklist.server.ts,5,0,fi_staff_members,true,true,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingInvitation.server.ts,onboarding,src/lib/team/onboarding/onboardingInvitation.server.ts,1,0,fi_staff_members,true,true,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingInviteUrlCore.ts,onboarding,src/lib/team/onboarding/onboardingInviteUrlCore.ts,2,1,,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingPage.server.ts,onboarding,src/lib/team/onboarding/onboardingPage.server.ts,2,0,fi_staff_members,true,true,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingPageModel.test.ts,onboarding,src/lib/team/onboarding/onboardingPageModel.test.ts,0,0,fi_staff_members,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingPinLayer.server.ts,onboarding,src/lib/team/onboarding/onboardingPinLayer.server.ts,2,0,fi_staff,true,true,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingStaffCreate.server.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreate.server.ts,0,1,,true,true,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingStaffCreate.test.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreate.test.ts,0,0,fi_staff_members|fi_staff,false,false,,,high,onboarding path/name
-src/lib/workforce/onboarding/onboardingStaffCreateCore.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreateCore.ts,0,0,,false,false,,,low,onboarding path/name
-src/lib/workforce/onboarding/onboardingTypes.ts,onboarding,src/lib/team/onboarding/onboardingTypes.ts,7,0,,false,false,,,medium,onboarding path/name
 src/lib/workforce/payPeriodCore.test.ts,payroll,src/lib/team/payroll/payPeriodCore.test.ts,0,0,,false,false,,,low,pay/time costing
 src/lib/workforce/payPeriodCore.ts,payroll,src/lib/team/payroll/payPeriodCore.ts,5,1,,false,false,,,medium,pay/time costing
 src/lib/workforce/payPeriodExport.server.ts,payroll,src/lib/team/payroll/payPeriodExport.server.ts,0,0,fi_staff_members,true,false,,,high,pay/time costing
@@ -253,7 +240,7 @@ src/lib/team/access/staffAccessCentreCore.test.ts,access,src/lib/team/access/sta
 src/lib/team/access/staffAccessCentreCore.ts,access,src/lib/team/access/staffAccessCentreCore.ts,2,0,,false,false,,,low,canonical team/access module
 src/lib/team/access/staffAccessInviteAudit.server.ts,access,src/lib/team/access/staffAccessInviteAudit.server.ts,0,1,,true,true,,,high,canonical team/access module
 src/lib/team/access/staffAccessInviteCore.test.ts,access,src/lib/team/access/staffAccessInviteCore.test.ts,0,0,,false,false,,,low,canonical team/access module
-src/lib/team/access/staffAccessInviteCore.ts,access,src/lib/team/access/staffAccessInviteCore.ts,1,2,,false,true,,,high,canonical team/access module
+src/lib/team/access/staffAccessInviteCore.ts,access,src/lib/team/access/staffAccessInviteCore.ts,2,2,,false,true,,,high,canonical team/access module
 src/lib/team/access/staffAccessPinLayer.server.ts,access,src/lib/team/access/staffAccessPinLayer.server.ts,1,0,fi_staff_members,true,true,,,high,canonical team/access module
 src/lib/team/access/staffFiUserLinkPlan.test.ts,access,src/lib/team/access/staffFiUserLinkPlan.test.ts,0,0,,false,false,,,low,canonical team/access module
 src/lib/team/access/staffFiUserLinkPlan.ts,access,src/lib/team/access/staffFiUserLinkPlan.ts,0,0,fi_staff,false,false,,,low,canonical team/access module
@@ -340,9 +327,28 @@ src/lib/team/identity/workforceReadinessTenantOverview.server.ts,identity,src/li
 src/lib/team/onboarding/index.ts,onboarding,src/lib/team/onboarding/index.ts,0,0,,false,false,,,low,canonical team/onboarding module
 src/lib/team/onboarding/onboardingActionFlags.ts,onboarding,src/lib/team/onboarding/onboardingActionFlags.ts,0,0,,false,false,,,high,canonical team/onboarding module
 src/lib/team/onboarding/onboardingAttentionReasons.ts,onboarding,src/lib/team/onboarding/onboardingAttentionReasons.ts,1,0,,false,false,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingCentre.test.ts,onboarding,src/lib/team/onboarding/onboardingCentre.test.ts,0,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingCentreCore.test.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.test.ts,0,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingCentreCore.ts,onboarding,src/lib/team/onboarding/onboardingCentreCore.ts,2,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingChecklist.server.ts,onboarding,src/lib/team/onboarding/onboardingChecklist.server.ts,4,0,fi_staff_members,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingCycleBreak.static.test.ts,onboarding,src/lib/team/onboarding/onboardingCycleBreak.static.test.ts,0,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingInvitation.server.ts,onboarding,src/lib/team/onboarding/onboardingInvitation.server.ts,0,0,fi_staff_members,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingInvitationAccept.server.ts,onboarding,src/lib/team/onboarding/onboardingInvitationAccept.server.ts,2,0,,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingInviteStatusCore.test.ts,onboarding,src/lib/team/onboarding/onboardingInviteStatusCore.test.ts,0,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingInviteStatusCore.ts,onboarding,src/lib/team/onboarding/onboardingInviteStatusCore.ts,3,1,,false,false,,,medium,canonical team/onboarding module
+src/lib/team/onboarding/onboardingInviteUrlCore.ts,onboarding,src/lib/team/onboarding/onboardingInviteUrlCore.ts,2,1,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingPage.server.ts,onboarding,src/lib/team/onboarding/onboardingPage.server.ts,1,0,fi_staff_members,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingPageModel.test.ts,onboarding,src/lib/team/onboarding/onboardingPageModel.test.ts,0,0,fi_staff_members,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingPinLayer.server.ts,onboarding,src/lib/team/onboarding/onboardingPinLayer.server.ts,0,0,fi_staff,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingPinSetup.server.ts,onboarding,src/lib/team/onboarding/onboardingPinSetup.server.ts,2,0,,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingStaffCreate.server.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreate.server.ts,1,1,,true,true,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingStaffCreate.test.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreate.test.ts,0,0,fi_staff_members|fi_staff,false,false,,,high,canonical team/onboarding module
+src/lib/team/onboarding/onboardingStaffCreateCore.ts,onboarding,src/lib/team/onboarding/onboardingStaffCreateCore.ts,0,0,,false,false,,,low,canonical team/onboarding module
+src/lib/team/onboarding/onboardingTypes.ts,onboarding,src/lib/team/onboarding/onboardingTypes.ts,7,0,,false,false,,,medium,canonical team/onboarding module
 src/lib/team/onboarding/projectStaffOnboardingEntry.bridge.test.ts,onboarding,src/lib/team/onboarding/projectStaffOnboardingEntry.bridge.test.ts,0,0,,false,false,,,high,canonical team/onboarding module
 src/lib/team/onboarding/projectStaffOnboardingEntry.test.ts,onboarding,src/lib/team/onboarding/projectStaffOnboardingEntry.test.ts,0,0,,false,false,,,low,canonical team/onboarding module
 src/lib/team/onboarding/projectStaffOnboardingEntry.ts,onboarding,src/lib/team/onboarding/projectStaffOnboardingEntry.ts,0,0,,false,false,,,high,canonical team/onboarding module
+src/lib/team/onboarding/server.ts,onboarding,src/lib/team/onboarding/server.ts,0,0,,true,false,,,medium,canonical team/onboarding module
 src/lib/team/onboarding/toOnboardingCentreRow.ts,onboarding,src/lib/team/onboarding/toOnboardingCentreRow.ts,0,0,,false,false,,,low,canonical team/onboarding module
 src/lib/team/onboarding/types.ts,onboarding,src/lib/team/onboarding/types.ts,8,0,,false,false,,,high,canonical team/onboarding module
 src/lib/team/payroll/index.ts,payroll,src/lib/team/payroll/index.ts,0,0,,false,false,,,high,canonical team/payroll module

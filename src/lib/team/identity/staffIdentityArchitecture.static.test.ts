@@ -24,6 +24,7 @@ const IDENTITY_ROOT = "src/lib/team/identity";
 const TEAM_DOMAIN_EXEMPT_PREFIXES = [
   "src/lib/team/identity/",
   "src/lib/team/access/",
+  "src/lib/team/onboarding/",
 ] as const;
 const HAS_FI_STAFF = /\bfi_staff\b/;
 const HAS_FI_STAFF_MEMBERS = /\bfi_staff_members\b/;

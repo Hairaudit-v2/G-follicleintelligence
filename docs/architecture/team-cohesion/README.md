@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.2 IN PROGRESS (B2.2b Access GREEN candidate) · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.2 GREEN candidate (a–c) · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -8,7 +8,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 
 **B2.1a** moved pure lifecycle / readiness into `src/lib/team/identity`. **B2.1b** moved identity server loaders (links, audit, tenant overviews), deleted the 11 temporary shims, and exposed them via `team/identity/server` — see [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md).
 
-**B2.2** physically homes directory / access / onboarding — see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md). **B2.2b** homes access cores + mutations under `team/access` (+ `server` barrel); onboarding cycle break is **B2.2c**.
+**B2.2** physically homes directory / access / onboarding — see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md). **B2.2c** homes onboarding under `team/onboarding`, breaks the invite↔PIN cycle (`cycleCount: 0`), and lands allowlist **12**. Optional **B2.2d** is the `clinicalStaffPicker` hotspot.
 
 ## Documents
 

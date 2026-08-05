@@ -33,14 +33,14 @@ When edges are labelled by proposed domain (see regenerate), the dominant **cros
 
 **Conclusion:** Identity is the hub. Roster is the largest dependent. B1 (identity foundation) unblocks every later domain move.
 
-## Circular dependencies (1 remaining)
+## Circular dependencies (0 remaining)
 
 | Cycle | Domains | Disposition |
 |-------|---------|-------------|
-| ~~`staffLifecycleCore.ts` ↔ `hrReconciliationEligibleCore.ts`~~ | identity ↔ identity | **BROKEN in B2.1a** — leaf `team/identity/staffEmploymentStatusPredicates.ts`; HR eligible imports leaf; lifecycle core may import HR one-way. |
-| `onboardingInvitation.server.ts` ↔ `onboardingPinLayer.server.ts` | onboarding ↔ onboarding | **Break in B2.2c** — one-way pin-setup / invitation-accept leaves. Login-access accept→PIN stays a one-way dynamic import (not this cycle). |
+| ~~`staffLifecycleCore.ts` ↔ `hrReconciliationEligibleCore.ts`~~ | identity ↔ identity | **BROKEN in B2.1a** |
+| ~~`onboardingInvitation.server.ts` ↔ `onboardingPinLayer.server.ts`~~ | onboarding ↔ onboarding | **BROKEN in B2.2c** — `pinSetup` / `invitationAccept` leaves; DAG `invitation → pinSetup`, `pinLayer → invitationAccept`. |
 
-No multi-tree cycles were found (cycles stay inside a single tree). Inventory `cycleCount: 1` after B2.2b.
+Inventory `cycleCount: 0` after B2.2c.
 
 ## External consumers into each tree
 

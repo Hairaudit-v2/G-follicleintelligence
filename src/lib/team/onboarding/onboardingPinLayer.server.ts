@@ -1,6 +1,13 @@
-import "server-only";
+/**
+ * Onboarding PIN completion / status — isolated from invite send/load.
+ * Completing onboarding PIN must not invent login access.
+ *
+ * Cycle break (B2.2c):
+ *   pinSetup (create/load) ← invitation send/load
+ *   invitationAccept ← pinLayer (complete)
+ */
 
-import { randomUUID } from "node:crypto";
+import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -9,81 +16,10 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { setStaffPinForTenant } from "@/src/lib/staffPin/staffPin.server";
 
 import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
-import { acceptOnboardingInvitation } from "./onboardingInvitation.server";
-import { ONBOARDING_INVITE_EXPIRY_DAYS } from "./onboardingTypes";
+import { acceptOnboardingInvitation } from "./onboardingInvitationAccept.server";
+import { loadPinSetupByToken } from "./onboardingPinSetup.server";
 
-/**
- * Isolated PIN management layer for staff onboarding.
- * Wraps existing fi_staff_pins operations without modifying staffPin.server.ts.
- */
-
-export async function createOnboardingPinSetupToken(input: {
-  tenantId: string;
-  staffMemberId: string;
-  fiStaffId: string;
-  invitationId?: string | null;
-  client?: SupabaseClient;
-}): Promise<{ setupToken: string }> {
-  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const mid = assertNonEmptyUuid(input.staffMemberId, "staffMemberId");
-  const fiStaffId = assertNonEmptyUuid(input.fiStaffId, "fiStaffId");
-  const supabase = input.client ?? supabaseAdmin();
-  const now = new Date();
-  const expiresAt = new Date(
-    now.getTime() + ONBOARDING_INVITE_EXPIRY_DAYS * 24 * 60 * 60 * 1000
-  ).toISOString();
-  const setupToken = randomUUID();
-
-  const { error } = await supabase.from("fi_staff_onboarding_pin_setups").insert({
-    tenant_id: tid,
-    staff_member_id: mid,
-    fi_staff_id: fiStaffId,
-    invitation_id: input.invitationId?.trim() || null,
-    setup_token: setupToken,
-    status: "pending",
-    expires_at: expiresAt,
-    created_at: now.toISOString(),
-    updated_at: now.toISOString(),
-  });
-  if (error) throw new Error(error.message);
-
-  return { setupToken };
-}
-
-async function loadPinSetupByToken(
-  tenantId: string,
-  setupToken: string,
-  client: SupabaseClient
-): Promise<{
-  id: string;
-  staffMemberId: string;
-  fiStaffId: string;
-  status: string;
-  expiresAt: string;
-} | null> {
-  const { data, error } = await client
-    .from("fi_staff_onboarding_pin_setups")
-    .select("id, staff_member_id, fi_staff_id, status, expires_at")
-    .eq("tenant_id", tenantId)
-    .eq("setup_token", setupToken.trim())
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) return null;
-  const row = data as {
-    id: string;
-    staff_member_id: string;
-    fi_staff_id: string;
-    status: string;
-    expires_at: string;
-  };
-  return {
-    id: String(row.id),
-    staffMemberId: String(row.staff_member_id),
-    fiStaffId: String(row.fi_staff_id),
-    status: String(row.status),
-    expiresAt: String(row.expires_at),
-  };
-}
+export { createOnboardingPinSetupToken } from "./onboardingPinSetup.server";
 
 export async function completeOnboardingPinSetup(input: {
   tenantId: string;

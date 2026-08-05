@@ -387,8 +387,8 @@ test("architecture: commandCentre loader uses batch identity + domain projects; 
   assert.doesNotMatch(page, /resolveCanonicalStaffLifecycleStatus/);
 });
 
-test("architecture: dual-table allowlist continues to shrink after B2.2b access move", () => {
-  assert.equal(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST.length, 13);
+test("architecture: dual-table allowlist continues to shrink after B2.2c onboarding move", () => {
+  assert.equal(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST.length, 12);
   assert.ok(
     !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
       "src/lib/workforce/identityReconciliation.server.ts"
@@ -407,6 +407,11 @@ test("architecture: dual-table allowlist continues to shrink after B2.2b access 
   assert.ok(
     !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
       "src/lib/workforce/staffAccessPinLayer.server.ts"
+    )
+  );
+  assert.ok(
+    !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
+      "src/lib/workforce/onboarding/onboardingInvitation.server.ts"
     )
   );
   assert.ok(

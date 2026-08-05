@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-05T20:47:27.279Z",
+  "generatedAt": "2026-08-05T21:00:28.478Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 379,
-  "growthSinceAudit": 112,
+  "currentFiles": 385,
+  "growthSinceAudit": 118,
   "trees": {
     "workforce-os": 77,
-    "workforce": 125,
+    "workforce": 112,
     "staff": 39
   },
   "domainCounts": {
@@ -14,17 +14,17 @@
     "identity": 105,
     "directory": 30,
     "compliance": 18,
-    "onboarding": 21,
     "payroll": 33,
     "planning": 23,
     "commandCentre": 15,
     "access": 27,
-    "delete": 3
+    "delete": 3,
+    "onboarding": 27
   },
   "riskCounts": {
-    "low": 142,
-    "medium": 58,
-    "high": 179
+    "low": 144,
+    "medium": 60,
+    "high": 181
   },
   "inventory": [
     {
@@ -1670,232 +1670,6 @@
         "fi_staff_members"
       ],
       "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingCentre.test.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingCentre.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingCentreCore.test.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingCentreCore.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingCentreCore.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingCentreCore.ts",
-      "runtimeConsumers": [
-        "src/lib/workforce/staffProfileHubCore.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingChecklist.server.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingChecklist.server.ts",
-      "runtimeConsumers": [
-        "src/lib/actions/workforce-onboarding-actions.ts",
-        "src/lib/team/profile/loadStaffProfileHub.server.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-        "src/lib/workforce/onboarding/onboardingStaffCreate.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingInvitation.server.ts",
-      "runtimeConsumers": [
-        "src/lib/workforce/onboarding/onboardingPinLayer.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingInviteUrlCore.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingInviteUrlCore.ts",
-      "runtimeConsumers": [
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/onboarding/onboardingPage.server.ts"
-      ],
-      "testConsumers": [
-        "src/lib/workforce/onboarding/onboardingCentre.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingPage.server.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingPage.server.ts",
-      "runtimeConsumers": [
-        "src/lib/actions/workforce-onboarding-actions.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingPageModel.test.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingPageModel.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingPinLayer.server.ts",
-      "runtimeConsumers": [
-        "src/lib/actions/workforce-onboarding-actions.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingStaffCreate.server.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [
-        "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members",
-        "fi_staff"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingStaffCreateCore.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreateCore.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/onboarding/onboardingTypes.ts",
-      "proposedDomain": "onboarding",
-      "proposeReason": "onboarding path/name",
-      "proposedPath": "src/lib/team/onboarding/onboardingTypes.ts",
-      "runtimeConsumers": [
-        "src/components/fi-admin/hr/OnboardingInviteClient.tsx",
-        "src/lib/team/profile/projectStaffProfileOverview.ts",
-        "src/lib/workforce/onboarding/onboardingChecklist.server.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-        "src/lib/workforce/onboarding/onboardingStaffCreate.server.ts",
-        "src/lib/workforce/staffProfileHubCore.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
@@ -4509,7 +4283,8 @@
       "proposeReason": "canonical team/access module",
       "proposedPath": "src/lib/team/access/staffAccessInviteCore.ts",
       "runtimeConsumers": [
-        "src/lib/team/access/staffAccessAccept.server.ts"
+        "src/lib/team/access/staffAccessAccept.server.ts",
+        "src/lib/team/onboarding/onboardingInvitationAccept.server.ts"
       ],
       "testConsumers": [
         "src/lib/team/access/staffAccessAccept.test.ts",
@@ -5257,6 +5032,8 @@
         "src/lib/staff/staffDirectoryLoader.server.ts",
         "src/lib/team/access/staffAccessCentre.server.ts",
         "src/lib/team/commandCentre/loadTeamCommandCentre.server.ts",
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "src/lib/team/onboarding/onboardingPage.server.ts",
         "src/lib/team/payroll/loadPayrollStaffContext.server.ts",
         "src/lib/team/payroll/payrollIdentityMutationGate.server.ts",
         "src/lib/team/planning/loadPlanningStaffContext.server.ts",
@@ -5265,8 +5042,6 @@
         "src/lib/workforce/complianceIdentityMutationGate.server.ts",
         "src/lib/workforce/compliancePage.server.ts",
         "src/lib/workforce/credentialsPage.server.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/onboarding/onboardingPage.server.ts",
         "src/lib/workforce/procedureStaffingOptimizer.server.ts",
         "src/lib/workforce/shiftCostIntelligence.server.ts"
       ],
@@ -5576,20 +5351,20 @@
         "src/lib/team/identity/staffLifecycleCore.ts",
         "src/lib/team/identity/types.ts",
         "src/lib/team/identity/workforceReadinessEngine.ts",
+        "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
         "src/lib/workforce-os/hrReconciliation.server.ts",
         "src/lib/workforce-os/hrReconciliationCandidateCore.ts",
         "src/lib/workforce-os/rosterEligibleStaffCore.ts",
         "src/lib/workforce-os/workforceOsDirectoryLoader.server.ts",
         "src/lib/workforce/clinicalEligibilityCore.ts",
-        "src/lib/workforce/onboarding/onboardingStaffCreate.server.ts",
         "src/lib/workforce/staffLeaveWorkflow.server.ts",
         "src/lib/workforce/staffLifecycleUxCore.ts",
         "src/lib/workforce/staffProfileHub.server.ts"
       ],
       "testConsumers": [
         "src/lib/team/identity/staffLifecycle.test.ts",
-        "src/lib/workforce-os/hrReconciliationEligibleCore.test.ts",
-        "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts"
+        "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
+        "src/lib/workforce-os/hrReconciliationEligibleCore.test.ts"
       ],
       "tablesReferenced": [],
       "serverOnly": false,
@@ -5621,6 +5396,7 @@
         "src/lib/team/identity/resolveStaffIdentity.server.ts",
         "src/lib/team/onboarding/onboardingActionFlags.ts",
         "src/lib/team/onboarding/onboardingAttentionReasons.ts",
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
         "src/lib/team/onboarding/projectStaffOnboardingEntry.ts",
         "src/lib/team/onboarding/types.ts",
         "src/lib/team/payroll/loadPayrollStaffContext.server.ts",
@@ -5643,7 +5419,6 @@
         "src/lib/team/roster/rosterIdentityEligibilityBridge.ts",
         "src/lib/workforce-os/rosterIdentityMutationGate.server.ts",
         "src/lib/workforce/complianceIdentityMutationGate.server.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
         "src/lib/workforce/shiftCostIntelligence.server.ts"
       ],
       "testConsumers": [
@@ -5999,6 +5774,310 @@
       "migrationRisk": "high"
     },
     {
+      "currentPath": "src/lib/team/onboarding/onboardingCentre.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingCentre.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingCentreCore.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingCentreCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingCentreCore.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingCentreCore.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/index.ts",
+        "src/lib/workforce/staffProfileHubCore.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingChecklist.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingChecklist.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingInvitationAccept.server.ts",
+        "src/lib/team/onboarding/onboardingPinLayer.server.ts",
+        "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
+        "src/lib/team/profile/loadStaffProfileHub.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingCycleBreak.static.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingCycleBreak.static.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingInvitation.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingInvitation.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingInvitationAccept.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingInvitationAccept.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingPinLayer.server.ts",
+        "src/lib/team/onboarding/server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingInviteStatusCore.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingInviteStatusCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingInviteStatusCore.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingInviteStatusCore.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/index.ts",
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "src/lib/team/onboarding/onboardingInvitationAccept.server.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/onboarding/onboardingInviteStatusCore.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingInviteUrlCore.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingInviteUrlCore.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "src/lib/team/onboarding/onboardingPage.server.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/onboarding/onboardingCentre.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingPage.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingPage.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingInvitation.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingPageModel.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingPageModel.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingPinLayer.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingPinLayer.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingPinSetup.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingPinSetup.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "src/lib/team/onboarding/onboardingPinLayer.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/server.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/onboarding/onboardingStaffCreate.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members",
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingStaffCreateCore.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingStaffCreateCore.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/onboarding/onboardingTypes.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/onboardingTypes.ts",
+      "runtimeConsumers": [
+        "src/lib/team/onboarding/onboardingChecklist.server.ts",
+        "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "src/lib/team/onboarding/onboardingInviteStatusCore.ts",
+        "src/lib/team/onboarding/onboardingPinSetup.server.ts",
+        "src/lib/team/onboarding/onboardingStaffCreate.server.ts",
+        "src/lib/team/profile/projectStaffProfileOverview.ts",
+        "src/lib/workforce/staffProfileHubCore.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
       "currentPath": "src/lib/team/onboarding/projectStaffOnboardingEntry.bridge.test.ts",
       "proposedDomain": "onboarding",
       "proposeReason": "canonical team/onboarding module",
@@ -6041,6 +6120,20 @@
       "migrationRisk": "high"
     },
     {
+      "currentPath": "src/lib/team/onboarding/server.ts",
+      "proposedDomain": "onboarding",
+      "proposeReason": "canonical team/onboarding module",
+      "proposedPath": "src/lib/team/onboarding/server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
       "currentPath": "src/lib/team/onboarding/toOnboardingCentreRow.ts",
       "proposedDomain": "onboarding",
       "proposeReason": "canonical team/onboarding module",
@@ -6064,10 +6157,10 @@
         "src/lib/team/commandCentre/types.ts",
         "src/lib/team/onboarding/index.ts",
         "src/lib/team/onboarding/onboardingActionFlags.ts",
+        "src/lib/team/onboarding/onboardingTypes.ts",
         "src/lib/team/profile/projectStaffProfileOverview.ts",
         "src/lib/team/profile/staffProfileAttentionReasons.ts",
-        "src/lib/team/profile/types.ts",
-        "src/lib/workforce/onboarding/onboardingTypes.ts"
+        "src/lib/team/profile/types.ts"
       ],
       "testConsumers": [],
       "tablesReferenced": [],
@@ -6600,7 +6693,7 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 153,
+    "interTreeEdgeCount": 147,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -7065,48 +7158,6 @@
         "spec": "@/src/lib/workforce-os/hrReconciliationEligibleCore"
       },
       {
-        "from": "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "to": "src/lib/team/identity/server.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/server"
-      },
-      {
-        "from": "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "to": "src/lib/team/identity/types.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/types"
-      },
-      {
-        "from": "src/lib/workforce/onboarding/onboardingPage.server.ts",
-        "to": "src/lib/team/identity/server.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/server"
-      },
-      {
-        "from": "src/lib/workforce/onboarding/onboardingStaffCreate.server.ts",
-        "to": "src/lib/team/identity/staffLifecycleTypes.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/staffLifecycleTypes"
-      },
-      {
-        "from": "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts",
-        "to": "src/lib/team/identity/staffLifecycleTypes.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/staffLifecycleTypes"
-      },
-      {
-        "from": "src/lib/workforce/onboarding/onboardingTypes.ts",
-        "to": "src/lib/team/onboarding/types.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/onboarding/types"
-      },
-      {
         "from": "src/lib/workforce/payPeriodExport.server.ts",
         "to": "src/lib/workforce-os/security/tenantScopedQuery.server.ts",
         "fromTree": "src/lib/workforce",
@@ -7273,6 +7324,20 @@
         "fromTree": "src/lib/workforce",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/identity/staffIdentityAuditAccess.server"
+      },
+      {
+        "from": "src/lib/workforce/staffProfileHubCore.ts",
+        "to": "src/lib/team/onboarding/onboardingCentreCore.ts",
+        "fromTree": "src/lib/workforce",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/onboarding/onboardingCentreCore"
+      },
+      {
+        "from": "src/lib/workforce/staffProfileHubCore.ts",
+        "to": "src/lib/team/onboarding/onboardingTypes.ts",
+        "fromTree": "src/lib/workforce",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/onboarding/onboardingTypes"
       },
       {
         "from": "src/lib/workforce/staffProfileHubCore.ts",
@@ -7619,13 +7684,6 @@
       },
       {
         "from": "src/lib/team/profile/loadStaffProfileHub.server.ts",
-        "to": "src/lib/workforce/onboarding/onboardingChecklist.server.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/workforce",
-        "spec": "@/src/lib/workforce/onboarding/onboardingChecklist.server"
-      },
-      {
-        "from": "src/lib/team/profile/loadStaffProfileHub.server.ts",
         "to": "src/lib/workforce/staffCredentials.server.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/workforce",
@@ -7660,13 +7718,6 @@
         "spec": "@/src/lib/staff/workforceCommandCentre"
       },
       {
-        "from": "src/lib/team/profile/projectStaffProfileOverview.ts",
-        "to": "src/lib/workforce/onboarding/onboardingTypes.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/workforce",
-        "spec": "@/src/lib/workforce/onboarding/onboardingTypes"
-      },
-      {
         "from": "src/lib/team/roster/rosterIdentityEligibilityBridge.ts",
         "to": "src/lib/workforce-os/rosterEligibleStaffCore.ts",
         "fromTree": "src/lib/team",
@@ -7674,14 +7725,8 @@
         "spec": "@/src/lib/workforce-os/rosterEligibleStaffCore"
       }
     ],
-    "cycles": [
-      [
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-        "src/lib/workforce/onboarding/onboardingInvitation.server.ts"
-      ]
-    ],
-    "cycleCount": 1,
+    "cycles": [],
+    "cycleCount": 0,
     "unofficialBarrels": [
       {
         "file": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -7747,11 +7792,6 @@
         "file": "src/lib/workforce/identityReconciliationCore.ts",
         "exportStar": 0,
         "namedExports": 12
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingTypes.ts",
-        "exportStar": 0,
-        "namedExports": 14
       },
       {
         "file": "src/lib/workforce/payPeriodExportCore.ts",
@@ -7912,6 +7952,11 @@
         "file": "src/lib/team/identity/types.ts",
         "exportStar": 0,
         "namedExports": 13
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingTypes.ts",
+        "exportStar": 0,
+        "namedExports": 14
       }
     ],
     "clientImportingServer": [
@@ -8031,7 +8076,7 @@
         "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 251,
+    "deepImportViolationCount": 247,
     "deepImportViolationsSample": [
       {
         "consumer": "src/components/calendar-os/CalendarOsDayResourceView.tsx",
@@ -8097,11 +8142,6 @@
         "consumer": "src/components/fi-admin/hr/OffboardingCentreClient.tsx",
         "target": "src/lib/team/identity/staffLifecyclePresentation.ts",
         "spec": "@/src/lib/team/identity/staffLifecyclePresentation"
-      },
-      {
-        "consumer": "src/components/fi-admin/hr/OnboardingInviteClient.tsx",
-        "target": "src/lib/workforce/onboarding/onboardingTypes.ts",
-        "spec": "@/src/lib/workforce/onboarding/onboardingTypes"
       },
       {
         "consumer": "src/components/fi-admin/hr/PayrollStaffImportClient.tsx",
@@ -8669,21 +8709,6 @@
         "spec": "@/src/lib/team/access/server"
       },
       {
-        "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-        "target": "src/lib/workforce/onboarding/onboardingChecklist.server.ts",
-        "spec": "@/src/lib/workforce/onboarding/onboardingChecklist.server"
-      },
-      {
-        "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-        "target": "src/lib/workforce/onboarding/onboardingPage.server.ts",
-        "spec": "@/src/lib/workforce/onboarding/onboardingPage.server"
-      },
-      {
-        "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-        "target": "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-        "spec": "@/src/lib/workforce/onboarding/onboardingPinLayer.server"
-      },
-      {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-2-actions.ts",
         "target": "src/lib/workforce/staffReconciliationPage.server.ts",
         "spec": "@/src/lib/workforce/staffReconciliationPage.server"
@@ -9032,11 +9057,31 @@
         "consumer": "src/lib/clinicSetup/clinicBookingSetupAutoFix.server.ts",
         "target": "src/lib/staff/clinicalStaffPicker.ts",
         "spec": "@/src/lib/staff/clinicalStaffPicker"
+      },
+      {
+        "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
+        "target": "src/lib/staff/clinicalStaffPicker.ts",
+        "spec": "@/src/lib/staff/clinicalStaffPicker"
+      },
+      {
+        "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
+        "target": "src/lib/staff/staffRolePolicy.ts",
+        "spec": "@/src/lib/staff/staffRolePolicy"
+      },
+      {
+        "consumer": "src/lib/clinicSetup/clinicSetupWizard.server.ts",
+        "target": "src/lib/staff/calendarVisibleStaff.ts",
+        "spec": "@/src/lib/staff/calendarVisibleStaff"
+      },
+      {
+        "consumer": "src/lib/consultations/consultationMutations.server.ts",
+        "target": "src/lib/staff/assertStaffClinicallyAvailable.server.ts",
+        "spec": "@/src/lib/staff/assertStaffClinicallyAvailable.server"
       }
     ],
     "externalIntoTreeCounts": {
       "workforce-os": 49,
-      "workforce": 54,
+      "workforce": 50,
       "staff": 126
     },
     "externalIntoTree": {
@@ -9262,22 +9307,6 @@
         {
           "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
           "target": "src/lib/workforce/hrSyncAuditPage.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-          "target": "src/lib/workforce/onboarding/onboardingChecklist.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-          "target": "src/lib/workforce/onboarding/onboardingPage.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-          "target": "src/lib/workforce/onboarding/onboardingPinLayer.server.ts"
-        },
-        {
-          "consumer": "src/components/fi-admin/hr/OnboardingInviteClient.tsx",
-          "target": "src/lib/workforce/onboarding/onboardingTypes.ts"
         },
         {
           "consumer": "src/components/fi/workforce/WorkforceOsPayrollClient.tsx",
@@ -10008,13 +10037,13 @@
         "fi_staff": 73,
         "fi_staff_members": 73
       },
-      "src/lib/workforce": {
-        "fi_staff": 29,
-        "fi_staff_members": 49
-      },
       "src/lib/team": {
-        "fi_staff": 17,
-        "fi_staff_members": 34
+        "fi_staff": 31,
+        "fi_staff_members": 43
+      },
+      "src/lib/workforce": {
+        "fi_staff": 15,
+        "fi_staff_members": 40
       },
       "src/lib/workforce-os": {
         "fi_staff": 14,
@@ -11125,6 +11154,48 @@
         "classification": "canonical identity resolution"
       },
       {
+        "file": "src/lib/team/onboarding/onboardingChecklist.server.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingInvitation.server.ts",
+        "table": "fi_staff_members",
+        "count": 4,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingPage.server.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingPageModel.test.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingPinLayer.server.ts",
+        "table": "fi_staff",
+        "count": 2,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
+        "table": "fi_staff",
+        "count": 12,
+        "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/onboarding/onboardingStaffCreate.test.ts",
+        "table": "fi_staff_members",
+        "count": 2,
+        "classification": "test or fixture"
+      },
+      {
         "file": "src/lib/team/roster/projectRosterStaffEntry.ts",
         "table": "fi_staff",
         "count": 1,
@@ -11171,48 +11242,6 @@
         "table": "fi_staff_members",
         "count": 1,
         "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingChecklist.server.ts",
-        "table": "fi_staff_members",
-        "count": 1,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "table": "fi_staff_members",
-        "count": 4,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingPage.server.ts",
-        "table": "fi_staff_members",
-        "count": 1,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingPageModel.test.ts",
-        "table": "fi_staff_members",
-        "count": 1,
-        "classification": "test or fixture"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingPinLayer.server.ts",
-        "table": "fi_staff",
-        "count": 2,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts",
-        "table": "fi_staff",
-        "count": 12,
-        "classification": "test or fixture"
-      },
-      {
-        "file": "src/lib/workforce/onboarding/onboardingStaffCreate.test.ts",
-        "table": "fi_staff_members",
-        "count": 2,
-        "classification": "test or fixture"
       },
       {
         "file": "src/lib/workforce/payPeriodExport.server.ts",

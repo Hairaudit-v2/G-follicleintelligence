@@ -5,7 +5,7 @@ import {
   getFiOsShellActiveSidebarId,
   resolveFiOsPrimarySidebarItems,
 } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
-import { buildOnboardingInviteUrl } from "@/src/lib/workforce/onboarding/onboardingInviteUrlCore";
+import { buildOnboardingInviteUrl } from "@/src/lib/team/onboarding/onboardingInviteUrlCore";
 
 const base = "/fi-admin/t-1";
 

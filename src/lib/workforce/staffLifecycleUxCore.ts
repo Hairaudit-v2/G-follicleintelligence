@@ -8,7 +8,7 @@ import {
   canResendOnboardingInvite,
   canSendOnboardingInvite,
   type OnboardingInviteDisplayStatus,
-} from "@/src/lib/workforce/onboarding/onboardingCentreCore";
+} from "@/src/lib/team/onboarding/onboardingCentreCore";
 import {
   authLoginStatusLabel,
   inviteStatusLabel,

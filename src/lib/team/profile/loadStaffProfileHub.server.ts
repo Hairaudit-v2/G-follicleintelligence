@@ -49,8 +49,8 @@ import {
   canResendOnboardingInvite,
   canSendOnboardingInvite,
   mapOnboardingInviteDisplayStatus,
-} from "@/src/lib/workforce/onboarding/onboardingCentreCore";
-import { loadOnboardingChecklist } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
+} from "@/src/lib/team/onboarding/onboardingCentreCore";
+import { loadOnboardingChecklist } from "@/src/lib/team/onboarding/onboardingChecklist.server";
 import {
   loadStaffAccessCentreRowForMember,
   type StaffAccessCentreRow,

@@ -7,7 +7,7 @@ import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRout
 import {
   expireStaleOnboardingInvitations,
   loadOnboardingPageModel,
-} from "@/src/lib/workforce/onboarding/onboardingPage.server";
+} from "@/src/lib/team/onboarding/server";
 import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {

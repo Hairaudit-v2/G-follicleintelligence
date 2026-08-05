@@ -7,12 +7,12 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveStaffIdentity } from "@/src/lib/team/identity/server";
 import type { StaffIdentity } from "@/src/lib/team/identity/types";
 
-import { syncOnboardingChecklistFromState } from "./onboardingChecklist.server";
+import { resolveOnboardingInvitationStatus } from "./onboardingInviteStatusCore";
 import { buildOnboardingInviteUrl } from "./onboardingInviteUrlCore";
 import { expireStaleOnboardingInvitations, newOnboardingToken } from "./onboardingPage.server";
 import type { OnboardingInvitationStatus, OnboardingInvitePageModel } from "./onboardingTypes";
 import { ONBOARDING_INVITE_EXPIRY_DAYS } from "./onboardingTypes";
-import { createOnboardingPinSetupToken } from "./onboardingPinLayer.server";
+import { createOnboardingPinSetupToken } from "./onboardingPinSetup.server";
 import {
   buildOnboardingInviteEmail,
   extractStaffFirstName,
@@ -130,16 +130,6 @@ async function revokeSupersededOnboardingInvites(
     .eq("staff_member_id", staffMemberId)
     .in("status", ["pending", "sent", "expired"]);
 }
-function resolveInvitationStatus(raw: unknown, expiresAt: string): OnboardingInvitationStatus {
-  const status = String(raw ?? "pending")
-    .trim()
-    .toLowerCase();
-  if (status === "accepted") return "accepted";
-  if (status === "revoked") return "expired";
-  if (status === "expired" || new Date(expiresAt).getTime() < Date.now()) return "expired";
-  return "pending";
-}
-
 async function loadStaffMemberForInvite(
   tenantId: string,
   staffMemberId: string,
@@ -452,7 +442,7 @@ export async function loadOnboardingInviteByToken(
     expires_at: string;
   };
 
-  const status = resolveInvitationStatus(inv.status, inv.expires_at);
+  const status = resolveOnboardingInvitationStatus(inv.status, inv.expires_at);
   if (status === "expired" && inv.status !== "expired") {
     await supabase
       .from("fi_staff_onboarding_invitations")
@@ -488,53 +478,6 @@ export async function loadOnboardingInviteByToken(
     pinSetupToken,
     expiresAt: String(inv.expires_at),
   };
-}
-
-export async function acceptOnboardingInvitation(input: {
-  tenantId: string;
-  inviteToken: string;
-  client?: SupabaseClient;
-}): Promise<{ staffMemberId: string }> {
-  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
-  const token = input.inviteToken.trim();
-  const supabase = input.client ?? supabaseAdmin();
-  const now = new Date().toISOString();
-
-  const tokenHash = hashStaffAccessInviteToken(token);
-  const { data: invitation, error } = await supabase
-    .from("fi_staff_onboarding_invitations")
-    .select("id, staff_member_id, status, expires_at")
-    .eq("tenant_id", tid)
-    .or(`invite_token.eq.${token},invite_token_hash.eq.${tokenHash}`)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!invitation)
-    throw new Error(
-      "This invite is no longer active. Ask your clinic administrator for a new invite."
-    );
-
-  const inv = invitation as {
-    id: string;
-    staff_member_id: string;
-    status: string;
-    expires_at: string;
-  };
-
-  const status = resolveInvitationStatus(inv.status, inv.expires_at);
-  if (status === "expired")
-    throw new Error("This invite has expired. Ask your clinic administrator to resend it.");
-  if (status === "accepted") return { staffMemberId: String(inv.staff_member_id) };
-
-  const { error: updateError } = await supabase
-    .from("fi_staff_onboarding_invitations")
-    .update({ status: "accepted", accepted_at: now, updated_at: now })
-    .eq("tenant_id", tid)
-    .eq("id", inv.id);
-  if (updateError) throw new Error(updateError.message);
-
-  await syncOnboardingChecklistFromState(tid, String(inv.staff_member_id), supabase);
-
-  return { staffMemberId: String(inv.staff_member_id) };
 }
 
 export async function copyOnboardingInviteLink(input: {
@@ -582,7 +525,7 @@ export async function copyOnboardingInviteLink(input: {
   };
   if (row.accepted_at) throw new Error("This invite has already been accepted.");
 
-  const status = resolveInvitationStatus(row.status, row.expires_at);
+  const status = resolveOnboardingInvitationStatus(row.status, row.expires_at);
   if (status === "accepted") throw new Error("This invite has already been accepted.");
   if (status === "expired") {
     throw new Error("This invite has expired. Ask your clinic administrator to resend it.");

@@ -9,7 +9,7 @@ import {
   loadOnboardingPageModel,
   mapOnboardingClinicOption,
   ONBOARDING_FI_CLINICS_SELECT,
-} from "@/src/lib/workforce/onboarding/onboardingPage.server";
+} from "@/src/lib/team/onboarding/onboardingPage.server";
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 const CLINIC_ID = "11111111-1111-4111-8111-111111111111";
@@ -52,7 +52,7 @@ test("mapOnboardingClinicOption: accepts production fi_clinics row shape (id + d
 
 test("onboardingPage.server.ts: fi_clinics loader does not reference fi_clinics.name", () => {
   const source = readFileSync(
-    join(process.cwd(), "src/lib/workforce/onboarding/onboardingPage.server.ts"),
+    join(process.cwd(), "src/lib/team/onboarding/onboardingPage.server.ts"),
     "utf8"
   );
   assert.ok(
