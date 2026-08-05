@@ -9,7 +9,7 @@ import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workf
 import {
   canStaffBeAssignedClinically,
   type StaffClinicalAssignmentResult,
-} from "./workforceReadinessClinicalEligibility";
+} from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 
 export type StaffProcedureAssignmentInput = {
   readinessInput: WorkforceReadinessScoreInput;

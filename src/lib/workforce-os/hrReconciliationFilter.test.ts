@@ -15,7 +15,10 @@ import {
   buildHrReconciliationDiagnostics,
   buildHrReconciliationPageData,
 } from "./hrReconciliationFilterCore";
-import type { HrReconciliationDiagnostics, StaffMemberLifecycleRow } from "./staffLifecycleTypes";
+import type {
+  HrReconciliationDiagnostics,
+  StaffMemberLifecycleRow,
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "./iiohrStaffHrLinkReconciliationTypes";
 
 function lifecycleRow(overrides: Partial<StaffMemberLifecycleRow> = {}): StaffMemberLifecycleRow {
