@@ -8,7 +8,7 @@ import { TRICHOSCOPY_ACKNOWLEDGEMENT_STATES } from "@/src/lib/integrations/hliTr
 import {
   mapTrichoscopyRouteError,
   resolveConsultationTrichoscopyActor,
-} from "../../_shared";
+} from "../../../_shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
