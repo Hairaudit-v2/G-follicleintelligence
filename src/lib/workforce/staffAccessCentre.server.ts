@@ -444,11 +444,12 @@ async function assertEligibleForLoginInvite(
   staffMemberId: string,
   client: SupabaseClient
 ): Promise<{ fiStaffId: string; email: string; fullName: string }> {
-  const identity = await resolveStaffIdentity(
-    { tenantId, by: "staffMemberId", staffMemberId },
-    { client }
+  const identity = assertUsableAccessIdentityTarget(
+    await resolveStaffIdentity(
+      { tenantId, by: "staffMemberId", staffMemberId },
+      { client }
+    )
   );
-  assertUsableAccessIdentityTarget(identity);
 
   const { fiStaffId, email } = await ensureFiStaffForMember(tenantId, staffMemberId, client);
 
@@ -910,11 +911,12 @@ export async function revokeStaffLoginAccess(input: {
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
-  const identity = await resolveStaffIdentity(
-    { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
-    { client: supabase }
+  const identity = assertUsableAccessIdentityTarget(
+    await resolveStaffIdentity(
+      { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
+      { client: supabase }
+    )
   );
-  assertUsableAccessIdentityTarget(identity);
 
   const { data: member, error } = await supabase
     .from("fi_staff_members")
@@ -968,11 +970,12 @@ export async function suspendStaffLoginAccess(input: {
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
-  const identity = await resolveStaffIdentity(
-    { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
-    { client: supabase }
+  const identity = assertUsableAccessIdentityTarget(
+    await resolveStaffIdentity(
+      { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
+      { client: supabase }
+    )
   );
-  assertUsableAccessIdentityTarget(identity);
 
   const { data: member, error } = await supabase
     .from("fi_staff_members")

@@ -24,7 +24,7 @@ export type OnboardingChecklistFacts = {
   trainingPending: boolean;
 };
 
-export type StaffOnboardingProjectionFacts = OnboardingDomainActionFacts & {
+export type StaffOnboardingProjectionFacts = Omit<OnboardingDomainActionFacts, "onboardingStatus"> & {
   onboardingInviteId: string | null;
   onboardingInviteStatus: "none" | "pending" | "accepted" | "expired" | "revoked";
   onboardingInviteExpiresAt: string | null;
