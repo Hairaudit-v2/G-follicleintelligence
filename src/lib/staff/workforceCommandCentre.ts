@@ -5,7 +5,7 @@
 
 import type { StaffDirectoryRowView } from "@/src/lib/staff/staffDirectoryFilters";
 import type { StaffComplianceStatus } from "@/src/lib/staffCompliance/staffComplianceTypes";
-import type { WorkforceReadinessBandId } from "@/src/lib/workforce-os/workforceReadinessBands";
+import type { WorkforceReadinessBandId } from "@/src/lib/team/identity/workforceReadinessBands";
 
 export type WorkforceRoleSegmentId =
   | "all"

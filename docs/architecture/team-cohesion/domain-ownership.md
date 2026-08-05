@@ -41,17 +41,21 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - Payroll calculations
 - Login invitations / PIN setup (those are **access**)
 
-**Seed modules (B1 → B2.1a pure home)**
+**Seed modules (B1 → B2.1b home)**
 
 - `team/identity/staffCanonicalLifecycle*` (**canonical**, B2.1a)
 - `team/identity/workforceIdentity*` pure modules (**canonical**, B2.1a)
 - `team/identity/workforceReadiness*` pure modules (**canonical**, B2.1a)
 - `team/identity/staffLifecycle*` types/core/presentation (**canonical**, B2.1a)
 - `team/identity/staffEmploymentStatusPredicates.ts` (cycle-break leaf)
-- Temporary shims: `workforce-os/<same-basename>.ts` → re-export until consumers migrate
-- Still legacy (B2.1b): `workforce-os/workforceIdentityLinks.server.ts`, readiness/identity tenant overview servers, `staffIdentityReadinessAudit*`, `staffLifecycle.server.ts`
+- `team/identity/workforceIdentityLinks.server.ts` (**canonical**, B2.1b)
+- `team/identity/staffIdentityReadinessAudit.server.ts` (+ access gate) (**canonical**, B2.1b)
+- `team/identity/workforceIdentityTenantOverview.server.ts` (**canonical**, B2.1b)
+- `team/identity/workforceReadinessTenantOverview.server.ts` (**canonical**, B2.1b)
+- Still legacy: `workforce-os/staffLifecycle.server.ts`, HR reconciliation / projection health mutations
 - `workforce/workforceStaffMemberResolve.server.ts` (already adapt/shim to identity resolve)
 - `workforce/identityReconciliation*`, `staffCanonicalDecision*`
+- `workforce/staffTenantLinkRepair.server.ts` — explicit dual-table repair boundary (allowlisted)
 - `staff/staff.server.ts` (fi_staff CRUD — eventually)
 - `staff/staffFiUserLink*` (link plan; invite execution remains access)
 

@@ -17,7 +17,7 @@ import {
 import {
   canonicaliseWorkforceSourceSystem,
   WORKFORCE_IDENTITY_SOURCE_SYSTEMS,
-} from "@/src/lib/workforce-os/workforceIdentitySources";
+} from "@/src/lib/team/identity/workforceIdentitySources";
 
 import type {
   IiohrHrImportExistingSourceId,

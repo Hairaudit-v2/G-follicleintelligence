@@ -8,8 +8,8 @@ import {
   parseStaffWeeklyHours,
   DEFAULT_STAFF_HOURS_FALLBACK_TZ,
 } from "@/src/lib/staff/staffWeeklyHours";
-import { canStaffBeAssignedClinically } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
-import type { StaffClinicalAssignmentResult } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
+import { canStaffBeAssignedClinically } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
+import type { StaffClinicalAssignmentResult } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 import {
   canStaffBeAssignedToProcedure,
   type StaffProcedureAssignmentResult,
@@ -19,7 +19,7 @@ import {
   normalizeRequiredRoles,
   type ClinicalStaffingRequiredRoles,
 } from "@/src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 // ---------------------------------------------------------------------------
 // Shared types

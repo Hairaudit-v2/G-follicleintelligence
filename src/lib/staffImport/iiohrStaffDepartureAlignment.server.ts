@@ -11,12 +11,12 @@ import {
   resolveIiohrDepartureAlignmentKind,
 } from "@/src/lib/staffImport/iiohrStaffDepartureCore";
 import { IIOHR_EVOLVED_HR_SOURCE_SYSTEM } from "@/src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes";
-import { parseStaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleCore";
+import { parseStaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleCore";
 import {
   OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
   STAFF_LIFECYCLE_AUDIT_EVENTS,
   type StaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 import { applyStaffDepartureSideEffects } from "@/src/lib/workforce/staffDepartureSideEffects.server";
 import { offboardStaffMember } from "@/src/lib/workforce/staffOffboarding.server";
 import {

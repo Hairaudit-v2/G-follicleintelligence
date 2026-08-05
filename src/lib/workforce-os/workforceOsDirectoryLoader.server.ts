@@ -13,7 +13,7 @@ import {
   loadStaffMemberAuditTimeline,
 } from "@/src/lib/workforce-os/staffLifecycle.server";
 import { workforceTenantClient } from "@/src/lib/workforce-os/security/tenantScopedQuery.server";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export async function loadWorkforceOsDirectoryPage(tenantId: string): Promise<{
   rows: StaffMemberLifecycleRow[];
@@ -77,10 +77,10 @@ export async function loadWorkforceOsStaffProfilePage(
 }
 
 export async function loadWorkforceOsHrReconciliationPage(tenantId: string): Promise<{
-  metrics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationMetrics;
-  suggestions: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationSuggestion[];
-  archivedHistorical: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationArchivedRecord[];
-  diagnostics: import("@/src/lib/workforce-os/staffLifecycleTypes").HrReconciliationDiagnostics;
+  metrics: import("@/src/lib/team/identity/staffLifecycleTypes").HrReconciliationMetrics;
+  suggestions: import("@/src/lib/team/identity/staffLifecycleTypes").HrReconciliationSuggestion[];
+  archivedHistorical: import("@/src/lib/team/identity/staffLifecycleTypes").HrReconciliationArchivedRecord[];
+  diagnostics: import("@/src/lib/team/identity/staffLifecycleTypes").HrReconciliationDiagnostics;
   projectionHealth: HrProjectionHealth;
 } | null> {
   const access = await resolveHrOsRouteAccess(tenantId.trim());

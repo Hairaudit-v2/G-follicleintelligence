@@ -10,7 +10,7 @@ import {
   resolveHrReconciliationFeedStatus,
   summarizeStaffMemberSourceSystems,
 } from "./hrReconciliationCandidateCore";
-import { buildReconciliationSuggestions } from "./staffLifecycleCore";
+import { buildReconciliationSuggestions } from "@/src/lib/team/identity/staffLifecycleCore";
 import type {
   HrReconciliationArchivedRecord,
   HrReconciliationDiagnostics,
@@ -18,7 +18,7 @@ import type {
   HrReconciliationMetrics,
   HrReconciliationSuggestion,
   StaffMemberLifecycleRow,
-} from "./staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export type BuildHrReconciliationPageDataInput = {
   staffMembers: StaffMemberLifecycleRow[];

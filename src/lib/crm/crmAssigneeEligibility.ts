@@ -6,8 +6,8 @@
 import {
   isOperationallyIneligible,
   parseStaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
-import type { StaffEmploymentStatus } from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleCore";
+import type { StaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleTypes";
 import { CRM_MUTATION_ROLES_LOWER } from "@/src/lib/crm/crmGatePolicy";
 
 /** Employment statuses that must not receive new CRM lead assignments. */

@@ -8,7 +8,7 @@ import {
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { rankAssignableStaffForRole } from "@/src/lib/workforce-os/workforceRosterCandidates";
-import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 const NOW = new Date("2026-06-22T12:00:00.000Z");
 

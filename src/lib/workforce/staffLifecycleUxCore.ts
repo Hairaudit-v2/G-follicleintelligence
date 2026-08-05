@@ -16,8 +16,8 @@ import {
   type StaffAuthLoginStatus,
   type StaffInviteStatus,
 } from "@/src/lib/workforce/staffAccessCentreCore";
-import { resolveStaffLifecycleOperationalState } from "@/src/lib/workforce-os/staffLifecyclePresentation";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { resolveStaffLifecycleOperationalState } from "@/src/lib/team/identity/staffLifecyclePresentation";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 export type StaffLifecycleSurface = "directory" | "profile" | "access_centre" | "command_centre";
 

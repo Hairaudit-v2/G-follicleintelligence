@@ -48,14 +48,7 @@ src/lib/workforce-os/rosterTxCore.ts,roster,src/lib/team/roster/rosterTxCore.ts,
 src/lib/workforce-os/security/README.md,shared,src/lib/team/shared/README.md,0,0,,false,false,,,low,docs/security guard scaffolding
 src/lib/workforce-os/security/tenantScopedQuery.server.ts,shared,src/lib/team/shared/tenantScopedQuery.server.ts,2,0,,true,true,,,high,tenant/actor resolution shared by roster+mutations
 src/lib/workforce-os/security/tenantScopingGuard.test.ts,shared,src/lib/team/shared/tenantScopingGuard.test.ts,0,0,,false,false,,,high,tenant/actor resolution shared by roster+mutations
-src/lib/workforce-os/staffCanonicalLifecycle.ts,identity,src/lib/team/identity/staffCanonicalLifecycle.ts,1,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffIdentityAuditAccess.server.ts,identity,src/lib/team/identity/staffIdentityAuditAccess.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffIdentityReadinessAudit.server.test.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffIdentityReadinessAudit.server.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.ts,0,0,fi_staff_members|fi_staff,true,false,,,medium,identity/lifecycle/readiness/reconciliation
 src/lib/workforce-os/staffLifecycle.server.ts,identity,src/lib/team/identity/staffLifecycle.server.ts,1,0,fi_staff_members,true,true,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffLifecycleCore.ts,identity,src/lib/team/identity/staffLifecycleCore.ts,8,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffLifecyclePresentation.ts,identity,src/lib/team/identity/staffLifecyclePresentation.ts,3,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/staffLifecycleTypes.ts,identity,src/lib/team/identity/staffLifecycleTypes.ts,15,3,,false,false,,,high,identity/lifecycle/readiness/reconciliation
 src/lib/workforce-os/staffStandardHours.server.ts,roster,src/lib/team/roster/staffStandardHours.server.ts,2,1,fi_staff,true,true,,,high,roster/ops scheduling
 src/lib/workforce-os/staffStandardHoursAllocation.test.ts,roster,src/lib/team/roster/staffStandardHoursAllocation.test.ts,0,0,fi_staff,false,false,,,low,roster/ops scheduling
 src/lib/workforce-os/staffStandardHoursBulkDefault.test.ts,roster,src/lib/team/roster/staffStandardHoursBulkDefault.test.ts,0,0,,false,false,,,low,roster/ops scheduling
@@ -69,22 +62,11 @@ src/lib/workforce-os/workforceClinicalEventMapping.test.ts,roster,src/lib/team/r
 src/lib/workforce-os/workforceClinicalEventMapping.ts,roster,src/lib/team/roster/workforceClinicalEventMapping.ts,3,1,,false,false,,,medium,clinical staffing eligibility bridge
 src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults.ts,roster,src/lib/team/roster/workforceClinicalStaffingTemplateDefaults.ts,1,1,,false,false,,,low,roster/ops scheduling
 src/lib/workforce-os/workforceEventAssignmentBridge.server.ts,roster,src/lib/team/roster/workforceEventAssignmentBridge.server.ts,6,0,,true,true,,,high,roster/ops scheduling
-src/lib/workforce-os/workforceIdentityLinks.pure.test.ts,identity,src/lib/team/identity/workforceIdentityLinks.pure.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentityLinks.server.ts,identity,src/lib/team/identity/workforceIdentityLinks.server.ts,0,0,fi_staff,true,true,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentityMetadata.ts,identity,src/lib/team/identity/workforceIdentityMetadata.ts,1,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentityReadinessSignals.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.ts,0,2,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentitySources.ts,identity,src/lib/team/identity/workforceIdentitySources.ts,4,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentitySummary.ts,identity,src/lib/team/identity/workforceIdentitySummary.ts,2,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceIdentityTenantOverview.server.ts,identity,src/lib/team/identity/workforceIdentityTenantOverview.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
 src/lib/workforce-os/workforceMutationErrorsCore.test.ts,shared,src/lib/team/shared/workforceMutationErrorsCore.test.ts,0,0,,false,false,,,low,cross-domain mutation error mapping
 src/lib/workforce-os/workforceMutationErrorsCore.ts,shared,src/lib/team/shared/workforceMutationErrorsCore.ts,3,1,fi_staff,false,false,,,medium,cross-domain mutation error mapping
 src/lib/workforce-os/workforceOsDirectoryLoader.server.ts,directory,src/lib/team/directory/workforceOsDirectoryLoader.server.ts,0,0,fi_staff_members,true,false,,,high,directory/list projections
 src/lib/workforce-os/workforceProcedureClinicalEligibility.test.ts,roster,src/lib/team/roster/workforceProcedureClinicalEligibility.test.ts,0,0,,false,false,,,low,clinical staffing eligibility bridge
 src/lib/workforce-os/workforceProcedureClinicalEligibility.ts,roster,src/lib/team/roster/workforceProcedureClinicalEligibility.ts,1,1,,false,false,,,low,clinical staffing eligibility bridge
-src/lib/workforce-os/workforceReadinessBands.ts,identity,src/lib/team/identity/workforceReadinessBands.ts,3,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceReadinessClinicalEligibility.ts,identity,src/lib/team/identity/workforceReadinessClinicalEligibility.ts,3,0,,false,false,,,medium,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceReadinessEngine.ts,identity,src/lib/team/identity/workforceReadinessEngine.ts,8,3,,false,false,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/workforce-os/workforceReadinessTenantOverview.server.ts,identity,src/lib/team/identity/workforceReadinessTenantOverview.server.ts,1,0,,true,false,,,medium,identity/lifecycle/readiness/reconciliation
 src/lib/workforce-os/workforceRosterCandidates.test.ts,roster,src/lib/team/roster/workforceRosterCandidates.test.ts,0,0,,false,false,,,low,roster/ops scheduling
 src/lib/workforce-os/workforceRosterCandidates.ts,roster,src/lib/team/roster/workforceRosterCandidates.ts,7,3,,false,false,,,medium,roster/ops scheduling
 src/lib/workforce-os/workforceRosterCommandCentre.server.ts,roster,src/lib/team/roster/workforceRosterCommandCentre.server.ts,9,0,fi_staff_members,true,false,,,high,roster command centre (ops surface)
@@ -317,36 +299,43 @@ src/lib/team/identity/internal/normaliseStaffIdentity.ts,identity,src/lib/team/i
 src/lib/team/identity/internal/staffIdentityRowTypes.ts,identity,src/lib/team/identity/staffIdentityRowTypes.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/resolveStaffIdentities.server.ts,identity,src/lib/team/identity/resolveStaffIdentities.server.ts,0,0,fi_staff,true,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/resolveStaffIdentity.server.ts,identity,src/lib/team/identity/resolveStaffIdentity.server.ts,0,0,fi_staff,true,false,,,high,canonical team/identity module (B1)
-src/lib/team/identity/server.ts,identity,src/lib/team/identity/server.ts,15,0,,true,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/server.ts,identity,src/lib/team/identity/server.ts,17,0,,true,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/staffCanonicalLifecycle.test.ts,identity,src/lib/team/identity/staffCanonicalLifecycle.test.ts,0,0,fi_staff,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/staffCanonicalLifecycle.ts,identity,src/lib/team/identity/staffCanonicalLifecycle.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/staffEmploymentStatusPredicates.ts,identity,src/lib/team/identity/staffEmploymentStatusPredicates.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityArchitecture.static.test.ts,identity,src/lib/team/identity/staffIdentityArchitecture.static.test.ts,0,0,fi_staff_members,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityAudit.ts,identity,src/lib/team/identity/staffIdentityAudit.ts,0,0,,false,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/staffIdentityAuditAccess.server.ts,identity,src/lib/team/identity/staffIdentityAuditAccess.server.ts,1,0,,true,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityDualTableAllowlist.ts,identity,src/lib/team/identity/staffIdentityDualTableAllowlist.ts,0,2,fi_staff_members,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityIntegrity.test.ts,identity,src/lib/team/identity/staffIdentityIntegrity.test.ts,0,0,,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityIntegrity.ts,identity,src/lib/team/identity/staffIdentityIntegrity.ts,1,1,fi_staff_members|fi_staff,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityKeys.ts,identity,src/lib/team/identity/staffIdentityKeys.ts,1,1,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/staffIdentityReadiness.ts,identity,src/lib/team/identity/staffIdentityReadiness.ts,0,0,,false,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/staffIdentityReadinessAudit.server.test.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/staffIdentityReadinessAudit.server.ts,identity,src/lib/team/identity/staffIdentityReadinessAudit.server.ts,0,0,fi_staff_members|fi_staff,true,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/staffLifecycle.test.ts,identity,src/lib/team/identity/staffLifecycle.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/staffLifecycleCore.ts,identity,src/lib/team/identity/staffLifecycleCore.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/staffLifecycleCore.ts,identity,src/lib/team/identity/staffLifecycleCore.ts,7,0,,false,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/staffLifecyclePresentation.test.ts,identity,src/lib/team/identity/staffLifecyclePresentation.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/staffLifecyclePresentation.ts,identity,src/lib/team/identity/staffLifecyclePresentation.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/staffLifecycleTypes.ts,identity,src/lib/team/identity/staffLifecycleTypes.ts,7,1,,false,false,,,medium,canonical team/identity module (B1)
+src/lib/team/identity/staffLifecyclePresentation.ts,identity,src/lib/team/identity/staffLifecyclePresentation.ts,3,0,,false,false,,,medium,canonical team/identity module (B1)
+src/lib/team/identity/staffLifecycleTypes.ts,identity,src/lib/team/identity/staffLifecycleTypes.ts,20,3,,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/types.ts,identity,src/lib/team/identity/types.ts,41,11,fi_staff_members,false,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentityLinks.pure.test.ts,identity,src/lib/team/identity/workforceIdentityLinks.pure.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentityLinks.server.ts,identity,src/lib/team/identity/workforceIdentityLinks.server.ts,0,0,fi_staff,true,true,,,high,canonical team/identity module (B1)
 src/lib/team/identity/workforceIdentityMetadata.test.ts,identity,src/lib/team/identity/workforceIdentityMetadata.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/workforceIdentityMetadata.ts,identity,src/lib/team/identity/workforceIdentityMetadata.ts,2,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/workforceIdentityReadinessSignals.test.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceIdentityReadinessSignals.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.ts,1,1,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentityReadinessSignals.ts,identity,src/lib/team/identity/workforceIdentityReadinessSignals.ts,0,3,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/workforceIdentitySources.test.ts,identity,src/lib/team/identity/workforceIdentitySources.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceIdentitySources.ts,identity,src/lib/team/identity/workforceIdentitySources.ts,1,1,,false,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentitySources.ts,identity,src/lib/team/identity/workforceIdentitySources.ts,4,1,,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/workforceIdentitySummary.test.ts,identity,src/lib/team/identity/workforceIdentitySummary.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceIdentitySummary.ts,identity,src/lib/team/identity/workforceIdentitySummary.ts,2,1,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentitySummary.ts,identity,src/lib/team/identity/workforceIdentitySummary.ts,3,1,,false,false,,,medium,canonical team/identity module (B1)
+src/lib/team/identity/workforceIdentityTenantOverview.server.ts,identity,src/lib/team/identity/workforceIdentityTenantOverview.server.ts,0,0,,true,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/workforceReadinessBands.test.ts,identity,src/lib/team/identity/workforceReadinessBands.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceReadinessBands.ts,identity,src/lib/team/identity/workforceReadinessBands.ts,1,1,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceReadinessClinicalEligibility.ts,identity,src/lib/team/identity/workforceReadinessClinicalEligibility.ts,1,1,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/workforceReadinessBands.ts,identity,src/lib/team/identity/workforceReadinessBands.ts,3,1,,false,false,,,medium,canonical team/identity module (B1)
+src/lib/team/identity/workforceReadinessClinicalEligibility.ts,identity,src/lib/team/identity/workforceReadinessClinicalEligibility.ts,3,1,,false,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/workforceReadinessEngine.test.ts,identity,src/lib/team/identity/workforceReadinessEngine.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
-src/lib/team/identity/workforceReadinessEngine.ts,identity,src/lib/team/identity/workforceReadinessEngine.ts,1,1,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/workforceReadinessEngine.ts,identity,src/lib/team/identity/workforceReadinessEngine.ts,8,4,,false,false,,,high,canonical team/identity module (B1)
+src/lib/team/identity/workforceReadinessTenantOverview.server.ts,identity,src/lib/team/identity/workforceReadinessTenantOverview.server.ts,0,0,,true,false,,,medium,canonical team/identity module (B1)
 src/lib/team/onboarding/index.ts,onboarding,src/lib/team/onboarding/index.ts,0,0,,false,false,,,low,canonical team/onboarding module
 src/lib/team/onboarding/onboardingActionFlags.ts,onboarding,src/lib/team/onboarding/onboardingActionFlags.ts,0,0,,false,false,,,high,canonical team/onboarding module
 src/lib/team/onboarding/onboardingAttentionReasons.ts,onboarding,src/lib/team/onboarding/onboardingAttentionReasons.ts,1,0,,false,false,,,high,canonical team/onboarding module

@@ -10,12 +10,12 @@ import {
   updateFiStaff,
 } from "@/src/lib/staff/staff.server";
 import type { NexusProvisionPayload } from "@/src/lib/nexus/nexusProvisioningTypes";
-import { WORKFORCE_IDENTITY_SOURCE_SYSTEMS } from "@/src/lib/workforce-os/workforceIdentitySources";
-import { sanitizeWorkforceIdentityMetadata } from "@/src/lib/workforce-os/workforceIdentityMetadata";
+import { WORKFORCE_IDENTITY_SOURCE_SYSTEMS } from "@/src/lib/team/identity/workforceIdentitySources";
+import { sanitizeWorkforceIdentityMetadata } from "@/src/lib/team/identity/workforceIdentityMetadata";
 import {
   getStaffIdentityLinksByExternalId,
   upsertStaffIdentityLink,
-} from "@/src/lib/workforce-os/workforceIdentityLinks.server";
+} from "@/src/lib/team/identity/server";
 
 export type NexusFiStaffBridgeResult = {
   staffId: string;

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { HrOsSubNav } from "@/src/components/fi/hr-os/HrOsSubNav";
 import { offboardStaffMemberAction } from "@/src/lib/actions/workforce-phase-1c-sprint-2-actions";
-import { OFFBOARDING_DEPARTURE_TYPES } from "@/src/lib/workforce-os/staffLifecyclePresentation";
+import { OFFBOARDING_DEPARTURE_TYPES } from "@/src/lib/team/identity/staffLifecyclePresentation";
 
 type OffboardingDepartureType = (typeof OFFBOARDING_DEPARTURE_TYPES)[number]["value"];
 

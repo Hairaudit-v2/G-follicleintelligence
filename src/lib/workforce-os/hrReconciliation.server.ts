@@ -27,17 +27,17 @@ import {
   parseStaffEmploymentStatus,
   parseStaffIdentitySource,
   splitFullName,
-} from "@/src/lib/workforce-os/staffLifecycleCore";
+} from "@/src/lib/team/identity/staffLifecycleCore";
 import type {
   HrReconciliationSuggestion,
   StaffMemberLifecycleRow,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 import type { HrProjectionHealth } from "@/src/lib/workforce-os/projectionHealthCore";
 import {
   loadTenantHrProjectionHealth,
   recordWorkforceProjectionSyncRun,
 } from "@/src/lib/workforce-os/projectionHealth.server";
-import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 const LIFECYCLE_SOURCE = "workforce_os_staff_lifecycle";
 

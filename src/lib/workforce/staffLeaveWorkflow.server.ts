@@ -9,7 +9,7 @@ import {
   changeStaffEmploymentStatus,
   loadStaffMemberLifecycle,
 } from "@/src/lib/workforce-os/staffLifecycle.server";
-import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
   localDateToLeaveRangeIso,
   type StaffLeaveBlockSnapshot,

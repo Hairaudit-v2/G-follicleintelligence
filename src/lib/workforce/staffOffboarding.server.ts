@@ -7,7 +7,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import {
   OFFBOARDING_CENTRE_EMPLOYMENT_STATUSES,
   type StaffEmploymentStatus,
-} from "@/src/lib/workforce-os/staffLifecycleTypes";
+} from "@/src/lib/team/identity/staffLifecycleTypes";
 import { applyStaffDepartureSideEffects } from "@/src/lib/workforce/staffDepartureSideEffects.server";
 
 import {

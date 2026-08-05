@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import { STAFF_LIFECYCLE_AUDIT_EVENTS } from "@/src/lib/team/identity/staffLifecycleTypes";
 import {
   loadIdentityLinksForTenant,
   loadStaffMembersForReconciliation,

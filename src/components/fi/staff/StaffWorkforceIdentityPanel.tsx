@@ -3,7 +3,7 @@
 import { CheckCircle2, Link2, Unlink } from "lucide-react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { WorkforceIdentitySummary } from "@/src/lib/workforce-os/workforceIdentitySummary";
+import type { WorkforceIdentitySummary } from "@/src/lib/team/identity/workforceIdentitySummary";
 
 function formatIso(iso: string | null): string {
   if (!iso) return "—";

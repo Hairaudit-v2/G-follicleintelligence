@@ -4,7 +4,7 @@ import type { IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapp
 import { normaliseStaffEmail } from "./iiohrStaffHrLinkReconciliationCore";
 import type { EvolvedStaffRecord } from "./iiohrStaffHrLinkReconciliationTypes";
 import { needsHrReconciliation } from "./hrReconciliationEligibleCore";
-import type { StaffMemberLifecycleRow } from "./staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 const uuidSchema = z.string().uuid();
 

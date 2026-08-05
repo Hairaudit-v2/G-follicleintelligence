@@ -12,9 +12,9 @@ import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {
   buildTenantWorkforceReadinessOverview,
   type TenantWorkforceReadinessOverview,
-} from "@/src/lib/workforce-os/workforceReadinessTenantOverview.server";
-import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
-import type { WorkforceReadinessBandId } from "@/src/lib/workforce-os/workforceReadinessBands";
+} from "@/src/lib/team/identity/server";
+import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workforceReadinessEngine";
+import type { WorkforceReadinessBandId } from "@/src/lib/team/identity/workforceReadinessBands";
 import {
   isSurgeryReadyStaff,
   type StaffWorkforceIntelligence,

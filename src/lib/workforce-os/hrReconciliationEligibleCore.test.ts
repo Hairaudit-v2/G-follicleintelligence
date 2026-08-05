@@ -5,7 +5,7 @@ import {
   isDepartedEmploymentStatus,
   needsHrReconciliation,
 } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
-import type { StaffMemberLifecycleRow } from "@/src/lib/workforce-os/staffLifecycleTypes";
+import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 
 function member(status: string): StaffMemberLifecycleRow {
   return {
