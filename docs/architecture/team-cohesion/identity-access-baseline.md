@@ -63,6 +63,7 @@ Cross-domain leak confirmed: bookings, CRM, calendar, financial/clinic setup, Hu
 |-------|------------------------|
 | **B1** | GREEN — `team/identity` API + profile hub proof + frozen dual-table allowlist / static test. |
 | **B1.1** | GREEN — directory uses batch resolver; allowlist 25 → 24 (directory loader removed). |
+| **B1.2** | GREEN — access centre uses batch resolver; allowlist 24 → 23 (access centre removed). |
 | **C** | Drive down `suspected duplicate identity logic` + `cross-domain join` classifications; opportunistic migration when files are touched. |
 
 Track progress by re-running the generator and diffing `identityBaseline.srcLibOnly` and `byClassification`.

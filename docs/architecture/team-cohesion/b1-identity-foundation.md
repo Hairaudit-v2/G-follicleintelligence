@@ -81,6 +81,6 @@ Identity package avoids importing `staffLifecycleCore` (which participates in th
 
 ## Next
 
-- B1.1 / B2: directory consumer migration; retire legacy command-centre dependency from profile hub
-- Later: move pure lifecycle/readiness modules under `team/identity` with shims
+- B1.1 directory + B1.2 access consumer proofs — GREEN
+- Later: onboarding + roster proofs; move pure lifecycle/readiness modules under `team/identity` with shims
 - Consumer migration of dual-table allowlist entries opportunistic when files are touched

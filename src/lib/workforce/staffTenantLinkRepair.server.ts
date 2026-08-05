@@ -83,7 +83,11 @@ async function loadOtherTenantNamesForAuthUser(
   return (tenants ?? []).map((row) => String((row as { name: string }).name ?? "Another clinic"));
 }
 
-async function ensureFiStaffForMember(
+/**
+ * Ensure a scheduling `fi_staff` row exists for a lifecycle member (login invite path).
+ * Dual-table write — owned here so access centre loaders can avoid raw dual joins.
+ */
+export async function ensureFiStaffForMember(
   tenantId: string,
   staffMemberId: string,
   client: SupabaseClient
@@ -527,4 +531,32 @@ export async function attemptStaffTenantPortalRepair(input: {
     client,
   });
   return true;
+}
+
+/**
+ * Mirror access suspend onto the scheduling projection (employment + active flag).
+ * Kept beside other dual-table access linkage writes.
+ */
+export async function markSchedulingStaffSuspendedForAccess(input: {
+  tenantId: string;
+  fiStaffId: string;
+  actorFiUserId?: string | null;
+  client: SupabaseClient;
+  now?: string;
+}): Promise<void> {
+  const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(input.fiStaffId, "fiStaffId");
+  const now = input.now ?? new Date().toISOString();
+  const { error } = await input.client
+    .from("fi_staff")
+    .update({
+      employment_status: "suspended",
+      is_active: false,
+      employment_status_changed_at: now,
+      employment_status_changed_by: input.actorFiUserId ?? null,
+      updated_at: now,
+    })
+    .eq("tenant_id", tid)
+    .eq("id", sid);
+  if (error) throw new Error(error.message);
 }

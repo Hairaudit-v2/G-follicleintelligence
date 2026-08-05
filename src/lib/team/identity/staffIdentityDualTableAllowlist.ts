@@ -3,11 +3,11 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.1 — directory loader removed from allowlist.
+ * Snapshot: FI-TEAM-COHESION-B1.2 — access centre loader removed from allowlist.
  *
- * Allowlist before B1.1: 25
- * Directory entries removed: 1 (`src/lib/staff/staffDirectoryLoader.server.ts`)
- * Allowlist after: 24
+ * Allowlist before B1.2: 24
+ * Access entries removed: 1 (`src/lib/workforce/staffAccessCentre.server.ts`)
+ * Allowlist after: 23
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -30,7 +30,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
   "src/lib/workforce/onboarding/onboardingPage.server.ts",
   "src/lib/workforce/staffAccessAccept.server.ts",
-  "src/lib/workforce/staffAccessCentre.server.ts",
   "src/lib/workforce/staffAccessPinLayer.server.ts",
   "src/lib/workforce/staffHrTaskMapCore.ts",
   "src/lib/workforce/staffLifecycleCopy.ts",

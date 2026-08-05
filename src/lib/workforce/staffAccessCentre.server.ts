@@ -10,6 +10,15 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { updateFiStaff } from "@/src/lib/staff/staff.server";
 import { disableStaffPinForTenant } from "@/src/lib/staffPin/staffPin.server";
 import {
+  applyStaffAccessEntryFlags,
+  projectStaffAccessEntry,
+  type StaffAccessAttentionReason,
+} from "@/src/lib/team/access";
+import { resolveStaffIdentities, resolveStaffIdentity } from "@/src/lib/team/identity/server";
+import type { StaffIdentity } from "@/src/lib/team/identity/types";
+import {
+  ensureFiStaffForMember,
+  markSchedulingStaffSuspendedForAccess,
   provisionStaffAuthInviteLink,
   repairStaffTenantLinkFromInvitation,
 } from "@/src/lib/workforce/staffTenantLinkRepair.server";
@@ -67,6 +76,8 @@ export type StaffAccessCentreRow = {
   canResetPin: boolean;
   canRevokeAccess: boolean;
   canSuspendAccess: boolean;
+  /** Identity integrity / access attention — never invents access decisions. */
+  attentionReasons: StaffAccessAttentionReason[];
 };
 
 export type StaffAccessCentrePageModel = {
@@ -169,29 +180,29 @@ export async function loadStaffAccessCentrePage(
     system_access_revoked: boolean | null;
   }[];
 
-  const fiStaffIds = memberRows
-    .map((m) => (m.fi_staff_id != null ? String(m.fi_staff_id) : null))
-    .filter(Boolean) as string[];
+  const memberIds = memberRows.map((m) => String(m.id));
 
-  const fiStaffById = new Map<string, { fi_user_id: string | null; email: string | null }>();
-  if (fiStaffIds.length) {
-    const { data: fiStaffRows, error: fsErr } = await supabase
-      .from("fi_staff")
-      .select("id, fi_user_id, email")
-      .eq("tenant_id", tid)
-      .in("id", fiStaffIds);
-    if (fsErr) throw new Error(fsErr.message);
-    for (const raw of fiStaffRows ?? []) {
-      const r = raw as { id: string; fi_user_id: string | null; email: string | null };
-      fiStaffById.set(String(r.id), {
-        fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
-        email: r.email,
-      });
-    }
-  }
+  /**
+   * Fixed query budget for identity: batch resolve uses bounded `.in(...)` loads
+   * (not one query per staff member). See resolveStaffIdentities.
+   * Collects staffId / staffMemberId / userId via the canonical resolver —
+   * no raw dual-table join in this loader.
+   */
+  const identityBatch = await resolveStaffIdentities(
+    {
+      tenantId: tid,
+      by: "staffMemberId",
+      staffMemberIds: memberIds,
+    },
+    { client: supabase }
+  );
 
   const fiUserIds = [
-    ...new Set([...fiStaffById.values()].map((s) => s.fi_user_id).filter(Boolean) as string[]),
+    ...new Set(
+      [...identityBatch.byKey.values()]
+        .map((identity) => identity?.userId?.trim() || null)
+        .filter(Boolean) as string[]
+    ),
   ];
   const fiUserById = new Map<string, { auth_user_id: string | null; email: string | null }>();
   if (fiUserIds.length) {
@@ -215,10 +226,10 @@ export async function loadStaffAccessCentrePage(
   ];
   const authSnapshots = await loadAuthSnapshots(authUserIds, supabase);
 
-  const memberIds = memberRows.map((m) => String(m.id));
   const latestInviteByMember = new Map<
     string,
     {
+      id: string;
       status: string;
       expires_at: string;
       invite_link: string | null;
@@ -231,7 +242,7 @@ export async function loadStaffAccessCentrePage(
     const { data: invites, error: invErr } = await supabase
       .from("fi_staff_login_invitations")
       .select(
-        "staff_member_id, status, expires_at, invite_link, invited_at, resend_count, accepted_at"
+        "id, staff_member_id, status, expires_at, invite_link, invited_at, resend_count, accepted_at"
       )
       .eq("tenant_id", tid)
       .in("staff_member_id", memberIds)
@@ -239,6 +250,7 @@ export async function loadStaffAccessCentrePage(
     if (invErr) throw new Error(invErr.message);
     for (const raw of invites ?? []) {
       const r = raw as {
+        id: string;
         staff_member_id: string;
         status: string;
         expires_at: string;
@@ -252,6 +264,13 @@ export async function loadStaffAccessCentrePage(
     }
   }
 
+  const fiStaffIds = [
+    ...new Set(
+      [...identityBatch.byKey.values()]
+        .map((identity) => identity?.staffId?.trim() || null)
+        .filter(Boolean) as string[]
+    ),
+  ];
   const pinStatusByStaffId = new Map<string, string>();
   for (const fiStaffId of fiStaffIds) {
     const pinMeta = await loadStaffPinMetadataForStaff(tid, fiStaffId);
@@ -260,9 +279,10 @@ export async function loadStaffAccessCentrePage(
 
   const rows: StaffAccessCentreRow[] = [];
   for (const member of memberRows) {
-    const fiStaffId = member.fi_staff_id != null ? String(member.fi_staff_id) : null;
-    const fiStaff = fiStaffId ? fiStaffById.get(fiStaffId) : null;
-    const fiUserId = fiStaff?.fi_user_id ?? null;
+    const mid = String(member.id);
+    const identity = identityBatch.byKey.get(mid) ?? null;
+    const fiStaffId = identity?.staffId ?? (member.fi_staff_id != null ? String(member.fi_staff_id) : null);
+    const fiUserId = identity?.userId ?? null;
     const fiUser = fiUserId ? fiUserById.get(fiUserId) : null;
     const authUserId = fiUser?.auth_user_id ?? null;
     const authSnap = authUserId ? authSnapshots.get(authUserId) : null;
@@ -276,13 +296,14 @@ export async function loadStaffAccessCentrePage(
       authHasSignedIn: authSnap?.hasSignedIn ?? false,
     });
 
-    const latestInvite = latestInviteByMember.get(String(member.id));
+    const latestInvite = latestInviteByMember.get(mid);
     const inviteStatus = resolveInviteStatus({
       invitationStatus: latestInvite?.status,
       expiresAt: latestInvite?.expires_at,
     });
 
-    const email = member.email?.trim() || fiStaff?.email?.trim() || null;
+    const email =
+      member.email?.trim() || identity?.email?.trim() || fiUser?.email?.trim() || null;
     const canSend = canReceiveLoginInvite({
       archivedAt: member.archived_at,
       employmentStatus: member.employment_status,
@@ -317,10 +338,37 @@ export async function loadStaffAccessCentrePage(
       !isDepartedForSuspend(member.employment_status) &&
       authLoginStatus !== "revoked";
 
+    const resolvedInviteStatus: StaffInviteStatus =
+      inviteAccepted && inviteStatus !== "revoked" ? "accepted" : inviteStatus;
+
+    const accessFacts = {
+      authLoginStatus,
+      inviteStatus: resolvedInviteStatus,
+      loginInviteId: latestInvite?.id != null ? String(latestInvite.id) : null,
+      loginInviteExpiresAt: latestInvite?.expires_at ?? null,
+      canSendInvite: canSend && inviteStatus === "none" && !inviteAccepted,
+      canResendInvite: canResend,
+      canSuspendAccess: canSuspend && authLoginStatus !== "suspended",
+      canRevokeAccess: canRevoke,
+    };
+
+    const accessEntry = identity
+      ? projectStaffAccessEntry(identity, accessFacts)
+      : null;
+    const identityFlags = accessEntry
+      ? applyStaffAccessEntryFlags(accessEntry)
+      : {
+          canSendInvite: accessFacts.canSendInvite,
+          canResendInvite: accessFacts.canResendInvite,
+          canSuspendAccess: accessFacts.canSuspendAccess,
+          canRevokeAccess: accessFacts.canRevokeAccess,
+          attentionReasons: ["identity_invalid"] as StaffAccessAttentionReason[],
+        };
+
     rows.push({
-      staffMemberId: String(member.id),
+      staffMemberId: mid,
       fiStaffId,
-      fullName: String(member.full_name ?? "Staff"),
+      fullName: String(member.full_name ?? identity?.displayName ?? "Staff"),
       email,
       roleCode: member.role_code,
       employmentStatus: member.employment_status,
@@ -330,20 +378,19 @@ export async function loadStaffAccessCentrePage(
       authLoginLabel: authLoginStatusLabel(authLoginStatus),
       pinStatus: pinStatusLabel(fiStaffId ? pinStatusByStaffId.get(fiStaffId) : "not_set"),
       permissionTemplate: resolvePermissionTemplateLabel(member.role_code),
-      inviteStatus: inviteAccepted && inviteStatus !== "revoked" ? "accepted" : inviteStatus,
-      inviteLabel: inviteStatusLabel(
-        inviteAccepted && inviteStatus !== "revoked" ? "accepted" : inviteStatus
-      ),
+      inviteStatus: resolvedInviteStatus,
+      inviteLabel: inviteStatusLabel(resolvedInviteStatus),
       inviteUrl: latestInvite?.invite_link?.trim() || null,
       invitedAt: latestInvite?.invited_at ?? null,
       inviteExpiresAt: latestInvite?.expires_at ?? null,
       resendCount: latestInvite?.resend_count ?? 0,
-      canSendInvite: canSend && inviteStatus === "none" && !inviteAccepted,
-      canResendInvite: canResend,
+      canSendInvite: identityFlags.canSendInvite,
+      canResendInvite: identityFlags.canResendInvite,
       canCopyInviteLink: canCopy,
       canResetPin,
-      canRevokeAccess: canRevoke,
-      canSuspendAccess: canSuspend && authLoginStatus !== "suspended",
+      canRevokeAccess: identityFlags.canRevokeAccess,
+      canSuspendAccess: identityFlags.canSuspendAccess,
+      attentionReasons: identityFlags.attentionReasons,
     });
   }
 
@@ -374,67 +421,22 @@ export type SendStaffLoginInviteResult = {
   crossTenantWarning: string | null;
 };
 
-async function ensureFiStaffForMember(
-  tenantId: string,
-  staffMemberId: string,
-  client: SupabaseClient
-): Promise<{ fiStaffId: string; email: string }> {
-  const { data, error } = await client
-    .from("fi_staff_members")
-    .select(
-      "full_name, email, fi_staff_id, role_code, employment_status, archived_at, system_access_revoked"
-    )
-    .eq("tenant_id", tenantId)
-    .eq("id", staffMemberId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Staff member not found.");
+const ACCESS_IDENTITY_TARGET_UNCERTAIN =
+  "Staff identity requires reconciliation before this access action can run.";
 
-  const row = data as {
-    full_name: string;
-    email: string | null;
-    fi_staff_id: string | null;
-    role_code: string | null;
-    employment_status: string;
-    archived_at: string | null;
-    system_access_revoked: boolean | null;
-  };
-
-  const email = row.email?.trim().toLowerCase();
-  if (!email) throw new Error("Staff member must have an email before sending a login invite.");
-
-  if (row.fi_staff_id) {
-    return { fiStaffId: String(row.fi_staff_id), email };
+function assertUsableAccessIdentityTarget(identity: StaffIdentity | null): StaffIdentity {
+  if (!identity) {
+    throw new Error(ACCESS_IDENTITY_TARGET_UNCERTAIN);
   }
-
-  const now = new Date().toISOString();
-  const { data: created, error: createErr } = await client
-    .from("fi_staff")
-    .insert({
-      tenant_id: tenantId,
-      full_name: String(row.full_name ?? "Staff").trim(),
-      email,
-      staff_role: row.role_code?.trim() || "consultant",
-      is_active: true,
-      employment_status: row.employment_status,
-      created_at: now,
-      updated_at: now,
-    })
-    .select("id")
-    .single();
-  if (createErr || !created) {
-    throw new Error(createErr?.message ?? "Could not create fi_staff projection.");
+  const { linkStatus } = identity.integrity;
+  if (
+    linkStatus === "ambiguous" ||
+    linkStatus === "cross_tenant_mismatch" ||
+    linkStatus === "invalid"
+  ) {
+    throw new Error(ACCESS_IDENTITY_TARGET_UNCERTAIN);
   }
-
-  const fiStaffId = String((created as { id: string }).id);
-  const { error: linkErr } = await client
-    .from("fi_staff_members")
-    .update({ fi_staff_id: fiStaffId, updated_at: now })
-    .eq("tenant_id", tenantId)
-    .eq("id", staffMemberId);
-  if (linkErr) throw new Error(linkErr.message);
-
-  return { fiStaffId, email };
+  return identity;
 }
 
 async function assertEligibleForLoginInvite(
@@ -442,6 +444,12 @@ async function assertEligibleForLoginInvite(
   staffMemberId: string,
   client: SupabaseClient
 ): Promise<{ fiStaffId: string; email: string; fullName: string }> {
+  const identity = await resolveStaffIdentity(
+    { tenantId, by: "staffMemberId", staffMemberId },
+    { client }
+  );
+  assertUsableAccessIdentityTarget(identity);
+
   const { fiStaffId, email } = await ensureFiStaffForMember(tenantId, staffMemberId, client);
 
   const { data: member, error } = await client
@@ -460,16 +468,8 @@ async function assertEligibleForLoginInvite(
     system_access_revoked: boolean | null;
   };
 
-  const { data: fiStaff, error: fsErr } = await client
-    .from("fi_staff")
-    .select("fi_user_id")
-    .eq("tenant_id", tenantId)
-    .eq("id", fiStaffId)
-    .maybeSingle();
-  if (fsErr) throw new Error(fsErr.message);
-
   let authLoginStatus: StaffAuthLoginStatus = "no_login";
-  const fiUserId = (fiStaff as { fi_user_id: string | null } | null)?.fi_user_id;
+  const fiUserId = identity.userId;
   if (fiUserId) {
     const { data: fiUser, error: uErr } = await client
       .from("fi_users")
@@ -910,19 +910,22 @@ export async function revokeStaffLoginAccess(input: {
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
+  const identity = await resolveStaffIdentity(
+    { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
+    { client: supabase }
+  );
+  assertUsableAccessIdentityTarget(identity);
+
   const { data: member, error } = await supabase
     .from("fi_staff_members")
-    .select("fi_staff_id")
+    .select("id")
     .eq("tenant_id", tid)
     .eq("id", mid)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!member) throw new Error("Staff member not found.");
 
-  const fiStaffId =
-    (member as { fi_staff_id: string | null }).fi_staff_id != null
-      ? String((member as { fi_staff_id: string }).fi_staff_id)
-      : null;
+  const fiStaffId = identity.staffId;
 
   await supabase
     .from("fi_staff_members")
@@ -965,9 +968,15 @@ export async function suspendStaffLoginAccess(input: {
   const supabase = input.client ?? supabaseAdmin();
   const now = new Date().toISOString();
 
+  const identity = await resolveStaffIdentity(
+    { tenantId: tid, by: "staffMemberId", staffMemberId: mid },
+    { client: supabase }
+  );
+  assertUsableAccessIdentityTarget(identity);
+
   const { data: member, error } = await supabase
     .from("fi_staff_members")
-    .select("fi_staff_id, employment_status")
+    .select("employment_status")
     .eq("tenant_id", tid)
     .eq("id", mid)
     .maybeSingle();
@@ -977,10 +986,7 @@ export async function suspendStaffLoginAccess(input: {
     throw new Error("Departed staff cannot be suspended.");
   }
 
-  const fiStaffId =
-    (member as { fi_staff_id: string | null }).fi_staff_id != null
-      ? String((member as { fi_staff_id: string }).fi_staff_id)
-      : null;
+  const fiStaffId = identity.staffId;
 
   await supabase
     .from("fi_staff_members")
@@ -995,17 +1001,13 @@ export async function suspendStaffLoginAccess(input: {
     .eq("id", mid);
 
   if (fiStaffId) {
-    await supabase
-      .from("fi_staff")
-      .update({
-        employment_status: "suspended",
-        is_active: false,
-        employment_status_changed_at: now,
-        employment_status_changed_by: input.actorFiUserId ?? null,
-        updated_at: now,
-      })
-      .eq("tenant_id", tid)
-      .eq("id", fiStaffId);
+    await markSchedulingStaffSuspendedForAccess({
+      tenantId: tid,
+      fiStaffId,
+      actorFiUserId: input.actorFiUserId ?? null,
+      client: supabase,
+      now,
+    });
     await disableStaffPinForTenant({
       tenantId: tid,
       staffId: fiStaffId,

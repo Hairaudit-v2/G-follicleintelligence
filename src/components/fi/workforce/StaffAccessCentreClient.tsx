@@ -15,6 +15,7 @@ import {
   sendStaffLoginInviteAction,
   suspendStaffLoginAccessAction,
 } from "@/src/lib/actions/workforce-staff-access-actions";
+import { STAFF_ACCESS_ATTENTION_LABELS } from "@/src/lib/team/access";
 import type { StaffAccessCentreRow } from "@/src/lib/workforce/staffAccessCentre.server";
 
 export type StaffAccessFilter = "all" | "needs_login" | "login_active" | "suspended" | "archived";
@@ -251,6 +252,19 @@ export function StaffAccessCentreClient({
                   <td className="px-4 py-3">
                     <p className="font-medium text-[#F8FAFC]">{row.fullName}</p>
                     <p className="text-xs text-[#64748B]">{row.email ?? "—"}</p>
+                    {row.attentionReasons.length > 0 ? (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {row.attentionReasons.map((reason) => (
+                          <span
+                            key={reason}
+                            className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-100"
+                            title={STAFF_ACCESS_ATTENTION_LABELS[reason]}
+                          >
+                            {STAFF_ACCESS_ATTENTION_LABELS[reason]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                     <Link
                       href={`/fi-admin/${tenantId}/workforce-os/staff/${row.staffMemberId}`}
                       className="mt-1 inline-block text-xs font-medium text-[#22C1FF] hover:underline"

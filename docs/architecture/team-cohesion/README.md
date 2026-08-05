@@ -1,10 +1,10 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B1.1 — Directory Identity Proof (GREEN) · B1 foundation intact · B0 inventory operational  
+**Phase:** B1.2 — Access Identity Proof (GREEN) · B1.1 directory proof intact · B1 foundation intact · B0 inventory operational  
 **Date:** 2026-08-05  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
-B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/identity`. **B1.1** proved the batch resolver in the staff directory — see [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md).
+B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/identity`. **B1.1** proved the batch resolver in the staff directory. **B1.2** proved it in Staff Access — see [b1.2-access-identity-proof.md](./b1.2-access-identity-proof.md).
 
 ## Documents
 
@@ -20,6 +20,7 @@ B0 was discovery and architecture-lock only. **B1** delivered `src/lib/team/iden
 | [first-migration-slice.md](./first-migration-slice.md) | B1 Identity Foundation — plan |
 | [b1-identity-foundation.md](./b1-identity-foundation.md) | B1 delivery record + enforcement |
 | [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md) | B1.1 directory batch-resolver proof |
+| [b1.2-access-identity-proof.md](./b1.2-access-identity-proof.md) | B1.2 access batch-resolver proof |
 
 ## Generated artifacts
 
@@ -52,8 +53,8 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## Recommended next slice
 
-**FI-TEAM-COHESION-B1.1** is GREEN — see [b1.1-directory-identity-proof.md](./b1.1-directory-identity-proof.md).
+**FI-TEAM-COHESION-B1.2** is GREEN — see [b1.2-access-identity-proof.md](./b1.2-access-identity-proof.md).
 
-Dual-table allowlist: **24** (was 25; directory loader removed).
+Dual-table allowlist: **23** (was 24; access centre loader removed).
 
-**Next:** B1.2 — Access identity proof. Then onboarding (B1.3), roster (B1.4).
+**Next:** B1.3 — Onboarding identity proof. Then roster (B1.4). Keep B1.1.1 (lifecycle-only directory rows) deferred.
