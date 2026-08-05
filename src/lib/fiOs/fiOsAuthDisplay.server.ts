@@ -88,8 +88,8 @@ export async function resolveFiOsAuthUserDisplayNameById(authUserId: string): Pr
 }
 
 /**
- * Tenant-aware display label for Today hero copy — hydrates fi_staff_members / fi_staff
- * before falling back to auth metadata and email local-part.
+ * Tenant-aware display label for Today hero copy — hydrates lifecycle / scheduling
+ * person profiles before falling back to auth metadata and email local-part.
  */
 export async function resolveFiOsAuthUserDisplayNameForTenant(
   authUserId: string,

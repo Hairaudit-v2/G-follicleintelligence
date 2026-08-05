@@ -159,7 +159,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 Consumes other domains. Contains minimal underlying business logic.
 
-**Canonical:** `workforce/workforceCommandCentre*`  
+**Canonical:** `src/lib/team/commandCentre` (B1.7) — page loader shim remains at `workforce/workforceCommandCentrePage.server.ts`  
+**Compat composition helpers:** `workforce/workforceCommandCentreCore.ts` (planning tiles / health until B1.8)  
 **Delete after consumer migration:** `staff/workforceCommandCentre*`
 
 ---

@@ -11,47 +11,24 @@ import { loadShiftCostIntelligence } from "@/src/lib/workforce/shiftCostIntellig
 import type { ShiftCostIntelligenceSnapshot } from "@/src/lib/workforce/shiftCostIntelligenceCore";
 import { listActiveStaffForWageProfiles } from "@/src/lib/workforce/wageProfile.server";
 import {
-  buildAttentionQueue,
-  buildCommandCentreKpis,
-  buildFinancialIntelligencePanel,
-  buildModuleTiles,
-  buildProcedureStaffingForecast,
-  buildWorkforceHealthRadar,
   composeSurgicalWorkforceIntelligence,
   composeWorkforceIntelligence,
   resolveSurgicalIntelligenceDates,
-  type ProcedureStaffingForecastPanel,
-  type SurgicalWorkforceIntelligencePanel,
-  type WorkforceIntelligencePanel,
-  type WorkforceAttentionQueueItem,
-  type WorkforceCommandCentreKpis,
-  type WorkforceFinancialIntelligencePanel,
-  type WorkforceHealthMetric,
-  type WorkforceModuleTile,
 } from "@/src/lib/workforce/workforceCommandCentreCore";
 import { loadWorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
 import type { WorkforceOperationalMetrics } from "@/src/lib/workforce/workforceOperationalMetrics.server";
 import { loadWorkforcePlanningEngine } from "@/src/lib/workforce/workforcePlanningEngine.server";
 import type { WorkforcePlanningSnapshot } from "@/src/lib/workforce/workforcePlanningEngineCore";
-import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
-import { resolveCanonicalStaffLifecycleStatus } from "@/src/lib/workforce-os/staffCanonicalLifecycle";
 import { loadProcedureStaffingOptimizer } from "@/src/lib/workforce/procedureStaffingOptimizer.server";
 import type { ProcedureStaffingOptimizerSnapshot } from "@/src/lib/workforce/procedureStaffingOptimizerCore";
 import { loadSurgeryCaseLinks } from "@/src/lib/workforce/surgicalWorkforceIntelligence.server";
+import {
+  adaptTeamCommandCentreToPageData,
+  type WorkforceCommandCentrePageData,
+} from "@/src/lib/team/commandCentre/adaptCommandCentrePage";
+import { loadTeamCommandCentre } from "@/src/lib/team/commandCentre/loadTeamCommandCentre.server";
 
-export type WorkforceCommandCentrePageData = {
-  canManage: boolean;
-  kpis: WorkforceCommandCentreKpis;
-  healthRadar: WorkforceHealthMetric[];
-  attentionQueue: WorkforceAttentionQueueItem[];
-  moduleTiles: WorkforceModuleTile[];
-  procedureForecast: ProcedureStaffingForecastPanel;
-  financialIntelligence: WorkforceFinancialIntelligencePanel;
-  planning: WorkforcePlanningSnapshot | null;
-  planningAvailable: boolean;
-  intelligence: WorkforceIntelligencePanel;
-  surgicalIntelligence: SurgicalWorkforceIntelligencePanel;
-};
+export type { WorkforceCommandCentrePageData };
 
 async function safeLoadPlanning(tenantId: string): Promise<WorkforcePlanningSnapshot | null> {
   try {
@@ -94,7 +71,7 @@ async function loadSurgicalIntelligenceSignals(
   tenantId: string,
   planning: WorkforcePlanningSnapshot | null,
   activeClinicalStaffCount: number
-): Promise<SurgicalWorkforceIntelligencePanel> {
+) {
   const { tomorrowDate, weekDates } = resolveSurgicalIntelligenceDates(planning);
   const optimizerDates = Array.from(new Set([tomorrowDate, ...weekDates]));
 
@@ -130,6 +107,13 @@ async function loadSurgicalIntelligenceSignals(
   });
 }
 
+/**
+ * Workforce Command Centre page loader (FI-TEAM-COHESION-B1.7).
+ *
+ * Identity / domain composition is owned by `loadTeamCommandCentre`.
+ * This module delegates person composition and adapts the existing client DTO.
+ * Planning / recruitment / wage engines remain supplemental until B1.8.
+ */
 export async function loadWorkforceCommandCentrePage(
   tenantId: string
 ): Promise<WorkforceCommandCentrePageData | null> {
@@ -142,7 +126,7 @@ export async function loadWorkforceCommandCentrePage(
     access.platformAdminPreview || (HR_OS_ROUTE_REQUIRED_ROLES as readonly string[]).includes(role);
 
   const [
-    directory,
+    teamComposition,
     planning,
     shiftCost,
     operationalMetrics,
@@ -150,7 +134,7 @@ export async function loadWorkforceCommandCentrePage(
     roleRequirements,
     wageStaff,
   ] = await Promise.all([
-    loadWorkforceOsDirectoryPage(tid).catch(() => null),
+    loadTeamCommandCentre(tid).catch(() => null),
     safeLoadPlanning(tid),
     safeLoadShiftCost(tid),
     canManage ? safeLoadOperationalMetrics(tid) : Promise.resolve(null),
@@ -159,18 +143,26 @@ export async function loadWorkforceCommandCentrePage(
     listActiveStaffForWageProfiles(tid).catch(() => []),
   ]);
 
-  // Canonical lifecycle: terminated/archived staff never count towards headcount,
-  // even when flags have drifted (matches Staff Directory + roster eligibility).
-  // On-leave/suspended/pending staff remain employed and stay in the headcount.
-  const totalStaff =
-    directory?.rows.filter((r) => {
-      const status = resolveCanonicalStaffLifecycleStatus({
-        isActive: true,
-        employmentStatus: r.employment_status,
-        archivedAt: r.archived_at,
-      });
-      return status !== "terminated" && status !== "archived";
-    }).length ?? 0;
+  // Fallback empty composition if identity batch fails — still render planning tiles.
+  const team =
+    teamComposition ??
+    ({
+      tenantId: tid,
+      staff: [],
+      attentionQueue: [],
+      kpis: {
+        totalStaff: 0,
+        activeStaff: 0,
+        onboardingIncomplete: 0,
+        accessPending: 0,
+        credentialIssues: 0,
+        rosterReady: 0,
+        identityReconciliation: 0,
+        attentionRequired: 0,
+        crossTenantIntegrityIssues: 0,
+      },
+    } as const);
+
   const activePipelineStages = new Set<string>(
     RECRUITMENT_PIPELINE_STAGES.filter((s) => s !== "hired" && s !== "withdrawn")
   );
@@ -187,7 +179,7 @@ export async function loadWorkforceCommandCentrePage(
 
   const composeInput = {
     tenantId: tid,
-    totalStaff,
+    totalStaff: team.kpis.totalStaff,
     operationalMetrics,
     planning,
     shiftCost,
@@ -197,24 +189,24 @@ export async function loadWorkforceCommandCentrePage(
     wageProfileCoveragePercent,
   };
 
-  const clinicallyEligible = operationalMetrics?.clinicallyEligibleStaff ?? totalStaff;
+  const clinicallyEligible = operationalMetrics?.clinicallyEligibleStaff ?? team.kpis.activeStaff;
   const surgicalIntelligence = await loadSurgicalIntelligenceSignals(
     tid,
     planning,
     clinicallyEligible
   );
 
-  return {
+  return adaptTeamCommandCentreToPageData({
+    team,
     canManage,
-    kpis: buildCommandCentreKpis(composeInput),
-    healthRadar: buildWorkforceHealthRadar(composeInput),
-    attentionQueue: buildAttentionQueue(composeInput),
-    moduleTiles: buildModuleTiles(composeInput),
-    procedureForecast: buildProcedureStaffingForecast(planning),
-    financialIntelligence: buildFinancialIntelligencePanel(planning, shiftCost),
+    operationalMetrics,
     planning,
-    planningAvailable: planning != null,
+    shiftCost,
+    openRecruitmentCount,
+    activeRecruitmentPipelineCount,
+    missingWageProfileCount,
+    wageProfileCoveragePercent,
     intelligence: composeWorkforceIntelligence(composeInput),
     surgicalIntelligence,
-  };
+  });
 }

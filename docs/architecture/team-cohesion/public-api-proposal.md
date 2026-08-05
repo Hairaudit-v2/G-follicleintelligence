@@ -68,7 +68,7 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 | profile | `StaffProfileHubModel`, attention aggregation, overview adapter | raw dual-table joins, domain policy engines |
 | payroll | pay period pure helpers, wage DTO types | wage writes, timesheet transitions |
 | planning | recruitment stage helpers, engine DTO types | planners’ write paths |
-| commandCentre | KPI/attention DTO types, href builders | data assembly servers |
+| commandCentre | KPI/attention DTO types, href builders, `TeamCommandCentreModel` | data assembly servers (`loadTeamCommandCentre.server`) |
 
 ## Current deep imports that will violate the boundary
 

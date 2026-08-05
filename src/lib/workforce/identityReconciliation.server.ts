@@ -263,7 +263,7 @@ export async function reconcileInboundStaffIdentityApply(input: {
   };
 }
 
-/** Enriches fi_staff import snapshots with workforce identity link mappings. */
+/** Enriches scheduling-staff import snapshots with workforce identity link mappings. */
 export async function enrichImportSnapshotsWithIdentityLinks(
   tenantId: string,
   inboundRows: IiohrHrStaffImportRow[],

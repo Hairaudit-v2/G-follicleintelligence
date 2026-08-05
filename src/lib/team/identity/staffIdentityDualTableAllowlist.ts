@@ -3,16 +3,17 @@
  * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B1.6 — profile hub composition; staffLifecycleCopy retired.
+ * Snapshot: FI-TEAM-COHESION-B1.7 — Command Centre batch composition.
  *
- * Allowlist before B1.6: 20
- * Profile entries removed: 1 (`src/lib/workforce/staffLifecycleCopy.ts`)
- * Allowlist after: 19
+ * Allowlist before B1.7: 19
+ * Entries removed: 2
+ *   - `src/lib/workforce/identityReconciliation.server.ts` (comment token only)
+ *   - `src/lib/fiOs/fiOsAuthDisplay.server.ts` (comment token only)
+ * Allowlist after: 17
  *
- * Staff profile hub now composes via `src/lib/team/profile` + `resolveStaffIdentity`
- * (discriminated by staffId | staffMemberId). `staffLifecycleCopy` was allowlisted solely
- * for documentation tokens naming both staff tables; comments were rewritten to domain
- * language (scheduling staff id) and the entry retired.
+ * Command Centre composes via `src/lib/team/commandCentre` + `resolveStaffIdentities`
+ * (batch). Documentation tokens naming both staff tables were rewritten to domain
+ * language where that was the sole dual-table signal.
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -20,7 +21,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/crm/crmAssignableOwners.server.ts",
   "src/lib/crm/crmAssigneeEligibility.ts",
   "src/lib/crm/leadDetailsUpdate.ts",
-  "src/lib/fiOs/fiOsAuthDisplay.server.ts",
   "src/lib/fiOs/todayStaffPersonHydration.server.ts",
   "src/lib/fiOs/workspaceAccessResolver.server.ts",
   "src/lib/fiOs/workspaceAccessResolverCore.ts",
@@ -30,7 +30,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/workforce-os/projectionHealth.server.ts",
   "src/lib/workforce-os/staffIdentityReadinessAudit.server.ts",
   "src/lib/workforce-os/staffLifecycle.server.ts",
-  "src/lib/workforce/identityReconciliation.server.ts",
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
   "src/lib/workforce/staffAccessAccept.server.ts",
   "src/lib/workforce/staffAccessPinLayer.server.ts",

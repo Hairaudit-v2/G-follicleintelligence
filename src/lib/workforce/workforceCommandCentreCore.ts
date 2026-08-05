@@ -33,6 +33,44 @@ export type WorkforceCommandCentreKpis = {
   weeklyWageExposureCents: number;
 };
 
+/**
+ * Snapshot of legacy KPI sources prior to B1.7 identity composition.
+ * Used for behaviour-neutral parity proofs — do not change definitions here
+ * without a separate KPI ticket.
+ */
+export const WORKFORCE_COMMAND_CENTRE_KPI_SOURCE_SNAPSHOT = {
+  totalStaff: {
+    currentSource: "workforceOsDirectoryPage rows filtered by canonical lifecycle",
+    canonicalReplacement: "TeamCommandCentreKpis.totalStaff (composed identities)",
+    definitionChanges: false,
+  },
+  clinicallyEligible: {
+    currentSource: "workforceOperationalMetrics.clinicallyEligibleStaff",
+    canonicalReplacement: "ops metric retained until B1.8 clinical readiness ownership",
+    definitionChanges: false,
+  },
+  credentialRisks: {
+    currentSource: "planning.credentialRisks | ops expiring+expired+alerts",
+    canonicalReplacement: "TeamCommandCentreKpis.credentialIssues when planning/ops empty",
+    definitionChanges: false,
+  },
+  openRecruitment: {
+    currentSource: "listWorkforceRoleRequirements isActive count",
+    canonicalReplacement: "unchanged (planning domain — B1.8B)",
+    definitionChanges: false,
+  },
+  upcomingProcedureGaps: {
+    currentSource: "planning.procedureCapacity / staffingShortages",
+    canonicalReplacement: "unchanged (planning domain — B1.8B)",
+    definitionChanges: false,
+  },
+  weeklyWageExposureCents: {
+    currentSource: "planning.weeklyWageExposureCents | shiftCost forecast",
+    canonicalReplacement: "unchanged (payroll domain — B1.8A)",
+    definitionChanges: false,
+  },
+} as const;
+
 export type WorkforceHealthMetric = {
   id: string;
   label: string;

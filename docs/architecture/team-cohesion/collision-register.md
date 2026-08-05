@@ -8,8 +8,9 @@ Each overlap has one disposition: `KEEP_CANONICAL` | `MERGE` | `RENAME` | `DELET
 
 | Implementation | Role | Disposition |
 |----------------|------|-------------|
-| `workforce/workforceCommandCentreCore.ts` + `workforceCommandCentrePage.server.ts` (+ test) | Live Team overview V2 (KPI / attention / tiles) | **KEEP_CANONICAL** → `team/commandCentre/` |
-| `staff/workforceCommandCentre.ts` + `.server.ts` + `.test.ts` | Legacy per-staff intelligence; still imported by `staffProfileHub.server.ts` and `staffDirectoryLoader.server.ts` | **DELETE** after those consumers switch to identity readiness + V2 composition APIs |
+| `workforce/workforceCommandCentreCore.ts` + `workforceCommandCentrePage.server.ts` (+ test) | Live Team overview V2 (KPI / attention / tiles) | **KEEP_CANONICAL** → page delegates to `team/commandCentre/` (B1.7 GREEN); core helpers retained for planning tiles until B1.8 |
+| `team/commandCentre/*` | Batch identity composition + attention/KPI pure helpers | **KEEP_CANONICAL** (B1.7) |
+| `staff/workforceCommandCentre.ts` + `.server.ts` + `.test.ts` | Legacy per-staff intelligence; still imported by profile presentation supplements and directory | **DELETE** after those consumers switch to identity readiness + V2 composition APIs |
 | `workforce-os/workforceRosterCommandCentre.server.ts` + `rosterCommandCentre*` | Roster ops command centre (different product) | **RENAME** on move to `team/roster/` (keep “Roster” in name to avoid future collision) |
 
 ---
