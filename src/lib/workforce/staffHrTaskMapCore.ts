@@ -8,6 +8,7 @@ import {
   buildStaffAccessCentreHrefForTenant,
   buildStaffDirectoryHref,
   buildStaffEntitlementsHref,
+  buildStaffHrTaskMapHref,
   buildStaffIdentityAuditHref,
   buildStaffProfileHref,
   buildWorkforceCommandCentreHref,
@@ -78,7 +79,9 @@ function profileArchiveHref(tenantId: string, staffId?: string): string {
 
 export function buildStaffHrTaskMap(tenantId: string, staffId?: string): StaffHrTaskDefinition[] {
   const tid = tenantId.trim();
-  const hrTaskMapHref = `${buildWorkforceCommandCentreHref(tid)}/hr-task-map`;
+  // Use the dedicated builder — concatenating onto the command-centre href broke
+  // when that href moved from /workforce-os to /team in A2.
+  const hrTaskMapHref = buildStaffHrTaskMapHref(tid);
   const offboardingHref = `/fi-admin/${tid}/hr-os/offboarding`;
   const readinessHref = `/fi-admin/${tid}/hr/staff-readiness`;
   const standardHoursHref = staffId

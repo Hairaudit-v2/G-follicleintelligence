@@ -34,13 +34,18 @@ test("resolveFiOsPrimarySidebarItems: includes onboarding tab when HR OS nav vis
   const onboarding = team?.subItems?.find((s) => s.id === "team-onboarding");
   assert.ok(onboarding);
   assert.equal(onboarding?.href, `${base}/team/onboarding`);
-  const legacy = team?.subItems?.find((s) => s.id === "onboarding-centre");
-  assert.equal(legacy?.href, `${base}/hr-os/onboarding`);
+  // A1 removed the legacy "(direct)" duplicate from the nav catalog.
+  assert.equal(
+    team?.subItems?.find((s) => s.id === "onboarding-centre"),
+    undefined
+  );
 });
 
-test("getFiOsShellActiveSidebarId: hr-os onboarding maps to onboarding-centre sidebar tab", () => {
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "onboarding-centre");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/offboarding`, base), "hr-os-dashboard");
+test("getFiOsShellActiveSidebarId: workforce surfaces all highlight the Team nav entry", () => {
+  // A2: /hr-os/onboarding redirects to /team/onboarding; /hr-os/offboarding still
+  // renders. Both belong to the Team workspace, so both highlight the same entry.
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "team");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/offboarding`, base), "team");
 });
 
 test("buildOnboardingInviteUrl: builds tenant-scoped invite path on canonical public URL", () => {

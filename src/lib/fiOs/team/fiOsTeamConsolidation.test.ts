@@ -132,13 +132,19 @@ test("A1: legacy Team routes stay live but are never advertised in the nav catal
   for (const legacy of FI_OS_TEAM_LEGACY_ROUTES) {
     assert.ok(!staffMoreIds.has(legacy.id), `${legacy.id} should be hidden from staff More`);
   }
-  // Active-nav mapping for legacy URLs is unchanged in A1 (removed in A2 with redirects).
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/workforce-os`, base), "workforce-os-hub");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), "onboarding-centre");
+  // A2: every workforce surface — retired or still rendering — highlights Team.
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/workforce-os`, base), FI_OS_TEAM_NAV_ID);
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), FI_OS_TEAM_NAV_ID);
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/hr-os/onboarding`, base), FI_OS_TEAM_NAV_ID);
   assert.equal(
-    getFiOsShellActiveSidebarId(`${base}/workforce-os/staff-identity-audit`, base),
-    "staff-identity-audit"
+    getFiOsShellActiveSidebarId(`${base}/hr-os/credentials`, base),
+    FI_OS_TEAM_NAV_ID,
+    "still-live HR OS surfaces must highlight Team, not a legacy id"
+  );
+  assert.equal(
+    getFiOsShellActiveSidebarId(`${base}/workforce-os/payroll`, base),
+    FI_OS_TEAM_NAV_ID,
+    "still-live WorkforceOS modules must highlight Team, not a legacy id"
   );
 });
 

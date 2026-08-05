@@ -1,31 +1,30 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { WorkforceCommandCentreClient } from "@/src/components/fi-admin/workforce/WorkforceCommandCentreClient";
-import { loadWorkforceCommandCentrePage } from "@/src/lib/workforce/workforceCommandCentrePage.server";
-
-export const metadata = {
-  title: "Team overview",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkforceOsCommandCentrePage({
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2 — the Team overview at /team renders the
+ * same WorkforceCommandCentreClient. Module routes under /workforce-os/* stay
+ * live and are still reached from the overview's module tiles.
+ */
+export default async function WorkforceOsLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const data = await loadWorkforceCommandCentrePage(tenantId.trim());
-  if (!data) notFound();
-
-  return (
-    <div className="pb-8">
-      <WorkforceCommandCentreClient tenantId={tenantId.trim()} data={data} />
-    </div>
-  );
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(teamLegacyRedirectHrefForSuffix("workforce-os", base, query) ?? `${base}/team`);
 }

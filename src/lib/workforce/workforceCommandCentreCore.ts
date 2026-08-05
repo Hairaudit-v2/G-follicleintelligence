@@ -253,7 +253,7 @@ export function buildWorkforceHealthRadar(
       explanation: ops
         ? `${ops.clinicallyEligibleStaff} of ${input.totalStaff} staff are clinically eligible.`
         : "Clinical eligibility data unavailable.",
-      href: `${base.replace("/workforce-os", "/hr-os")}/compliance`,
+      href: `${base.replace("/workforce-os", "/team")}/compliance`,
     },
     {
       id: "procedure-coverage",
@@ -324,7 +324,7 @@ export function buildOperationalAttentionItems(
       title: "Expired certifications",
       explanation: `${ops.expiredCertifications} certification(s) are expired and may block clinical work.`,
       recommendedAction: "Review certifications",
-      href: `${base}/hr-os/certifications`,
+      href: `${base}/team/training`,
       score: SEVERITY_SCORE.critical + ops.expiredCertifications,
     });
   }
@@ -396,7 +396,7 @@ export function buildOperationalAttentionItems(
       title: "Open compliance alerts",
       explanation: `${ops.complianceAlerts} unresolved compliance alert(s) require attention.`,
       recommendedAction: "Review compliance",
-      href: `${base}/hr-os/compliance`,
+      href: `${base}/team/compliance`,
       score: SEVERITY_SCORE.high + ops.complianceAlerts,
     });
   }
@@ -495,7 +495,10 @@ export function formatModuleTileMetric(value: string | number): string {
 export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): WorkforceModuleTile[] {
   const base = `/fi-admin/${input.tenantId}/workforce-os`;
   const hrBase = `/fi-admin/${input.tenantId}/hr-os`;
-  const staffBase = `/fi-admin/${input.tenantId}/staff`;
+  // A2: compliance and the staff directory retired into /team tabs — link to the
+  // canonical paths so tiles do not bounce through a redirect.
+  const teamBase = `/fi-admin/${input.tenantId}/team`;
+  const staffBase = `${teamBase}/staff`;
   const ops = input.operationalMetrics;
   const planning = input.planning;
   const financial = buildFinancialIntelligencePanel(planning, input.shiftCost);
@@ -581,7 +584,7 @@ export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): Wor
         label: (ops?.complianceAlerts ?? 0) > 0 ? "Alerts open" : "Clear",
         variant: (ops?.complianceAlerts ?? 0) > 0 ? "warning" : "success",
       },
-      href: `${hrBase}/compliance`,
+      href: `${teamBase}/compliance`,
       ctaLabel: "Open compliance",
     },
     {
@@ -631,7 +634,7 @@ export function buildModuleTiles(input: WorkforceCommandCentreComposeInput): Wor
         "Guide to every staff HR task — where to go, what changes, and what stays the same.",
       keyMetric: "Onboarding, access, leave, roster, offboarding",
       statusBadge: { label: "Help guide", variant: "neutral" },
-      href: `${base}/hr-task-map`,
+      href: `${teamBase}/admin/access-task-map`,
       ctaLabel: "Open HR Task Map",
     },
     {

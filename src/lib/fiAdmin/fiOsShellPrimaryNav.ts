@@ -535,24 +535,12 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "payments") return "payments-inbox";
     if (firstEarly === "financial-os") return "financial-os";
     if (firstEarly === "financial") return "financial-os";
-    if (firstEarly === "staff") return "staff-directory-legacy";
-    if (firstEarly === "workforce-os") {
-      const secondEarly = restEarly.split("/")[1] ?? "";
-      if (secondEarly === "staff-identity-audit") return "staff-identity-audit";
-      if (secondEarly === "staff-access") return "staff-access-legacy";
-      if (secondEarly === "hr-task-map") return "hr-task-map-legacy";
-      if (secondEarly === "roster") return "roster-command-legacy";
-      return "workforce-os-hub";
-    }
-    if (firstEarly === "hr-os") {
-      const secondEarly = restEarly.split("/")[1] ?? "";
-      if (secondEarly === "onboarding") return "onboarding-centre";
-      if (secondEarly === "compliance") return "compliance-legacy";
-      if (secondEarly === "certifications") return "certifications-legacy";
-      if (secondEarly === "credentials") return "credentials-legacy";
-      if (secondEarly === "sync-health") return "hr-os-sync-health";
-      if (secondEarly === "roster") return "roster-command-legacy";
-      return "hr-os-dashboard";
+    // A2: every workforce surface is part of the Team workspace. Retired routes
+    // redirect into /team/*; the ones still rendering (HR OS credentials,
+    // WorkforceOS intelligence modules, …) highlight the same Team nav entry
+    // rather than legacy ids that no nav item carries any more.
+    if (firstEarly === "staff" || firstEarly === "workforce-os" || firstEarly === "hr-os") {
+      return FI_OS_TEAM_NAV_ID;
     }
     if (firstEarly === "academy") return "academyos";
   }
@@ -588,25 +576,9 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (first === "financial") return "financial-os";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
-    if (first === "hr-os") {
-      const second = rest.split("/")[1] ?? "";
-      if (second === "onboarding") return "onboarding-centre";
-      if (second === "compliance") return "compliance-legacy";
-      if (second === "certifications") return "certifications-legacy";
-      if (second === "credentials") return "credentials-legacy";
-      if (second === "sync-health") return "hr-os-sync-health";
-      if (second === "roster") return "roster-command-legacy";
-      return "hr-os-dashboard";
+    if (first === "team" || first === "hr-os" || first === "workforce-os" || first === "staff") {
+      return FI_OS_TEAM_NAV_ID;
     }
-    if (first === "workforce-os") {
-      const second = rest.split("/")[1] ?? "";
-      if (second === "staff-identity-audit") return "staff-identity-audit";
-      if (second === "staff-access") return "staff-access-legacy";
-      if (second === "hr-task-map") return "hr-task-map-legacy";
-      if (second === "roster") return "roster-command-legacy";
-      return "workforce-os-hub";
-    }
-    if (first === "team") return FI_OS_TEAM_NAV_ID;
     if (first === "reports") return FI_OS_REPORTS_NAV_ID;
     if (first === "analytics") return "analytics-legacy";
     if (first === "audit") return "auditos-legacy";

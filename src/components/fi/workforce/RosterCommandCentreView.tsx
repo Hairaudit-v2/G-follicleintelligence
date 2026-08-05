@@ -91,8 +91,6 @@ export type RosterCommandCentreViewProps = {
     eventType: string;
     status: RosterStaffingStatusFilter | "";
   };
-  useWorkforceOsRoute?: boolean;
-  useTeamRoute?: boolean;
   canManage?: boolean;
   canManageStandardHours?: boolean;
   manageDeniedReason?: string;
@@ -124,8 +122,6 @@ export function RosterCommandCentreView({
   payload,
   eventDetails,
   filters,
-  useWorkforceOsRoute = false,
-  useTeamRoute = false,
   canManage = true,
   canManageStandardHours = true,
   manageDeniedReason,
@@ -247,8 +243,6 @@ export function RosterCommandCentreView({
         status: merged.status || null,
         eventSource: selectedEventKey?.split(":")[0] as "booking" | undefined,
         eventId: selectedEventKey?.split(":")[1] ?? null,
-        useWorkforceOsRoute,
-        useTeamRoute,
       })
     );
   }
@@ -541,23 +535,6 @@ export function RosterCommandCentreView({
           from standard hours. Adjust individual shifts at any time — changes persist until you
           choose to regenerate.
         </p>
-        {!useTeamRoute ? (
-          <p className="mt-2 text-xs text-slate-500">
-            <Link
-              href={`/fi-admin/${tenantId}/workforce-os`}
-              className="text-cyan-400 hover:text-cyan-300"
-            >
-              Team overview
-            </Link>
-            {" · "}
-            <Link
-              href={`/fi-admin/${tenantId}/hr-os`}
-              className="text-cyan-400 hover:text-cyan-300"
-            >
-              HR dashboard
-            </Link>
-          </p>
-        ) : null}
       </header>
 
       <StaffHrTaskMapEntryBanner tenantId={tenantId} surface="roster_command_centre" />

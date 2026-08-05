@@ -37,9 +37,9 @@ function errMsg(e: unknown): string {
 function revalidateRosterSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/settings/clinic-setup`);
-  revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
+  // A2: canonical roster surface plus the standard-hours setup pages that feed it.
+  revalidatePath(`/fi-admin/${tid}/team/roster`);
   revalidatePath(`/fi-admin/${tid}/workforce-os/roster/standard-hours`);
-  revalidatePath(`/fi-admin/${tid}/hr-os/roster`);
 }
 
 export type WorkforceRosterCadenceActionResult<T> =

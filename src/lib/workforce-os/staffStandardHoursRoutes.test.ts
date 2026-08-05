@@ -30,9 +30,10 @@ test("buildStaffStandardHoursEditorHref encodes optional returnTo query", () => 
   );
 });
 
-test("buildStaffStandardHoursReturnToRosterHref points at roster command centre", () => {
+test("buildStaffStandardHoursReturnToRosterHref points at the canonical Team roster", () => {
+  // A2: /workforce-os/roster retired into /team/roster.
   assert.equal(
     buildStaffStandardHoursReturnToRosterHref(TENANT),
-    `/fi-admin/${TENANT}/workforce-os/roster`
+    `/fi-admin/${TENANT}/team/roster`
   );
 });

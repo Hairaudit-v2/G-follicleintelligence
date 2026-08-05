@@ -19,7 +19,8 @@ test("buildRosterCommandCentreHref includes event preselection query params", ()
     date: "2026-06-22T09:00:00.000Z",
     status: "missing_roles",
   });
-  assert.match(href, /\/hr-os\/roster\?/);
+  // A2: /team/roster is the only roster route.
+  assert.match(href, /\/team\/roster\?/);
   assert.match(href, /eventSource=booking/);
   assert.match(href, /eventId=22222222-2222-4222-8222-222222222222/);
   assert.match(href, /status=missing_roles/);

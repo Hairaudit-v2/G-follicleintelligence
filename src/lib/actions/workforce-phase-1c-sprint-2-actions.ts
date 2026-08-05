@@ -22,15 +22,17 @@ function errMsg(e: unknown): string {
 function revalidateWorkforceHrSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   const paths = [
-    `/fi-admin/${tid}/staff`,
+    // A2: /team tabs replace the retired /staff, /hr-os/onboarding and
+    // /workforce-os paths; the remaining HR OS surfaces stay live.
+    `/fi-admin/${tid}/team/staff`,
+    `/fi-admin/${tid}/team/onboarding`,
+    `/fi-admin/${tid}/team`,
     `/fi-admin/${tid}/hr-os`,
-    `/fi-admin/${tid}/hr-os/sync-health`,
+    `/fi-admin/${tid}/team/admin/sync-health`,
     `/fi-admin/${tid}/hr-os/staff-reconciliation`,
     `/fi-admin/${tid}/hr-os/duplicates`,
     `/fi-admin/${tid}/hr-os/offboarding`,
-    `/fi-admin/${tid}/hr-os/onboarding`,
     `/fi-admin/${tid}/hr/sync-health`,
-    `/fi-admin/${tid}/workforce-os`,
     `/fi-admin/${tid}/workforce-os/hr-reconciliation`,
   ];
   for (const p of paths) revalidatePath(p);

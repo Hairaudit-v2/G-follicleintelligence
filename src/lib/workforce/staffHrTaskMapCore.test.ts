@@ -22,7 +22,7 @@ describe("staff HR task map", () => {
     assert.equal(task.route.serverAction, "setStaffMaternityLeaveAction");
   });
 
-  it("HR task map links point to workforce-os routes", () => {
+  it("HR task map links point at canonical routes after A2 consolidation", () => {
     const maternity = findStaffHrTaskById(tasks, "set_maternity_leave");
     const standardHours = findStaffHrTaskById(tasks, "set_standard_hours");
     const identityAudit = findStaffHrTaskById(tasks, "view_identity_audit");
@@ -30,8 +30,9 @@ describe("staff HR task map", () => {
 
     assert.match(maternity?.route.href ?? "", /^\/fi-admin\/tenant-abc\//);
     assert.match(standardHours?.route.href ?? "", /standard-hours/);
-    assert.match(identityAudit?.route.href ?? "", /staff-identity-audit/);
-    assert.match(hrTaskMap?.route.href ?? "", /hr-task-map/);
+    // Admin diagnostics moved into the /team/admin namespace.
+    assert.match(identityAudit?.route.href ?? "", /\/team\/admin\/identity-audit/);
+    assert.match(hrTaskMap?.route.href ?? "", /\/team\/admin\/access-task-map/);
   });
 
   it("groups tasks into expected categories", () => {

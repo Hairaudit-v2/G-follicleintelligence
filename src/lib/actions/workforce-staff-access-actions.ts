@@ -26,13 +26,16 @@ function errMsg(e: unknown): string {
 
 function revalidateStaffAccessSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
+  // A2: /team/identity is the canonical access surface; /team/staff and
+  // /team/onboarding replace the retired /staff and /hr-os/onboarding paths.
   const paths = [
+    `/fi-admin/${tid}/team/identity`,
+    `/fi-admin/${tid}/team/staff`,
+    `/fi-admin/${tid}/team/onboarding`,
+    `/fi-admin/${tid}/team`,
     `/fi-admin/${tid}/workforce-os/staff-access`,
     `/fi-admin/${tid}/workforce-os/directory`,
-    `/fi-admin/${tid}/workforce-os`,
     `/fi-admin/${tid}/workforce-os/staff`,
-    `/fi-admin/${tid}/staff`,
-    `/fi-admin/${tid}/hr-os/onboarding`,
   ];
   for (const p of paths) revalidatePath(p, "layout");
 }

@@ -48,10 +48,6 @@ export type BuildRosterCommandCentreHrefInput = {
   eventSource?: WorkforceClinicalEventSource | null;
   eventId?: string | null;
   date?: string | null;
-  /** When set, roster href uses workforce-os route instead of hr-os. */
-  useWorkforceOsRoute?: boolean;
-  /** When set, roster href uses consolidated team workspace route. */
-  useTeamRoute?: boolean;
 };
 
 function trimOrUndefined(value: string | null | undefined): string | undefined {
@@ -59,14 +55,16 @@ function trimOrUndefined(value: string | null | undefined): string | undefined {
   return v || undefined;
 }
 
-/** Build roster command centre href with optional filters and event preselection. */
+/**
+ * Build roster command centre href with optional filters and event preselection.
+ *
+ * A2: `/team/roster` is the only roster route — the former `/hr-os/roster` and
+ * `/workforce-os/roster` targets now redirect here, so links point straight at
+ * the canonical path rather than bouncing through a redirect.
+ */
 export function buildRosterCommandCentreHref(input: BuildRosterCommandCentreHrefInput): string {
   const tid = input.tenantId.trim();
-  const base = input.useTeamRoute
-    ? `/fi-admin/${tid}/team/roster`
-    : input.useWorkforceOsRoute
-      ? `/fi-admin/${tid}/workforce-os/roster`
-      : `/fi-admin/${tid}/hr-os/roster`;
+  const base = `/fi-admin/${tid}/team/roster`;
   const params = new URLSearchParams();
 
   const dateFrom = trimOrUndefined(input.dateFrom);

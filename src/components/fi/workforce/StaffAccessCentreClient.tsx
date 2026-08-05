@@ -360,7 +360,7 @@ export function StaffAccessCentreClient({
       <InfoNotice variant="info">
         New hires still use the HR OS{" "}
         <a
-          href={`/fi-admin/${tenantId}/hr-os/onboarding`}
+          href={`/fi-admin/${tenantId}/team/onboarding`}
           className="font-medium text-[#22C1FF] underline"
         >
           Onboarding

@@ -27,8 +27,9 @@ export function buildWorkforceOsNavItems(
   const showIdentityAudit = opts?.showIdentityAudit !== false;
   return [
     {
+      // A2: the /workforce-os index retired into the Team overview.
       label: STAFF_LIFECYCLE_LABELS.commandCentreShort,
-      href: base,
+      href: `/fi-admin/${tenantId}/team`,
       segment: "",
     },
     { label: "Planning", href: `${base}/planning`, segment: "planning" },
@@ -47,8 +48,9 @@ export function buildWorkforceOsNavItems(
     },
     { label: "Members", href: `${base}/directory`, segment: "members" },
     {
+      // A2: staff access retired into the Team Identity & access tab.
       label: STAFF_LIFECYCLE_LABELS.staffAccess,
-      href: `${base}/staff-access`,
+      href: `/fi-admin/${tenantId}/team/identity`,
       segment: "staff-access",
     },
     ...(showIdentityAudit
@@ -81,10 +83,12 @@ export function isWorkforceOsNavActive(pathname: string, base: string, segment: 
     return pathname.startsWith(`${base}/staff-access`);
   }
   if (segment === "identity-audit") {
-    return pathname.startsWith(`${base}/staff-identity-audit`);
+    // A2: moved into the /team/admin diagnostics namespace.
+    return pathname.includes("/team/admin/identity-audit");
   }
   if (segment === "roster") {
-    return pathname.includes("/workforce-os/roster") || pathname.includes("/hr-os/roster");
+    // A2: roster lives at /team/roster, outside this nav's own routes.
+    return pathname.includes("/team/roster");
   }
   return pathname === `${base}/${segment}` || pathname.startsWith(`${base}/${segment}/`);
 }

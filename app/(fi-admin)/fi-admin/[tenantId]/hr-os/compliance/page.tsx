@@ -1,50 +1,28 @@
-import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffComplianceClient } from "@/src/components/fi-admin/hr/StaffComplianceClient";
-import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
-import { loadCompliancePageModel } from "@/src/lib/workforce/compliancePage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
-
-export const metadata = {
-  title: "Compliance · Team",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function HrOsCompliancePage({
+/** Retired in FI-WORKFORCE-COHESION-A2 — /team/compliance is the identical page. */
+export default async function HrOsComplianceLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const tid = tenantId?.trim();
-  if (!tid) notFound();
+  if (!tenantId?.trim()) notFound();
 
-  try {
-    const access = await resolveHrOsRouteAccess(tid);
-    if (!access.ok) notFound();
-
-    const model = await loadCompliancePageModel(tid);
-    const canManage =
-      access.platformAdminPreview ||
-      WORKFORCE_HR_MANAGE_ROLES.some((r) => r === access.userRole.trim().toLowerCase());
-
-    return (
-      <StaffComplianceClient
-        tenantId={tid}
-        alerts={model.alerts}
-        recentRuns={model.recentRuns}
-        canManage={canManage}
-      />
-    );
-  } catch (e) {
-    if (e instanceof CrmAccessError && (e.status === 401 || e.status === 403)) {
-      notFound();
-    }
-    throw e;
-  }
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("hr-os/compliance", base, query) ?? `${base}/team/compliance`
+  );
 }

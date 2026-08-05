@@ -1,31 +1,30 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
-type PageProps = {
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2. This previously chained to
+ * /workforce-os/roster (itself now retired); it points straight at the
+ * canonical /team/roster so there is only ever one redirect hop.
+ */
+export default async function HrOsRosterLegacyRedirectPage({
+  params,
+  searchParams,
+}: {
   params: Promise<{ tenantId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-/** Legacy HR OS roster route — redirects to Team roster command centre. */
-export default async function HrOsRosterRedirectPage({ params, searchParams }: PageProps) {
+}) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const rawSearch = await searchParams;
-  const qs = new URLSearchParams();
-  for (const [key, value] of Object.entries(rawSearch)) {
-    if (Array.isArray(value)) {
-      if (value[0]) qs.set(key, value[0]);
-    } else if (value) {
-      qs.set(key, value);
-    }
-  }
-
-  const query = qs.toString();
-  redirect(
-    query
-      ? `/fi-admin/${tenantId.trim()}/workforce-os/roster?${query}`
-      : `/fi-admin/${tenantId.trim()}/workforce-os/roster`
-  );
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(teamLegacyRedirectHrefForSuffix("hr-os/roster", base, query) ?? `${base}/team/roster`);
 }

@@ -101,7 +101,6 @@ export default async function FiAdminTeamRosterPage({ params, searchParams }: Pa
             eventType: parsed.eventType ?? "",
             status: parsed.status ?? "",
           }}
-          useTeamRoute
           canManage={manageCapability.canManage}
           canManageStandardHours={teamAccess.tabAccess.canManageStandardHours}
           manageDeniedReason={ROSTER_MANAGE_DENIED_REASON}

@@ -43,13 +43,13 @@ export default async function FiAdminTeamTrainingPage({
             href={`${base}/hr-os/credentials`}
             className="rounded-full border border-white/[0.08] px-3 py-1.5 text-slate-400 transition-colors hover:border-white/[0.14] hover:text-slate-200"
           >
-            Credentials (direct)
+            Credentials
           </Link>
           <Link
             href={`${base}/academy`}
             className="rounded-full border border-white/[0.08] px-3 py-1.5 text-slate-400 transition-colors hover:border-white/[0.14] hover:text-slate-200"
           >
-            Academy (direct)
+            Academy
           </Link>
         </div>
         <StaffCertificationClient

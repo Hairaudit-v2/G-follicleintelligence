@@ -29,12 +29,14 @@ function errMsg(e: unknown): string {
 
 function revalidateOnboardingSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
+  // A2: canonical /team tabs replace the retired /hr-os/onboarding, /workforce-os
+  // and /staff paths; /hr-os and /workforce-os/staff remain live surfaces.
   const paths = [
-    `/fi-admin/${tid}/hr-os/onboarding`,
+    `/fi-admin/${tid}/team/onboarding`,
+    `/fi-admin/${tid}/team/staff`,
+    `/fi-admin/${tid}/team`,
     `/fi-admin/${tid}/hr-os`,
-    `/fi-admin/${tid}/workforce-os`,
     `/fi-admin/${tid}/workforce-os/staff`,
-    `/fi-admin/${tid}/staff`,
   ];
   for (const p of paths) revalidatePath(p, "layout");
 }

@@ -1,34 +1,29 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffIdentityReadinessAuditClient } from "@/src/components/fi/workforce/StaffIdentityReadinessAuditClient";
-import { resolveStaffIdentityAuditAccess } from "@/src/lib/workforce-os/staffIdentityAuditAccess.server";
-import { runStaffIdentityReadinessAudit } from "@/src/lib/workforce-os/staffIdentityReadinessAudit.server";
-
-export const metadata = {
-  title: "Identity readiness · Team",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffIdentityAuditPage({
+/** Moved in FI-WORKFORCE-COHESION-A2 to the /team/admin diagnostics namespace. */
+export default async function StaffIdentityAuditLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const { allowed } = await resolveStaffIdentityAuditAccess(tenantId.trim());
-  if (!allowed) notFound();
-
-  const audit = await runStaffIdentityReadinessAudit(tenantId.trim());
-
-  return (
-    <div className="mx-auto max-w-6xl pb-8">
-      <StaffIdentityReadinessAuditClient tenantId={tenantId.trim()} audit={audit} />
-    </div>
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("workforce-os/staff-identity-audit", base, query) ??
+      `${base}/team/admin/identity-audit`
   );
 }

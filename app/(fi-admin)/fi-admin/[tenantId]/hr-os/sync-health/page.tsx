@@ -1,34 +1,29 @@
-import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
-import { HrSyncHealthClient } from "@/src/components/fi-admin/hr/HrSyncHealthClient";
-import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { loadHrSyncHealthPageModel } from "@/src/lib/hr/hrStaffSyncHealthPage.server";
-
-export const metadata = {
-  title: "HR sync health",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function HrOsSyncHealthPage({
+/** Moved in FI-WORKFORCE-COHESION-A2 to the /team/admin diagnostics namespace. */
+export default async function HrOsSyncHealthLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const tid = tenantId?.trim();
-  if (!tid) notFound();
+  if (!tenantId?.trim()) notFound();
 
-  try {
-    const model = await loadHrSyncHealthPageModel(tid);
-    return <HrSyncHealthClient tenantId={tid} pageModel={model} />;
-  } catch (e) {
-    if (e instanceof CrmAccessError && (e.status === 401 || e.status === 403)) {
-      notFound();
-    }
-    throw e;
-  }
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("hr-os/sync-health", base, query) ??
+      `${base}/team/admin/sync-health`
+  );
 }

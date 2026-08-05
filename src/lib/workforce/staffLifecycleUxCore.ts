@@ -69,12 +69,14 @@ export type StaffUnifiedStatusSnapshot = {
   isOnboardingComplete: boolean;
 };
 
+// A2: onboarding and staff access retired into /team tabs — link to the
+// canonical paths rather than bouncing through a redirect.
 export function buildStaffOnboardingCentreHref(tenantBase: string): string {
-  return `${tenantBase.replace(/\/$/, "")}/hr-os/onboarding`;
+  return `${tenantBase.replace(/\/$/, "")}/team/onboarding`;
 }
 
 export function buildStaffAccessCentreHref(tenantBase: string): string {
-  return `${tenantBase.replace(/\/$/, "")}/workforce-os/staff-access`;
+  return `${tenantBase.replace(/\/$/, "")}/team/identity`;
 }
 
 export function buildStaffDirectoryPrimaryActionHref(tenantBase: string): string {

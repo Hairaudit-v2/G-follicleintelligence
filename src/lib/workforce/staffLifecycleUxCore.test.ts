@@ -9,10 +9,11 @@ import {
   staffDirectoryLifecycleGuidance,
 } from "@/src/lib/workforce/staffLifecycleUxCore";
 
-test("Staff Directory primary action routes to Onboarding Centre", () => {
+test("Staff Directory primary action routes to the Team onboarding tab", () => {
+  // A2: onboarding retired from /hr-os into the canonical /team tab.
   assert.equal(
     buildStaffDirectoryPrimaryActionHref("/fi-admin/tenant-1"),
-    "/fi-admin/tenant-1/hr-os/onboarding"
+    "/fi-admin/tenant-1/team/onboarding"
   );
 });
 

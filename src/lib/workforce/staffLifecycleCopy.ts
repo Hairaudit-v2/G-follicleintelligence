@@ -43,7 +43,8 @@ function tenantAdminBase(tenantId: string): string {
 }
 
 export function buildWorkforceCommandCentreHref(tenantId: string): string {
-  return `${tenantAdminBase(tenantId)}/workforce-os`;
+  // A2: the /workforce-os index retired into the Team overview.
+  return `${tenantAdminBase(tenantId)}/team`;
 }
 
 export type StaffHrTaskMapHrefOptions = {
@@ -56,7 +57,7 @@ export function buildStaffHrTaskMapHref(
   tenantId: string,
   options?: string | StaffHrTaskMapHrefOptions
 ): string {
-  const base = `${tenantAdminBase(tenantId)}/workforce-os/hr-task-map`;
+  const base = `${tenantAdminBase(tenantId)}/team/admin/access-task-map`;
   const resolved: StaffHrTaskMapHrefOptions =
     typeof options === "string" ? { staffId: options } : (options ?? {});
   const params = new URLSearchParams();
@@ -68,15 +69,15 @@ export function buildStaffHrTaskMapHref(
 }
 
 export function buildStaffDirectoryHref(tenantId: string): string {
-  return `${tenantAdminBase(tenantId)}/staff`;
+  return `${tenantAdminBase(tenantId)}/team/staff`;
 }
 
 export function buildStaffIdentityAuditHref(tenantId: string): string {
-  return `${tenantAdminBase(tenantId)}/workforce-os/staff-identity-audit`;
+  return `${tenantAdminBase(tenantId)}/team/admin/identity-audit`;
 }
 
 export function buildWorkforceRosterHref(tenantId: string): string {
-  return buildRosterCommandCentreHref({ tenantId, useWorkforceOsRoute: true });
+  return buildRosterCommandCentreHref({ tenantId });
 }
 
 export function buildStaffAccessCentreHrefForTenant(tenantId: string): string {

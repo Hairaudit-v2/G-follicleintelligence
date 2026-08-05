@@ -22,7 +22,7 @@ export function buildStaffStandardHoursEditorHref(
 }
 
 export function buildStaffStandardHoursReturnToRosterHref(tenantId: string): string {
-  return `/fi-admin/${tenantId.trim()}/workforce-os/roster`;
+  return `/fi-admin/${tenantId.trim()}/team/roster`;
 }
 
 /** Staff employment / lifecycle profile used from roster ineligible list and HR deep links. */

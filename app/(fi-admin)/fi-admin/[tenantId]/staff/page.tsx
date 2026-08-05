@@ -1,45 +1,31 @@
-import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffDirectoryClient } from "@/src/components/fi/staff/StaffDirectoryClient";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
-import { parseStaffDirectoryFiltersFromSearchParams } from "@/src/lib/staff/staffDirectoryFilters";
-import { loadStaffDirectoryPage } from "@/src/lib/staff/staffDirectoryLoader.server";
-import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
-
-export const metadata = {
-  title: "Staff Directory",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffDirectoryRoutePage({
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2 — the staff directory now lives at
+ * /team/staff. Directory filters are carried across so bookmarked filtered
+ * views keep working. Sub-routes (/staff/link-users, /staff/role-review, …)
+ * are unaffected: the map matches this path exactly, not by prefix.
+ */
+export default async function StaffDirectoryLegacyRedirectPage({
   params,
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: Promise<{ staff_role?: string; payroll?: string; active?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const sp = await searchParams;
   if (!tenantId?.trim()) notFound();
-  await assertStaffModuleAccess(tenantId, "workforce_os", "read");
 
-  const initialFilters = parseStaffDirectoryFiltersFromSearchParams(sp);
-
-  const [data, showCrmNav] = await Promise.all([
-    loadStaffDirectoryPage(tenantId.trim()),
-    getCrmShellNavAllowed(tenantId),
-  ]);
-
-  return (
-    <StaffDirectoryClient
-      tenantId={tenantId.trim()}
-      data={data}
-      showCrmNav={showCrmNav}
-      initialFilters={initialFilters}
-    />
-  );
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(teamLegacyRedirectHrefForSuffix("staff", base, query) ?? `${base}/team/staff`);
 }

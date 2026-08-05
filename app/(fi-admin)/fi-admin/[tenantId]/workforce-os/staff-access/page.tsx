@@ -1,42 +1,36 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffAccessCentreClient } from "@/src/components/fi/workforce/StaffAccessCentreClient";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
-import { loadStaffAccessCentrePage } from "@/src/lib/workforce/staffAccessCentre.server";
-import { resolveWorkforceHrManageCapability } from "@/src/lib/workforce/workforceHrManageGate.server";
-
-export const metadata = {
-  title: "Staff access · Team",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkforceOsStaffAccessPage({
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2 — the Identity & access tab renders the
+ * same StaffAccessCentreClient.
+ *
+ * Only this index page redirects. The token-authenticated children
+ * (accept/[token], pin-setup/[setupToken]) are separate routes that keep
+ * rendering: invitees following an emailed link must never be bounced.
+ */
+export default async function WorkforceOsStaffAccessLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (!access.ok) notFound();
-
-  const [data, manage] = await Promise.all([
-    loadStaffAccessCentrePage(tenantId.trim()),
-    resolveWorkforceHrManageCapability(tenantId.trim()),
-  ]);
-
-  return (
-    <div className="mx-auto max-w-6xl pb-8">
-      <StaffAccessCentreClient
-        tenantId={tenantId.trim()}
-        rows={data.rows}
-        canManage={manage.canManage}
-      />
-    </div>
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("workforce-os/staff-access", base, query) ??
+      `${base}/team/identity`
   );
 }

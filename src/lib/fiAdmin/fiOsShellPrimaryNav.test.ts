@@ -45,7 +45,8 @@ test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
 
 test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () => {
   assert.equal(getFiOsShellActiveSidebarId(`${base}/foundation-integrity`, base), "patient-twin");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff-directory-legacy");
+  // A2: /staff retired into /team/staff — all workforce surfaces highlight Team.
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "team");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations`, base), "settings");

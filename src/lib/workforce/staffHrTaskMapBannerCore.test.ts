@@ -27,9 +27,10 @@ describe("staff HR task map entry banners", () => {
 
   it("banner href deep-links category and task for standard hours", () => {
     const href = buildStaffHrTaskMapBannerHref(TENANT, "standard_hours");
+    // A2: the task map moved into the /team/admin diagnostics namespace.
     assert.equal(
       href,
-      `/fi-admin/${TENANT}/workforce-os/hr-task-map?category=roster&task=set_standard_hours`
+      `/fi-admin/${TENANT}/team/admin/access-task-map?category=roster&task=set_standard_hours`
     );
   });
 
@@ -42,7 +43,7 @@ describe("staff HR task map entry banners", () => {
   it("buildStaffHrTaskMapHref supports legacy staffId string argument", () => {
     assert.equal(
       buildStaffHrTaskMapHref(TENANT, STAFF),
-      `/fi-admin/${TENANT}/workforce-os/hr-task-map?staffId=${STAFF}`
+      `/fi-admin/${TENANT}/team/admin/access-task-map?staffId=${STAFF}`
     );
   });
 });

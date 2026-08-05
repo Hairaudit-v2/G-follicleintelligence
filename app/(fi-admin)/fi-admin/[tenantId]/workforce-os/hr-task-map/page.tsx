@@ -1,46 +1,32 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffHrTaskMapClient } from "@/src/components/fi/workforce/StaffHrTaskMapClient";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
-import { HR_OS_ROUTE_REQUIRED_ROLES } from "@/src/lib/platform/entitlements/hrOsRouteGateCore.server";
-
-export const metadata = {
-  title: "HR Task Map · Team",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffHrTaskMapPage({
+/**
+ * Moved in FI-WORKFORCE-COHESION-A2 to the /team/admin diagnostics namespace.
+ * staffId / category / task deep links are carried across.
+ */
+export default async function StaffHrTaskMapLegacyRedirectPage({
   params,
   searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
-  searchParams: Promise<{ staffId?: string; category?: string; task?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const { staffId, category, task } = await searchParams;
   if (!tenantId?.trim()) notFound();
 
-  const access = await resolveHrOsRouteAccess(tenantId.trim());
-  if (!access.ok) notFound();
-  if (!access.platformAdminPreview) {
-    const role = access.userRole.trim().toLowerCase();
-    if (!HR_OS_ROUTE_REQUIRED_ROLES.some((allowed) => allowed === role)) {
-      notFound();
-    }
-  }
-
-  return (
-    <div className="mx-auto max-w-4xl pb-8">
-      <StaffHrTaskMapClient
-        tenantId={tenantId.trim()}
-        staffId={staffId?.trim() ?? null}
-        initialCategory={category?.trim() ?? null}
-        initialTaskId={task?.trim() ?? null}
-      />
-    </div>
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("workforce-os/hr-task-map", base, query) ??
+      `${base}/team/admin/access-task-map`
   );
 }

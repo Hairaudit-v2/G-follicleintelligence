@@ -163,9 +163,12 @@ function errMsg(e: unknown): string {
 
 function revalidateRosterSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
+  // A2: /team/roster is the canonical roster surface — it must be revalidated
+  // so soft navigations do not serve a stale router-cache payload after a shift
+  // mutation. /hr-os and the standard-hours setup pages remain live surfaces.
+  revalidatePath(`/fi-admin/${tid}/team`);
+  revalidatePath(`/fi-admin/${tid}/team/roster`);
   revalidatePath(`/fi-admin/${tid}/hr-os`);
-  revalidatePath(`/fi-admin/${tid}/hr-os/roster`);
-  revalidatePath(`/fi-admin/${tid}/workforce-os/roster`);
   revalidatePath(`/fi-admin/${tid}/workforce-os/roster/standard-hours`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}/tomorrow`);

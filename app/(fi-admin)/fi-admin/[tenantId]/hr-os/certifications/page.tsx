@@ -1,45 +1,31 @@
-import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
-import { StaffCertificationClient } from "@/src/components/fi-admin/hr/StaffCertificationClient";
-import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
-import { loadCertificationsPageModel } from "@/src/lib/workforce/certificationsPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
-
-export const metadata = {
-  title: "Certifications · Team",
-  robots: { index: false, follow: false },
-};
+import {
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function HrOsCertificationsPage({
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2 — the Training tab renders the same
+ * StaffCertificationClient via loadCertificationsPageModel.
+ */
+export default async function HrOsCertificationsLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const tid = tenantId?.trim();
-  if (!tid) notFound();
+  if (!tenantId?.trim()) notFound();
 
-  try {
-    const access = await resolveHrOsRouteAccess(tid);
-    if (!access.ok) notFound();
-
-    const model = await loadCertificationsPageModel(tid);
-    const canManage =
-      access.platformAdminPreview ||
-      WORKFORCE_HR_MANAGE_ROLES.some((r) => r === access.userRole.trim().toLowerCase());
-
-    return (
-      <StaffCertificationClient tenantId={tid} staffRows={model.staffRows} canManage={canManage} />
-    );
-  } catch (e) {
-    if (e instanceof CrmAccessError && (e.status === 401 || e.status === 403)) {
-      notFound();
-    }
-    throw e;
-  }
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("hr-os/certifications", base, query) ?? `${base}/team/training`
+  );
 }

@@ -212,7 +212,13 @@ export const GO_LIVE_SHELL_ACTIVE_SIDEBAR_EXPECTATIONS: ReadonlyArray<{
   { suffix: "tomorrow", expectedNavId: "tomorrow-board" },
   { suffix: "surgery-os", expectedNavId: "surgery-os" },
   { suffix: "cases", expectedNavId: "cases-worklist" },
-  { suffix: "workforce-os", expectedNavId: "workforce-os-hub" },
+  // A2: consolidated — all workforce surfaces highlight the Team nav entry.
+  { suffix: "workforce-os", expectedNavId: FI_OS_TEAM_NAV_ID },
+  { suffix: "workforce-os/payroll", expectedNavId: FI_OS_TEAM_NAV_ID },
+  { suffix: "hr-os", expectedNavId: FI_OS_TEAM_NAV_ID },
+  { suffix: "hr-os/credentials", expectedNavId: FI_OS_TEAM_NAV_ID },
+  { suffix: "staff", expectedNavId: FI_OS_TEAM_NAV_ID },
+  { suffix: "team/admin/identity-audit", expectedNavId: FI_OS_TEAM_NAV_ID },
   { suffix: "analytics", expectedNavId: "analytics-legacy" },
   { suffix: "intelligence/navigation-audit", expectedNavId: "d6-navigation-audit" },
 ] as const;

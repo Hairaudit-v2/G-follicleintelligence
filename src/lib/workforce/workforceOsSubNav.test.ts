@@ -37,7 +37,8 @@ describe("WorkforceOsSubNav", () => {
     assert.ok(roster);
     assert.equal(roster.label, STAFF_LIFECYCLE_LABELS.roster);
     assert.equal(roster.href, buildWorkforceRosterHref(tenantId));
-    assert.match(roster.href, /\/workforce-os\/roster$/);
+    // A2: /team/roster is the only roster route.
+    assert.match(roster.href, /\/team\/roster$/);
   });
 
   it("buildWorkforceOsNavItems includes command centre and lifecycle modules", () => {
@@ -70,18 +71,26 @@ describe("WorkforceOsSubNav", () => {
     assert.equal(isWorkforceOsNavActive(`${base}/recruitment`, base, "members"), false);
   });
 
-  it("isWorkforceOsNavActive highlights identity audit and roster routes", () => {
+  // A2: identity audit and roster moved out of /workforce-os, so the nav
+  // highlights them at their canonical /team locations.
+  it("isWorkforceOsNavActive highlights identity audit and roster at canonical routes", () => {
+    assert.equal(
+      isWorkforceOsNavActive(
+        `/fi-admin/${tenantId}/team/admin/identity-audit`,
+        base,
+        "identity-audit"
+      ),
+      true
+    );
+    assert.equal(isWorkforceOsNavActive(`/fi-admin/${tenantId}/team/roster`, base, "roster"), true);
+    assert.equal(
+      isWorkforceOsNavActive(`/fi-admin/${tenantId}/team/roster?eventId=1`, base, "roster"),
+      true
+    );
+    // The retired paths no longer render, so they never highlight.
     assert.equal(
       isWorkforceOsNavActive(`${base}/staff-identity-audit`, base, "identity-audit"),
-      true
-    );
-    assert.equal(
-      isWorkforceOsNavActive(`/fi-admin/${tenantId}/workforce-os/roster`, base, "roster"),
-      true
-    );
-    assert.equal(
-      isWorkforceOsNavActive(`/fi-admin/${tenantId}/workforce-os/roster?eventId=1`, base, "roster"),
-      true
+      false
     );
   });
 });
@@ -89,12 +98,17 @@ describe("WorkforceOsSubNav", () => {
 describe("HrOsSubNav", () => {
   const tenantId = "tenant-1";
 
-  it("includes Roster in HR OS navigation", () => {
+  it("links Roster out to the canonical Team route after A2", () => {
     const items = buildHrOsNavItems(tenantId);
-    const roster = items.find((i) => i.segment === "roster");
+    const roster = items.find((i) => i.segment === "team-roster");
     assert.ok(roster);
     assert.equal(roster.label, STAFF_LIFECYCLE_LABELS.roster);
-    assert.equal(roster.href, `/fi-admin/${tenantId}/hr-os/roster`);
+    assert.equal(roster.href, `/fi-admin/${tenantId}/team/roster`);
+    // The retired /hr-os/roster entry is gone from this nav entirely.
+    assert.equal(
+      items.find((i) => i.href === `/fi-admin/${tenantId}/hr-os/roster`),
+      undefined
+    );
   });
 });
 
@@ -102,41 +116,43 @@ describe("staffLifecycleCopy nav integrity", () => {
   const tenantId = "tenant-1";
   const adminBase = `/fi-admin/${tenantId}`;
 
-  it("Workforce Command Centre links point to the true command centre route", () => {
-    assert.equal(buildWorkforceCommandCentreHref(tenantId), `${adminBase}/workforce-os`);
+  // A2: every lifecycle nav link points at its canonical /team destination, so
+  // the app never navigates through a redirect.
+  it("Workforce Command Centre links point to the Team overview", () => {
+    assert.equal(buildWorkforceCommandCentreHref(tenantId), `${adminBase}/team`);
     const link = buildStaffLifecycleNavIntegrityLinks(tenantId).find(
       (l) => l.id === "workforce_command_centre"
     );
     assert.ok(link);
-    assert.equal(link.href, `${adminBase}/workforce-os`);
+    assert.equal(link.href, `${adminBase}/team`);
     assert.equal(link.label, STAFF_LIFECYCLE_LABELS.workforceCommandCentre);
   });
 
-  it("Staff Directory links point to the directory route", () => {
-    assert.equal(buildStaffDirectoryHref(tenantId), `${adminBase}/staff`);
+  it("Staff Directory links point to the Team staff tab", () => {
+    assert.equal(buildStaffDirectoryHref(tenantId), `${adminBase}/team/staff`);
     const link = buildStaffLifecycleNavIntegrityLinks(tenantId).find(
       (l) => l.id === "staff_directory"
     );
     assert.ok(link);
-    assert.equal(link.href, `${adminBase}/staff`);
+    assert.equal(link.href, `${adminBase}/team/staff`);
   });
 
-  it("Staff Access links point to Staff Access Centre", () => {
-    assert.equal(buildStaffAccessCentreHref(adminBase), `${adminBase}/workforce-os/staff-access`);
+  it("Staff Access links point to the Team identity tab", () => {
+    assert.equal(buildStaffAccessCentreHref(adminBase), `${adminBase}/team/identity`);
     const link = buildStaffLifecycleNavIntegrityLinks(tenantId).find(
       (l) => l.id === "staff_access_centre"
     );
     assert.ok(link);
-    assert.equal(link.href, `${adminBase}/workforce-os/staff-access`);
+    assert.equal(link.href, `${adminBase}/team/identity`);
   });
 
-  it("Onboarding links point to Onboarding Centre", () => {
-    assert.equal(buildStaffOnboardingCentreHref(adminBase), `${adminBase}/hr-os/onboarding`);
+  it("Onboarding links point to the Team onboarding tab", () => {
+    assert.equal(buildStaffOnboardingCentreHref(adminBase), `${adminBase}/team/onboarding`);
     const link = buildStaffLifecycleNavIntegrityLinks(tenantId).find(
       (l) => l.id === "onboarding_centre"
     );
     assert.ok(link);
-    assert.equal(link.href, `${adminBase}/hr-os/onboarding`);
+    assert.equal(link.href, `${adminBase}/team/onboarding`);
   });
 
   it("settings staff label no longer conflicts with Staff Access wording", () => {
@@ -151,9 +167,6 @@ describe("staffLifecycleCopy nav integrity", () => {
   });
 });
 
-describe("WorkforceCommandCentreView deprecation", () => {
-  it("legacy view module remains importable for Phase 4 reference", async () => {
-    const mod = await import("@/src/components/fi/staff/WorkforceCommandCentreView");
-    assert.equal(typeof mod.WorkforceCommandCentreView, "function");
-  });
-});
+// A2: the orphaned WorkforceCommandCentreView was deleted. It was never mounted
+// and carried dead "Add staff" / "Assign training" actions plus links to routes
+// that have since retired. The live surface is WorkforceCommandCentreClient.

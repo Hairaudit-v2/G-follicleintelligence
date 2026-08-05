@@ -102,7 +102,45 @@ Navigation-only pass. All legacy routes stay live but stop being advertised, and
 
 **Acceptance:** sidebar shows one Team entry with ≤8 sub-items and zero "(direct)" duplicates; all legacy URLs still render; legacy-use telemetry visible in logs; token-flow e2e green.
 
-### Phase A2 — Redirect and retire (next release, informed by A1 telemetry)
+### Phase A2 — Redirect and retire ✅ delivered 2026-08-05
+
+**Caveat on sequencing:** A1 and A2 shipped in the same session, so the legacy-use telemetry had no release cycle to collect data. The redirect map was therefore derived by **verifying page equivalence in code** (comparing each legacy page's client + loader against its candidate `/team` tab) rather than from observed traffic. Telemetry remains in place and still identifies stragglers after deploy.
+
+**Redirect map** — a route was only retired where the canonical target renders equivalent content:
+
+| Retired | Canonical | Basis |
+|---------|-----------|-------|
+| `/staff` | `/team/staff` | Same `StaffDirectoryClient` + `loadStaffDirectoryPage` |
+| `/workforce-os` | `/team` | Same `WorkforceCommandCentreClient` + loader |
+| `/workforce-os/roster` | `/team/roster` | Same view; `/team` applies the canonical capability gate |
+| `/hr-os/roster` | `/team/roster` | Previously chained via `/workforce-os/roster` |
+| `/hr-os/onboarding` | `/team/onboarding` | Byte-identical page |
+| `/hr-os/compliance` | `/team/compliance` | Byte-identical page |
+| `/hr-os/certifications` | `/team/training` | Same `StaffCertificationClient` + loader |
+| `/workforce-os/staff-access` | `/team/identity` | Same `StaffAccessCentreClient` + loader |
+| `/workforce-os/staff-identity-audit` | `/team/admin/identity-audit` | Moved verbatim |
+| `/workforce-os/hr-task-map` | `/team/admin/access-task-map` | Moved verbatim |
+| `/hr-os/sync-health` | `/team/admin/sync-health` | Moved verbatim |
+
+**Deliberately NOT redirected** (documented in `TEAM_PRESERVED_LEGACY_ROUTES` with reasons): the `/hr-os` index (unique identity/readiness/clinical-rostering dashboard with no `/team` equivalent), `/hr-os/credentials`, `/hr-os/offboarding`, `/hr-os/duplicates`, `/hr-os/staff-reconciliation`, the `/workforce-os` intelligence modules, and the `/staff/*` sub-routes. Retiring these needs product work, not a redirect.
+
+**Key implementation points:**
+
+- `src/lib/fiOs/team/teamLegacyRedirects.ts` is the single source of truth — pure, testable, with the equivalence basis recorded per entry.
+- Matching is **exact on the path suffix, never prefix-based**. `/staff` retires while `/staff/link-users` keeps rendering; `/workforce-os/staff-access` retires while its `accept/[token]` and `pin-setup/[setupToken]` children do not.
+- Query strings are preserved (directory filters, roster period/clinic/event deep links, task-map `staffId`/`category`/`task`).
+- Internal links were **retargeted at the canonical paths** rather than left to bounce through redirects: roster href builder, standard-hours return link, lifecycle copy builders, command-centre tiles and attention-queue items, both sub-navs, and the dashboard cards.
+- `revalidatePath` calls in the roster, onboarding, credentials and staff-access actions now invalidate the `/team` tabs. Previously they only invalidated retired paths, so the canonical pages could serve a stale router-cache payload after a mutation.
+- Nav special-casing removed: `getFiOsShellActiveSidebarId` collapsed ~40 lines of legacy branches into "every workforce surface highlights Team", which also fixes still-live pages (`/hr-os/credentials`, `/workforce-os/payroll`) that would otherwise have highlighted nothing after A1.
+- Deleted the orphaned `WorkforceCommandCentreView.tsx` (491 lines) and its test reference.
+
+**Bug found during A2:** `staffHrTaskMapCore.ts` built the task-map href by concatenating onto the command-centre href (`${buildWorkforceCommandCentreHref(tid)}/hr-task-map`). When that builder moved to `/team`, it silently produced `/team/hr-task-map` — a 404. Now uses the dedicated `buildStaffHrTaskMapHref`.
+
+**Verification:** 1,407 unit tests across the workforce, nav, staff and staffAccess trees; 4 failures, all confirmed pre-existing on clean `main` by stashing (3 roster permission-gating source assertions, 1 Pipeline nav test). `tsc --noEmit` adds no new errors. 8 new redirect contract tests assert the full map, query preservation, exact-match boundaries, token-route exemption, and that no target is itself retired.
+
+---
+
+### Phase A2 — original plan (for reference)
 
 1. Redirect normal legacy pages to their `/team` tab: `/staff` → `/team/staff`, `/hr-os/onboarding` → `/team/onboarding`, `/hr-os/roster` + `/workforce-os/roster` → `/team/roster`, `/hr-os` + `/workforce-os` → `/team`, etc. Use A1 telemetry to sequence and to catch consumers the audit missed.
 2. **Preserve callback/token routes** at their current URLs (`staff-access/accept/[token]`, `staff-access/pin-setup/[setupToken]`, `onboarding/invite/[token]`) — invites in flight must not break.

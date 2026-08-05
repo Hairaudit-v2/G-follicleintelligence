@@ -1,55 +1,32 @@
-import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 
-import { OnboardingCentreClient } from "@/src/components/fi-admin/hr/OnboardingCentreClient";
-import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import {
-  expireStaleOnboardingInvitations,
-  loadOnboardingPageModel,
-} from "@/src/lib/workforce/onboarding/onboardingPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
-
-export const metadata = {
-  title: "Onboarding · Team",
-  robots: { index: false, follow: false },
-};
+  buildLegacyRedirectQuery,
+  teamLegacyRedirectHrefForSuffix,
+} from "@/src/lib/fiOs/team/teamLegacyRedirects";
 
 export const dynamic = "force-dynamic";
 
-export default async function HrOsOnboardingPage({
+/**
+ * Retired in FI-WORKFORCE-COHESION-A2 — /team/onboarding renders the identical
+ * OnboardingCentreClient. The token-authenticated invite accept flow lives at
+ * /onboarding/invite/[token] and is unaffected.
+ */
+export default async function HrOsOnboardingLegacyRedirectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   noStore();
   const { tenantId } = await params;
-  const tid = tenantId?.trim();
-  if (!tid) notFound();
+  if (!tenantId?.trim()) notFound();
 
-  try {
-    const access = await resolveHrOsRouteAccess(tid);
-    if (!access.ok) notFound();
-
-    await expireStaleOnboardingInvitations(tid);
-    const model = await loadOnboardingPageModel(tid);
-    const canManage =
-      access.platformAdminPreview ||
-      WORKFORCE_HR_MANAGE_ROLES.some((r) => r === access.userRole.trim().toLowerCase());
-
-    return (
-      <OnboardingCentreClient
-        tenantId={tid}
-        staff={model.staff}
-        clinics={model.clinics}
-        roleOptions={model.roleOptions}
-        canManage={canManage}
-      />
-    );
-  } catch (e) {
-    if (e instanceof CrmAccessError && (e.status === 401 || e.status === 403)) {
-      notFound();
-    }
-    throw e;
-  }
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const query = buildLegacyRedirectQuery(await searchParams);
+  redirect(
+    teamLegacyRedirectHrefForSuffix("hr-os/onboarding", base, query) ?? `${base}/team/onboarding`
+  );
 }

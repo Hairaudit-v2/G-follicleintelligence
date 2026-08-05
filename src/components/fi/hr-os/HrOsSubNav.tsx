@@ -11,10 +11,16 @@ export type HrOsNavItem = {
   segment: string;
 };
 
+/**
+ * A2: onboarding, roster, certifications and compliance retired into /team tabs,
+ * so those entries link out to the canonical path (and never show as active
+ * here). The remaining entries are HR OS surfaces with no /team equivalent.
+ */
 export function buildHrOsNavItems(tenantId: string): HrOsNavItem[] {
   const base = `/fi-admin/${tenantId}/hr-os`;
+  const team = `/fi-admin/${tenantId}/team`;
   return [
-    { label: "Team overview", href: base, segment: "" },
+    { label: "HR dashboard", href: base, segment: "" },
     { label: "Sync health", href: `${base}/sync-health`, segment: "sync-health" },
     {
       label: "Staff reconciliation",
@@ -22,17 +28,19 @@ export function buildHrOsNavItems(tenantId: string): HrOsNavItem[] {
       segment: "staff-reconciliation",
     },
     { label: "Duplicate review", href: `${base}/duplicates`, segment: "duplicates" },
-    { label: "Onboarding", href: `${base}/onboarding`, segment: "onboarding" },
-    { label: "Roster", href: `${base}/roster`, segment: "roster" },
     { label: "Offboarding", href: `${base}/offboarding`, segment: "offboarding" },
     { label: "Credentials", href: `${base}/credentials`, segment: "credentials" },
-    { label: "Certifications", href: `${base}/certifications`, segment: "certifications" },
-    { label: "Compliance", href: `${base}/compliance`, segment: "compliance" },
+    { label: "Onboarding", href: `${team}/onboarding`, segment: "team-onboarding" },
+    { label: "Roster", href: `${team}/roster`, segment: "team-roster" },
+    { label: "Training", href: `${team}/training`, segment: "team-training" },
+    { label: "Compliance", href: `${team}/compliance`, segment: "team-compliance" },
   ];
 }
 
 function isActive(pathname: string, base: string, segment: string): boolean {
   if (!segment) return pathname === base || pathname === `${base}/`;
+  // Cross-links into the Team workspace never render this nav, so they are never active.
+  if (segment.startsWith("team-")) return false;
   return pathname.startsWith(`${base}/${segment}`);
 }
 

@@ -23,12 +23,14 @@ function errMsg(e: unknown): string {
 
 function revalidateWorkforceClinicalSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
+  // A2: certifications/compliance/staff directory now live on /team tabs;
+  // /hr-os/credentials has no /team equivalent and stays live.
   const paths = [
-    `/fi-admin/${tid}/staff`,
+    `/fi-admin/${tid}/team/staff`,
+    `/fi-admin/${tid}/team/training`,
+    `/fi-admin/${tid}/team/compliance`,
     `/fi-admin/${tid}/hr-os`,
     `/fi-admin/${tid}/hr-os/credentials`,
-    `/fi-admin/${tid}/hr-os/certifications`,
-    `/fi-admin/${tid}/hr-os/compliance`,
   ];
   for (const p of paths) revalidatePath(p);
 }

@@ -176,7 +176,7 @@ export function StaffReconciliationClient({
 
       <p className="mt-4 text-xs text-slate-500">
         <Link
-          href={`/fi-admin/${tenantId}/hr-os/sync-health`}
+          href={`/fi-admin/${tenantId}/team/admin/sync-health`}
           className="text-cyan-400 hover:text-cyan-300"
         >
           View sync health

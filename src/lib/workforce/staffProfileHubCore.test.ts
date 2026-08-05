@@ -213,14 +213,15 @@ test("Blocker links route to correct lifecycle centres", () => {
     },
   });
 
+  // A2: blockers deep-link to canonical /team destinations, not retired routes.
   const onboardingBlocker = blockers.find((b) => b.id === "invite_not_sent");
-  assert.ok(onboardingBlocker?.href.includes("/hr-os/onboarding"));
+  assert.ok(onboardingBlocker?.href.includes("/team/onboarding"));
 
   const identityBlocker = blockers.find((b) => b.id === "missing_identity_link");
-  assert.ok(identityBlocker?.href.includes("/staff-identity-audit"));
+  assert.ok(identityBlocker?.href.includes("/team/admin/identity-audit"));
 
   const trainingBlocker = blockers.find((b) => b.id === "training_incomplete");
-  assert.ok(trainingBlocker?.href.includes("/hr-os/onboarding"));
+  assert.ok(trainingBlocker?.href.includes("/team/onboarding"));
 });
 
 test("resolveStaffUnifiedStatus preserves access suspended semantics", () => {
