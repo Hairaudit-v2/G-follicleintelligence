@@ -191,7 +191,11 @@ describe("roster grid cell actions", () => {
 test("RosterCommandCentreView wires eligible grid rows and ineligible section below grid", () => {
   const src = readFileSync("src/components/fi/workforce/RosterCommandCentreView.tsx", "utf8");
   assert.ok(src.includes("rosterGridStaffOptions"));
-  assert.ok(src.includes("resolveRosterCellClickOutcome"));
+  // Cell clicks always open the drawer; non-managers get manageDeniedMessage via banner
+  // (drawer + roster-action-error) rather than resolveRosterCellClickOutcome short-circuit.
+  assert.ok(src.includes("openShiftDrawer"));
+  assert.ok(src.includes("handleCellClick"));
+  assert.ok(src.includes("setActionError(canManage ? null : manageDeniedMessage)"));
   assert.ok(src.includes('data-testid="roster-ineligible-staff-toggle"'));
   assert.ok(src.includes("staffOptions={rosterGridStaffOptions}"));
   const gridIndex = src.indexOf("staffOptions={rosterGridStaffOptions}");
@@ -216,8 +220,9 @@ test("RosterShiftDrawer exposes optional generate and manual shift actions with 
 test("RosterShiftDrawer gates mutations when canManage is false", () => {
   const src = readFileSync("src/components/fi/workforce/RosterShiftDrawer.tsx", "utf8");
   assert.ok(src.includes('data-testid="roster-shift-manage-denied"'));
-  assert.ok(src.includes("ROSTER_MANAGE_DENIED_REASON"));
-  assert.ok(src.includes("canCancelShift && !isInlineEditing"));
+  assert.ok(src.includes("resolveRosterManageDeniedMessage"));
+  assert.ok(src.includes("manageDeniedMessage"));
+  assert.ok(src.includes("canManage && canCancelShift && !isInlineEditing"));
   assert.ok(src.includes('data-testid="roster-shift-cancellation-reason"'));
   assert.ok(src.includes("disabled={pending || !cancellationReason.trim()}"));
 });
@@ -225,7 +230,8 @@ test("RosterShiftDrawer gates mutations when canManage is false", () => {
 test("RosterCommandCentreView passes canManage into RosterShiftDrawer", () => {
   const src = readFileSync("src/components/fi/workforce/RosterCommandCentreView.tsx", "utf8");
   assert.ok(src.includes("canManage={canManage}"));
-  assert.ok(src.includes("manageDeniedReason={manageDeniedReason}"));
+  assert.ok(src.includes("resolveRosterManageDeniedMessage"));
+  assert.ok(src.includes("manageDeniedReason={manageDeniedMessage}"));
   assert.ok(src.includes("tenantTimezone={payload.tenantTimezone}"));
   assert.ok(src.includes("staffTimezone={payload.staffTimezoneByStaffId"));
 });

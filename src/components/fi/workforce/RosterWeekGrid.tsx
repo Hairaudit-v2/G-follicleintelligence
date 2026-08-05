@@ -9,6 +9,7 @@ import type {
 import {
   buildStaffStandardHoursEditorHref,
   buildStaffStandardHoursReturnToRosterHref,
+  ROSTER_MANAGE_DENIED_REASON,
 } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
   formatStandardHoursSummary,
@@ -118,7 +119,7 @@ export function RosterWeekGrid({
   rosterCadence = "weekly",
   rosterCycleAnchorDate = "2026-01-05",
   canManage = true,
-  manageDeniedReason = "You do not have permission to edit roster shifts.",
+  manageDeniedReason = ROSTER_MANAGE_DENIED_REASON,
   showStandardHoursEditor = true,
   periodLabel = "period",
   onCellClick,

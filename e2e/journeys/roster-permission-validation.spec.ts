@@ -178,8 +178,14 @@ viewOnlyTest.describe("Roster view-only permission validation @roster-view-only"
       true,
     );
 
-    // Step 14: Clear deny alert — not a dead click, drawer must not open
+    // Canonical contract (1C/1D): non-manager opens the drawer, sees deny surfaces,
+    // and never gets mutation controls. Silent no-op is not acceptable.
     await expect(alert).toHaveAttribute("role", "alert");
-    await expect(page.getByTestId("roster-shift-drawer")).toHaveCount(0);
+    const drawer = page.getByTestId("roster-shift-drawer");
+    await expect(drawer).toBeVisible({ timeout: 15_000 });
+    await expect(drawer.getByTestId("roster-shift-manage-denied")).toBeVisible();
+    await expect(drawer.getByTestId("roster-manual-shift-form")).toHaveCount(0);
+    await expect(drawer.getByTestId("roster-shift-cancel-section")).toHaveCount(0);
+    await expect(drawer.getByTestId("roster-shift-edit-start")).toHaveCount(0);
   });
 });

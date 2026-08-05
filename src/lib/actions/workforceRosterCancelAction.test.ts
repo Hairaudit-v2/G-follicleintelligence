@@ -67,13 +67,20 @@ describe("drawer cancellation reason options", () => {
 
 describe("RosterShiftDrawer permission and cancel UI", () => {
   it("gates mutation controls by canManage and shows read-only message", () => {
+    // Deny copy goes through resolveRosterManageDeniedMessage — components must not
+    // re-inline ROSTER_MANAGE_DENIED_REASON (single permission-message contract).
     sourceIncludes(
       SHIFT_DRAWER,
       "canManage = true",
+      "resolveRosterManageDeniedMessage",
+      "manageDeniedMessage",
       'data-testid="roster-shift-manage-denied"',
-      "ROSTER_MANAGE_DENIED_REASON",
       "formReadOnly",
       "showCreateSave"
+    );
+    assert.ok(
+      !readFileSync(SHIFT_DRAWER, "utf8").includes("ROSTER_MANAGE_DENIED_REASON"),
+      "drawer must use resolveRosterManageDeniedMessage, not re-import ROSTER_MANAGE_DENIED_REASON"
     );
   });
 
@@ -93,8 +100,8 @@ describe("RosterShiftDrawer permission and cancel UI", () => {
 
   it("hides cancel section when canManage is false or shift is not cancellable", () => {
     const src = readFileSync(SHIFT_DRAWER, "utf8");
-    assert.ok(src.includes("canCancelShift && !isInlineEditing"));
-    assert.ok(src.includes("{canManage ? ("));
+    // Cancel is gated by canManage && canCancelShift && !isInlineEditing (not a bare ternary).
+    assert.ok(src.includes("canManage && canCancelShift && !isInlineEditing"));
   });
 });
 
@@ -180,11 +187,14 @@ describe("RosterShiftDrawer existing shift inline edit", () => {
 });
 
 describe("RosterCommandCentreView passes canManage to shift drawer", () => {
-  it("wires canManage and manageDeniedReason into RosterShiftDrawer", () => {
+  it("wires canManage and resolved deny message into RosterShiftDrawer", () => {
+    // Props prop name stays manageDeniedReason; value is the resolved manageDeniedMessage.
     sourceIncludes(
       ROSTER_VIEW,
+      "resolveRosterManageDeniedMessage",
+      "manageDeniedMessage",
       "canManage={canManage}",
-      "manageDeniedReason={manageDeniedReason}",
+      "manageDeniedReason={manageDeniedMessage}",
       "tenantTimezone={payload.tenantTimezone}",
       "handleShiftClick"
     );
