@@ -153,7 +153,8 @@ async function callGoogleCalendarApi(
   accessToken: string,
   opts: ServerOpts,
   body?: Record<string, unknown>,
-  query?: Record<string, string>
+  query?: Record<string, string>,
+  extraHeaders?: Record<string, string>
 ): Promise<{ ok: true; json: unknown } | { ok: false; error: string; status?: number }> {
   const fetchFn = opts.fetchOverride ?? fetch;
   const params = query ? `?${new URLSearchParams(query).toString()}` : "";
@@ -165,6 +166,7 @@ async function callGoogleCalendarApi(
       Authorization: `Bearer ${accessToken}`,
       Accept: "application/json",
       ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(extraHeaders ?? {}),
     },
     body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
@@ -509,22 +511,54 @@ export async function createGoogleMeetAppointment(
   return createGoogleCalendarEvent({ ...input, addGoogleMeet: true }, opts);
 }
 
-/** Update Google Calendar event + FI mirror. */
+export type UpdateGoogleCalendarEventFailureCode =
+  | "not_found"
+  | "missing_external_id"
+  | "etag_required"
+  | "concurrent_edit"
+  | "google_api"
+  | "local_update";
+
+export type UpdateGoogleCalendarEventResult =
+  | { ok: true; data: { event: FiCalendarEvent; googleEtag: string | null } }
+  | {
+      ok: false;
+      error: string;
+      code?: UpdateGoogleCalendarEventFailureCode;
+      status?: number;
+    };
+
+/** Update Google Calendar event + FI mirror (optional If-Match concurrency). */
 export async function updateGoogleCalendarEvent(
   input: UpdateGoogleCalendarEventInput,
   opts: ServerOpts = {}
-): Promise<GoogleCalendarServiceResult<{ event: FiCalendarEvent }>> {
+): Promise<UpdateGoogleCalendarEventResult> {
   const tenantId = input.tenantId.trim();
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const local = await loadLocalEvent(supabase, tenantId, input.eventId);
-  if (!local) return { ok: false, error: "Calendar event not found." };
+  if (!local) return { ok: false, error: "Calendar event not found.", code: "not_found" };
 
   const ctx = await resolveIntegrationContext(tenantId, opts, local.calendar_id);
-  if (!ctx.ok) return ctx;
+  if (!ctx.ok) {
+    return { ok: false, error: ctx.error, code: "google_api" };
+  }
 
   const externalId = local.external_event_id?.trim();
   if (!externalId) {
-    return { ok: false, error: "Event has no external Google id — cannot update provider." };
+    return {
+      ok: false,
+      error: "Event has no external Google id — cannot update provider.",
+      code: "missing_external_id",
+    };
+  }
+
+  const expectedEtag = input.expectedEtag?.trim() || null;
+  if (input.requireEtagMatch && !expectedEtag) {
+    return {
+      ok: false,
+      error: "Google event version (etag) is required before write-back.",
+      code: "etag_required",
+    };
   }
 
   const patchBody: Record<string, unknown> = {};
@@ -541,15 +575,40 @@ export async function updateGoogleCalendarEvent(
     `/calendars/${encodedCalendar}/events/${encodedEvent}`,
     ctx.accessToken,
     opts,
-    patchBody
+    patchBody,
+    undefined,
+    expectedEtag ? { "If-Match": expectedEtag } : undefined
   );
 
-  if (!apiResult.ok) return { ok: false, error: apiResult.error };
+  if (!apiResult.ok) {
+    if (apiResult.status === 412) {
+      return {
+        ok: false,
+        error:
+          "Google Calendar was edited elsewhere. Reload and reconcile before saving again.",
+        code: "concurrent_edit",
+        status: 412,
+      };
+    }
+    return { ok: false, error: apiResult.error, code: "google_api", status: apiResult.status };
+  }
 
-  const googleEvent = apiResult.json as GoogleCalendarApiEventWithConference;
+  const googleEvent = apiResult.json as GoogleCalendarApiEventWithConference & {
+    etag?: string;
+    htmlLink?: string;
+  };
   const mapped = mapGoogleApiEventToFiFields(googleEvent, ctx.calendarId);
+  const googleEtag =
+    typeof googleEvent.etag === "string" && googleEvent.etag.trim()
+      ? googleEvent.etag.trim()
+      : null;
+  const googleHtmlLink =
+    typeof googleEvent.htmlLink === "string" && googleEvent.htmlLink.trim()
+      ? googleEvent.htmlLink.trim()
+      : null;
   const now = new Date().toISOString();
 
+  // Preserve Google + FiOS ids — never reassign on update.
   const { data, error } = await supabase
     .from("fi_calendar_events")
     .update({
@@ -560,10 +619,15 @@ export async function updateGoogleCalendarEvent(
       end_time: input.endTime ?? mapped.endTime,
       event_type: input.eventType ?? local.event_type ?? mapped.eventType,
       google_meet_url: mapped.googleMeetUrl ?? local.google_meet_url,
+      external_event_id: externalId,
       metadata: {
         ...(local.metadata ?? {}),
         ...(input.metadata ?? {}),
         last_synced_at: now,
+        sync_status: "synced",
+        writeback_status: "synced",
+        ...(googleEtag ? { google_etag: googleEtag } : {}),
+        ...(googleHtmlLink ? { google_html_link: googleHtmlLink } : {}),
       },
       updated_at: now,
     })
@@ -573,10 +637,14 @@ export async function updateGoogleCalendarEvent(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message ?? "Failed to update FI calendar event." };
+    return {
+      ok: false,
+      error: error?.message ?? "Failed to update FI calendar event.",
+      code: "local_update",
+    };
   }
 
-  return { ok: true, data: { event: mapEventRow(data as EventRow) } };
+  return { ok: true, data: { event: mapEventRow(data as EventRow), googleEtag } };
 }
 
 /** Delete Google Calendar event + mark FI mirror. */

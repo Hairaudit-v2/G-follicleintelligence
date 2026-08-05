@@ -168,3 +168,166 @@ export async function rescheduleCalendarAppointmentRequest(
     isConflict: res.status === 409,
   };
 }
+
+function calendarOsEventBase(tenantId: string, eventId: string): string {
+  return `/api/tenants/${encodeURIComponent(tenantId.trim())}/calendar/appointments/${encodeURIComponent(eventId.trim())}`;
+}
+
+export type RescheduleCalendarOsEventInput = {
+  tenantId: string;
+  eventId: string;
+  startAt: string;
+  endAt: string;
+  staffId?: string | null;
+  clinicId?: string | null;
+  roomId?: string | null;
+  interactionSource?: "calendar_drag" | "calendar_quick_edit";
+};
+
+export type RescheduleCalendarOsEventResult =
+  | { ok: true; writebackStatus: string; googleEtag: string | null; auditId: string }
+  | {
+      ok: false;
+      error: string;
+      code?: string;
+      writebackStatus?: string;
+      isConflict?: boolean;
+    };
+
+/** PATCH CalendarOS google_linked_fios event with Google write-back. */
+export async function rescheduleCalendarOsEventRequest(
+  input: RescheduleCalendarOsEventInput
+): Promise<RescheduleCalendarOsEventResult> {
+  let res: Response;
+  try {
+    res = await fetch(calendarOsEventBase(input.tenantId, input.eventId), {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        startAt: input.startAt,
+        endAt: input.endAt,
+        staffId: input.staffId,
+        clinicId: input.clinicId,
+        roomId: input.roomId,
+        interactionSource: input.interactionSource ?? "calendar_drag",
+      }),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Network error" };
+  }
+
+  const json = (await res.json().catch(() => ({
+    ok: false,
+    error: `Request failed (${res.status}).`,
+  }))) as Record<string, unknown>;
+
+  if (res.ok && json.ok) {
+    return {
+      ok: true,
+      writebackStatus: String(json.writebackStatus ?? "synced"),
+      googleEtag: (json.googleEtag as string | null) ?? null,
+      auditId: String(json.auditId ?? ""),
+    };
+  }
+
+  return {
+    ok: false,
+    error: typeof json.error === "string" ? json.error : `Request failed (${res.status}).`,
+    code: typeof json.code === "string" ? json.code : undefined,
+    writebackStatus: typeof json.writebackStatus === "string" ? json.writebackStatus : undefined,
+    isConflict: res.status === 409 || json.code === "concurrent_edit",
+  };
+}
+
+export async function linkCalendarOsPatientRequest(input: {
+  tenantId: string;
+  eventId: string;
+  patientId: string;
+  confirmed: boolean;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await fetch(`${calendarOsEventBase(input.tenantId, input.eventId)}/link-patient`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      patientId: input.patientId,
+      confirmed: input.confirmed,
+    }),
+  });
+  const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as {
+    ok?: boolean;
+    error?: string;
+  };
+  if (res.ok && json.ok) return { ok: true };
+  return { ok: false, error: json.error ?? `Request failed (${res.status}).` };
+}
+
+export async function convertExternalCalendarEventRequest(input: {
+  tenantId: string;
+  eventId: string;
+  clinicId?: string | null;
+  assignedStaffId?: string | null;
+}): Promise<
+  | { ok: true; fiosAppointmentId: string }
+  | { ok: false; error: string }
+> {
+  const res = await fetch(`${calendarOsEventBase(input.tenantId, input.eventId)}/convert`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      clinicId: input.clinicId,
+      assignedStaffId: input.assignedStaffId,
+    }),
+  });
+  const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as {
+    ok?: boolean;
+    error?: string;
+    fiosAppointmentId?: string;
+  };
+  if (res.ok && json.ok && json.fiosAppointmentId) {
+    return { ok: true, fiosAppointmentId: json.fiosAppointmentId };
+  }
+  return { ok: false, error: json.error ?? `Request failed (${res.status}).` };
+}
+
+export async function quickEditCalendarOsEventRequest(input: {
+  tenantId: string;
+  eventId: string;
+  patch: Record<string, unknown>;
+}): Promise<RescheduleCalendarOsEventResult> {
+  let res: Response;
+  try {
+    res = await fetch(calendarOsEventBase(input.tenantId, input.eventId), {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...input.patch,
+        interactionSource: "calendar_quick_edit",
+      }),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Network error" };
+  }
+  const json = (await res.json().catch(() => ({
+    ok: false,
+    error: `Request failed (${res.status}).`,
+  }))) as Record<string, unknown>;
+  if (res.ok && json.ok) {
+    return {
+      ok: true,
+      writebackStatus: String(json.writebackStatus ?? "synced"),
+      googleEtag: (json.googleEtag as string | null) ?? null,
+      auditId: String(json.auditId ?? ""),
+    };
+  }
+  return {
+    ok: false,
+    error: typeof json.error === "string" ? json.error : `Request failed (${res.status}).`,
+    code: typeof json.code === "string" ? json.code : undefined,
+    writebackStatus: typeof json.writebackStatus === "string" ? json.writebackStatus : undefined,
+    isConflict: res.status === 409 || json.code === "concurrent_edit",
+  };
+}

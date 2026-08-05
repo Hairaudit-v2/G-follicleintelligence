@@ -85,6 +85,13 @@ export type UpdateGoogleCalendarEventInput = {
   endTime?: string;
   eventType?: string | null;
   metadata?: Record<string, unknown>;
+  /**
+   * When set, outbound Google PATCH sends `If-Match` so concurrent Google edits
+   * return HTTP 412 instead of silently overwriting (FI-CALENDAR-WRITEBACK-1A).
+   */
+  expectedEtag?: string | null;
+  /** When true, refuse to PATCH Google if no expectedEtag is available. */
+  requireEtagMatch?: boolean;
 };
 
 export type GoogleCalendarOAuthTokenResponse = {

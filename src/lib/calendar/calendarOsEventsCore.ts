@@ -13,6 +13,11 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
+  PATIENT_NOT_LINKED_LABEL,
+  classifyFiCalendarEventOverlapRow,
+  withCalendarEventClassificationMeta,
+} from "@/src/lib/calendar/calendarEventClassification";
+import {
   buildStaffCalendarLinkIndex,
   resolveCalendarEventStaffAssignment,
   type StaffCalendarLinkLookupRow,
@@ -181,6 +186,19 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
   const clientFields = calendarOsClientFieldsFromEvent(row);
   const eventType = clientFields.eventType?.trim() || "consultation";
   const safeMeta = sanitizeCalendarOsMetadataForClient(meta);
+  const classification = classifyFiCalendarEventOverlapRow(row);
+  const googleHtmlLink =
+    typeof safeMeta.google_html_link === "string" ? safeMeta.google_html_link.trim() : null;
+  const writebackStatus =
+    typeof safeMeta.writeback_status === "string" ? safeMeta.writeback_status.trim() : null;
+  const clinicId =
+    typeof safeMeta.clinic_id === "string" && safeMeta.clinic_id.trim()
+      ? safeMeta.clinic_id.trim()
+      : null;
+  const roomId =
+    typeof safeMeta.room_id === "string" && safeMeta.room_id.trim()
+      ? safeMeta.room_id.trim()
+      : null;
 
   return {
     id: row.id,
@@ -189,8 +207,8 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
     person_id: null,
     patient_id: row.patient_id,
     case_id: null,
-    clinic_id: null,
-    room_id: null,
+    clinic_id: clinicId,
+    room_id: roomId,
     room_required: false,
     assigned_staff_id: staffAssignment?.staffMemberId?.trim() || null,
     assigned_user_id: null,
@@ -203,8 +221,7 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
     timezone: calendarTimezone,
     location: row.location,
     metadata: {
-      ...safeMeta,
-      [CALENDAR_OS_EVENT_META_FLAG]: true,
+      ...withCalendarEventClassificationMeta(safeMeta, classification),
       calendar_os_provider: clientFields.calendarOsProvider,
       calendar_os_source_label: clientFields.calendarOsSourceLabel,
       calendar_id: clientFields.calendarId,
@@ -212,6 +229,8 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
       external_event_id: clientFields.externalEventId,
       event_type: clientFields.eventType,
       calendar_os_status: clientFields.calendarOsStatus,
+      ...(googleHtmlLink ? { google_html_link: googleHtmlLink } : {}),
+      ...(writebackStatus ? { writeback_status: writebackStatus } : {}),
       ...(clientFields.googleMeetUrl ? { is_virtual: true } : {}),
     },
     cancelled_at: null,
@@ -232,6 +251,7 @@ export function mapFiCalendarEventToBookingDisplay(
   }
 ): OperationalCalendarBookingDisplay {
   const clientFields = calendarOsClientFieldsFromEvent(row);
+  const classification = classifyFiCalendarEventOverlapRow(row);
   const startMs = row.start_time ? Date.parse(row.start_time) : NaN;
   const endMs = row.end_time ? Date.parse(row.end_time) : NaN;
   const durationMin =
@@ -240,9 +260,27 @@ export function mapFiCalendarEventToBookingDisplay(
       : 30;
 
   const eventTypeLabel = humanizeEventType(clientFields.eventType ?? row.event_type ?? "event");
+  const hasPatientLink = Boolean(row.patient_id?.trim() || row.lead_id?.trim());
+  const externalTitle = row.title?.trim() || null;
+  const resolvedAnchor = opts?.anchorLabel?.trim() || null;
+  const anchorLabel = !hasPatientLink
+    ? PATIENT_NOT_LINKED_LABEL
+    : resolvedAnchor || externalTitle || eventTypeLabel;
+
+  const meta = row.metadata ?? {};
+  const googleHtmlLink =
+    typeof meta.google_html_link === "string" ? meta.google_html_link.trim() : null;
+  const writebackStatus =
+    typeof meta.writeback_status === "string" ? meta.writeback_status.trim() : null;
+  const fiosAppointmentId =
+    typeof meta.fios_appointment_id === "string"
+      ? meta.fios_appointment_id.trim()
+      : typeof meta.fi_booking_id === "string"
+        ? meta.fi_booking_id.trim()
+        : null;
 
   return {
-    anchorLabel: opts?.anchorLabel?.trim() || row.title?.trim() || eventTypeLabel,
+    anchorLabel,
     scalesSummary: null,
     durationMin,
     reminderHint: null,
@@ -262,6 +300,12 @@ export function mapFiCalendarEventToBookingDisplay(
     calendarOsEventTypeLabel: eventTypeLabel,
     calendarOsExternalEventId: clientFields.externalEventId,
     calendarOsStatus: clientFields.calendarOsStatus,
+    calendarEventClassification: classification,
+    calendarOsExternalTitle: !hasPatientLink ? externalTitle : null,
+    calendarOsGoogleHtmlLink: googleHtmlLink,
+    calendarOsWritebackStatus: writebackStatus,
+    calendarOsFiosAppointmentId: fiosAppointmentId,
+    patientNotLinked: !hasPatientLink,
   };
 }
 

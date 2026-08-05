@@ -70,7 +70,7 @@ import {
   resolveDisplayResourceColumnId,
   type BusinessGridConfig,
 } from "@/src/lib/calendar/operationalCalendarLayout";
-import { assigneeMetaFromResourceColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
+import { resolveCalendarDropIntent } from "@/src/lib/calendar/calendarDropIntent";
 import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
@@ -159,14 +159,6 @@ function snapToQuarterHourModifier(): Modifier {
     ...transform,
     y: Math.round(transform.y / slotPx) * slotPx,
   });
-}
-
-function assigneeFromColumn(
-  column: CalendarColumn,
-  staffIdByUserId: Map<string, string>,
-  resourceView: ParsedCalendarQuery["resourceView"]
-): WeekViewRescheduleMeta {
-  return assigneeMetaFromResourceColumnId(column.id, staffIdByUserId, { resourceView });
 }
 
 function WeekViewInner({
@@ -487,12 +479,30 @@ function WeekViewInner({
       const targetColumn = columnsForView.find(
         (c) => c.id === drop.columnId && c.dayKey === drop.dayKey
       );
-      const meta: WeekViewRescheduleMeta | undefined =
+      const dropIntent =
         filterColBookingsByResource && targetColumn
-          ? {
-              ...assigneeFromColumn(targetColumn, staffIdByUserId, resourceView),
-              clearWaitlist: Boolean(waitlistBookingId),
-            }
+          ? resolveCalendarDropIntent({
+              booking,
+              startAt: startIso,
+              endAt: endIso,
+              columnId: targetColumn.id,
+              staffIdByUserId,
+              resourceView,
+            })
+          : null;
+      const meta: WeekViewRescheduleMeta | undefined = dropIntent
+        ? {
+            ...(dropIntent.resources.touched.includes("clinician")
+              ? {
+                  assignedStaffId: dropIntent.resources.assignedStaffId,
+                  assignedUserId: dropIntent.resources.assignedUserId,
+                }
+              : {}),
+            ...(dropIntent.resources.touched.includes("clinic")
+              ? { clinicId: dropIntent.resources.clinicId }
+              : {}),
+            clearWaitlist: Boolean(waitlistBookingId),
+          }
           : waitlistBookingId
             ? { clearWaitlist: true }
             : undefined;

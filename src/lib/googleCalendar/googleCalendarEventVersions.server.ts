@@ -37,6 +37,28 @@ export type UpsertEventVersionInput = {
   versionStatus: "synced" | "pending_local" | "pending_external" | "conflict";
 };
 
+/** Load stored version row for a Google event (etag / ownership / sync status). */
+export async function loadCalendarEventVersion(
+  input: {
+    tenantId: string;
+    googleCalendarId: string;
+    externalEventId: string;
+  },
+  opts: ServerOpts = {}
+): Promise<EventVersionRow | null> {
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_calendar_event_versions")
+    .select("*")
+    .eq("tenant_id", input.tenantId.trim())
+    .eq("provider", "google")
+    .eq("google_calendar_id", input.googleCalendarId.trim())
+    .eq("external_event_id", input.externalEventId.trim())
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as EventVersionRow | null) ?? null;
+}
+
 /** Skip processing when etag and updated timestamp match the stored version. */
 export function shouldProcessEventVersion(
   existing: EventVersionRow,
