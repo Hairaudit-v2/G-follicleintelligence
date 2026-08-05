@@ -6,7 +6,7 @@ import { StaffCertificationClient } from "@/src/components/fi-admin/hr/StaffCert
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadCertificationsPageModel } from "@/src/lib/workforce/certificationsPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Training",

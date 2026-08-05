@@ -9,7 +9,7 @@ import {
 } from "@/src/lib/actions/workforce-phase-1c-sprint-2-actions";
 import { manuallyLinkStaffIdentity } from "@/src/lib/workforce/staffReconciliationPage.server";
 import type { ReconciliationRecommendationType } from "@/src/lib/workforce/staffReconciliationRecommendationCore";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 import {
   WORKFORCE_PHASE_1C_AUDIT_EVENTS,
   WORKFORCE_PHASE_1C_AUDIT_SOURCE,

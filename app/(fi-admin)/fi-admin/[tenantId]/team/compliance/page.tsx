@@ -5,7 +5,7 @@ import { StaffComplianceClient } from "@/src/components/fi-admin/hr/StaffComplia
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadCompliancePageModel } from "@/src/lib/workforce/compliancePage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Compliance",

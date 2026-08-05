@@ -20,8 +20,17 @@ import { STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST_SET } from "@/src/lib/team/identity
 
 const SRC_LIB = "src/lib";
 const IDENTITY_ROOT = "src/lib/team/identity";
+/** Canonical Team domains that own dual-table joins after B2 consolidation. */
+const TEAM_DOMAIN_EXEMPT_PREFIXES = [
+  "src/lib/team/identity/",
+  "src/lib/team/access/",
+] as const;
 const HAS_FI_STAFF = /\bfi_staff\b/;
 const HAS_FI_STAFF_MEMBERS = /\bfi_staff_members\b/;
+
+function isTeamDomainExempt(rel: string): boolean {
+  return TEAM_DOMAIN_EXEMPT_PREFIXES.some((prefix) => rel.startsWith(prefix));
+}
 
 function walkTsFiles(dir: string, acc: string[] = []): string[] {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -51,8 +60,8 @@ test("B1 identity: dual-table allowlist is frozen and sorted", () => {
   for (const rel of list) {
     assert.match(rel, /^src\/lib\//, `allowlist path must be under src/lib: ${rel}`);
     assert.ok(
-      !rel.startsWith(`${IDENTITY_ROOT}/`),
-      `identity package files must not be on the debt allowlist: ${rel}`
+      !isTeamDomainExempt(rel),
+      `canonical team domain files must not be on the debt allowlist: ${rel}`
     );
   }
 });
@@ -62,7 +71,7 @@ test("B1 identity: no new dual fi_staff + fi_staff_members references outside al
   const violations: string[] = [];
 
   for (const rel of files) {
-    if (rel.startsWith(`${IDENTITY_ROOT}/`)) continue;
+    if (isTeamDomainExempt(rel)) continue;
     if (rel.endsWith("staffIdentityDualTableAllowlist.ts")) continue;
 
     const src = readFileSync(rel, "utf8");
@@ -107,6 +116,7 @@ test("B1 identity: public consumers must not import identity/internal", () => {
 
   for (const rel of files) {
     if (rel.startsWith(`${IDENTITY_ROOT}/`)) continue;
+    // Access may load identity via the public/server barrels only.
     const src = readFileSync(rel, "utf8");
     if (banned.test(src)) violations.push(rel);
   }

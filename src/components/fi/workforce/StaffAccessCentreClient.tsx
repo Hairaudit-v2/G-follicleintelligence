@@ -16,7 +16,7 @@ import {
   suspendStaffLoginAccessAction,
 } from "@/src/lib/actions/workforce-staff-access-actions";
 import { STAFF_ACCESS_ATTENTION_LABELS } from "@/src/lib/team/access";
-import type { StaffAccessCentreRow } from "@/src/lib/workforce/staffAccessCentre.server";
+import type { StaffAccessCentreRow } from "@/src/lib/team/access/staffAccessCentre.server";
 
 export type StaffAccessFilter = "all" | "needs_login" | "login_active" | "suspended" | "archived";
 

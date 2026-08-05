@@ -5,7 +5,7 @@
 import {
   STAFF_HR_TASK_CATEGORY_LABELS,
   type StaffHrTaskCategory,
-} from "@/src/lib/workforce/staffHrTaskMapCore";
+} from "@/src/lib/team/access/staffHrTaskMapCore";
 import { buildStaffHrTaskMapHref } from "@/src/lib/workforce/staffLifecycleCopy";
 
 export type StaffHrTaskMapBannerSurface =

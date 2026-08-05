@@ -10,7 +10,7 @@ import {
   resolveAuthLoginStatus,
   resolveInviteStatus,
   STAFF_LOGIN_INVITE_EXPIRY_DAYS,
-} from "@/src/lib/workforce/staffAccessCentreCore";
+} from "@/src/lib/team/access/staffAccessCentreCore";
 
 test("active staff without login can receive invite", () => {
   const authStatus = resolveAuthLoginStatus({

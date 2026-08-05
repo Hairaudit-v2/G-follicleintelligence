@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { refreshWorkforcePlanningForWeek } from "@/src/lib/workforce/workforcePlanningEngine.server";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

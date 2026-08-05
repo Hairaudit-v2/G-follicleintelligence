@@ -5,7 +5,7 @@ import { StaffCredentialsClient } from "@/src/components/fi-admin/hr/StaffCreden
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadCredentialsPageModel } from "@/src/lib/workforce/credentialsPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Credentials · Team",

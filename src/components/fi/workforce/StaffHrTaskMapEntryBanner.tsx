@@ -7,7 +7,7 @@ import {
   buildStaffHrTaskMapBannerHref,
   resolveStaffHrTaskMapBanner,
   type StaffHrTaskMapBannerSurface,
-} from "@/src/lib/workforce/staffHrTaskMapBannerCore";
+} from "@/src/lib/team/access/staffHrTaskMapBannerCore";
 import { cn } from "@/lib/utils";
 
 export function StaffHrTaskMapEntryBanner({

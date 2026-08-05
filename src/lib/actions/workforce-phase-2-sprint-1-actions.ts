@@ -14,7 +14,7 @@ import {
   isRecruitmentPipelineStage,
   type RecruitmentCandidateSource,
 } from "@/src/lib/workforce/recruitmentPipelineCore";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

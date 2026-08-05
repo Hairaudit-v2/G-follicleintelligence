@@ -16,7 +16,7 @@ import {
   resolveStaffAccessAcceptAuditKind,
   type StaffTenantLinkSnapshot,
 } from "./staffAccessAcceptCore";
-import { repairStaffTenantLinkFromInvitation } from "./staffTenantLinkRepair.server";
+import { repairStaffTenantLinkFromInvitation } from "@/src/lib/workforce/staffTenantLinkRepair.server";
 
 export type StaffAccessAcceptPageModel = {
   tenantId: string;

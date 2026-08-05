@@ -5,7 +5,7 @@ import { StaffReconciliationDecisionClient } from "@/src/components/fi-admin/hr/
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadStaffReconciliationDecisionQueue } from "@/src/lib/workforce/staffReconciliationPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Staff reconciliation · Team",

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { StaffAccessPinSetupClient } from "@/src/components/fi/workforce/StaffAccessPinSetupClient";
-import { hashStaffAccessInviteToken } from "@/src/lib/workforce/staffAccessInviteCore";
+import { hashStaffAccessInviteToken } from "@/src/lib/team/access/staffAccessInviteCore";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 

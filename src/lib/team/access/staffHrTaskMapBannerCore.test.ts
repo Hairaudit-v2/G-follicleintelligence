@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import {
   buildStaffHrTaskMapBannerHref,
   resolveStaffHrTaskMapBanner,
-} from "@/src/lib/workforce/staffHrTaskMapBannerCore";
+} from "@/src/lib/team/access/staffHrTaskMapBannerCore";
 import { buildStaffHrTaskMapHref } from "@/src/lib/workforce/staffLifecycleCopy";
 
 const TENANT = "tenant-abc";

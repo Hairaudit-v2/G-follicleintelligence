@@ -34,7 +34,7 @@ import {
   resolvePermissionTemplateLabel,
   type StaffAuthLoginStatus,
   type StaffInviteStatus,
-} from "@/src/lib/workforce/staffAccessCentreCore";
+} from "@/src/lib/team/access/staffAccessCentreCore";
 import {
   buildStaffAccessInviteEmail,
   buildStaffAccessInviteUrl,
@@ -44,12 +44,12 @@ import {
   hashStaffAccessInviteToken,
   STAFF_ACCESS_INVITE_ERRORS,
   STAFF_ACCESS_INVITE_EXPIRY_DAYS,
-} from "@/src/lib/workforce/staffAccessInviteCore";
+} from "@/src/lib/team/access/staffAccessInviteCore";
 import {
   insertStaffAccessAuditEvent,
   STAFF_ACCESS_AUDIT_EVENTS,
-} from "@/src/lib/workforce/staffAccessInviteAudit.server";
-import { createStaffAccessPinSetupToken } from "@/src/lib/workforce/staffAccessPinLayer.server";
+} from "@/src/lib/team/access/staffAccessInviteAudit.server";
+import { createStaffAccessPinSetupToken } from "@/src/lib/team/access/staffAccessPinLayer.server";
 
 export type StaffAccessCentreRow = {
   staffMemberId: string;

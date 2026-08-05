@@ -10,7 +10,7 @@ import {
   type StaffFiUserLinkCandidate,
   type StaffFiUserLinkExistingUser,
   type StaffFiUserLinkPlanRow,
-} from "@/src/lib/staff/staffFiUserLinkPlan";
+} from "@/src/lib/team/access/staffFiUserLinkPlan";
 
 export type StaffFiUserLinkPageRow = StaffFiUserLinkPlanRow & {
   selected: boolean;

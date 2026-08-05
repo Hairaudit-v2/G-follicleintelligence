@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { revokeStaffLoginAccess } from "@/src/lib/workforce/staffAccessCentre.server";
+import { revokeStaffLoginAccess } from "@/src/lib/team/access/server";
 import {
   changeStaffEmploymentStatus,
   loadStaffMemberLifecycle,

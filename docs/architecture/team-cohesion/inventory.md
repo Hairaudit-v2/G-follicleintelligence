@@ -6,16 +6,16 @@
 
 ## Scope count
 
-| Tree | Audit (Aug 2026) | B0 regenerate | Δ |
-|------|-----------------:|-------------:|--:|
-| `src/lib/workforce-os` | 100 | 103 | +3 |
-| `src/lib/workforce` | 127 | 140 | +13 |
-| `src/lib/staff` | 40 | 40 | 0 |
-| **Total** | **267** | **283** | **+16** |
+| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2b regenerate |
+|------|-----------------:|---------------------------:|-----------------:|
+| `src/lib/workforce-os` | 100 | 103 | 77 |
+| `src/lib/workforce` | 127 | 140 | 125 |
+| `src/lib/staff` | 40 | 40 | 39 |
+| **Legacy total** | **267** | **283** | **241** |
 
-B0 classifies **all 283 current files** (not only the historical 267). Acceptance “all 267 classified” is satisfied and exceeded.
+Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2b, access implementations live under `src/lib/team/access` (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
 
-Also inventoried (rename map, not part of the 283): **11** `src/lib/actions/workforce*.ts` action modules (+ 1 cancel test).
+Also inventoried (rename map, not part of the legacy total): **11** `src/lib/actions/workforce*.ts` action modules (+ 1 cancel test).
 
 ## Domain ownership distribution
 

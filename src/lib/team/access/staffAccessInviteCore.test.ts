@@ -11,11 +11,11 @@ import {
   STAFF_ACCESS_INVITE_ERRORS,
   STAFF_ACCESS_INVITE_EXPIRY_DAYS,
   staffAccessInviteExpiryIso,
-} from "@/src/lib/workforce/staffAccessInviteCore";
+} from "@/src/lib/team/access/staffAccessInviteCore";
 import {
   nextResendInvitationTimestamps,
   resolveInviteStatus,
-} from "@/src/lib/workforce/staffAccessCentreCore";
+} from "@/src/lib/team/access/staffAccessCentreCore";
 
 test("generateStaffAccessInviteToken returns uuid-shaped token", () => {
   const token = generateStaffAccessInviteToken();

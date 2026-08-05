@@ -4,19 +4,17 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
 import {
+  assertWorkforceHrManageAllowed,
+  acceptStaffAccessInvitation,
+  completeStaffAccessPinSetup,
   copyStaffLoginInviteLink,
+  requestStaffPinResetLink,
   resendStaffLoginInvite,
   revokeStaffLoginAccess,
   sendStaffLoginInvite,
   suspendStaffLoginAccess,
-} from "@/src/lib/workforce/staffAccessCentre.server";
-import { acceptStaffAccessInvitation } from "@/src/lib/workforce/staffAccessAccept.server";
-import {
-  completeStaffAccessPinSetup,
-  requestStaffPinResetLink,
-} from "@/src/lib/workforce/staffAccessPinLayer.server";
+} from "@/src/lib/team/access/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

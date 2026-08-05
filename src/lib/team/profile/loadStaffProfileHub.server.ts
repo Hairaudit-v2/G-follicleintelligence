@@ -54,7 +54,7 @@ import { loadOnboardingChecklist } from "@/src/lib/workforce/onboarding/onboardi
 import {
   loadStaffAccessCentreRowForMember,
   type StaffAccessCentreRow,
-} from "@/src/lib/workforce/staffAccessCentre.server";
+} from "@/src/lib/team/access/server";
 import { loadStaffCredentials } from "@/src/lib/workforce/staffCredentials.server";
 import { loadStaffLeaveContext } from "@/src/lib/workforce/staffLeaveWorkflow.server";
 import type { StaffProfileLeaveContext } from "@/src/lib/workforce/staffProfileHubCore";

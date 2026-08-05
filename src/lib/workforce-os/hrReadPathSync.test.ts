@@ -18,7 +18,7 @@ function extractExportedFunctionBody(source: string, functionName: string): stri
 }
 
 test("loadStaffAccessCentrePage does not call syncAllStaffProjectionsForTenant", () => {
-  const source = readRepoFile("src/lib/workforce/staffAccessCentre.server.ts");
+  const source = readRepoFile("src/lib/team/access/staffAccessCentre.server.ts");
   const body = extractExportedFunctionBody(source, "loadStaffAccessCentrePage");
   assert.equal(body.includes("syncAllStaffProjectionsForTenant"), false);
 });

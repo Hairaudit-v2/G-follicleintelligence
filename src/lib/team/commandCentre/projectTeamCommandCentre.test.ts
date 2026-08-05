@@ -387,8 +387,8 @@ test("architecture: commandCentre loader uses batch identity + domain projects; 
   assert.doesNotMatch(page, /resolveCanonicalStaffLifecycleStatus/);
 });
 
-test("architecture: allowlist decreased for B1.7 comment-token retirements", () => {
-  assert.equal(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST.length, 17);
+test("architecture: dual-table allowlist continues to shrink after B2.2b access move", () => {
+  assert.equal(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST.length, 13);
   assert.ok(
     !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
       "src/lib/workforce/identityReconciliation.server.ts"
@@ -397,6 +397,21 @@ test("architecture: allowlist decreased for B1.7 comment-token retirements", () 
   assert.ok(
     !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
       "src/lib/fiOs/fiOsAuthDisplay.server.ts"
+    )
+  );
+  assert.ok(
+    !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
+      "src/lib/workforce/staffAccessAccept.server.ts"
+    )
+  );
+  assert.ok(
+    !(STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
+      "src/lib/workforce/staffAccessPinLayer.server.ts"
+    )
+  );
+  assert.ok(
+    (STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST as readonly string[]).includes(
+      "src/lib/workforce/staffTenantLinkRepair.server.ts"
     )
   );
 });

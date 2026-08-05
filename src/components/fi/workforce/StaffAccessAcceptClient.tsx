@@ -11,7 +11,7 @@ import {
   completeStaffAccessPinSetupAction,
 } from "@/src/lib/actions/workforce-staff-access-actions";
 import type { NormalizedTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingCore";
-import type { StaffAccessAcceptPageModel } from "@/src/lib/workforce/staffAccessAccept.server";
+import type { StaffAccessAcceptPageModel } from "@/src/lib/team/access/staffAccessAccept.server";
 
 export function StaffAccessAcceptClient({
   model,

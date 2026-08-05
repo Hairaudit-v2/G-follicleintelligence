@@ -11,8 +11,8 @@ import {
   STAFF_HR_TASK_CATEGORY_LABELS,
   type StaffHrTaskCategory,
   type StaffHrTaskDefinition,
-} from "@/src/lib/workforce/staffHrTaskMapCore";
-import { parseStaffHrTaskMapCategoryParam } from "@/src/lib/workforce/staffHrTaskMapBannerCore";
+} from "@/src/lib/team/access/staffHrTaskMapCore";
+import { parseStaffHrTaskMapCategoryParam } from "@/src/lib/team/access/staffHrTaskMapBannerCore";
 import {
   buildStaffProfileHref,
   buildStaffHrTaskMapHref,

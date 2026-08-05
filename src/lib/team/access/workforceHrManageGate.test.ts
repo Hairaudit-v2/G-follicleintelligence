@@ -9,9 +9,9 @@ import {
   WORKFORCE_HR_MANAGE_DENIED_MESSAGE,
   WORKFORCE_HR_MANAGE_ROLES,
   workforceHrManageAllowedForRole,
-} from "@/src/lib/workforce/workforceHrManageGateCore";
+} from "@/src/lib/team/access/workforceHrManageGateCore";
 
-const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
+const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..", "..");
 
 test("WORKFORCE_HR_MANAGE_ROLES matches HR_OS_ROUTE_REQUIRED_ROLES (includes manager)", () => {
   assert.deepEqual([...WORKFORCE_HR_MANAGE_ROLES], [...HR_OS_ROUTE_REQUIRED_ROLES]);

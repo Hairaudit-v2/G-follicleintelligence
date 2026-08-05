@@ -1,14 +1,19 @@
 /**
  * Frozen allowlist of files that already reference both `fi_staff` and
- * `fi_staff_members` outside `src/lib/team/identity` (B0/B1 debt).
+ * `fi_staff_members` outside canonical Team domains (B0/B1 debt).
+ *
+ * Exempt from this debt scan (domain-owned, not allowlisted):
+ * - `src/lib/team/identity/**`
+ * - `src/lib/team/access/**` (B2.2b — login invite / PIN mutation servers)
  *
  * New files must not appear here without an explicit Team cohesion register update.
- * Snapshot: FI-TEAM-COHESION-B2.1b — Identity server consolidation.
+ * Snapshot: FI-TEAM-COHESION-B2.2b — Access pure + mutations.
  *
- * Allowlist before B2.1b: 16
- * Entries removed: 1 (`src/lib/workforce-os/staffIdentityReadinessAudit.server.ts`
- *   moved into `team/identity`, which is exempt from the dual-table debt scan)
- * Allowlist after: 15
+ * Allowlist before B2.2b: 15
+ * Entries removed: 2
+ *   - `src/lib/workforce/staffAccessAccept.server.ts` → `team/access` (exempt)
+ *   - `src/lib/workforce/staffAccessPinLayer.server.ts` → `team/access` (exempt)
+ * Allowlist after: 13
  *
  * Paths use forward slashes relative to repo root.
  */
@@ -24,8 +29,6 @@ export const STAFF_IDENTITY_DUAL_TABLE_ALLOWLIST = [
   "src/lib/workforce-os/projectionHealth.server.ts",
   "src/lib/workforce-os/staffLifecycle.server.ts",
   "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-  "src/lib/workforce/staffAccessAccept.server.ts",
-  "src/lib/workforce/staffAccessPinLayer.server.ts",
   "src/lib/workforce/staffOffboarding.server.ts",
   "src/lib/workforce/staffTenantLinkRepair.server.ts",
 ] as const;

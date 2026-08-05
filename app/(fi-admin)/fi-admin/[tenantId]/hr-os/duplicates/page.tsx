@@ -5,7 +5,7 @@ import { DuplicateReviewClient } from "@/src/components/fi-admin/hr/DuplicateRev
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadDuplicateDecisionCards } from "@/src/lib/workforce/duplicateReview.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Duplicate review · Team",

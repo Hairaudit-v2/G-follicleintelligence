@@ -17,7 +17,7 @@ import type {
 } from "@/src/lib/team/profile/types";
 import type { StaffWorkforceIntelligence } from "@/src/lib/staff/workforceCommandCentre";
 import type { OnboardingChecklistState } from "@/src/lib/workforce/onboarding/onboardingTypes";
-import type { StaffAuthLoginStatus, StaffInviteStatus } from "@/src/lib/workforce/staffAccessCentreCore";
+import type { StaffAuthLoginStatus, StaffInviteStatus } from "@/src/lib/team/access";
 import {
   buildStaffProfileOverviewModel,
   type StaffProfileAccessSnapshot,

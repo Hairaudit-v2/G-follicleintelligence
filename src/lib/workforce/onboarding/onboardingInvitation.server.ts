@@ -18,7 +18,7 @@ import {
   extractStaffFirstName,
   formatInviteExpiryDate,
   hashStaffAccessInviteToken,
-} from "@/src/lib/workforce/staffAccessInviteCore";
+} from "@/src/lib/team/access/staffAccessInviteCore";
 
 export type SendOnboardingInviteResult = {
   invitationId: string;

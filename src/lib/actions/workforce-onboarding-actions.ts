@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 import { markOnboardingTrainingComplete } from "@/src/lib/workforce/onboarding/onboardingChecklist.server";
 import {
   sendOnboardingInvite,

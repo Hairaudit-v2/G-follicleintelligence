@@ -4,15 +4,15 @@ import test from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { acceptStaffAccessInvitation } from "@/src/lib/workforce/staffAccessAccept.server";
+import { acceptStaffAccessInvitation } from "@/src/lib/team/access/staffAccessAccept.server";
 import {
   assessStaffTenantLinkIntegrity,
   resolveStaffAccessAcceptAuditKind,
-} from "@/src/lib/workforce/staffAccessAcceptCore";
-import { STAFF_ACCESS_INVITE_ERRORS } from "@/src/lib/workforce/staffAccessInviteCore";
-import { hashStaffAccessInviteToken } from "@/src/lib/workforce/staffAccessInviteCore";
-import { revokeStaffLoginAccess } from "@/src/lib/workforce/staffAccessCentre.server";
-import { STAFF_ACCESS_AUDIT_EVENTS } from "@/src/lib/workforce/staffAccessInviteAudit.server";
+} from "@/src/lib/team/access/staffAccessAcceptCore";
+import { STAFF_ACCESS_INVITE_ERRORS } from "@/src/lib/team/access/staffAccessInviteCore";
+import { hashStaffAccessInviteToken } from "@/src/lib/team/access/staffAccessInviteCore";
+import { revokeStaffLoginAccess } from "@/src/lib/team/access/staffAccessCentre.server";
+import { STAFF_ACCESS_AUDIT_EVENTS } from "@/src/lib/team/access/staffAccessInviteAudit.server";
 
 const TENANT = "22222222-2222-4222-8222-222222222222";
 const STAFF_MEMBER = "33333333-3333-4333-8333-333333333333";

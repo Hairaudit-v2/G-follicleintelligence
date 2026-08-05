@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { StaffAccessAcceptClient } from "@/src/components/fi/workforce/StaffAccessAcceptClient";
 import { resolveTenantBranding } from "@/src/lib/fi/foundation/tenantBrandingResolver.server";
-import { loadStaffAccessInviteByToken } from "@/src/lib/workforce/staffAccessAccept.server";
+import { loadStaffAccessInviteByToken } from "@/src/lib/team/access/server";
 
 export default async function StaffAccessAcceptPage({
   params,

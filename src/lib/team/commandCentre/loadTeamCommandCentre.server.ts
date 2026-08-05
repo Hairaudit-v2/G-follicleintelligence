@@ -43,7 +43,7 @@ import {
 import {
   loadStaffAccessCentrePage,
   type StaffAccessCentreRow,
-} from "@/src/lib/workforce/staffAccessCentre.server";
+} from "@/src/lib/team/access/server";
 import { loadStaffCredentialsForMembers } from "@/src/lib/workforce/staffCredentials.server";
 
 export type LoadTeamCommandCentreOptions = {

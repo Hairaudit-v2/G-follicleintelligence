@@ -5,7 +5,7 @@ import {
   buildStaffHrTaskMap,
   findStaffHrTaskById,
   groupStaffHrTasksByCategory,
-} from "@/src/lib/workforce/staffHrTaskMapCore";
+} from "@/src/lib/team/access/staffHrTaskMapCore";
 
 const TENANT = "tenant-abc";
 const STAFF = "staff-1";

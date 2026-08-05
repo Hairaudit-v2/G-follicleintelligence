@@ -15,7 +15,7 @@ import {
   pinStatusLabel,
   type StaffAuthLoginStatus,
   type StaffInviteStatus,
-} from "@/src/lib/workforce/staffAccessCentreCore";
+} from "@/src/lib/team/access/staffAccessCentreCore";
 import { resolveStaffLifecycleOperationalState } from "@/src/lib/team/identity/staffLifecyclePresentation";
 import type { StaffMemberLifecycleRow } from "@/src/lib/team/identity/staffLifecycleTypes";
 

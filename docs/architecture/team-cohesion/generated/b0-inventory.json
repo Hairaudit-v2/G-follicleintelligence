@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-05T11:05:27.028Z",
+  "generatedAt": "2026-08-05T20:47:27.279Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 378,
-  "growthSinceAudit": 111,
+  "currentFiles": 379,
+  "growthSinceAudit": 112,
   "trees": {
     "workforce-os": 77,
-    "workforce": 142,
-    "staff": 41
+    "workforce": 125,
+    "staff": 39
   },
   "domainCounts": {
     "shared": 35,
@@ -17,14 +17,14 @@
     "onboarding": 21,
     "payroll": 33,
     "planning": 23,
-    "access": 26,
     "commandCentre": 15,
+    "access": 27,
     "delete": 3
   },
   "riskCounts": {
-    "low": 141,
-    "medium": 60,
-    "high": 177
+    "low": 142,
+    "medium": 58,
+    "high": 179
   },
   "inventory": [
     {
@@ -419,8 +419,8 @@
       "proposedPath": "src/lib/team/shared/resolveWorkforceActorFiUserId.server.ts",
       "runtimeConsumers": [
         "src/lib/actions/workforce-roster-actions.ts",
-        "src/lib/workforce-os/staffStandardHoursManageGate.server.ts",
-        "src/lib/workforce/workforceHrManageGate.server.ts"
+        "src/lib/team/access/workforceHrManageGate.server.ts",
+        "src/lib/workforce-os/staffStandardHoursManageGate.server.ts"
       ],
       "testConsumers": [],
       "tablesReferenced": [],
@@ -977,7 +977,7 @@
       "proposeReason": "roster/ops scheduling",
       "proposedPath": "src/lib/team/roster/staffStandardHoursRoutes.ts",
       "runtimeConsumers": [
-        "src/lib/workforce/staffHrTaskMapCore.ts",
+        "src/lib/team/access/staffHrTaskMapCore.ts",
         "src/lib/workforce/staffProfileHubCore.ts"
       ],
       "testConsumers": [
@@ -2253,181 +2253,6 @@
       "migrationRisk": "high"
     },
     {
-      "currentPath": "src/lib/workforce/staffAccessAccept.server.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessAccept.server.ts",
-      "runtimeConsumers": [
-        "src/components/fi/workforce/StaffAccessAcceptClient.tsx",
-        "src/lib/actions/workforce-staff-access-actions.ts"
-      ],
-      "testConsumers": [
-        "src/lib/workforce/staffAccessAccept.test.ts",
-        "src/lib/workforce/staffTenantLinkRepair.test.ts"
-      ],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessAccept.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessAccept.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members",
-        "fi_staff"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessAcceptCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessAcceptCore.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessCentre.server.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessCentre.server.ts",
-      "runtimeConsumers": [
-        "src/components/fi/workforce/StaffAccessCentreClient.tsx",
-        "src/lib/workforce/staffLeaveWorkflow.server.ts"
-      ],
-      "testConsumers": [
-        "src/lib/workforce/staffAccessAccept.test.ts"
-      ],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessCentreCore.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessCentreCore.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessCentreCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessCentreCore.ts",
-      "runtimeConsumers": [
-        "src/lib/team/access/projectStaffAccessEntry.ts",
-        "src/lib/team/profile/projectStaffProfileOverview.ts",
-        "src/lib/workforce/staffAccessAccept.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessInviteAudit.server.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessInviteAudit.server.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [
-        "src/lib/workforce/staffAccessAccept.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessInviteCore.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessInviteCore.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessInviteCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessInviteCore.ts",
-      "runtimeConsumers": [
-        "src/lib/workforce/staffAccessAccept.server.ts"
-      ],
-      "testConsumers": [
-        "src/lib/workforce/staffAccessAccept.test.ts",
-        "src/lib/workforce/staffTenantLinkRepair.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffAccessPinLayer.server.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffAccessPinLayer.server.ts",
-      "runtimeConsumers": [
-        "src/lib/workforce/staffAccessCentre.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff_members"
-      ],
-      "serverOnly": true,
-      "mutationBearing": true,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
       "currentPath": "src/lib/workforce/staffCanonicalDecision.server.ts",
       "proposedDomain": "identity",
       "proposeReason": "identity/lifecycle/readiness/reconciliation",
@@ -2564,64 +2389,6 @@
       "migrationRisk": "low"
     },
     {
-      "currentPath": "src/lib/workforce/staffHrTaskMapBannerCore.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "access task map (identity linkage UX)",
-      "proposedPath": "src/lib/team/access/staffHrTaskMapBannerCore.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffHrTaskMapBannerCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "access task map (identity linkage UX)",
-      "proposedPath": "src/lib/team/access/staffHrTaskMapBannerCore.ts",
-      "runtimeConsumers": [
-        "src/components/fi/workforce/StaffHrTaskMapClient.tsx"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffHrTaskMapCore.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "access task map (identity linkage UX)",
-      "proposedPath": "src/lib/team/access/staffHrTaskMapCore.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/workforce/staffHrTaskMapCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "access task map (identity linkage UX)",
-      "proposedPath": "src/lib/team/access/staffHrTaskMapCore.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
       "currentPath": "src/lib/workforce/staffLeaveWorkflow.server.test.ts",
       "proposedDomain": "roster",
       "proposeReason": "leave affects roster eligibility/availability",
@@ -2694,10 +2461,10 @@
       "proposedPath": "src/lib/team/shared/staffLifecycleCopy.ts",
       "runtimeConsumers": [
         "src/components/fi/staff/StaffDirectorySecondaryView.tsx",
-        "src/lib/workforce/staffHrTaskMapBannerCore.ts"
+        "src/lib/team/access/staffHrTaskMapBannerCore.ts"
       ],
       "testConsumers": [
-        "src/lib/workforce/staffHrTaskMapBannerCore.test.ts",
+        "src/lib/team/access/staffHrTaskMapBannerCore.test.ts",
         "src/lib/workforce/staffProfileHubCore.test.ts"
       ],
       "tablesReferenced": [],
@@ -2964,7 +2731,7 @@
         "src/lib/fiOs/fiOsPortalGate.server.ts",
         "src/lib/fiOs/fiOsRedirect.server.ts",
         "src/lib/onboarding-os/guidedAssist.server.ts",
-        "src/lib/workforce/staffAccessAccept.server.ts"
+        "src/lib/team/access/staffAccessAccept.server.ts"
       ],
       "testConsumers": [],
       "tablesReferenced": [
@@ -3357,59 +3124,6 @@
       "duplicateOf": null,
       "deletionReason": null,
       "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/workforce/workforceHrManageGate.server.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/workforceHrManageGate.server.ts",
-      "runtimeConsumers": [
-        "src/lib/actions/staff-time-clock-actions.ts",
-        "src/lib/actions/workforce-onboarding-actions.ts",
-        "src/lib/actions/workforce-phase-1c-sprint-2-actions.ts",
-        "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
-        "src/lib/actions/workforce-phase-1c-sprint-35-actions.ts",
-        "src/lib/actions/workforce-phase-2-sprint-1-actions.ts",
-        "src/lib/actions/workforce-phase-2-sprint-2-actions.ts",
-        "src/lib/actions/workforce-phase-2-sprint-4-actions.ts",
-        "src/lib/actions/workforce-phase-2-sprint-5-actions.ts",
-        "src/lib/actions/workforce-staff-access-actions.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/workforceHrManageGate.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/workforceHrManageGate.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/workforce/workforceHrManageGateCore.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/workforceHrManageGateCore.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
     },
     {
       "currentPath": "src/lib/workforce/workforceHrStaffSyncOrchestrator.server.ts",
@@ -4010,6 +3724,7 @@
         "src/lib/staff/staffTwinLoader.server.ts",
         "src/lib/staff/workforceCommandCentre.server.ts",
         "src/lib/staffPin/staffPinLoginLoader.server.ts",
+        "src/lib/team/access/staffAccessCentre.server.ts",
         "src/lib/team/commandCentre/loadTeamCommandCentre.server.ts",
         "src/lib/team/identity/workforceIdentityTenantOverview.server.ts",
         "src/lib/team/identity/workforceReadinessTenantOverview.server.ts",
@@ -4025,7 +3740,6 @@
         "src/lib/workforce-os/workforceRostering.server.ts",
         "src/lib/workforce/clinicalEligibility.server.ts",
         "src/lib/workforce/clinicalEligibilityGate.server.ts",
-        "src/lib/workforce/staffAccessCentre.server.ts",
         "src/lib/workforce/staffTenantLinkRepair.server.ts"
       ],
       "testConsumers": [
@@ -4174,36 +3888,6 @@
       "duplicateOf": null,
       "deletionReason": null,
       "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/staff/staffFiUserLinkPlan.test.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffFiUserLinkPlan.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/staff/staffFiUserLinkPlan.ts",
-      "proposedDomain": "access",
-      "proposeReason": "login/PIN/entitlement",
-      "proposedPath": "src/lib/team/access/staffFiUserLinkPlan.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
     },
     {
       "currentPath": "src/lib/staff/staffHrImportPage.server.ts",
@@ -4615,7 +4299,7 @@
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
-      "migrationRisk": "low"
+      "migrationRisk": "high"
     },
     {
       "currentPath": "src/lib/team/access/projectStaffAccessEntry.bridge.test.ts",
@@ -4660,6 +4344,291 @@
       "migrationRisk": "high"
     },
     {
+      "currentPath": "src/lib/team/access/server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/server.ts",
+      "runtimeConsumers": [
+        "src/lib/actions/staff-time-clock-actions.ts",
+        "src/lib/actions/workforce-onboarding-actions.ts",
+        "src/lib/actions/workforce-phase-1c-sprint-2-actions.ts",
+        "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
+        "src/lib/actions/workforce-phase-1c-sprint-35-actions.ts",
+        "src/lib/actions/workforce-phase-2-sprint-1-actions.ts",
+        "src/lib/actions/workforce-phase-2-sprint-2-actions.ts",
+        "src/lib/actions/workforce-phase-2-sprint-4-actions.ts",
+        "src/lib/actions/workforce-phase-2-sprint-5-actions.ts",
+        "src/lib/workforce/staffLeaveWorkflow.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessAccept.server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessAccept.server.ts",
+      "runtimeConsumers": [
+        "src/components/fi/workforce/StaffAccessAcceptClient.tsx"
+      ],
+      "testConsumers": [
+        "src/lib/team/access/staffAccessAccept.test.ts",
+        "src/lib/workforce/staffTenantLinkRepair.test.ts"
+      ],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessAccept.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessAccept.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members",
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessAcceptCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessAcceptCore.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessCentre.server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessCentre.server.ts",
+      "runtimeConsumers": [
+        "src/components/fi/workforce/StaffAccessCentreClient.tsx"
+      ],
+      "testConsumers": [
+        "src/lib/team/access/staffAccessAccept.test.ts"
+      ],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessCentreCore.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessCentreCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessCentreCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessCentreCore.ts",
+      "runtimeConsumers": [
+        "src/lib/team/access/projectStaffAccessEntry.ts",
+        "src/lib/team/access/staffAccessAccept.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessInviteAudit.server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessInviteAudit.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [
+        "src/lib/team/access/staffAccessAccept.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessInviteCore.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessInviteCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessInviteCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessInviteCore.ts",
+      "runtimeConsumers": [
+        "src/lib/team/access/staffAccessAccept.server.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/access/staffAccessAccept.test.ts",
+        "src/lib/workforce/staffTenantLinkRepair.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffAccessPinLayer.server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffAccessPinLayer.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/access/staffAccessCentre.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff_members"
+      ],
+      "serverOnly": true,
+      "mutationBearing": true,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffFiUserLinkPlan.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffFiUserLinkPlan.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffFiUserLinkPlan.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffFiUserLinkPlan.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffHrTaskMapBannerCore.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffHrTaskMapBannerCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffHrTaskMapBannerCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffHrTaskMapBannerCore.ts",
+      "runtimeConsumers": [
+        "src/components/fi/workforce/StaffHrTaskMapClient.tsx"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffHrTaskMapCore.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffHrTaskMapCore.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/access/staffHrTaskMapCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/staffHrTaskMapCore.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
       "currentPath": "src/lib/team/access/toStaffAccessCentreRow.ts",
       "proposedDomain": "access",
       "proposeReason": "canonical team/access module",
@@ -4687,6 +4656,48 @@
         "src/lib/team/profile/staffProfileAttentionReasons.ts",
         "src/lib/team/profile/types.ts"
       ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/workforceHrManageGate.server.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/workforceHrManageGate.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/workforceHrManageGate.test.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/workforceHrManageGate.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/access/workforceHrManageGateCore.ts",
+      "proposedDomain": "access",
+      "proposeReason": "canonical team/access module",
+      "proposedPath": "src/lib/team/access/workforceHrManageGateCore.ts",
+      "runtimeConsumers": [],
       "testConsumers": [],
       "tablesReferenced": [],
       "serverOnly": false,
@@ -5244,6 +5255,7 @@
         "src/lib/analytics-os/analyticsExecutive.server.ts",
         "src/lib/hr/hrStaffSyncHealthPage.server.ts",
         "src/lib/staff/staffDirectoryLoader.server.ts",
+        "src/lib/team/access/staffAccessCentre.server.ts",
         "src/lib/team/commandCentre/loadTeamCommandCentre.server.ts",
         "src/lib/team/payroll/loadPayrollStaffContext.server.ts",
         "src/lib/team/payroll/payrollIdentityMutationGate.server.ts",
@@ -5256,8 +5268,7 @@
         "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
         "src/lib/workforce/onboarding/onboardingPage.server.ts",
         "src/lib/workforce/procedureStaffingOptimizer.server.ts",
-        "src/lib/workforce/shiftCostIntelligence.server.ts",
-        "src/lib/workforce/staffAccessCentre.server.ts"
+        "src/lib/workforce/shiftCostIntelligence.server.ts"
       ],
       "testConsumers": [],
       "tablesReferenced": [],
@@ -5378,7 +5389,7 @@
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
-      "migrationRisk": "high"
+      "migrationRisk": "low"
     },
     {
       "currentPath": "src/lib/team/identity/staffIdentityIntegrity.test.ts",
@@ -5501,6 +5512,7 @@
         "src/components/fi/workforce/WorkforceOsDirectoryClient.tsx",
         "src/lib/staffImport/iiohrStaffDepartureAlignment.server.ts",
         "src/lib/staffImport/iiohrStaffDepartureCore.ts",
+        "src/lib/workforce-os/hrReconciliationFilterCore.ts",
         "src/lib/workforce-os/workforceRosterCommandCentre.server.ts",
         "src/lib/workforce/clinicalEligibility.server.ts",
         "src/lib/workforce/clinicalEligibilityCore.ts",
@@ -5512,7 +5524,7 @@
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
-      "migrationRisk": "medium"
+      "migrationRisk": "high"
     },
     {
       "currentPath": "src/lib/team/identity/staffLifecyclePresentation.test.ts",
@@ -5565,6 +5577,7 @@
         "src/lib/team/identity/types.ts",
         "src/lib/team/identity/workforceReadinessEngine.ts",
         "src/lib/workforce-os/hrReconciliation.server.ts",
+        "src/lib/workforce-os/hrReconciliationCandidateCore.ts",
         "src/lib/workforce-os/rosterEligibleStaffCore.ts",
         "src/lib/workforce-os/workforceOsDirectoryLoader.server.ts",
         "src/lib/workforce/clinicalEligibilityCore.ts",
@@ -5592,6 +5605,7 @@
       "proposedPath": "src/lib/team/identity/types.ts",
       "runtimeConsumers": [
         "src/lib/team/access/projectStaffAccessEntry.ts",
+        "src/lib/team/access/staffAccessCentre.server.ts",
         "src/lib/team/access/types.ts",
         "src/lib/team/commandCentre/commandCentreActionFlags.ts",
         "src/lib/team/commandCentre/composeAttentionQueue.ts",
@@ -5630,8 +5644,7 @@
         "src/lib/workforce-os/rosterIdentityMutationGate.server.ts",
         "src/lib/workforce/complianceIdentityMutationGate.server.ts",
         "src/lib/workforce/onboarding/onboardingInvitation.server.ts",
-        "src/lib/workforce/shiftCostIntelligence.server.ts",
-        "src/lib/workforce/staffAccessCentre.server.ts"
+        "src/lib/workforce/shiftCostIntelligence.server.ts"
       ],
       "testConsumers": [
         "src/lib/team/access/projectStaffAccessEntry.bridge.test.ts",
@@ -6587,10 +6600,17 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 150,
+    "interTreeEdgeCount": 153,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
+        "to": "src/lib/team/identity/staffLifecycleTypes.ts",
+        "fromTree": "src/lib/workforce-os",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/identity/staffLifecycleTypes"
+      },
+      {
+        "from": "src/lib/workforce-os/hrReconciliationCandidateCore.ts",
         "to": "src/lib/team/identity/staffLifecycleTypes.ts",
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
@@ -6602,6 +6622,13 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/identity/staffLifecycleTypes"
+      },
+      {
+        "from": "src/lib/workforce-os/hrReconciliationFilterCore.ts",
+        "to": "src/lib/team/identity/staffLifecycleCore.ts",
+        "fromTree": "src/lib/workforce-os",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/identity/staffLifecycleCore"
       },
       {
         "from": "src/lib/workforce-os/nexusFiStaffBridge.server.ts",
@@ -7150,34 +7177,6 @@
         "spec": "@/src/lib/team/identity/types"
       },
       {
-        "from": "src/lib/workforce/staffAccessCentre.server.ts",
-        "to": "src/lib/staff/staff.server.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "from": "src/lib/workforce/staffAccessCentre.server.ts",
-        "to": "src/lib/team/identity/server.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/server"
-      },
-      {
-        "from": "src/lib/workforce/staffAccessCentre.server.ts",
-        "to": "src/lib/team/identity/types.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/team",
-        "spec": "@/src/lib/team/identity/types"
-      },
-      {
-        "from": "src/lib/workforce/staffHrTaskMapCore.ts",
-        "to": "src/lib/workforce-os/staffStandardHoursRoutes.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/workforce-os",
-        "spec": "@/src/lib/workforce-os/staffStandardHoursRoutes"
-      },
-      {
         "from": "src/lib/workforce/staffLeaveWorkflow.server.test.ts",
         "to": "src/lib/workforce-os/workforceMutationErrorsCore.ts",
         "fromTree": "src/lib/workforce",
@@ -7190,6 +7189,13 @@
         "fromTree": "src/lib/workforce",
         "toTree": "src/lib/workforce-os",
         "spec": "@/src/lib/workforce-os/workforceRostering.server"
+      },
+      {
+        "from": "src/lib/workforce/staffLeaveWorkflow.server.ts",
+        "to": "src/lib/team/access/server.ts",
+        "fromTree": "src/lib/workforce",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "from": "src/lib/workforce/staffLeaveWorkflow.server.ts",
@@ -7311,6 +7317,20 @@
         "spec": "@/src/lib/team/identity/staffLifecycleCore"
       },
       {
+        "from": "src/lib/workforce/staffTenantLinkRepair.test.ts",
+        "to": "src/lib/team/access/staffAccessAccept.server.ts",
+        "fromTree": "src/lib/workforce",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/access/staffAccessAccept.server"
+      },
+      {
+        "from": "src/lib/workforce/staffTenantLinkRepair.test.ts",
+        "to": "src/lib/team/access/staffAccessInviteCore.ts",
+        "fromTree": "src/lib/workforce",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/access/staffAccessInviteCore"
+      },
+      {
         "from": "src/lib/workforce/surgicalWorkforceIntelligenceCore.test.ts",
         "to": "src/lib/workforce-os/workforceRosterCandidates.ts",
         "fromTree": "src/lib/workforce",
@@ -7330,13 +7350,6 @@
         "fromTree": "src/lib/workforce",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/commandCentre/loadTeamCommandCentre.server"
-      },
-      {
-        "from": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "to": "src/lib/workforce-os/resolveWorkforceActorFiUserId.server.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/workforce-os",
-        "spec": "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server"
       },
       {
         "from": "src/lib/workforce/workforcePhase2Sprint4.test.ts",
@@ -7388,18 +7401,46 @@
         "spec": "@/src/lib/team/identity/workforceReadinessBands"
       },
       {
-        "from": "src/lib/team/access/projectStaffAccessEntry.ts",
-        "to": "src/lib/workforce/staffAccessCentreCore.ts",
+        "from": "src/lib/team/access/staffAccessAccept.server.ts",
+        "to": "src/lib/workforce/staffTenantLinkRepair.server.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/workforce",
-        "spec": "@/src/lib/workforce/staffAccessCentreCore"
+        "spec": "@/src/lib/workforce/staffTenantLinkRepair.server"
       },
       {
-        "from": "src/lib/team/access/projectStaffAccessEntry.ts",
-        "to": "src/lib/workforce/staffAccessCentreCore.ts",
+        "from": "src/lib/team/access/staffAccessCentre.server.ts",
+        "to": "src/lib/staff/staff.server.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "from": "src/lib/team/access/staffHrTaskMapBannerCore.test.ts",
+        "to": "src/lib/workforce/staffLifecycleCopy.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/workforce",
-        "spec": "@/src/lib/workforce/staffAccessCentreCore"
+        "spec": "@/src/lib/workforce/staffLifecycleCopy"
+      },
+      {
+        "from": "src/lib/team/access/staffHrTaskMapBannerCore.ts",
+        "to": "src/lib/workforce/staffLifecycleCopy.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/workforce",
+        "spec": "@/src/lib/workforce/staffLifecycleCopy"
+      },
+      {
+        "from": "src/lib/team/access/staffHrTaskMapCore.ts",
+        "to": "src/lib/workforce-os/staffStandardHoursRoutes.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/workforce-os",
+        "spec": "@/src/lib/workforce-os/staffStandardHoursRoutes"
+      },
+      {
+        "from": "src/lib/team/access/workforceHrManageGate.server.ts",
+        "to": "src/lib/workforce-os/resolveWorkforceActorFiUserId.server.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/workforce-os",
+        "spec": "@/src/lib/workforce-os/resolveWorkforceActorFiUserId.server"
       },
       {
         "from": "src/lib/team/commandCentre/adaptCommandCentrePage.ts",
@@ -7626,13 +7667,6 @@
         "spec": "@/src/lib/workforce/onboarding/onboardingTypes"
       },
       {
-        "from": "src/lib/team/profile/projectStaffProfileOverview.ts",
-        "to": "src/lib/workforce/staffAccessCentreCore.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/workforce",
-        "spec": "@/src/lib/workforce/staffAccessCentreCore"
-      },
-      {
         "from": "src/lib/team/roster/rosterIdentityEligibilityBridge.ts",
         "to": "src/lib/workforce-os/rosterEligibleStaffCore.ts",
         "fromTree": "src/lib/team",
@@ -7740,16 +7774,6 @@
         "namedExports": 17
       },
       {
-        "file": "src/lib/workforce/staffAccessCentre.server.ts",
-        "exportStar": 0,
-        "namedExports": 12
-      },
-      {
-        "file": "src/lib/workforce/staffAccessCentreCore.ts",
-        "exportStar": 0,
-        "namedExports": 14
-      },
-      {
         "file": "src/lib/workforce/staffLeaveWorkflowCore.ts",
         "exportStar": 0,
         "namedExports": 16
@@ -7853,6 +7877,16 @@
         "file": "src/lib/staff/workforceCommandCentre.ts",
         "exportStar": 0,
         "namedExports": 18
+      },
+      {
+        "file": "src/lib/team/access/staffAccessCentre.server.ts",
+        "exportStar": 0,
+        "namedExports": 12
+      },
+      {
+        "file": "src/lib/team/access/staffAccessCentreCore.ts",
+        "exportStar": 0,
+        "namedExports": 14
       },
       {
         "file": "src/lib/team/commandCentre/types.ts",
@@ -7988,16 +8022,16 @@
       },
       {
         "client": "src/components/fi/workforce/StaffAccessAcceptClient.tsx",
-        "serverModule": "src/lib/workforce/staffAccessAccept.server.ts",
-        "spec": "@/src/lib/workforce/staffAccessAccept.server"
+        "serverModule": "src/lib/team/access/staffAccessAccept.server.ts",
+        "spec": "@/src/lib/team/access/staffAccessAccept.server"
       },
       {
         "client": "src/components/fi/workforce/StaffAccessCentreClient.tsx",
-        "serverModule": "src/lib/workforce/staffAccessCentre.server.ts",
-        "spec": "@/src/lib/workforce/staffAccessCentre.server"
+        "serverModule": "src/lib/team/access/staffAccessCentre.server.ts",
+        "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 253,
+    "deepImportViolationCount": 251,
     "deepImportViolationsSample": [
       {
         "consumer": "src/components/calendar-os/CalendarOsDayResourceView.tsx",
@@ -8451,18 +8485,18 @@
       },
       {
         "consumer": "src/components/fi/workforce/StaffAccessAcceptClient.tsx",
-        "target": "src/lib/workforce/staffAccessAccept.server.ts",
-        "spec": "@/src/lib/workforce/staffAccessAccept.server"
+        "target": "src/lib/team/access/staffAccessAccept.server.ts",
+        "spec": "@/src/lib/team/access/staffAccessAccept.server"
       },
       {
         "consumer": "src/components/fi/workforce/StaffAccessCentreClient.tsx",
-        "target": "src/lib/workforce/staffAccessCentre.server.ts",
-        "spec": "@/src/lib/workforce/staffAccessCentre.server"
+        "target": "src/lib/team/access/staffAccessCentre.server.ts",
+        "spec": "@/src/lib/team/access/staffAccessCentre.server"
       },
       {
         "consumer": "src/components/fi/workforce/StaffHrTaskMapClient.tsx",
-        "target": "src/lib/workforce/staffHrTaskMapBannerCore.ts",
-        "spec": "@/src/lib/workforce/staffHrTaskMapBannerCore"
+        "target": "src/lib/team/access/staffHrTaskMapBannerCore.ts",
+        "spec": "@/src/lib/team/access/staffHrTaskMapBannerCore"
       },
       {
         "consumer": "src/components/fi/workforce/StaffLifecycleModals.tsx",
@@ -8626,13 +8660,13 @@
       },
       {
         "consumer": "src/lib/actions/staff-time-clock-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
@@ -8666,8 +8700,8 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-2-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
@@ -8676,8 +8710,8 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
@@ -8696,13 +8730,13 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-1c-sprint-35-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-1-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-2-actions.ts",
@@ -8711,8 +8745,8 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-2-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-4-actions.ts",
@@ -8721,8 +8755,8 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-4-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-5-actions.ts",
@@ -8731,8 +8765,8 @@
       },
       {
         "consumer": "src/lib/actions/workforce-phase-2-sprint-5-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
+        "target": "src/lib/team/access/server.ts",
+        "spec": "@/src/lib/team/access/server"
       },
       {
         "consumer": "src/lib/actions/workforce-roster-actions.ts",
@@ -8768,16 +8802,6 @@
         "consumer": "src/lib/actions/workforce-roster-cadence-actions.ts",
         "target": "src/lib/workforce/rosterCadencePolicyCore.ts",
         "spec": "@/src/lib/workforce/rosterCadencePolicyCore"
-      },
-      {
-        "consumer": "src/lib/actions/workforce-staff-access-actions.ts",
-        "target": "src/lib/workforce/workforceHrManageGate.server.ts",
-        "spec": "@/src/lib/workforce/workforceHrManageGate.server"
-      },
-      {
-        "consumer": "src/lib/actions/workforce-staff-access-actions.ts",
-        "target": "src/lib/workforce/staffAccessAccept.server.ts",
-        "spec": "@/src/lib/workforce/staffAccessAccept.server"
       },
       {
         "consumer": "src/lib/analytics-os/analyticsExecutive.server.ts",
@@ -8998,11 +9022,21 @@
         "consumer": "src/lib/clinicOs/tomorrowBoardLoader.server.ts",
         "target": "src/lib/workforce-os/clinicalStaffingSummary.types.ts",
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
+      },
+      {
+        "consumer": "src/lib/clinicOs/tomorrowBoardLoader.server.ts",
+        "target": "src/lib/workforce-os/workforceEventAssignmentBridge.server.ts",
+        "spec": "@/src/lib/workforce-os/workforceEventAssignmentBridge.server"
+      },
+      {
+        "consumer": "src/lib/clinicSetup/clinicBookingSetupAutoFix.server.ts",
+        "target": "src/lib/staff/clinicalStaffPicker.ts",
+        "spec": "@/src/lib/staff/clinicalStaffPicker"
       }
     ],
     "externalIntoTreeCounts": {
       "workforce-os": 49,
-      "workforce": 68,
+      "workforce": 54,
       "staff": 126
     },
     "externalIntoTree": {
@@ -9282,24 +9316,8 @@
           "target": "src/lib/workforce/rosterCadencePolicyCore.ts"
         },
         {
-          "consumer": "src/components/fi/workforce/StaffAccessAcceptClient.tsx",
-          "target": "src/lib/workforce/staffAccessAccept.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-staff-access-actions.ts",
-          "target": "src/lib/workforce/staffAccessAccept.server.ts"
-        },
-        {
-          "consumer": "src/components/fi/workforce/StaffAccessCentreClient.tsx",
-          "target": "src/lib/workforce/staffAccessCentre.server.ts"
-        },
-        {
           "consumer": "src/lib/staffImport/iiohrStaffDepartureAlignment.server.ts",
           "target": "src/lib/workforce/staffDepartureSideEffects.server.ts"
-        },
-        {
-          "consumer": "src/components/fi/workforce/StaffHrTaskMapClient.tsx",
-          "target": "src/lib/workforce/staffHrTaskMapBannerCore.ts"
         },
         {
           "consumer": "src/components/fi/workforce/StaffLifecycleModals.tsx",
@@ -9420,46 +9438,6 @@
         {
           "consumer": "src/components/fi-admin/workforce/WorkforceCommandCentreClient.tsx",
           "target": "src/lib/workforce/workforceCommandCentrePage.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/staff-time-clock-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-onboarding-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-1c-sprint-2-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-1c-sprint-3-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-1c-sprint-35-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-2-sprint-1-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-2-sprint-2-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-2-sprint-4-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-phase-2-sprint-5-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
-        },
-        {
-          "consumer": "src/lib/actions/workforce-staff-access-actions.ts",
-          "target": "src/lib/workforce/workforceHrManageGate.server.ts"
         },
         {
           "consumer": "src/components/fi-admin/workforce/WorkforceCommandCentreClient.tsx",
@@ -10031,28 +10009,28 @@
         "fi_staff_members": 73
       },
       "src/lib/workforce": {
-        "fi_staff": 33,
-        "fi_staff_members": 64
+        "fi_staff": 29,
+        "fi_staff_members": 49
+      },
+      "src/lib/team": {
+        "fi_staff": 17,
+        "fi_staff_members": 34
       },
       "src/lib/workforce-os": {
         "fi_staff": 14,
         "fi_staff_members": 21
       },
-      "src/lib/team": {
-        "fi_staff": 12,
-        "fi_staff_members": 19
-      },
       "src/lib/staffImport": {
         "fi_staff": 19,
         "fi_staff_members": 11
       },
-      "src/lib/staff": {
-        "fi_staff": 22,
-        "fi_staff_members": 0
-      },
       "src/lib/fiOs": {
         "fi_staff": 12,
         "fi_staff_members": 9
+      },
+      "src/lib/staff": {
+        "fi_staff": 21,
+        "fi_staff_members": 0
       },
       "src/components": {
         "fi_staff": 18,
@@ -10859,12 +10837,6 @@
         "classification": "scheduling read"
       },
       {
-        "file": "src/lib/staff/staffFiUserLinkPlan.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "scheduling read"
-      },
-      {
         "file": "src/lib/staff/staffProfileExtras.ts",
         "table": "fi_staff",
         "count": 1,
@@ -11007,6 +10979,48 @@
         "table": "fi_staff",
         "count": 1,
         "classification": "cross-domain join"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessAccept.server.ts",
+        "table": "fi_staff_members",
+        "count": 2,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessAccept.test.ts",
+        "table": "fi_staff",
+        "count": 3,
+        "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessAccept.test.ts",
+        "table": "fi_staff_members",
+        "count": 6,
+        "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessAcceptCore.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessCentre.server.ts",
+        "table": "fi_staff_members",
+        "count": 6,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/access/staffAccessPinLayer.server.ts",
+        "table": "fi_staff_members",
+        "count": 1,
+        "classification": "lifecycle read"
+      },
+      {
+        "file": "src/lib/team/access/staffFiUserLinkPlan.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
       },
       {
         "file": "src/lib/team/commandCentre/loadTeamCommandCentre.server.ts",
@@ -11217,42 +11231,6 @@
         "table": "fi_staff_members",
         "count": 1,
         "classification": "reporting"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessAccept.server.ts",
-        "table": "fi_staff_members",
-        "count": 2,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessAccept.test.ts",
-        "table": "fi_staff",
-        "count": 3,
-        "classification": "test or fixture"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessAccept.test.ts",
-        "table": "fi_staff_members",
-        "count": 6,
-        "classification": "test or fixture"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessAcceptCore.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "scheduling read"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessCentre.server.ts",
-        "table": "fi_staff_members",
-        "count": 6,
-        "classification": "lifecycle read"
-      },
-      {
-        "file": "src/lib/workforce/staffAccessPinLayer.server.ts",
-        "table": "fi_staff_members",
-        "count": 1,
-        "classification": "lifecycle read"
       },
       {
         "file": "src/lib/workforce/staffLeaveWorkflow.server.test.ts",

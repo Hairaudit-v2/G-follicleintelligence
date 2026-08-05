@@ -4,7 +4,7 @@ import test from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { acceptStaffAccessInvitation } from "@/src/lib/workforce/staffAccessAccept.server";
+import { acceptStaffAccessInvitation } from "@/src/lib/team/access/staffAccessAccept.server";
 import {
   blocksStaffAccessLoginForEmploymentStatus,
   extractTenantIdFromFiAdminPath,
@@ -20,7 +20,7 @@ import {
   repairStaffTenantLinkFromInvitation,
   repairStaffTenantLinkOnAuthConfirm,
 } from "@/src/lib/workforce/staffTenantLinkRepair.server";
-import { hashStaffAccessInviteToken } from "@/src/lib/workforce/staffAccessInviteCore";
+import { hashStaffAccessInviteToken } from "@/src/lib/team/access/staffAccessInviteCore";
 
 const DEMO_TENANT = "11111111-1111-4111-8111-111111111111";
 const EVOLVED_TENANT = "22222222-2222-4222-8222-222222222222";

@@ -11,7 +11,7 @@ import {
 import { manuallyLinkStaffIdentity } from "@/src/lib/workforce/staffReconciliationPage.server";
 import { mergeStaffRecords } from "@/src/lib/workforce/staffMerge.server";
 import { offboardStaffMember } from "@/src/lib/workforce/staffOffboarding.server";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

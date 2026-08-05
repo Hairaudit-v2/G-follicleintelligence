@@ -6,8 +6,8 @@
  * uncertain identity targets only suppress destructive UI flags.
  */
 
-import { isDepartedStaff } from "@/src/lib/workforce/staffAccessCentreCore";
-import type { StaffAuthLoginStatus } from "@/src/lib/workforce/staffAccessCentreCore";
+import { isDepartedStaff } from "@/src/lib/team/access/staffAccessCentreCore";
+import type { StaffAuthLoginStatus } from "@/src/lib/team/access/staffAccessCentreCore";
 import type { StaffIdentity } from "@/src/lib/team/identity/types";
 import type {
   StaffAccessAttentionReason,

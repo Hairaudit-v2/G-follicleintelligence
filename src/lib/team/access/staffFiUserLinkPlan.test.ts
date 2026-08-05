@@ -6,7 +6,7 @@ import {
   listUnlinkedStaffWithEmail,
   normalizeStaffLinkEmail,
   planStaffFiUserLinks,
-} from "@/src/lib/staff/staffFiUserLinkPlan";
+} from "@/src/lib/team/access/staffFiUserLinkPlan";
 
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TENANT_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";

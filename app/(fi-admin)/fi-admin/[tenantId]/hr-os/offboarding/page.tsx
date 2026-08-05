@@ -5,7 +5,7 @@ import { OffboardingCentreClient } from "@/src/components/fi-admin/hr/Offboardin
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { loadOffboardingPageModel } from "@/src/lib/workforce/offboardingPage.server";
-import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { WORKFORCE_HR_MANAGE_ROLES } from "@/src/lib/team/access";
 
 export const metadata = {
   title: "Offboarding · Team",

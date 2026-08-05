@@ -57,7 +57,7 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - `workforce/identityReconciliation*`, `staffCanonicalDecision*`
 - `workforce/staffTenantLinkRepair.server.ts` — explicit dual-table repair boundary (allowlisted)
 - `staff/staff.server.ts` (fi_staff CRUD — eventually)
-- `staff/staffFiUserLink*` (link plan; invite execution remains access)
+- `staff/staffFiUserLink.server.ts` (link **execution**; pure plan moved to `team/access` in B2.2b)
 
 ---
 
@@ -73,9 +73,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 **Seed modules**
 
-- `staff/staffDirectoryLoader.server.ts`, `staffDirectoryFilters.ts`
-- `workforce-os/workforceOsDirectoryLoader.server.ts`
-- `staff/clinicalStaffPicker*`, `calendarVisibleStaff*`, `staffAssigneeDisplay.ts`
+- `team/directory/*` loaders / filters / calendar visibility (**canonical**, B2.2a)
+- Deferred hot cluster: `clinicalStaffPicker.ts`, HR notification / role-hours surfaces (B2.2d)
 
 ---
 
@@ -113,13 +112,22 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 **Owns**
 
-- User linkage execution for login
-- Login invitations
+- User linkage **plan** (`staffFiUserLinkPlan`) and login invite / PIN **execution**
+- Login invitations (not hire/onboarding invitations)
 - Access PIN setup / reset
 - Suspend and revoke
 - Entitlement and HR manage gates
+- Access-centre loaders / projections and HR task-map composition
 
-**Does not own** employment termination (identity/offboarding).
+**Canonical home (B2.2b)**
+
+- `src/lib/team/access` — pure cores, task map, fi-user link plan
+- `src/lib/team/access/server` — centre loader, accept/PIN mutations, manage gate, audit helpers
+
+**Does not own** employment termination (identity/offboarding).  
+**Does not absorb** `staffTenantLinkRepair.server.ts` — access may call it; repair stays the explicit dual-table boundary.
+
+**Deferred:** `staff/staffFiUserLink.server.ts` (execution still outside access until a later slice); B3 action file renames.
 
 ---
 

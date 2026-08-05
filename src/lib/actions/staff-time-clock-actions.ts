@@ -13,7 +13,7 @@ import {
 import { isPayPeriodFrequency } from "@/src/lib/workforce/payPeriodCore";
 import { saveWorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicy.server";
 import type { WorkforceTimeClockPolicy } from "@/src/lib/workforce/staffTimeClockPolicyCore";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

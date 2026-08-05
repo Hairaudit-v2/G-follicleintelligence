@@ -11,13 +11,13 @@ export {
   WORKFORCE_HR_MANAGE_ROLES,
   workforceHrManageAllowedForRole,
   type WorkforceHrManageDecision,
-} from "@/src/lib/workforce/workforceHrManageGateCore";
+} from "@/src/lib/team/access/workforceHrManageGateCore";
 
 import {
   WORKFORCE_HR_MANAGE_DENIED_MESSAGE,
   workforceHrManageAllowedForRole,
   type WorkforceHrManageDecision,
-} from "@/src/lib/workforce/workforceHrManageGateCore";
+} from "@/src/lib/team/access/workforceHrManageGateCore";
 
 export async function resolveWorkforceHrManageCapability(
   tenantId: string

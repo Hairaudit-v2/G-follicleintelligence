@@ -9,7 +9,7 @@ import type { StaffWorkforceIntelligence } from "@/src/lib/staff/workforceComman
 import type {
   StaffAuthLoginStatus,
   StaffInviteStatus,
-} from "@/src/lib/workforce/staffAccessCentreCore";
+} from "@/src/lib/team/access/staffAccessCentreCore";
 
 export type StaffProfileIdentityAuditSnapshot = {
   workspaceProfileStatus: "ready" | "missing" | "ambiguous" | "unknown";

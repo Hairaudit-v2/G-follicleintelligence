@@ -12,7 +12,7 @@ import {
   updateStaffCredential,
 } from "@/src/lib/workforce/staffCredentials.server";
 import { runStaffComplianceAudit } from "@/src/lib/workforce/complianceAutomation.server";
-import { assertWorkforceHrManageAllowed } from "@/src/lib/workforce/workforceHrManageGate.server";
+import { assertWorkforceHrManageAllowed } from "@/src/lib/team/access/server";
 import { STAFF_CREDENTIAL_TYPES } from "@/src/lib/workforce/workforceClinicalTypes";
 
 function errMsg(e: unknown): string {
