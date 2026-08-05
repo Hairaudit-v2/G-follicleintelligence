@@ -1,0 +1,170 @@
+# Follicle Intelligence — Cursor Automations (as-code)
+#
+# Loaded by the hourly Cursor Automation whose prompt is:
+#   "Load your cursor-automations.yaml"
+#
+# This file is the source of truth for what that runner does, and a catalog of
+# recommended Cursor Automations to configure at https://cursor.com/automations.
+#
+# Hard constraints (also in AI_RULES.md):
+# - Never modify migrations without approval
+# - Never touch authentication flows
+# - Never alter tenant isolation / RLS assumptions
+# - Never remove backwards compatibility
+# - Preserve financial audit trails; PaymentsOS stays idempotent
+# - Additive schema changes only
+# - Never break consultation pipeline
+# - No mock code in production; TypeScript strict only
+# - Medical workflows require audit logging
+
+version: 1
+project: follicle-intelligence
+repository: Hairaudit-v2/G-follicleintelligence
+updated: "2026-08-05"
+
+# ---------------------------------------------------------------------------
+# Runner — executed by the cron automation that loads this file
+# ---------------------------------------------------------------------------
+runner:
+  id: cursor-automations-config
+  cursor_automation_id: c764bf4f-9086-11f1-ba66-0e7d0216e441
+  schedule: "0 * * * *" # hourly (matches Cursor Automation trigger)
+  mode: maintain
+
+  instructions: |
+    You are the Follicle Intelligence Cursor Automations configuration runner.
+
+    1. Load and parse this file (`cursor-automations.yaml` at the repo root).
+    2. Consult automation memory. Prefer no-op when nothing material changed.
+    3. Validate this YAML remains well-formed and still documents the runner
+       plus the catalog entries below.
+    4. Only open a PR when you make a real, justified change (schema fix,
+       new approved catalog entry, or outdated instruction cleanup).
+    5. Do NOT invent product features, refactor app code, or "improve" unrelated
+       files. Scope is this configuration surface and tiny docs that point at it.
+    6. Never violate AI_RULES.md. Never commit secrets, tokens, or env values.
+    7. If the file is missing, recreate it from memory / last known good content
+       and open a PR — do not silently invent a different schema.
+    8. After a successful maintain pass with no code changes, write a short
+       memory note (timestamp + "healthy no-op") and exit.
+
+  safety:
+    allowed_paths:
+      - cursor-automations.yaml
+      - .cursor/automations/**
+      - docs/cursor-automations.md
+    forbidden_paths:
+      - supabase/migrations/**
+      - "**/.env*"
+      - "**/middleware.ts"
+      - src/lib/security/**
+      - lib/supabaseAdmin.ts
+    require_pr_for_changes: true
+    max_files_changed: 5
+
+# ---------------------------------------------------------------------------
+# Catalog — recommended Cursor Automations (configure in Cursor UI; prompts
+# here are the instruction bodies to paste / keep in sync)
+# ---------------------------------------------------------------------------
+catalog:
+  - id: config-runner
+    name: Cursor automations configuration
+    enabled_in_cursor: true
+    trigger:
+      type: cron
+      schedule: "0 * * * *"
+    tools:
+      - open_git_pr
+      - automation_memory
+    repository: Hairaudit-v2/G-follicleintelligence
+    prompt: |
+      Load your cursor-automations.yaml
+    notes: >
+      Meta-runner. Prompt stays one line; all behavior lives in this YAML.
+
+  - id: pr-bug-sweep
+    name: PR bug sweep
+    enabled_in_cursor: false
+    trigger:
+      type: github
+      events:
+        - pull_request_opened
+        - pull_request_pushed
+    tools:
+      - comment_on_pull_request
+      - automation_memory
+    repository: Hairaudit-v2/G-follicleintelligence
+    prompt: |
+      Review the changed files on this pull request for real bugs and regressions.
+
+      Focus on:
+      - Tenant isolation / accidental cross-tenant reads or writes
+      - Broken consultation, booking, CRM, or payment paths
+      - Missing auth/gate checks on new API routes or server actions
+      - Idempotency breaks in PaymentsOS / cron / webhook handlers
+      - TypeScript strictness escapes (as any, unsafe casts) introduced by the diff
+
+      Rules:
+      - Comment only on issues with concrete evidence in the diff
+      - Prefer inline comments on the relevant lines
+      - Do not request changes for style nits or speculative refactors
+      - Never suggest weakening RLS, auth, or cron secret checks
+      - Read AI_RULES.md and honor every constraint
+
+  - id: ci-failure-triage
+    name: CI failure triage
+    enabled_in_cursor: false
+    trigger:
+      type: github
+      events:
+        - ci_completed
+      when: failure
+    tools:
+      - open_git_pr
+      - comment_on_pull_request
+      - automation_memory
+    repository: Hairaudit-v2/G-follicleintelligence
+    prompt: |
+      A CI check failed. Inspect the failing workflow logs and the related diff.
+
+      - Identify the root cause from logs (not guesses)
+      - Propose the smallest safe fix
+      - Do not modify tests solely to make them pass
+      - Do not touch supabase/migrations, auth flows, or tenant isolation
+      - If the failure is flaky infrastructure with no code fix, comment that
+        finding and stop — do not open a noisy PR
+      - If you have a verified fix, open a focused PR
+
+  - id: daily-health-digest
+    name: Daily codebase health digest
+    enabled_in_cursor: false
+    trigger:
+      type: cron
+      schedule: "0 7 * * 1-5" # weekdays 07:00 UTC
+    tools:
+      - automation_memory
+      - open_git_pr
+    repository: Hairaudit-v2/G-follicleintelligence
+    prompt: |
+      Produce a concise weekday health pass for Follicle Intelligence.
+
+      Check (read-only unless a tiny doc fix is clearly warranted):
+      - Whether cursor-automations.yaml is present and valid
+      - Recent main commits for obvious risk areas (auth, RLS, payments, cron)
+      - Open PRs that look stalled or conflicting with AI_RULES.md
+
+      Output:
+      - Write findings to automation memory under health-digest.md
+      - Only open a PR for documentation/config fixes inside allowed runner paths
+      - No product feature work
+
+# ---------------------------------------------------------------------------
+# Sync checklist — keep Cursor UI and this file aligned
+# ---------------------------------------------------------------------------
+sync:
+  instructions: |
+    When enabling a catalog entry in the Cursor Automations UI:
+    1. Set enabled_in_cursor: true for that entry in this file
+    2. Keep the UI prompt identical to the prompt field here
+    3. Match trigger schedule / events and enabled tools
+    4. Open a PR for the YAML update via the config-runner
