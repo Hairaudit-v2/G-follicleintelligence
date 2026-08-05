@@ -46,6 +46,11 @@ export type {
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import {
+  resolveCalendarAppointmentCapabilities,
+  serializeCalendarCapabilities,
+} from "@/src/lib/calendar/calendarAppointmentCapabilities";
+import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
+import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
 } from "@/src/lib/staff/staffWeeklyHours";
@@ -592,11 +597,51 @@ function buildSetupRecommendations(input: {
 async function resolveBookingMutationGate(tenantId: string): Promise<{
   canMutateBookings: boolean;
   bookingMutationBlockedReason: string | null;
+  calendarCapabilities: ReturnType<typeof serializeCalendarCapabilities>;
+  googleWritebackReady: boolean;
 }> {
   const access = await resolveDevelopmentClinicAccessForTenant(tenantId);
+  const tid = tenantId.trim();
+
+  let googleWritebackReady = false;
+  try {
+    const { data } = await supabaseAdmin()
+      .from("fi_calendar_integrations")
+      .select("status, access_token_encrypted")
+      .eq("tenant_id", tid)
+      .neq("status", "disconnected")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const row = data as { status: string; access_token_encrypted: string | null } | null;
+    googleWritebackReady = Boolean(
+      row?.access_token_encrypted?.trim() && row.status !== "disconnected"
+    );
+  } catch {
+    googleWritebackReady = false;
+  }
+
+  const elevated =
+    access.allowed &&
+    (isFiOsElevatedOsOperatorRole(access.fiUserRole) ||
+      ["fi_admin", "admin", "owner", "operations_admin", "clinic_admin", "manager"].includes(
+        String(access.fiUserRole ?? "")
+          .trim()
+          .toLowerCase()
+      ));
+
+  const caps = resolveCalendarAppointmentCapabilities({
+    canView: true,
+    canMutateBookings: access.allowed,
+    googleWritebackReady,
+    isElevatedOperator: Boolean(elevated),
+  });
+
   return {
     canMutateBookings: access.allowed,
     bookingMutationBlockedReason: access.blockedReason,
+    calendarCapabilities: serializeCalendarCapabilities(caps),
+    googleWritebackReady,
   };
 }
 
@@ -1058,6 +1103,8 @@ export async function loadOperationalCalendarGridData(
     gridConfig: calendarSettings.gridConfig,
     canMutateBookings: mutationGate.canMutateBookings,
     bookingMutationBlockedReason: mutationGate.bookingMutationBlockedReason,
+    calendarCapabilities: mutationGate.calendarCapabilities,
+    googleWritebackReady: mutationGate.googleWritebackReady,
     calendarV2Enabled,
     loadTier: "full",
   };

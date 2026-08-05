@@ -43,6 +43,21 @@ export type OperationalCalendarBookingDisplay = {
   /** Diagnostic-only — shown in read-only event drawer, not on grid chips. */
   calendarOsExternalEventId?: string | null;
   calendarOsStatus?: string | null;
+  /** FI-CALENDAR-WRITEBACK-1A — explicit event classification for drawer + DnD. */
+  calendarEventClassification?:
+    | "fios_native"
+    | "google_linked_fios"
+    | "google_external_unlinked"
+    | "calendaros_test"
+    | "blocked_or_unsupported"
+    | null;
+  /** Original Google / external title when patient is not linked. */
+  calendarOsExternalTitle?: string | null;
+  calendarOsGoogleHtmlLink?: string | null;
+  calendarOsWritebackStatus?: string | null;
+  calendarOsFiosAppointmentId?: string | null;
+  /** True when clinical event has no patient/lead link. */
+  patientNotLinked?: boolean;
 };
 
 export type OperationalCalendarResourceColumn = {
@@ -90,6 +105,10 @@ export type OperationalCalendarPageData = {
    * Shown next to the calendar “Read-only” badge so operators know what to fix.
    */
   bookingMutationBlockedReason: string | null;
+  /** FI-CALENDAR-WRITEBACK-1A — fine-grained calendar capabilities. */
+  calendarCapabilities?: import("@/src/lib/calendar/calendarAppointmentCapabilities").CalendarAppointmentCapability[];
+  /** Tenant Google integration is ready for outbound write-back. */
+  googleWritebackReady?: boolean;
   /** Serialized map for edit drawer + calendar hints. */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
   /** Tenant procedure catalog — durations, prices, colours for booking UI. */
@@ -136,5 +155,7 @@ export type OperationalCalendarGridPatch = Pick<
   | "loadTier"
   | "canMutateBookings"
   | "bookingMutationBlockedReason"
+  | "calendarCapabilities"
+  | "googleWritebackReady"
   | "calendarV2Enabled"
 >;

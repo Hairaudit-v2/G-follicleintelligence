@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, startTransition } from "react";
 
-import { rescheduleCalendarAppointmentRequest } from "@/lib/calendar/appointmentsApiClient";
+import { rescheduleCalendarAppointmentRequest, rescheduleCalendarOsEventRequest } from "@/lib/calendar/appointmentsApiClient";
 import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
 import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 import {
@@ -29,6 +29,13 @@ import type {
   OperationalCalendarPageData,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import { classifyBookingRow } from "@/src/lib/calendar/calendarEventClassification";
+import {
+  calendarCapabilitiesFromSerialized,
+  resolveCalendarAppointmentCapabilities,
+} from "@/src/lib/calendar/calendarAppointmentCapabilities";
+import { resolveBookingEditPolicy } from "@/src/lib/calendar/calendarEventEditPolicy";
 
 export type CalendarRescheduleMeta = {
   assignedUserId?: string | null;
@@ -244,6 +251,70 @@ export function useCalendarAppointments(
 
       if (isSampleBookingId(b.id)) {
         markPending(b.id, false);
+        return { ok: true };
+      }
+
+      // CalendarOS google_linked_fios — write back via CalendarOS PATCH (not fi_bookings).
+      if (isCalendarOsEventRow(b)) {
+        const classification = classifyBookingRow(b);
+        const caps = data.calendarCapabilities?.length
+          ? calendarCapabilitiesFromSerialized(data.calendarCapabilities)
+          : resolveCalendarAppointmentCapabilities({
+              canView: true,
+              canMutateBookings: data.canMutateBookings,
+              googleWritebackReady: data.googleWritebackReady !== false,
+              isElevatedOperator: false,
+            });
+        const policy = resolveBookingEditPolicy(b, caps, {
+          googleWritebackReady: data.googleWritebackReady !== false,
+        });
+        if (!policy.canDrag || classification !== "google_linked_fios") {
+          replaceBooking(b.id, snapshot);
+          markPending(b.id, false);
+          return {
+            ok: false,
+            error:
+              policy.readOnlyExplanation ??
+              "This event cannot be dragged from the production calendar.",
+          };
+        }
+
+        const osResult = await rescheduleCalendarOsEventRequest({
+          tenantId: data.tenantId,
+          eventId: b.id,
+          startAt: startIso,
+          endAt: endIso,
+          staffId: Object.prototype.hasOwnProperty.call(meta ?? {}, "assignedStaffId")
+            ? nextStaffId
+            : undefined,
+          clinicId: Object.prototype.hasOwnProperty.call(meta ?? {}, "clinicId")
+            ? nextClinicId
+            : undefined,
+          interactionSource: "calendar_drag",
+        });
+
+        markPending(b.id, false);
+
+        if (!osResult.ok) {
+          replaceBooking(b.id, snapshot);
+          return {
+            ok: false,
+            error: osResult.error,
+            isConflict: Boolean(osResult.isConflict),
+          };
+        }
+
+        replaceBooking(b.id, {
+          ...b,
+          ...patch,
+          metadata: {
+            ...nextMetadata,
+            writeback_status: osResult.writebackStatus,
+            ...(osResult.googleEtag ? { google_etag: osResult.googleEtag } : {}),
+          },
+          updated_at: new Date().toISOString(),
+        });
+        refresh();
         return { ok: true };
       }
 

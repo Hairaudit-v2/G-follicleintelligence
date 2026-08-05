@@ -23,6 +23,16 @@ import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import { classifyBookingRow } from "@/src/lib/calendar/calendarEventClassification";
+import {
+  calendarCapabilitiesFromSerialized,
+  resolveCalendarAppointmentCapabilities,
+  type CalendarAppointmentCapability,
+} from "@/src/lib/calendar/calendarAppointmentCapabilities";
+import {
+  resolveBookingEditPolicy,
+  calendarEventIsDraggable,
+} from "@/src/lib/calendar/calendarEventEditPolicy";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
 import {
   addUtcMinutesToIso,
@@ -57,6 +67,10 @@ export type AppointmentCardData = {
   calendarOsProvider?: "google" | "fi" | null;
   googleMeetUrl?: string | null;
   calendarOsEventTypeLabel?: string | null;
+  /** FI-CALENDAR-WRITEBACK-1A */
+  isExternalUnlinked?: boolean;
+  patientNotLinked?: boolean;
+  showGrabCursor?: boolean;
   /** CalendarOS v2 operational overlays */
   isSurgery?: boolean;
   riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
@@ -177,6 +191,8 @@ export function appointmentCardDataFromBooking(
     calendarOsProvider?: "google" | "fi" | null;
     googleMeetUrl?: string | null;
     calendarOsEventTypeLabel?: string | null;
+    calendarEventClassification?: string | null;
+    patientNotLinked?: boolean;
     operational?: {
       isSurgery?: boolean;
       riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
@@ -197,6 +213,13 @@ export function appointmentCardDataFromBooking(
     meta.zoom ??
     (typeof meta.google_meet_url === "string" && meta.google_meet_url)
   );
+  const classification =
+    display?.calendarEventClassification ??
+    (isCalendarOsEventRow(booking) ? classifyBookingRow(booking) : "fios_native");
+  const isExternalUnlinked = classification === "google_external_unlinked";
+  const patientNotLinked =
+    Boolean(display?.patientNotLinked) ||
+    (isCalendarOsEventRow(booking) && !booking.patient_id?.trim() && !booking.lead_id?.trim());
 
   return {
     id: booking.id,
@@ -224,6 +247,8 @@ export function appointmentCardDataFromBooking(
       (typeof meta.google_meet_url === "string" ? meta.google_meet_url.trim() : null) ||
       null,
     calendarOsEventTypeLabel: display?.calendarOsEventTypeLabel ?? null,
+    isExternalUnlinked,
+    patientNotLinked,
     isSurgery: display?.operational?.isSurgery ?? booking.booking_type.trim() === "surgery",
     riskStatus: display?.operational?.riskStatus,
     readinessPercent: display?.operational?.readinessPercent ?? null,
@@ -368,6 +393,34 @@ function CalendarOsSourceBadge({ label, compact }: { label: string; compact?: bo
   );
 }
 
+function ExternalEventBadge({ compact }: { compact?: boolean }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "shrink-0 border-violet-500/40 bg-violet-950/45 font-medium text-violet-100",
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      External
+    </Badge>
+  );
+}
+
+function PatientNotLinkedBadge({ compact }: { compact?: boolean }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "shrink-0 border-amber-500/40 bg-amber-950/45 font-medium text-amber-100",
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      Patient not linked
+    </Badge>
+  );
+}
+
 function GoogleMeetBadge({ meetUrl, compact }: { meetUrl: string; compact?: boolean }) {
   return (
     <a
@@ -426,6 +479,8 @@ function AppointmentCardInner({
   const isTerminal = dimTerminal && style.isTerminal;
 
   const canDrag = draggable && !isTerminal && !isDragPreview && !isPendingSave;
+  const readOnlyCursor =
+    !canDrag && (appointment.isExternalUnlinked || appointment.patientNotLinked);
   const canResize =
     resizable &&
     !isTerminal &&
@@ -527,6 +582,9 @@ function AppointmentCardInner({
         isTerminal && "opacity-55 saturate-[0.8]",
         isPendingSave && "opacity-80 ring-2 ring-amber-400/35",
         isHighlighted && "ring-2 ring-cyan-400/70 shadow-lg shadow-cyan-500/20",
+        appointment.isExternalUnlinked &&
+          "border-dashed border-violet-400/40 bg-violet-950/20 dark:bg-violet-950/30",
+        readOnlyCursor && "cursor-default",
         !layout && "w-full",
         className
       )}
@@ -766,6 +824,12 @@ function AppointmentCardInner({
                 {priceLabel ? (
                   <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} />
                 ) : null}
+                {appointment.isExternalUnlinked ? (
+                  <ExternalEventBadge compact={Boolean(layout || isMedium)} />
+                ) : null}
+                {appointment.patientNotLinked ? (
+                  <PatientNotLinkedBadge compact={Boolean(layout || isMedium)} />
+                ) : null}
                 {appointment.calendarOsSourceLabel ? (
                   <CalendarOsSourceBadge
                     label={appointment.calendarOsSourceLabel}
@@ -831,6 +895,8 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   isPendingSave,
   isHighlighted,
   calendarTimezone,
+  calendarCapabilities,
+  googleWritebackReady = true,
 }: {
   booking: FiBookingRow;
   display?: {
@@ -845,6 +911,8 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
     calendarOsProvider?: "google" | "fi" | null;
     googleMeetUrl?: string | null;
     calendarOsEventTypeLabel?: string | null;
+    calendarEventClassification?: string | null;
+    patientNotLinked?: boolean;
     operational?: {
       isSurgery?: boolean;
       riskStatus?: "ready" | "attention" | "at_risk" | "blocked";
@@ -869,18 +937,29 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   isPendingSave?: boolean;
   isHighlighted?: boolean;
   calendarTimezone?: string | null;
+  calendarCapabilities?: CalendarAppointmentCapability[];
+  googleWritebackReady?: boolean;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
   const dimTerminal = cancelled || booking.booking_status === "completed";
-  const readOnlyCalendarOs = isCalendarOsEventRow(booking);
+  const caps = calendarCapabilities?.length
+    ? calendarCapabilitiesFromSerialized(calendarCapabilities)
+    : resolveCalendarAppointmentCapabilities({
+        canView: true,
+        canMutateBookings: Boolean(draggable),
+        googleWritebackReady,
+        isElevatedOperator: false,
+      });
+  const policy = resolveBookingEditPolicy(booking, caps, { googleWritebackReady });
+  const allowDrag = calendarEventIsDraggable(policy);
 
   return (
     <AppointmentCard
       appointment={appointment}
       layout={layout}
-      draggable={draggable && !dimTerminal && !readOnlyCalendarOs}
-      resizable={resizable && !dimTerminal && !readOnlyCalendarOs}
+      draggable={Boolean(draggable) && !dimTerminal && allowDrag}
+      resizable={Boolean(resizable) && !dimTerminal && allowDrag}
       onResizeEnd={onResizeEnd}
       onClick={onClick}
       className={className}

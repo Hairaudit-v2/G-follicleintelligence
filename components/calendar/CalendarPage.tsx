@@ -30,7 +30,10 @@ import {
   CalendarQuickCreateDrawer,
   type CalendarQuickCreatePrefill,
 } from "@/src/components/fi/calendar/CalendarQuickCreateDrawer";
+import { CalendarQuickEditDrawer } from "@/src/components/fi/calendar/CalendarQuickEditDrawer";
 import { CalendarSlotContextMenu } from "@/src/components/fi/calendar/CalendarSlotContextMenu";
+import type { CalendarEventEditPolicy } from "@/src/lib/calendar/calendarEventEditPolicy";
+import { classifyBookingRow } from "@/src/lib/calendar/calendarEventClassification";
 import {
   calendarQuickTemplateById,
   type CalendarQuickTemplateId,
@@ -96,6 +99,10 @@ function CalendarPageImpl({
   const router = useRouter();
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
+  const [quickEdit, setQuickEdit] = useState<{
+    booking: FiBookingRow;
+    policy: CalendarEventEditPolicy;
+  } | null>(null);
   const [callInOpen, setCallInOpen] = useState(false);
   const [callInPrefill, setCallInPrefill] = useState<{
     localStart?: string;
@@ -726,10 +733,13 @@ function CalendarPageImpl({
         onClose={() => setDrawer(null)}
         onChanged={refresh}
         onEdit={(b) => setEditing(b)}
+        onQuickEdit={(b, policy) => setQuickEdit({ booking: b, policy })}
         variant={isFiOsWorkspace ? "fiOs" : "default"}
         patientSummary={drawer ? (data.bookingDisplay[drawer.id]?.anchorLabel ?? null) : null}
         staffDirectory={data.staffDirectory}
         canMutateBookings={data.canMutateBookings}
+        calendarCapabilities={data.calendarCapabilities}
+        googleWritebackReady={data.googleWritebackReady !== false}
         procedureLabel={
           drawer ? (data.bookingDisplay[drawer.id]?.procedureCatalogName ?? null) : null
         }
@@ -754,6 +764,27 @@ function CalendarPageImpl({
         calendarOsStatus={
           drawer ? (data.bookingDisplay[drawer.id]?.calendarOsStatus ?? null) : null
         }
+        calendarEventClassification={
+          drawer
+            ? (data.bookingDisplay[drawer.id]?.calendarEventClassification ??
+              classifyBookingRow(drawer))
+            : null
+        }
+        calendarOsExternalTitle={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsExternalTitle ?? null) : null
+        }
+        calendarOsGoogleHtmlLink={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsGoogleHtmlLink ?? null) : null
+        }
+        calendarOsWritebackStatus={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsWritebackStatus ?? null) : null
+        }
+        calendarOsFiosAppointmentId={
+          drawer ? (data.bookingDisplay[drawer.id]?.calendarOsFiosAppointmentId ?? null) : null
+        }
+        patientNotLinked={
+          drawer ? Boolean(data.bookingDisplay[drawer.id]?.patientNotLinked) : false
+        }
         operationalIntelligence={
           drawer ? (data.bookingDisplay[drawer.id]?.operational ?? null) : null
         }
@@ -762,6 +793,28 @@ function CalendarPageImpl({
           setDrawer(b);
         }}
       />
+
+      {quickEdit ? (
+        <CalendarQuickEditDrawer
+          tenantId={data.tenantId}
+          booking={quickEdit.booking}
+          policy={quickEdit.policy}
+          classification={
+            data.bookingDisplay[quickEdit.booking.id]?.calendarEventClassification ??
+            classifyBookingRow(quickEdit.booking)
+          }
+          clinics={data.clinics}
+          staffDirectory={data.staffDirectory}
+          calendarTimezone={data.calendarTimezone}
+          externalTitle={data.bookingDisplay[quickEdit.booking.id]?.calendarOsExternalTitle}
+          googleHtmlLink={data.bookingDisplay[quickEdit.booking.id]?.calendarOsGoogleHtmlLink}
+          fiosAppointmentId={data.bookingDisplay[quickEdit.booking.id]?.calendarOsFiosAppointmentId}
+          patientNotLinked={Boolean(data.bookingDisplay[quickEdit.booking.id]?.patientNotLinked)}
+          onClose={() => setQuickEdit(null)}
+          onSaved={refresh}
+          onOpenFull={(b) => setEditing(b)}
+        />
+      ) : null}
 
       <BookingEditDrawer
         tenantId={data.tenantId}

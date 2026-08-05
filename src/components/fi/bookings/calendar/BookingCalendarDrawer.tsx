@@ -21,6 +21,21 @@ import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/Clinic
 import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import {
+  calendarEventClassificationLabel,
+  classifyBookingRow,
+  PATIENT_NOT_LINKED_LABEL,
+  type CalendarEventClassification,
+} from "@/src/lib/calendar/calendarEventClassification";
+import {
+  resolveBookingEditPolicy,
+  type CalendarEventEditPolicy,
+} from "@/src/lib/calendar/calendarEventEditPolicy";
+import {
+  calendarCapabilitiesFromSerialized,
+  resolveCalendarAppointmentCapabilities,
+  type CalendarAppointmentCapability,
+} from "@/src/lib/calendar/calendarAppointmentCapabilities";
 import type { CalendarBookingIntelligence } from "@/src/lib/calendarIntelligence/calendarIntelligenceTypes";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
@@ -152,6 +167,15 @@ export function BookingCalendarDrawer({
   calendarOsExternalEventId,
   calendarOsStatus,
   operationalIntelligence,
+  calendarEventClassification,
+  calendarOsExternalTitle,
+  calendarOsGoogleHtmlLink,
+  calendarOsWritebackStatus,
+  calendarOsFiosAppointmentId,
+  patientNotLinked,
+  calendarCapabilities,
+  googleWritebackReady = true,
+  onQuickEdit,
 }: {
   tenantId: string;
   booking: FiBookingRow | null;
@@ -184,6 +208,15 @@ export function BookingCalendarDrawer({
   calendarOsStatus?: string | null;
   /** CalendarOS v2 — readiness, journey, blockers, next action. */
   operationalIntelligence?: CalendarBookingIntelligence | null;
+  calendarEventClassification?: CalendarEventClassification | null;
+  calendarOsExternalTitle?: string | null;
+  calendarOsGoogleHtmlLink?: string | null;
+  calendarOsWritebackStatus?: string | null;
+  calendarOsFiosAppointmentId?: string | null;
+  patientNotLinked?: boolean;
+  calendarCapabilities?: CalendarAppointmentCapability[];
+  googleWritebackReady?: boolean;
+  onQuickEdit?: (b: FiBookingRow, policy: CalendarEventEditPolicy) => void;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -208,6 +241,25 @@ export function BookingCalendarDrawer({
 
   const row = booking;
   const calendarOsEvent = isCalendarOsEventRow(row);
+  const classification =
+    calendarEventClassification ?? classifyBookingRow(row);
+  const caps = calendarCapabilities?.length
+    ? calendarCapabilitiesFromSerialized(calendarCapabilities)
+    : resolveCalendarAppointmentCapabilities({
+        canView: true,
+        canMutateBookings,
+        googleWritebackReady,
+        isElevatedOperator: false,
+      });
+  const editPolicy = resolveBookingEditPolicy(row, caps, {
+    googleWritebackReady,
+    googleHtmlLink: calendarOsGoogleHtmlLink,
+    fiosAppointmentId: calendarOsFiosAppointmentId,
+  });
+  const notLinked = Boolean(
+    patientNotLinked ||
+      (calendarOsEvent && !row.patient_id?.trim() && !row.lead_id?.trim())
+  );
 
   const cancelled = isBookingCancelled(row);
   const completed = row.booking_status === "completed";
@@ -229,7 +281,9 @@ export function BookingCalendarDrawer({
     calendarOsEventTypeLabel?.trim() ||
     procedureLabel?.trim() ||
     humanizeBookingType(row.booking_type);
-  const headerName = patientSummary?.trim() || row.title?.trim() || typeLabel;
+  const headerName = notLinked
+    ? PATIENT_NOT_LINKED_LABEL
+    : patientSummary?.trim() || row.title?.trim() || typeLabel;
   const locationLabel = row.location?.trim() || "—";
   const sourceLabel = calendarOsSourceLabel?.trim() || "—";
   const eventStatusLabel = calendarOsStatus?.trim() || row.booking_status;
@@ -380,10 +434,104 @@ export function BookingCalendarDrawer({
 
             <div className={cn(fiOsChromeClasses.rightDrawerBodyScroll, "px-3 py-3")}>
               {calendarOsEvent ? (
-                <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
-                  CalendarOS event — read-only in this phase. Edit in Google Calendar or the
-                  CalendarOS test panel.
-                </p>
+                <div className="mb-3 space-y-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="rounded border border-white/[0.1] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
+                      {calendarEventClassificationLabel(classification)}
+                    </span>
+                    {editPolicy.showExternalBadge ? (
+                      <span className="rounded border border-violet-500/35 bg-violet-950/40 px-1.5 py-0.5 text-[10px] font-medium text-violet-100">
+                        External
+                      </span>
+                    ) : null}
+                    {notLinked ? (
+                      <span className="rounded border border-amber-500/35 bg-amber-950/40 px-1.5 py-0.5 text-[10px] font-medium text-amber-100">
+                        Patient not linked
+                      </span>
+                    ) : null}
+                    {editPolicy.showSyncStatus && calendarOsWritebackStatus ? (
+                      <span className="rounded border border-sky-500/30 bg-sky-950/35 px-1.5 py-0.5 text-[10px] text-sky-100">
+                        Sync: {calendarOsWritebackStatus}
+                      </span>
+                    ) : null}
+                  </div>
+                  {calendarOsExternalTitle?.trim() ? (
+                    <p className="text-[11px] text-slate-400">
+                      External title: {calendarOsExternalTitle.trim()}
+                    </p>
+                  ) : null}
+                  {editPolicy.readOnlyExplanation ? (
+                    <p className="rounded-md border border-amber-500/20 bg-amber-950/30 px-2.5 py-2 text-[11px] leading-snug text-amber-100/90">
+                      {editPolicy.readOnlyExplanation}
+                    </p>
+                  ) : null}
+                  <div className="grid grid-cols-2 gap-2">
+                    {editPolicy.drawerActions.includes("quick_edit") && onQuickEdit ? (
+                      <button
+                        type="button"
+                        className={osActionClass}
+                        disabled={busy || !mut}
+                        onClick={() => {
+                          onQuickEdit(row, editPolicy);
+                          onClose();
+                        }}
+                      >
+                        Quick Edit
+                      </button>
+                    ) : null}
+                    {editPolicy.drawerActions.includes("open_full_appointment") ? (
+                      <button
+                        type="button"
+                        className={osActionClass}
+                        disabled={busy || !mut}
+                        onClick={() => {
+                          onEdit(row);
+                          onClose();
+                        }}
+                      >
+                        Open full appointment
+                      </button>
+                    ) : null}
+                    {editPolicy.drawerActions.includes("open_in_google_calendar") &&
+                    calendarOsGoogleHtmlLink ? (
+                      <a
+                        href={calendarOsGoogleHtmlLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={osActionClass}
+                      >
+                        Open in Google Calendar
+                      </a>
+                    ) : null}
+                    {editPolicy.drawerActions.includes("link_patient") && onQuickEdit ? (
+                      <button
+                        type="button"
+                        className={osActionClass}
+                        disabled={busy || !mut}
+                        onClick={() => {
+                          onQuickEdit(row, editPolicy);
+                          onClose();
+                        }}
+                      >
+                        Link patient
+                      </button>
+                    ) : null}
+                    {editPolicy.drawerActions.includes("convert_to_fios_appointment") &&
+                    onQuickEdit ? (
+                      <button
+                        type="button"
+                        className={osActionClass}
+                        disabled={busy || !mut}
+                        onClick={() => {
+                          onQuickEdit(row, editPolicy);
+                          onClose();
+                        }}
+                      >
+                        Convert to FiOS appointment
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
               ) : null}
 
               {!calendarOsEvent ? (
@@ -433,11 +581,27 @@ export function BookingCalendarDrawer({
                     disabled={busy || !canRescheduleOrComplete}
                     title={!mut ? "No booking edit permission" : undefined}
                     onClick={() => {
+                      if (onQuickEdit && editPolicy.canQuickEdit) {
+                        onQuickEdit(row, editPolicy);
+                      } else {
+                        onEdit(row);
+                      }
+                      onClose();
+                    }}
+                  >
+                    Quick Edit
+                  </button>
+                  <button
+                    type="button"
+                    className={osActionClass}
+                    disabled={busy || !canRescheduleOrComplete}
+                    title={!mut ? "No booking edit permission" : undefined}
+                    onClick={() => {
                       onEdit(row);
                       onClose();
                     }}
                   >
-                    Reschedule
+                    Open full appointment
                   </button>
                   <button
                     type="button"
@@ -741,10 +905,15 @@ export function BookingCalendarDrawer({
             <div className="space-y-4 p-4 text-sm text-slate-200">
               {calendarOsEvent ? (
                 <>
-                  <p className="rounded border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-200">
-                    CalendarOS event — read-only display. No edits from the calendar UI in this
-                    phase.
+                  <p className="rounded border border-slate-500/30 bg-slate-900/40 px-3 py-2 text-xs text-slate-200">
+                    {editPolicy.readOnlyExplanation ??
+                      `${calendarEventClassificationLabel(classification)} — manage from Quick Edit or linked actions below.`}
                   </p>
+                  {editPolicy.showExternalBadge ? (
+                    <p className="rounded border border-violet-500/30 bg-violet-950/30 px-3 py-2 text-xs text-violet-100">
+                      External event
+                    </p>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     <BookingTypeBadge type={row.booking_type} />
                     <BookingStatusBadge status={row.booking_status} />
@@ -753,6 +922,12 @@ export function BookingCalendarDrawer({
                     <p className="text-xs font-medium uppercase text-gray-500">Title</p>
                     <p className="mt-1 text-base font-medium text-slate-100">{headerName}</p>
                   </div>
+                  {calendarOsExternalTitle?.trim() ? (
+                    <div>
+                      <p className="text-xs font-medium uppercase text-gray-500">External title</p>
+                      <p className="mt-1">{calendarOsExternalTitle.trim()}</p>
+                    </div>
+                  ) : null}
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">When</p>
                     <p className="mt-1">{range}</p>
@@ -769,6 +944,10 @@ export function BookingCalendarDrawer({
                     <p className="text-xs font-medium uppercase text-gray-500">Source</p>
                     <p className="mt-1">{sourceLabel}</p>
                   </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Classification</p>
+                    <p className="mt-1">{calendarEventClassificationLabel(classification)}</p>
+                  </div>
                   {googleMeetUrl?.trim() ? (
                     <div>
                       <p className="text-xs font-medium uppercase text-gray-500">Google Meet</p>
@@ -784,6 +963,30 @@ export function BookingCalendarDrawer({
                       </p>
                     </div>
                   ) : null}
+                  <div className="flex flex-col gap-2">
+                    {editPolicy.drawerActions.includes("quick_edit") && onQuickEdit ? (
+                      <button
+                        type="button"
+                        className="rounded border border-white/[0.12] px-3 py-2 text-sm text-slate-100"
+                        onClick={() => {
+                          onQuickEdit(row, editPolicy);
+                          onClose();
+                        }}
+                      >
+                        Quick Edit
+                      </button>
+                    ) : null}
+                    {calendarOsGoogleHtmlLink ? (
+                      <a
+                        href={calendarOsGoogleHtmlLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded border border-white/[0.12] px-3 py-2 text-center text-sm text-slate-100"
+                      >
+                        Open in Google Calendar
+                      </a>
+                    ) : null}
+                  </div>
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">Linked</p>
                     <div className="mt-1">{anchorSummary(tenantId, row, variant)}</div>

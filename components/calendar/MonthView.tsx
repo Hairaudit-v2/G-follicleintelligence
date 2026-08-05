@@ -25,6 +25,11 @@ import {
   type AppointmentCardData,
 } from "@/components/calendar/AppointmentCard";
 import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import { resolveCalendarAppointmentCapabilities } from "@/src/lib/calendar/calendarAppointmentCapabilities";
+import {
+  resolveBookingEditPolicy,
+  calendarEventIsDraggable,
+} from "@/src/lib/calendar/calendarEventEditPolicy";
 import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
@@ -351,7 +356,13 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
 }) {
   const meta = booking.metadata ?? {};
   const isVirtual = Boolean(meta.is_virtual ?? meta.virtual ?? meta.zoom);
-  const readOnlyCalendarOs = isCalendarOsEventRow(booking);
+  const caps = resolveCalendarAppointmentCapabilities({
+    canView: true,
+    canMutateBookings: draggable,
+    googleWritebackReady: true,
+    isElevatedOperator: false,
+  });
+  const allowDrag = calendarEventIsDraggable(resolveBookingEditPolicy(booking, caps));
   const appointmentStyle = getAppointmentStyle({
     procedureType: booking.booking_type,
     status: booking.booking_status,
@@ -362,7 +373,7 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: booking.id,
-    disabled: !draggable || isPendingSave || readOnlyCalendarOs,
+    disabled: !draggable || isPendingSave || !allowDrag,
     data: {
       type: "appointment",
       appointment: appointmentCardDataFromBooking(booking, { anchorLabel: label }),
@@ -374,9 +385,7 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
       ref={setNodeRef}
       type="button"
       aria-busy={isPendingSave || undefined}
-      {...(draggable && !isPendingSave && !readOnlyCalendarOs
-        ? { ...listeners, ...attributes }
-        : {})}
+      {...(draggable && !isPendingSave && allowDrag ? { ...listeners, ...attributes } : {})}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -422,9 +431,16 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
         >
           {label}
         </span>
-        {readOnlyCalendarOs && meta.calendar_os_source_label ? (
+        {isCalendarOsEventRow(booking) && meta.calendar_os_source_label ? (
           <span className="ml-1 shrink-0 rounded border border-sky-500/30 px-1 text-[8px] font-semibold uppercase tracking-wide text-sky-300">
             {String(meta.calendar_os_source_label).includes("Google") ? "GCal" : "FI"}
+          </span>
+        ) : null}
+        {isCalendarOsEventRow(booking) &&
+        !booking.patient_id?.trim() &&
+        !booking.lead_id?.trim() ? (
+          <span className="ml-1 shrink-0 rounded border border-amber-500/30 px-1 text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+            Unlinked
           </span>
         ) : null}
       </span>

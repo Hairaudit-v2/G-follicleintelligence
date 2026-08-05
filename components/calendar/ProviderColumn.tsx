@@ -551,6 +551,8 @@ export function ProviderColumn({
                   calendarOsProvider: d?.calendarOsProvider,
                   googleMeetUrl: d?.googleMeetUrl,
                   calendarOsEventTypeLabel: d?.calendarOsEventTypeLabel,
+                  calendarEventClassification: d?.calendarEventClassification,
+                  patientNotLinked: d?.patientNotLinked,
                   operational: d?.operational
                     ? {
                         ...d.operational,
