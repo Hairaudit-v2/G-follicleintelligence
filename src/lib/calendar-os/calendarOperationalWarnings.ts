@@ -104,7 +104,7 @@ export function deriveCalendarOsBookingWarnings(input: {
   if (isBookingUnassignedForCalendarOs(booking)) {
     push({
       kind: "unassigned",
-      label: "Unassigned — no clinician",
+      label: "Clinician unassigned",
       severity: "warning",
     });
   }

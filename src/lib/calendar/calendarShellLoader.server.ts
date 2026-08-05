@@ -65,18 +65,14 @@ function resolveCalendarQueryFromShellSettings(
   return { query: withSettings, lanes, settingsRedirectHref };
 }
 
+import { buildUnassignedResourceColumn } from "@/src/lib/calendar/unassignedResourceColumn";
+
 function buildShellResourceColumns(
   resourceView: ParsedCalendarQuery["resourceView"]
 ): OperationalCalendarResourceColumn[] {
-  if (resourceView === "room") {
-    return [{ id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No room" }];
-  }
-  if (resourceView === "clinic") {
-    return [{ id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No clinic" }];
-  }
-  return [
-    { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No staff column" },
-  ];
+  // Shell may show the exception lane before bookings hydrate; the grid loader
+  // omits it when empty so the live calendar does not double in width.
+  return [buildUnassignedResourceColumn(resourceView)];
 }
 
 /**

@@ -36,6 +36,8 @@ import {
   DEFAULT_APPOINTMENT_BUFFER_MINUTES,
 } from "./appointmentAvailability";
 import { AppointmentConflictError } from "./bookingErrors";
+import { resolveAppointmentClinicId } from "./resolveAppointmentClinicId";
+import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
   assertBookingResourceAvailability,
   assertServiceStaffEligible,
@@ -145,6 +147,75 @@ async function loadRoomDisplayName(
 ): Promise<string | null> {
   const room = await loadClinicRoomForTenant(tenantId, roomId, supabase);
   return room?.display_name?.trim() || null;
+}
+
+async function loadPatientPrimaryClinicId(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("primary_clinic_id")
+    .eq("tenant_id", tenantId.trim())
+    .eq("id", patientId.trim())
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const cid = (data as { primary_clinic_id?: string | null } | null)?.primary_clinic_id;
+  return cid?.trim() || null;
+}
+
+/**
+ * Resolve canonical `clinic_id` for a booking write without letting staff/room
+ * override an explicit appointment clinic. Cross-tenant ids are rejected.
+ */
+async function resolveClinicIdForBookingWrite(
+  supabase: SupabaseClient,
+  tid: string,
+  input: {
+    appointmentClinicId?: string | null;
+    roomId?: string | null;
+    leadClinicId?: string | null;
+    patientId?: string | null;
+    assignedStaffId?: string | null;
+  }
+): Promise<string | null> {
+  const explicit = input.appointmentClinicId?.trim() || null;
+  if (explicit) {
+    await assertClinicBelongsToTenant(supabase, tid, explicit);
+    return explicit;
+  }
+
+  let roomClinicId: string | null = null;
+  if (input.roomId?.trim()) {
+    const room = await loadClinicRoomForTenant(tid, input.roomId.trim(), supabase);
+    roomClinicId = room?.clinic_id?.trim() || null;
+  }
+
+  let patientSelectedClinicId: string | null = null;
+  if (input.patientId?.trim()) {
+    patientSelectedClinicId = await loadPatientPrimaryClinicId(supabase, tid, input.patientId);
+  }
+
+  let staffClinicId: string | null = null;
+  if (input.assignedStaffId?.trim()) {
+    const staff = await loadStaffMemberForTenant(tid, input.assignedStaffId.trim(), supabase);
+    staffClinicId =
+      parseStaffProfileExtras(staff?.working_hours ?? null).primary_clinic_id?.trim() || null;
+  }
+
+  const resolved = resolveAppointmentClinicId({
+    appointmentClinicId: null,
+    enquiryClinicId: input.leadClinicId,
+    patientSelectedClinicId,
+    roomClinicId,
+    staffClinicId,
+  });
+
+  if (resolved) {
+    await assertClinicBelongsToTenant(supabase, tid, resolved);
+  }
+  return resolved;
 }
 
 async function assertPersonBelongsToTenant(
@@ -664,7 +735,14 @@ export async function createBooking(
 
   const roomRequired = params.roomRequired !== false;
   let resolvedRoomId = params.roomId?.trim() || null;
-  const clinicId = params.clinicId?.trim() || null;
+  let clinicId = await resolveClinicIdForBookingWrite(supabase, tid, {
+    appointmentClinicId: params.clinicId,
+    roomId: resolvedRoomId,
+    leadClinicId: lead?.clinic_id,
+    patientId: params.patientId,
+    assignedStaffId: assign.assigned_staff_id,
+  });
+
   if (roomRequired && !resolvedRoomId && clinicId) {
     resolvedRoomId = await resolveDefaultRoomForService({
       tenantId: tid,
@@ -674,6 +752,16 @@ export async function createBooking(
       endAt: params.endAt.trim(),
       client: supabase,
     });
+    // Room may imply clinic when the caller omitted it (legacy fallback only).
+    if (!clinicId && resolvedRoomId) {
+      clinicId = await resolveClinicIdForBookingWrite(supabase, tid, {
+        appointmentClinicId: null,
+        roomId: resolvedRoomId,
+        leadClinicId: lead?.clinic_id,
+        patientId: params.patientId,
+        assignedStaffId: assign.assigned_staff_id,
+      });
+    }
   }
 
   await assertBookingResourceAvailability({
@@ -1035,6 +1123,18 @@ export async function updateBooking(
     },
     lead
   );
+
+  // Preserve explicit clinic clears (`clinicId: null`); only backfill when still missing
+  // and the caller did not intentionally send a clinic field.
+  if (!next.clinic_id?.trim() && params.clinicId === undefined) {
+    next.clinic_id = await resolveClinicIdForBookingWrite(supabase, tid, {
+      appointmentClinicId: null,
+      roomId: next.room_id,
+      leadClinicId: lead?.clinic_id,
+      patientId: next.patient_id,
+      assignedStaffId: next.assigned_staff_id,
+    });
+  }
 
   if (next.clinic_id?.trim()) await assertClinicBelongsToTenant(supabase, tid, next.clinic_id);
   if (next.assigned_user_id?.trim())

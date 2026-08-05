@@ -163,9 +163,10 @@ function snapToQuarterHourModifier(): Modifier {
 
 function assigneeFromColumn(
   column: CalendarColumn,
-  staffIdByUserId: Map<string, string>
+  staffIdByUserId: Map<string, string>,
+  resourceView: ParsedCalendarQuery["resourceView"]
 ): WeekViewRescheduleMeta {
-  return assigneeMetaFromResourceColumnId(column.id, staffIdByUserId);
+  return assigneeMetaFromResourceColumnId(column.id, staffIdByUserId, { resourceView });
 }
 
 function WeekViewInner({
@@ -489,7 +490,7 @@ function WeekViewInner({
       const meta: WeekViewRescheduleMeta | undefined =
         filterColBookingsByResource && targetColumn
           ? {
-              ...assigneeFromColumn(targetColumn, staffIdByUserId),
+              ...assigneeFromColumn(targetColumn, staffIdByUserId, resourceView),
               clearWaitlist: Boolean(waitlistBookingId),
             }
           : waitlistBookingId
@@ -507,6 +508,7 @@ function WeekViewInner({
       gridConfig,
       lanes,
       rescheduleWithToast,
+      resourceView,
       staffIdByUserId,
     ]
   );

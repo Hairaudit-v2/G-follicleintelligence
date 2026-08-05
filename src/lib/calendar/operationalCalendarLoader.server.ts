@@ -53,7 +53,6 @@ import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/c
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
-import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
   buildLegacyUserResourceColumns,
   buildStaffResourceColumns,
@@ -61,6 +60,12 @@ import {
   appendProviderLinkedStaffColumns,
   normalizeCalendarStaffFilter,
 } from "@/src/lib/calendar/operationalCalendarColumns";
+import { appendUnassignedResourceColumnIfNeeded } from "@/src/lib/calendar/unassignedResourceColumn";
+import {
+  resolveClinicIdForBookingRow,
+  type ResolveAppointmentClinicIdResult,
+} from "@/src/lib/bookings/resolveAppointmentClinicId";
+import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
@@ -296,20 +301,12 @@ async function loadTenantStaffAndClinics(
 
   let resourceColumns: OperationalCalendarResourceColumn[];
   if (resourceView === "room") {
-    resourceColumns = [
-      ...roomColumns,
-      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No room" },
-    ];
+    // Unassigned lane is appended after bookings load (omit when empty).
+    resourceColumns = [...roomColumns];
   } else if (resourceView === "clinic") {
-    resourceColumns = [
-      ...clinicColumns,
-      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No clinic" },
-    ];
+    resourceColumns = [...clinicColumns];
   } else {
-    resourceColumns = [
-      ...staffColumns,
-      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No staff column" },
-    ];
+    resourceColumns = [...staffColumns];
   }
 
   return {
@@ -340,12 +337,75 @@ function appendLegacyUserColumns(
   return [...withoutUnassigned, ...legacy, ...(unassigned ? [unassigned] : [])];
 }
 
+type ClinicRelatedMaps = {
+  roomClinicById: Map<string, string | null>;
+  staffClinicById: Map<string, string | null>;
+  allowedClinicIds: Set<string>;
+};
+
+function buildClinicRelatedMaps(input: {
+  rooms: FiClinicRoomRow[];
+  staffDirectory: ClinicalStaffPickerOption[];
+  clinics: CrmShellClinicOption[];
+}): ClinicRelatedMaps {
+  const roomClinicById = new Map<string, string | null>();
+  for (const room of input.rooms) {
+    roomClinicById.set(room.id, room.clinic_id?.trim() || null);
+  }
+  const staffClinicById = new Map<string, string | null>();
+  for (const staff of input.staffDirectory) {
+    const cid = parseStaffProfileExtras(staff.working_hours ?? null).primary_clinic_id;
+    staffClinicById.set(String(staff.id), cid?.trim() || null);
+  }
+  const allowedClinicIds = new Set(
+    input.clinics.map((c) => c.id.trim()).filter(Boolean)
+  );
+  return { roomClinicById, staffClinicById, allowedClinicIds };
+}
+
+function resolveBookingClinicForCalendar(
+  b: FiBookingRow,
+  maps: ClinicRelatedMaps
+): ResolveAppointmentClinicIdResult {
+  const roomKey = b.room_id?.trim() || "";
+  const staffKey = b.assigned_staff_id?.trim() || "";
+  return resolveClinicIdForBookingRow(
+    {
+      clinic_id: b.clinic_id,
+      room_id: b.room_id,
+      assigned_staff_id: b.assigned_staff_id,
+    },
+    {
+      roomClinicId: roomKey ? (maps.roomClinicById.get(roomKey) ?? null) : null,
+      staffClinicId: staffKey ? (maps.staffClinicById.get(staffKey) ?? null) : null,
+      allowedClinicIds: maps.allowedClinicIds,
+    }
+  );
+}
+
+/**
+ * Apply the shared clinic resolver onto calendar rows so placement / clinic filters
+ * see a canonical clinicId without mutating persistence. Explicit `clinic_id` wins.
+ */
+function enrichBookingsWithResolvedClinicId(
+  rows: FiBookingRow[],
+  maps: ClinicRelatedMaps
+): FiBookingRow[] {
+  return rows.map((b) => {
+    if (b.clinic_id?.trim()) return b;
+    const resolved = resolveBookingClinicForCalendar(b, maps);
+    if (!resolved.clinicId) return b;
+    return { ...b, clinic_id: resolved.clinicId };
+  });
+}
+
 function applyStructuredFilters(
   rows: FiBookingRow[],
   q: ParsedCalendarQuery,
   staffUserByStaffId: Map<string, string | null>,
   staffIdByUserId: Map<string, string>,
-  staffDirectory: ClinicalStaffPickerOption[]
+  staffDirectory: ClinicalStaffPickerOption[],
+  clinicMaps?: ClinicRelatedMaps
 ): FiBookingRow[] {
   const roleBucketIds =
     q.staffRoleBucket && !q.staffId?.trim()
@@ -391,7 +451,13 @@ function applyStructuredFilters(
       if (linkedStaffId && b.assigned_staff_id?.trim() === linkedStaffId) return true;
       return false;
     }
-    if (q.clinicId?.trim() && b.clinic_id !== q.clinicId.trim()) return false;
+    if (q.clinicId?.trim()) {
+      const filterClinic = q.clinicId.trim();
+      const resolved = clinicMaps
+        ? resolveBookingClinicForCalendar(b, clinicMaps)
+        : { clinicId: b.clinic_id?.trim() || null, source: null };
+      if (resolved.clinicId !== filterClinic) return false;
+    }
     if (q.roomId?.trim() && b.room_id !== q.roomId.trim()) return false;
     if (q.waitingOnly) {
       const st = b.booking_status.trim();
@@ -468,7 +534,8 @@ function calendarOsBookingFilterExcludedIds(
   query: ParsedCalendarQuery,
   staffUserByStaffId: Map<string, string | null>,
   staffIdByUserId: Map<string, string>,
-  staffDirectory: ClinicalStaffPickerOption[]
+  staffDirectory: ClinicalStaffPickerOption[],
+  clinicMaps?: ClinicRelatedMaps
 ): Set<string> {
   const kept = new Set(
     applyStructuredFilters(
@@ -476,7 +543,8 @@ function calendarOsBookingFilterExcludedIds(
       query,
       staffUserByStaffId,
       staffIdByUserId,
-      staffDirectory
+      staffDirectory,
+      clinicMaps
     ).map((b) => b.id)
   );
   const excluded = new Set<string>();
@@ -653,22 +721,31 @@ export async function loadOperationalCalendarGridData(
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
 
+  const clinicMaps = buildClinicRelatedMaps({
+    rooms: resources.rooms,
+    staffDirectory: resources.staffDirectory,
+    clinics: resources.clinics,
+  });
+
+  const bookingsWithClinic = enrichBookingsWithResolvedClinicId(rawBookings, clinicMaps);
+
   let resourceColumns =
     query.resourceView === "staff"
       ? appendLegacyUserColumns(resources.resourceColumns, {
           userAssignees: resources.assignees,
           staffIdByUserId: resources.staffIdByUserId,
-          bookings: rawBookings,
+          bookings: bookingsWithClinic,
           filterUserId: query.assignedUserId,
         })
       : resources.resourceColumns;
 
   const structuredBookings = applyStructuredFilters(
-    rawBookings,
+    bookingsWithClinic,
     query,
     resources.staffUserByStaffId,
     resources.staffIdByUserId,
-    resources.staffDirectory
+    resources.staffDirectory,
+    clinicMaps
   );
 
   const displayContextInput = monthSummaryMode
@@ -766,7 +843,8 @@ export async function loadOperationalCalendarGridData(
     query,
     resources.staffUserByStaffId,
     resources.staffIdByUserId,
-    resources.staffDirectory
+    resources.staffDirectory,
+    clinicMaps
   );
   /** Apply the same booking URL filters (type/status/staff/clinic) as fi_bookings — F-PILOT-11. */
   const structuredCalendarOs = applyCalendarOsBookingUrlFilters(
@@ -784,6 +862,11 @@ export async function loadOperationalCalendarGridData(
   );
 
   const structured = [...structuredBookings, ...structuredCalendarOs];
+
+  resourceColumns = appendUnassignedResourceColumnIfNeeded(resourceColumns, structured, {
+    resourceView: query.resourceView,
+    staffIdByUserId: resources.staffIdByUserId,
+  });
 
   const staffNameById: Record<string, string> = {};
   for (const s of resources.staffDirectory) {

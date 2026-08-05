@@ -210,10 +210,23 @@ export function buildLegacyUserResourceColumns(input: {
   return cols.sort((a, b) => a.label.localeCompare(b.label));
 }
 
+/**
+ * Drag / reschedule meta from a visible resource column.
+ *
+ * Unassigned means "clear the dimension this view is about" only:
+ * - staff view → clear clinician, **preserve clinic**
+ * - clinic view → clear clinic, **preserve clinician**
+ * - room view → clear room assignment dimensions only (no clinic wipe)
+ *
+ * Never wipe `clinicId` when the operator is merely unassigning staff.
+ */
 export function assigneeMetaFromResourceColumnId(
   columnId: string,
-  staffIdByUserId: Map<string, string>
+  staffIdByUserId: Map<string, string>,
+  opts?: { resourceView?: CalendarResourceView }
 ): { assignedStaffId?: string | null; assignedUserId?: string | null; clinicId?: string | null } {
+  const view = opts?.resourceView ?? "staff";
+
   if (columnId.startsWith("s:")) {
     return { assignedStaffId: columnId.slice(2) };
   }
@@ -224,10 +237,18 @@ export function assigneeMetaFromResourceColumnId(
     return { assignedUserId: uid, assignedStaffId: null };
   }
   if (columnId.startsWith("c:")) {
-    return { assignedStaffId: null, clinicId: columnId.slice(2) };
+    // Assign clinic without silently clearing the clinician.
+    return { clinicId: columnId.slice(2) };
+  }
+  if (columnId.startsWith("r:")) {
+    return {};
   }
   if (columnId === "unassigned") {
-    return { assignedStaffId: null, clinicId: null };
+    if (view === "clinic") {
+      return { clinicId: null };
+    }
+    // staff / room / default: clinician unassigned — keep appointment clinic
+    return { assignedStaffId: null, assignedUserId: null };
   }
   return {};
 }

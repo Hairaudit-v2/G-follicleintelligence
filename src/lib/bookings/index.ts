@@ -27,3 +27,12 @@ export {
   type BookingDetailComparableSnapshot,
 } from "./bookingChangedFields";
 export { isBookingUpcoming, sortBookingsByStartAt } from "./bookingTime";
+export {
+  resolveAppointmentClinicId,
+  resolveAppointmentClinicIdDetailed,
+  resolveClinicIdForBookingRow,
+  type AppointmentClinicSource,
+  type ResolveAppointmentClinicIdInput,
+  type ResolveAppointmentClinicIdOptions,
+  type ResolveAppointmentClinicIdResult,
+} from "./resolveAppointmentClinicId";

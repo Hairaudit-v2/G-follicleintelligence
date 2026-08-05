@@ -18,6 +18,21 @@ import {
 } from "@/src/lib/calendar/calendarTimezone";
 import type { CalendarResourceView } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { resolveClinicIdForBookingRow } from "@/src/lib/bookings/resolveAppointmentClinicId";
+
+export type ResourceColumnPlacementOpts = {
+  resourceView?: CalendarResourceView;
+  staffIdByUserId?: Map<string, string>;
+  /**
+   * Optional related clinic identities for clinic-view placement when `clinic_id`
+   * is null (room / staff / enquiry / patient). Explicit `clinic_id` always wins.
+   */
+  roomClinicById?: ReadonlyMap<string, string | null | undefined>;
+  staffClinicById?: ReadonlyMap<string, string | null | undefined>;
+  enquiryClinicByLeadId?: ReadonlyMap<string, string | null | undefined>;
+  patientClinicById?: ReadonlyMap<string, string | null | undefined>;
+  allowedClinicIds?: ReadonlySet<string> | readonly string[] | null;
+};
 
 export type BusinessGridConfig = {
   /** Clinic-local business day start hour (field name kept for DB compat). */
@@ -199,7 +214,7 @@ export function bookingConflictsForOperationalCalendar(
 export function resolveDisplayResourceColumnId(
   b: FiBookingRow,
   visibleColumnIds: ReadonlySet<string> | readonly string[],
-  opts?: { resourceView?: CalendarResourceView; staffIdByUserId?: Map<string, string> }
+  opts?: ResourceColumnPlacementOpts
 ): string {
   const ideal = resourceColumnIdForBooking(b, opts);
   const ids = visibleColumnIds instanceof Set ? visibleColumnIds : new Set(visibleColumnIds);
@@ -211,7 +226,7 @@ export function resolveDisplayResourceColumnId(
 /** Maps a booking to a resource column id for day view (`s:…`, `r:…`, `u:…`, `c:…`, or `unassigned`). */
 export function resourceColumnIdForBooking(
   b: FiBookingRow,
-  opts?: { resourceView?: CalendarResourceView; staffIdByUserId?: Map<string, string> }
+  opts?: ResourceColumnPlacementOpts
 ): string {
   const view = opts?.resourceView ?? "staff";
 
@@ -221,7 +236,23 @@ export function resourceColumnIdForBooking(
   }
 
   if (view === "clinic") {
-    if (b.clinic_id?.trim()) return `c:${b.clinic_id.trim()}`;
+    const roomKey = b.room_id?.trim() || "";
+    const staffKey = b.assigned_staff_id?.trim() || "";
+    const leadKey = b.lead_id?.trim() || "";
+    const patientKey = b.patient_id?.trim() || "";
+    const resolved = resolveClinicIdForBookingRow(
+      { clinic_id: b.clinic_id, room_id: b.room_id, assigned_staff_id: b.assigned_staff_id },
+      {
+        roomClinicId: roomKey ? (opts?.roomClinicById?.get(roomKey) ?? null) : null,
+        staffClinicId: staffKey ? (opts?.staffClinicById?.get(staffKey) ?? null) : null,
+        enquiryClinicId: leadKey ? (opts?.enquiryClinicByLeadId?.get(leadKey) ?? null) : null,
+        patientSelectedClinicId: patientKey
+          ? (opts?.patientClinicById?.get(patientKey) ?? null)
+          : null,
+        allowedClinicIds: opts?.allowedClinicIds,
+      }
+    );
+    if (resolved.clinicId) return `c:${resolved.clinicId}`;
     return "unassigned";
   }
 
@@ -232,6 +263,8 @@ export function resourceColumnIdForBooking(
     if (linkedStaffId) return `s:${linkedStaffId}`;
     return `u:${uid}`;
   }
-  if (b.clinic_id?.trim()) return `c:${b.clinic_id.trim()}`;
+  // Staff view: missing clinician stays in the clinician-unassigned lane.
+  // Do NOT remap to `c:{clinicId}` — that column is absent in staff grids and
+  // previously bounced into a generic Unassigned bucket after display fallback.
   return "unassigned";
 }
