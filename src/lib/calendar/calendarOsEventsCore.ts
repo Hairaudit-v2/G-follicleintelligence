@@ -66,8 +66,35 @@ export type FiCalendarEventOverlapRow = {
   updated_at: string;
 };
 
+/** Overlap projection that works before identity-link migration columns exist. */
+export const FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE =
+  "id, tenant_id, external_event_id, provider, calendar_id, title, description, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, metadata, created_at, updated_at";
+
+/**
+ * Preferred overlap projection including identity columns from
+ * `202611102001_calendar_identity_link_1b`. Loader falls back to
+ * {@link FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE} when those columns are missing.
+ */
 export const FI_CALENDAR_EVENTS_OVERLAP_SELECT =
   "id, tenant_id, external_event_id, provider, calendar_id, title, description, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, consultation_id, person_id, metadata, created_at, updated_at";
+
+/** True when PostgREST rejects consultation_id / person_id on fi_calendar_events. */
+export function isMissingFiCalendarIdentityColumnError(
+  error: { message?: string; code?: string } | null | undefined
+): boolean {
+  const m = (error?.message ?? "").toLowerCase();
+  if (!m) return false;
+  const mentionsIdentityCol =
+    m.includes("consultation_id") || m.includes("person_id");
+  if (!mentionsIdentityCol) return false;
+  return (
+    m.includes("does not exist") ||
+    m.includes("schema cache") ||
+    m.includes("could not find the") ||
+    error?.code === "42703" ||
+    error?.code === "PGRST204"
+  );
+}
 
 /** Hard cap for CalendarOS overlap reads — month grid should stay well under this after range scoping. */
 export const CALENDAR_OS_EVENTS_OVERLAP_CAP = 1000;

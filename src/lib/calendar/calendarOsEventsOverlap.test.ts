@@ -9,8 +9,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   CALENDAR_OS_EVENTS_OVERLAP_CAP,
   FI_CALENDAR_EVENTS_OVERLAP_SELECT,
+  FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE,
+  isMissingFiCalendarIdentityColumnError,
   calendarOsBookingRowExposesSecrets,
   calendarOsOverlapRowsForDisplayContext,
+  mapFiCalendarEventToBookingDisplay,
   mapFiCalendarEventsToOperationalCalendar,
   type FiCalendarEventOverlapRow,
 } from "@/src/lib/calendar/calendarOsEventsCore";
@@ -65,15 +68,29 @@ function sampleLink(
 
 type OverlapQueryCapture = {
   select: string | null;
+  selects: string[];
   tenantId: string | null;
   ltStart: string | null;
   gtEnd: string | null;
   limit: number | null;
 };
 
-function createOverlapMockSupabase(rows: FiCalendarEventOverlapRow[]) {
+function createOverlapMockSupabase(
+  rows: FiCalendarEventOverlapRow[],
+  opts?: {
+    /** When the select string includes these substrings, fail like a missing column. */
+    failSelectContaining?: string[];
+    failErrorMessage?: string;
+  }
+) {
+  const failContaining = opts?.failSelectContaining ?? [];
+  const failMessage =
+    opts?.failErrorMessage ??
+    "column fi_calendar_events.consultation_id does not exist";
+
   const capture: OverlapQueryCapture = {
     select: null,
+    selects: [],
     tenantId: null,
     ltStart: null,
     gtEnd: null,
@@ -86,6 +103,7 @@ function createOverlapMockSupabase(rows: FiCalendarEventOverlapRow[]) {
       return {
         select(cols: string) {
           capture.select = cols;
+          capture.selects.push(cols);
           return {
             eq(col: string, val: string) {
               assert.equal(col, "tenant_id");
@@ -103,6 +121,18 @@ function createOverlapMockSupabase(rows: FiCalendarEventOverlapRow[]) {
                           return {
                             limit(n: number) {
                               capture.limit = n;
+                              if (
+                                failContaining.length > 0 &&
+                                failContaining.every((s) => cols.includes(s))
+                              ) {
+                                return Promise.resolve({
+                                  data: null,
+                                  error: {
+                                    message: failMessage,
+                                    code: "42703",
+                                  },
+                                });
+                              }
                               const filtered = rows.filter(
                                 (r) =>
                                   r.tenant_id === capture.tenantId &&
@@ -179,6 +209,78 @@ describe("CalendarOS overlap query — range scoped", () => {
     assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("refresh_token"), false);
     assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("provider_payload"), false);
     assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("description"), true);
+    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE.includes("consultation_id"), false);
+    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE.includes("person_id"), false);
+    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("consultation_id"), true);
+    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("person_id"), true);
+  });
+
+  it("falls back to base select when consultation_id/person_id columns are missing", async () => {
+    const inRange = sampleEventRow({
+      start_time: "2026-06-10T09:00:00.000Z",
+      end_time: "2026-06-10T10:00:00.000Z",
+      metadata: {
+        consultation_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+        person_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      },
+    });
+    const { client, capture } = createOverlapMockSupabase([inRange], {
+      failSelectContaining: ["consultation_id", "person_id"],
+    });
+
+    const rows = await loadFiCalendarEventsForOverlap(
+      {
+        tenantId: TENANT_A,
+        rangeStartIso: "2026-06-01T00:00:00.000Z",
+        rangeEndIso: "2026-07-01T00:00:00.000Z",
+      },
+      client
+    );
+
+    assert.deepEqual(capture.selects, [
+      FI_CALENDAR_EVENTS_OVERLAP_SELECT,
+      FI_CALENDAR_EVENTS_OVERLAP_SELECT_BASE,
+    ]);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]!.id, inRange.id);
+
+    // Mapping must not throw and still resolve consultation/person from metadata.
+    const display = mapFiCalendarEventToBookingDisplay(rows[0]!);
+    assert.ok(display.anchorLabel);
+  });
+
+  it("detects missing identity column PostgREST errors", () => {
+    assert.equal(
+      isMissingFiCalendarIdentityColumnError({
+        message: "column fi_calendar_events.consultation_id does not exist",
+        code: "42703",
+      }),
+      true
+    );
+    assert.equal(
+      isMissingFiCalendarIdentityColumnError({
+        message: "Could not find the 'person_id' column of 'fi_calendar_events' in the schema cache",
+      }),
+      true
+    );
+    assert.equal(
+      isMissingFiCalendarIdentityColumnError({
+        message: "permission denied for table fi_calendar_events",
+      }),
+      false
+    );
+  });
+
+  it("mapFiCalendarEventToBookingDisplay tolerates null metadata and missing identity columns", () => {
+    const display = mapFiCalendarEventToBookingDisplay(
+      sampleEventRow({
+        consultation_id: undefined,
+        person_id: undefined,
+        metadata: null as unknown as Record<string, unknown>,
+      })
+    );
+    assert.ok(typeof display.anchorLabel === "string");
+    assert.ok(display.anchorLabel.length > 0);
   });
 
   it("empty calendar event list remains fast and safe", async () => {
