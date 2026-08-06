@@ -348,11 +348,25 @@ export function RosterWeekGrid({
                         {cellBlocks.map((block) => (
                           <span
                             key={block.blockId}
-                            className="block rounded-md bg-rose-950/40 px-2 py-1.5 text-xs text-rose-200"
-                          >
-                            {blockTypeDisplayLabel(
-                              block.blockType as import("@/src/lib/workforce-os/workforceRosteringEngine").AvailabilityBlockType
+                            title={block.reason}
+                            data-testid={`roster-availability-${block.blockId}`}
+                            className={cn(
+                              "block rounded-md px-2 py-1.5 text-xs",
+                              block.blockType === "available_override"
+                                ? "bg-emerald-950/40 text-emerald-100"
+                                : "bg-rose-950/40 text-rose-200"
                             )}
+                          >
+                            <span className="block font-medium">
+                              {blockTypeDisplayLabel(
+                                block.blockType as import("@/src/lib/workforce-os/workforceRosteringEngine").AvailabilityBlockType
+                              )}
+                            </span>
+                            {block.reason && block.reason !== block.label ? (
+                              <span className="mt-0.5 block text-[10px] opacity-80">
+                                {block.reason}
+                              </span>
+                            ) : null}
                           </span>
                         ))}
                         {rdo ? (

@@ -230,6 +230,8 @@ test("RosterShiftDrawer passes canManage from command centre and supports genera
     "roster-mark-day-away-panel",
     "roster-mark-sick-leave",
     "roster-mark-personal-leave",
+    "roster-availability-explanation",
+    "explainRosterDayAvailability",
     "rosterShiftDatetimeLocalToUtcIso",
     "updateRosterShiftAction",
     "openInEditMode",

@@ -73,7 +73,7 @@ src/lib/workforce-os/workforceRosterQueryParams.test.ts,roster,src/lib/team/rost
 src/lib/workforce-os/workforceRosterQueryParams.ts,roster,src/lib/team/roster/workforceRosterQueryParams.ts,2,0,,false,false,,,low,roster/ops scheduling
 src/lib/workforce-os/workforceRostering.server.ts,roster,src/lib/team/roster/workforceRostering.server.ts,5,2,,true,true,,,high,roster/ops scheduling
 src/lib/workforce-os/workforceRosteringEngine.test.ts,roster,src/lib/team/roster/workforceRosteringEngine.test.ts,0,0,,false,false,,,low,roster/ops scheduling
-src/lib/workforce-os/workforceRosteringEngine.ts,roster,src/lib/team/roster/workforceRosteringEngine.ts,4,1,,false,false,,,medium,roster/ops scheduling
+src/lib/workforce-os/workforceRosteringEngine.ts,roster,src/lib/team/roster/workforceRosteringEngine.ts,3,1,,false,false,,,medium,roster/ops scheduling
 src/lib/workforce-os/workforceSurgeryStaffingBridge.test.ts,roster,src/lib/team/roster/workforceSurgeryStaffingBridge.test.ts,0,0,,false,false,,,low,clinical staffing eligibility bridge
 src/lib/workforce/certificationsPage.server.ts,compliance,src/lib/team/compliance/certificationsPage.server.ts,1,0,fi_staff_members,true,false,,,medium,credentials/certs/audits
 src/lib/workforce/clinicalEligibility.server.ts,roster,src/lib/team/roster/clinicalEligibility.server.ts,1,0,fi_staff_members,true,false,,,medium,clinical staffing eligibility bridge

@@ -56,11 +56,37 @@ export type StaffAvailabilityRangeInput = {
   shifts: StaffShiftRecord[];
 };
 
+/** Why the person is available or unavailable for the requested window. */
+export type StaffAvailabilitySource =
+  | "weekly_hours"
+  | "available_override"
+  | "leave"
+  | "sick_leave"
+  | "maternity_leave"
+  | "unavailable"
+  | "training"
+  | "admin"
+  | "outside_weekly_hours"
+  | "invalid_range";
+
+export type StaffAvailabilityExplanation = {
+  available: boolean;
+  source: StaffAvailabilitySource;
+  reason: string;
+  /** Present when availability comes from `available_override`. */
+  overrideType: "available_override" | null;
+  /** Blocking / override row id when safe to expose to managers. */
+  blockingRecordId: string | null;
+  effectiveStart: string | null;
+  effectiveEnd: string | null;
+};
+
 export type StaffAvailabilityRangeResult = {
   available: boolean;
   reasons: string[];
   activeBlocks: StaffAvailabilityBlockRecord[];
   matchingShifts: StaffShiftRecord[];
+  explanation: StaffAvailabilityExplanation;
 };
 
 export const BLOCKING_AVAILABILITY_BLOCK_TYPES: readonly AvailabilityBlockType[] = [
@@ -71,6 +97,18 @@ export const BLOCKING_AVAILABILITY_BLOCK_TYPES: readonly AvailabilityBlockType[]
   "training",
   "admin",
 ] as const;
+
+const BLOCK_SOURCE_LABEL: Record<
+  Exclude<AvailabilityBlockType, "available_override">,
+  string
+> = {
+  unavailable: "Unavailable / manual block",
+  leave: "Leave",
+  sick_leave: "Sick leave",
+  maternity_leave: "Maternity leave",
+  training: "Training",
+  admin: "Admin",
+};
 
 export function parseTimeRangeMs(
   startsAt: string,
@@ -89,6 +127,86 @@ export function rangesOverlap(
   bEndMs: number
 ): boolean {
   return aStartMs < bEndMs && bStartMs < aEndMs;
+}
+
+function humanBlockLabel(blockType: AvailabilityBlockType): string {
+  if (blockType === "available_override") return "Temporary available override";
+  return BLOCK_SOURCE_LABEL[blockType] ?? blockType.replace(/_/g, " ");
+}
+
+function buildExplanation(input: {
+  available: boolean;
+  startsAt: string;
+  endsAt: string;
+  rangeValid: boolean;
+  blockingBlocks: StaffAvailabilityBlockRecord[];
+  overrideBlock: StaffAvailabilityBlockRecord | null;
+  withinWorkingHours: boolean;
+}): StaffAvailabilityExplanation {
+  const { startsAt, endsAt } = input;
+  if (!input.rangeValid) {
+    return {
+      available: false,
+      source: "invalid_range",
+      reason: "Invalid availability window",
+      overrideType: null,
+      blockingRecordId: null,
+      effectiveStart: null,
+      effectiveEnd: null,
+    };
+  }
+
+  if (input.blockingBlocks.length > 0) {
+    const primary = input.blockingBlocks[0]!;
+    const label = humanBlockLabel(primary.block_type);
+    const detail = primary.reason?.trim();
+    return {
+      available: false,
+      source: primary.block_type as StaffAvailabilitySource,
+      reason: detail ? `${label}: ${detail}` : label,
+      overrideType: null,
+      blockingRecordId: primary.id?.trim() || null,
+      effectiveStart: primary.starts_at,
+      effectiveEnd: primary.ends_at,
+    };
+  }
+
+  if (input.available && input.overrideBlock && !input.withinWorkingHours) {
+    const detail = input.overrideBlock.reason?.trim();
+    return {
+      available: true,
+      source: "available_override",
+      reason: detail
+        ? `Temporary available override: ${detail}`
+        : "Temporary available override",
+      overrideType: "available_override",
+      blockingRecordId: input.overrideBlock.id?.trim() || null,
+      effectiveStart: input.overrideBlock.starts_at,
+      effectiveEnd: input.overrideBlock.ends_at,
+    };
+  }
+
+  if (input.available && input.withinWorkingHours) {
+    return {
+      available: true,
+      source: "weekly_hours",
+      reason: "Normal weekly hours",
+      overrideType: input.overrideBlock ? "available_override" : null,
+      blockingRecordId: input.overrideBlock?.id?.trim() || null,
+      effectiveStart: startsAt,
+      effectiveEnd: endsAt,
+    };
+  }
+
+  return {
+    available: false,
+    source: "outside_weekly_hours",
+    reason: "Outside normal weekly hours",
+    overrideType: null,
+    blockingRecordId: null,
+    effectiveStart: startsAt,
+    effectiveEnd: endsAt,
+  };
 }
 
 /**
@@ -113,7 +231,9 @@ export function getStaffAvailabilityForRange(
     return sr && range && rangesOverlap(range.startMs, range.endMs, sr.startMs, sr.endMs);
   });
 
-  const hasOverride = overlappingBlocks.some((b) => b.block_type === "available_override");
+  const overrideBlock =
+    overlappingBlocks.find((b) => b.block_type === "available_override") ?? null;
+  const hasOverride = Boolean(overrideBlock);
   const blockingBlocks = overlappingBlocks.filter((b) =>
     (BLOCKING_AVAILABILITY_BLOCK_TYPES as readonly string[]).includes(b.block_type)
   );
@@ -134,10 +254,23 @@ export function getStaffAvailabilityForRange(
     }
   }
 
+  const available = Boolean(range) && blockingBlocks.length === 0 && (withinWorkingHours || hasOverride);
+
+  const explanation = buildExplanation({
+    available,
+    startsAt: input.startsAt,
+    endsAt: input.endsAt,
+    rangeValid: Boolean(range),
+    blockingBlocks,
+    overrideBlock,
+    withinWorkingHours,
+  });
+
   return {
-    available: blockingBlocks.length === 0 && (withinWorkingHours || hasOverride),
+    available,
     reasons,
     activeBlocks: overlappingBlocks,
     matchingShifts,
+    explanation,
   };
 }

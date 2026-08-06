@@ -17,6 +17,7 @@ import {
   collectCancellableRosterDayShifts,
   formatRosterDrawerDateLabel,
   formatRosterShiftDrawerTitle,
+  explainRosterDayAvailability,
   resolveRosterManageDeniedMessage,
   resolveRosterShiftDrawerChangedFields,
   resolveRosterShiftDrawerEditEligibility,
@@ -68,6 +69,17 @@ export type RosterShiftDrawerProps = {
   selectedShift: RosterGridShift | null;
   /** Other shifts for this staff/day (used when marking away / cancelling cover). */
   dayShifts?: RosterGridShift[];
+  /** Active availability blocks overlapping this staff/day (for explanation). */
+  dayAvailabilityBlocks?: Array<{
+    id: string;
+    block_type: string;
+    starts_at: string;
+    ends_at: string;
+    status?: string | null;
+    reason?: string | null;
+  }>;
+  /** Recurring weekly template for effective availability explanation. */
+  workingHours?: Record<string, unknown> | null;
   clinics: Array<{ id: string; displayName: string }>;
   staffTimezone?: string | null;
   tenantTimezone: string;
@@ -100,6 +112,8 @@ function RosterShiftDrawerBody({
   rosterCycleAnchorDate = "2026-01-05",
   selectedShift,
   dayShifts = [],
+  dayAvailabilityBlocks = [],
+  workingHours = null,
   clinics,
   staffTimezone = null,
   tenantTimezone,
@@ -111,6 +125,14 @@ function RosterShiftDrawerBody({
   onEditStandardHours,
 }: RosterShiftDrawerProps) {
   const manageDeniedMessage = resolveRosterManageDeniedMessage(manageDeniedReason);
+  const dayAvailability = explainRosterDayAvailability({
+    staffId,
+    localDate,
+    workingHours,
+    staffTimezone,
+    tenantTimezone,
+    availabilityBlocks: dayAvailabilityBlocks,
+  });
   const viewingExistingShift = mode === "edit" && selectedShift ? selectedShift : null;
   const cancellableDayShifts = collectCancellableRosterDayShifts({
     dayShifts,
@@ -448,6 +470,32 @@ function RosterShiftDrawerBody({
       testId="roster-shift-drawer"
     >
       <div className="space-y-4">
+        <div
+          className={
+            dayAvailability.available
+              ? "rounded-lg border border-emerald-500/25 bg-emerald-950/15 px-3 py-2"
+              : "rounded-lg border border-amber-500/25 bg-amber-950/15 px-3 py-2"
+          }
+          data-testid="roster-availability-explanation"
+          data-availability-source={dayAvailability.source}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            Availability
+          </p>
+          <p
+            className={
+              dayAvailability.available
+                ? "mt-0.5 text-sm text-emerald-100"
+                : "mt-0.5 text-sm text-amber-100"
+            }
+          >
+            {dayAvailability.reason}
+          </p>
+          {dayAvailability.overrideType ? (
+            <p className="mt-1 text-[11px] text-emerald-200/80">Temporary available override</p>
+          ) : null}
+        </div>
+
         {!canManage ? (
           <p
             className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-100"

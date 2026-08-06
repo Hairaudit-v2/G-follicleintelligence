@@ -160,4 +160,51 @@ test("effective availability: empty weekly hours allow with override", () => {
     shifts: [],
   });
   assert.equal(result.available, true);
+  assert.equal(result.explanation.source, "available_override");
+  assert.equal(result.explanation.overrideType, "available_override");
+});
+
+test("effective availability: explanation for weekly hours", () => {
+  const result = getStaffAvailabilityForRange({
+    staffId: "staff-1",
+    startsAt: RANGE_START,
+    endsAt: RANGE_END,
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+    availabilityBlocks: [],
+    shifts: [],
+  });
+  assert.equal(result.explanation.available, true);
+  assert.equal(result.explanation.source, "weekly_hours");
+  assert.equal(result.explanation.reason, "Normal weekly hours");
+});
+
+test("effective availability: explanation for leave includes blocking id", () => {
+  const result = getStaffAvailabilityForRange({
+    staffId: "staff-1",
+    startsAt: RANGE_START,
+    endsAt: RANGE_END,
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+    availabilityBlocks: [block({ id: "leave-99", block_type: "leave", reason: "annual leave" })],
+    shifts: [],
+  });
+  assert.equal(result.explanation.available, false);
+  assert.equal(result.explanation.source, "leave");
+  assert.equal(result.explanation.blockingRecordId, "leave-99");
+  assert.match(result.explanation.reason, /annual leave/);
+});
+
+test("effective availability: explanation for outside weekly hours", () => {
+  const result = getStaffAvailabilityForRange({
+    staffId: "staff-1",
+    startsAt: "2026-06-07T02:00:00.000Z",
+    endsAt: "2026-06-07T03:00:00.000Z",
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+    availabilityBlocks: [],
+    shifts: [],
+  });
+  assert.equal(result.explanation.available, false);
+  assert.equal(result.explanation.source, "outside_weekly_hours");
 });

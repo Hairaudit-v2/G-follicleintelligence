@@ -179,6 +179,34 @@ export function RosterCommandCentreView({
     );
   }, [drawerState, drawerStaffMemberId, payload.shifts]);
 
+  const drawerDayAvailabilityBlocks = useMemo(() => {
+    if (drawerState.kind !== "shift" || !drawerStaffMemberId) return [];
+    const day = drawerState.localDate.slice(0, 10);
+    return (payload.availabilityBlocks ?? [])
+      .filter((block) => block.staff_id === drawerStaffMemberId)
+      .filter((block) => {
+        const cell = payload.availabilityCells.find((c) => c.blockId === block.id);
+        if (cell) return cell.localDate.slice(0, 10) === day;
+        // Multi-day blocks: include when the drawer day falls within [starts, ends).
+        const startDay = block.starts_at.slice(0, 10);
+        const endDay = block.ends_at.slice(0, 10);
+        return startDay <= day && day <= endDay;
+      })
+      .map((block) => ({
+        id: block.id,
+        block_type: block.block_type,
+        starts_at: block.starts_at,
+        ends_at: block.ends_at,
+        status: block.status,
+        reason: block.reason ?? null,
+      }));
+  }, [
+    drawerState,
+    drawerStaffMemberId,
+    payload.availabilityBlocks,
+    payload.availabilityCells,
+  ]);
+
   useEffect(() => {
     if (!actionError) return;
     actionErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -972,6 +1000,12 @@ export function RosterCommandCentreView({
           rosterCycleAnchorDate={rosterPlanning.rosterCycleAnchorDate}
           selectedShift={drawerShift}
           dayShifts={drawerDayShifts}
+          dayAvailabilityBlocks={drawerDayAvailabilityBlocks}
+          workingHours={
+            drawerStaffMemberId
+              ? (payload.workingHoursByStaffId?.[drawerStaffMemberId] ?? null)
+              : null
+          }
           clinics={payload.clinics}
           staffTimezone={payload.staffTimezoneByStaffId[drawerStaffMemberId] ?? null}
           tenantTimezone={payload.tenantTimezone}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T02:47:09.805Z",
+  "generatedAt": "2026-08-06T03:49:55.456Z",
   "auditBaselineFiles": 267,
   "currentFiles": 393,
   "growthSinceAudit": 126,
@@ -1292,7 +1292,6 @@
       "runtimeConsumers": [
         "src/lib/workforce-os/clinicalStaffingStatusDisplay.ts",
         "src/lib/workforce-os/rosterEligibleStaffCore.ts",
-        "src/lib/workforce-os/rosterGenerationCore.ts",
         "src/lib/workforce/staffLeaveWorkflowCore.ts"
       ],
       "testConsumers": [
@@ -7780,7 +7779,7 @@
       {
         "file": "src/lib/workforce-os/rosterCommandCentreUxCore.ts",
         "exportStar": 0,
-        "namedExports": 59
+        "namedExports": 60
       },
       {
         "file": "src/lib/workforce-os/rosterEligibleStaffCore.ts",
@@ -7996,6 +7995,11 @@
         "file": "src/lib/team/onboarding/onboardingTypes.ts",
         "exportStar": 0,
         "namedExports": 14
+      },
+      {
+        "file": "src/lib/team/roster/availability/effectiveAvailability.ts",
+        "exportStar": 0,
+        "namedExports": 13
       },
       {
         "file": "src/lib/team/roster/availability/weeklyHours.ts",

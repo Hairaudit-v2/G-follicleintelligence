@@ -127,6 +127,8 @@ export type RosterGridAvailabilityCell = {
   staffName: string;
   blockType: string;
   label: string;
+  /** Manager-facing reason (block.reason or default source label). */
+  reason: string;
   startsAt: string;
   endsAt: string;
   localDate: string;
@@ -154,6 +156,8 @@ export type RosterCommandCentrePayload = {
   availabilityBlocks: FiStaffAvailabilityBlockRow[];
   availabilityCells: RosterGridAvailabilityCell[];
   standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]>;
+  /** Recurring weekly template (working_hours document) by staff id — for availability explanation. */
+  workingHoursByStaffId: Record<string, Record<string, unknown>>;
   eligibleStaffIds: string[];
   ineligibleStaffOptions: RosterIneligibleStaffOption[];
   staffMissingStandardHours: Array<{ id: string; name: string }>;
@@ -654,27 +658,44 @@ export async function loadRosterCommandCentre(
     blockRows = blockRows.filter((b) => b.staff_id === staffFilter);
   }
 
-  const availabilityCells: RosterGridAvailabilityCell[] = blockRows.map((block) => ({
-    blockId: block.id,
-    staffId: block.staff_id,
-    staffName: staffNameById.get(block.staff_id) ?? "Staff",
-    blockType: block.block_type,
-    label:
-      block.block_type === "leave" || block.block_type === "sick_leave"
-        ? "Leave"
-        : block.block_type === "maternity_leave"
-          ? "Maternity leave"
-          : block.block_type === "unavailable"
-            ? "Unavailable"
-            : block.block_type.replace(/_/g, " "),
-    startsAt: block.starts_at,
-    endsAt: block.ends_at,
-    localDate: localDateFromIso(
-      block.starts_at,
-      staffTimezoneById.get(block.staff_id),
-      tenantTimezone
-    ),
-  }));
+  const availabilityCells: RosterGridAvailabilityCell[] = blockRows.map((block) => {
+    const label =
+      block.block_type === "sick_leave"
+        ? "Sick leave"
+        : block.block_type === "leave"
+          ? "Leave"
+          : block.block_type === "maternity_leave"
+            ? "Maternity leave"
+            : block.block_type === "unavailable"
+              ? "Unavailable"
+              : block.block_type === "available_override"
+                ? "Available override"
+                : block.block_type.replace(/_/g, " ");
+    const detail = block.reason?.trim();
+    return {
+      blockId: block.id,
+      staffId: block.staff_id,
+      staffName: staffNameById.get(block.staff_id) ?? "Staff",
+      blockType: block.block_type,
+      label,
+      reason: detail ? `${label}: ${detail}` : label,
+      startsAt: block.starts_at,
+      endsAt: block.ends_at,
+      localDate: localDateFromIso(
+        block.starts_at,
+        staffTimezoneById.get(block.staff_id),
+        tenantTimezone
+      ),
+    };
+  });
+
+  const workingHoursByStaffId: Record<string, Record<string, unknown>> = {};
+  for (const staff of staffRows) {
+    workingHoursByStaffId[staff.id] =
+      staff.working_hours && typeof staff.working_hours === "object"
+        ? staff.working_hours
+        : {};
+  }
 
   const standardHoursByStaffId: Record<string, StaffStandardHoursDayInput[]> = {};
   for (const [staffId, days] of standardHoursMap.entries()) {
@@ -745,6 +766,7 @@ export async function loadRosterCommandCentre(
     availabilityBlocks: blockRows,
     availabilityCells,
     standardHoursByStaffId,
+    workingHoursByStaffId,
     eligibleStaffIds: eligibilityContext.eligibleStaffIds,
     ineligibleStaffOptions: eligibilityContext.ineligibleStaffOptions,
     staffMissingStandardHours,

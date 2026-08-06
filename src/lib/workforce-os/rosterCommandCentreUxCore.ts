@@ -32,6 +32,14 @@ import {
   rosterShiftEditRequiresReason,
   type RosterShiftSnapshot,
 } from "@/src/lib/workforce-os/rosterManualAdjustmentsCore";
+import {
+  getStaffAvailabilityForRange,
+  parseStaffWeeklyHours,
+  staffWeekdayKeyFromUtcMs,
+  type StaffAvailabilityBlockRecord,
+  type StaffAvailabilityExplanation,
+  type StaffAvailabilitySource,
+} from "@/src/lib/team/roster/availability";
 
 export type RosterCellClickIntent = "open_cell_actions";
 
@@ -653,4 +661,114 @@ export function rosterAvailabilityLocalDateFromIso(
   if (ms == null) return iso.trim().slice(0, 10);
   const tz = normalizeCalendarTimezone(staffTimezone?.trim() || tenantTimezone);
   return calendarDateStringFromInstant(new Date(ms), tz);
+}
+
+/**
+ * Explains why a staff member is available / unavailable for a roster grid day.
+ * Block precedence matches effective availability; weekly is evaluated as the
+ * day's recurring template (enabled / disabled), not a full-day containment check.
+ */
+export function explainRosterDayAvailability(input: {
+  staffId: string;
+  localDate: string;
+  workingHours: Record<string, unknown> | null | undefined;
+  staffTimezone?: string | null;
+  tenantTimezone: string;
+  availabilityBlocks: Array<{
+    id: string;
+    block_type: string;
+    starts_at: string;
+    ends_at: string;
+    status?: string | null;
+    reason?: string | null;
+  }>;
+}): StaffAvailabilityExplanation {
+  const window = buildRosterFullDayAbsenceLocalWindow(input.localDate);
+  const tz = normalizeCalendarTimezone(
+    input.staffTimezone?.trim() || input.tenantTimezone
+  );
+  const converted = rosterShiftDatetimeLocalToUtcIso({
+    startsAtLocal: window.startsAtLocal,
+    endsAtLocal: window.endsAtLocal,
+    staffTimezone: input.staffTimezone,
+    tenantTimezone: input.tenantTimezone,
+  });
+  const startsAt =
+    "error" in converted
+      ? fromDatetimeLocalValueInTimezone(window.startsAtLocal, tz) ??
+        `${input.localDate}T00:00:00.000Z`
+      : converted.startsAt;
+  const endsAt =
+    "error" in converted
+      ? fromDatetimeLocalValueInTimezone(window.endsAtLocal, tz) ??
+        `${input.localDate}T23:59:00.000Z`
+      : converted.endsAt;
+
+  const blocks: StaffAvailabilityBlockRecord[] = input.availabilityBlocks.map((b) => ({
+    id: b.id,
+    block_type: b.block_type as StaffAvailabilityBlockRecord["block_type"],
+    starts_at: b.starts_at,
+    ends_at: b.ends_at,
+    status: (b.status as StaffAvailabilityBlockRecord["status"]) || "active",
+    reason: b.reason ?? null,
+  }));
+
+  // Probe a one-hour midday window so weekly containment is meaningful for day labels.
+  const middayLocal = `${input.localDate.slice(0, 10)}T12:00`;
+  const middayEndLocal = `${input.localDate.slice(0, 10)}T13:00`;
+  const midday = rosterShiftDatetimeLocalToUtcIso({
+    startsAtLocal: middayLocal,
+    endsAtLocal: middayEndLocal,
+    staffTimezone: input.staffTimezone,
+    tenantTimezone: input.tenantTimezone,
+  });
+  const probeStart = "error" in midday ? startsAt : midday.startsAt;
+  const probeEnd = "error" in midday ? endsAt : midday.endsAt;
+
+  const slotExplanation = getStaffAvailabilityForRange({
+    staffId: input.staffId,
+    startsAt: probeStart,
+    endsAt: probeEnd,
+    workingHours: input.workingHours,
+    staffTimezone: tz,
+    availabilityBlocks: blocks,
+    shifts: [],
+  }).explanation;
+
+  if (
+    slotExplanation.source !== "outside_weekly_hours" &&
+    slotExplanation.source !== "weekly_hours"
+  ) {
+    return {
+      ...slotExplanation,
+      effectiveStart: slotExplanation.effectiveStart ?? startsAt,
+      effectiveEnd: slotExplanation.effectiveEnd ?? endsAt,
+    };
+  }
+
+  const weekly = parseStaffWeeklyHours(input.workingHours);
+  const startMs = Date.parse(probeStart);
+  const key = Number.isFinite(startMs) ? staffWeekdayKeyFromUtcMs(startMs, tz) : null;
+  const day = key ? weekly[key] : null;
+  if (day && day.enabled !== false && day.start && day.end) {
+    return {
+      available: true,
+      source: "weekly_hours",
+      reason: `Normal weekly hours (${day.start}–${day.end})`,
+      overrideType: null,
+      blockingRecordId: null,
+      effectiveStart: startsAt,
+      effectiveEnd: endsAt,
+    };
+  }
+
+  return {
+    available: false,
+    source: "outside_weekly_hours" as StaffAvailabilitySource,
+    reason: "Outside normal weekly hours",
+    overrideType: null,
+    blockingRecordId: null,
+    effectiveStart: startsAt,
+    effectiveEnd: endsAt,
+  };
 }

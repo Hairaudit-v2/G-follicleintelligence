@@ -39,10 +39,10 @@ import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory";
 import { isSupportStaffRole } from "@/src/lib/team/directory";
 import {
   DEFAULT_STAFF_HOURS_FALLBACK_TZ,
-  isUtcRangeWithinStaffWeeklyHours,
-  parseStaffWeeklyHours,
   staffWeekdayKeyFromUtcMs,
+  type StaffAvailabilityBlockRecord,
 } from "@/src/lib/team/roster/availability";
+import { isCandidateSlotWithinStaffEffectiveAvailability } from "@/src/lib/calendar/findNextAvailableBookingSlotsCore";
 
 export type NextAvailableBookingSlot = {
   startAt: string;
@@ -138,9 +138,41 @@ function isSuggestableClinicalAssignableStaff(staff: {
   return true;
 }
 
+function mapAvailabilityBlock(row: Record<string, unknown>): StaffAvailabilityBlockRecord {
+  return {
+    id: String(row.id ?? ""),
+    block_type: row.block_type as StaffAvailabilityBlockRecord["block_type"],
+    starts_at: String(row.starts_at ?? ""),
+    ends_at: String(row.ends_at ?? ""),
+    status: (row.status as StaffAvailabilityBlockRecord["status"]) || "active",
+    reason: (row.reason as string | null | undefined) ?? null,
+  };
+}
+
+async function loadActiveAvailabilityBlocksForStaffHorizon(
+  tenantId: string,
+  staffId: string,
+  startIso: string,
+  endIso: string,
+  client: SupabaseClient
+): Promise<StaffAvailabilityBlockRecord[]> {
+  const { data, error } = await client
+    .from("fi_staff_availability_blocks")
+    .select("id, block_type, starts_at, ends_at, status, reason")
+    .eq("tenant_id", tenantId)
+    .eq("staff_id", staffId)
+    .eq("status", "active")
+    .lt("starts_at", endIso)
+    .gt("ends_at", startIso);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
+}
+
 /**
  * Search forward on the tenant operational grid for bookable (room + optional staff) slots
- * that pass the same overlap, eligibility, and working-hours rules as save-time booking.
+ * that pass the same overlap, eligibility, and effective-availability rules as save-time booking
+ * (weekly OR available_override; blocked by leave/sick/unavailable/etc.).
  */
 export async function findNextAvailableBookingSlots(
   input: FindNextAvailableBookingSlotsInput
@@ -173,8 +205,8 @@ export async function findNextAvailableBookingSlots(
   }
 
   let staff: Awaited<ReturnType<typeof loadStaffMemberForTenant>> = null;
-  let staffWeekly = parseStaffWeeklyHours({});
   let staffTz = normalizeCalendarTimezone(DEFAULT_STAFF_HOURS_FALLBACK_TZ);
+  let staffBlocks: StaffAvailabilityBlockRecord[] = [];
   let staffRules: Awaited<ReturnType<typeof loadServiceStaffEligibilityForService>> = [];
 
   if (staffId) {
@@ -182,7 +214,6 @@ export async function findNextAvailableBookingSlots(
     if (!staff || !isSuggestableClinicalAssignableStaff(staff)) {
       return { slots: [] };
     }
-    staffWeekly = parseStaffWeeklyHours(staff.working_hours);
     staffTz = normalizeCalendarTimezone(
       staff.default_timezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ
     );
@@ -244,6 +275,16 @@ export async function findNextAvailableBookingSlots(
     client
   );
 
+  if (staffId && staff) {
+    staffBlocks = await loadActiveAvailabilityBlocksForStaffHorizon(
+      tid,
+      staffId,
+      preferredStartAt,
+      horizonEndIso,
+      client
+    );
+  }
+
   const slots: NextAvailableBookingSlot[] = [];
   const seen = new Set<string>();
   const prefClockKey = localClockKey(preferredStartAt, gridTz);
@@ -274,7 +315,18 @@ export async function findNextAvailableBookingSlots(
 
       if (staffId && staff) {
         if (!fitsSameLocalCalendarDayForStaff(startMs, endMs, staffTz)) continue;
-        if (!isUtcRangeWithinStaffWeeklyHours(startMs, endMs, staffWeekly, staffTz)) continue;
+        if (
+          !isCandidateSlotWithinStaffEffectiveAvailability({
+            staffId,
+            startIso,
+            endIso,
+            workingHours: staff.working_hours,
+            staffTimezone: staffTz,
+            availabilityBlocks: staffBlocks,
+          })
+        ) {
+          continue;
+        }
         if (
           findStaffOverlapConflictWithAssignments({
             candidateStaffId: staffId,

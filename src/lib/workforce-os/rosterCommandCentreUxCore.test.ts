@@ -36,6 +36,7 @@ import {
   shiftMatchesRosterCellDate,
   ROSTER_GRID_SCROLL_CLASSES,
   ROSTER_PAGE_SCROLL_ROOT_CLASSES,
+  explainRosterDayAvailability,
 } from "@/src/lib/workforce-os/rosterCommandCentreUxCore";
 import { ROSTER_MANAGE_DENIED_REASON } from "@/src/lib/workforce-os/staffStandardHoursRoutes";
 import {
@@ -522,4 +523,54 @@ test("toRosterShiftDatetimeLocal uses staff timezone for edit form display", () 
     toRosterShiftDatetimeLocal("2026-07-05T23:00:00.000Z", "Australia/Sydney", "Australia/Sydney"),
     "2026-07-06T09:00"
   );
+});
+
+test("explainRosterDayAvailability: leave day surfaces sick/leave reason", () => {
+  const explanation = explainRosterDayAvailability({
+    staffId: "staff-1",
+    localDate: "2026-06-08",
+    workingHours: {
+      weekly: { mon: { enabled: true, start: "08:30", end: "17:30" } },
+    },
+    staffTimezone: "Australia/Perth",
+    tenantTimezone: "Australia/Perth",
+    availabilityBlocks: [
+      {
+        id: "blk-1",
+        block_type: "sick_leave",
+        starts_at: "2026-06-07T16:00:00.000Z",
+        ends_at: "2026-06-08T16:00:00.000Z",
+        status: "active",
+        reason: "Flu",
+      },
+    ],
+  });
+  assert.equal(explanation.available, false);
+  assert.equal(explanation.source, "sick_leave");
+  assert.match(explanation.reason, /Flu/);
+  assert.equal(explanation.blockingRecordId, "blk-1");
+});
+
+test("explainRosterDayAvailability: weekly hours when no blocks", () => {
+  const explanation = explainRosterDayAvailability({
+    staffId: "staff-1",
+    localDate: "2026-06-08",
+    workingHours: {
+      weekly: {
+        mon: { enabled: true, start: "08:30", end: "17:30" },
+        tue: { enabled: true, start: "08:30", end: "17:30" },
+        wed: { enabled: true, start: "08:30", end: "17:30" },
+        thu: { enabled: true, start: "08:30", end: "17:30" },
+        fri: { enabled: true, start: "08:30", end: "17:30" },
+        sat: { enabled: false },
+        sun: { enabled: false },
+      },
+    },
+    staffTimezone: "Australia/Perth",
+    tenantTimezone: "Australia/Perth",
+    availabilityBlocks: [],
+  });
+  assert.equal(explanation.available, true);
+  assert.equal(explanation.source, "weekly_hours");
+  assert.match(explanation.reason, /Normal weekly hours/);
 });

@@ -32,7 +32,9 @@ export {
   type AvailabilityBlockType,
   type ShiftStatus,
   type StaffAvailabilityBlockRecord,
+  type StaffAvailabilityExplanation,
   type StaffAvailabilityRangeInput,
   type StaffAvailabilityRangeResult,
+  type StaffAvailabilitySource,
   type StaffShiftRecord,
 } from "@/src/lib/team/roster/availability/effectiveAvailability";

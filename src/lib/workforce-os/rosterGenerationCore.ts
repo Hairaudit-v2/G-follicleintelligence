@@ -3,10 +3,13 @@
  */
 
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/team/roster/availability";
+import {
+  BLOCKING_AVAILABILITY_BLOCK_TYPES,
+  DEFAULT_STAFF_HOURS_FALLBACK_TZ,
+  type AvailabilityBlockType,
+} from "@/src/lib/team/roster/availability";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
-import type { AvailabilityBlockType } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
   normaliseCycleWeek,
   type StaffStandardHoursDayInput,
@@ -87,14 +90,7 @@ export type GenerateRosterFromStandardHoursResult = {
   };
 };
 
-const BLOCKING_BLOCK_TYPES = new Set<AvailabilityBlockType>([
-  "unavailable",
-  "leave",
-  "sick_leave",
-  "maternity_leave",
-  "training",
-  "admin",
-]);
+const BLOCKING_BLOCK_TYPES = new Set<AvailabilityBlockType>(BLOCKING_AVAILABILITY_BLOCK_TYPES);
 
 function parseIsoMs(iso: string): number {
   const ms = Date.parse(iso);
