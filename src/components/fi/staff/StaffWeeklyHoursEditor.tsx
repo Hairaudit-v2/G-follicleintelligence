@@ -6,7 +6,7 @@ import {
   type StaffDayHours,
   type StaffWeeklyHoursMap,
   STAFF_WEEKDAY_KEYS,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 const DAY_LABEL: Record<(typeof STAFF_WEEKDAY_KEYS)[number], string> = {
   mon: "Monday",

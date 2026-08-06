@@ -1,13 +1,34 @@
 /**
  * WorkforceOS Phase 2C — clinical rostering engine (pure functions, no I/O).
  * Validates availability, conflicts, staffing templates, and clinical eligibility.
+ *
+ * Weekly template + effective UTC-range availability live in
+ * `@/src/lib/team/roster/availability` (canonical). This module re-exports those
+ * symbols for existing workforce-os call sites.
  */
 
+export {
+  getStaffAvailabilityForRange,
+  parseTimeRangeMs,
+  rangesOverlap,
+  type AvailabilityBlockStatus,
+  type AvailabilityBlockType,
+  type ShiftStatus,
+  type StaffAvailabilityBlockRecord,
+  type StaffAvailabilityRangeInput,
+  type StaffAvailabilityRangeResult,
+  type StaffShiftRecord,
+} from "@/src/lib/team/roster/availability";
+
 import {
-  isUtcRangeWithinStaffWeeklyHours,
-  parseStaffWeeklyHours,
-  DEFAULT_STAFF_HOURS_FALLBACK_TZ,
-} from "@/src/lib/staff/staffWeeklyHours";
+  BLOCKING_AVAILABILITY_BLOCK_TYPES,
+  getStaffAvailabilityForRange,
+  parseTimeRangeMs,
+  rangesOverlap,
+  type StaffAvailabilityBlockRecord,
+  type StaffAvailabilityRangeInput,
+  type StaffShiftRecord,
+} from "@/src/lib/team/roster/availability";
 import { canStaffBeAssignedClinically } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 import type { StaffClinicalAssignmentResult } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 import {
@@ -22,40 +43,10 @@ import {
 import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";
 
 // ---------------------------------------------------------------------------
-// Shared types
+// Shared types (engine-specific)
 // ---------------------------------------------------------------------------
 
-export type AvailabilityBlockType =
-  | "unavailable"
-  | "leave"
-  | "sick_leave"
-  | "maternity_leave"
-  | "training"
-  | "admin"
-  | "available_override";
-
-export type AvailabilityBlockStatus = "active" | "cancelled";
-
-export type ShiftStatus = "scheduled" | "confirmed" | "completed" | "cancelled";
-
 export type AssignmentStatus = "scheduled" | "confirmed" | "completed" | "cancelled" | "blocked";
-
-export type StaffAvailabilityBlockRecord = {
-  id: string;
-  block_type: AvailabilityBlockType;
-  starts_at: string;
-  ends_at: string;
-  status: AvailabilityBlockStatus;
-  reason?: string | null;
-};
-
-export type StaffShiftRecord = {
-  id: string;
-  shift_type: string;
-  starts_at: string;
-  ends_at: string;
-  status: ShiftStatus;
-};
 
 export type StaffEventAssignmentRecord = {
   id: string;
@@ -94,23 +85,6 @@ export type CandidateAssignment = {
   assignedRole: string;
   readinessInput: WorkforceReadinessScoreInput;
   privilegeEligibility?: ProcedurePrivilegeEligibilityResult;
-};
-
-export type StaffAvailabilityRangeInput = {
-  staffId: string;
-  startsAt: string;
-  endsAt: string;
-  workingHours: Record<string, unknown> | null | undefined;
-  staffTimezone?: string | null;
-  availabilityBlocks: StaffAvailabilityBlockRecord[];
-  shifts: StaffShiftRecord[];
-};
-
-export type StaffAvailabilityRangeResult = {
-  available: boolean;
-  reasons: string[];
-  activeBlocks: StaffAvailabilityBlockRecord[];
-  matchingShifts: StaffShiftRecord[];
 };
 
 export type SchedulingConflictInput = {
@@ -198,96 +172,8 @@ export type AssignStaffToClinicalEventResult =
     };
 
 // ---------------------------------------------------------------------------
-// Time helpers
-// ---------------------------------------------------------------------------
-
-export function parseTimeRangeMs(
-  startsAt: string,
-  endsAt: string
-): { startMs: number; endMs: number } | null {
-  const startMs = Date.parse(startsAt);
-  const endMs = Date.parse(endsAt);
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return null;
-  return { startMs, endMs };
-}
-
-export function rangesOverlap(
-  aStartMs: number,
-  aEndMs: number,
-  bStartMs: number,
-  bEndMs: number
-): boolean {
-  return aStartMs < bEndMs && bStartMs < aEndMs;
-}
-
-const UNAVAILABLE_BLOCK_TYPES: AvailabilityBlockType[] = [
-  "unavailable",
-  "leave",
-  "sick_leave",
-  "maternity_leave",
-  "training",
-  "admin",
-];
-
-// ---------------------------------------------------------------------------
 // Core functions
 // ---------------------------------------------------------------------------
-
-export function getStaffAvailabilityForRange(
-  input: StaffAvailabilityRangeInput
-): StaffAvailabilityRangeResult {
-  const range = parseTimeRangeMs(input.startsAt, input.endsAt);
-  const reasons: string[] = [];
-  const activeBlocks = input.availabilityBlocks.filter((b) => b.status === "active");
-
-  const overlappingBlocks = activeBlocks.filter((b) => {
-    const br = parseTimeRangeMs(b.starts_at, b.ends_at);
-    return br && range && rangesOverlap(range.startMs, range.endMs, br.startMs, br.endMs);
-  });
-
-  const matchingShifts = input.shifts.filter((s) => {
-    if (s.status === "cancelled") return false;
-    const sr = parseTimeRangeMs(s.starts_at, s.ends_at);
-    return sr && range && rangesOverlap(range.startMs, range.endMs, sr.startMs, sr.endMs);
-  });
-
-  const hasOverride = overlappingBlocks.some((b) => b.block_type === "available_override");
-  const blockingBlocks = overlappingBlocks.filter((b) =>
-    UNAVAILABLE_BLOCK_TYPES.includes(b.block_type)
-  );
-
-  if (blockingBlocks.length > 0) {
-    for (const b of blockingBlocks) {
-      reasons.push(`Active ${b.block_type.replace(/_/g, " ")} block`);
-    }
-  }
-
-  let withinWorkingHours = false;
-  if (range) {
-    const weekly = parseStaffWeeklyHours(input.workingHours);
-    const tz = input.staffTimezone?.trim() || DEFAULT_STAFF_HOURS_FALLBACK_TZ;
-    withinWorkingHours = isUtcRangeWithinStaffWeeklyHours(range.startMs, range.endMs, weekly, tz);
-    if (!withinWorkingHours && !hasOverride) {
-      reasons.push("Outside configured weekly working hours");
-    }
-  }
-
-  const available =
-    (withinWorkingHours || hasOverride) &&
-    blockingBlocks.length === 0 &&
-    (matchingShifts.length > 0 || hasOverride || withinWorkingHours);
-
-  if (available && matchingShifts.length === 0 && !hasOverride) {
-    // Staff may still be available via working hours even without an explicit shift row.
-  }
-
-  return {
-    available: blockingBlocks.length === 0 && (withinWorkingHours || hasOverride),
-    reasons,
-    activeBlocks: overlappingBlocks,
-    matchingShifts,
-  };
-}
 
 export function detectStaffSchedulingConflicts(
   input: SchedulingConflictInput
@@ -314,7 +200,7 @@ export function detectStaffSchedulingConflicts(
         message: "Staff has sick leave during this period",
         relatedId: block.id,
       });
-    } else if (UNAVAILABLE_BLOCK_TYPES.includes(block.block_type)) {
+    } else if ((BLOCKING_AVAILABILITY_BLOCK_TYPES as readonly string[]).includes(block.block_type)) {
       conflicts.push({
         kind: "unavailable_block",
         message: `Staff unavailable (${block.block_type}) during this period`,

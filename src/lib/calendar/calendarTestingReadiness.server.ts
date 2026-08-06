@@ -21,13 +21,13 @@ import {
   loadStaffFiUserIdMap,
   resolveBookingStaffAssignment,
 } from "@/src/lib/staff/staff.server";
-import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/bookings/staffSlotAvailability.server";
 import {
   formatStaffWeeklyHoursSummary,
   minutesFromHm,
   parseStaffWeeklyHours,
   staffWeekdayKeyFromUtcMs,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 import { nextStaffWorkingLocalDayYmd } from "./calendarTestingSlotHelpers";
 import { loadCalendarReminderTestingPayload } from "./calendarReminderTesting.server";

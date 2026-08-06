@@ -13,7 +13,7 @@ import {
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,
   type StaffWeeklyHoursMap,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/team/notifications";
 import type { StaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";

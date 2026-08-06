@@ -36,7 +36,7 @@ import {
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,
   type StaffWeeklyHoursMap,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 type Mode = "idle" | "edit";
 

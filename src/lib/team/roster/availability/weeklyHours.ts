@@ -1,5 +1,8 @@
 /**
- * Weekly working hours for `fi_staff.working_hours` (JSON object).
+ * Team Roster — recurring weekly availability template for `fi_staff.working_hours`.
+ * Usual scheduling availability only — not contracted payroll hours or the final
+ * appointment allow/deny gate (see effectiveAvailability + bookings staffSlotAvailability).
+ *
  * Wall times are interpreted in the staff member's `default_timezone`
  * (fallback {@link DEFAULT_STAFF_HOURS_FALLBACK_TZ} when unset).
  */

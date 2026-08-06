@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.3b GREEN · B2.3a GREEN · B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.4 GREEN · B2.3b GREEN · B2.3a GREEN · B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -18,6 +18,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | B2.2a — Directory core | **GREEN** (delivery record / recovery id B2.2a-R — [record](./b2.2a-r-directory-core-consolidation.md); earlier “already GREEN” wording was incorrect) |
 | B2.3a — Staff role policy | **GREEN** — [plan](./b2.3a-staff-role-policy-plan.md) · [proof](./b2.3a-staff-role-policy-proof.md) |
 | B2.3b — HR readiness + notifications | **GREEN** — [plan](./b2.3b-hr-readiness-notification-plan.md) · [proof](./b2.3b-hr-readiness-notification-proof.md) |
+| B2.4 — Roster availability + booking slot gate | **GREEN** — [plan](./b2.4-roster-availability-booking-gate-plan.md) · [proof](./b2.4-roster-availability-booking-gate-proof.md) |
 
 **History note:** An earlier draft claimed B2.2a GREEN before any directory-core `git mv`. That claim was stricken. Clinical picker (B2.2d) and directory-core (B2.2a) are distinct deliveries.
 
@@ -52,6 +53,8 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b2.3a-staff-role-policy-proof.md](./b2.3a-staff-role-policy-proof.md) | B2.3a delivery proof |
 | [b2.3b-hr-readiness-notification-plan.md](./b2.3b-hr-readiness-notification-plan.md) | B2.3b ownership audit + must-move manifest |
 | [b2.3b-hr-readiness-notification-proof.md](./b2.3b-hr-readiness-notification-proof.md) | B2.3b delivery proof |
+| [b2.4-roster-availability-booking-gate-plan.md](./b2.4-roster-availability-booking-gate-plan.md) | B2.4 ownership audit + must-move manifest |
+| [b2.4-roster-availability-booking-gate-proof.md](./b2.4-roster-availability-booking-gate-proof.md) | B2.4 delivery proof |
 
 ## Generated artifacts
 
@@ -71,7 +74,7 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 | Metric | Value |
 |--------|------:|
-| Canonical Team domains delivered | identity, directory, notifications, access, onboarding, roster, compliance, profile, commandCentre, payroll, planning |
+| Canonical Team domains delivered | identity, directory, notifications, access, onboarding, roster (+ availability), compliance, profile, commandCentre, payroll, planning |
 | Dual-table allowlist | **12** — must not grow |
 | B1 program | **CLOSED** |
 | B2.1a temporary compatibility shims | **0** (deleted in B2.1b) |
@@ -79,10 +82,10 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## B2 scorecard
 
-| Metric | B2.3a | B2.3b now | Target |
-|--------|------:|----------:|-------:|
-| Files in legacy lib trees | 215 | **209** | 0 |
-| Deep legacy imports | 195 | **190** | 0 |
+| Metric | B2.3b | B2.4 now | Target |
+|--------|------:|---------:|-------:|
+| Files in legacy lib trees | 209 | **207** | 0 |
+| Deep legacy imports | 190 | **180** | 0 |
 | Sprint-named action files | 7 | 7 | 0 |
 | Documented dependency cycles | 0 | **0** | 0 |
 | Temporary compatibility exports | 0 | **0** | 0 |
@@ -92,10 +95,8 @@ Refresh “Current” from `generated/b0-summary.json` after each inventory rege
 
 ## Recommended next slice
 
-After B2.3b:
+After B2.4:
 
-1. Semantic decision then move for `staffWeeklyHours` / `staffSlotHours`
-2. Otherwise another high-fan-out single-domain legacy cluster (roster / payroll engines)
-3. Deferred mixed composition: `staffRoleReview*` / sprint actions
-
-**Do not start B3** sprint-action renames until those homes stabilize.
+1. Deferred mixed composition: `staffRoleReview*` / sprint actions
+2. Otherwise another high-fan-out single-domain legacy cluster (roster server / payroll engines / standard-hours home)
+3. Optional: roster CC “available outside hours” UI; slot finder honouring leave blocks

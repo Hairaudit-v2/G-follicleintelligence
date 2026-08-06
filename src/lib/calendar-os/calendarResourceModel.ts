@@ -23,7 +23,7 @@ import {
   parseStaffWeeklyHours,
   type StaffWeekdayKey,
   STAFF_WEEKDAY_KEYS,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 import { CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR } from "@/src/lib/calendar-os/calendarDisplayDensity";
 import { weekdayKeyFromDayKey } from "@/src/lib/calendar-os/calendarWorkforceBlocks";
 

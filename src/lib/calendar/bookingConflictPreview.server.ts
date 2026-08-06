@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { AppointmentStaffHoursError } from "@/src/lib/bookings/bookingErrors";
-import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/bookings/staffSlotAvailability.server";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { toDatetimeLocalValueInTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";

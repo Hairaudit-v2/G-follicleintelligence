@@ -3,7 +3,7 @@
  */
 
 import { zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
-import type { StaffWeekdayKey } from "@/src/lib/staff/staffWeeklyHours";
+import type { StaffWeekdayKey } from "@/src/lib/team/roster/availability";
 
 const WEEKDAY_TO_KEY: Record<number, StaffWeekdayKey> = {
   1: "mon",

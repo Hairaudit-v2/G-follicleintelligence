@@ -18,7 +18,7 @@ import {
   isUtcRangeWithinStaffWeeklyHours,
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 import { localWallTimeToUtcRange } from "@/src/lib/workforce-os/rosterGenerationCore";
 import {
   applyStandardHoursTemplate,

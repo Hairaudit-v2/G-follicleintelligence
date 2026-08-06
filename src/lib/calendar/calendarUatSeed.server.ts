@@ -19,7 +19,7 @@ import {
   defaultPerthClinicWeeklyHours,
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 const UAT_STAFF_PREFIX = "UAT Seed —";
 const UAT_BOOKING_TITLE_TAG = "UAT Seed";

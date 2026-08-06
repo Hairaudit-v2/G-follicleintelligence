@@ -77,11 +77,11 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 **Seed modules**
 
 - `team/directory/*` B1.1 projections + **clinical staff picker (B2.2d GREEN)** + **directory core (B2.2a GREEN)** + **staff role policy (B2.3a GREEN)** via `index` / `server`
-- Remaining hot cluster (post–B2.3b): `staffWeeklyHours*` / `staffSlotHours*` (semantic split pending), `staffRoleReview*` (mixed payroll/clinic/HR notification composition)
+- Remaining hot cluster: `staffRoleReview*` (mixed payroll/clinic/HR notification composition)
 
 **Directory owns (B2.3a):** staff-role classification for directory visibility, clinical bookability role predicates (`needs_review`), picker/filter role policy.
 
-**Directory does not own:** wage/payroll role review, contracted/roster hours, HR notification delivery, identity readiness thresholds.
+**Directory does not own:** wage/payroll role review, contracted/roster hours, weekly availability templates, HR notification delivery, identity readiness thresholds.
 
 ---
 
@@ -114,11 +114,21 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - Transaction boundaries including `rosterTx`
 - Roster command-centre payload / grid UX (ops surface, not Team overview)
 - Standard hours used as roster inputs
+- **Recurring weekly availability template** (`fi_staff.working_hours` parse/serialize/window predicates)
+- **Effective UTC-range availability** (weekly OR `available_override`, blocked by leave/sick/unavailable/training/admin/maternity)
+
+**Canonical availability (B2.4)**
+
+- `src/lib/team/roster/availability` — weekly hours + `getStaffAvailabilityForRange`
+- Exposed via `@/src/lib/team/roster` and `@/src/lib/team/roster/availability`
+- Bookings compose this contract; bookings do not own weekly parsing or block precedence
 
 **Seed modules**
 
-- All `workforce-os/roster*`, `workforceRostering*`, `workforceRoster*`
+- All `workforce-os/roster*`, `workforceRostering*` (engine re-exports availability), `workforceRoster*`
 - `workforce/rosterCadence*`, `rosterActualVariance*`, leave workflow (availability effect)
+
+**Does not own:** final appointment slot allow/deny (Bookings), contracted payroll hours (Payroll)
 
 ---
 

@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-08-06T02:03:49.209Z",
+  "generatedAt": "2026-08-06T02:47:09.805Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 391,
-  "growthSinceAudit": 124,
+  "currentFiles": 393,
+  "growthSinceAudit": 126,
   "trees": {
     "workforce-os": 76,
     "workforce": 112,
-    "staff": 21
+    "staff": 19
   },
   "domainCounts": {
     "shared": 35,
-    "roster": 69,
+    "roster": 73,
     "identity": 107,
     "compliance": 18,
     "payroll": 33,
@@ -18,13 +18,13 @@
     "commandCentre": 15,
     "access": 27,
     "notifications": 9,
-    "directory": 25,
+    "directory": 23,
     "delete": 3,
     "onboarding": 27
   },
   "riskCounts": {
-    "low": 151,
-    "medium": 60,
+    "low": 154,
+    "medium": 59,
     "high": 180
   },
   "inventory": [
@@ -3263,6 +3263,7 @@
         "src/lib/actions/fi-staff-role-review-actions.ts",
         "src/lib/analytics-os/analyticsExecutive.server.ts",
         "src/lib/bookings/appointmentsApi.ts",
+        "src/lib/bookings/staffSlotAvailability.server.ts",
         "src/lib/calendar/bookingConflictPreview.server.ts",
         "src/lib/calendar/bookingResourceRequirements.server.ts",
         "src/lib/calendar/calendarTestingSmoke.server.ts",
@@ -3279,7 +3280,6 @@
         "src/lib/staff/staffFiUserLink.server.ts",
         "src/lib/staff/staffRoleReviewApply.ts",
         "src/lib/staff/staffRoleReviewLoader.server.ts",
-        "src/lib/staff/staffSlotHours.server.ts",
         "src/lib/staff/staffTwinLoader.server.ts",
         "src/lib/staff/workforceCommandCentre.server.ts",
         "src/lib/staffPin/staffPinLoginLoader.server.ts",
@@ -3499,28 +3499,6 @@
       "migrationRisk": "low"
     },
     {
-      "currentPath": "src/lib/staff/staffSlotHours.server.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "staff presentation/picker helpers",
-      "proposedPath": "src/lib/team/directory/staffSlotHours.server.ts",
-      "runtimeConsumers": [
-        "src/lib/bookings/appointmentsApi.ts",
-        "src/lib/bookings/bookings.ts",
-        "src/lib/calendar/bookingConflictPreview.server.ts",
-        "src/lib/calendar/bookingResourceRequirements.server.ts",
-        "src/lib/calendar/calendarTestingReadiness.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
       "currentPath": "src/lib/staff/staffSourceIdsNormalize.test.ts",
       "proposedDomain": "identity",
       "proposeReason": "identity/lifecycle/readiness/reconciliation",
@@ -3573,32 +3551,6 @@
       "testConsumers": [],
       "tablesReferenced": [],
       "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/staff/staffWeeklyHours.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "staff presentation/picker helpers",
-      "proposedPath": "src/lib/team/directory/staffWeeklyHours.ts",
-      "runtimeConsumers": [
-        "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-        "src/components/fi/staff/StaffRoleReviewClient.tsx",
-        "src/lib/actions/fi-staff-role-review-actions.ts",
-        "src/lib/calendar-os/calendarWorkforceBlocks.ts",
-        "src/lib/calendar/calendarTestingSlotHelpers.ts",
-        "src/lib/staff/staffApiSchemas.ts",
-        "src/lib/workforce-os/rosterEligibleStaffCore.ts",
-        "src/lib/workforce-os/rosterGenerationCore.ts",
-        "src/lib/workforce-os/staffStandardHours.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": false,
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
@@ -6596,6 +6548,66 @@
       "migrationRisk": "high"
     },
     {
+      "currentPath": "src/lib/team/roster/availability/effectiveAvailability.test.ts",
+      "proposedDomain": "roster",
+      "proposeReason": "canonical team/roster module",
+      "proposedPath": "src/lib/team/roster/effectiveAvailability.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/roster/availability/effectiveAvailability.ts",
+      "proposedDomain": "roster",
+      "proposeReason": "canonical team/roster module",
+      "proposedPath": "src/lib/team/roster/effectiveAvailability.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/roster/availability/index.ts",
+      "proposedDomain": "roster",
+      "proposeReason": "canonical team/roster module",
+      "proposedPath": "src/lib/team/roster/index.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/roster/availability/weeklyHours.ts",
+      "proposedDomain": "roster",
+      "proposeReason": "canonical team/roster module",
+      "proposedPath": "src/lib/team/roster/weeklyHours.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
       "currentPath": "src/lib/team/roster/index.ts",
       "proposedDomain": "roster",
       "proposeReason": "canonical team/roster module",
@@ -6697,7 +6709,7 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 154,
+    "interTreeEdgeCount": 151,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -6785,13 +6797,6 @@
       },
       {
         "from": "src/lib/workforce-os/rosterEligibleStaffCore.ts",
-        "to": "src/lib/staff/staffWeeklyHours.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
-      },
-      {
-        "from": "src/lib/workforce-os/rosterEligibleStaffCore.ts",
         "to": "src/lib/team/identity/staffLifecycleTypes.ts",
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
@@ -6810,13 +6815,6 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/workforce",
         "spec": "@/src/lib/workforce/rosterCadencePolicy.server"
-      },
-      {
-        "from": "src/lib/workforce-os/rosterGenerationCore.ts",
-        "to": "src/lib/staff/staffWeeklyHours.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
       },
       {
         "from": "src/lib/workforce-os/rosterGenerationCore.ts",
@@ -6859,13 +6857,6 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "from": "src/lib/workforce-os/staffStandardHours.server.ts",
-        "to": "src/lib/staff/staffWeeklyHours.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
       },
       {
         "from": "src/lib/workforce-os/staffStandardHours.server.ts",
@@ -7839,7 +7830,7 @@
       {
         "file": "src/lib/workforce-os/workforceRosteringEngine.ts",
         "exportStar": 0,
-        "namedExports": 28
+        "namedExports": 18
       },
       {
         "file": "src/lib/workforce/identityReconciliationCore.ts",
@@ -7952,11 +7943,6 @@
         "namedExports": 13
       },
       {
-        "file": "src/lib/staff/staffWeeklyHours.ts",
-        "exportStar": 0,
-        "namedExports": 17
-      },
-      {
         "file": "src/lib/staff/workforceCommandCentre.ts",
         "exportStar": 0,
         "namedExports": 18
@@ -8010,6 +7996,11 @@
         "file": "src/lib/team/onboarding/onboardingTypes.ts",
         "exportStar": 0,
         "namedExports": 14
+      },
+      {
+        "file": "src/lib/team/roster/availability/weeklyHours.ts",
+        "exportStar": 0,
+        "namedExports": 17
       }
     ],
     "clientImportingServer": [
@@ -8129,7 +8120,7 @@
         "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 190,
+    "deepImportViolationCount": 180,
     "deepImportViolationsSample": [
       {
         "consumer": "src/components/fi-admin/hr/DuplicateReviewClient.tsx",
@@ -8207,11 +8198,6 @@
         "spec": "@/src/lib/workforce/workforceIntelligenceEngineCore"
       },
       {
-        "consumer": "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
-      },
-      {
         "consumer": "src/components/fi/appointments/shared/AppointmentOperationalSummary.tsx",
         "target": "src/lib/workforce-os/clinicalStaffingSummary.types.ts",
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
@@ -8270,11 +8256,6 @@
         "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
         "target": "src/lib/team/directory/server.ts",
         "spec": "@/src/lib/team/directory/server"
-      },
-      {
-        "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
       },
       {
         "consumer": "src/components/fi/staff/StaffWorkforceIdentityPanel.tsx",
@@ -8562,11 +8543,6 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "consumer": "src/lib/actions/fi-staff-role-review-actions.ts",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
-      },
-      {
         "consumer": "src/lib/actions/staff-time-clock-actions.ts",
         "target": "src/lib/workforce/payPeriodCore.ts",
         "spec": "@/src/lib/workforce/payPeriodCore"
@@ -8742,19 +8718,9 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "consumer": "src/lib/bookings/appointmentsApi.ts",
-        "target": "src/lib/staff/staffSlotHours.server.ts",
-        "spec": "@/src/lib/staff/staffSlotHours.server"
-      },
-      {
         "consumer": "src/lib/bookings/bookingOperatorLoader.ts",
         "target": "src/lib/team/directory/server.ts",
         "spec": "@/src/lib/team/directory/server"
-      },
-      {
-        "consumer": "src/lib/bookings/bookings.ts",
-        "target": "src/lib/staff/staffSlotHours.server.ts",
-        "spec": "@/src/lib/staff/staffSlotHours.server"
       },
       {
         "consumer": "src/lib/bookings/bookings.ts",
@@ -8767,6 +8733,11 @@
         "spec": "@/src/lib/team/directory/server"
       },
       {
+        "consumer": "src/lib/bookings/staffSlotAvailability.server.ts",
+        "target": "src/lib/staff/staff.server.ts",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
         "consumer": "src/lib/calendar-os/calendarBookingCardModel.ts",
         "target": "src/lib/workforce-os/clinicalStaffingSummary.types.ts",
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
@@ -8777,16 +8748,6 @@
         "spec": "@/src/lib/workforce-os/clinicalStaffingSummary.types"
       },
       {
-        "consumer": "src/lib/calendar-os/calendarWorkforceBlocks.ts",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
-      },
-      {
-        "consumer": "src/lib/calendar/bookingConflictPreview.server.ts",
-        "target": "src/lib/staff/staffSlotHours.server.ts",
-        "spec": "@/src/lib/staff/staffSlotHours.server"
-      },
-      {
         "consumer": "src/lib/calendar/bookingConflictPreview.server.ts",
         "target": "src/lib/staff/staff.server.ts",
         "spec": "@/src/lib/staff/staff.server"
@@ -8795,26 +8756,6 @@
         "consumer": "src/lib/calendar/bookingResourceRequirements.server.ts",
         "target": "src/lib/staff/staff.server.ts",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "consumer": "src/lib/calendar/bookingResourceRequirements.server.ts",
-        "target": "src/lib/staff/staffSlotHours.server.ts",
-        "spec": "@/src/lib/staff/staffSlotHours.server"
-      },
-      {
-        "consumer": "src/lib/calendar/calendarTestingReadiness.server.ts",
-        "target": "src/lib/staff/staffSlotHours.server.ts",
-        "spec": "@/src/lib/staff/staffSlotHours.server"
-      },
-      {
-        "consumer": "src/lib/calendar/calendarTestingSlotHelpers.ts",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
-      },
-      {
-        "consumer": "src/lib/calendar/calendarTestingSlotHelpers.ts",
-        "target": "src/lib/staff/staffWeeklyHours.ts",
-        "spec": "@/src/lib/staff/staffWeeklyHours"
       },
       {
         "consumer": "src/lib/calendar/calendarTestingSmoke.server.ts",
@@ -9085,7 +9026,7 @@
     "externalIntoTreeCounts": {
       "workforce-os": 49,
       "workforce": 50,
-      "staff": 47
+      "staff": 38
     },
     "externalIntoTree": {
       "workforce-os": [
@@ -9526,6 +9467,10 @@
           "target": "src/lib/staff/staff.server.ts"
         },
         {
+          "consumer": "src/lib/bookings/staffSlotAvailability.server.ts",
+          "target": "src/lib/staff/staff.server.ts"
+        },
+        {
           "consumer": "src/lib/calendar/bookingConflictPreview.server.ts",
           "target": "src/lib/staff/staff.server.ts"
         },
@@ -9622,26 +9567,6 @@
           "target": "src/lib/staff/staffProfileExtras.ts"
         },
         {
-          "consumer": "src/lib/bookings/appointmentsApi.ts",
-          "target": "src/lib/staff/staffSlotHours.server.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookings.ts",
-          "target": "src/lib/staff/staffSlotHours.server.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/bookingConflictPreview.server.ts",
-          "target": "src/lib/staff/staffSlotHours.server.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/bookingResourceRequirements.server.ts",
-          "target": "src/lib/staff/staffSlotHours.server.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/calendarTestingReadiness.server.ts",
-          "target": "src/lib/staff/staffSlotHours.server.ts"
-        },
-        {
           "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
           "target": "src/lib/staff/staffSourceIdsNormalize.ts"
         },
@@ -9656,26 +9581,6 @@
         {
           "consumer": "src/lib/fiOs/workspaceShell/workspaceShellLoaders.server.ts",
           "target": "src/lib/staff/staffTwinLoader.server.ts"
-        },
-        {
-          "consumer": "src/components/fi/appointments/AppointmentCreateSlideOver.tsx",
-          "target": "src/lib/staff/staffWeeklyHours.ts"
-        },
-        {
-          "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
-          "target": "src/lib/staff/staffWeeklyHours.ts"
-        },
-        {
-          "consumer": "src/lib/actions/fi-staff-role-review-actions.ts",
-          "target": "src/lib/staff/staffWeeklyHours.ts"
-        },
-        {
-          "consumer": "src/lib/calendar-os/calendarWorkforceBlocks.ts",
-          "target": "src/lib/staff/staffWeeklyHours.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/calendarTestingSlotHelpers.ts",
-          "target": "src/lib/staff/staffWeeklyHours.ts"
         }
       ]
     }
@@ -9698,18 +9603,18 @@
       "supabase"
     ],
     "auditParityNote": "Aug 2026 audit cited 448 refs / 176 files in src/lib. Re-run produces srcLibOnly below for apples-to-apples.",
-    "fi_staff_reference_count": 372,
+    "fi_staff_reference_count": 373,
     "fi_staff_members_reference_count": 234,
-    "total_raw_references": 606,
-    "files_with_any_reference": 255,
+    "total_raw_references": 607,
+    "files_with_any_reference": 256,
     "srcLibOnly": {
-      "fi_staff": 235,
+      "fi_staff": 236,
       "fi_staff_members": 128,
-      "total": 363,
-      "files": 177
+      "total": 364,
+      "files": 178
     },
     "byClassification": {
-      "scheduling read": 89,
+      "scheduling read": 90,
       "suspected duplicate identity logic": 36,
       "lifecycle read": 47,
       "cross-domain join": 46,
@@ -9725,7 +9630,7 @@
         "fi_staff_members": 73
       },
       "src/lib/team": {
-        "fi_staff": 36,
+        "fi_staff": 38,
         "fi_staff_members": 44
       },
       "src/lib/workforce": {
@@ -9752,10 +9657,6 @@
         "fi_staff": 17,
         "fi_staff_members": 0
       },
-      "src/lib/staff": {
-        "fi_staff": 16,
-        "fi_staff_members": 0
-      },
       "scripts/fi-workforce-live-data-cleanup-1.ts": {
         "fi_staff": 10,
         "fi_staff_members": 6
@@ -9763,6 +9664,10 @@
       "src/lib/crm": {
         "fi_staff": 12,
         "fi_staff_members": 2
+      },
+      "src/lib/staff": {
+        "fi_staff": 14,
+        "fi_staff_members": 0
       },
       "src/lib/bookings": {
         "fi_staff": 11,
@@ -9913,6 +9818,10 @@
         "fi_staff_members": 0
       },
       "src/lib/rooms": {
+        "fi_staff": 1,
+        "fi_staff_members": 0
+      },
+      "src/lib/services": {
         "fi_staff": 1,
         "fi_staff_members": 0
       },
@@ -10511,6 +10420,12 @@
         "classification": "scheduling read"
       },
       {
+        "file": "src/lib/services/servicesCatalogLoader.server.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
+      },
+      {
         "file": "src/lib/staff/staff.server.ts",
         "table": "fi_staff",
         "count": 11,
@@ -10530,18 +10445,6 @@
       },
       {
         "file": "src/lib/staff/staffProfileExtras.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "scheduling read"
-      },
-      {
-        "file": "src/lib/staff/staffSlotHours.server.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "scheduling read"
-      },
-      {
-        "file": "src/lib/staff/staffWeeklyHours.ts",
         "table": "fi_staff",
         "count": 1,
         "classification": "scheduling read"
@@ -10887,6 +10790,18 @@
         "table": "fi_staff_members",
         "count": 2,
         "classification": "test or fixture"
+      },
+      {
+        "file": "src/lib/team/roster/availability/effectiveAvailability.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
+      },
+      {
+        "file": "src/lib/team/roster/availability/weeklyHours.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "scheduling read"
       },
       {
         "file": "src/lib/team/roster/projectRosterStaffEntry.ts",

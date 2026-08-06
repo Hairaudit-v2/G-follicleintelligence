@@ -23,7 +23,7 @@ import {
   validateStaffRoleReviewSave,
 } from "@/src/lib/staff/staffRoleReviewApply";
 import { CLINICAL_STAFF_ROLE_OPTIONS } from "@/src/lib/team/directory";
-import { defaultPerthClinicWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import { defaultPerthClinicWeeklyHours } from "@/src/lib/team/roster/availability";
 
 function rowPayload(row: StaffRoleReviewEditableRow) {
   return {

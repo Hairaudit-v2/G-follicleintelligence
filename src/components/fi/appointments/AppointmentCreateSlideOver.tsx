@@ -19,7 +19,7 @@ import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
-import { buildStaffBookingAvailabilityHint } from "@/src/lib/staff/staffWeeklyHours";
+import { buildStaffBookingAvailabilityHint } from "@/src/lib/team/roster/availability";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {

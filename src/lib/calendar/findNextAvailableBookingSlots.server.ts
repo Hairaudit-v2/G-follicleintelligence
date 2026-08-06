@@ -42,7 +42,7 @@ import {
   isUtcRangeWithinStaffWeeklyHours,
   parseStaffWeeklyHours,
   staffWeekdayKeyFromUtcMs,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 export type NextAvailableBookingSlot = {
   startAt: string;

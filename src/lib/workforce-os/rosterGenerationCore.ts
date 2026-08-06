@@ -3,7 +3,7 @@
  */
 
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/staff/staffWeeklyHours";
+import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/team/roster/availability";
 import type { RosterCadence } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { resolveFortnightCycleWeek } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import type { AvailabilityBlockType } from "@/src/lib/workforce-os/workforceRosteringEngine";

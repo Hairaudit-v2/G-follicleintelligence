@@ -18,7 +18,7 @@ import {
 import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 /** Roles that deliver clinical care — HR/training policy blocks clinical availability. */
 export const CLINICAL_PROVIDER_STAFF_ROLES = [

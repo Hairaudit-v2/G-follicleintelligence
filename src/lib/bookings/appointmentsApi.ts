@@ -28,7 +28,7 @@ import { mergeAppointmentProcedureMetadata } from "./appointmentMetadata";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { FiBookingRow } from "./types";
 import { AppointmentConflictError } from "./bookingErrors";
-import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/bookings/staffSlotAvailability.server";
 
 export { AppointmentConflictError, AppointmentStaffHoursError } from "./bookingErrors";
 

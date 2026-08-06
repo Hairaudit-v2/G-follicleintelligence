@@ -10,7 +10,7 @@ import {
   validateStaffRoleReviewSaveAll,
 } from "@/src/lib/staff/staffRoleReviewApply";
 import { loadStaffMemberForTenant, updateFiStaff } from "@/src/lib/staff/staff.server";
-import type { StaffWeeklyHoursMap } from "@/src/lib/staff/staffWeeklyHours";
+import type { StaffWeeklyHoursMap } from "@/src/lib/team/roster/availability";
 
 const staffDayHoursSchema = z.object({
   enabled: z.boolean().optional(),

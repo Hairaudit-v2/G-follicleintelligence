@@ -26,8 +26,12 @@ src/lib/team/
 ├── notifications/index.ts       # B2.3b pure
 ├── notifications/server.ts      # B2.3b loaders
 ├── roster/index.ts
+├── roster/availability/         # B2.4 weekly + effective availability
 ├── onboarding/index.ts
 ├── access/index.ts
+...
+# Bookings (adjacent, not under team/)
+src/lib/bookings/staffSlotAvailability.server.ts  # B2.4 appointment slot gate
 ├── compliance/index.ts
 ├── profile/index.ts             # B1.6 person-level composition
 ├── payroll/index.ts

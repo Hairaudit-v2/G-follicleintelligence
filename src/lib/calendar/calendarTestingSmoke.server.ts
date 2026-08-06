@@ -16,7 +16,7 @@ import {
   minutesFromHm,
   parseStaffWeeklyHours,
   staffWeekdayKeyFromUtcMs,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 function hasWeeklyHoursSummary(staff: { working_hours: Record<string, unknown> }): boolean {
   return Boolean(formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(staff.working_hours)).trim());

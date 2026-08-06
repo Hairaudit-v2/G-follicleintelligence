@@ -53,7 +53,7 @@ import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/team/directory/server";

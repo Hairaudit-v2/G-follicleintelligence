@@ -8,7 +8,7 @@ import {
   STAFF_WEEKDAY_KEYS,
   type StaffWeekdayKey,
   type StaffWeeklyHoursMap,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 
 export const STANDARD_HOURS_WEEKDAY_LABELS = [
   "Monday",

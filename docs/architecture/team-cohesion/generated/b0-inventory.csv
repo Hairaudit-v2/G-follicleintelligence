@@ -200,11 +200,9 @@ src/lib/staff/staffRoleReview.test.ts,directory,src/lib/team/directory/staffRole
 src/lib/staff/staffRoleReviewApply.ts,directory,src/lib/team/directory/staffRoleReviewApply.ts,1,1,,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/staffRoleReviewLoader.server.ts,directory,src/lib/team/directory/staffRoleReviewLoader.server.ts,0,0,,true,false,,,high,staff presentation/picker helpers
 src/lib/staff/staffSensitiveMetadataKeys.ts,identity,src/lib/team/identity/staffSensitiveMetadataKeys.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/staff/staffSlotHours.server.ts,directory,src/lib/team/directory/staffSlotHours.server.ts,5,0,fi_staff,true,false,,,medium,staff presentation/picker helpers
 src/lib/staff/staffSourceIdsNormalize.test.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffSourceIdsNormalize.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.ts,13,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffTwinLoader.server.ts,identity,src/lib/team/identity/staffTwinLoader.server.ts,1,0,,true,false,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/staff/staffWeeklyHours.ts,directory,src/lib/team/directory/staffWeeklyHours.ts,9,0,fi_staff,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/workforceCommandCentre.server.ts,delete,,1,0,,true,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,medium,legacy staff CC vs workforce V2
 src/lib/staff/workforceCommandCentre.test.ts,delete,,0,0,,false,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,low,legacy staff CC vs workforce V2
 src/lib/staff/workforceCommandCentre.ts,delete,,3,1,,false,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,medium,legacy staff CC vs workforce V2
@@ -384,6 +382,10 @@ src/lib/team/profile/server.ts,shared,src/lib/team/shared/server.ts,1,0,,true,fa
 src/lib/team/profile/staffProfileActionFlags.ts,shared,src/lib/team/shared/staffProfileActionFlags.ts,2,0,,false,false,,,high,team umbrella / unclassified domain folder
 src/lib/team/profile/staffProfileAttentionReasons.ts,shared,src/lib/team/shared/staffProfileAttentionReasons.ts,2,0,,false,false,,,high,team umbrella / unclassified domain folder
 src/lib/team/profile/types.ts,shared,src/lib/team/shared/types.ts,2,0,,false,false,,,high,team umbrella / unclassified domain folder
+src/lib/team/roster/availability/effectiveAvailability.test.ts,roster,src/lib/team/roster/effectiveAvailability.test.ts,0,0,,false,false,,,low,canonical team/roster module
+src/lib/team/roster/availability/effectiveAvailability.ts,roster,src/lib/team/roster/effectiveAvailability.ts,0,0,fi_staff,false,false,,,low,canonical team/roster module
+src/lib/team/roster/availability/index.ts,roster,src/lib/team/roster/index.ts,0,0,,false,false,,,low,canonical team/roster module
+src/lib/team/roster/availability/weeklyHours.ts,roster,src/lib/team/roster/weeklyHours.ts,0,0,fi_staff,false,false,,,high,canonical team/roster module
 src/lib/team/roster/index.ts,roster,src/lib/team/roster/index.ts,0,0,,false,false,,,low,canonical team/roster module
 src/lib/team/roster/projectRosterStaffEntry.test.ts,roster,src/lib/team/roster/projectRosterStaffEntry.test.ts,0,0,,false,false,,,high,canonical team/roster module
 src/lib/team/roster/projectRosterStaffEntry.ts,roster,src/lib/team/roster/projectRosterStaffEntry.ts,0,0,fi_staff,false,false,,,low,canonical team/roster module

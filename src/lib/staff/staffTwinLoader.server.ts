@@ -16,7 +16,7 @@ import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComp
 import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
-} from "@/src/lib/staff/staffWeeklyHours";
+} from "@/src/lib/team/roster/availability";
 import { loadStaffCompetencyProjections } from "@/src/lib/academy-os/academyCompetencyReceiver.server";
 import type { FiStaffCompetencyProjectionRow } from "@/src/lib/academy-os/academyCompetencyTypes";
 import {

@@ -8,8 +8,8 @@ import {
   normalizeCalendarTimezone,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
-import type { StaffWeeklyHoursMap } from "@/src/lib/staff/staffWeeklyHours";
-import { staffWeekdayKeyFromUtcMs } from "@/src/lib/staff/staffWeeklyHours";
+import type { StaffWeeklyHoursMap } from "@/src/lib/team/roster/availability";
+import { staffWeekdayKeyFromUtcMs } from "@/src/lib/team/roster/availability";
 
 /** Next local calendar day (from `fromMs` in `staffTz`) where weekly config has enabled hours with start+end. */
 export function nextStaffWorkingLocalDayYmd(

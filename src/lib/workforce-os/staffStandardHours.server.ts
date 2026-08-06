@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
-import { parseStaffWeeklyHours, serializeStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import { parseStaffWeeklyHours, serializeStaffWeeklyHours } from "@/src/lib/team/roster/availability";
 import {
   applyStandardHoursTemplate,
   staffHasConfiguredStandardHours,

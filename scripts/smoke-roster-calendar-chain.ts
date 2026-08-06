@@ -13,7 +13,7 @@ import {
   enrichCrmShellStaffPickerOption,
 } from "@/src/lib/team/directory";
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/team/notifications";
-import { parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import { parseStaffWeeklyHours } from "@/src/lib/team/roster/availability";
 import { loadWorkforceRosterPlanningPolicy } from "@/src/lib/workforce/rosterCadencePolicy.server";
 import { rosterDateRangeFromPeriodStart } from "@/src/lib/workforce/rosterCadencePolicyCore";
 import { loadRosterCommandCentrePageData } from "@/src/lib/workforce-os/rosterCommandCentrePageLoader.server";

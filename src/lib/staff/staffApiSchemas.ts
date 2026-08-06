@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { STAFF_WEEKDAY_KEYS } from "@/src/lib/staff/staffWeeklyHours";
+import { STAFF_WEEKDAY_KEYS } from "@/src/lib/team/roster/availability";
 
 const uuid = z.string().uuid();
 const optionalUuid = z.union([uuid, z.literal(""), z.null()]).optional();

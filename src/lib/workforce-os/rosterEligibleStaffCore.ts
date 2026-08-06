@@ -6,7 +6,7 @@
  */
 
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/staff/staffWeeklyHours";
+import { DEFAULT_STAFF_HOURS_FALLBACK_TZ } from "@/src/lib/team/roster/availability";
 import { isStaffArchived } from "@/src/lib/workforce-os/hrReconciliationEligibleCore";
 import {
   isOperationallyIneligible,

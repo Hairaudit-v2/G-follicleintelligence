@@ -25,7 +25,7 @@ import {
   loadStaffMemberForTenant,
   loadStaffFiUserIdMap,
 } from "@/src/lib/staff/staff.server";
-import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/bookings/staffSlotAvailability.server";
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import {
   publishConsultationEvent,
