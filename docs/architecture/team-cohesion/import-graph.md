@@ -46,17 +46,17 @@ Inventory `cycleCount: 0` after B2.2c (unchanged through B2.2d).
 
 Unique outside→inside import edges (runtime + tests outside the three trees):
 
-| Tree | External edges (B2.2d) |
+| Tree | External edges (B2.2a) |
 |------|---------------:|
-| `staff` | 83 |
+| `staff` | 65 |
 | `workforce-os` | 49 |
 | `workforce` | 50 |
 
-`staff` remains hot (`staff.server`, assignee display); clinical picker consumers now enter via `@/src/lib/team/directory` / `.../server` (B2.2d).
+`staff` remains hot (`staff.server`); directory loaders, calendar-visible predicates, assignee labels, availability asserts, and clinical picker now enter via `@/src/lib/team/directory` / `.../server` (B2.2a + B2.2d).
 
 ## Deep imports that bypass future domain boundaries
 
-**211** non-test deep legacy import violations after B2.2d (−36 from B2.2c). After `src/lib/team/<domain>/index.ts` exists, remaining deep imports become boundary violations unless updated to the domain index.
+**199** non-test deep legacy import violations after B2.2a (−12 from B2.2d). After `src/lib/team/<domain>/index.ts` exists, remaining deep imports become boundary violations unless updated to the domain index.
 
 Highest-pressure external areas (from inventory consumer lists and identity baseline):
 
