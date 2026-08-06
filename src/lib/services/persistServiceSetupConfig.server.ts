@@ -25,7 +25,14 @@ export async function persistServiceSetupConfig(args: {
     .update({ setup_config: config, updated_at: now })
     .eq("tenant_id", tid)
     .eq("id", sid);
-  if (cfgErr) throw new Error(cfgErr.message);
+  if (cfgErr) {
+    const m = cfgErr.message.toLowerCase();
+    const missingSetup =
+      m.includes("setup_config") &&
+      (m.includes("does not exist") || m.includes("schema cache") || m.includes("could not find"));
+    if (!missingSetup) throw new Error(cfgErr.message);
+    // Column not migrated yet — still sync eligibility / resource tables below.
+  }
 
   await supabase
     .from("fi_service_staff_eligibility")

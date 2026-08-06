@@ -4,8 +4,19 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { parseServiceSetupConfig } from "@/src/lib/services/setup/serviceSetupDefaults";
 
-const SERVICE_SELECT =
+const SERVICE_SELECT_WITH_SETUP =
   "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, setup_config, created_at, updated_at";
+
+const SERVICE_SELECT_LEGACY =
+  "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at";
+
+function isMissingSetupConfigColumn(errorMessage: string | undefined): boolean {
+  const m = String(errorMessage ?? "").toLowerCase();
+  return (
+    m.includes("setup_config") &&
+    (m.includes("does not exist") || m.includes("schema cache") || m.includes("could not find"))
+  );
+}
 
 function mapRow(raw: Record<string, unknown>): FiServiceRow {
   const bp = raw.base_price;
@@ -29,14 +40,30 @@ function mapRow(raw: Record<string, unknown>): FiServiceRow {
 export async function loadFiServicesForTenant(tenantId: string): Promise<FiServiceRow[]> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase
+  const primary = await supabase
     .from("fi_services")
-    .select(SERVICE_SELECT)
+    .select(SERVICE_SELECT_WITH_SETUP)
     .eq("tenant_id", tid)
     .order("category", { ascending: true, nullsFirst: false })
     .order("name", { ascending: true });
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => mapRow(r as Record<string, unknown>));
+
+  if (!primary.error) {
+    return (primary.data ?? []).map((r) => mapRow(r as Record<string, unknown>));
+  }
+
+  if (!isMissingSetupConfigColumn(primary.error.message)) {
+    throw new Error(primary.error.message);
+  }
+
+  // Deployed before migration: keep catalog surfaces up with empty setup_config.
+  const fallback = await supabase
+    .from("fi_services")
+    .select(SERVICE_SELECT_LEGACY)
+    .eq("tenant_id", tid)
+    .order("category", { ascending: true, nullsFirst: false })
+    .order("name", { ascending: true });
+  if (fallback.error) throw new Error(fallback.error.message);
+  return (fallback.data ?? []).map((r) => mapRow(r as Record<string, unknown>));
 }
 
 export async function insertFiService(
@@ -55,27 +82,44 @@ export async function insertFiService(
   const tid = tenantId.trim();
   const now = new Date().toISOString();
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase
+  const payload: Record<string, unknown> = {
+    tenant_id: tid,
+    name: input.name.trim(),
+    duration_minutes: input.duration_minutes,
+    base_price: input.base_price,
+    color: input.color?.trim() || null,
+    category: input.category?.trim() || null,
+    is_active: input.is_active,
+    booking_type: input.booking_type?.trim() || null,
+    created_at: now,
+    updated_at: now,
+  };
+  if (input.setup_config) {
+    payload.setup_config = parseServiceSetupConfig(input.setup_config);
+  }
+
+  const primary = await supabase
     .from("fi_services")
-    .insert({
-      tenant_id: tid,
-      name: input.name.trim(),
-      duration_minutes: input.duration_minutes,
-      base_price: input.base_price,
-      color: input.color?.trim() || null,
-      category: input.category?.trim() || null,
-      is_active: input.is_active,
-      booking_type: input.booking_type?.trim() || null,
-      setup_config: input.setup_config
-        ? parseServiceSetupConfig(input.setup_config)
-        : {},
-      created_at: now,
-      updated_at: now,
-    })
-    .select(SERVICE_SELECT)
+    .insert(payload)
+    .select(SERVICE_SELECT_WITH_SETUP)
     .single();
-  if (error) throw new Error(error.message);
-  return mapRow(data as Record<string, unknown>);
+
+  if (!primary.error) {
+    return mapRow(primary.data as Record<string, unknown>);
+  }
+
+  if (!isMissingSetupConfigColumn(primary.error.message)) {
+    throw new Error(primary.error.message);
+  }
+
+  delete payload.setup_config;
+  const fallback = await supabase
+    .from("fi_services")
+    .insert(payload)
+    .select(SERVICE_SELECT_LEGACY)
+    .single();
+  if (fallback.error) throw new Error(fallback.error.message);
+  return mapRow(fallback.data as Record<string, unknown>);
 }
 
 export async function updateFiService(
@@ -110,13 +154,30 @@ export async function updateFiService(
   }
 
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase
+  const primary = await supabase
     .from("fi_services")
     .update(body)
     .eq("tenant_id", tid)
     .eq("id", sid)
-    .select(SERVICE_SELECT)
+    .select(SERVICE_SELECT_WITH_SETUP)
     .single();
-  if (error) throw new Error(error.message);
-  return mapRow(data as Record<string, unknown>);
+
+  if (!primary.error) {
+    return mapRow(primary.data as Record<string, unknown>);
+  }
+
+  if (!isMissingSetupConfigColumn(primary.error.message)) {
+    throw new Error(primary.error.message);
+  }
+
+  delete body.setup_config;
+  const fallback = await supabase
+    .from("fi_services")
+    .update(body)
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .select(SERVICE_SELECT_LEGACY)
+    .single();
+  if (fallback.error) throw new Error(fallback.error.message);
+  return mapRow(fallback.data as Record<string, unknown>);
 }
