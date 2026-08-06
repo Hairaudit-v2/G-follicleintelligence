@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/team/directory/assertStaffClinicallyAvailable.server";
 import { assertFiStaffPositionTypeAssignableToTenant } from "@/src/lib/fi-os/staffPositionTypeValidation.server";
 
 export type FiStaffRow = {

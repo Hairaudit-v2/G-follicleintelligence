@@ -15,7 +15,7 @@ import {
   canSelectStaffForClinicalPicker,
   enrichCrmShellStaffPickerOption,
 } from "@/src/lib/team/directory";
-import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { bookingAssignmentDisplay } from "@/src/lib/team/directory";
 import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 

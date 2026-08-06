@@ -10,7 +10,7 @@ import {
   buildStaffDirectorySearchParams,
   type StaffDirectoryFilterState,
   type StaffDirectoryRowView,
-} from "@/src/lib/staff/staffDirectoryFilters";
+} from "@/src/lib/team/directory";
 import { STAFF_DIRECTORY_ATTENTION_LABELS } from "@/src/lib/team/directory";
 import {
   buildStaffAccessCentreHref,

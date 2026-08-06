@@ -73,10 +73,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 **Seed modules**
 
-- `team/directory/*` B1.1 projections + **clinical staff picker pure/loader (B2.2d GREEN)** via `index` / `server`
-- **B2.2a NOT DELIVERED** — directory-core loaders / filters / calendar visibility / `assertStaffClinicallyAvailable` still under `src/lib/staff/` and `workforce-os/`
-- Recovery: [B2.2a-R](./b2.2a-r-directory-core-consolidation.md)
-- Remaining hot cluster (post–B2.2a-R): `staffHrNotificationSummary*`, role/hours surfaces
+- `team/directory/*` B1.1 projections + **clinical staff picker (B2.2d GREEN)** + **directory core (B2.2a GREEN)** via `index` / `server`
+- Remaining hot cluster (post–B2.2a): `staffHrNotificationSummary*`, role/hours surfaces still under `src/lib/staff/`
 
 ---
 

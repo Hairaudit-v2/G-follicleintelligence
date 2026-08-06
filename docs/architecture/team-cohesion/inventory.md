@@ -6,14 +6,14 @@
 
 ## Scope count
 
-| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2d regenerate |
+| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2a regenerate |
 |------|-----------------:|---------------------------:|-----------------:|
-| `src/lib/workforce-os` | 100 | 103 | 77 |
+| `src/lib/workforce-os` | 100 | 103 | 76 |
 | `src/lib/workforce` | 127 | 140 | 112 |
-| `src/lib/staff` | 40 | 40 | 36 |
-| **Legacy total** | **267** | **283** | **225** |
+| `src/lib/staff` | 40 | 40 | 28 |
+| **Legacy total** | **267** | **283** | **216** |
 
-Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2d, access / onboarding MUST-MOVE homes and the clinical staff picker live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. **B2.2a directory-core was not delivered**; those loaders remain under `src/lib/staff/` / `workforce-os/` until [B2.2a-R](./b2.2a-r-directory-core-consolidation.md) (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
+Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2a–d, access / onboarding / directory-core / clinical picker homes live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. Earlier false B2.2a GREEN wording was stricken; true directory-core delivery is [B2.2a](./b2.2a-r-directory-core-consolidation.md) (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
 
 ## Domain ownership distribution
 

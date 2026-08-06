@@ -18,7 +18,7 @@ import {
 import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,
-} from "@/src/lib/staff/calendarVisibleStaff";
+} from "@/src/lib/team/directory";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";

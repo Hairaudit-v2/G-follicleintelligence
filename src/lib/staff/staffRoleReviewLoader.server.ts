@@ -7,7 +7,7 @@ import {
   type StaffPayrollSourceDisplay,
 } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
-import type { StaffDirectoryClinicOption } from "@/src/lib/staff/staffDirectoryLoader.server";
+import type { StaffDirectoryClinicOption } from "@/src/lib/team/directory/server";
 import {
   buildStaffRoleReviewEditableRow,
   filterActiveNeedsReviewStaff,

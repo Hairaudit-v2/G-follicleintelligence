@@ -8,7 +8,7 @@ import { test } from "node:test";
 import {
   enrichStaffDirectoryRows,
   filterStaffDirectoryRows,
-} from "@/src/lib/staff/staffDirectoryFilters";
+} from "@/src/lib/team/directory";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 
 function staff(p: Partial<FiStaffRow> & Pick<FiStaffRow, "id" | "full_name">): FiStaffRow {

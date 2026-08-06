@@ -21,7 +21,7 @@ import {
 } from "@/src/lib/rooms/fiClinicRooms.server";
 import { filterRoomEligibilityForClinic } from "@/src/lib/rooms/roomAvailability.server";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
-import { isNonCalendarSupportRole } from "@/src/lib/staff/calendarVisibleStaff";
+import { isNonCalendarSupportRole } from "@/src/lib/team/directory";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export {

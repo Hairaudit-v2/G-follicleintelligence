@@ -19,7 +19,7 @@ import {
   isStaffBookableForClinicalWorkflow,
   isStaffRoleNeedsReview,
 } from "@/src/lib/staff/staffRolePolicy";
-import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { staffOptionPrimaryLabel } from "@/src/lib/team/directory/staffAssigneeDisplay";
 
 export const SUPPORT_STAFF_ROLES = ["admin", "reception", "coordinator"] as const;
 

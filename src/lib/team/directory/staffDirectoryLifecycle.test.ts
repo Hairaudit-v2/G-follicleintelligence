@@ -5,7 +5,7 @@ import {
   enrichStaffDirectoryRows,
   filterStaffDirectoryRows,
   type StaffDirectoryLifecycleSignal,
-} from "@/src/lib/staff/staffDirectoryFilters";
+} from "@/src/lib/team/directory";
 import { buildWorkforceCommandCentreMetrics } from "@/src/lib/staff/workforceCommandCentre";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 

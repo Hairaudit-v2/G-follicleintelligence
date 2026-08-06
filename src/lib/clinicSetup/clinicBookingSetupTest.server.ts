@@ -19,7 +19,7 @@ import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePol
 import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,
-} from "@/src/lib/staff/calendarVisibleStaff";
+} from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import type {

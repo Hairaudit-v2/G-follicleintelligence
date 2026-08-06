@@ -6,7 +6,7 @@ import {
   CrmAccessError,
   tryResolveFiUserIdForTenant,
 } from "@/src/lib/crm/crmGate";
-import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/team/directory/server";
 import {
   completeConsultationDraft,
   createConsultationDraft,

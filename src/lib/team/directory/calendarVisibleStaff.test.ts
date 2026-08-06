@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
+import { isCalendarVisibleClinicalStaff } from "@/src/lib/team/directory";
 
 describe("calendarVisibleStaff", () => {
   it("excludes receptionist from calendar providers", () => {

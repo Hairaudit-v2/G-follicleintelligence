@@ -3,7 +3,7 @@ import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotifica
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import type { StaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
-import type { StaffDirectoryAttentionReason } from "@/src/lib/team/directory";
+import type { StaffDirectoryAttentionReason } from "@/src/lib/team/directory/types";
 import {
   resolveCanonicalStaffLifecycleStatus,
   isCanonicalStaffLifecycleActive,

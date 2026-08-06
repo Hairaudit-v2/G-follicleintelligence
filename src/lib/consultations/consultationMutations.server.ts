@@ -12,7 +12,7 @@ import {
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
-import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/team/directory/server";
 import { assertFiStaffBelongsToTenant } from "@/src/lib/staff/staff.server";
 import {
   type ConsultationCreateDraftBody,

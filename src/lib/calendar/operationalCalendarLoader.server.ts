@@ -76,7 +76,7 @@ import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
-import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
+import { isCalendarVisibleClinicalStaff } from "@/src/lib/team/directory";
 import {
   anchorLabelForBookingRow,
   patientContactForBookingRow,

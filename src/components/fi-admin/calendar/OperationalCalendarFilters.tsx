@@ -6,7 +6,7 @@ import {
   allBookingTypeOptions,
 } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { staffOptionPrimaryLabel } from "@/src/lib/team/directory";
 
 const FILTER_HEADING_ID = "operational-calendar-filters-heading";
 

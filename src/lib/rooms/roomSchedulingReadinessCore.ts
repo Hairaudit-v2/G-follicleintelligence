@@ -3,7 +3,7 @@ import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,
-} from "@/src/lib/staff/calendarVisibleStaff";
+} from "@/src/lib/team/directory";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type ReadinessCheckStatus = "pass" | "warning" | "fail";

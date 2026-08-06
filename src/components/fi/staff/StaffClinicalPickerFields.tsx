@@ -14,7 +14,7 @@ import {
   formatProcedureTeamPickerLabel,
   staffReadinessDashboardPath,
 } from "@/src/lib/team/directory";
-import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { staffOptionPrimaryLabel } from "@/src/lib/team/directory";
 
 export function StaffClinicalSelect({
   tenantId,

@@ -12,7 +12,7 @@ import {
 import { StaffHrNotificationBadge } from "@/src/components/fi/staff/StaffHrNotificationBadge";
 import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
-import type { StaffDirectoryClinicOption } from "@/src/lib/staff/staffDirectoryLoader.server";
+import type { StaffDirectoryClinicOption } from "@/src/lib/team/directory/server";
 import {
   applyBulkDefaultWeeklyHours,
   applyBulkNonClinicalAdminRole,

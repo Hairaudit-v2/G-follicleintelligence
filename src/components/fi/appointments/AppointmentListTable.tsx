@@ -5,7 +5,7 @@ import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingT
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { bookingAssignmentDisplay } from "@/src/lib/team/directory";
 import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import { useAppointmentSlideOverOptional } from "./AppointmentSlideOver";
 import { AppointmentSlideOverTrigger } from "./AppointmentSlideOverTrigger";

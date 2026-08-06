@@ -3,8 +3,8 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { StaffDirectoryClient } from "@/src/components/fi/staff/StaffDirectoryClient";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
-import { parseStaffDirectoryFiltersFromSearchParams } from "@/src/lib/staff/staffDirectoryFilters";
-import { loadStaffDirectoryPage } from "@/src/lib/staff/staffDirectoryLoader.server";
+import { parseStaffDirectoryFiltersFromSearchParams } from "@/src/lib/team/directory";
+import { loadStaffDirectoryPage } from "@/src/lib/team/directory/server";
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {

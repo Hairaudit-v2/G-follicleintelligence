@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.2d GREEN · B2.2b–c GREEN · **B2.2a NOT DELIVERED** · next = [B2.2a-R](./b2.2a-r-directory-core-consolidation.md) · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -15,10 +15,9 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | B2.2b — Access | **GREEN** |
 | B2.2c — Onboarding + cycle break | **GREEN** (`cycleCount: 0`, allowlist **12**) |
 | B2.2d — Clinical staff picker | **GREEN** (`e3d5a55c`; deep imports 247 → **211**) |
-| B2.2a — Directory core | **DEFERRED / NOT YET DELIVERED** (earlier GREEN wording was incorrect) |
-| B2.2a-R — Directory core consolidation | **PLANNED** — [plan](./b2.2a-r-directory-core-consolidation.md) |
+| B2.2a — Directory core | **GREEN** (delivery record / recovery id B2.2a-R — [record](./b2.2a-r-directory-core-consolidation.md); earlier “already GREEN” wording was incorrect) |
 
-**Correction:** Clinical picker consolidation is complete. Directory-core consolidation was **not** delivered under B2.2a and remains outstanding as B2.2a-R.
+**History note:** An earlier draft claimed B2.2a GREEN before any directory-core `git mv`. That claim was stricken. Clinical picker (B2.2d) and directory-core (B2.2a) are distinct deliveries.
 
 ## Documents
 
@@ -45,8 +44,8 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b1-identity-program-closure.md](./b1-identity-program-closure.md) | B1 program closure evidence |
 | [b2.1a-identity-pure-consolidation.md](./b2.1a-identity-pure-consolidation.md) | B2.1a pure lifecycle/readiness move |
 | [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md) | B2.1b identity server move + shim deletion |
-| [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md) | B2.2 directory / access / onboarding physical consolidation (b–d GREEN; a not delivered) |
-| [b2.2a-r-directory-core-consolidation.md](./b2.2a-r-directory-core-consolidation.md) | B2.2a-R directory-core recovery plan (next) |
+| [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md) | B2.2 directory / access / onboarding physical consolidation (a–d GREEN) |
+| [b2.2a-r-directory-core-consolidation.md](./b2.2a-r-directory-core-consolidation.md) | B2.2a directory-core delivery record (recovery id B2.2a-R) |
 
 ## Generated artifacts
 
@@ -74,10 +73,10 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## B2 scorecard
 
-| Metric | B2.2c | B2.2d now | Target |
+| Metric | B2.2d | B2.2a now | Target |
 |--------|------:|----------:|-------:|
-| Files in legacy lib trees | 228 | **225** | 0 |
-| Deep legacy imports | 247 | **211** | 0 |
+| Files in legacy lib trees | 225 | **216** | 0 |
+| Deep legacy imports | 211 | **199** | 0 |
 | Sprint-named action files | 7 | 7 | 0 |
 | Documented dependency cycles | 0 | **0** | 0 |
 | Temporary compatibility exports | 0 | **0** | 0 |
@@ -87,4 +86,4 @@ Refresh “Current” from `generated/b0-summary.json` after each inventory rege
 
 ## Recommended next slice
 
-**[B2.2a-R — Directory Core Consolidation](./b2.2a-r-directory-core-consolidation.md)** — physically move `staffDirectoryLoader`, `calendarVisibleStaff`, `assertStaffClinicallyAvailable`, filters, assignee/visibility helpers, and related B0 directory-core rows into `team/directory` (+ expand `server.ts`). Then pick the next highest-fan-out legacy cluster from B0. **Do not start B3** sprint-action renames until directory (and the next domain) homes stabilize.
+Inspect the regenerated B0 inventory and choose the next **highest-fan-out** legacy cluster (deferred directory hot cluster: `staffHrNotification*`, role/hours — or another domain by import concentration). Stabilise that domain’s public/server boundaries. **Do not start B3** sprint-action renames until those homes stabilize.

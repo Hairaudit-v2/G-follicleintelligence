@@ -2,7 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { WorkforceOsStaffProfileClient } from "@/src/components/fi/workforce/WorkforceOsStaffProfileClient";
-import { loadWorkforceOsStaffProfilePage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { loadWorkforceOsStaffProfilePage } from "@/src/lib/team/directory/server";
 import { loadStaffProfileHubOverview } from "@/src/lib/workforce/staffProfileHub.server";
 
 export const metadata = {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { enrichStaffDirectoryRows } from "@/src/lib/staff/staffDirectoryFilters";
+import { enrichStaffDirectoryRows } from "@/src/lib/team/directory";
 import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {

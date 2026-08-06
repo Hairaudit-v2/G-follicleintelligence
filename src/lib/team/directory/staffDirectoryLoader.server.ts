@@ -31,13 +31,15 @@ import {
   loadWorkforceCommandCentreIntelligence,
   type WorkforceCommandCentreIntelligence,
 } from "@/src/lib/staff/workforceCommandCentre.server";
-import type { StaffDirectoryLifecycleSignal } from "@/src/lib/staff/staffDirectoryFilters";
+import type { StaffDirectoryLifecycleSignal } from "@/src/lib/team/directory/staffDirectoryFilters";
 import {
   projectStaffDirectoryEntry,
   toStaffDirectoryLifecycleSignal,
-  type StaffDirectoryAttentionReason,
-  type StaffDirectoryEntry,
-} from "@/src/lib/team/directory";
+} from "@/src/lib/team/directory/projectStaffDirectoryEntry";
+import type {
+  StaffDirectoryAttentionReason,
+  StaffDirectoryEntry,
+} from "@/src/lib/team/directory/types";
 import { resolveStaffIdentities } from "@/src/lib/team/identity/server";
 import {
   loadWorkforceOperationalMetrics,

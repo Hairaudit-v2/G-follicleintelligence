@@ -7,7 +7,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { insertPrescriptionStatusAuditEvent } from "@/src/lib/prescribing/prescriptionStatusAudit.server";
 import { requireFiPrescribingActor } from "@/src/lib/prescribing/fiPrescribingAccess.server";
 import { loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
-import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/team/directory/server";
 import { validateRepeatRulesPrescriberConfirmed } from "@/src/lib/prescribing/prescribingRepeatRules";
 import {
   prescriptionIdBodySchema,

@@ -25,7 +25,7 @@ import {
 import { buildCalendarNavigationHref } from "@/src/lib/calendar/calendarViewNavigation";
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { staffOptionPrimaryLabel } from "@/src/lib/team/directory";
 import { CalendarToolbarFilterSelect } from "@/components/calendar/CalendarToolbarFilterSelect";
 import { CalendarTransitionLink } from "@/components/calendar/CalendarTransitionLink";
 import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";

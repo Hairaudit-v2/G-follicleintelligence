@@ -24,13 +24,13 @@ test("loadStaffAccessCentrePage does not call syncAllStaffProjectionsForTenant",
 });
 
 test("loadWorkforceOsDirectoryPage does not call syncAllStaffProjectionsForTenant", () => {
-  const source = readRepoFile("src/lib/workforce-os/workforceOsDirectoryLoader.server.ts");
+  const source = readRepoFile("src/lib/team/directory/workforceOsDirectoryLoader.server.ts");
   const body = extractExportedFunctionBody(source, "loadWorkforceOsDirectoryPage");
   assert.equal(body.includes("syncAllStaffProjectionsForTenant"), false);
 });
 
 test("loadWorkforceOsHrReconciliationPage does not call syncAllStaffProjectionsForTenant", () => {
-  const source = readRepoFile("src/lib/workforce-os/workforceOsDirectoryLoader.server.ts");
+  const source = readRepoFile("src/lib/team/directory/workforceOsDirectoryLoader.server.ts");
   const body = extractExportedFunctionBody(source, "loadWorkforceOsHrReconciliationPage");
   assert.equal(body.includes("syncAllStaffProjectionsForTenant"), false);
   assert.match(body, /loadTenantHrProjectionHealth/);

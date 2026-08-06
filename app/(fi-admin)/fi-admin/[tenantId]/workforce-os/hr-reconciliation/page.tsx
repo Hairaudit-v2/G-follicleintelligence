@@ -2,7 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { HrReconciliationClient } from "@/src/components/fi/workforce/HrReconciliationClient";
-import { loadWorkforceOsHrReconciliationPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { loadWorkforceOsHrReconciliationPage } from "@/src/lib/team/directory/server";
 
 export const metadata = {
   title: "HR Reconciliation · Team",

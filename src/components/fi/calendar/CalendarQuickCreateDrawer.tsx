@@ -61,7 +61,7 @@ import type { RoomPickerOption } from "@/src/lib/rooms/roomTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { OperationalCalendarResourceColumn } from "@/src/lib/calendar/operationalCalendarTypes";
-import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
+import { isCalendarVisibleClinicalStaff } from "@/src/lib/team/directory";
 import {
   buildStaffUserLinkIndex,
   columnPrefillAssignment,

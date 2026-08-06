@@ -20,7 +20,7 @@ import {
 } from "@/src/lib/bookings/appointmentMetadata";
 import { loadAppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
-import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/team/directory/server";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import {
   cancelBooking,

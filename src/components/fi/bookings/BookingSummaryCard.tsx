@@ -9,7 +9,7 @@ import {
   formatBookingWindowInTimezone,
   normalizeCalendarTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
-import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { bookingAssignmentDisplay } from "@/src/lib/team/directory";
 import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 
 const card =

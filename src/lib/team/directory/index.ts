@@ -1,8 +1,9 @@
 /**
- * Public Team directory API — pure types, projection helpers, and clinical
- * staff picker eligibility helpers (client + server safe).
+ * Public Team directory API — pure types, projection helpers, directory filters,
+ * calendar-visible predicates, assignee labels, and clinical staff picker helpers
+ * (client + server safe).
  *
- * Server loaders: `@/src/lib/team/directory/server`
+ * Server loaders / asserts: `@/src/lib/team/directory/server`
  * Do not import `*.server` modules from client components.
  */
 
@@ -19,6 +20,36 @@ export {
   projectStaffDirectoryEntry,
   toStaffDirectoryLifecycleSignal,
 } from "@/src/lib/team/directory/projectStaffDirectoryEntry";
+
+export type {
+  StaffDirectoryFilterState,
+  StaffDirectoryLifecycleSignal,
+  StaffDirectoryRowView,
+} from "@/src/lib/team/directory/staffDirectoryFilters";
+
+export {
+  buildStaffDirectorySearchParams,
+  enrichStaffDirectoryRows,
+  filterStaffDirectoryRows,
+  parseStaffDirectoryFiltersFromSearchParams,
+} from "@/src/lib/team/directory/staffDirectoryFilters";
+
+export type { CalendarVisibleStaffInput } from "@/src/lib/team/directory/calendarVisibleStaff";
+
+export {
+  CALENDAR_VISIBLE_CLINICAL_ROLES,
+  isCalendarVisibleClinicalStaff,
+  isNonCalendarSupportRole,
+} from "@/src/lib/team/directory/calendarVisibleStaff";
+
+export type { BookingAssignmentDisplay } from "@/src/lib/team/directory/staffAssigneeDisplay";
+
+export {
+  bookingAssigneeDisplayLabel,
+  bookingAssignmentDisplay,
+  staffOptionPrimaryLabel,
+  staffOptionSubtitle,
+} from "@/src/lib/team/directory/staffAssigneeDisplay";
 
 export type {
   ClinicalStaffPickerOption,

@@ -15,12 +15,12 @@ import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSetting
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
 import { StaffDirectorySecondaryView } from "@/src/components/fi/staff/StaffDirectorySecondaryView";
 import { detectStaffHrSyncIssues } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
-import type { StaffDirectoryPageResult } from "@/src/lib/staff/staffDirectoryLoader.server";
+import type { StaffDirectoryPageResult } from "@/src/lib/team/directory/server";
 import {
   enrichStaffDirectoryRows,
   filterStaffDirectoryRows,
   type StaffDirectoryFilterState,
-} from "@/src/lib/staff/staffDirectoryFilters";
+} from "@/src/lib/team/directory";
 import {
   mergeStaffWorkingHoursDocument,
   parseStaffProfileExtras,

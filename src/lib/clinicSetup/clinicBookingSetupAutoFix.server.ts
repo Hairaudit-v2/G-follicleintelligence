@@ -27,7 +27,7 @@ import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,
-} from "@/src/lib/staff/calendarVisibleStaff";
+} from "@/src/lib/team/directory";
 import { isSupportStaffRole } from "@/src/lib/team/directory";
 
 import type {

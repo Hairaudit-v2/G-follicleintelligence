@@ -16,7 +16,7 @@ import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/c
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { bookingAssignmentDisplay } from "@/src/lib/team/directory";
 import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import { BookingFollowUpCalendarPanel } from "@/src/components/fi-admin/followUp/BookingFollowUpCalendarPanel";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";

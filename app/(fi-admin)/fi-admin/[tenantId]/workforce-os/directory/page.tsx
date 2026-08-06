@@ -2,7 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { WorkforceOsDirectoryClient } from "@/src/components/fi/workforce/WorkforceOsDirectoryClient";
-import { loadWorkforceOsDirectoryPage } from "@/src/lib/workforce-os/workforceOsDirectoryLoader.server";
+import { loadWorkforceOsDirectoryPage } from "@/src/lib/team/directory/server";
 
 export const metadata = {
   title: "Team directory",

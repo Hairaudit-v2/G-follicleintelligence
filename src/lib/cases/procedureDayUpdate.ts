@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { assertProcedureDayTeamAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertProcedureDayTeamAssignments } from "@/src/lib/team/directory/server";
 import type { ProcedureDayUpsertPatch } from "./procedureDayTypes";
 import { maybeTriggerSurgeryProfitabilitySnapshot } from "@/src/lib/financialOs/financialSurgeryEconomicsSnapshotOrchestrator.server";
 
