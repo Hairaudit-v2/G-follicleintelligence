@@ -287,7 +287,8 @@ export function assessStaffClinicCompatibility(input: {
 
   if (
     !isStaffBookableForClinicalWorkflow({
-      is_active: staff.is_active !== false,
+      // is_active === false already returned above; narrowed to true | undefined.
+      is_active: true,
       staff_role: staff.staff_role,
     })
   ) {
