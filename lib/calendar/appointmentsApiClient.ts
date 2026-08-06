@@ -371,6 +371,7 @@ export async function convertExternalCalendarEventRequest(input: {
   eventId: string;
   clinicId?: string | null;
   assignedStaffId?: string | null;
+  roomId?: string | null;
 }): Promise<
   | { ok: true; fiosAppointmentId: string }
   | { ok: false; error: string }
@@ -382,6 +383,7 @@ export async function convertExternalCalendarEventRequest(input: {
     body: JSON.stringify({
       clinicId: input.clinicId,
       assignedStaffId: input.assignedStaffId,
+      roomId: input.roomId,
     }),
   });
   const json = (await res.json().catch(() => ({ ok: false, error: "Invalid response" }))) as {

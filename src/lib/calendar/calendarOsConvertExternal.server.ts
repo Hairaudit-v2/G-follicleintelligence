@@ -34,6 +34,8 @@ export type ConvertExternalCalendarEventInput = {
   actingUserLabel?: string | null;
   clinicId?: string | null;
   assignedStaffId?: string | null;
+  /** Optional room UUID; must belong to clinicId when both are set (validated by caller). */
+  roomId?: string | null;
   /**
    * When identity is consultation without patient: promote before creating appointment.
    * Defaults to true (canonical patient for FiOS appointment).
@@ -277,6 +279,10 @@ export async function convertExternalCalendarEventToFiosAppointment(
   const bookingType = row.event_type?.trim() || "consultation";
   const conversionKey = (input.idempotencyKey?.trim() || row.id).trim();
 
+  const clinicId = input.clinicId?.trim() || null;
+  const assignedStaffId = input.assignedStaffId?.trim() || null;
+  const roomId = input.roomId?.trim() || null;
+
   const { error: insertErr } = await supabase.from("fi_bookings").insert({
     id: bookingId,
     tenant_id: tenantId,
@@ -284,10 +290,10 @@ export async function convertExternalCalendarEventToFiosAppointment(
     patient_id: patientId,
     person_id: personId,
     case_id: null,
-    clinic_id: input.clinicId?.trim() || null,
-    room_id: null,
+    clinic_id: clinicId,
+    room_id: roomId,
     room_required: false,
-    assigned_staff_id: input.assignedStaffId?.trim() || null,
+    assigned_staff_id: assignedStaffId,
     assigned_user_id: null,
     booking_type: bookingType,
     booking_status: "scheduled",
@@ -391,6 +397,9 @@ export async function convertExternalCalendarEventToFiosAppointment(
       fios_appointment_id: null,
       classification: classificationBefore,
       identity_state: resolution.identityState,
+      clinic_id: null,
+      assigned_staff_id: null,
+      room_id: null,
     },
     nextValues: {
       fios_appointment_id: bookingId,
@@ -398,11 +407,28 @@ export async function convertExternalCalendarEventToFiosAppointment(
       identity_state: identityState,
       patient_id: patientId,
       consultation_id: consultationId,
+      clinic_id: clinicId,
+      assigned_staff_id: assignedStaffId,
+      room_id: roomId,
     },
     writebackStatus: "not_required",
     metadata: {
       match_method: resolution.matchEvidence.method,
       google_event_id_preserved: row.external_event_id,
+      google_event_id: row.external_event_id,
+      patient_id: patientId,
+      consultation_id: consultationId,
+      enquiry_id: leadId,
+      appointment_id: bookingId,
+      clinic_id: clinicId,
+      staff_id: assignedStaffId,
+      room_id: roomId,
+      identity_match_method: resolution.matchEvidence.method,
+      acting_user_id: input.actingUserId ?? null,
+      source_interaction: "external_event_conversion",
+      previous_classification: classificationBefore,
+      new_classification: classification,
+      idempotency_result: "created",
     },
   });
 

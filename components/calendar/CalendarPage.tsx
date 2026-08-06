@@ -851,6 +851,7 @@ function CalendarPageImpl({
           googleHydratedAppointmentType={
             data.bookingDisplay[quickEdit.booking.id]?.googleHydratedAppointmentType ?? null
           }
+          calendarCapabilities={data.calendarCapabilities}
           onClose={() => setQuickEdit(null)}
           onSaved={refresh}
           onOpenFull={(b) => setEditing(b)}
