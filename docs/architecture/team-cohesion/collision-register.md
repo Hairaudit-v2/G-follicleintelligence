@@ -42,8 +42,10 @@ No competing engines — split is organizational, not semantic duplication of th
 
 | File | Model | Disposition |
 |------|-------|-------------|
-| `staff/staffDirectoryLoader.server.ts` + filters | `fi_staff` + overlays | **KEEP_CANONICAL** → `team/directory/` |
-| `workforce-os/workforceOsDirectoryLoader.server.ts` | `fi_staff_members` lifecycle rows | **MERGE** behind one directory loader that consumes identity projections |
+| `staff/staffDirectoryLoader.server.ts` + filters | `fi_staff` + overlays | **KEEP_CANONICAL** → `team/directory/` (**B2.2a-R**; B2.2a was **not** delivered) |
+| `workforce-os/workforceOsDirectoryLoader.server.ts` | `fi_staff_members` lifecycle rows | **MERGE** behind one directory loader that consumes identity projections (**B2.2a-R**) |
+
+Clinical picker (`clinicalStaffPicker*`) already lives under `team/directory` (**B2.2d GREEN**). Do not confuse that hotspot with this C4 directory-core move.
 
 ---
 

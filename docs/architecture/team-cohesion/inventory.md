@@ -13,7 +13,7 @@
 | `src/lib/staff` | 40 | 40 | 36 |
 | **Legacy total** | **267** | **283** | **225** |
 
-Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2d, access / onboarding MUST-MOVE homes and the clinical staff picker live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. Directory-core loaders remain under `src/lib/staff/` until B2.2a (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
+Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2d, access / onboarding MUST-MOVE homes and the clinical staff picker live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. **B2.2a directory-core was not delivered**; those loaders remain under `src/lib/staff/` / `workforce-os/` until [B2.2a-R](./b2.2a-r-directory-core-consolidation.md) (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
 
 ## Domain ownership distribution
 
