@@ -6,7 +6,7 @@ import {
   enrichCrmShellStaffPickerOption,
 } from "@/src/lib/team/directory";
 import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
-import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
+import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/team/directory";
 import { bookingUpdateBodySchema } from "@/src/lib/bookings/bookingApiSchemas";
 
 const STAFF_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";

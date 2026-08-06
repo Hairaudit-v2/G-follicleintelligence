@@ -22,7 +22,7 @@ import {
   type StaffRoleReviewEditableRow,
   validateStaffRoleReviewSave,
 } from "@/src/lib/staff/staffRoleReviewApply";
-import { CLINICAL_STAFF_ROLE_OPTIONS } from "@/src/lib/staff/staffRolePolicy";
+import { CLINICAL_STAFF_ROLE_OPTIONS } from "@/src/lib/team/directory";
 import { defaultPerthClinicWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 
 function rowPayload(row: StaffRoleReviewEditableRow) {

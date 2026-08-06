@@ -6,7 +6,7 @@
 
 import type { CalendarAppointmentCapabilitySet } from "@/src/lib/calendar/calendarAppointmentCapabilities";
 import { calendarCapabilitySatisfies } from "@/src/lib/calendar/calendarAppointmentCapabilities";
-import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory";
 
 export const EXTERNAL_CONVERSION_WIZARD_STEPS = [
   { id: 1, key: "patient", label: "Patient" },

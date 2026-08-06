@@ -75,3 +75,14 @@ export {
   staffAllowedInProcedureSlot,
   staffReadinessDashboardPath,
 } from "@/src/lib/team/directory/clinicalStaffPicker";
+
+export type { ClinicalStaffRoleOption } from "@/src/lib/team/directory/staffRolePolicy";
+
+export {
+  CLINICAL_STAFF_ROLE_OPTIONS,
+  NEEDS_REVIEW_STAFF_ROLE,
+  assertStaffBookableForClinicalWorkflow,
+  isStaffBookableForClinicalWorkflow,
+  isStaffRoleNeedsReview,
+  staffClinicalBookingBlockReason,
+} from "@/src/lib/team/directory/staffRolePolicy";

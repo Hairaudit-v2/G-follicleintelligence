@@ -6,12 +6,12 @@
 
 ## Scope count
 
-| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2a regenerate |
-|------|-----------------:|---------------------------:|-----------------:|
-| `src/lib/workforce-os` | 100 | 103 | 76 |
-| `src/lib/workforce` | 127 | 140 | 112 |
-| `src/lib/staff` | 40 | 40 | 28 |
-| **Legacy total** | **267** | **283** | **216** |
+| Tree | Audit (Aug 2026) | B0 regenerate (historical) | B2.2a | B2.3a |
+|------|-----------------:|---------------------------:|------:|------:|
+| `src/lib/workforce-os` | 100 | 103 | 76 | 76 |
+| `src/lib/workforce` | 127 | 140 | 112 | 112 |
+| `src/lib/staff` | 40 | 40 | 28 | **27** |
+| **Legacy total** | **267** | **283** | **216** | **215** |
 
 Canonical Team files are inventoried alongside legacy trees (see `generated/b0-summary.json`). After B2.2a–d, access / onboarding / directory-core / clinical picker homes live under `src/lib/team/{directory,access,onboarding}` with `cycleCount: 0`. Earlier false B2.2a GREEN wording was stricken; true directory-core delivery is [B2.2a](./b2.2a-r-directory-core-consolidation.md) (see [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md)).
 
@@ -50,7 +50,7 @@ Highest fan-in runtime modules (move late or behind stable barrels):
 | — | `team/directory/clinicalStaffPicker.ts` (B2.2d; was 36 consumers under `staff/`) | directory |
 | 19 | `workforce-os/staffLifecycleTypes.ts` | identity |
 | 14 | `workforce-os/clinicalStaffingSummary.types.ts` | roster |
-| 14 | `staff/staffHrNotificationSummary.ts` | directory |
+| 14 | `staff/staffHrNotificationSummary.ts` | **not directory** (B2.3a lock — identity readiness consumes contracts; ownership pending) |
 | 12 | `staff/staffSourceIdsNormalize.ts` | identity |
 | 11 | `workforce-os/staffStandardHoursCore.ts` | roster |
 | 10 | `workforce-os/staffLifecycleCore.ts` | identity |

@@ -28,7 +28,7 @@ import {
 import {
   CLINICAL_STAFF_ROLE_OPTIONS,
   NEEDS_REVIEW_STAFF_ROLE,
-} from "@/src/lib/staff/staffRolePolicy";
+} from "@/src/lib/team/directory";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 
 import { parseExplicitWorkspaceProfile } from "@/src/lib/fi-os/workspaceProfileDerivation";

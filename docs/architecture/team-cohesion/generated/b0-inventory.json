@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-06T00:34:48.430Z",
+  "generatedAt": "2026-08-06T01:47:35.195Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 386,
-  "growthSinceAudit": 119,
+  "currentFiles": 387,
+  "growthSinceAudit": 120,
   "trees": {
     "workforce-os": 76,
     "workforce": 112,
-    "staff": 28
+    "staff": 27
   },
   "domainCounts": {
     "shared": 35,
@@ -16,7 +16,7 @@
     "payroll": 33,
     "planning": 23,
     "commandCentre": 15,
-    "directory": 31,
+    "directory": 32,
     "access": 27,
     "delete": 3,
     "onboarding": 27
@@ -24,7 +24,7 @@
   "riskCounts": {
     "low": 147,
     "medium": 59,
-    "high": 180
+    "high": 181
   },
   "inventory": [
     {
@@ -3561,35 +3561,6 @@
       "migrationRisk": "medium"
     },
     {
-      "currentPath": "src/lib/staff/staffRolePolicy.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "staff presentation/picker helpers",
-      "proposedPath": "src/lib/team/directory/staffRolePolicy.ts",
-      "runtimeConsumers": [
-        "src/components/fi/staff/StaffRoleReviewClient.tsx",
-        "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-        "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
-        "src/lib/crm/crmShellLoaders.ts",
-        "src/lib/staff/staffRoleReviewApply.ts",
-        "src/lib/staff/staffSlotHours.server.ts",
-        "src/lib/team/directory/assertStaffClinicallyAvailable.server.ts",
-        "src/lib/team/directory/staffDirectoryFilters.ts"
-      ],
-      "testConsumers": [
-        "src/lib/bookings/bookingEditStaffReadiness.test.ts",
-        "src/lib/bookings/bookingStaffAssigneeAlignment.test.ts",
-        "src/lib/calendar/operationalCalendarStaffColumns.test.ts",
-        "src/lib/hr/hrStaffReadinessDashboard.test.ts",
-        "src/lib/team/directory/clinicalStaffAssignment.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
       "currentPath": "src/lib/staff/staffRoleReview.test.ts",
       "proposedDomain": "directory",
       "proposeReason": "staff presentation/picker helpers",
@@ -4759,6 +4730,40 @@
       "testConsumers": [],
       "tablesReferenced": [],
       "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/directory/staffRolePolicy.test.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/staffRolePolicy.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/directory/staffRolePolicy.ts",
+      "proposedDomain": "directory",
+      "proposeReason": "canonical team/directory module",
+      "proposedPath": "src/lib/team/directory/staffRolePolicy.ts",
+      "runtimeConsumers": [
+        "src/lib/team/directory/assertStaffClinicallyAvailable.server.ts",
+        "src/lib/team/directory/index.ts",
+        "src/lib/team/directory/staffDirectoryFilters.ts"
+      ],
+      "testConsumers": [
+        "src/lib/team/directory/clinicalStaffAssignment.test.ts"
+      ],
+      "tablesReferenced": [],
+      "serverOnly": false,
       "mutationBearing": false,
       "duplicateOf": null,
       "deletionReason": null,
@@ -6652,7 +6657,7 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 167,
+    "interTreeEdgeCount": 164,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -7516,32 +7521,11 @@
         "spec": "@/src/lib/workforce/workforceCommandCentreCore"
       },
       {
-        "from": "src/lib/team/directory/assertStaffClinicallyAvailable.server.ts",
-        "to": "src/lib/staff/staffRolePolicy.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffRolePolicy"
-      },
-      {
-        "from": "src/lib/team/directory/clinicalStaffAssignment.test.ts",
-        "to": "src/lib/staff/staffRolePolicy.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffRolePolicy"
-      },
-      {
         "from": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
         "to": "src/lib/staff/staffHrNotificationLoader.server.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
-      },
-      {
-        "from": "src/lib/team/directory/staffDirectoryFilters.ts",
-        "to": "src/lib/staff/staffRolePolicy.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffRolePolicy"
       },
       {
         "from": "src/lib/team/directory/staffDirectoryFilters.ts",
@@ -8175,7 +8159,7 @@
         "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 199,
+    "deepImportViolationCount": 195,
     "deepImportViolationsSample": [
       {
         "consumer": "src/components/fi-admin/hr/DuplicateReviewClient.tsx",
@@ -8321,11 +8305,6 @@
         "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
         "target": "src/lib/team/directory/server.ts",
         "spec": "@/src/lib/team/directory/server"
-      },
-      {
-        "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
-        "target": "src/lib/staff/staffRolePolicy.ts",
-        "spec": "@/src/lib/staff/staffRolePolicy"
       },
       {
         "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
@@ -8893,11 +8872,6 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "consumer": "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-        "target": "src/lib/staff/staffRolePolicy.ts",
-        "spec": "@/src/lib/staff/staffRolePolicy"
-      },
-      {
         "consumer": "src/lib/calendar/operationalCalendarLoader.server.ts",
         "target": "src/lib/workforce-os/workforceEventAssignmentBridge.server.ts",
         "spec": "@/src/lib/workforce-os/workforceEventAssignmentBridge.server"
@@ -8933,11 +8907,6 @@
         "spec": "@/src/lib/workforce-os/workforceEventAssignmentBridge.server"
       },
       {
-        "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
-        "target": "src/lib/staff/staffRolePolicy.ts",
-        "spec": "@/src/lib/staff/staffRolePolicy"
-      },
-      {
         "consumer": "src/lib/consultations/consultationMutations.server.ts",
         "target": "src/lib/team/directory/server.ts",
         "spec": "@/src/lib/team/directory/server"
@@ -8951,11 +8920,6 @@
         "consumer": "src/lib/crm/crmAssigneeEligibility.ts",
         "target": "src/lib/team/identity/staffLifecycleTypes.ts",
         "spec": "@/src/lib/team/identity/staffLifecycleTypes"
-      },
-      {
-        "consumer": "src/lib/crm/crmShellLoaders.ts",
-        "target": "src/lib/staff/staffRolePolicy.ts",
-        "spec": "@/src/lib/staff/staffRolePolicy"
       },
       {
         "consumer": "src/lib/fi-os/organisationalProfile.server.ts",
@@ -9176,7 +9140,7 @@
     "externalIntoTreeCounts": {
       "workforce-os": 49,
       "workforce": 50,
-      "staff": 65
+      "staff": 57
     },
     "externalIntoTree": {
       "workforce-os": [
@@ -9751,38 +9715,6 @@
         {
           "consumer": "src/lib/hr/hrStaffReadinessDashboard.ts",
           "target": "src/lib/staff/staffProfileExtras.ts"
-        },
-        {
-          "consumer": "src/components/fi/staff/StaffRoleReviewClient.tsx",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/findNextAvailableBookingSlots.server.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/clinicSetup/clinicBookingSetupTest.server.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/crm/crmShellLoaders.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookingEditStaffReadiness.test.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookingStaffAssigneeAlignment.test.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/calendar/operationalCalendarStaffColumns.test.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
-        },
-        {
-          "consumer": "src/lib/hr/hrStaffReadinessDashboard.test.ts",
-          "target": "src/lib/staff/staffRolePolicy.ts"
         },
         {
           "consumer": "src/lib/bookings/appointmentsApi.ts",

@@ -60,7 +60,7 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 
 | Domain | Example public exports | Must stay internal |
 |--------|------------------------|--------------------|
-| directory | directory page loader DTO types, filter helpers | raw table queries |
+| directory | directory page loader DTO types, filter helpers, clinical picker helpers, **staff role policy / bookability predicates (B2.3a)** | raw table queries |
 | roster | href builders, payload types, eligibility predicates | `rosterTx` implementation details, mutation servers |
 | onboarding | invite URL builders, page model types | token hashing, invite row writes |
 | access | centre DTO types, manage-gate result types | invite token generation, revoke mutations |

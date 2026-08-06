@@ -20,7 +20,7 @@ import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workfo
 import { buildAcademyCompetencySignalsFromProjections } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
-import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffRoleNeedsReview } from "@/src/lib/team/directory";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";
 
 export const metadata = {

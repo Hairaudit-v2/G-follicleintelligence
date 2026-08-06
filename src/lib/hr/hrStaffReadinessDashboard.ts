@@ -8,7 +8,7 @@ import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
   isStaffBookableForClinicalWorkflow,
   isStaffRoleNeedsReview,
-} from "@/src/lib/staff/staffRolePolicy";
+} from "@/src/lib/team/directory";
 import {
   buildStaffHrNotificationNoLinkSummary,
   type StaffHrNotificationSummary,

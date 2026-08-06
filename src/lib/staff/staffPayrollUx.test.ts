@@ -4,15 +4,10 @@ import { test } from "node:test";
 import {
   enrichStaffDirectoryRows,
   filterStaffDirectoryRows,
-  parseStaffDirectoryFiltersFromSearchParams,
-} from "./staffDirectoryFilters";
-import { buildStaffPayrollSourceDisplay } from "./staffPayrollSourceDisplay";
-import {
-  assertStaffBookableForClinicalWorkflow,
-  isStaffBookableForClinicalWorkflow,
-  isStaffRoleNeedsReview,
   NEEDS_REVIEW_STAFF_ROLE,
-} from "./staffRolePolicy";
+  parseStaffDirectoryFiltersFromSearchParams,
+} from "@/src/lib/team/directory";
+import { buildStaffPayrollSourceDisplay } from "./staffPayrollSourceDisplay";
 import type { FiStaffRow } from "./staff.server";
 
 function staff(p: Partial<FiStaffRow> & Pick<FiStaffRow, "id" | "full_name">): FiStaffRow {
@@ -33,25 +28,6 @@ function staff(p: Partial<FiStaffRow> & Pick<FiStaffRow, "id" | "full_name">): F
     ...p,
   };
 }
-
-test("isStaffRoleNeedsReview detects payroll default role", () => {
-  assert.equal(isStaffRoleNeedsReview(NEEDS_REVIEW_STAFF_ROLE), true);
-  assert.equal(isStaffRoleNeedsReview("consultant"), false);
-});
-
-test("needs_review staff are not bookable for clinical workflows", () => {
-  assert.equal(
-    isStaffBookableForClinicalWorkflow({ is_active: true, staff_role: NEEDS_REVIEW_STAFF_ROLE }),
-    false
-  );
-  assert.throws(() =>
-    assertStaffBookableForClinicalWorkflow({
-      full_name: "Payroll Hire",
-      is_active: true,
-      staff_role: NEEDS_REVIEW_STAFF_ROLE,
-    })
-  );
-});
 
 test("staff directory filters parse URL params", () => {
   const f = parseStaffDirectoryFiltersFromSearchParams({

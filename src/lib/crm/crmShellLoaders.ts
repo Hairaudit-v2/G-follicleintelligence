@@ -56,7 +56,7 @@ import {
 import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory";
 import {
   parseStaffProfileExtras,
   staffClinicMembershipIds,

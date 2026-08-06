@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.3a GREEN · B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -16,6 +16,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | B2.2c — Onboarding + cycle break | **GREEN** (`cycleCount: 0`, allowlist **12**) |
 | B2.2d — Clinical staff picker | **GREEN** (`e3d5a55c`; deep imports 247 → **211**) |
 | B2.2a — Directory core | **GREEN** (delivery record / recovery id B2.2a-R — [record](./b2.2a-r-directory-core-consolidation.md); earlier “already GREEN” wording was incorrect) |
+| B2.3a — Staff role policy | **GREEN** — [plan](./b2.3a-staff-role-policy-plan.md) · [proof](./b2.3a-staff-role-policy-proof.md) |
 
 **History note:** An earlier draft claimed B2.2a GREEN before any directory-core `git mv`. That claim was stricken. Clinical picker (B2.2d) and directory-core (B2.2a) are distinct deliveries.
 
@@ -46,6 +47,8 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md) | B2.1b identity server move + shim deletion |
 | [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md) | B2.2 directory / access / onboarding physical consolidation (a–d GREEN) |
 | [b2.2a-r-directory-core-consolidation.md](./b2.2a-r-directory-core-consolidation.md) | B2.2a directory-core delivery record (recovery id B2.2a-R) |
+| [b2.3a-staff-role-policy-plan.md](./b2.3a-staff-role-policy-plan.md) | B2.3a must-move manifest |
+| [b2.3a-staff-role-policy-proof.md](./b2.3a-staff-role-policy-proof.md) | B2.3a delivery proof |
 
 ## Generated artifacts
 
@@ -73,10 +76,10 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## B2 scorecard
 
-| Metric | B2.2d | B2.2a now | Target |
+| Metric | B2.2a | B2.3a now | Target |
 |--------|------:|----------:|-------:|
-| Files in legacy lib trees | 225 | **216** | 0 |
-| Deep legacy imports | 211 | **199** | 0 |
+| Files in legacy lib trees | 216 | **215** | 0 |
+| Deep legacy imports | 199 | **195** | 0 |
 | Sprint-named action files | 7 | 7 | 0 |
 | Documented dependency cycles | 0 | **0** | 0 |
 | Temporary compatibility exports | 0 | **0** | 0 |
@@ -86,4 +89,10 @@ Refresh “Current” from `generated/b0-summary.json` after each inventory rege
 
 ## Recommended next slice
 
-Inspect the regenerated B0 inventory and choose the next **highest-fan-out** legacy cluster (deferred directory hot cluster: `staffHrNotification*`, role/hours — or another domain by import concentration). Stabilise that domain’s public/server boundaries. **Do not start B3** sprint-action renames until those homes stabilize.
+After B2.3a: do **not** move the remainder of the mixed role/hours hot cluster as one unit. Next highest-fan-out coherent options (re-rank from inventory):
+
+1. Split ownership for `staffHrNotification*` (identity readiness contracts — not directory)
+2. Semantic decision then move for `staffWeeklyHours` / `staffSlotHours`
+3. Otherwise another high-fan-out single-domain legacy cluster (roster / payroll engines)
+
+**Do not start B3** sprint-action renames until those homes stabilize.

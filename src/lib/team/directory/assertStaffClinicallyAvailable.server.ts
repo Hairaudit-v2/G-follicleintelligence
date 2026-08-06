@@ -14,7 +14,7 @@ import {
   staffAllowedInProcedureSlot,
   type ProcedureTeamSlotKind,
 } from "@/src/lib/team/directory";
-import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory/staffRolePolicy";
 import {
   assertFiStaffBelongsToTenant,
   loadStaffMemberForTenant,

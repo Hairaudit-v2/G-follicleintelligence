@@ -8,7 +8,7 @@ import {
   parseStaffProfileExtras,
   type StaffProfileExtras,
 } from "@/src/lib/staff/staffProfileExtras";
-import { isStaffRoleNeedsReview, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffRoleNeedsReview, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/team/directory";
 import {
   parseStaffWeeklyHours,
   serializeStaffWeeklyHours,

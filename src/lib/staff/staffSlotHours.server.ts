@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { AppointmentStaffHoursError } from "@/src/lib/bookings/bookingErrors";
 import {

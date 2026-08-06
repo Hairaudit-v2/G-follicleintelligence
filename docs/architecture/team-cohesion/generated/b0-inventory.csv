@@ -202,7 +202,6 @@ src/lib/staff/staffHrNotificationSummary.ts,directory,src/lib/team/directory/sta
 src/lib/staff/staffPayrollSourceDisplay.ts,payroll,src/lib/team/payroll/staffPayrollSourceDisplay.ts,5,2,,false,false,,,high,pay/time costing
 src/lib/staff/staffPayrollUx.test.ts,payroll,src/lib/team/payroll/staffPayrollUx.test.ts,0,0,,false,false,,,high,pay/time costing
 src/lib/staff/staffProfileExtras.ts,directory,src/lib/team/directory/staffProfileExtras.ts,6,0,fi_staff,false,false,,,medium,staff presentation/picker helpers
-src/lib/staff/staffRolePolicy.ts,directory,src/lib/team/directory/staffRolePolicy.ts,8,5,,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/staffRoleReview.test.ts,directory,src/lib/team/directory/staffRoleReview.test.ts,0,0,,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/staffRoleReviewApply.ts,directory,src/lib/team/directory/staffRoleReviewApply.ts,1,1,,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/staffRoleReviewLoader.server.ts,directory,src/lib/team/directory/staffRoleReviewLoader.server.ts,0,0,,true,false,,,high,staff presentation/picker helpers
@@ -275,6 +274,8 @@ src/lib/team/directory/staffDirectoryFilters.ts,directory,src/lib/team/directory
 src/lib/team/directory/staffDirectoryIdentityAttention.test.ts,directory,src/lib/team/directory/staffDirectoryIdentityAttention.test.ts,0,0,,false,false,,,high,canonical team/directory module
 src/lib/team/directory/staffDirectoryLifecycle.test.ts,directory,src/lib/team/directory/staffDirectoryLifecycle.test.ts,0,0,,false,false,,,high,canonical team/directory module
 src/lib/team/directory/staffDirectoryLoader.server.ts,directory,src/lib/team/directory/staffDirectoryLoader.server.ts,1,0,,true,false,,,high,canonical team/directory module
+src/lib/team/directory/staffRolePolicy.test.ts,directory,src/lib/team/directory/staffRolePolicy.test.ts,0,0,,false,false,,,high,canonical team/directory module
+src/lib/team/directory/staffRolePolicy.ts,directory,src/lib/team/directory/staffRolePolicy.ts,3,1,,false,false,,,high,canonical team/directory module
 src/lib/team/directory/types.ts,directory,src/lib/team/directory/types.ts,4,0,,false,false,,,high,canonical team/directory module
 src/lib/team/directory/workforceOsDirectoryLoader.server.ts,directory,src/lib/team/directory/workforceOsDirectoryLoader.server.ts,0,0,fi_staff_members,true,false,,,high,canonical team/directory module
 src/lib/team/identity/adapters/fromStaffProfileHub.ts,identity,src/lib/team/identity/fromStaffProfileHub.ts,0,0,fi_staff,false,false,,,high,canonical team/identity module (B1)

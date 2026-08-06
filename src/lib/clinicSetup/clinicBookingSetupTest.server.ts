@@ -15,7 +15,7 @@ import { filterRoomEligibilityForClinic } from "@/src/lib/rooms/roomAvailability
 import type { FiClinicRoomRow, FiServiceRoomEligibilityRow } from "@/src/lib/rooms/roomTypes";
 import { isStaffEligibleForServiceRules } from "@/src/lib/rooms/roomAvailabilityCore";
 import { isSupportStaffRole } from "@/src/lib/team/directory";
-import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/team/directory";
 import {
   isCalendarVisibleClinicalStaff,
   isNonCalendarSupportRole,

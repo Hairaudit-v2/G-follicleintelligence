@@ -73,9 +73,12 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 
 **Seed modules**
 
-- `team/directory/*` B1.1 projections + **clinical staff picker (B2.2d GREEN)** + **directory core (B2.2a GREEN)** via `index` / `server`
-- Remaining hot cluster (post–B2.2a): `staffHrNotificationSummary*`, role/hours surfaces still under `src/lib/staff/`
+- `team/directory/*` B1.1 projections + **clinical staff picker (B2.2d GREEN)** + **directory core (B2.2a GREEN)** + **staff role policy (B2.3a GREEN)** via `index` / `server`
+- Remaining hot cluster (post–B2.3a): `staffHrNotificationSummary*` (not directory — identity readiness consumes contracts), `staffWeeklyHours*` / `staffSlotHours*` (semantic split pending), `staffRoleReview*` (mixed payroll/clinic/HR composition)
 
+**Directory owns (B2.3a):** staff-role classification for directory visibility, clinical bookability role predicates (`needs_review`), picker/filter role policy.
+
+**Directory does not own:** wage/payroll role review, contracted/roster hours, HR notification delivery, identity readiness thresholds.
 ---
 
 ## roster
