@@ -1,28 +1,29 @@
 {
-  "generatedAt": "2026-08-06T01:47:35.195Z",
-  "currentFiles": 387,
+  "generatedAt": "2026-08-06T02:03:49.209Z",
+  "currentFiles": 391,
   "trees": {
     "workforce-os": 76,
     "workforce": 112,
-    "staff": 27
+    "staff": 21
   },
   "domainCounts": {
     "shared": 35,
     "roster": 69,
-    "identity": 105,
+    "identity": 107,
     "compliance": 18,
     "payroll": 33,
     "planning": 23,
     "commandCentre": 15,
-    "directory": 32,
     "access": 27,
+    "notifications": 9,
+    "directory": 25,
     "delete": 3,
     "onboarding": 27
   },
   "riskCounts": {
-    "low": 147,
-    "medium": 59,
-    "high": 181
+    "low": 151,
+    "medium": 60,
+    "high": 180
   },
   "identity": {
     "fi_staff": 372,
@@ -42,14 +43,14 @@
     }
   },
   "importGraph": {
-    "interTreeEdgeCount": 164,
+    "interTreeEdgeCount": 154,
     "cycleCount": 0,
-    "deepImportViolationCount": 195,
+    "deepImportViolationCount": 190,
     "clientImportingServerCount": 23,
     "externalIntoTreeCounts": {
       "workforce-os": 49,
       "workforce": 50,
-      "staff": 57
+      "staff": 47
     }
   },
   "basenameCollisionCount": 1,

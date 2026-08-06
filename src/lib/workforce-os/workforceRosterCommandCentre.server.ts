@@ -12,7 +12,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { parseStaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleCore";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import {

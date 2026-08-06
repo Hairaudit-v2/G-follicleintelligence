@@ -3,7 +3,7 @@ import "server-only";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickStaffHrReadinessFromSourceRows } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import {
   calculateWorkforceReadinessScore,
@@ -123,12 +123,12 @@ export async function buildTenantWorkforceReadinessOverview(
       metadata: row.metadata as Record<string, unknown> | null,
     }));
 
-    const hr = pickStaffHrNotificationFromSourceRows(
+    const hr = pickStaffHrReadinessFromSourceRows(
       srcRows.map((row) => ({
         source_system: row.source_system,
-        source_url: row.source_url,
         metadata: row.metadata as Record<string, unknown> | null,
-      }))
+      })),
+      now
     );
 
     const compliance = buildStaffComplianceSummaryFromSourceRows(

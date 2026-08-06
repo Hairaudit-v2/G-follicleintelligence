@@ -4,8 +4,8 @@ import {
   buildStaffHrNotificationNoLinkSummary,
   pickStaffHrNotificationFromSourceRows,
   type StaffHrNotificationSummary,
-} from "@/src/lib/staff/staffHrNotificationSummary";
-import { HR_PORTAL_SOURCE_SYSTEM_PRIORITY } from "@/src/lib/staff/myHrPortalSelection";
+} from "@/src/lib/team/notifications/staffHrNotificationSummary";
+import { HR_PORTAL_SOURCE_SYSTEM_PRIORITY } from "@/src/lib/team/notifications/myHrPortalSelection";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 

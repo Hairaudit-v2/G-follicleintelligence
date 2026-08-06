@@ -19,9 +19,12 @@ import { resolveCanonicalStaffLifecycleStatus } from "@/src/lib/team/identity/in
 src/lib/team/
 ├── identity/
 │   ├── index.ts                 # public
+│   ├── readiness/               # B2.3b HR readiness contracts
 │   ├── internal/                # optional; not for external import
 │   └── *.ts                     # implementation (moved over time)
 ├── directory/index.ts
+├── notifications/index.ts       # B2.3b pure
+├── notifications/server.ts      # B2.3b loaders
 ├── roster/index.ts
 ├── onboarding/index.ts
 ├── access/index.ts
@@ -69,6 +72,7 @@ Server symbols must be exported from `identity/index.server.ts` **or** documente
 | payroll | `PayrollStaffEntry`, pay-basis aliases, identity mutation gate, audit identity refs | wage writes, timesheet transitions, rate math |
 | planning | `PlanningStaffEntry`, candidate/vacancy refs, procedure staffing identity bridge | planners’ write paths, optimizer ranking cores |
 | commandCentre | KPI/attention DTO types, href builders, `TeamCommandCentreModel` | data assembly servers (`loadTeamCommandCentre.server`) |
+| notifications | HR portal selection, notification DTOs/builders (B2.3b) | server loaders (`loadHrNotificationByStaffId`, `loadMyHrPortalPage`) — use `notifications/server` |
 
 ## Current deep imports that will violate the boundary
 

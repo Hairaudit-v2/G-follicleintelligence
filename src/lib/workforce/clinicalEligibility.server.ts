@@ -10,7 +10,7 @@ import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workf
 import { parseStaffEmploymentStatus } from "@/src/lib/team/identity/staffLifecycleCore";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/team/notifications";
 import {
   calculateClinicalEligibility,
   type StaffClinicalEligibilityResult,

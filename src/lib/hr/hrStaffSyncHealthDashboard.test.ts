@@ -14,7 +14,7 @@ import {
 import {
   buildStaffHrNotificationSummary,
   STAFF_HR_SYNC_STALE_DAYS,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import type { FiStaffSyncRunRow } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
 import { buildRelinkSyncRowsByEmail, buildRelinkSyncRowsBySourceStaffId } from "./hrStaffRelink";
 

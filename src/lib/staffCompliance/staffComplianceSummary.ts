@@ -4,7 +4,7 @@
  * for Academy or HR records — treat this as a denormalised snapshot for Staff Twin / My HR only.
  */
 
-import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { isAllowedHrPortalUrl } from "@/src/lib/team/notifications";
 
 import type {
   StaffComplianceCounts,

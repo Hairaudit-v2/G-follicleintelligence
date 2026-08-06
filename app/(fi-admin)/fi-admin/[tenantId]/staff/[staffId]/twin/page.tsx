@@ -6,7 +6,7 @@ import { ExternalLink } from "lucide-react";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
 import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/team/notifications";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWorkforceIdentityPanel";
@@ -18,7 +18,7 @@ import { loadStaffRosterProfile } from "@/src/lib/workforce-os/workforceRosterin
 import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/team/identity/workforceIdentitySummary";
 import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workforceReadinessEngine";
 import { buildAcademyCompetencySignalsFromProjections } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
-import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { isAllowedHrPortalUrl } from "@/src/lib/team/notifications";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { isStaffRoleNeedsReview } from "@/src/lib/team/directory";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";

@@ -9,11 +9,12 @@ import {
   isStaffBookableForClinicalWorkflow,
   isStaffRoleNeedsReview,
 } from "@/src/lib/team/directory";
+import type { StaffHrReadinessSummary } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import {
   buildStaffHrNotificationNoLinkSummary,
   type StaffHrNotificationSummary,
   STAFF_HR_SENSITIVE_METADATA_KEYS,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
@@ -91,7 +92,7 @@ export type StaffReadinessTableRow = {
   primaryClinicName: string | null;
   payrollLinkStatus: "linked" | "not_linked";
   hrLinkStatus: "linked" | "not_linked";
-  hrOnboardingStatus: StaffHrNotificationSummary["onboardingStatus"];
+  hrOnboardingStatus: StaffHrReadinessSummary["onboardingStatus"];
   trainingRequiredCount: number | null;
   certificatesOutstandingCount: number | null;
   workingHoursStatus: "configured" | "missing";
@@ -124,14 +125,14 @@ export function staffHasConfiguredWorkingHours(
   return formatStaffWeeklyHoursSummary(weekly).length > 0;
 }
 
-export function isHrOnboardingIncomplete(hr: StaffHrNotificationSummary): boolean {
+export function isHrOnboardingIncomplete(hr: StaffHrReadinessSummary): boolean {
   return (
     hr.onboardingStatus === "incomplete" ||
     (hr.required_documents_missing_count != null && hr.required_documents_missing_count > 0)
   );
 }
 
-export function isTrainingIncomplete(hr: StaffHrNotificationSummary): boolean {
+export function isTrainingIncomplete(hr: StaffHrReadinessSummary): boolean {
   return (
     (hr.training_required_count != null && hr.training_required_count > 0) ||
     (hr.certificates_outstanding_count != null && hr.certificates_outstanding_count > 0)
@@ -140,7 +141,7 @@ export function isTrainingIncomplete(hr: StaffHrNotificationSummary): boolean {
 
 export function isBlockedByHrTrainingPolicyForClinicalRole(input: {
   staff_role: string | null | undefined;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
 }): boolean {
   if (!isClinicalProviderStaffRole(input.staff_role)) return false;
   return isHrOnboardingIncomplete(input.hr) || isTrainingIncomplete(input.hr);
@@ -154,7 +155,7 @@ export function isStaffClinicallyAvailable(input: {
   is_active: boolean;
   staff_role: string | null | undefined;
   working_hours: Record<string, unknown> | null | undefined;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
 }): boolean {
   if (
     !isStaffBookableForClinicalWorkflow({
@@ -182,7 +183,7 @@ export function staffClinicalAvailabilityReason(input: {
   is_active: boolean;
   staff_role: string | null | undefined;
   working_hours: Record<string, unknown> | null | undefined;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
 }): string | null {
   if (!input.is_active) return "Inactive";
   if (isStaffRoleNeedsReview(input.staff_role)) return "Role needs review";
@@ -198,7 +199,7 @@ export function deriveStaffReadinessState(input: {
   is_active: boolean;
   staff_role: string | null | undefined;
   working_hours: Record<string, unknown> | null | undefined;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
 }): StaffReadinessState {
   if (!input.is_active) return "inactive";
   if (isStaffRoleNeedsReview(input.staff_role)) return "needs_role";

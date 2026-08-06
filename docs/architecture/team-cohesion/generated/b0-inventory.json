@@ -1,30 +1,31 @@
 {
-  "generatedAt": "2026-08-06T01:47:35.195Z",
+  "generatedAt": "2026-08-06T02:03:49.209Z",
   "auditBaselineFiles": 267,
-  "currentFiles": 387,
-  "growthSinceAudit": 120,
+  "currentFiles": 391,
+  "growthSinceAudit": 124,
   "trees": {
     "workforce-os": 76,
     "workforce": 112,
-    "staff": 27
+    "staff": 21
   },
   "domainCounts": {
     "shared": 35,
     "roster": 69,
-    "identity": 105,
+    "identity": 107,
     "compliance": 18,
     "payroll": 33,
     "planning": 23,
     "commandCentre": 15,
-    "directory": 32,
     "access": 27,
+    "notifications": 9,
+    "directory": 25,
     "delete": 3,
     "onboarding": 27
   },
   "riskCounts": {
-    "low": 147,
-    "medium": 59,
-    "high": 181
+    "low": 151,
+    "medium": 60,
+    "high": 180
   },
   "inventory": [
     {
@@ -3252,60 +3253,6 @@
       "migrationRisk": "high"
     },
     {
-      "currentPath": "src/lib/staff/myHrPortalLoader.server.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/myHrPortalLoader.server.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/staff/myHrPortalLoader.test.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/myHrPortalLoader.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [
-        "fi_staff"
-      ],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "low"
-    },
-    {
-      "currentPath": "src/lib/staff/myHrPortalSelection.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/myHrPortalSelection.ts",
-      "runtimeConsumers": [
-        "src/components/staff/staffComplianceReadOnly.tsx",
-        "src/lib/staff/myHrPortalLoader.server.ts",
-        "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "src/lib/staffCompliance/staffComplianceSummary.ts",
-        "src/lib/staffImport/iiohrHrStaffImportPlan.ts"
-      ],
-      "testConsumers": [
-        "src/lib/staff/myHrPortalLoader.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
       "currentPath": "src/lib/staff/staff.server.ts",
       "proposedDomain": "identity",
       "proposeReason": "canonical fi_staff CRUD",
@@ -3357,12 +3304,12 @@
         "src/lib/workforce/staffTenantLinkRepair.server.ts"
       ],
       "testConsumers": [
-        "src/lib/staff/staffHrNotificationSummary.test.ts",
         "src/lib/staff/staffPayrollUx.test.ts",
         "src/lib/staff/staffRoleReview.test.ts",
         "src/lib/staff/workforceCommandCentre.test.ts",
         "src/lib/team/directory/staffDirectoryIdentityAttention.test.ts",
         "src/lib/team/directory/staffDirectoryLifecycle.test.ts",
+        "src/lib/team/notifications/staffHrNotificationSummary.test.ts",
         "src/lib/workforce-os/rosterEligibleStaff.test.ts",
         "src/lib/workforce-os/rosterGridEligibility.test.ts"
       ],
@@ -3412,9 +3359,9 @@
     },
     {
       "currentPath": "src/lib/staff/staffHrImportPage.server.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/staffHrImportPage.server.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "HR portal/notification orchestration (B2.3b)",
+      "proposedPath": "src/lib/team/notifications/staffHrImportPage.server.ts",
       "runtimeConsumers": [
         "src/components/fi-admin/hr/PayrollStaffImportClient.tsx",
         "src/components/fi-admin/hr/StaffImportClient.tsx"
@@ -3426,79 +3373,6 @@
       "duplicateOf": null,
       "deletionReason": null,
       "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/staff/staffHrNotificationLoader.server.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/staffHrNotificationLoader.server.ts",
-      "runtimeConsumers": [
-        "src/lib/hr/hrStaffReadinessPage.server.ts",
-        "src/lib/hr/hrStaffSyncHealthPage.server.ts",
-        "src/lib/staff/staffRoleReviewLoader.server.ts",
-        "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
-        "src/lib/team/directory/staffDirectoryLoader.server.ts",
-        "src/lib/team/profile/loadStaffProfileHub.server.ts"
-      ],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": true,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "medium"
-    },
-    {
-      "currentPath": "src/lib/staff/staffHrNotificationSummary.test.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/staffHrNotificationSummary.test.ts",
-      "runtimeConsumers": [],
-      "testConsumers": [],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
-    },
-    {
-      "currentPath": "src/lib/staff/staffHrNotificationSummary.ts",
-      "proposedDomain": "directory",
-      "proposeReason": "HR portal/directory adjacent loaders",
-      "proposedPath": "src/lib/team/directory/staffHrNotificationSummary.ts",
-      "runtimeConsumers": [
-        "src/components/fi/staff/StaffHrNotificationBadge.tsx",
-        "src/lib/hr/hrStaffSyncHealthDashboard.ts",
-        "src/lib/staff/myHrPortalLoader.server.ts",
-        "src/lib/staff/staffRoleReviewApply.ts",
-        "src/lib/staff/workforceCommandCentre.server.ts",
-        "src/lib/team/directory/staffDirectoryFilters.ts",
-        "src/lib/team/directory/staffDirectoryLoader.server.ts",
-        "src/lib/team/identity/workforceIdentityReadinessSignals.ts",
-        "src/lib/team/identity/workforceIdentitySummary.ts",
-        "src/lib/team/identity/workforceReadinessEngine.ts",
-        "src/lib/team/identity/workforceReadinessTenantOverview.server.ts",
-        "src/lib/workforce-os/workforceRosterCommandCentre.server.ts",
-        "src/lib/workforce-os/workforceRostering.server.ts",
-        "src/lib/workforce/clinicalEligibility.server.ts"
-      ],
-      "testConsumers": [
-        "src/lib/academy-os/academyCompetencyReceiver.test.ts",
-        "src/lib/academy-os/procedurePrivilegeIntegration.test.ts",
-        "src/lib/bookings/bookingEditStaffReadiness.test.ts",
-        "src/lib/staff/workforceCommandCentre.test.ts",
-        "src/lib/workforce-os/staffStandardHoursAllocation.test.ts",
-        "src/lib/workforce-os/workforceProcedureClinicalEligibility.test.ts",
-        "src/lib/workforce-os/workforceRosterCandidates.test.ts",
-        "src/lib/workforce-os/workforceRosteringEngine.test.ts"
-      ],
-      "tablesReferenced": [],
-      "serverOnly": false,
-      "mutationBearing": false,
-      "duplicateOf": null,
-      "deletionReason": null,
-      "migrationRisk": "high"
     },
     {
       "currentPath": "src/lib/staff/staffPayrollSourceDisplay.ts",
@@ -3583,7 +3457,7 @@
         "src/lib/staff/staffRoleReviewLoader.server.ts"
       ],
       "testConsumers": [
-        "src/lib/staff/staffHrNotificationSummary.test.ts"
+        "src/lib/team/notifications/staffHrNotificationSummary.test.ts"
       ],
       "tablesReferenced": [],
       "serverOnly": false,
@@ -3668,16 +3542,17 @@
       "runtimeConsumers": [
         "src/lib/hr/hrStaffReadinessPage.server.ts",
         "src/lib/hr/hrStaffRelink.ts",
-        "src/lib/staff/myHrPortalSelection.ts",
-        "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "src/lib/staff/staffHrNotificationSummary.ts",
         "src/lib/staff/staffPayrollSourceDisplay.ts",
         "src/lib/staff/staffRoleReviewLoader.server.ts",
         "src/lib/staffImport/iiohrHrStaffSync.ts",
         "src/lib/team/directory/staffDirectoryLoader.server.ts",
+        "src/lib/team/identity/readiness/hrReadinessContracts.ts",
         "src/lib/team/identity/workforceIdentityLinks.server.ts",
         "src/lib/team/identity/workforceIdentityMetadata.ts",
-        "src/lib/team/identity/workforceIdentitySources.ts"
+        "src/lib/team/identity/workforceIdentitySources.ts",
+        "src/lib/team/notifications/myHrPortalSelection.ts",
+        "src/lib/team/notifications/staffHrNotificationLoader.server.ts",
+        "src/lib/team/notifications/staffHrNotificationSummary.ts"
       ],
       "testConsumers": [],
       "tablesReferenced": [],
@@ -4954,6 +4829,41 @@
       "migrationRisk": "low"
     },
     {
+      "currentPath": "src/lib/team/identity/readiness/hrReadinessContracts.test.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/hrReadinessContracts.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/identity/readiness/hrReadinessContracts.ts",
+      "proposedDomain": "identity",
+      "proposeReason": "canonical team/identity module (B1)",
+      "proposedPath": "src/lib/team/identity/hrReadinessContracts.ts",
+      "runtimeConsumers": [
+        "src/lib/hr/hrStaffReadinessDashboard.ts",
+        "src/lib/team/identity/workforceIdentityReadinessSignals.ts",
+        "src/lib/team/identity/workforceIdentitySummary.ts",
+        "src/lib/team/identity/workforceReadinessEngine.ts",
+        "src/lib/team/identity/workforceReadinessTenantOverview.server.ts",
+        "src/lib/team/notifications/myHrPortalSelection.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
       "currentPath": "src/lib/team/identity/resolveStaffIdentities.server.ts",
       "proposedDomain": "identity",
       "proposeReason": "canonical team/identity module (B1)",
@@ -5692,6 +5602,136 @@
       "duplicateOf": null,
       "deletionReason": null,
       "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/index.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/index.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/myHrPortalLoader.server.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/myHrPortalLoader.server.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/myHrPortalSelection.test.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/myHrPortalSelection.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [
+        "fi_staff"
+      ],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/myHrPortalSelection.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/myHrPortalSelection.ts",
+      "runtimeConsumers": [
+        "src/lib/team/notifications/myHrPortalLoader.server.ts",
+        "src/lib/team/notifications/staffHrNotificationLoader.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/server.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/server.ts",
+      "runtimeConsumers": [
+        "src/lib/hr/hrStaffReadinessPage.server.ts",
+        "src/lib/hr/hrStaffSyncHealthPage.server.ts",
+        "src/lib/staff/staffRoleReviewLoader.server.ts",
+        "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
+        "src/lib/team/directory/staffDirectoryLoader.server.ts",
+        "src/lib/team/profile/loadStaffProfileHub.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/staffHrNotificationLoader.server.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/staffHrNotificationLoader.server.ts",
+      "runtimeConsumers": [
+        "src/lib/team/notifications/server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": true,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "medium"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/staffHrNotificationSummary.test.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/staffHrNotificationSummary.test.ts",
+      "runtimeConsumers": [],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "high"
+    },
+    {
+      "currentPath": "src/lib/team/notifications/staffHrNotificationSummary.ts",
+      "proposedDomain": "notifications",
+      "proposeReason": "canonical team/notifications module",
+      "proposedPath": "src/lib/team/notifications/staffHrNotificationSummary.ts",
+      "runtimeConsumers": [
+        "src/lib/team/notifications/myHrPortalLoader.server.ts"
+      ],
+      "testConsumers": [],
+      "tablesReferenced": [],
+      "serverOnly": false,
+      "mutationBearing": false,
+      "duplicateOf": null,
+      "deletionReason": null,
+      "migrationRisk": "low"
     },
     {
       "currentPath": "src/lib/team/onboarding/index.ts",
@@ -6657,7 +6697,7 @@
     }
   ],
   "importGraph": {
-    "interTreeEdgeCount": 164,
+    "interTreeEdgeCount": 154,
     "interTreeEdges": [
       {
         "from": "src/lib/workforce-os/hrReconciliation.server.ts",
@@ -6835,13 +6875,6 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "from": "src/lib/workforce-os/staffStandardHoursAllocation.test.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
         "from": "src/lib/workforce-os/staffStandardHoursPage.server.ts",
         "to": "src/lib/staff/staff.server.ts",
         "fromTree": "src/lib/workforce-os",
@@ -6871,13 +6904,6 @@
       },
       {
         "from": "src/lib/workforce-os/workforceProcedureClinicalEligibility.test.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
-        "from": "src/lib/workforce-os/workforceProcedureClinicalEligibility.test.ts",
         "to": "src/lib/team/identity/workforceReadinessEngine.ts",
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
@@ -6889,13 +6915,6 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/identity/workforceReadinessEngine"
-      },
-      {
-        "from": "src/lib/workforce-os/workforceRosterCandidates.test.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/workforce-os/workforceRosterCandidates.ts",
@@ -6934,13 +6953,6 @@
       },
       {
         "from": "src/lib/workforce-os/workforceRosterCommandCentre.server.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
-        "from": "src/lib/workforce-os/workforceRosterCommandCentre.server.ts",
         "to": "src/lib/workforce/rosterCadencePolicy.server.ts",
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/workforce",
@@ -6959,13 +6971,6 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/identity/workforceReadinessEngine"
-      },
-      {
-        "from": "src/lib/workforce-os/workforceRostering.server.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/workforce-os/workforceRostering.server.ts",
@@ -6994,13 +6999,6 @@
         "fromTree": "src/lib/workforce-os",
         "toTree": "src/lib/team",
         "spec": "@/src/lib/team/identity/workforceReadinessEngine"
-      },
-      {
-        "from": "src/lib/workforce-os/workforceRosteringEngine.test.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce-os",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/workforce-os/workforceRosteringEngine.ts",
@@ -7050,13 +7048,6 @@
         "fromTree": "src/lib/workforce",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "from": "src/lib/workforce/clinicalEligibility.server.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/workforce",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/workforce/clinicalEligibilityCore.ts",
@@ -7409,6 +7400,13 @@
         "spec": "@/src/lib/team/directory/server"
       },
       {
+        "from": "src/lib/staff/staffRoleReviewLoader.server.ts",
+        "to": "src/lib/team/notifications/server.ts",
+        "fromTree": "src/lib/staff",
+        "toTree": "src/lib/team",
+        "spec": "@/src/lib/team/notifications/server"
+      },
+      {
         "from": "src/lib/staff/workforceCommandCentre.server.ts",
         "to": "src/lib/team/identity/workforceReadinessEngine.ts",
         "fromTree": "src/lib/staff",
@@ -7521,27 +7519,6 @@
         "spec": "@/src/lib/workforce/workforceCommandCentreCore"
       },
       {
-        "from": "src/lib/team/directory/clinicalStaffPickerLoader.server.ts",
-        "to": "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
-      },
-      {
-        "from": "src/lib/team/directory/staffDirectoryFilters.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
-        "from": "src/lib/team/directory/staffDirectoryFilters.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
         "from": "src/lib/team/directory/staffDirectoryFilters.ts",
         "to": "src/lib/staff/staffPayrollSourceDisplay.ts",
         "fromTree": "src/lib/team",
@@ -7582,20 +7559,6 @@
         "fromTree": "src/lib/team",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "from": "src/lib/team/directory/staffDirectoryLoader.server.ts",
-        "to": "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
-      },
-      {
-        "from": "src/lib/team/directory/staffDirectoryLoader.server.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/team/directory/staffDirectoryLoader.server.ts",
@@ -7647,6 +7610,13 @@
         "spec": "@/src/lib/staff/staffProfileExtras"
       },
       {
+        "from": "src/lib/team/identity/readiness/hrReadinessContracts.ts",
+        "to": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
         "from": "src/lib/team/identity/staffLifecycleCore.ts",
         "to": "src/lib/workforce-os/iiohrStaffHrLinkReconciliationTypes.ts",
         "fromTree": "src/lib/team",
@@ -7689,25 +7659,11 @@
         "spec": "@/src/lib/staff/staffSourceIdsNormalize"
       },
       {
-        "from": "src/lib/team/identity/workforceIdentityReadinessSignals.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
         "from": "src/lib/team/identity/workforceIdentitySources.ts",
         "to": "src/lib/staff/staffSourceIdsNormalize.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staffSourceIdsNormalize"
-      },
-      {
-        "from": "src/lib/team/identity/workforceIdentitySummary.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "from": "src/lib/team/identity/workforceIdentityTenantOverview.server.ts",
@@ -7717,13 +7673,6 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "from": "src/lib/team/identity/workforceReadinessEngine.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
         "from": "src/lib/team/identity/workforceReadinessTenantOverview.server.ts",
         "to": "src/lib/staff/staff.server.ts",
         "fromTree": "src/lib/team",
@@ -7731,11 +7680,39 @@
         "spec": "@/src/lib/staff/staff.server"
       },
       {
-        "from": "src/lib/team/identity/workforceReadinessTenantOverview.server.ts",
-        "to": "src/lib/staff/staffHrNotificationSummary.ts",
+        "from": "src/lib/team/notifications/myHrPortalSelection.ts",
+        "to": "src/lib/staff/staffSourceIdsNormalize.ts",
         "fromTree": "src/lib/team",
         "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
+        "from": "src/lib/team/notifications/staffHrNotificationLoader.server.ts",
+        "to": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
+      },
+      {
+        "from": "src/lib/team/notifications/staffHrNotificationSummary.test.ts",
+        "to": "src/lib/staff/staffRoleReviewApply.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffRoleReviewApply"
+      },
+      {
+        "from": "src/lib/team/notifications/staffHrNotificationSummary.test.ts",
+        "to": "src/lib/staff/staff.server.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staff.server"
+      },
+      {
+        "from": "src/lib/team/notifications/staffHrNotificationSummary.ts",
+        "to": "src/lib/staff/staffSourceIdsNormalize.ts",
+        "fromTree": "src/lib/team",
+        "toTree": "src/lib/staff",
+        "spec": "@/src/lib/staff/staffSourceIdsNormalize"
       },
       {
         "from": "src/lib/team/planning/loadPlanningStaffContext.server.ts",
@@ -7750,13 +7727,6 @@
         "fromTree": "src/lib/team",
         "toTree": "src/lib/staff",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "from": "src/lib/team/profile/loadStaffProfileHub.server.ts",
-        "to": "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "fromTree": "src/lib/team",
-        "toTree": "src/lib/staff",
-        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
       },
       {
         "from": "src/lib/team/profile/loadStaffProfileHub.server.ts",
@@ -7977,11 +7947,6 @@
         "namedExports": 12
       },
       {
-        "file": "src/lib/staff/staffHrNotificationSummary.ts",
-        "exportStar": 0,
-        "namedExports": 12
-      },
-      {
         "file": "src/lib/staff/staffRoleReviewApply.ts",
         "exportStar": 0,
         "namedExports": 13
@@ -8015,6 +7980,11 @@
         "file": "src/lib/team/directory/clinicalStaffPicker.ts",
         "exportStar": 0,
         "namedExports": 19
+      },
+      {
+        "file": "src/lib/team/identity/readiness/hrReadinessContracts.ts",
+        "exportStar": 0,
+        "namedExports": 12
       },
       {
         "file": "src/lib/team/identity/staffCanonicalLifecycle.ts",
@@ -8159,7 +8129,7 @@
         "spec": "@/src/lib/team/access/staffAccessCentre.server"
       }
     ],
-    "deepImportViolationCount": 195,
+    "deepImportViolationCount": 190,
     "deepImportViolationsSample": [
       {
         "consumer": "src/components/fi-admin/hr/DuplicateReviewClient.tsx",
@@ -8285,11 +8255,6 @@
         "consumer": "src/components/fi/staff/StaffDirectorySecondaryView.tsx",
         "target": "src/lib/team/identity/staffCanonicalLifecycle.ts",
         "spec": "@/src/lib/team/identity/staffCanonicalLifecycle"
-      },
-      {
-        "consumer": "src/components/fi/staff/StaffHrNotificationBadge.tsx",
-        "target": "src/lib/staff/staffHrNotificationSummary.ts",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "consumer": "src/components/fi/staff/StaffLinkUsersClient.tsx",
@@ -8570,11 +8535,6 @@
         "consumer": "src/components/fi/workforce/WorkforceOsStaffProfileClient.tsx",
         "target": "src/lib/team/identity/staffLifecyclePresentation.ts",
         "spec": "@/src/lib/team/identity/staffLifecyclePresentation"
-      },
-      {
-        "consumer": "src/components/staff/staffComplianceReadOnly.tsx",
-        "target": "src/lib/staff/myHrPortalSelection.ts",
-        "spec": "@/src/lib/staff/myHrPortalSelection"
       },
       {
         "consumer": "src/lib/academy-os/academyCompetencyReceiver.server.ts",
@@ -8977,14 +8937,19 @@
         "spec": "@/src/lib/staff/staffProfileExtras"
       },
       {
+        "consumer": "src/lib/hr/hrStaffReadinessDashboard.ts",
+        "target": "src/lib/team/identity/readiness/hrReadinessContracts.ts",
+        "spec": "@/src/lib/team/identity/readiness/hrReadinessContracts"
+      },
+      {
         "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
         "target": "src/lib/staff/staff.server.ts",
         "spec": "@/src/lib/staff/staff.server"
       },
       {
         "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
-        "target": "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
+        "target": "src/lib/team/notifications/server.ts",
+        "spec": "@/src/lib/team/notifications/server"
       },
       {
         "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
@@ -9005,16 +8970,6 @@
         "consumer": "src/lib/hr/hrStaffRelink.ts",
         "target": "src/lib/staff/hrStaffReadinessMetadata.ts",
         "spec": "@/src/lib/staff/hrStaffReadinessMetadata"
-      },
-      {
-        "consumer": "src/lib/hr/hrStaffSyncHealthDashboard.ts",
-        "target": "src/lib/staff/staffHrNotificationSummary.ts",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
-      },
-      {
-        "consumer": "src/lib/hr/hrStaffSyncHealthDashboard.ts",
-        "target": "src/lib/staff/staffHrNotificationSummary.ts",
-        "spec": "@/src/lib/staff/staffHrNotificationSummary"
       },
       {
         "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
@@ -9038,8 +8993,8 @@
       },
       {
         "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
-        "target": "src/lib/staff/staffHrNotificationLoader.server.ts",
-        "spec": "@/src/lib/staff/staffHrNotificationLoader.server"
+        "target": "src/lib/team/notifications/server.ts",
+        "spec": "@/src/lib/team/notifications/server"
       },
       {
         "consumer": "src/lib/onboarding-os/guidedAssist.server.ts",
@@ -9060,16 +9015,6 @@
         "consumer": "src/lib/rooms/roomAvailability.server.ts",
         "target": "src/lib/staff/staff.server.ts",
         "spec": "@/src/lib/staff/staff.server"
-      },
-      {
-        "consumer": "src/lib/staffCompliance/staffComplianceSummary.ts",
-        "target": "src/lib/staff/myHrPortalSelection.ts",
-        "spec": "@/src/lib/staff/myHrPortalSelection"
-      },
-      {
-        "consumer": "src/lib/staffImport/iiohrHrStaffImportPlan.ts",
-        "target": "src/lib/staff/myHrPortalSelection.ts",
-        "spec": "@/src/lib/staff/myHrPortalSelection"
       },
       {
         "consumer": "src/lib/staffImport/iiohrHrStaffSync.ts",
@@ -9140,7 +9085,7 @@
     "externalIntoTreeCounts": {
       "workforce-os": 49,
       "workforce": 50,
-      "staff": 57
+      "staff": 47
     },
     "externalIntoTree": {
       "workforce-os": [
@@ -9561,18 +9506,6 @@
           "target": "src/lib/staff/hrStaffReadinessMetadata.ts"
         },
         {
-          "consumer": "src/components/staff/staffComplianceReadOnly.tsx",
-          "target": "src/lib/staff/myHrPortalSelection.ts"
-        },
-        {
-          "consumer": "src/lib/staffCompliance/staffComplianceSummary.ts",
-          "target": "src/lib/staff/myHrPortalSelection.ts"
-        },
-        {
-          "consumer": "src/lib/staffImport/iiohrHrStaffImportPlan.ts",
-          "target": "src/lib/staff/myHrPortalSelection.ts"
-        },
-        {
           "consumer": "src/components/fi/staff/StaffDirectoryClient.tsx",
           "target": "src/lib/staff/staff.server.ts"
         },
@@ -9663,34 +9596,6 @@
         {
           "consumer": "src/components/fi-admin/hr/StaffImportClient.tsx",
           "target": "src/lib/staff/staffHrImportPage.server.ts"
-        },
-        {
-          "consumer": "src/lib/hr/hrStaffReadinessPage.server.ts",
-          "target": "src/lib/staff/staffHrNotificationLoader.server.ts"
-        },
-        {
-          "consumer": "src/lib/hr/hrStaffSyncHealthPage.server.ts",
-          "target": "src/lib/staff/staffHrNotificationLoader.server.ts"
-        },
-        {
-          "consumer": "src/components/fi/staff/StaffHrNotificationBadge.tsx",
-          "target": "src/lib/staff/staffHrNotificationSummary.ts"
-        },
-        {
-          "consumer": "src/lib/hr/hrStaffSyncHealthDashboard.ts",
-          "target": "src/lib/staff/staffHrNotificationSummary.ts"
-        },
-        {
-          "consumer": "src/lib/academy-os/academyCompetencyReceiver.test.ts",
-          "target": "src/lib/staff/staffHrNotificationSummary.ts"
-        },
-        {
-          "consumer": "src/lib/academy-os/procedurePrivilegeIntegration.test.ts",
-          "target": "src/lib/staff/staffHrNotificationSummary.ts"
-        },
-        {
-          "consumer": "src/lib/bookings/bookingEditStaffReadiness.test.ts",
-          "target": "src/lib/staff/staffHrNotificationSummary.ts"
         },
         {
           "consumer": "src/components/fi/staff/StaffPayrollMetadataPanel.tsx",
@@ -9820,7 +9725,7 @@
         "fi_staff_members": 73
       },
       "src/lib/team": {
-        "fi_staff": 33,
+        "fi_staff": 36,
         "fi_staff_members": 44
       },
       "src/lib/workforce": {
@@ -9843,12 +9748,12 @@
         "fi_staff": 18,
         "fi_staff_members": 1
       },
-      "src/lib/staff": {
-        "fi_staff": 19,
-        "fi_staff_members": 0
-      },
       "src/lib/integrations": {
         "fi_staff": 17,
+        "fi_staff_members": 0
+      },
+      "src/lib/staff": {
+        "fi_staff": 16,
         "fi_staff_members": 0
       },
       "scripts/fi-workforce-live-data-cleanup-1.ts": {
@@ -10606,18 +10511,6 @@
         "classification": "scheduling read"
       },
       {
-        "file": "src/lib/staff/myHrPortalLoader.server.ts",
-        "table": "fi_staff",
-        "count": 2,
-        "classification": "scheduling read"
-      },
-      {
-        "file": "src/lib/staff/myHrPortalLoader.test.ts",
-        "table": "fi_staff",
-        "count": 1,
-        "classification": "test or fixture"
-      },
-      {
         "file": "src/lib/staff/staff.server.ts",
         "table": "fi_staff",
         "count": 11,
@@ -10940,6 +10833,18 @@
         "table": "fi_staff",
         "count": 1,
         "classification": "canonical identity resolution"
+      },
+      {
+        "file": "src/lib/team/notifications/myHrPortalLoader.server.ts",
+        "table": "fi_staff",
+        "count": 2,
+        "classification": "scheduling read"
+      },
+      {
+        "file": "src/lib/team/notifications/myHrPortalSelection.test.ts",
+        "table": "fi_staff",
+        "count": 1,
+        "classification": "test or fixture"
       },
       {
         "file": "src/lib/team/onboarding/onboardingChecklist.server.ts",

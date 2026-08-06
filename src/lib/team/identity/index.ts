@@ -94,3 +94,22 @@ export {
   type CanonicalStaffLifecycleStatus,
   type StaffLifecycleSignal,
 } from "@/src/lib/team/identity/staffCanonicalLifecycle";
+
+/**
+ * HR readiness contracts (B2.3b) — staleness thresholds + neutral readiness types.
+ * Notification badges / portal selection: `@/src/lib/team/notifications`.
+ */
+export {
+  STAFF_HR_SYNC_STALE_DAYS,
+  HR_READINESS_SOURCE_SYSTEM_PRIORITY,
+  buildStaffHrReadinessLinkedSummary,
+  buildStaffHrReadinessNoLinkSummary,
+  computeStaffHrOutstandingTaskCount,
+  isHrSyncStale,
+  pickStaffHrReadinessFromSourceRows,
+  resolveHrOnboardingStatus,
+  type BuildStaffHrReadinessLinkedInput,
+  type StaffHrOnboardingStatus,
+  type StaffHrReadinessSourceRow,
+  type StaffHrReadinessSummary,
+} from "@/src/lib/team/identity/readiness/hrReadinessContracts";

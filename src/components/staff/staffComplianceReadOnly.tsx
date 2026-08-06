@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
-import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { isAllowedHrPortalUrl } from "@/src/lib/team/notifications";
 import type {
   StaffComplianceItem,
   StaffComplianceStatus,

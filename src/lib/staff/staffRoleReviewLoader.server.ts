@@ -14,7 +14,7 @@ import {
 } from "@/src/lib/staff/staffRoleReviewApply";
 import type { StaffRoleReviewEditableRow } from "@/src/lib/staff/staffRoleReviewApply";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
+import { loadHrNotificationByStaffId } from "@/src/lib/team/notifications/server";
 import { EVOLVED_PAYROLL_SOURCE_SYSTEM } from "@/src/lib/staffImport/evolvedPayrollStaffImportConstants";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";

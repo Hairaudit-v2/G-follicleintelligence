@@ -14,7 +14,7 @@ import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
   buildStaffHrNotificationNoLinkSummary,
   type StaffHrNotificationSummary,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import {
   isStaffBookableForClinicalWorkflow,
   isStaffRoleNeedsReview,

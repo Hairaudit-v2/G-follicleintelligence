@@ -23,8 +23,8 @@ import {
   type StaffPayrollSourceDisplay,
 } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { loadStaffPinMetadataMap, type StaffPinMetadata } from "@/src/lib/staffPin/staffPin.server";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { loadHrNotificationByStaffId } from "@/src/lib/team/notifications/server";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { EVOLVED_PAYROLL_SOURCE_SYSTEM } from "@/src/lib/staffImport/evolvedPayrollStaffImportConstants";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";
 import {

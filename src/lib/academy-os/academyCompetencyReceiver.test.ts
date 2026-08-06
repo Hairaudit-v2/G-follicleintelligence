@@ -12,7 +12,7 @@ import {
 import { buildAcademyCompetencySignalsFromProjections } from "./academyWorkforceSignalAdapter";
 import { buildWorkforceIdentityReadinessSignals } from "@/src/lib/team/identity/workforceIdentityReadinessSignals";
 import { calculateWorkforceReadinessScore } from "@/src/lib/team/identity/workforceReadinessEngine";
-import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 
 const TENANT_ID = "11111111-1111-4111-8111-111111111111";

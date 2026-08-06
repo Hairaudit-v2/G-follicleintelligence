@@ -15,7 +15,7 @@ import { buildTenantWorkforceIdentityOverview } from "@/src/lib/team/identity/se
 import type { WorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
 import { loadWorkforceHrSyncAuditPageModel } from "@/src/lib/workforce/hrSyncAuditPage.server";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
+import { loadHrNotificationByStaffId } from "@/src/lib/team/notifications/server";
 import {
   listRecentStaffSyncRunsForTenant,
   type FiStaffSyncRunRow,

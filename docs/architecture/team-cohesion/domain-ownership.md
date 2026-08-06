@@ -8,6 +8,7 @@ Target tree:
 src/lib/team/
 ├── identity/
 ├── directory/
+├── notifications/   # B2.3b — HR portal selection + notification composition
 ├── roster/
 ├── onboarding/
 ├── access/
@@ -59,6 +60,8 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - `staff/staff.server.ts` (fi_staff CRUD — eventually)
 - `staff/staffFiUserLink.server.ts` (link **execution**; pure plan moved to `team/access` in B2.2b)
 
+**B2.3b readiness contracts (canonical):** `team/identity/readiness/hrReadinessContracts.ts` — `STAFF_HR_SYNC_STALE_DAYS`, `StaffHrReadinessSummary`, neutral onboarding/stale predicates. Exposed via `@/src/lib/team/identity`. Must not import notifications or directory.
+
 ---
 
 ## directory
@@ -74,11 +77,32 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 **Seed modules**
 
 - `team/directory/*` B1.1 projections + **clinical staff picker (B2.2d GREEN)** + **directory core (B2.2a GREEN)** + **staff role policy (B2.3a GREEN)** via `index` / `server`
-- Remaining hot cluster (post–B2.3a): `staffHrNotificationSummary*` (not directory — identity readiness consumes contracts), `staffWeeklyHours*` / `staffSlotHours*` (semantic split pending), `staffRoleReview*` (mixed payroll/clinic/HR composition)
+- Remaining hot cluster (post–B2.3b): `staffWeeklyHours*` / `staffSlotHours*` (semantic split pending), `staffRoleReview*` (mixed payroll/clinic/HR notification composition)
 
 **Directory owns (B2.3a):** staff-role classification for directory visibility, clinical bookability role predicates (`needs_review`), picker/filter role policy.
 
 **Directory does not own:** wage/payroll role review, contracted/roster hours, HR notification delivery, identity readiness thresholds.
+
+---
+
+## notifications
+
+**Owns**
+
+- HR notification composition (badge / variant / alert copy)
+- HR portal URL allowlist and source-system priority selection
+- Notification recipient / My HR portal page loaders
+- Notification action eligibility at the notification layer
+
+**Consumes** identity readiness contracts. Must not own staleness thresholds or neutral readiness summary types.
+
+**Canonical home (B2.3b)**
+
+- `src/lib/team/notifications` — pure portal selection + notification DTOs/builders
+- `src/lib/team/notifications/server` — `loadHrNotificationByStaffId`, `loadMyHrPortalPage`
+
+**Does not own:** identity readiness scoring engines, directory list loaders, payroll role-review workflows.
+
 ---
 
 ## roster

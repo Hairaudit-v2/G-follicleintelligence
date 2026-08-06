@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildStaffRoleReviewEditableRow } from "./staffRoleReviewApply";
-import type { FiStaffRow } from "./staff.server";
+import { buildStaffRoleReviewEditableRow } from "@/src/lib/staff/staffRoleReviewApply";
+import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {
   buildStaffHrNotificationNoLinkSummary,
   buildStaffHrNotificationSummary,
@@ -10,7 +10,7 @@ import {
   pickStaffHrNotificationFromSourceRows,
   staffHrNotificationSummaryHasSensitiveKeys,
   STAFF_HR_SYNC_STALE_DAYS,
-} from "./staffHrNotificationSummary";
+} from "@/src/lib/team/notifications/staffHrNotificationSummary";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 

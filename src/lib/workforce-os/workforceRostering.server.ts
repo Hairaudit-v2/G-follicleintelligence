@@ -16,7 +16,7 @@ import {
   normalizeRequiredRoles,
   type ClinicalStaffingRequiredRoles,
 } from "@/src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";

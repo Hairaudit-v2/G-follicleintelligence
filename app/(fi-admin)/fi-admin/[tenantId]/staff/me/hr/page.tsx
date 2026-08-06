@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
 import { MyHrTrainingComplianceCompactCard } from "@/src/components/staff/staffComplianceReadOnly";
-import { loadMyHrPortalPage } from "@/src/lib/staff/myHrPortalLoader.server";
+import { loadMyHrPortalPage } from "@/src/lib/team/notifications/server";
 
 export const metadata = {
   title: "My HR Portal",

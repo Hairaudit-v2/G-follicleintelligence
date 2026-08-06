@@ -46,6 +46,7 @@ function proposeDomain(relPath) {
         "planning",
         "commandcentre",
         "shared",
+        "notifications",
       ].includes(seg)
     ) {
       return {
@@ -161,7 +162,7 @@ function proposeDomain(relPath) {
   // Shared / presentation leftovers in staff/
   if (p.startsWith("src/lib/staff/")) {
     if (/myhrportal|hrnotification|staffhrimport/.test(base)) {
-      return { domain: "directory", reason: "HR portal/directory adjacent loaders" };
+      return { domain: "notifications", reason: "HR portal/notification orchestration (B2.3b)" };
     }
     if (/staffrole|staffweekly|staffslot|staffpayrollsource|staffprofileextras|staffapischemas|staffsensitive|staffassignee|clinicalstaff|calendarvisible|assertstaff/.test(base.replace(/[.-]/g, ""))) {
       return { domain: "directory", reason: "staff presentation/picker helpers" };

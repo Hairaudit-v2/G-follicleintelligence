@@ -6,7 +6,7 @@ import { test } from "node:test";
  * Auth and `fi_staff` linkage (`no_staff_profile`, `no_tenant_membership`) are enforced in the loader with DB access;
  * these tests cover the source-id URL contract only.
  */
-import { isAllowedHrPortalUrl, pickHrPortalFromSourceIds } from "./myHrPortalSelection";
+import { isAllowedHrPortalUrl, pickHrPortalFromSourceIds } from "@/src/lib/team/notifications";
 
 test("isAllowedHrPortalUrl accepts http(s) only", () => {
   assert.equal(isAllowedHrPortalUrl("https://hr.example/onboarding"), true);

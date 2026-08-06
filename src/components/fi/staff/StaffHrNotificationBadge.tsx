@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
 
 function badgeClass(variant: StaffHrNotificationSummary["variant"], compact: boolean): string {
   const base = compact

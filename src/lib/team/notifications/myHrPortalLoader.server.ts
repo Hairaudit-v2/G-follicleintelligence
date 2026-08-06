@@ -3,9 +3,9 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { pickHrPortalFromSourceIds } from "@/src/lib/staff/myHrPortalSelection";
-import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { pickHrPortalFromSourceIds } from "@/src/lib/team/notifications/myHrPortalSelection";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/team/notifications/staffHrNotificationSummary";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 

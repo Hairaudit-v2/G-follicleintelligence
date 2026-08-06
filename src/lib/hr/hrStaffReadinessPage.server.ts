@@ -12,7 +12,7 @@ import {
   type StaffReadinessTableRow,
 } from "@/src/lib/hr/hrStaffReadinessDashboard";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
+import { loadHrNotificationByStaffId } from "@/src/lib/team/notifications/server";
 import { buildStaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { EVOLVED_PAYROLL_SOURCE_SYSTEM } from "@/src/lib/staffImport/evolvedPayrollStaffImportConstants";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";

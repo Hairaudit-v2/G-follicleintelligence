@@ -6,7 +6,7 @@ import {
   buildStaffHrNotificationNoLinkSummary,
   buildStaffHrNotificationSummary,
   STAFF_HR_SYNC_STALE_DAYS,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { canStaffBeAssignedClinically } from "@/src/lib/team/identity/workforceReadinessClinicalEligibility";
 import {

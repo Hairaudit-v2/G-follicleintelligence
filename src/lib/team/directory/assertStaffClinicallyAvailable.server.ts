@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   pickStaffHrNotificationFromSourceRows,
   type StaffHrNotificationSourceRow,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import { isClinicalProviderStaffRole } from "@/src/lib/hr/hrStaffReadinessDashboard";
 import {
   buildClinicalStaffPickerReadiness,

@@ -1,7 +1,15 @@
+/**
+ * Client-safe HR portal source selection for Team notifications.
+ */
+
+import { HR_READINESS_SOURCE_SYSTEM_PRIORITY } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";
 
-/** Preferred `fi_staff_source_ids.source_system` values for HR portal (first match with a safe URL wins). */
-export const HR_PORTAL_SOURCE_SYSTEM_PRIORITY = ["iiohr_hr", "iiohr", "hr"] as const;
+/**
+ * Preferred `fi_staff_source_ids.source_system` values for HR portal
+ * (aligned with identity readiness source tiers — first match with a safe URL wins).
+ */
+export const HR_PORTAL_SOURCE_SYSTEM_PRIORITY = HR_READINESS_SOURCE_SYSTEM_PRIORITY;
 
 export type HrPortalSourceIdInput = {
   source_system: string;

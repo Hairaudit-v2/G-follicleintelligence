@@ -3,8 +3,8 @@
  */
 
 import type { FiStaffSyncRunRow } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
-import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/staff/staffHrNotificationSummary";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
+import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/team/notifications";
 import { canUseDevelopmentClinicFeaturesFromFiUserRole } from "@/src/lib/fiOs/developmentClinicAccess";
 
 export type HrSyncEnvChecklistItem = {

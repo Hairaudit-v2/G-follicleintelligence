@@ -5,8 +5,8 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import {
   pickStaffHrNotificationFromSourceRows,
   buildStaffHrNotificationNoLinkSummary,
-} from "@/src/lib/staff/staffHrNotificationSummary";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {

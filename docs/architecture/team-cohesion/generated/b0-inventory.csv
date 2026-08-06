@@ -189,16 +189,10 @@ src/lib/workforce/workforceStaffMemberResolve.server.ts,identity,src/lib/team/id
 src/lib/workforce/workforceTimeClockAutoCloseCron.server.ts,payroll,src/lib/team/payroll/workforceTimeClockAutoCloseCron.server.ts,0,0,,true,false,,,high,pay/time costing
 src/lib/staff/hrStaffReadinessMetadata.test.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/staff/hrStaffReadinessMetadata.ts,identity,src/lib/team/identity/hrStaffReadinessMetadata.ts,4,1,,false,false,,,high,identity/lifecycle/readiness/reconciliation
-src/lib/staff/myHrPortalLoader.server.ts,directory,src/lib/team/directory/myHrPortalLoader.server.ts,0,0,fi_staff,true,false,,,medium,HR portal/directory adjacent loaders
-src/lib/staff/myHrPortalLoader.test.ts,directory,src/lib/team/directory/myHrPortalLoader.test.ts,0,0,fi_staff,false,false,,,low,HR portal/directory adjacent loaders
-src/lib/staff/myHrPortalSelection.ts,directory,src/lib/team/directory/myHrPortalSelection.ts,5,1,,false,false,,,medium,HR portal/directory adjacent loaders
 src/lib/staff/staff.server.ts,identity,src/lib/team/identity/staff.server.ts,44,8,fi_staff,true,true,,,high,canonical fi_staff CRUD
 src/lib/staff/staffApiSchemas.ts,identity,src/lib/team/identity/staffApiSchemas.ts,0,0,fi_staff,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffFiUserLink.server.ts,access,src/lib/team/access/staffFiUserLink.server.ts,2,0,fi_staff,true,true,,,high,login/PIN/entitlement
-src/lib/staff/staffHrImportPage.server.ts,directory,src/lib/team/directory/staffHrImportPage.server.ts,2,0,,true,false,,,medium,HR portal/directory adjacent loaders
-src/lib/staff/staffHrNotificationLoader.server.ts,directory,src/lib/team/directory/staffHrNotificationLoader.server.ts,6,0,,true,false,,,medium,HR portal/directory adjacent loaders
-src/lib/staff/staffHrNotificationSummary.test.ts,directory,src/lib/team/directory/staffHrNotificationSummary.test.ts,0,0,,false,false,,,high,HR portal/directory adjacent loaders
-src/lib/staff/staffHrNotificationSummary.ts,directory,src/lib/team/directory/staffHrNotificationSummary.ts,14,8,,false,false,,,high,HR portal/directory adjacent loaders
+src/lib/staff/staffHrImportPage.server.ts,notifications,src/lib/team/notifications/staffHrImportPage.server.ts,2,0,,true,false,,,medium,HR portal/notification orchestration (B2.3b)
 src/lib/staff/staffPayrollSourceDisplay.ts,payroll,src/lib/team/payroll/staffPayrollSourceDisplay.ts,5,2,,false,false,,,high,pay/time costing
 src/lib/staff/staffPayrollUx.test.ts,payroll,src/lib/team/payroll/staffPayrollUx.test.ts,0,0,,false,false,,,high,pay/time costing
 src/lib/staff/staffProfileExtras.ts,directory,src/lib/team/directory/staffProfileExtras.ts,6,0,fi_staff,false,false,,,medium,staff presentation/picker helpers
@@ -208,7 +202,7 @@ src/lib/staff/staffRoleReviewLoader.server.ts,directory,src/lib/team/directory/s
 src/lib/staff/staffSensitiveMetadataKeys.ts,identity,src/lib/team/identity/staffSensitiveMetadataKeys.ts,1,1,,false,false,,,low,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffSlotHours.server.ts,directory,src/lib/team/directory/staffSlotHours.server.ts,5,0,fi_staff,true,false,,,medium,staff presentation/picker helpers
 src/lib/staff/staffSourceIdsNormalize.test.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.test.ts,0,0,,false,false,,,low,identity/lifecycle/readiness/reconciliation
-src/lib/staff/staffSourceIdsNormalize.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.ts,12,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
+src/lib/staff/staffSourceIdsNormalize.ts,identity,src/lib/team/identity/staffSourceIdsNormalize.ts,13,0,,false,false,,,high,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffTwinLoader.server.ts,identity,src/lib/team/identity/staffTwinLoader.server.ts,1,0,,true,false,,,high,identity/lifecycle/readiness/reconciliation
 src/lib/staff/staffWeeklyHours.ts,directory,src/lib/team/directory/staffWeeklyHours.ts,9,0,fi_staff,false,false,,,high,staff presentation/picker helpers
 src/lib/staff/workforceCommandCentre.server.ts,delete,,1,0,,true,false,src/lib/workforce/workforceCommandCentreCore.ts,Legacy staff command-centre implementation. KEEP_CANONICAL is workforce V2; DELETE after profile/directory consumers move.,medium,legacy staff CC vs workforce V2
@@ -287,6 +281,8 @@ src/lib/team/identity/internal/identityResolutionErrors.ts,identity,src/lib/team
 src/lib/team/identity/internal/loadStaffIdentityRows.server.ts,identity,src/lib/team/identity/loadStaffIdentityRows.server.ts,0,0,fi_staff_members|fi_staff,true,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/internal/normaliseStaffIdentity.ts,identity,src/lib/team/identity/normaliseStaffIdentity.ts,2,1,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/internal/staffIdentityRowTypes.ts,identity,src/lib/team/identity/staffIdentityRowTypes.ts,1,0,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/readiness/hrReadinessContracts.test.ts,identity,src/lib/team/identity/hrReadinessContracts.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
+src/lib/team/identity/readiness/hrReadinessContracts.ts,identity,src/lib/team/identity/hrReadinessContracts.ts,6,0,,false,false,,,medium,canonical team/identity module (B1)
 src/lib/team/identity/resolveStaffIdentities.server.ts,identity,src/lib/team/identity/resolveStaffIdentities.server.ts,0,0,fi_staff,true,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/resolveStaffIdentity.server.ts,identity,src/lib/team/identity/resolveStaffIdentity.server.ts,0,0,fi_staff,true,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/server.ts,identity,src/lib/team/identity/server.ts,17,0,,true,false,,,high,canonical team/identity module (B1)
@@ -326,6 +322,14 @@ src/lib/team/identity/workforceReadinessClinicalEligibility.ts,identity,src/lib/
 src/lib/team/identity/workforceReadinessEngine.test.ts,identity,src/lib/team/identity/workforceReadinessEngine.test.ts,0,0,,false,false,,,low,canonical team/identity module (B1)
 src/lib/team/identity/workforceReadinessEngine.ts,identity,src/lib/team/identity/workforceReadinessEngine.ts,8,4,,false,false,,,high,canonical team/identity module (B1)
 src/lib/team/identity/workforceReadinessTenantOverview.server.ts,identity,src/lib/team/identity/workforceReadinessTenantOverview.server.ts,0,0,,true,false,,,medium,canonical team/identity module (B1)
+src/lib/team/notifications/index.ts,notifications,src/lib/team/notifications/index.ts,0,0,,false,false,,,low,canonical team/notifications module
+src/lib/team/notifications/myHrPortalLoader.server.ts,notifications,src/lib/team/notifications/myHrPortalLoader.server.ts,0,0,fi_staff,true,false,,,medium,canonical team/notifications module
+src/lib/team/notifications/myHrPortalSelection.test.ts,notifications,src/lib/team/notifications/myHrPortalSelection.test.ts,0,0,fi_staff,false,false,,,low,canonical team/notifications module
+src/lib/team/notifications/myHrPortalSelection.ts,notifications,src/lib/team/notifications/myHrPortalSelection.ts,2,0,,false,false,,,low,canonical team/notifications module
+src/lib/team/notifications/server.ts,notifications,src/lib/team/notifications/server.ts,6,0,,true,false,,,medium,canonical team/notifications module
+src/lib/team/notifications/staffHrNotificationLoader.server.ts,notifications,src/lib/team/notifications/staffHrNotificationLoader.server.ts,1,0,,true,false,,,medium,canonical team/notifications module
+src/lib/team/notifications/staffHrNotificationSummary.test.ts,notifications,src/lib/team/notifications/staffHrNotificationSummary.test.ts,0,0,,false,false,,,high,canonical team/notifications module
+src/lib/team/notifications/staffHrNotificationSummary.ts,notifications,src/lib/team/notifications/staffHrNotificationSummary.ts,1,0,,false,false,,,low,canonical team/notifications module
 src/lib/team/onboarding/index.ts,onboarding,src/lib/team/onboarding/index.ts,0,0,,false,false,,,low,canonical team/onboarding module
 src/lib/team/onboarding/onboardingActionFlags.ts,onboarding,src/lib/team/onboarding/onboardingActionFlags.ts,0,0,,false,false,,,high,canonical team/onboarding module
 src/lib/team/onboarding/onboardingAttentionReasons.ts,onboarding,src/lib/team/onboarding/onboardingAttentionReasons.ts,1,0,,false,false,,,high,canonical team/onboarding module

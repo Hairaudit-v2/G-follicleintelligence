@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { DEFAULT_PROCEDURE_PRIVILEGE_REQUIREMENTS } from "@/src/lib/academy-os/procedurePrivilegeRequirementDefaults";
-import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { canStaffBeAssignedToProcedure } from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
 import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";

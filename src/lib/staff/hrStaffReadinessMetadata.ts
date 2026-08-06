@@ -6,7 +6,7 @@
 import {
   HR_PORTAL_SOURCE_SYSTEM_PRIORITY,
   isAllowedHrPortalUrl,
-} from "@/src/lib/staff/myHrPortalSelection";
+} from "@/src/lib/team/notifications";
 import {
   isStaffSensitiveMetadataKey,
   parseIsoStaffMetadataDate,

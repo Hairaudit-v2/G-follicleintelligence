@@ -8,7 +8,7 @@ import {
   isTrainingIncomplete,
   staffHasConfiguredWorkingHours,
 } from "@/src/lib/hr/hrStaffReadinessDashboard";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import type { StaffHrReadinessSummary } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import type {
   StaffComplianceItem,
   StaffComplianceSummary,
@@ -72,7 +72,7 @@ export type WorkforceReadinessScoreInput = {
   employment_status?: StaffEmploymentStatus | null;
   staff_role: string | null | undefined;
   working_hours: Record<string, unknown> | null | undefined;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
   identityRows: WorkforceIdentitySourceRowInput[];
   compliance: StaffComplianceSummary;
   /** Optional competency review due date (ISO) from identity metadata. */
@@ -185,7 +185,7 @@ function ratioScore(current: number, total: number, maxScore: number): number {
   return Math.round(ratio * maxScore);
 }
 
-function scoreOnboarding(hr: StaffHrNotificationSummary): number {
+function scoreOnboarding(hr: StaffHrReadinessSummary): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.onboarding;
   if (!hr.hasHrLink) return 0;
   if (isHrOnboardingIncomplete(hr)) {
@@ -198,7 +198,7 @@ function scoreOnboarding(hr: StaffHrNotificationSummary): number {
 }
 
 function scoreTraining(
-  hr: StaffHrNotificationSummary,
+  hr: StaffHrReadinessSummary,
   trainingItems: StaffComplianceItem[]
 ): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.training;
@@ -219,7 +219,7 @@ function scoreTraining(
 }
 
 function scoreCertification(
-  hr: StaffHrNotificationSummary,
+  hr: StaffHrReadinessSummary,
   certificationItems: StaffComplianceItem[]
 ): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.certification;
@@ -267,7 +267,7 @@ function scoreAvailability(is_active: boolean): number {
 
 function scoreHrSync(
   signals: WorkforceIdentityReadinessSignals,
-  hr: StaffHrNotificationSummary
+  hr: StaffHrReadinessSummary
 ): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.hr_sync;
   if (!signals.hasHrIdentityLink) return 0;
@@ -338,7 +338,7 @@ function extractCompetencyReviewDueAt(rows: WorkforceIdentitySourceRowInput[]): 
 
 function collectBlockingIssues(input: {
   is_active: boolean;
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
   signals: WorkforceIdentityReadinessSignals;
   compliance: StaffComplianceSummary;
   trainingItems: StaffComplianceItem[];
@@ -374,7 +374,7 @@ function collectBlockingIssues(input: {
 }
 
 function collectWarnings(input: {
-  hr: StaffHrNotificationSummary;
+  hr: StaffHrReadinessSummary;
   signals: WorkforceIdentityReadinessSignals;
   working_hours: Record<string, unknown> | null | undefined;
   sopItems: StaffComplianceItem[];

@@ -11,7 +11,7 @@ import {
 import {
   buildStaffHrNotificationSummary,
   STAFF_HR_SYNC_STALE_DAYS,
-} from "./staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");
 const FRESH_SYNC_AT = NOW.toISOString();

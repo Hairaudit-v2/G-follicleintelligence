@@ -5,7 +5,7 @@ import {
   buildClinicalStaffPickerReadiness,
   enrichCrmShellStaffPickerOption,
 } from "@/src/lib/team/directory";
-import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/team/directory";
 import { bookingUpdateBodySchema } from "@/src/lib/bookings/bookingApiSchemas";
 

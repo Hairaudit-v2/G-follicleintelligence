@@ -355,7 +355,7 @@ async function buildReadinessInputForStaff(tenantId: string, staffId: string) {
   if (error) throw new Error(error.message);
 
   const { pickStaffHrNotificationFromSourceRows } =
-    await import("@/src/lib/staff/staffHrNotificationSummary");
+    await import("@/src/lib/team/notifications");
   const { buildStaffComplianceSummaryFromSourceRows } =
     await import("@/src/lib/staffCompliance/staffComplianceSummary");
 

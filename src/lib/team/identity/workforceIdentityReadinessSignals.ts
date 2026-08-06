@@ -3,7 +3,7 @@
  * Does not change existing readiness state machine; consumers can layer these signals later.
  */
 
-import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/staff/staffHrNotificationSummary";
+import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import {
   canonicaliseWorkforceSourceSystem,
   WORKFORCE_IDENTITY_SOURCE_SYSTEMS,

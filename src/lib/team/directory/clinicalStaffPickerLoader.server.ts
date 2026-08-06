@@ -8,7 +8,7 @@ import {
   type ClinicalStaffPickerOption,
   type ProcedureTeamPickerOption,
 } from "@/src/lib/team/directory/clinicalStaffPicker";
-import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
+import { loadHrNotificationByStaffId } from "@/src/lib/team/notifications/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 

@@ -5,7 +5,7 @@ import {
   ACADEMY_EVENTS,
   isEventTypeAllowedForModule,
 } from "@/src/lib/analytics-os/analyticsEventTypes";
-import { buildStaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import { buildStaffHrNotificationSummary } from "@/src/lib/team/notifications";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import { rankAssignableStaffForRole } from "@/src/lib/workforce-os/workforceRosterCandidates";
 import type { WorkforceReadinessScoreInput } from "@/src/lib/team/identity/workforceReadinessEngine";

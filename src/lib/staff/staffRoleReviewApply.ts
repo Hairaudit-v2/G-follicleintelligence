@@ -14,8 +14,8 @@ import {
   serializeStaffWeeklyHours,
   type StaffWeeklyHoursMap,
 } from "@/src/lib/staff/staffWeeklyHours";
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
-import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/staff/staffHrNotificationSummary";
+import type { StaffHrNotificationSummary } from "@/src/lib/team/notifications";
+import { buildStaffHrNotificationNoLinkSummary } from "@/src/lib/team/notifications";
 import type { StaffPayrollSourceDisplay } from "@/src/lib/staff/staffPayrollSourceDisplay";
 
 export type StaffRoleReviewEditableRow = {

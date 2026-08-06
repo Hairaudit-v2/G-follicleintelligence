@@ -14,7 +14,7 @@ import {
 import {
   buildStaffHrNotificationSummary,
   STAFF_HR_SYNC_STALE_DAYS,
-} from "@/src/lib/staff/staffHrNotificationSummary";
+} from "@/src/lib/team/notifications";
 import { NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/team/directory/staffRolePolicy";
 
 const NOW = new Date("2026-06-09T12:00:00.000Z");

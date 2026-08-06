@@ -3,7 +3,7 @@
  * No database I/O — callers load snapshots and execute returned actions separately.
  */
 
-import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { isAllowedHrPortalUrl } from "@/src/lib/team/notifications";
 import {
   hrStaffSourceSystemRank,
   isHrStaffSourceSystem,

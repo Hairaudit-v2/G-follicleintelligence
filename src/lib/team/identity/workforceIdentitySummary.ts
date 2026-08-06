@@ -2,7 +2,7 @@
  * Client-safe read model for workforce identity link status (no secrets, no server-only imports).
  */
 
-import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/staff/staffHrNotificationSummary";
+import { STAFF_HR_SYNC_STALE_DAYS } from "@/src/lib/team/identity/readiness/hrReadinessContracts";
 import {
   canonicaliseWorkforceSourceSystem,
   WORKFORCE_IDENTITY_SOURCE_SYSTEMS,
@@ -52,6 +52,8 @@ function emptyLinkStatus(sourceSystem: string): WorkforceIdentityLinkStatus {
 }
 
 function isSyncStale(lastSyncedAt: string | null, now: Date): boolean {
+  // Linked identity rows without a sync timestamp are not treated as stale here
+  // (distinct from HR notification readiness, which treats missing sync as stale).
   if (!lastSyncedAt) return false;
   const t = Date.parse(lastSyncedAt);
   if (Number.isNaN(t)) return false;
