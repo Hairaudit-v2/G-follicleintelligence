@@ -12,16 +12,20 @@ import {
   loadDefaultClinicServicesAction,
   updateServiceAction,
 } from "@/lib/actions/fi-services-actions";
-import {
-  saveServiceRoomEligibilityAction,
-  saveServiceStaffEligibilityAction,
-} from "@/lib/actions/fi-rooms-actions";
 import { DEFAULT_CLINIC_SERVICE_LIBRARY } from "@/src/lib/services/defaultClinicServices";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { formatPriceAud } from "@/src/lib/bookings/servicesCatalog";
 import type { ServicesCatalogPageResult } from "@/src/lib/services/servicesCatalogLoader.server";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import {
+  applyServiceFamilyTemplate,
+  emptyServiceSetupConfig,
+  evaluateServiceSetupActivation,
+  inferServiceFamilyFromBookingType,
+  type ServiceSetupConfig,
+} from "@/src/lib/services/setup";
+import { ServiceSetupEditorPanel } from "@/src/components/fi/services/ServiceSetupEditorPanel";
 
 type Mode = "idle" | "create" | "edit";
 
@@ -63,30 +67,35 @@ export function ServicesCatalogClient({
   const [mode, setMode] = useState<Mode>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>(emptyForm());
+  const [setup, setSetup] = useState<ServiceSetupConfig>(emptyServiceSetupConfig());
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [eligibleRoomIds, setEligibleRoomIds] = useState<string[]>([]);
-  const [preferredRoomId, setPreferredRoomId] = useState<string>("");
-  const [staffRoles, setStaffRoles] = useState<string>("");
 
   const canManage = data.canManageServices;
   const showEmptyCatalogBanner = data.activeServiceCount === 0;
 
   const openCreate = () => {
     setError(null);
+    setWarnings([]);
     setForm(emptyForm());
+    setSetup(applyServiceFamilyTemplate("consultation"));
     setEditingId(null);
     setMode("create");
   };
 
   const openEdit = (row: FiServiceRow) => {
     setError(null);
+    setWarnings([]);
     setForm(rowToForm(row));
     setEditingId(row.id);
-    setEligibleRoomIds(data.roomEligibilityByServiceId[row.id] ?? []);
-    setPreferredRoomId(data.preferredRoomByServiceId[row.id] ?? "");
-    setStaffRoles((data.staffRolesByServiceId[row.id] ?? []).join(", "));
+    setSetup(
+      data.setupConfigByServiceId[row.id] ??
+        applyServiceFamilyTemplate(
+          inferServiceFamilyFromBookingType(row.booking_type, row.name)
+        )
+    );
     setMode("edit");
   };
 
@@ -94,6 +103,7 @@ export function ServicesCatalogClient({
     setMode("idle");
     setEditingId(null);
     setError(null);
+    setWarnings([]);
   };
 
   const onField = useCallback((key: string, value: string) => {
@@ -116,10 +126,16 @@ export function ServicesCatalogClient({
 
   const activateRow = (row: FiServiceRow) => {
     setError(null);
+    setWarnings([]);
     startTransition(async () => {
-      const r = await updateServiceAction(tenantId, row.id, { is_active: true });
+      const cfg = data.setupConfigByServiceId[row.id];
+      const r = await updateServiceAction(tenantId, row.id, {
+        is_active: true,
+        ...(cfg ? { setup_config: cfg } : {}),
+      });
       if (!r.ok) {
         setError(r.error);
+        setWarnings((r.warnings ?? []).map((w) => w.message));
         return;
       }
       router.refresh();
@@ -145,11 +161,28 @@ export function ServicesCatalogClient({
     });
   };
 
-  const submit = () => {
+  const submit = (asDraft: boolean) => {
     setError(null);
+    setWarnings([]);
     const duration = Number.parseInt(form.duration_minutes, 10);
     const price = Number.parseFloat(form.base_price);
     const bookingType = form.booking_type.trim();
+    const wantActive = !asDraft && form.is_active === "on";
+
+    if (wantActive) {
+      const evaluation = evaluateServiceSetupActivation(setup, {
+        staffCountByRole: data.staffCountByRole,
+        availableRoomIds: data.rooms.filter((r) => r.is_active).map((r) => r.id),
+      });
+      if (!evaluation.canActivate) {
+        setError(
+          "Cannot activate: required roles or rooms have no eligible resources. Save as draft instead."
+        );
+        setWarnings(evaluation.warnings.map((w) => w.message));
+        return;
+      }
+      setWarnings(evaluation.warnings.map((w) => w.message));
+    }
 
     const body = {
       name: form.name.trim(),
@@ -157,8 +190,10 @@ export function ServicesCatalogClient({
       base_price: Number.isFinite(price) ? price : 0,
       color: form.color.trim() || null,
       category: form.category.trim() || null,
-      is_active: form.is_active === "on",
+      is_active: wantActive,
       booking_type: bookingType ? bookingType : null,
+      setup_config: setup,
+      save_as_draft: asDraft,
     };
 
     startTransition(async () => {
@@ -166,6 +201,7 @@ export function ServicesCatalogClient({
         const r = await createServiceAction(tenantId, body);
         if (!r.ok) {
           setError(r.error);
+          setWarnings((r.warnings ?? []).map((w) => w.message));
           return;
         }
         closePanel();
@@ -176,20 +212,9 @@ export function ServicesCatalogClient({
         const r = await updateServiceAction(tenantId, editingId, body);
         if (!r.ok) {
           setError(r.error);
+          setWarnings((r.warnings ?? []).map((w) => w.message));
           return;
         }
-        const roomRows = eligibleRoomIds.map((roomId) => ({
-          roomId,
-          isPreferred: preferredRoomId === roomId,
-          isActive: true,
-        }));
-        const staffRows = staffRoles
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((staffRole) => ({ staffRole, isActive: true }));
-        await saveServiceRoomEligibilityAction(tenantId, editingId, { rows: roomRows });
-        await saveServiceStaffEligibilityAction(tenantId, editingId, { rows: staffRows });
         closePanel();
         router.refresh();
       }
@@ -202,9 +227,9 @@ export function ServicesCatalogClient({
         <div className="space-y-1">
           <h1 className="text-lg font-semibold text-slate-100">Services</h1>
           <p className="max-w-3xl text-sm text-slate-400">
-            Procedure catalog: default duration, price suggestion, and calendar colour per booking
-            type. When <span className="font-medium">Procedure type</span> is set, that row defines
-            the catalog for that type (one per tenant).
+            Procedure catalog with structured eligibility, staff allocation, competency rules, and
+            room requirements. When <span className="font-medium">Procedure type</span> is set, that
+            row defines the catalog for that type (one per tenant).
           </p>
           <p className="text-sm text-slate-400">
             <Link href={base} className="text-blue-300 hover:underline">
@@ -288,6 +313,19 @@ export function ServicesCatalogClient({
         </div>
       ) : null}
 
+      {warnings.length > 0 ? (
+        <div
+          className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-100"
+          role="status"
+        >
+          <ul className="list-disc space-y-1 pl-4">
+            {warnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {(mode === "create" || mode === "edit") && canManage ? (
         <section
           className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
@@ -360,7 +398,16 @@ export function ServicesCatalogClient({
               <select
                 className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                 value={form.booking_type}
-                onChange={(e) => onField("booking_type", e.target.value)}
+                onChange={(e) => {
+                  onField("booking_type", e.target.value);
+                  const family = inferServiceFamilyFromBookingType(
+                    e.target.value || null,
+                    form.name
+                  );
+                  if (setup.serviceFamily === "custom" || mode === "create") {
+                    setSetup(applyServiceFamilyTemplate(family, setup));
+                  }
+                }}
               >
                 <option value="">None (custom listing only)</option>
                 {BOOKING_TYPES.map((t) => (
@@ -376,78 +423,30 @@ export function ServicesCatalogClient({
                 checked={form.is_active === "on"}
                 onChange={(e) => onField("is_active", e.target.checked ? "on" : "")}
               />
-              Active
+              Active (blocked when required resources are missing)
             </label>
           </div>
-          {mode === "edit" ? (
-            <div className="mt-4 space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Scheduling eligibility
-              </p>
-              {data.rooms.length === 0 ? (
-                <p className="text-xs text-gray-500">
-                  No rooms configured. Add rooms in{" "}
-                  <Link href={`${base}/rooms`} className="text-cyan-300 underline">
-                    Settings → Rooms
-                  </Link>
-                  .
-                </p>
-              ) : (
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {data.rooms.map((room) => (
-                    <label key={room.id} className="flex items-center gap-2 text-xs text-slate-300">
-                      <input
-                        type="checkbox"
-                        checked={eligibleRoomIds.includes(room.id)}
-                        onChange={(e) => {
-                          setEligibleRoomIds((ids) =>
-                            e.target.checked
-                              ? [...ids, room.id]
-                              : ids.filter((id) => id !== room.id)
-                          );
-                          if (!e.target.checked && preferredRoomId === room.id)
-                            setPreferredRoomId("");
-                        }}
-                      />
-                      {room.display_name}
-                    </label>
-                  ))}
-                </div>
-              )}
-              {eligibleRoomIds.length > 0 ? (
-                <label className="block text-xs font-medium text-slate-300">
-                  Preferred room
-                  <select
-                    className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
-                    value={preferredRoomId}
-                    onChange={(e) => setPreferredRoomId(e.target.value)}
-                  >
-                    <option value="">None</option>
-                    {eligibleRoomIds.map((id) => {
-                      const room = data.rooms.find((r) => r.id === id);
-                      return (
-                        <option key={id} value={id}>
-                          {room?.display_name ?? id}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </label>
-              ) : null}
-              <label className="block text-xs font-medium text-slate-300">
-                Eligible staff roles (comma-separated)
-                <input
-                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
-                  value={staffRoles}
-                  onChange={(e) => setStaffRoles(e.target.value)}
-                  placeholder="consultant, nurse, doctor, technician"
-                />
-              </label>
-            </div>
-          ) : null}
-          <div className="mt-4 flex gap-2">
-            <Button type="button" onClick={submit} disabled={pending || !form.name.trim()}>
+
+          <ServiceSetupEditorPanel
+            setup={setup}
+            onChange={setSetup}
+            rooms={data.rooms}
+            staffOptions={data.staffOptions}
+            staffCountByRole={data.staffCountByRole}
+            roomsBaseHref={`${base}/rooms`}
+          />
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" onClick={() => submit(false)} disabled={pending || !form.name.trim()}>
               {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => submit(true)}
+              disabled={pending || !form.name.trim()}
+            >
+              Save as draft
             </Button>
             <Button type="button" variant="outline" onClick={closePanel} disabled={pending}>
               Cancel
@@ -462,6 +461,7 @@ export function ServicesCatalogClient({
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
+              <th className="px-3 py-2">Family</th>
               <th className="px-3 py-2">Duration</th>
               <th className="px-3 py-2">Price</th>
               <th className="px-3 py-2">Colour</th>
@@ -473,7 +473,7 @@ export function ServicesCatalogClient({
           <tbody className="divide-y divide-white/[0.06]">
             {data.services.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-slate-400">
+                <td colSpan={9} className="px-3 py-8 text-center text-slate-400">
                   <p>No services in the catalog yet.</p>
                   <p className="mt-2 text-sm text-gray-500">
                     {canManage
@@ -492,65 +492,74 @@ export function ServicesCatalogClient({
                 </td>
               </tr>
             ) : (
-              data.services.map((row) => (
-                <tr key={row.id} className={cn(!row.is_active && "bg-white/[0.03] text-gray-500")}>
-                  <td className="px-3 py-2 font-medium text-slate-100">{row.name}</td>
-                  <td className="px-3 py-2 text-slate-300">
-                    {row.booking_type ? bookingTypeLabel(row.booking_type) : "—"}
-                  </td>
-                  <td className="px-3 py-2">{row.duration_minutes} min</td>
-                  <td className="px-3 py-2">{formatPriceAud(row.base_price)}</td>
-                  <td className="px-3 py-2">
-                    {row.color ? (
-                      <span className="inline-flex items-center gap-1">
-                        <span
-                          className="inline-block h-4 w-4 rounded border border-slate-700"
-                          style={{ backgroundColor: row.color }}
-                          title={row.color}
-                        />
-                        <span className="font-mono text-xs">{row.color}</span>
-                      </span>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-3 py-2">{row.category ?? "—"}</td>
-                  <td className="px-3 py-2">{row.is_active ? "Active" : "Inactive"}</td>
-                  <td className="px-3 py-2 text-right">
-                    {canManage ? (
-                      <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
-                        <button
-                          type="button"
-                          className="text-blue-300 hover:underline disabled:opacity-50"
-                          disabled={pending}
-                          onClick={() => openEdit(row)}
-                        >
-                          Edit
-                        </button>
-                        {row.is_active ? (
-                          <button
-                            type="button"
-                            className="text-amber-300 hover:underline disabled:opacity-50"
-                            disabled={pending}
-                            onClick={() => deactivateRow(row)}
-                          >
-                            Deactivate
-                          </button>
-                        ) : (
+              data.services.map((row) => {
+                const family = data.setupConfigByServiceId[row.id]?.serviceFamily;
+                return (
+                  <tr
+                    key={row.id}
+                    className={cn(!row.is_active && "bg-white/[0.03] text-gray-500")}
+                  >
+                    <td className="px-3 py-2 font-medium text-slate-100">{row.name}</td>
+                    <td className="px-3 py-2 text-slate-300">
+                      {row.booking_type ? bookingTypeLabel(row.booking_type) : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-slate-400">
+                      {family ? family.replaceAll("_", " ") : "—"}
+                    </td>
+                    <td className="px-3 py-2">{row.duration_minutes} min</td>
+                    <td className="px-3 py-2">{formatPriceAud(row.base_price)}</td>
+                    <td className="px-3 py-2">
+                      {row.color ? (
+                        <span className="inline-flex items-center gap-1">
+                          <span
+                            className="inline-block h-4 w-4 rounded border border-slate-700"
+                            style={{ backgroundColor: row.color }}
+                            title={row.color}
+                          />
+                          <span className="font-mono text-xs">{row.color}</span>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="px-3 py-2">{row.category ?? "—"}</td>
+                    <td className="px-3 py-2">{row.is_active ? "Active" : "Draft / inactive"}</td>
+                    <td className="px-3 py-2 text-right">
+                      {canManage ? (
+                        <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
                           <button
                             type="button"
                             className="text-blue-300 hover:underline disabled:opacity-50"
                             disabled={pending}
-                            onClick={() => activateRow(row)}
+                            onClick={() => openEdit(row)}
                           >
-                            Activate
+                            Edit
                           </button>
-                        )}
-                      </span>
-                    ) : null}
-                  </td>
-                </tr>
-              ))
+                          {row.is_active ? (
+                            <button
+                              type="button"
+                              className="text-amber-300 hover:underline disabled:opacity-50"
+                              disabled={pending}
+                              onClick={() => deactivateRow(row)}
+                            >
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="text-blue-300 hover:underline disabled:opacity-50"
+                              disabled={pending}
+                              onClick={() => activateRow(row)}
+                            >
+                              Activate
+                            </button>
+                          )}
+                        </span>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

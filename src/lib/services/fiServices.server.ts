@@ -2,6 +2,10 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import { parseServiceSetupConfig } from "@/src/lib/services/setup/serviceSetupDefaults";
+
+const SERVICE_SELECT =
+  "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, setup_config, created_at, updated_at";
 
 function mapRow(raw: Record<string, unknown>): FiServiceRow {
   const bp = raw.base_price;
@@ -16,6 +20,7 @@ function mapRow(raw: Record<string, unknown>): FiServiceRow {
     category: raw.category != null ? String(raw.category).trim() : null,
     is_active: Boolean(raw.is_active),
     booking_type: raw.booking_type != null ? String(raw.booking_type).trim() : null,
+    setup_config: parseServiceSetupConfig(raw.setup_config),
     created_at: raw.created_at != null ? String(raw.created_at) : undefined,
     updated_at: raw.updated_at != null ? String(raw.updated_at) : undefined,
   };
@@ -26,9 +31,7 @@ export async function loadFiServicesForTenant(tenantId: string): Promise<FiServi
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_services")
-    .select(
-      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
-    )
+    .select(SERVICE_SELECT)
     .eq("tenant_id", tid)
     .order("category", { ascending: true, nullsFirst: false })
     .order("name", { ascending: true });
@@ -46,6 +49,7 @@ export async function insertFiService(
     category?: string | null;
     is_active: boolean;
     booking_type?: string | null;
+    setup_config?: Record<string, unknown> | null;
   }
 ): Promise<FiServiceRow> {
   const tid = tenantId.trim();
@@ -62,12 +66,13 @@ export async function insertFiService(
       category: input.category?.trim() || null,
       is_active: input.is_active,
       booking_type: input.booking_type?.trim() || null,
+      setup_config: input.setup_config
+        ? parseServiceSetupConfig(input.setup_config)
+        : {},
       created_at: now,
       updated_at: now,
     })
-    .select(
-      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
-    )
+    .select(SERVICE_SELECT)
     .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);
@@ -84,6 +89,7 @@ export async function updateFiService(
     category: string | null;
     is_active: boolean;
     booking_type: string | null;
+    setup_config: Record<string, unknown> | null;
   }>
 ): Promise<FiServiceRow> {
   const tid = tenantId.trim();
@@ -97,6 +103,11 @@ export async function updateFiService(
   if (patch.category !== undefined) body.category = patch.category?.trim() || null;
   if (patch.is_active !== undefined) body.is_active = patch.is_active;
   if (patch.booking_type !== undefined) body.booking_type = patch.booking_type?.trim() || null;
+  if (patch.setup_config !== undefined) {
+    body.setup_config = patch.setup_config
+      ? parseServiceSetupConfig(patch.setup_config)
+      : {};
+  }
 
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -104,9 +115,7 @@ export async function updateFiService(
     .update(body)
     .eq("tenant_id", tid)
     .eq("id", sid)
-    .select(
-      "id, tenant_id, name, duration_minutes, base_price, color, category, is_active, booking_type, created_at, updated_at"
-    )
+    .select(SERVICE_SELECT)
     .single();
   if (error) throw new Error(error.message);
   return mapRow(data as Record<string, unknown>);
