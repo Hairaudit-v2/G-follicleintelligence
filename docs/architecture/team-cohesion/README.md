@@ -46,6 +46,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b2.1b-identity-server-consolidation.md](./b2.1b-identity-server-consolidation.md) | B2.1b identity server move + shim deletion |
 | [b2.2-directory-access-onboarding.md](./b2.2-directory-access-onboarding.md) | B2.2 directory / access / onboarding physical consolidation (a–d GREEN) |
 | [b2.2a-r-directory-core-consolidation.md](./b2.2a-r-directory-core-consolidation.md) | B2.2a directory-core delivery record (recovery id B2.2a-R) |
+| [b2.3-highest-fan-out-discovery.md](./b2.3-highest-fan-out-discovery.md) | B2.3 highest-fan-out cluster discovery gate |
 
 ## Generated artifacts
 
@@ -86,4 +87,4 @@ Refresh “Current” from `generated/b0-summary.json` after each inventory rege
 
 ## Recommended next slice
 
-Inspect the regenerated B0 inventory and choose the next **highest-fan-out** legacy cluster (deferred directory hot cluster: `staffHrNotification*`, role/hours — or another domain by import concentration). Stabilise that domain’s public/server boundaries. **Do not start B3** sprint-action renames until those homes stabilize.
+**[B2.3 discovery](./b2.3-highest-fan-out-discovery.md)** — highest-fan-out legacy cluster (gate). Recommended implement-next: roster `clinicalStaffingSummary.types` + `staffStandardHoursCore`. Do **not** start B3 until the next domain home is stable.
