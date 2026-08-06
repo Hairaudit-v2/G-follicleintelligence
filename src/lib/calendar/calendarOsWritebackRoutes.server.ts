@@ -281,6 +281,7 @@ export async function handleConvertExternalCalendarEvent(
           : body.staffId !== undefined
             ? (body.staffId as string | null)
             : undefined,
+      roomId: body.roomId !== undefined ? (body.roomId as string | null) : undefined,
       promoteConsultationIfNeeded: body.promoteConsultationIfNeeded !== false,
       selectedPatientId: body.selectedPatientId != null ? String(body.selectedPatientId) : null,
       selectedConsultationId:

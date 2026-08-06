@@ -5,6 +5,7 @@
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {
   mergeStaffWorkingHoursDocument,
+  parseStaffProfileExtras,
   type StaffProfileExtras,
 } from "@/src/lib/staff/staffProfileExtras";
 import { isStaffRoleNeedsReview, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
@@ -100,11 +101,13 @@ export function buildStaffRoleReviewWorkingHours(
   row: Pick<StaffRoleReviewEditableRow, "weekly" | "position_title" | "primary_clinic_id">,
   existingWorkingHours?: Record<string, unknown> | null
 ): Record<string, unknown> {
+  const existingExtras = parseStaffProfileExtras(existingWorkingHours ?? null);
   return mergeStaffWorkingHoursDocument(
     serializeStaffWeeklyHours(row.weekly),
     {
       position_title: row.position_title?.trim() || null,
       primary_clinic_id: row.primary_clinic_id?.trim() || null,
+      additional_clinic_ids: existingExtras.additional_clinic_ids,
     },
     existingWorkingHours ?? null
   );

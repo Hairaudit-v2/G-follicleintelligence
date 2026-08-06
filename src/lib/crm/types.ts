@@ -199,6 +199,15 @@ export type FiCrmMessageRow = {
   created_at: string;
 };
 
+/** FI Admin CRM shell: clinic row for lead scope picker (Stage 2G). */
+export type CrmShellClinicOption = {
+  id: string;
+  display_name: string;
+  organisation_id: string | null;
+  /** `fi_clinics.metadata` — country/locale hints for display (not required for pickers). */
+  metadata?: Record<string, unknown> | null;
+};
+
 /** FI Admin CRM shell: tenant user row for owner filter dropdown (Stage 2F). */
 export type CrmShellUserPickerOption = {
   id: string;
@@ -218,19 +227,20 @@ export type CrmShellUserPickerOption = {
   /** When set on `fi_staff`, overrides calendar column visibility by role. */
   calendar_visible?: boolean | null;
   is_active?: boolean;
+  /**
+   * Canonical home clinic from `working_hours._profile.primary_clinic_id`
+   * (FI-CALENDAR-CONVERSION-UX-1C / team directory affinity).
+   */
+  primary_clinic_id?: string | null;
+  /**
+   * Clinic memberships (primary + additional) for multi-clinic affinity checks.
+   * Deduped; primary listed first when present.
+   */
+  clinic_ids?: string[];
 };
 
 /** FI Admin CRM shell: organisation row for lead scope picker (Stage 2G). */
 export type CrmShellOrgOption = { id: string; name: string };
-
-/** FI Admin CRM shell: clinic row for lead scope picker (Stage 2G). */
-export type CrmShellClinicOption = {
-  id: string;
-  display_name: string;
-  organisation_id: string | null;
-  /** `fi_clinics.metadata` — country/locale hints for display (not required for pickers). */
-  metadata?: Record<string, unknown> | null;
-};
 
 /** Scope used for lazy pipeline seeding and stage resolution. */
 export type CrmPipelineScope = {

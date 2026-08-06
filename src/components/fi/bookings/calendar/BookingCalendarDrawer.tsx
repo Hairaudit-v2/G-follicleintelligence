@@ -592,20 +592,8 @@ export function BookingCalendarDrawer({
                         Open in Google Calendar
                       </a>
                     ) : null}
-                    {editPolicy.drawerActions.includes("link_patient") && onQuickEdit ? (
-                      <button
-                        type="button"
-                        className={osActionClass}
-                        disabled={busy || !mut}
-                        onClick={() => {
-                          onQuickEdit(row, editPolicy);
-                          onClose();
-                        }}
-                      >
-                        Link patient
-                      </button>
-                    ) : null}
-                    {editPolicy.drawerActions.includes("convert_to_fios_appointment") &&
+                    {(editPolicy.drawerActions.includes("convert_to_fios_appointment") ||
+                      editPolicy.drawerActions.includes("link_patient")) &&
                     onQuickEdit ? (
                       <button
                         type="button"
@@ -616,7 +604,9 @@ export function BookingCalendarDrawer({
                           onClose();
                         }}
                       >
-                        Convert to FiOS appointment
+                        {editPolicy.drawerActions.includes("convert_to_fios_appointment")
+                          ? "Convert to FiOS"
+                          : "Add to FiOS"}
                       </button>
                     ) : null}
                   </div>

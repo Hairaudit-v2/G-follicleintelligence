@@ -23,7 +23,12 @@ import {
   type CalendarEventClassification,
 } from "@/src/lib/calendar/calendarEventClassification";
 import type { CalendarEventEditPolicy } from "@/src/lib/calendar/calendarEventEditPolicy";
+import type { CalendarAppointmentCapability } from "@/src/lib/calendar/calendarAppointmentCapabilities";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  type ConversionRoomOption,
+} from "@/src/lib/calendar/externalEventConversionUx";
+import { ExternalEventConversionWizard } from "@/src/components/fi/calendar/ExternalEventConversionWizard";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +81,8 @@ export function CalendarQuickEditDrawer({
   googleHydratedPhone,
   googleHydratedLocation,
   googleHydratedAppointmentType,
+  calendarCapabilities,
+  rooms = [],
   onClose,
   onSaved,
   onOpenFull,
@@ -99,6 +106,9 @@ export function CalendarQuickEditDrawer({
   googleHydratedPhone?: string | null;
   googleHydratedLocation?: string | null;
   googleHydratedAppointmentType?: string | null;
+  calendarCapabilities?: readonly CalendarAppointmentCapability[] | null;
+  /** Active clinic rooms for conversion room picker (FI-CALENDAR-CONVERSION-UX-1C). */
+  rooms?: ConversionRoomOption[];
   onClose: () => void;
   onSaved: () => void;
   onOpenFull: (b: FiBookingRow) => void;
@@ -135,6 +145,9 @@ export function CalendarQuickEditDrawer({
 
   const actions = new Set(policy.drawerActions);
   const editable = policy.canQuickEdit;
+  const useGuidedConversion =
+    classification === "google_external_unlinked" &&
+    (actions.has("convert_to_fios_appointment") || actions.has("link_patient"));
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -145,6 +158,7 @@ export function CalendarQuickEditDrawer({
   }, [onClose]);
 
   useEffect(() => {
+    if (useGuidedConversion) return;
     if (!policy.drawerActions.includes("link_patient")) return;
     const q = patientSearch.trim();
     const handle = window.setTimeout(() => {
@@ -182,7 +196,7 @@ export function CalendarQuickEditDrawer({
       })();
     }, 250);
     return () => window.clearTimeout(handle);
-  }, [patientSearch, tenantId, booking.id, policy.drawerActions]);
+  }, [patientSearch, tenantId, booking.id, policy.drawerActions, useGuidedConversion]);
 
   async function onSave() {
     if (!editable) return;
@@ -357,10 +371,10 @@ export function CalendarQuickEditDrawer({
                 {calendarEventClassificationLabel(classification)}
                 {policy.showSyncStatus ? " · sync visible" : ""}
               </p>
-              {identityKindLabel ? (
+              {identityKindLabel && !useGuidedConversion ? (
                 <p className="text-[11px] text-cyan-200/90">{identityKindLabel}</p>
               ) : null}
-              {identityStatusLabel ? (
+              {identityStatusLabel && !useGuidedConversion ? (
                 <p className="text-[11px] text-sky-200/90">{identityStatusLabel}</p>
               ) : null}
               {(googleHydratedEmail || googleHydratedPhone || googleHydratedLocation) && (
@@ -386,6 +400,32 @@ export function CalendarQuickEditDrawer({
         </header>
 
         <div className={cn(fiOsChromeClasses.rightDrawerBodyScroll, "space-y-3 px-3 py-3")}>
+          {useGuidedConversion ? (
+            <ExternalEventConversionWizard
+              tenantId={tenantId}
+              booking={booking}
+              clinics={clinics}
+              staffDirectory={staffDirectory}
+              rooms={rooms}
+              calendarTimezone={calendarTimezone}
+              displayName={displayName}
+              googleHydratedEmail={googleHydratedEmail}
+              googleHydratedPhone={googleHydratedPhone}
+              googleHydratedLocation={googleHydratedLocation}
+              googleHydratedAppointmentType={googleHydratedAppointmentType}
+              identityState={identityState}
+              identityKindLabel={identityKindLabel}
+              identityStatusLabel={identityStatusLabel}
+              fiosAppointmentId={fiosAppointmentId}
+              calendarCapabilities={calendarCapabilities}
+              onClose={onClose}
+              onConverted={() => {
+                onSaved();
+                onClose();
+              }}
+            />
+          ) : (
+            <>
           {policy.readOnlyExplanation ? (
             <p className="rounded-md border border-amber-500/25 bg-amber-950/30 px-2.5 py-2 text-[11px] text-amber-100/90">
               {policy.readOnlyExplanation}
@@ -639,6 +679,8 @@ export function CalendarQuickEditDrawer({
           </div>
 
           {feedback ? <p className="text-xs text-red-300">{feedback}</p> : null}
+            </>
+          )}
         </div>
       </aside>
     </div>

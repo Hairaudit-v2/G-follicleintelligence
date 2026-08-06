@@ -851,6 +851,16 @@ function CalendarPageImpl({
           googleHydratedAppointmentType={
             data.bookingDisplay[quickEdit.booking.id]?.googleHydratedAppointmentType ?? null
           }
+          calendarCapabilities={data.calendarCapabilities}
+          rooms={data.rooms.map((r) => ({
+            id: r.id,
+            name: r.display_name?.trim() || r.room_code?.trim() || r.id.slice(0, 8),
+            clinic_id: r.clinic_id,
+            room_type: r.room_type,
+            is_active: r.is_active,
+            appointment_type_compatible: null,
+            availability_state: "unknown" as const,
+          }))}
           onClose={() => setQuickEdit(null)}
           onSaved={refresh}
           onOpenFull={(b) => setEditing(b)}
