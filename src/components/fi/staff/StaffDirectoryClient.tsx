@@ -175,11 +175,16 @@ export function StaffDirectoryClient({
   const submit = () => {
     setError(null);
     const weeklyDoc = serializeStaffWeeklyHours(weekly);
+    const existingExtras =
+      mode === "edit" && editingRow
+        ? parseStaffProfileExtras(editingRow.working_hours)
+        : { position_title: null, primary_clinic_id: null, additional_clinic_ids: [] as string[] };
     const working_hours = mergeStaffWorkingHoursDocument(
       weeklyDoc,
       {
         position_title: form.position_title.trim() || null,
         primary_clinic_id: form.primary_clinic_id.trim() || null,
+        additional_clinic_ids: existingExtras.additional_clinic_ids,
       },
       mode === "edit" && editingRow ? editingRow.working_hours : null
     );

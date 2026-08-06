@@ -57,6 +57,10 @@ import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
+import {
+  parseStaffProfileExtras,
+  staffClinicMembershipIds,
+} from "@/src/lib/staff/staffProfileExtras";
 import { loadCrmAssignableOwnerOptions } from "@/src/lib/crm/crmAssignableOwners.server";
 
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
@@ -287,6 +291,7 @@ export async function loadCrmShellStaffPickerOptions(
         r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
           ? (r.working_hours as Record<string, unknown>)
           : null;
+      const profile = parseStaffProfileExtras(wh);
       return {
         id: String(r.id),
         email: r.email != null ? String(r.email) : null,
@@ -300,6 +305,8 @@ export async function loadCrmShellStaffPickerOptions(
         working_hours: wh,
         is_active: Boolean(r.is_active),
         calendar_visible: r.calendar_visible == null ? null : Boolean(r.calendar_visible),
+        primary_clinic_id: profile.primary_clinic_id,
+        clinic_ids: staffClinicMembershipIds(profile),
       };
     })
     .filter((s) =>

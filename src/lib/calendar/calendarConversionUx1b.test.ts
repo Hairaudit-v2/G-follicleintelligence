@@ -245,6 +245,7 @@ describe("FI-CALENDAR-CONVERSION-UX-1B conversion summary and audit", () => {
     assert.equal(summary.identityAction, "Create new FiOS patient");
     assert.equal(summary.clinic, "Evolved Perth");
     assert.equal(summary.staff, "Unassigned");
+    assert.equal(summary.room, "None");
     assert.equal(summary.appointment.type, "Surgery");
     assert.equal(summary.source, "Google Calendar");
 

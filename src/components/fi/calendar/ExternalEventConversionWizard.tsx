@@ -19,17 +19,22 @@ import {
   EXTERNAL_CONVERSION_WIZARD_STEPS,
   EXTERNAL_IDENTITY_RESULT_LABELS,
   PATIENT_IDENTITY_ACTION_LABELS,
+  STAFF_CLINIC_COMPATIBILITY_LABELS,
   applyStaffUnassigned,
   assessStaffClinicCompatibility,
   buildConversionSummary,
   listActiveTenantStaffForConversion,
   resolveConversionWizardPermissions,
   resolveExternalIdentityResultState,
-  revalidateRoomForClinic,
+  revalidateRoomForClinicDetailed,
   roomsForSelectedClinic,
   type ConversionRoomOption,
   type PatientIdentityAction,
 } from "@/src/lib/calendar/externalEventConversionUx";
+import {
+  listMissingConversionRequirements,
+  resolveConversionAppointmentResourcePolicy,
+} from "@/src/lib/calendar/conversionAppointmentResourcePolicy";
 import {
   resolveConfirmedClinicId,
   suggestClinicFromGoogleLocation,
@@ -187,6 +192,9 @@ export function ExternalEventConversionWizard({
   const [crossClinicConfirmed, setCrossClinicConfirmed] = useState(false);
 
   const [roomId, setRoomId] = useState("");
+  const [roomClearedExplanation, setRoomClearedExplanation] = useState<string | null>(null);
+  const [staffOverrideConfirmed, setStaffOverrideConfirmed] = useState(false);
+  const [roomOverrideConfirmed, setRoomOverrideConfirmed] = useState(false);
   const [appointmentType, setAppointmentType] = useState(
     googleHydratedAppointmentType?.trim() || booking.booking_type || "consultation"
   );
@@ -195,8 +203,34 @@ export function ExternalEventConversionWizard({
   const [notes, setNotes] = useState(booking.description ?? "");
 
   const activeStaff = useMemo(
-    () => listActiveTenantStaffForConversion(staffDirectory),
+    () =>
+      listActiveTenantStaffForConversion(
+        staffDirectory.map((s) => ({
+          id: s.id,
+          full_name: s.full_name,
+          email: s.email,
+          staff_role: s.staff_role,
+          is_active: s.is_active,
+          primary_clinic_id: s.primary_clinic_id ?? null,
+          clinic_ids: s.clinic_ids ?? [],
+          clinically_eligible:
+            "clinical_readiness" in s
+              ? (s as { clinical_readiness?: { clinically_available?: boolean } })
+                  .clinical_readiness?.clinically_available !== false
+              : true,
+          availability_summary: null,
+        }))
+      ),
     [staffDirectory]
+  );
+
+  const resourcePolicy = useMemo(
+    () =>
+      resolveConversionAppointmentResourcePolicy({
+        appointmentType,
+        allowClinicUnassigned,
+      }),
+    [appointmentType, allowClinicUnassigned]
   );
 
   const filteredStaff = useMemo(() => {
@@ -301,9 +335,82 @@ export function ExternalEventConversionWizard({
   const selectedStaff = activeStaff.find((s) => s.id === staffId);
   const selectedStaffName =
     selectedStaff?.full_name?.trim() || selectedStaff?.email?.trim() || null;
+  const selectedRoomName = clinicRooms.find((r) => r.id === roomId)?.name ?? null;
 
   const dateLabel = formatLocalDateLabel(booking.start_at, tz);
   const timeRangeLabel = `${formatLocalTimeLabel(booking.start_at, tz)}–${formatLocalTimeLabel(booking.end_at, tz)}`;
+
+  const soleClinicId = clinics.length === 1 ? clinics[0]!.id : null;
+
+  const staffCompat = useMemo(
+    () =>
+      assessStaffClinicCompatibility({
+        staffId: staffAssignLater ? null : staffId,
+        clinicId: clinicUnassigned ? null : clinicId,
+        staff: activeStaff,
+        crossClinicConfirmed,
+        noRelationshipOverride: staffOverrideConfirmed,
+        soleClinicId,
+      }),
+    [
+      staffAssignLater,
+      staffId,
+      clinicUnassigned,
+      clinicId,
+      activeStaff,
+      crossClinicConfirmed,
+      staffOverrideConfirmed,
+      soleClinicId,
+    ]
+  );
+
+  const compatibilityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    if (staffCompat.ok && staffCompat.state === "different_primary_clinic") {
+      warnings.push("Staff primary clinic differs from the selected FiOS clinic.");
+    }
+    if (staffCompat.ok && staffCompat.state === "no_clinic_relationship") {
+      warnings.push("Staff has no clinic relationship on file — override confirmed.");
+    }
+    if (resourcePolicy.staff === "recommended" && (staffAssignLater || !staffId)) {
+      warnings.push("Staff is recommended for this appointment type but left unassigned.");
+    }
+    if (resourcePolicy.room === "recommended" && !roomId) {
+      warnings.push("Room is recommended for this appointment type but left unassigned.");
+    }
+    if (roomClearedExplanation) warnings.push(roomClearedExplanation);
+    return warnings;
+  }, [
+    staffCompat,
+    resourcePolicy,
+    staffAssignLater,
+    staffId,
+    roomId,
+    roomClearedExplanation,
+  ]);
+
+  const policyMissing = useMemo(
+    () =>
+      listMissingConversionRequirements({
+        policy: resourcePolicy,
+        clinicId: clinicUnassigned ? null : clinicId,
+        staffId,
+        staffAssignLater,
+        roomId,
+        staffOverrideConfirmed,
+        roomOverrideConfirmed,
+      }),
+    [
+      resourcePolicy,
+      clinicUnassigned,
+      clinicId,
+      staffId,
+      staffAssignLater,
+      roomId,
+      staffOverrideConfirmed,
+      roomOverrideConfirmed,
+    ]
+  );
 
   const summary = buildConversionSummary({
     patientDisplayName: personName,
@@ -312,9 +419,12 @@ export function ExternalEventConversionWizard({
     clinicUnassigned,
     staffName: selectedStaffName,
     staffAssignLater: staffAssignLater || !staffId,
+    roomName: selectedRoomName,
     appointmentType,
     dateLabel,
     timeRangeLabel,
+    compatibilityWarnings,
+    missingRequired: policyMissing,
   });
 
   function onClinicChange(nextId: string) {
@@ -322,8 +432,15 @@ export function ExternalEventConversionWizard({
     setClinicUnassigned(false);
     const suggestedId = clinicSuggestion.ok ? clinicSuggestion.suggestedClinicId : null;
     setClinicConfirmed(Boolean(nextId) && nextId !== suggestedId);
-    setRoomId((prev) => revalidateRoomForClinic({ clinicId: nextId, roomId: prev, rooms }) ?? "");
+    const revalidated = revalidateRoomForClinicDetailed({
+      clinicId: nextId,
+      roomId,
+      rooms,
+    });
+    setRoomId(revalidated.roomId ?? "");
+    setRoomClearedExplanation(revalidated.explanation);
     setCrossClinicConfirmed(false);
+    setStaffOverrideConfirmed(false);
   }
 
   function onSelectAssignLater() {
@@ -443,19 +560,35 @@ export function ExternalEventConversionWizard({
       clinicId: clinicUnassigned ? null : clinicId,
       staff: activeStaff,
       crossClinicConfirmed,
+      noRelationshipOverride: staffOverrideConfirmed,
+      soleClinicId,
     });
     if (!staffCheck.ok) {
       setFeedback(staffCheck.error);
       return;
     }
-    const validRoom = revalidateRoomForClinic({
+    const validRoom = revalidateRoomForClinicDetailed({
       clinicId: clinicUnassigned ? null : clinicId,
       roomId,
       rooms,
     });
-    if (roomId && !validRoom) {
-      setFeedback("Selected room is not at this clinic. Choose another room or clear it.");
+    if (roomId && validRoom.cleared) {
+      setFeedback(validRoom.explanation ?? "Selected room is not valid for this clinic.");
       setRoomId("");
+      setRoomClearedExplanation(validRoom.explanation);
+      return;
+    }
+    const missing = listMissingConversionRequirements({
+      policy: resourcePolicy,
+      clinicId: clinicUnassigned ? null : clinicId,
+      staffId,
+      staffAssignLater,
+      roomId: validRoom.roomId,
+      staffOverrideConfirmed,
+      roomOverrideConfirmed,
+    });
+    if (missing.includes("Assigned staff") || missing.includes("Room")) {
+      setFeedback(`Required before continuing: ${missing.join(", ")}`);
       return;
     }
     setStep(4);
@@ -471,11 +604,16 @@ export function ExternalEventConversionWizard({
       setFeedback(`Missing required: ${summary.missingRequired.join(", ")}`);
       return;
     }
+    if (!staffCompat.ok) {
+      setFeedback(staffCompat.error);
+      setStep(3);
+      return;
+    }
     const clinicResolved = resolveConfirmedClinicId({
       selectedClinicId: clinicUnassigned ? null : clinicId,
       suggestedClinicId: clinicSuggestion.ok ? clinicSuggestion.suggestedClinicId : null,
       clinicConfirmed,
-      allowUnassigned: allowClinicUnassigned,
+      allowUnassigned: allowClinicUnassigned && resourcePolicy.clinic !== "required",
     });
     if (!clinicResolved.ok) {
       setFeedback(clinicResolved.error);
@@ -530,6 +668,13 @@ export function ExternalEventConversionWizard({
             <dd>
               {staffDirectory.find((s) => s.id === booking.assigned_staff_id)?.full_name ||
                 (booking.assigned_staff_id ? "Assigned" : "Unassigned")}
+            </dd>
+          </div>
+          <div>
+            <dt className={labelClass}>Room</dt>
+            <dd>
+              {rooms.find((r) => r.id === booking.room_id)?.name ||
+                (booking.room_id ? "Assigned" : "None")}
             </dd>
           </div>
         </dl>
@@ -836,7 +981,18 @@ export function ExternalEventConversionWizard({
                   if (e.target.checked) {
                     setClinicId("");
                     setClinicConfirmed(false);
+                    const revalidated = revalidateRoomForClinicDetailed({
+                      clinicId: null,
+                      roomId,
+                      rooms,
+                    });
                     setRoomId("");
+                    setRoomClearedExplanation(
+                      roomId
+                        ? revalidated.explanation ??
+                            "Room cleared because clinic is unassigned."
+                        : null
+                    );
                   }
                 }}
               />
@@ -904,14 +1060,22 @@ export function ExternalEventConversionWizard({
                 clinicId: clinicUnassigned ? null : clinicId,
                 staff: activeStaff,
                 crossClinicConfirmed: true,
+                noRelationshipOverride: true,
+                soleClinicId,
               });
+              const stateLabel = STAFF_CLINIC_COMPATIBILITY_LABELS[compat.state];
               return (
                 <li key={s.id}>
                   <button
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    disabled={!permissions["appointment.assign_staff"].allowed}
+                    disabled={
+                      !permissions["appointment.assign_staff"].allowed ||
+                      compat.state === "inactive" ||
+                      compat.state === "clinically_ineligible" ||
+                      compat.state === "unavailable"
+                    }
                     className={cn(
                       "w-full rounded px-2 py-1.5 text-left text-[11px] text-slate-200 hover:bg-white/[0.06] disabled:opacity-40",
                       selected && "bg-cyan-950/40 text-cyan-100"
@@ -920,66 +1084,104 @@ export function ExternalEventConversionWizard({
                       setStaffId(s.id);
                       setStaffAssignLater(false);
                       setCrossClinicConfirmed(false);
+                      setStaffOverrideConfirmed(false);
                     }}
                   >
                     <span className="block font-medium">{name}</span>
                     <span className="text-[10px] text-slate-500">
-                      {s.staff_role?.trim() || "Staff"}
-                      {compat.ok && compat.status === "confirmed_cross_clinic"
-                        ? " · different usual clinic"
-                        : " · clinic compatible"}
+                      {s.staff_role?.trim() || "Staff"} · {stateLabel}
+                      {s.primary_clinic_id
+                        ? ` · home ${clinics.find((c) => c.id === s.primary_clinic_id)?.display_name ?? "clinic"}`
+                        : ""}
                     </span>
                   </button>
                 </li>
               );
             })}
           </ul>
-          {staffId && !staffAssignLater
-            ? (() => {
-                const check = assessStaffClinicCompatibility({
-                  staffId,
-                  clinicId: clinicUnassigned ? null : clinicId,
-                  staff: activeStaff,
-                  crossClinicConfirmed,
-                });
-                if (check.ok || !check.requiresConfirmation) return null;
-                return (
-                  <label className="flex items-center gap-2 text-[11px] text-amber-100">
-                    <input
-                      type="checkbox"
-                      checked={crossClinicConfirmed}
-                      onChange={(e) => setCrossClinicConfirmed(e.target.checked)}
-                    />
-                    Confirm cross-clinic staff assignment
-                  </label>
-                );
-              })()
-            : null}
-
-          {clinicRooms.length > 0 || rooms.length > 0 ? (
-            <label className="block">
-              <span className={labelClass}>Room (optional)</span>
-              <select
-                className={fieldClass}
-                value={roomId}
-                disabled={
-                  !permissions["appointment.assign_room"].allowed || clinicUnassigned || !clinicId
+          {staffId && !staffAssignLater && !staffCompat.ok && staffCompat.requiresConfirmation ? (
+            <label className="flex items-center gap-2 text-[11px] text-amber-100">
+              <input
+                type="checkbox"
+                checked={
+                  staffCompat.state === "no_clinic_relationship"
+                    ? staffOverrideConfirmed
+                    : crossClinicConfirmed
                 }
-                onChange={(e) => setRoomId(e.target.value)}
-              >
-                <option value="">No room</option>
-                {clinicRooms.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => {
+                  if (staffCompat.state === "no_clinic_relationship") {
+                    setStaffOverrideConfirmed(e.target.checked);
+                  } else {
+                    setCrossClinicConfirmed(e.target.checked);
+                  }
+                }}
+              />
+              {staffCompat.state === "no_clinic_relationship"
+                ? "Confirm authorised override — no clinic relationship on file"
+                : "Confirm cross-clinic staff assignment"}
             </label>
-          ) : (
-            <p className="text-[10px] text-slate-500">
-              Room can be assigned after conversion when clinic rooms are available.
+          ) : null}
+          {resourcePolicy.staff === "required" && (staffAssignLater || !staffId) ? (
+            <label className="flex items-center gap-2 text-[11px] text-amber-100">
+              <input
+                type="checkbox"
+                checked={staffOverrideConfirmed}
+                onChange={(e) => setStaffOverrideConfirmed(e.target.checked)}
+              />
+              Operational override — proceed without assigned staff
+            </label>
+          ) : null}
+
+          <label className="block">
+            <span className={labelClass}>
+              Room
+              {resourcePolicy.room === "required"
+                ? " (required)"
+                : resourcePolicy.room === "recommended"
+                  ? " (recommended)"
+                  : " (optional)"}
+            </span>
+            <select
+              className={fieldClass}
+              value={roomId}
+              data-testid="conversion-room-select"
+              disabled={
+                !permissions["appointment.assign_room"].allowed || clinicUnassigned || !clinicId
+              }
+              onChange={(e) => {
+                setRoomId(e.target.value);
+                setRoomClearedExplanation(null);
+              }}
+            >
+              <option value="">No room</option>
+              {clinicRooms.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                  {r.room_type ? ` · ${r.room_type}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          {roomClearedExplanation ? (
+            <p className="text-[10px] text-amber-200" role="status">
+              {roomClearedExplanation}
             </p>
-          )}
+          ) : null}
+          {clinicId && clinicRooms.length === 0 ? (
+            <p className="text-[10px] text-slate-500">
+              No active rooms for this clinic.
+            </p>
+          ) : null}
+          {resourcePolicy.room === "required" && !roomId ? (
+            <label className="flex items-center gap-2 text-[11px] text-amber-100">
+              <input
+                type="checkbox"
+                checked={roomOverrideConfirmed}
+                onChange={(e) => setRoomOverrideConfirmed(e.target.checked)}
+              />
+              Operational override — proceed without a room
+            </label>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2">
             <button type="button" className={btnClass} disabled={busy} onClick={() => setStep(2)}>
@@ -1049,6 +1251,9 @@ export function ExternalEventConversionWizard({
               </dd>
             </div>
           </dl>
+          <p className="text-[10px] text-slate-500">
+            Staff {resourcePolicy.staff} · Room {resourcePolicy.room} for this appointment type
+          </p>
           <label className="block">
             <span className={labelClass}>Notes</span>
             <textarea
@@ -1099,6 +1304,10 @@ export function ExternalEventConversionWizard({
               <dd>{summary.staff}</dd>
             </div>
             <div>
+              <dt className={labelClass}>Room</dt>
+              <dd>{summary.room}</dd>
+            </div>
+            <div>
               <dt className={labelClass}>Appointment</dt>
               <dd>
                 {summary.appointment.type}
@@ -1113,6 +1322,16 @@ export function ExternalEventConversionWizard({
               <dd>{summary.source}</dd>
             </div>
           </dl>
+          {summary.compatibilityWarnings.length > 0 ? (
+            <ul
+              className="space-y-1 rounded-md border border-amber-500/25 bg-amber-950/30 px-2 py-1.5 text-[11px] text-amber-100"
+              data-testid="conversion-compatibility-warnings"
+            >
+              {summary.compatibilityWarnings.map((w) => (
+                <li key={w}>{w}</li>
+              ))}
+            </ul>
+          ) : null}
           {summary.missingRequired.length > 0 ? (
             <p
               className="rounded-md border border-amber-500/30 bg-amber-950/35 px-2 py-1.5 text-[11px] text-amber-100"

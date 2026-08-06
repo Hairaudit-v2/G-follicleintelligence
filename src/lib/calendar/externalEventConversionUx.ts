@@ -172,6 +172,12 @@ export type ConversionRoomOption = {
   id: string;
   name: string;
   clinic_id: string;
+  room_type?: string | null;
+  is_active?: boolean;
+  /** Appointment-type / eligibility hint when known. */
+  appointment_type_compatible?: boolean | null;
+  /** Availability / conflict hint when known. */
+  availability_state?: "available" | "conflict" | "unknown" | null;
 };
 
 export type ConversionStaffOption = {
@@ -180,18 +186,47 @@ export type ConversionStaffOption = {
   email?: string | null;
   staff_role?: string | null;
   is_active?: boolean;
-  /** Optional staff home clinic for compatibility checks. */
+  /** Home clinic from team directory affinity. */
   primary_clinic_id?: string | null;
+  /** Primary + additional clinic memberships. */
+  clinic_ids?: string[];
+  /** Clinical eligibility override (false blocks selection). */
+  clinically_eligible?: boolean;
+  /** Optional availability summary for display. */
+  availability_summary?: string | null;
+};
+
+export type StaffClinicCompatibilityState =
+  | "compatible"
+  | "multi_clinic_compatible"
+  | "different_primary_clinic"
+  | "clinically_ineligible"
+  | "unavailable"
+  | "inactive"
+  | "no_clinic_relationship"
+  | "unassigned";
+
+export const STAFF_CLINIC_COMPATIBILITY_LABELS: Record<StaffClinicCompatibilityState, string> = {
+  compatible: "Compatible with clinic",
+  multi_clinic_compatible: "Multi-clinic membership",
+  different_primary_clinic: "Different primary clinic",
+  clinically_ineligible: "Clinically ineligible",
+  unavailable: "Unavailable",
+  inactive: "Inactive",
+  no_clinic_relationship: "No clinic relationship",
+  unassigned: "Assign later",
 };
 
 export function listActiveTenantStaffForConversion(
   staff: readonly ConversionStaffOption[]
 ): ConversionStaffOption[] {
-  return staff.filter((s) =>
-    isStaffBookableForClinicalWorkflow({
-      is_active: s.is_active !== false,
-      staff_role: s.staff_role,
-    })
+  return staff.filter(
+    (s) =>
+      s.is_active !== false &&
+      isStaffBookableForClinicalWorkflow({
+        is_active: s.is_active !== false,
+        staff_role: s.staff_role,
+      })
   );
 }
 
@@ -200,17 +235,53 @@ export function assessStaffClinicCompatibility(input: {
   clinicId: string | null | undefined;
   staff: readonly ConversionStaffOption[];
   crossClinicConfirmed?: boolean;
+  /** Authorised override when staff has no clinic relationship. */
+  noRelationshipOverride?: boolean;
+  /**
+   * When the tenant has exactly one clinic, null staff affinity is treated as
+   * compatible with that clinic (common Evolved Perth case).
+   */
+  soleClinicId?: string | null;
 }):
-  | { ok: true; status: "unassigned" | "compatible" | "confirmed_cross_clinic" }
-  | { ok: false; error: string; requiresConfirmation?: boolean } {
+  | {
+      ok: true;
+      status: StaffClinicCompatibilityState;
+      state: StaffClinicCompatibilityState;
+    }
+  | {
+      ok: false;
+      error: string;
+      state: StaffClinicCompatibilityState;
+      requiresConfirmation?: boolean;
+    } {
   const staffId = input.staffId?.trim() || null;
   if (!staffId) {
-    return { ok: true, status: "unassigned" };
+    return { ok: true, status: "unassigned", state: "unassigned" };
   }
 
   const staff = input.staff.find((s) => s.id.trim() === staffId);
   if (!staff) {
-    return { ok: false, error: "Selected staff is not active for this tenant." };
+    return {
+      ok: false,
+      state: "unavailable",
+      error: "Selected staff is not active for this tenant.",
+    };
+  }
+
+  if (staff.is_active === false) {
+    return {
+      ok: false,
+      state: "inactive",
+      error: "Inactive staff cannot be assigned.",
+    };
+  }
+
+  if (staff.clinically_eligible === false) {
+    return {
+      ok: false,
+      state: "clinically_ineligible",
+      error: "This staff member is not clinically eligible for assignment.",
+    };
   }
 
   if (
@@ -221,25 +292,79 @@ export function assessStaffClinicCompatibility(input: {
   ) {
     return {
       ok: false,
+      state: "clinically_ineligible",
       error: "This staff member is not assignable for clinical bookings.",
     };
   }
 
   const clinicId = input.clinicId?.trim() || null;
+  const soleClinicId = input.soleClinicId?.trim() || null;
   const primary = staff.primary_clinic_id?.trim() || null;
-  if (clinicId && primary && primary !== clinicId) {
-    if (input.crossClinicConfirmed) {
-      return { ok: true, status: "confirmed_cross_clinic" };
-    }
+  const memberships = (staff.clinic_ids ?? [])
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const membershipSet = new Set(memberships);
+  if (primary) membershipSet.add(primary);
+
+  if (!clinicId) {
+    return { ok: true, status: "compatible", state: "compatible" };
+  }
+
+  if (primary && primary === clinicId) {
+    return { ok: true, status: "compatible", state: "compatible" };
+  }
+
+  if (membershipSet.has(clinicId) && (!primary || primary !== clinicId)) {
     return {
-      ok: false,
-      requiresConfirmation: true,
-      error:
-        "Selected staff usually works at a different clinic. Confirm cross-clinic assignment to continue.",
+      ok: true,
+      status: "multi_clinic_compatible",
+      state: "multi_clinic_compatible",
     };
   }
 
-  return { ok: true, status: "compatible" };
+  if (primary && primary !== clinicId) {
+    if (input.crossClinicConfirmed) {
+      return {
+        ok: true,
+        status: "different_primary_clinic",
+        state: "different_primary_clinic",
+      };
+    }
+    return {
+      ok: false,
+      state: "different_primary_clinic",
+      requiresConfirmation: true,
+      error:
+        "Selected staff has a different primary clinic. Confirm cross-clinic assignment to continue.",
+    };
+  }
+
+  // No primary and no membership for this clinic.
+  if (membershipSet.size === 0) {
+    if (soleClinicId && clinicId === soleClinicId) {
+      return { ok: true, status: "compatible", state: "compatible" };
+    }
+    if (input.noRelationshipOverride || input.crossClinicConfirmed) {
+      return {
+        ok: true,
+        status: "no_clinic_relationship",
+        state: "no_clinic_relationship",
+      };
+    }
+    return {
+      ok: false,
+      state: "no_clinic_relationship",
+      requiresConfirmation: true,
+      error:
+        "Selected staff has no clinic relationship on file. Confirm an authorised override to continue.",
+    };
+  }
+
+  return {
+    ok: false,
+    state: "no_clinic_relationship",
+    error: "Selected staff is not linked to this clinic.",
+  };
 }
 
 /**
@@ -263,22 +388,85 @@ export function roomsForSelectedClinic(
 ): ConversionRoomOption[] {
   const cid = clinicId?.trim() || null;
   if (!cid) return [];
-  return rooms.filter((r) => r.clinic_id.trim() === cid);
+  return rooms.filter(
+    (r) => r.clinic_id.trim() === cid && r.is_active !== false
+  );
 }
+
+export type RoomRevalidationResult = {
+  roomId: string | null;
+  cleared: boolean;
+  explanation: string | null;
+};
 
 /**
  * When clinic changes, drop room if it no longer belongs to the clinic.
- * Clearing room must not clear clinic or staff.
+ * Clearing room must not clear clinic or staff. Surface an explanation when cleared.
  */
 export function revalidateRoomForClinic(input: {
   clinicId: string | null | undefined;
   roomId: string | null | undefined;
   rooms: readonly ConversionRoomOption[];
 }): string | null {
+  return revalidateRoomForClinicDetailed(input).roomId;
+}
+
+export function revalidateRoomForClinicDetailed(input: {
+  clinicId: string | null | undefined;
+  roomId: string | null | undefined;
+  rooms: readonly ConversionRoomOption[];
+}): RoomRevalidationResult {
   const roomId = input.roomId?.trim() || null;
-  if (!roomId) return null;
+  if (!roomId) {
+    return { roomId: null, cleared: false, explanation: null };
+  }
+
+  const room = input.rooms.find((r) => r.id === roomId);
+  if (!room) {
+    return {
+      roomId: null,
+      cleared: true,
+      explanation: "Selected room is no longer available and was cleared.",
+    };
+  }
+  if (room.is_active === false) {
+    return {
+      roomId: null,
+      cleared: true,
+      explanation: "Selected room is inactive and was cleared.",
+    };
+  }
   const allowed = roomsForSelectedClinic(input.rooms, input.clinicId);
-  return allowed.some((r) => r.id === roomId) ? roomId : null;
+  if (!allowed.some((r) => r.id === roomId)) {
+    return {
+      roomId: null,
+      cleared: true,
+      explanation:
+        "Selected room does not belong to the confirmed clinic and was cleared.",
+    };
+  }
+  return { roomId, cleared: false, explanation: null };
+}
+
+export function mapClinicRoomsToConversionOptions(
+  rooms: readonly {
+    id: string;
+    display_name?: string | null;
+    room_code?: string | null;
+    clinic_id: string;
+    room_type?: string | null;
+    is_active?: boolean;
+  }[]
+): ConversionRoomOption[] {
+  return rooms.map((r) => ({
+    id: r.id,
+    name: r.display_name?.trim() || r.room_code?.trim() || r.id.slice(0, 8),
+    clinic_id: r.clinic_id,
+    room_type: r.room_type ?? null,
+    is_active: r.is_active !== false,
+    appointment_type_compatible: null,
+    availability_state: "unknown",
+  }));
 }
 
 export type ConversionSummaryInput = {
@@ -288,10 +476,13 @@ export type ConversionSummaryInput = {
   clinicUnassigned: boolean;
   staffName: string | null;
   staffAssignLater: boolean;
+  roomName?: string | null;
   appointmentType: string;
   dateLabel: string;
   timeRangeLabel: string;
   sourceLabel?: string;
+  compatibilityWarnings?: string[];
+  missingRequired?: string[];
 };
 
 export type ConversionSummary = {
@@ -299,19 +490,23 @@ export type ConversionSummary = {
   identityAction: string;
   clinic: string;
   staff: string;
+  room: string;
   appointment: {
     type: string;
     date: string;
     timeRange: string;
   };
   source: string;
+  compatibilityWarnings: string[];
   missingRequired: string[];
 };
 
 export function buildConversionSummary(input: ConversionSummaryInput): ConversionSummary {
-  const missingRequired: string[] = [];
+  const missingRequired = [...(input.missingRequired ?? [])];
   if (!input.patientDisplayName.trim()) missingRequired.push("Patient");
-  if (!input.clinicUnassigned && !input.clinicName?.trim()) missingRequired.push("Clinic");
+  if (!input.clinicUnassigned && !input.clinicName?.trim() && !missingRequired.includes("Clinic")) {
+    // Soft clinic gap only when not already flagged by policy.
+  }
 
   return {
     patient: input.patientDisplayName.trim() || "—",
@@ -322,13 +517,15 @@ export function buildConversionSummary(input: ConversionSummaryInput): Conversio
     staff: input.staffAssignLater
       ? "Unassigned"
       : input.staffName?.trim() || "Unassigned",
+    room: input.roomName?.trim() || "None",
     appointment: {
       type: input.appointmentType.trim() || "—",
       date: input.dateLabel,
       timeRange: input.timeRangeLabel,
     },
     source: input.sourceLabel?.trim() || "Google Calendar",
-    missingRequired,
+    compatibilityWarnings: [...(input.compatibilityWarnings ?? [])],
+    missingRequired: [...new Set(missingRequired)],
   };
 }
 

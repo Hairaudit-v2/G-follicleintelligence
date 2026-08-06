@@ -25,6 +25,9 @@ import {
 import type { CalendarEventEditPolicy } from "@/src/lib/calendar/calendarEventEditPolicy";
 import type { CalendarAppointmentCapability } from "@/src/lib/calendar/calendarAppointmentCapabilities";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  type ConversionRoomOption,
+} from "@/src/lib/calendar/externalEventConversionUx";
 import { ExternalEventConversionWizard } from "@/src/components/fi/calendar/ExternalEventConversionWizard";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { cn } from "@/lib/utils";
@@ -79,6 +82,7 @@ export function CalendarQuickEditDrawer({
   googleHydratedLocation,
   googleHydratedAppointmentType,
   calendarCapabilities,
+  rooms = [],
   onClose,
   onSaved,
   onOpenFull,
@@ -103,6 +107,8 @@ export function CalendarQuickEditDrawer({
   googleHydratedLocation?: string | null;
   googleHydratedAppointmentType?: string | null;
   calendarCapabilities?: readonly CalendarAppointmentCapability[] | null;
+  /** Active clinic rooms for conversion room picker (FI-CALENDAR-CONVERSION-UX-1C). */
+  rooms?: ConversionRoomOption[];
   onClose: () => void;
   onSaved: () => void;
   onOpenFull: (b: FiBookingRow) => void;
@@ -400,6 +406,7 @@ export function CalendarQuickEditDrawer({
               booking={booking}
               clinics={clinics}
               staffDirectory={staffDirectory}
+              rooms={rooms}
               calendarTimezone={calendarTimezone}
               displayName={displayName}
               googleHydratedEmail={googleHydratedEmail}
