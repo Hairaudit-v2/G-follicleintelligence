@@ -423,7 +423,7 @@ async function upsertWorkforceAssignment(input: {
   );
   if (activeMatch) return activeMatch;
 
-  const { readinessInput } = await buildReadinessInputForStaff(tid, sid);
+  const { readinessInput, staff } = await buildReadinessInputForStaff(tid, sid);
   const privilegeEligibility = await evaluateStaffProcedurePrivilegeForEvent({
     tenantId: tid,
     staffId: sid,
@@ -472,6 +472,8 @@ async function upsertWorkforceAssignment(input: {
     availabilityBlocks: blocks,
     shifts,
     eventAssignments: assignments,
+    workingHours: staff.working_hours,
+    staffTimezone: staff.default_timezone,
   });
 
   const result = assignStaffToClinicalEvent({

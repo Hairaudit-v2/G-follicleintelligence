@@ -767,6 +767,8 @@ export async function assignStaffToClinicalEventAction(input: {
     availabilityBlocks: blocks,
     shifts,
     eventAssignments: assignments,
+    workingHours: staff.working_hours,
+    staffTimezone: staff.default_timezone,
   });
 
   const readinessInput = await buildReadinessInputForStaff(tid, staff);
@@ -964,6 +966,8 @@ export async function loadClinicalEventStaffingStatus(input: {
       availabilityBlocks: blocks,
       shifts,
       eventAssignments: assignments,
+      workingHours: staff.working_hours,
+      staffTimezone: staff.default_timezone,
     });
     conflictsByStaff.set(candidate.staffId, conflicts);
 

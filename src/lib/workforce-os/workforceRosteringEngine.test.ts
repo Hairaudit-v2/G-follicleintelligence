@@ -271,6 +271,92 @@ test("detectStaffSchedulingConflicts ignores cancelled shifts and blocks", () =>
   assert.equal(conflicts.length, 0);
 });
 
+test("detectStaffSchedulingConflicts flags outside weekly hours when workingHours provided", () => {
+  const conflicts = detectStaffSchedulingConflicts({
+    staffId: "staff-1",
+    startsAt: "2026-06-08T10:00:00.000Z", // 18:00 Perth
+    endsAt: "2026-06-08T11:00:00.000Z",
+    availabilityBlocks: [],
+    shifts: [],
+    eventAssignments: [],
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+  });
+  assert.ok(conflicts.some((c) => c.kind === "outside_weekly_hours"));
+});
+
+test("detectStaffSchedulingConflicts does not flag outside hours when available_override covers", () => {
+  const conflicts = detectStaffSchedulingConflicts({
+    staffId: "staff-1",
+    startsAt: "2026-06-08T10:00:00.000Z",
+    endsAt: "2026-06-08T11:00:00.000Z",
+    availabilityBlocks: [
+      block({
+        id: "ov-1",
+        block_type: "available_override",
+        starts_at: "2026-06-08T10:00:00.000Z",
+        ends_at: "2026-06-08T11:00:00.000Z",
+      }),
+    ],
+    shifts: [],
+    eventAssignments: [],
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+  });
+  assert.equal(
+    conflicts.some((c) => c.kind === "outside_weekly_hours"),
+    false
+  );
+});
+
+test("detectStaffSchedulingConflicts still flags leave even when workingHours provided", () => {
+  const conflicts = detectStaffSchedulingConflicts({
+    staffId: "staff-1",
+    startsAt: RANGE_START,
+    endsAt: RANGE_END,
+    availabilityBlocks: [block({ block_type: "leave", id: "leave-1" })],
+    shifts: [],
+    eventAssignments: [],
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+  });
+  assert.ok(conflicts.some((c) => c.kind === "leave_block"));
+  assert.equal(
+    conflicts.some((c) => c.kind === "outside_weekly_hours"),
+    false
+  );
+});
+
+test("assignStaffToClinicalEvent soft-warns on outside hours when allowBlockedDraft", () => {
+  const conflicts = detectStaffSchedulingConflicts({
+    staffId: "staff-1",
+    startsAt: "2026-06-08T10:00:00.000Z",
+    endsAt: "2026-06-08T11:00:00.000Z",
+    availabilityBlocks: [],
+    shifts: [],
+    eventAssignments: [],
+    workingHours: workingHours(),
+    staffTimezone: "Australia/Perth",
+  });
+  const result = assignStaffToClinicalEvent({
+    tenantId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    staffId: "staff-1",
+    assignedRole: "nurse",
+    startsAt: "2026-06-08T10:00:00.000Z",
+    endsAt: "2026-06-08T11:00:00.000Z",
+    eventSource: "booking",
+    eventId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    readinessInput: freshReadinessInput(),
+    conflicts,
+    allowBlockedDraft: true,
+  });
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.equal(result.assignmentStatus, "blocked");
+    assert.ok(result.warnings.some((w) => /Outside normal weekly hours/i.test(w)));
+  }
+});
+
 test("detectStaffSchedulingConflicts detects assignment overlap via snapshot window", () => {
   const assignments: StaffEventAssignmentRecord[] = [
     {

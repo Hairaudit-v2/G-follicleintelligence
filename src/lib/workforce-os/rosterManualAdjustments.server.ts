@@ -201,6 +201,8 @@ export async function evaluateStaffShiftAssignmentWarnings(input: {
     shifts,
     eventAssignments: [],
     excludeShiftId: input.excludeShiftId,
+    workingHours: staff?.working_hours ?? null,
+    staffTimezone: staff?.default_timezone ?? null,
   });
 
   for (const conflict of conflicts) {
@@ -701,6 +703,8 @@ export async function loadReplacementStaffForShift(input: {
         availabilityBlocks: blocks,
         shifts,
         eventAssignments: [],
+        workingHours: staff.working_hours,
+        staffTimezone: staff.default_timezone,
       })
     );
   }

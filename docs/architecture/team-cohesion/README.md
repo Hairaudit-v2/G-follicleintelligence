@@ -1,6 +1,6 @@
 # FI-TEAM-COHESION — Architecture register
 
-**Phase:** B2.5 GREEN · B2.4 GREEN · B2.3b GREEN · B2.3a GREEN · B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
+**Phase:** B2.6 GREEN · B2.5 GREEN · B2.4 GREEN · B2.3b GREEN · B2.3a GREEN · B2.2a–d GREEN · B2.1b GREEN · B1 CLOSED · B0 inventory operational  
 **Date:** 2026-08-06  
 **Predecessor:** [workforceos-cohesion-audit-2026-08.md](../../workforce/workforceos-cohesion-audit-2026-08.md)
 
@@ -20,6 +20,7 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | B2.3b — HR readiness + notifications | **GREEN** — [plan](./b2.3b-hr-readiness-notification-plan.md) · [proof](./b2.3b-hr-readiness-notification-proof.md) |
 | B2.4 — Roster availability + booking slot gate | **GREEN** — [plan](./b2.4-roster-availability-booking-gate-plan.md) · [proof](./b2.4-roster-availability-booking-gate-proof.md) |
 | B2.5 — Effective availability consumer audit + explanation UI | **GREEN** — [plan](./b2.5-effective-availability-consumer-audit-plan.md) · [proof](./b2.5-effective-availability-consumer-audit-proof.md) |
+| B2.6 — Calendar availability parity | **GREEN** — [plan](./b2.6-calendar-availability-parity-plan.md) · [proof](./b2.6-calendar-availability-parity-proof.md) |
 
 **History note:** An earlier draft claimed B2.2a GREEN before any directory-core `git mv`. That claim was stricken. Clinical picker (B2.2d) and directory-core (B2.2a) are distinct deliveries.
 
@@ -58,6 +59,8 @@ B0 was discovery and architecture-lock only. **B1–B1.8** prove identity throug
 | [b2.4-roster-availability-booking-gate-proof.md](./b2.4-roster-availability-booking-gate-proof.md) | B2.4 delivery proof |
 | [b2.5-effective-availability-consumer-audit-plan.md](./b2.5-effective-availability-consumer-audit-plan.md) | B2.5 consumer audit + delivery plan |
 | [b2.5-effective-availability-consumer-audit-proof.md](./b2.5-effective-availability-consumer-audit-proof.md) | B2.5 delivery proof |
+| [b2.6-calendar-availability-parity-plan.md](./b2.6-calendar-availability-parity-plan.md) | B2.6 CalendarOS + assignment bridge parity plan |
+| [b2.6-calendar-availability-parity-proof.md](./b2.6-calendar-availability-parity-proof.md) | B2.6 delivery proof |
 
 ## Generated artifacts
 
@@ -85,7 +88,7 @@ node scripts/team-cohesion/generate-b0-inventory.mjs
 
 ## B2 scorecard
 
-| Metric | B2.4 | B2.5 now | Target |
+| Metric | B2.5 | B2.6 now | Target |
 |--------|-----:|---------:|-------:|
 | Files in legacy lib trees | 207 | **207** | 0 |
 | Deep legacy imports | 180 | **180** | 0 |
@@ -98,9 +101,9 @@ Refresh “Current” from `generated/b0-summary.json` after each inventory rege
 
 ## Recommended next slice
 
-After B2.5:
+After B2.6:
 
-1. Deferred mixed composition: `staffRoleReview*` / sprint actions
-2. CalendarOS leave-block chrome + assignment-bridge weekly/override hard parity
-3. Roster “available outside hours” create CTA (API already supports `available_override`)
-4. Otherwise another high-fan-out single-domain legacy cluster (roster server / payroll engines / standard-hours home)
+1. Override creation UX (Roster / Calendar “mark available outside hours” — API already supports `available_override`)
+2. Full roster / standard-hours physical home move
+3. Deferred mixed composition: `staffRoleReview*` / sprint actions
+4. Otherwise begin B3 sprint-action renames once domain homes feel stable

@@ -171,6 +171,7 @@ export function CalendarOsShell({
               bookingDisplay={bookingDisplay}
               resourceColumns={data.resourceColumns}
               staffDirectory={data.staffDirectory}
+              availabilityBlocksByStaffId={data.availabilityBlocksByStaffId}
               rooms={data.rooms}
               staffIdByUserId={staffIdByUserId}
               gridConfig={data.gridConfig}

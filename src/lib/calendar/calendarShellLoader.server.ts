@@ -134,6 +134,7 @@ export async function loadOperationalCalendarShellData(
       bookingDisplay: {},
       assignees: [],
       staffDirectory: [],
+      availabilityBlocksByStaffId: {},
       clinics: [],
       rooms: [],
       roomDisplayById: {},

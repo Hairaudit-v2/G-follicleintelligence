@@ -10,7 +10,6 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { ClinicalStaffPickerOption } from "@/src/lib/team/directory";
 import {
   operationalResourceColumnIdForBooking,
-  staffColumnId,
 } from "@/src/lib/calendar/operationalCalendarColumns";
 import {
   layoutBookingInBusinessDayUtc,
@@ -19,13 +18,21 @@ import {
 } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { OperationalCalendarResourceColumn } from "@/src/lib/calendar/operationalCalendarTypes";
-import {
-  parseStaffWeeklyHours,
-  type StaffWeekdayKey,
-  STAFF_WEEKDAY_KEYS,
-} from "@/src/lib/team/roster/availability";
-import { CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR } from "@/src/lib/calendar-os/calendarDisplayDensity";
-import { weekdayKeyFromDayKey } from "@/src/lib/calendar-os/calendarWorkforceBlocks";
+import type {
+  CalendarOsAvailabilityBlockInput,
+  CalendarOsWorkforceBlock,
+  CalendarOsWorkforceBlockKind,
+} from "@/src/lib/calendar-os/calendarWorkforceBlocks";
+import { deriveWorkforceBlocksForStaffRow as deriveWorkforceBlocksForStaffRowImpl } from "@/src/lib/calendar-os/calendarWorkforceBlocks";
+import { STAFF_WEEKDAY_KEYS, type StaffWeekdayKey } from "@/src/lib/team/roster/availability";
+
+export type {
+  CalendarOsAvailabilityBlockInput,
+  CalendarOsWorkforceBlock,
+  CalendarOsWorkforceBlockKind,
+} from "@/src/lib/calendar-os/calendarWorkforceBlocks";
+
+export { STAFF_WEEKDAY_KEYS, type StaffWeekdayKey };
 
 export const CALENDAR_OS_RESOURCE_ROLE_GROUPS = [
   "surgeons",
@@ -94,24 +101,6 @@ export type CalendarOsDayPlacement = {
   resourceId: string;
   topPx: number;
   heightPx: number;
-};
-
-export type CalendarOsWorkforceBlockKind =
-  | "rdo"
-  | "leave"
-  | "lunch"
-  | "unavailable"
-  | "working_hours";
-
-export type CalendarOsWorkforceBlock = {
-  id: string;
-  resourceId: string;
-  dayKey: string;
-  kind: CalendarOsWorkforceBlockKind;
-  label: string;
-  /** Day view vertical placement when applicable. */
-  topPx?: number;
-  heightPx?: number;
 };
 
 export type CalendarOsResourceModelInput = {
@@ -432,104 +421,10 @@ export function deriveWorkforceBlocksForStaffRow(input: {
   dayKey: string;
   gridConfig: BusinessGridConfig;
   lane: CalendarDayLane;
+  availabilityBlocks?: CalendarOsAvailabilityBlockInput[];
+  staffTimezone?: string | null;
 }): CalendarOsWorkforceBlock[] {
-  const { staff, dayKey, gridConfig, lane } = input;
-  const resourceId = staffColumnId(String(staff.id));
-  const blocks: CalendarOsWorkforceBlock[] = [];
-  const weekday = weekdayKeyFromDayKey(dayKey, gridConfig.timeZone);
-  const weekly = parseStaffWeeklyHours(staff.working_hours ?? null);
-  const dayHours = weekday ? weekly[weekday] : undefined;
-
-  if (!staff.is_active) {
-    blocks.push({
-      id: `${resourceId}:${dayKey}:inactive`,
-      resourceId,
-      dayKey,
-      kind: "unavailable",
-      label: "Inactive",
-    });
-    return blocks;
-  }
-
-  const readiness = staff.clinical_readiness;
-  if (readiness && !readiness.clinically_available) {
-    blocks.push({
-      id: `${resourceId}:${dayKey}:readiness`,
-      resourceId,
-      dayKey,
-      kind: "leave",
-      label: readiness.block_reason ?? readiness.warning_label ?? "Unavailable",
-    });
-  }
-
-  if (weekday && dayHours && dayHours.enabled === false) {
-    blocks.push({
-      id: `${resourceId}:${dayKey}:rdo`,
-      resourceId,
-      dayKey,
-      kind: "rdo",
-      label: "RDO",
-    });
-  }
-
-  if (weekday && dayHours?.start && dayHours?.end && dayHours.enabled !== false) {
-    const lunchStartMin = parseHmToMinutes("12:00");
-    const lunchEndMin = parseHmToMinutes("13:00");
-    const workStart = parseHmToMinutes(dayHours.start);
-    const workEnd = parseHmToMinutes(dayHours.end);
-    if (
-      lunchStartMin != null &&
-      lunchEndMin != null &&
-      workStart != null &&
-      workEnd != null &&
-      lunchStartMin >= workStart &&
-      lunchEndMin <= workEnd
-    ) {
-      const placement = minutesRangeToDayPlacement(
-        lane,
-        gridConfig,
-        lunchStartMin,
-        lunchEndMin - lunchStartMin
-      );
-      if (placement) {
-        blocks.push({
-          id: `${resourceId}:${dayKey}:lunch`,
-          resourceId,
-          dayKey,
-          kind: "lunch",
-          label: "Lunch",
-          topPx: placement.topPx,
-          heightPx: placement.heightPx,
-        });
-      }
-    }
-  }
-
-  return blocks;
-}
-
-function parseHmToMinutes(hm: string): number | null {
-  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(hm.trim());
-  if (!m) return null;
-  return Number(m[1]) * 60 + Number(m[2]);
-}
-
-function minutesRangeToDayPlacement(
-  lane: CalendarDayLane,
-  cfg: BusinessGridConfig,
-  startMinFromMidnight: number,
-  durationMin: number
-): { topPx: number; heightPx: number } | null {
-  const gridStart = cfg.dayStartHourUtc * 60;
-  const gridEnd = cfg.dayEndHourUtc * 60;
-  const visStart = Math.max(startMinFromMidnight, gridStart);
-  const visEnd = Math.min(startMinFromMidnight + durationMin, gridEnd);
-  if (visEnd <= visStart) return null;
-  const pxPerMin = CALENDAR_OS_LAYOUT_BASE_PX_PER_HOUR / 60;
-  return {
-    topPx: (visStart - gridStart) * pxPerMin,
-    heightPx: Math.max((visEnd - visStart) * pxPerMin, 12),
-  };
+  return deriveWorkforceBlocksForStaffRowImpl(input);
 }
 
 export function calendarOsDefaultViewForQuery(query: ParsedCalendarQuery): "day" | "week" {
@@ -587,5 +482,3 @@ export function staffInitialsFromLabel(label: string): string {
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
-
-export { STAFF_WEEKDAY_KEYS, type StaffWeekdayKey };

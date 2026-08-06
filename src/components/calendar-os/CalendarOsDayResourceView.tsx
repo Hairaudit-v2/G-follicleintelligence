@@ -15,6 +15,7 @@ import {
 } from "@/src/lib/calendar-os/calendarResourceModel";
 import type {
   OperationalCalendarBookingDisplay,
+  OperationalCalendarPageData,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
@@ -39,9 +40,12 @@ import { fiOsCalFloatingAssistScrollPad } from "@/src/lib/calendar/fiOsCalendarR
 const BLOCK_TONE: Record<string, string> = {
   rdo: "bg-slate-600/30 border-slate-500/30 text-slate-400",
   leave: "bg-rose-500/15 border-rose-500/25 text-rose-200",
+  sick_leave: "bg-rose-600/20 border-rose-500/30 text-rose-100",
   lunch: "bg-amber-500/10 border-amber-500/20 text-amber-200/80",
   unavailable: "bg-slate-700/40 border-slate-600/30 text-slate-400",
   working_hours: "bg-emerald-500/5 border-emerald-500/15 text-emerald-200/70",
+  available_override: "bg-sky-500/15 border-sky-400/30 text-sky-100",
+  outside_hours: "bg-slate-800/35 border-slate-700/25 text-slate-500",
 };
 
 export type CalendarOsDayResourceViewProps = {
@@ -51,6 +55,7 @@ export type CalendarOsDayResourceViewProps = {
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   resourceColumns: OperationalCalendarResourceColumn[];
   staffDirectory: ClinicalStaffPickerOption[];
+  availabilityBlocksByStaffId?: OperationalCalendarPageData["availabilityBlocksByStaffId"];
   rooms: FiClinicRoomRow[];
   staffIdByUserId: Map<string, string>;
   gridConfig: BusinessGridConfig;
@@ -68,6 +73,7 @@ export function CalendarOsDayResourceView({
   bookingDisplay,
   resourceColumns,
   staffDirectory,
+  availabilityBlocksByStaffId,
   rooms,
   staffIdByUserId,
   gridConfig,
@@ -155,11 +161,12 @@ export function CalendarOsDayResourceView({
           dayKey: lane.dayKey,
           gridConfig,
           lane,
+          availabilityBlocks: availabilityBlocksByStaffId?.[row.staffId] ?? [],
         })
       );
     }
     return blocks;
-  }, [resourceRows, staffById, lane, gridConfig]);
+  }, [resourceRows, staffById, lane, gridConfig, availabilityBlocksByStaffId]);
 
   const bookingById = useMemo(() => new Map(bookings.map((b) => [b.id, b])), [bookings]);
 

@@ -126,6 +126,21 @@ export type OperationalCalendarPageData = {
   assignees: CrmShellUserPickerOption[];
   /** Active `fi_staff` with readiness — day columns, staff URL filter, clinical pickers. */
   staffDirectory: ClinicalStaffPickerOption[];
+  /**
+   * Active availability blocks overlapping the visible calendar range, keyed by staff id.
+   * Used by CalendarOS lane chrome (leave / override / unavailable). Hydrated with the grid patch.
+   */
+  availabilityBlocksByStaffId?: Record<
+    string,
+    Array<{
+      id: string;
+      block_type: string;
+      starts_at: string;
+      ends_at: string;
+      status: string;
+      reason?: string | null;
+    }>
+  >;
   clinics: CrmShellClinicOption[];
   rooms: FiClinicRoomRow[];
   roomDisplayById: Record<string, string>;
@@ -178,6 +193,7 @@ export type OperationalCalendarGridPatch = Pick<
   | "rangeTitle"
   | "assignees"
   | "staffDirectory"
+  | "availabilityBlocksByStaffId"
   | "clinics"
   | "rooms"
   | "roomDisplayById"

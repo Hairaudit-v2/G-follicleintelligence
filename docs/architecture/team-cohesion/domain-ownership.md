@@ -122,6 +122,7 @@ Action modules live beside their domain (see [action-rename-map.md](./action-ren
 - `src/lib/team/roster/availability` — weekly hours + `getStaffAvailabilityForRange`
 - Exposed via `@/src/lib/team/roster` and `@/src/lib/team/roster/availability`
 - Bookings compose this contract; bookings do not own weekly parsing or block precedence
+- CalendarOS lane chrome (B2.6) and assignment soft conflicts consume the same explanation / effective range — they must not reimplement precedence
 
 **Seed modules**
 

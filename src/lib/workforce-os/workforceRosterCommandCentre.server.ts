@@ -943,6 +943,8 @@ export async function loadRosterAssignableStaff(
         availabilityBlocks: blocks,
         shifts,
         eventAssignments: assignments,
+        workingHours: staff.working_hours,
+        staffTimezone: staff.default_timezone,
       })
     );
 

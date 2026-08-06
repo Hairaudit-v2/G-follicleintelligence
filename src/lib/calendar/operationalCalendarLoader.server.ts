@@ -220,6 +220,76 @@ async function loadClinicalDetailsMap(
   return out;
 }
 
+async function loadAvailabilityBlocksForCalendarRange(input: {
+  tenantId: string;
+  staffIds: string[];
+  rangeStartIso: string;
+  rangeEndIso: string;
+}): Promise<
+  Record<
+    string,
+    Array<{
+      id: string;
+      block_type: string;
+      starts_at: string;
+      ends_at: string;
+      status: string;
+      reason?: string | null;
+    }>
+  >
+> {
+  const ids = Array.from(new Set(input.staffIds.map((x) => x.trim()).filter(Boolean)));
+  if (!ids.length) return {};
+
+  const { data, error } = await supabaseAdmin()
+    .from("fi_staff_availability_blocks")
+    .select("id, staff_id, block_type, starts_at, ends_at, status, reason")
+    .eq("tenant_id", input.tenantId.trim())
+    .in("staff_id", ids)
+    .eq("status", "active")
+    .lt("starts_at", input.rangeEndIso)
+    .gt("ends_at", input.rangeStartIso);
+
+  if (error) throw new Error(error.message);
+
+  const out: Record<
+    string,
+    Array<{
+      id: string;
+      block_type: string;
+      starts_at: string;
+      ends_at: string;
+      status: string;
+      reason?: string | null;
+    }>
+  > = {};
+
+  for (const raw of data ?? []) {
+    const r = raw as {
+      id: string;
+      staff_id: string;
+      block_type: string;
+      starts_at: string;
+      ends_at: string;
+      status: string;
+      reason?: string | null;
+    };
+    const sid = String(r.staff_id).trim();
+    if (!sid) continue;
+    const list = out[sid] ?? [];
+    list.push({
+      id: String(r.id),
+      block_type: String(r.block_type),
+      starts_at: String(r.starts_at),
+      ends_at: String(r.ends_at),
+      status: String(r.status || "active"),
+      reason: r.reason ?? null,
+    });
+    out[sid] = list;
+  }
+  return out;
+}
+
 async function loadTenantStaffAndClinics(
   tenantId: string,
   opts?: { resourceView?: ParsedCalendarQuery["resourceView"]; clinicId?: string | null }
@@ -824,6 +894,7 @@ export async function loadOperationalCalendarGridData(
     [clinicalMap, subMs_clinicalDetailsMap],
     [assignmentMap, subMs_resourceAssignmentsMap],
     [clinicalStaffingByBooking, subMs_clinicalStaffingSummaries],
+    availabilityBlocksByStaffId,
   ] = await Promise.all([
     monthSummaryMode
       ? Promise.resolve([emptyDisplayMaps, 0] as const)
@@ -849,6 +920,12 @@ export async function loadOperationalCalendarGridData(
             preloadedResourceAssignments: assignmentMapPromise,
           })
         ),
+    loadAvailabilityBlocksForCalendarRange({
+      tenantId: tid,
+      staffIds: resources.staffDirectory.map((s) => String(s.id)),
+      rangeStartIso,
+      rangeEndIso,
+    }),
   ]);
   const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
   logOperationalCalendarServerTiming({
@@ -1092,6 +1169,7 @@ export async function loadOperationalCalendarGridData(
     rangeTitle,
     assignees: resources.assignees,
     staffDirectory: resources.staffDirectory,
+    availabilityBlocksByStaffId,
     clinics: resources.clinics,
     rooms: resources.rooms,
     roomDisplayById: resources.roomDisplayById,

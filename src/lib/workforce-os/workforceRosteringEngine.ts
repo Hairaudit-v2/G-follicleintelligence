@@ -75,7 +75,8 @@ export type SchedulingConflict = {
     | "assignment_overlap"
     | "unavailable_block"
     | "leave_block"
-    | "sick_leave_block";
+    | "sick_leave_block"
+    | "outside_weekly_hours";
   message: string;
   relatedId?: string;
 };
@@ -94,6 +95,13 @@ export type SchedulingConflictInput = {
   availabilityBlocks: StaffAvailabilityBlockRecord[];
   shifts: StaffShiftRecord[];
   eventAssignments: StaffEventAssignmentRecord[];
+  /**
+   * When provided, also soft-flag outside weekly hours unless covered by
+   * `available_override` (via `getStaffAvailabilityForRange`). Leave/sick/
+   * unavailable continue to be detected from blocks regardless.
+   */
+  workingHours?: Record<string, unknown> | null;
+  staffTimezone?: string | null;
   /** When checking an update, exclude this assignment id from overlap checks. */
   excludeAssignmentId?: string | null;
   /** When checking a shift update, exclude this shift id from overlap checks. */
@@ -234,6 +242,28 @@ export function detectStaffSchedulingConflicts(
       message: `Overlapping clinical event assignment (${assignment.assigned_role})`,
       relatedId: assignment.id,
     });
+  }
+
+  // Effective availability parity with Bookings / slot finder: outside weekly hours
+  // without available_override is a soft conflict. Leave/unavailable already covered above.
+  // available_override allows the window — do not flag outside hours in that case.
+  if (input.workingHours !== undefined) {
+    const effective = getStaffAvailabilityForRange({
+      staffId: input.staffId,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      workingHours: input.workingHours,
+      staffTimezone: input.staffTimezone,
+      availabilityBlocks: input.availabilityBlocks,
+      shifts: [],
+    });
+    if (!effective.available && effective.explanation.source === "outside_weekly_hours") {
+      conflicts.push({
+        kind: "outside_weekly_hours",
+        message: effective.explanation.reason,
+        relatedId: effective.explanation.blockingRecordId ?? undefined,
+      });
+    }
   }
 
   return conflicts;
