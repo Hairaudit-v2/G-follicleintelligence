@@ -224,7 +224,8 @@ export function listActiveTenantStaffForConversion(
     (s) =>
       s.is_active !== false &&
       isStaffBookableForClinicalWorkflow({
-        is_active: s.is_active !== false,
+        // Outer guard already excludes explicit false; remaining is true | undefined.
+        is_active: true,
         staff_role: s.staff_role,
       })
   );
