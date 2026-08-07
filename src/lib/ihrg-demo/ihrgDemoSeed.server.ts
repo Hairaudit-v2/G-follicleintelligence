@@ -12,6 +12,10 @@ import {
   type IhrgDemoExpansionSeedResult,
 } from "./ihrgDemoExpansionSeed.server";
 import {
+  seedIhrgDemoDayAlignment,
+  type IhrgDemoDayAlignmentResult,
+} from "./ihrgDemoDayAlignmentSeed.server";
+import {
   IHRG_DEMO_DEFAULT_PROFILE,
   ihrgDemoProfileConfig,
   parseIhrgDemoProfile,
@@ -24,6 +28,7 @@ export type IhrgDemoSeedResult = EnterpriseDemoSeedResult &
     profile: IhrgDemoProfile;
     patientsTarget: number;
     surgeriesTarget: number;
+    demoDay: IhrgDemoDayAlignmentResult | null;
   };
 
 export type IhrgDemoSeedOptions = {
@@ -53,12 +58,32 @@ function emptyExpansion(): IhrgDemoExpansionSeedResult {
   };
 }
 
+function emptyDemoDay(): IhrgDemoDayAlignmentResult {
+  return {
+    ok: true,
+    clinicId: null,
+    todayYmd: null,
+    timezoneSet: false,
+    createdBookings: 0,
+    updatedBookings: 0,
+    createdDeposits: 0,
+    existingDeposits: 0,
+    createdCalendarEvents: 0,
+    updatedCalendarEvents: 0,
+    createdReceptionTasks: 0,
+    existingReceptionTasks: 0,
+    warnings: [],
+  };
+}
+
 function mergeIhrgResult(
   core: EnterpriseDemoSeedResult,
   expansion: IhrgDemoExpansionSeedResult,
   profile: IhrgDemoProfile,
-  profileConfig: ReturnType<typeof ihrgDemoProfileConfig>
+  profileConfig: ReturnType<typeof ihrgDemoProfileConfig>,
+  demoDay: IhrgDemoDayAlignmentResult | null = null
 ): IhrgDemoSeedResult {
+  const day = demoDay ?? emptyDemoDay();
   return {
     ...emptyExpansion(),
     ...core,
@@ -66,7 +91,13 @@ function mergeIhrgResult(
     profile,
     patientsTarget: ENTERPRISE_DEMO_CLINICS.length * profileConfig.patientsPerClinic,
     surgeriesTarget: ENTERPRISE_DEMO_CLINICS.length * profileConfig.surgeriesPerClinic,
-    warnings: [...core.warnings, ...expansion.warnings],
+    demoDay: day,
+    warnings: [
+      ...core.warnings,
+      ...expansion.warnings,
+      ...(day.warnings ?? []),
+      ...(day.ok === false && day.error ? [day.error] : []),
+    ],
   };
 }
 
@@ -161,15 +192,29 @@ export async function seedIhrgDemoData(opts?: IhrgDemoSeedOptions): Promise<Ihrg
     );
   }
 
+  const sb = opts?.supabase ?? supabaseAdmin();
   console.log("[ihrg-demo] Starting expansion seed for tenant", core.tenantId);
-  const expansion = await seedIhrgDemoExpansion(
-    opts?.supabase ?? supabaseAdmin(),
-    core.tenantId,
-    profileConfig
-  );
+  const expansion = await seedIhrgDemoExpansion(sb, core.tenantId, profileConfig);
   console.log("[ihrg-demo] Expansion seed completed");
 
-  return mergeIhrgResult(core, expansion, profile, profileConfig);
+  console.log("[ihrg-demo] Starting Sydney Demo Day alignment");
+  const demoDay = await seedIhrgDemoDayAlignment(sb, core.tenantId);
+  console.log(
+    "[ihrg-demo] Demo Day alignment completed: ok=",
+    demoDay.ok,
+    demoDay.todayYmd ? `today=${demoDay.todayYmd}` : "",
+    demoDay.error ? `error=${demoDay.error}` : ""
+  );
+
+  const merged = mergeIhrgResult(core, expansion, profile, profileConfig, demoDay);
+  // Demo Day failure should warn but not fail the broader showcase seed —
+  // GCC / franchise data remain usable; Reception deep-dive may be thin.
+  if (!demoDay.ok) {
+    merged.warnings.push(
+      `Demo Day alignment incomplete: ${demoDay.error ?? "unknown error"}. GCC still usable.`
+    );
+  }
+  return merged;
 }
 
 export { parseIhrgDemoProfile, resolveIhrgDemoTenantSlug };

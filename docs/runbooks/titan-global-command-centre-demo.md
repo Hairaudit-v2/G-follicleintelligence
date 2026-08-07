@@ -144,6 +144,7 @@ No Supabase Storage upload is required for command centre demos. Real image file
 
 ## Related docs
 
+- [FiOS Demo Day runbook](./fios-demo-day.md) — Packages A/B, checklist, Sydney Demo Day alignment
 - [Enterprise demo environment](../architecture/enterprise-demo-environment.md) — TITAN phase history and seed safety
-- Seed command: `npm run seed:enterprise-demo`
+- Seed command: `npm run seed:ihrg-showcase` (preferred) or `npm run seed:enterprise-demo`
 - Unit tests: `npx tsx --test src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentre*.test.ts`

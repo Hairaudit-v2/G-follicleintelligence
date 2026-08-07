@@ -21,7 +21,22 @@ import type {
 } from "./tenantProvisioningTypes";
 
 const DEMO_PERSON_SOURCE = SANDBOX_SEED_SOURCE;
-const FIXED_EPOCH = "2026-06-01T00:00:00.000Z";
+
+/** Relative demo anchor: midnight UTC of the generatedAt calendar day (falls back to now). */
+function sandboxAnchorMs(generatedAt: string): number {
+  const parsed = Date.parse(generatedAt);
+  const base = Number.isFinite(parsed) ? new Date(parsed) : new Date();
+  return Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate());
+}
+
+function sandboxOffsetIso(generatedAt: string, dayOffset: number, hourUtc = 10): string {
+  const ms = sandboxAnchorMs(generatedAt) + dayOffset * 86_400_000 + hourUtc * 3_600_000;
+  return new Date(ms).toISOString();
+}
+
+function sandboxOffsetYmd(generatedAt: string, dayOffset: number): string {
+  return sandboxOffsetIso(generatedAt, dayOffset, 0).slice(0, 10);
+}
 
 type ApplyContext = {
   supabase: SupabaseClient;
@@ -349,9 +364,8 @@ async function seedConsultations(
       continue;
     }
 
-    const consultationDate = new Date(Date.parse(FIXED_EPOCH) + i * 86_400_000)
-      .toISOString()
-      .slice(0, 10);
+    // Mix recent past + near future so consultation lists look alive.
+    const consultationDate = sandboxOffsetYmd(ctx.generatedAt, i % 2 === 0 ? -i : i);
     const structured = {
       ...sandboxMetadata(ctx, "consultations", i),
       sandbox_training_note: "Demo consultation workspace — not real clinical data.",
@@ -405,7 +419,24 @@ async function seedAppointments(
       ctx.tenantId,
       key
     );
+    // Bias first half of appointments onto today / tomorrow for live Reception demos.
+    const dayOffset = i < 4 ? 0 : i < 8 ? 1 : -(i - 7);
+    const hourUtc = 9 + (i % 6);
+    const startIso = sandboxOffsetIso(ctx.generatedAt, dayOffset, hourUtc);
+    const endIso = new Date(Date.parse(startIso) + 45 * 60_000).toISOString();
+
     if (existingId) {
+      // Re-align times on every apply so permanent demos stay "today"-dense.
+      await ctx.supabase
+        .from("fi_bookings")
+        .update({
+          start_at: startIso,
+          end_at: endIso,
+          booking_status: i % 4 === 0 ? "completed" : "confirmed",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("tenant_id", ctx.tenantId)
+        .eq("id", existingId);
       bookingIds.push(existingId);
       counts.appointments = {
         created: counts.appointments?.created ?? 0,
@@ -415,8 +446,8 @@ async function seedAppointments(
     }
 
     const personIdx = i % Math.max(personIds.length, 1);
-    const start = new Date(Date.parse(FIXED_EPOCH) + (i + 1) * 86_400_000 + 10 * 3_600_000);
-    const end = new Date(start.getTime() + 45 * 60_000);
+    const start = new Date(startIso);
+    const end = new Date(endIso);
 
     const { data, error } = await ctx.supabase
       .from("fi_bookings")
@@ -475,9 +506,7 @@ async function seedSurgeries(
       continue;
     }
 
-    const scheduledDate = new Date(Date.parse(FIXED_EPOCH) + (i + 14) * 86_400_000)
-      .toISOString()
-      .slice(0, 10);
+    const scheduledDate = sandboxOffsetYmd(ctx.generatedAt, i === 0 ? 0 : i + 3);
     const metadata = {
       ...sandboxMetadata(ctx, "surgeries", i),
       surgery_os_metric_placeholder: {
@@ -563,15 +592,15 @@ async function seedInvoicesAndPayments(
         lead_id: leadIds[i] ?? null,
         consultation_id: consultationIds[i] ?? null,
         invoice_kind: i % 2 === 0 ? "consultation_quote" : "surgery_deposit",
-        status: i % 3 === 0 ? "paid" : "issued",
+        status: i % 3 === 0 ? "paid" : "awaiting_payment",
         amount_cents: amountCents,
         tax_cents: Math.round(amountCents * 0.1),
         total_cents: amountCents + Math.round(amountCents * 0.1),
         amount_paid_cents: i % 3 === 0 ? amountCents : 0,
         currency: "AUD",
-        due_date: new Date(Date.parse(FIXED_EPOCH) + (i + 30) * 86_400_000)
-          .toISOString()
-          .slice(0, 10),
+        issued_at: sandboxOffsetIso(ctx.generatedAt, -(i % 5), 9),
+        paid_at: i % 3 === 0 ? sandboxOffsetIso(ctx.generatedAt, -(i % 3), 12) : null,
+        due_date: sandboxOffsetYmd(ctx.generatedAt, i % 3 === 0 ? -2 : i + 7),
         invoice_number: `SBX-INV-${String(i + 1).padStart(4, "0")}`,
         title: `Sandbox invoice #${i + 1}`,
         metadata,

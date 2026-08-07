@@ -113,3 +113,8 @@ npm run seed:enterprise-demo
 - No major new features — QA and operational hardening only
 
 ## Future Phases
+
+- Demo Day operational alignment (Sydney Reception/calendar) — see `docs/runbooks/fios-demo-day.md` and `seedIhrgDemoDayAlignment`
+- Package B single-clinic tenant: `follicle-demo-clinic` via `npm run seed:follicle-demo-clinic`
+- Optional ImagingOS media pack: `npm run seed:titan-demo-media-pack`
+- Shared Auth demo logins (Phase 2)

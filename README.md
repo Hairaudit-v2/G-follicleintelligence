@@ -1,38 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Follicle Intelligence (FiOS)
 
 ## Getting started
 
 From the repository root:
 
-`ash
+```bash
 npm install
 npm run dev
-`
+```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-**Package manager:** use **npm** with package-lock.json. Do not alternate 
-pm install and pnpm install on the same clone. See [docs/package-manager.md](./docs/package-manager.md).
+**Package manager:** use **npm** with package-lock.json. Do not alternate npm install and pnpm install on the same clone. See [docs/package-manager.md](./docs/package-manager.md).
 
-**Build / cache issues:** see [docs/next-build-troubleshooting.md](./docs/next-build-troubleshooting.md) (including ANALYZE and 
-pm run clean).
+**Build / cache issues:** see [docs/next-build-troubleshooting.md](./docs/next-build-troubleshooting.md) (including ANALYZE and npm run clean).
 
-You can start editing the page by modifying pp/page.tsx. The page auto-updates as you edit the file.
+## Guided demos (FiOS)
 
-This project uses [
-ext/font](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family from Vercel.
+Two preloaded demo packages for screen-share pitches:
+
+| Package | Command | Docs |
+|---------|---------|------|
+| A — Enterprise (IHRG / TITAN) | `npm run seed:ihrg-showcase` | [docs/runbooks/fios-demo-day.md](./docs/runbooks/fios-demo-day.md) |
+| B — Single clinic | `npm run seed:follicle-demo-clinic` | same runbook |
+
+Also: `npm run validate:titan-global-command-centre`, `npm run seed:titan-demo-media-pack` (optional ImagingOS placeholders).
 
 ## Learn more
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) — learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) — an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) — your feedback and contributions are welcome.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Learn Next.js](https://nextjs.org/learn)
 
 ## Deploy on Vercel
 
-The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).

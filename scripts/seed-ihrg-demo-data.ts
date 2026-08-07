@@ -92,6 +92,19 @@ function printResult(result: Awaited<ReturnType<typeof seedIhrgDemoData>>): void
     ["Competency projections created", result.createdCompetencyProjections],
   ]);
 
+  if (result.demoDay) {
+    printSection("Sydney Demo Day alignment", [
+      ["Bookings created", result.demoDay.createdBookings],
+      ["Bookings retimed", result.demoDay.updatedBookings],
+      ["Deposits created", result.demoDay.createdDeposits],
+      ["Calendar events created", result.demoDay.createdCalendarEvents],
+      ["Reception tasks created", result.demoDay.createdReceptionTasks],
+    ]);
+    if (result.demoDay.todayYmd) {
+      console.log(`  Operational today (Sydney): ${result.demoDay.todayYmd}`);
+    }
+  }
+
   if (result.warnings.length > 0) {
     console.log("\nWarnings:");
     for (const warning of result.warnings) {
