@@ -37,3 +37,10 @@ export {
 } from "./patientTwinCompleteness";
 export { loadPatientTwinV1, type LoadPatientTwinV1Params } from "./patientTwinLoader.server";
 export { patientTwinV1Schema, validatePatientTwinV1 } from "./patientTwinSchema";
+export {
+  composePatientIntelligenceOverview,
+  type OverviewComposeExtras,
+} from "./patientTwinOverviewComposer";
+export { detectShowcasePatient } from "./patientTwinShowcaseDetection";
+export type { PatientIntelligenceOverviewModel } from "./patientTwinOverviewTypes";
+export { loadPatientIntelligenceOverview } from "./patientTwinOverviewLoader.server";

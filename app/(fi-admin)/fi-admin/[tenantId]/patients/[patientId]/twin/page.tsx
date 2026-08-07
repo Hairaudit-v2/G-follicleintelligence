@@ -13,6 +13,7 @@ import {
   loadPatientOutcomeProtocols,
 } from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.server";
+import { loadPatientIntelligenceOverview } from "@/src/lib/patientTwin/patientTwinOverviewLoader.server";
 import { resolvePatientProfile } from "@/src/lib/patients/resolvePatientProfile.server";
 import { buildCanonicalPatientProfileHref } from "@/src/lib/patients/resolvePatientProfile";
 
@@ -31,16 +32,31 @@ export async function generateMetadata({
   };
 }
 
+function isPresentationQuery(searchParams: {
+  presentation?: string | string[];
+  demo?: string | string[];
+}): boolean {
+  const presentation = Array.isArray(searchParams.presentation)
+    ? searchParams.presentation[0]
+    : searchParams.presentation;
+  const demo = Array.isArray(searchParams.demo) ? searchParams.demo[0] : searchParams.demo;
+  return presentation === "1" || demo === "overview";
+}
+
 /**
  * Read-only Health record V1 dashboard (foundation patient). Tenant access is enforced by
  * `assertFiTenantPortalAccess` in the parent `[tenantId]` layout.
  */
 export default async function PatientTwinV1RoutePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string; patientId: string }>;
+  searchParams?: Promise<{ presentation?: string | string[]; demo?: string | string[] }>;
 }) {
   const { tenantId, patientId } = await params;
+  const query = (await searchParams) ?? {};
+  const presentationMode = isPresentationQuery(query);
   const tid = tenantId?.trim();
   const pid = patientId?.trim();
   if (!tid || !pid) notFound();
@@ -66,9 +82,15 @@ export default async function PatientTwinV1RoutePage({
   });
   if (!twin) notFound();
 
-  const [outcomeMeasurements, outcomeProtocols] = await Promise.all([
+  const [outcomeMeasurements, outcomeProtocols, overview] = await Promise.all([
     loadPatientOutcomeMeasurements(tid, canonicalPatientId),
     loadPatientOutcomeProtocols(tid, canonicalPatientId),
+    loadPatientIntelligenceOverview({
+      tenantId: tid,
+      patientId: canonicalPatientId,
+      twin,
+      presentationMode,
+    }).catch(() => null),
   ]);
 
   const clinicalIntel: PatientClinicalIntelligenceView = {
@@ -77,9 +99,10 @@ export default async function PatientTwinV1RoutePage({
   };
 
   const profileHref = buildCanonicalPatientProfileHref(tid, canonicalPatientId);
+  const maxWidth = presentationMode ? "max-w-7xl" : "max-w-6xl";
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className={`mx-auto ${maxWidth} space-y-5`}>
       <Link
         href={profileHref}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-[#94A3B8] transition hover:text-[#E2E8F0]"
@@ -94,6 +117,7 @@ export default async function PatientTwinV1RoutePage({
         clinicalIntel={clinicalIntel}
         outcomeMeasurements={outcomeMeasurements}
         outcomeProtocols={outcomeProtocols}
+        overview={overview}
       />
     </div>
   );
