@@ -117,4 +117,5 @@ npm run seed:enterprise-demo
 - Demo Day operational alignment (Sydney Reception/calendar) — see `docs/runbooks/fios-demo-day.md` and `seedIhrgDemoDayAlignment`
 - Package B single-clinic tenant: `follicle-demo-clinic` via `npm run seed:follicle-demo-clinic`
 - Optional ImagingOS media pack: `npm run seed:titan-demo-media-pack`
-- Shared Auth demo logins (Phase 2)
+- **FI-DEMO-DAY-2A** — Canonical showcase patient (James Chen) + Patient Intelligence Overview on Health record: `docs/audits/FI-DEMO-DAY-2A.md`
+- Shared Auth demo logins (Phase 2+)

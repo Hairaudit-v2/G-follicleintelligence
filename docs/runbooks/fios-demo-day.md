@@ -127,8 +127,10 @@ Uploads tiny placeholder JPEGs to existing `titan-demo/synthetic/` Storage paths
 
 ---
 
-## Out of scope (Phase 2+)
+## Out of scope (Phase 1) / Phase 2+
 
 - Shared guest logins / Auth users for TITAN staff
 - Downloadable offline demo
 - Inventory / pathology / patient-portal narrative wiring
+
+**Phase 2 (planned):** FI-DEMO-DAY-2 — Hair Restoration Digital Twin Showcase. First implementation slice: [FI-DEMO-DAY-2A — Canonical Digital Twin Fixture and Patient Intelligence Overview](../audits/FI-DEMO-DAY-2A.md) (James Chen on Packages A+B; Health record overview; showcase validation).
