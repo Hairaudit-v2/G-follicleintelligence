@@ -20,6 +20,10 @@ import {
   CLINIC_DEMO_TIMEZONE,
   isClinicDemoTenantMetadata,
 } from "./clinicDemoConstants";
+import {
+  seedClinicShowcaseJamesChen,
+  type ClinicShowcaseJamesChenSeedResult,
+} from "./clinicDemoShowcaseJamesChenSeed.server";
 
 export type ClinicDemoSeedResult = {
   ok: boolean;
@@ -31,6 +35,7 @@ export type ClinicDemoSeedResult = {
   sandboxWarnings: string[];
   createdDeposits: number;
   existingDeposits: number;
+  jamesChen?: ClinicShowcaseJamesChenSeedResult | null;
   warnings: string[];
   error?: string;
 };
@@ -311,6 +316,22 @@ export async function seedFollicleDemoClinic(opts?: {
 
     const deposits = await ensurePendingDepositOnFirstSurgeryBooking(supabase, tenant.tenantId);
 
+    console.log("[clinic-demo] Starting James Chen Package B showcase seed");
+    const jamesChen = await seedClinicShowcaseJamesChen(supabase, tenant.tenantId);
+    console.log(
+      "[clinic-demo] James Chen showcase seed completed: ok=",
+      jamesChen.ok,
+      `completeness=${jamesChen.completenessScore}`,
+      jamesChen.patientId ? `patientId=${jamesChen.patientId}` : "",
+      jamesChen.error ? `error=${jamesChen.error}` : ""
+    );
+    warnings.push(...jamesChen.warnings);
+    if (!jamesChen.ok) {
+      warnings.push(
+        `James Chen Package B seed incomplete: ${jamesChen.error ?? "unknown error"}. Reception board data remains usable.`
+      );
+    }
+
     return {
       ok: true,
       tenantSlug: CLINIC_DEMO_TENANT_SLUG,
@@ -321,6 +342,7 @@ export async function seedFollicleDemoClinic(opts?: {
       sandboxWarnings: applied.warnings,
       createdDeposits: deposits.created,
       existingDeposits: deposits.existing,
+      jamesChen,
       warnings,
     };
   } catch (e) {

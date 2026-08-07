@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   CLINIC_DEMO_PACK_CODE,
+  CLINIC_DEMO_SHOWCASE_JAMES_CHEN_PATIENT_KEY,
   CLINIC_DEMO_TENANT_SLUG,
   isClinicDemoTenantMetadata,
 } from "./clinicDemoConstants";
@@ -17,5 +18,9 @@ describe("clinicDemoConstants", () => {
     assert.equal(isClinicDemoTenantMetadata({ clinic_demo_mode: true }), true);
     assert.equal(isClinicDemoTenantMetadata({ demo_package: "B" }), true);
     assert.equal(isClinicDemoTenantMetadata({ enterprise_demo_mode: true }), false);
+  });
+
+  it("aligns James Chen showcase key with shared canonical key", () => {
+    assert.equal(CLINIC_DEMO_SHOWCASE_JAMES_CHEN_PATIENT_KEY, "showcase-james-chen-v1");
   });
 });

@@ -17,6 +17,9 @@ export const CLINIC_DEMO_METADATA = {
   operating_mode: "clinic_simulation",
 } as const;
 
+/** Canonical Package B James Chen patient key (must match SHOWCASE_JAMES_CHEN_PATIENT_KEY). */
+export const CLINIC_DEMO_SHOWCASE_JAMES_CHEN_PATIENT_KEY = "showcase-james-chen-v1" as const;
+
 export function isClinicDemoTenantMetadata(metadata: unknown): boolean {
   if (metadata == null || typeof metadata !== "object" || Array.isArray(metadata)) return false;
   const m = metadata as Record<string, unknown>;
