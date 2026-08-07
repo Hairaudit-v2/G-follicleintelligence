@@ -16,6 +16,10 @@ import {
   type IhrgDemoDayAlignmentResult,
 } from "./ihrgDemoDayAlignmentSeed.server";
 import {
+  seedIhrgShowcaseJamesChen,
+  type IhrgShowcaseJamesChenSeedResult,
+} from "./ihrgShowcaseJamesChenSeed.server";
+import {
   IHRG_DEMO_DEFAULT_PROFILE,
   ihrgDemoProfileConfig,
   parseIhrgDemoProfile,
@@ -29,6 +33,7 @@ export type IhrgDemoSeedResult = EnterpriseDemoSeedResult &
     patientsTarget: number;
     surgeriesTarget: number;
     demoDay: IhrgDemoDayAlignmentResult | null;
+    jamesChen?: IhrgShowcaseJamesChenSeedResult | null;
   };
 
 export type IhrgDemoSeedOptions = {
@@ -81,7 +86,8 @@ function mergeIhrgResult(
   expansion: IhrgDemoExpansionSeedResult,
   profile: IhrgDemoProfile,
   profileConfig: ReturnType<typeof ihrgDemoProfileConfig>,
-  demoDay: IhrgDemoDayAlignmentResult | null = null
+  demoDay: IhrgDemoDayAlignmentResult | null = null,
+  jamesChen: IhrgShowcaseJamesChenSeedResult | null = null
 ): IhrgDemoSeedResult {
   const day = demoDay ?? emptyDemoDay();
   return {
@@ -92,11 +98,14 @@ function mergeIhrgResult(
     patientsTarget: ENTERPRISE_DEMO_CLINICS.length * profileConfig.patientsPerClinic,
     surgeriesTarget: ENTERPRISE_DEMO_CLINICS.length * profileConfig.surgeriesPerClinic,
     demoDay: day,
+    jamesChen,
     warnings: [
       ...core.warnings,
       ...expansion.warnings,
       ...(day.warnings ?? []),
       ...(day.ok === false && day.error ? [day.error] : []),
+      ...(jamesChen?.warnings ?? []),
+      ...(jamesChen?.ok === false && jamesChen.error ? [jamesChen.error] : []),
     ],
   };
 }
@@ -206,12 +215,26 @@ export async function seedIhrgDemoData(opts?: IhrgDemoSeedOptions): Promise<Ihrg
     demoDay.error ? `error=${demoDay.error}` : ""
   );
 
-  const merged = mergeIhrgResult(core, expansion, profile, profileConfig, demoDay);
+  console.log("[ihrg-demo] Starting James Chen Package A showcase seed");
+  const jamesChen = await seedIhrgShowcaseJamesChen(sb, core.tenantId);
+  console.log(
+    "[ihrg-demo] James Chen showcase seed completed: ok=",
+    jamesChen.ok,
+    `completeness=${jamesChen.completenessScore}`,
+    jamesChen.error ? `error=${jamesChen.error}` : ""
+  );
+
+  const merged = mergeIhrgResult(core, expansion, profile, profileConfig, demoDay, jamesChen);
   // Demo Day failure should warn but not fail the broader showcase seed —
   // GCC / franchise data remain usable; Reception deep-dive may be thin.
   if (!demoDay.ok) {
     merged.warnings.push(
       `Demo Day alignment incomplete: ${demoDay.error ?? "unknown error"}. GCC still usable.`
+    );
+  }
+  if (!jamesChen.ok) {
+    merged.warnings.push(
+      `James Chen Package A seed incomplete: ${jamesChen.error ?? "unknown error"}. Other IHRG demo data remains usable.`
     );
   }
   return merged;
