@@ -1,5 +1,5 @@
 /**
- * FI-IMAGINGOS-PRE-SURGERY-PROJECTION-1A — Explicit provider selection (no silent stub fallback).
+ * FI-IMAGINGOS-PRE-SURGERY-PROJECTION-1A/1C — Explicit provider selection (no silent stub fallback).
  */
 
 import "server-only";
@@ -12,6 +12,8 @@ import {
 import { ProjectionGatewayError } from "./errors";
 import type { PreSurgeryProjectionProvider } from "./provider";
 import { createStubPreSurgeryProjectionProvider } from "./stubProvider.server";
+import { createSharedOpenAiGatewayProvider } from "./sharedOpenAiGatewayProvider.server";
+import { resolveSharedProjectionProviderConfig } from "@/src/lib/imaging-os/sharedProjection/providerConfig";
 
 export function resolveProjectionProvider(
   config: ProjectionGatewayConfig = resolveProjectionGatewayConfig()
@@ -42,6 +44,19 @@ export function resolveProjectionProvider(
       "No real projection provider is connected; generation is disabled",
       503
     );
+  }
+
+  if (config.provider === "openai-gpt-image") {
+    const shared = resolveSharedProjectionProviderConfig();
+    if (!shared.mayInvokeProvider) {
+      throw new ProjectionGatewayError(
+        "provider_disabled",
+        shared.configurationError ??
+          "Shared openai-gpt-image provider failed closed (DPIA/config)",
+        503
+      );
+    }
+    return createSharedOpenAiGatewayProvider();
   }
 
   if (config.provider === "stub") {

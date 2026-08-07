@@ -31,6 +31,12 @@
       ],
       "@follicle/intelligence-core/*": [
         "./packages/intelligence-core/*"
+      ],
+      "@follicle/projection-core": [
+        "./packages/projection-core/index.ts"
+      ],
+      "@follicle/projection-core/*": [
+        "./packages/projection-core/*"
       ]
     }
   },

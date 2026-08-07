@@ -81,7 +81,12 @@ export function resolveProjectionGatewayConfig(
 ): ProjectionGatewayConfig {
   const rawProvider = (env[FI_PRE_SURGERY_PROJECTION_PROVIDER_ENV] ?? "stub").trim().toLowerCase();
   const provider: ProjectionProviderName =
-    rawProvider === "disabled" ? "disabled" : "stub";
+    rawProvider === "disabled"
+      ? "disabled"
+      : rawProvider === "openai-gpt-image" || rawProvider === "openai"
+        ? "openai-gpt-image"
+        : "stub";
+
 
   const skewRaw = env[FI_PRE_SURGERY_PROJECTION_TIMESTAMP_SKEW_SECONDS_ENV]?.trim();
   const skewParsed = skewRaw ? Number.parseInt(skewRaw, 10) : NaN;
@@ -130,6 +135,9 @@ export function validateProjectionServiceToken(
 export function reportProviderState(config: ProjectionGatewayConfig): ProviderStateReport {
   if (!config.enabled || config.provider === "disabled") {
     return "PROVIDER_DISABLED";
+  }
+  if (config.provider === "openai-gpt-image") {
+    return "REAL_PROVIDER_CONNECTED";
   }
   if (config.provider === "stub") {
     if (isProductionRuntime() && !config.allowStubInProduction) {

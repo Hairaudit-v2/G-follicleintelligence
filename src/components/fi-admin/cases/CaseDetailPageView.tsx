@@ -20,12 +20,14 @@ import { CasePostOpTrackingCard } from "./CasePostOpTrackingCard";
 import { CaseReadinessSummaryCard } from "./CaseReadinessSummaryCard";
 import { CaseProcedureDayCard } from "./CaseProcedureDayCard";
 import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
+import { CaseSurgeryProjectionPanel } from "./surgery-projection/CaseSurgeryProjectionPanel";
 import { CaseSummaryCard } from "./CaseSummaryCard";
 import { CaseTimelineCard } from "./CaseTimelineCard";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import type { ProcedureTeamPickerOption } from "@/src/lib/team/directory";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
+import type { HairlineDesignRow } from "@/src/lib/cases/surgeryProjection/hairlineDomain";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -87,10 +89,14 @@ export function CaseDetailPageView({
   caseRevenueAttributionOverride = null,
   caseRevenueAttributionConsultantOptions = [],
   caseAccountsReceivable,
+  hairlineDesigns = [],
+  actorUserId = null,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
   surgeryPlan: CaseSurgeryPlanRow | null;
+  hairlineDesigns?: HairlineDesignRow[];
+  actorUserId?: string | null;
   procedureDay: CaseProcedureRow | null;
   teamUserOptions: ProcedureTeamPickerOption[];
   /** Earliest non-cancelled surgery booking day on the case (tenant calendar), for procedure-day alignment. */
@@ -338,6 +344,17 @@ export function CaseDetailPageView({
             procedureDay={procedureDay}
             linkedSurgeryBookingYmd={linkedSurgeryBookingYmd}
           />
+          <div className="mt-6">
+            <CaseSurgeryProjectionPanel
+              tenantId={tenantId}
+              caseId={detail.id}
+              plan={surgeryPlan}
+              hairlineDesigns={hairlineDesigns}
+              images={detail.images ?? []}
+              patientSubjectRef={twinFoundationPatientId}
+              actorUserId={actorUserId}
+            />
+          </div>
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.procedureDay}>

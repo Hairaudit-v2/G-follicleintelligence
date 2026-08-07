@@ -66,6 +66,52 @@ export function CasePlannedZonesPanel({
                     placeholder="Optional display name"
                   />
                 </label>
+                <label className="text-xs text-slate-400">
+                  Grafts
+                  <input
+                    type="number"
+                    min={0}
+                    value={z.grafts ?? ""}
+                    onChange={(e) =>
+                      updateAt(i, {
+                        grafts: e.target.value === "" ? null : Number(e.target.value),
+                      })
+                    }
+                    className="mt-0.5 block w-24 rounded border border-slate-700 px-2 py-1 text-sm"
+                  />
+                </label>
+                <label className="text-xs text-slate-400">
+                  Density /cm²
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    value={z.targetDensityPerCm2 ?? ""}
+                    onChange={(e) =>
+                      updateAt(i, {
+                        targetDensityPerCm2:
+                          e.target.value === "" ? null : Number(e.target.value),
+                      })
+                    }
+                    className="mt-0.5 block w-24 rounded border border-slate-700 px-2 py-1 text-sm"
+                  />
+                </label>
+                <label className="flex items-center gap-1 text-xs text-slate-400">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(z.deferred)}
+                    onChange={(e) => updateAt(i, { deferred: e.target.checked })}
+                  />
+                  Deferred
+                </label>
+                <label className="flex items-center gap-1 text-xs text-slate-400">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(z.unassessed)}
+                    onChange={(e) => updateAt(i, { unassessed: e.target.checked })}
+                  />
+                  Unassessed
+                </label>
                 <button
                   type="button"
                   onClick={() => onChange(zones.filter((_, j) => j !== i))}

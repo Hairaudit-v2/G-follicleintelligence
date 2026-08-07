@@ -43,7 +43,7 @@ export type ProviderStateReport =
   | "STUB_ONLY_NON_PRODUCTION"
   | "PROVIDER_DISABLED";
 
-export type ProjectionProviderName = "stub" | "disabled";
+export type ProjectionProviderName = "stub" | "disabled" | "openai-gpt-image";
 
 export type CanonicalProjectionGeometry = {
   hairlineAnnotationIds: string[];

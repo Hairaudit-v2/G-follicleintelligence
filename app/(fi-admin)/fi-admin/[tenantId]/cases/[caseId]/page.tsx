@@ -15,6 +15,7 @@ import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { pickPrimaryLinkedSurgeryBookingYmd } from "@/src/lib/cases/caseProcedureDayLinkedBooking";
 import { loadProcedureTeamPickerOptions } from "@/src/lib/team/directory/server";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
+import { loadHairlineDesignsForCase } from "@/src/lib/cases/surgeryProjection/hairlineLoaders.server";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import { loadCasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
@@ -85,6 +86,7 @@ export default async function CaseDetailRoutePage({
     measurementRows,
     protocolRows,
     casePaymentReadiness,
+    hairlineDesigns,
   ] = await Promise.all([
     loadCaseAdminDetail(tenantId, caseId),
     loadSurgeryPlanForCase(tenantId, caseId),
@@ -96,6 +98,7 @@ export default async function CaseDetailRoutePage({
     loadCaseOutcomeMeasurements(tenantId, caseId),
     loadCaseOutcomeProtocols(tenantId, caseId),
     loadCasePaymentReadiness(tenantId, caseId),
+    loadHairlineDesignsForCase(tenantId, caseId).catch(() => []),
   ]);
   if (!detail) notFound();
 
@@ -264,6 +267,8 @@ export default async function CaseDetailRoutePage({
       caseRevenueAttributionOverride={caseRevenueAttributionOverride}
       caseRevenueAttributionConsultantOptions={caseRevenueAttributionConsultantOptions}
       caseAccountsReceivable={caseAccountsReceivable}
+      hairlineDesigns={hairlineDesigns}
+      actorUserId={bookingSession?.fiUserId ?? null}
     />
   );
 
