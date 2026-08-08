@@ -5,7 +5,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { SharedProjectionProvider } from "@follicle/projection-core";
+import type { SharedProjectionProvider } from "@follicle/projection-core/client";
 import {
   resolveSharedProjectionProviderConfig,
   type SharedProjectionProviderConfig,

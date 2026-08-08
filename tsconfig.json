@@ -32,8 +32,11 @@
       "@follicle/intelligence-core/*": [
         "./packages/intelligence-core/*"
       ],
-      "@follicle/projection-core": [
-        "./packages/projection-core/index.ts"
+      "@follicle/projection-core/client": [
+        "./packages/projection-core/client.ts"
+      ],
+      "@follicle/projection-core/server": [
+        "./packages/projection-core/server.ts"
       ],
       "@follicle/projection-core/*": [
         "./packages/projection-core/*"

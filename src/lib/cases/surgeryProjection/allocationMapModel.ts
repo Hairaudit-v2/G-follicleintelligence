@@ -11,7 +11,7 @@ import {
 import {
   assertAllocationMapLabelSafe,
   labelForArtifactType,
-} from "@follicle/projection-core";
+} from "@follicle/projection-core/client";
 
 export type AllocationMapViewModel = {
   artifactType: "graft_allocation_map";

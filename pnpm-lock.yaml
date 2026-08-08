@@ -177,7 +177,11 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
-  packages/projection-core: {}
+  packages/projection-core:
+    dependencies:
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
 
 packages:
 

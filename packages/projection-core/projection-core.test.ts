@@ -9,7 +9,7 @@ import {
   assertSharedProjectionLifecycleTransition,
   providerLooksLikeOverlayOnly,
   providerLooksLikePhotoreal,
-} from "./index.ts";
+} from "./client.ts";
 
 describe("@follicle/projection-core", () => {
   it("exposes required lifecycle states", () => {

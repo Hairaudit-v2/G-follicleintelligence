@@ -21,7 +21,7 @@ import {
   type SharedProjectionRequestingProduct,
   type SharedProjectionResponseV1,
   type SharedTechnicalValidationResults,
-} from "@follicle/projection-core";
+} from "@follicle/projection-core/server";
 import {
   assertProviderConfigAllowsGeneration,
   estimateSharedProjectionCostUsd,

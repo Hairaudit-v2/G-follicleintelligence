@@ -10,7 +10,7 @@ import {
   HAIRAUDIT_OPENAI_PILOT_ASSET_INSPECTION,
   externalProjectionDisplayLabel,
 } from "@/src/lib/imaging-os/sharedProjection/externalAssetPolicy";
-import { ILLUSTRATIVE_PROJECTED_OUTCOME_DISCLAIMER } from "@follicle/projection-core";
+import { ILLUSTRATIVE_PROJECTED_OUTCOME_DISCLAIMER } from "@follicle/projection-core/client";
 import { AllocationMapTab } from "./AllocationMapTab";
 import { HairlineDesignTab } from "./HairlineDesignTab";
 import { ProjectedOutcomeTab } from "./ProjectedOutcomeTab";

@@ -2,7 +2,7 @@
  * Prerequisite gates for photoreal generation — patient sharing always unavailable in 1B.
  */
 
-import { lifecycleFromPrerequisites } from "@follicle/projection-core";
+import { lifecycleFromPrerequisites } from "@follicle/projection-core/client";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { HairlineDesignRow } from "./hairlineDomain";
 import {

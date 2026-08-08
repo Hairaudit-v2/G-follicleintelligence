@@ -1,9 +1,12 @@
 /**
  * Cross-product idempotency — one current generation per clinical key.
+ * Server-only: must never be reachable from client entry points.
  */
 
+import "server-only";
+
 import { createHash } from "node:crypto";
-import type { SharedProjectionIdempotencyParts } from "./requestContract";
+import type { SharedProjectionIdempotencyParts } from "../shared/requestContract";
 
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") {

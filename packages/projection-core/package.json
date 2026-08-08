@@ -2,17 +2,14 @@
   "name": "@follicle/projection-core",
   "version": "0.1.0",
   "private": true,
-  "description": "Provider-neutral pre-surgery projection contracts shared by FiOS, HairAudit, and authorised PatientOS consumers. No product UI, no OpenAI SDK, no FiOS/HairAudit tables.",
+  "description": "Provider-neutral pre-surgery projection contracts shared by FiOS, HairAudit, and authorised PatientOS consumers. No product UI, no OpenAI SDK, no FiOS/HairAudit tables. Explicit /client and /server entry points — root import is intentionally unavailable.",
   "license": "UNLICENSED",
   "type": "module",
   "exports": {
-    ".": "./index.ts",
-    "./artifactTypes": "./artifactTypes.ts",
-    "./lifecycle": "./lifecycle.ts",
-    "./request": "./requestContract.ts",
-    "./response": "./responseContract.ts",
-    "./idempotency": "./idempotency.ts",
-    "./failures": "./failureCategories.ts",
-    "./provider": "./providerBoundary.ts"
+    "./client": "./client.ts",
+    "./server": "./server.ts"
+  },
+  "dependencies": {
+    "server-only": "^0.0.1"
   }
 }

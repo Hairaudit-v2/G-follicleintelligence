@@ -9,8 +9,8 @@ import path from "node:path";
 import {
   HAIRAUDIT_EXTRACT_INVENTORY,
   assertProviderMayEmitArtifact,
-  deriveSharedProjectionIdempotencyKey,
-} from "@follicle/projection-core";
+} from "@follicle/projection-core/client";
+import { deriveSharedProjectionIdempotencyKey } from "@follicle/projection-core/server";
 import {
   assertProviderConfigAllowsGeneration,
   estimateSharedProjectionCostUsd,

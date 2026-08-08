@@ -8,13 +8,13 @@ import { describe, it } from "node:test";
 import {
   assertProviderMayEmitArtifact,
   canTransitionSharedProjectionLifecycle,
-  deriveSharedProjectionIdempotencyKey,
   lifecycleFromPrerequisites,
   patientSafeFailureMessage,
   resolveProjectionArtifactType,
   assertAllocationMapLabelSafe,
   HAIRAUDIT_EXTRACT_INVENTORY,
-} from "@follicle/projection-core";
+} from "@follicle/projection-core/client";
+import { deriveSharedProjectionIdempotencyKey } from "@follicle/projection-core/server";
 import { buildAllocationMapViewModel } from "@/src/lib/cases/surgeryProjection/allocationMapModel";
 import {
   buildHairlinePolylineFromControls,

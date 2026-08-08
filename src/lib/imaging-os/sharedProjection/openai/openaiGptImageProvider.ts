@@ -12,7 +12,7 @@ import type {
   SharedProjectionProviderGenerateResult,
   SharedProjectionProviderHealth,
   SharedProjectionRequestV1,
-} from "@follicle/projection-core";
+} from "@follicle/projection-core/client";
 import { compositeOutcomeWithinMask, normalizeProjectionRaster } from "./maskContainmentComposite";
 import {
   computeAspectFitLayout,

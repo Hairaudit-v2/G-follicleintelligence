@@ -6,7 +6,7 @@
 
 import { createHash } from "node:crypto";
 import sharp from "sharp";
-import type { SharedTechnicalValidationResults } from "@follicle/projection-core";
+import type { SharedTechnicalValidationResults } from "@follicle/projection-core/client";
 
 export type OutcomeValidationMeasurement = {
   sourceChecksum: string;
